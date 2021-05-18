@@ -1,0 +1,17 @@
+{
+  "colors": {
+    "primary": "#112836",
+    "secondary": "#DDAF57",
+    "dark": "#112836",
+    "light": "#FAF8F9"
+  },
+  "fontSizes": {
+    "h1": ["54px", "700", "-0.025em", "none", "100%"],
+    "h2": ["32px", "700", "-0.025em", "none", "100%"],
+    "h3": ["24px", "700", "-0.025em", "none", "100%"],
+    "h4": ["21px", "700", "-0.025em", "none"],
+    "subtitle": ["24px", "700", "-0.025em"],
+    "button": ["16px", "700", "0.01", "uppercase"],
+    "overline": ["14px", "700", "0.25em", "uppercase"]
+  }
+}

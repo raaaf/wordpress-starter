@@ -1,0 +1,177 @@
+.mb-2 {
+    margin-bottom: 0.5rem
+}
+.flex {
+    display: flex
+}
+.flex-col {
+    flex-direction: column
+}
+.items-center {
+    align-items: center
+}
+.justify-center {
+    justify-content: center
+}
+.justify-between {
+    justify-content: space-between
+}
+.bg-white {
+    --tw-bg-opacity: 1;
+    background-color: rgba(255, 255, 255, var(--tw-bg-opacity))
+}
+.bg-gray-100 {
+    --tw-bg-opacity: 1;
+    background-color: rgba(243, 244, 246, var(--tw-bg-opacity))
+}
+.p-4 {
+    padding: 1rem
+}
+.py-6 {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem
+}
+.antialiased {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale
+}
+.opacity-50 {
+    opacity: 0.5
+}
+.has-primary-text-color {
+    color: #112836
+}
+.has-secondary-text-color {
+    color: #DDAF57
+}
+.has-dark-text-color {
+    color: #112836
+}
+.has-light-text-color {
+    color: #FAF8F9
+}
+.has-primary-background-color {
+    background-color: #112836
+}
+.has-secondary-background-color {
+    background-color: #DDAF57
+}
+.has-dark-background-color {
+    background-color: #112836
+}
+.has-light-background-color {
+    background-color: #FAF8F9
+}
+.alignfull {
+    margin: 0.5rem calc(50% - 50vw);
+    max-width: 100vw;
+    width: 100vw
+}
+.alignwide {
+    margin-left: -4rem;
+    margin-right: -4rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    max-width: 1280px
+}
+.alignnone {
+    margin-left: 0px;
+    margin-right: 0px;
+    height: auto;
+    max-width: 100%
+}
+.aligncenter {
+    margin: 0.5rem auto;
+    display: block
+}
+@media (min-width: 640px) {
+    .alignleft:not(.wp-block-button) {
+        margin-right: 0.5rem
+    }
+    .alignleft:not(.wp-block-button) {
+        float: left
+    }
+    .alignright:not(.wp-block-button) {
+        margin-left: 0.5rem
+    }
+    .alignright:not(.wp-block-button) {
+        float: right
+    }
+    .wp-block-button.alignleft a {
+        float: left
+    }
+    .wp-block-button.alignleft a {
+        margin-right: 1rem
+    }
+    .wp-block-button.alignright a {
+        float: right
+    }
+    .wp-block-button.alignright a {
+        margin-left: 1rem
+    }
+}
+.wp-caption {
+    display: inline-block
+}
+.wp-caption img {
+    margin-bottom: 0.5rem;
+    line-height: 1
+}
+.wp-caption-text {
+    font-size: 0.875rem;
+    color: #4b5563
+}
+.entry-content h1, .block-editor-block-list__layout h1 {
+    font-size: 1.5rem;
+    line-height: 2rem
+}
+.entry-content h2, .block-editor-block-list__layout h2 {
+    font-size: 1.25rem;
+    line-height: 1.75rem
+}
+.entry-content h3, .block-editor-block-list__layout h3 {
+    font-size: 1.125rem;
+    line-height: 1.75rem
+}
+.entry-content p a, .entry-content ul a, .entry-content ol a, .block-editor-block-list__layout p a, .block-editor-block-list__layout ul a, .block-editor-block-list__layout ol a {
+    --tw-text-opacity: 1;
+    color: rgba(59, 130, 246, var(--tw-text-opacity))
+}
+.entry-content p a, .entry-content ul a, .entry-content ol a, .block-editor-block-list__layout p a, .block-editor-block-list__layout ul a, .block-editor-block-list__layout ol a {
+    text-decoration: underline
+}
+.entry-content p a:hover, .entry-content ul a:hover, .entry-content ol a:hover, .block-editor-block-list__layout p a:hover, .block-editor-block-list__layout ul a:hover, .block-editor-block-list__layout ol a:hover {
+    text-decoration: none
+}
+.entry-content p, .entry-content ul, .entry-content ol, .block-editor-block-list__layout p, .block-editor-block-list__layout ul, .block-editor-block-list__layout ol {
+    margin-bottom: 2rem
+}
+.entry-content ul li, .block-editor-block-list__layout ul li {
+    list-style-position: inside
+}
+.entry-content ul li, .block-editor-block-list__layout ul li {
+    list-style-type: disc
+}
+.entry-content ol li, .block-editor-block-list__layout ol li {
+    list-style-position: inside
+}
+.entry-content ol li, .block-editor-block-list__layout ol li {
+    list-style-type: decimal
+}
+.block-editor__typewriter {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"
+}
+.wp-block {
+    max-width: 1024px
+}
+.wp-block[data-align=wide] {
+    max-width: 1280px
+}
+.wp-block[data-align=full] {
+    max-width: 100%
+}
+@media (min-width: 768px) {
+    .md\:p-8 {
+        padding: 2rem
+    }
+}
