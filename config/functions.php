@@ -162,6 +162,9 @@ function theme_setup()
 	// Let WordPress manage the document title.
 	add_theme_support('title-tag');
 
+	// Allow Custom Logo
+	add_theme_support( 'custom-logo' );
+
 	// Switch default core markup for search form, comment form, and comments
 	// to output valid HTML5.
 	add_theme_support(
