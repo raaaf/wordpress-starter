@@ -1,10 +1,11 @@
 const plugin = require('tailwindcss/plugin');
 const _ = require("lodash");
-const theme = require('./theme.json');
+const brand = require('./brand.json');
 
 module.exports = {
     mode: 'jit',
-    theme,
+    brand,
+    darkMode: false,
     purge: {
         content: [
             './*.php',
@@ -13,15 +14,8 @@ module.exports = {
         ],
     },
     theme: {
-        container: {
-            padding: {
-                DEFAULT: '1rem',
-                sm: '2rem',
-                lg: '0rem'
-            },
-        },
         extend: {
-            colors: theme.colors
+            colors: brand.colors
         },
     },
     plugins: [
@@ -31,25 +25,25 @@ module.exports = {
             const screens = theme('screens');
             const fontSize = theme('fontSize');
 
-            const editorColorText = _.map(config("theme.colors", {}), (value, key) => {
+            const editorColorText = _.map(config("brand.colors", {}), (value, key) => {
                 return {
-                    [`.has-${key}-text-color`]: {
+                    [`.typo-${key}-text-color`]: {
                         color: value,
                     },
                 };
             });
 
-            const editorColorBackground = _.map(config("theme.colors", {}), (value, key) => {
+            const editorColorBackground = _.map(config("brand.colors", {}), (value, key) => {
                 return {
-                    [`.has-${key}-background-color`]: {
+                    [`.typo-${key}-background-color`]: {
                         backgroundColor: value,
                     },
                 };
             });
 
-            const editorFontSizes = _.map(config("theme.fontSizes", {}), (value, key) => {
+            const editorFontSizes = _.map(config("brand.fontSizes", {}), (value, key) => {
                 return {
-                    [`.has-${key}-font-size`]: {
+                    [`.typo-${key}`]: {
                         fontSize: value[0],
                         fontWeight: `${value[1] || '400'}`,
                         letterSpacing: `${value[2] || '0'}`,

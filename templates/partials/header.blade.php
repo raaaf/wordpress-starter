@@ -50,7 +50,7 @@
     @php(wp_head())
 </head>
 
-<body @php(body_class( 'bg-white antialiased has-primary-text-color' ))>
+<body @php(body_class( 'bg-white antialiased typo-primary-text-color' ))>
 
     @php(wp_body_open())
 

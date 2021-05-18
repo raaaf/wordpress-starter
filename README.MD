@@ -20,10 +20,10 @@ CSS-classes for alignment, background and text colors will be generated automati
 To make the editing experience within the block editor more in line with the front end styling, a `editor-style.css` is generated.
 
 ### Define theme colors
-Four colors (primary, secondary, dark and light) are defined from the beginning. You can modify the colors in `theme.json`.
+Four colors (primary, secondary, dark and light) are defined from the beginning. You can modify the colors in `brand.json`.
 
 ### Define theme font sizes
-You can modify the font sizes within `theme.json`.
+You can modify the font sizes within `brand.json`.
 
 ## JIT
 [Tailwind CSS JIT](https://tailwindcss.com/docs/just-in-time-mode#enabling-jit-mode) is used to allow for fast compiling.

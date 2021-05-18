@@ -38,28 +38,28 @@
 .opacity-50 {
     opacity: 0.5
 }
-.has-primary-text-color {
+.typo-primary-text-color {
     color: #112836
 }
-.has-secondary-text-color {
+.typo-secondary-text-color {
     color: #DDAF57
 }
-.has-dark-text-color {
+.typo-dark-text-color {
     color: #112836
 }
-.has-light-text-color {
+.typo-light-text-color {
     color: #FAF8F9
 }
-.has-primary-background-color {
+.typo-primary-background-color {
     background-color: #112836
 }
-.has-secondary-background-color {
+.typo-secondary-background-color {
     background-color: #DDAF57
 }
-.has-dark-background-color {
+.typo-dark-background-color {
     background-color: #112836
 }
-.has-light-background-color {
+.typo-light-background-color {
     background-color: #FAF8F9
 }
 .alignfull {
@@ -109,6 +109,55 @@
     .wp-block-button.alignright a {
         margin-left: 1rem
     }
+}
+.typo-h1 {
+    font-size: 54px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    text-transform: none;
+    line-height: 100%
+}
+.typo-h2 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    text-transform: none;
+    line-height: 100%
+}
+.typo-h3 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    text-transform: none;
+    line-height: 100%
+}
+.typo-h4 {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    text-transform: none;
+    line-height: 150%
+}
+.typo-subtitle {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    text-transform: none;
+    line-height: 150%
+}
+.typo-button {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.01;
+    text-transform: uppercase;
+    line-height: 150%
+}
+.typo-overline {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    line-height: 150%
 }
 .wp-caption {
     display: inline-block
