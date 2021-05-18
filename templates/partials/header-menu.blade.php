@@ -2,9 +2,11 @@
     <div class="flex items-center justify-between">
         <div>
             @if ( has_custom_logo() )
-            <a href="{{ get_bloginfo( 'url' ) }} title=" {{ get_bloginfo( 'name' ) }}">
-                {{ the_custom_logo() }}
-            </a>
+            @php( $custom_logo_id = get_theme_mod( 'custom_logo' ) )
+            @php( $logo = wp_get_attachment_image_src( $custom_logo_id , 'full' ) )
+                <a href="{{ get_bloginfo( 'url' ) }}" title="{{ get_bloginfo( 'name' ) }}" class="inline-block transition-opacity duration-300 hover:opacity-75">
+                    <img src="{{ esc_url( $logo[0] ) }}" alt="{{ get_bloginfo( 'name' ) }}">
+                </a>
             @else
             <a href="{{ get_bloginfo( 'url' ) }}" title="{{ get_bloginfo( 'name' ) }}" class="typo-h2">
                 {{ get_bloginfo( 'name' ) }}
@@ -13,7 +15,6 @@
                 {{ get_bloginfo( 'description' ) }}
             </p>
             @endif
-
         </div>
 
     </div>
