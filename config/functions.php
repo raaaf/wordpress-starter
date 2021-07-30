@@ -25,8 +25,8 @@ add_action('wp_enqueue_scripts', function () {
 		wp_deregister_script('jquery');
 	}
 
-	wp_enqueue_style('style', theme_get_mix_compiled_asset_url('/dist/app.css'), array(), $theme->get('Version'));
-	wp_enqueue_script('app', theme_get_mix_compiled_asset_url('/dist/app.js'), array('jquery'), $theme->get('Version'));
+	wp_enqueue_style('style', theme_get_mix_compiled_asset_url('dist/app.css'), array(), $theme->get('Version'));
+	wp_enqueue_script('app', theme_get_mix_compiled_asset_url('dist/app.js'), array('jquery'), $theme->get('Version'), true);
 });
 
 add_filter('template_include', function ($template) {
