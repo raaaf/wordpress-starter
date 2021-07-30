@@ -207,7 +207,7 @@ function theme_setup()
 		function ($size, $px) {
 			return array(
 				'name' => ucfirst($size),
-				'size' => $px,
+				'size' => $px[0],
 				'slug' => $size,
 			);
 		},

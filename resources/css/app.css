@@ -5,7 +5,7 @@
 @import "custom.css";
 
 @layer base {
-    html {
-      -webkit-tap-highlight-color: transparent;
-    }
+  html {
+    -webkit-tap-highlight-color: transparent;
   }
+}

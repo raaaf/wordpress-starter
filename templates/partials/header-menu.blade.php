@@ -11,7 +11,7 @@
             <a href="{{ get_bloginfo( 'url' ) }}" title="{{ get_bloginfo( 'name' ) }}" class="typo-h2">
                 {{ get_bloginfo( 'name' ) }}
             </a>
-            <p class="typo-button typo-secondary-text-color">
+            <p class="typo-button typo-secondary-color">
                 {{ get_bloginfo( 'description' ) }}
             </p>
             @endif

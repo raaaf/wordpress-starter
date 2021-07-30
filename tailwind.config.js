@@ -27,7 +27,7 @@ module.exports = {
 
             const editorColorText = _.map(config("brand.colors", {}), (value, key) => {
                 return {
-                    [`.typo-${key}-text-color`]: {
+                    [`.has-${key}-color`]: {
                         color: value,
                     },
                 };
@@ -35,7 +35,7 @@ module.exports = {
 
             const editorColorBackground = _.map(config("brand.colors", {}), (value, key) => {
                 return {
-                    [`.typo-${key}-background-color`]: {
+                    [`.has-${key}-background-color`]: {
                         backgroundColor: value,
                     },
                 };
@@ -43,7 +43,7 @@ module.exports = {
 
             const editorFontSizes = _.map(config("brand.fontSizes", {}), (value, key) => {
                 return {
-                    [`.typo-${key}`]: {
+                    [`.has-${key}`]: {
                         fontSize: value[0],
                         fontWeight: `${value[1] || '400'}`,
                         letterSpacing: `${value[2] || '0'}`,
