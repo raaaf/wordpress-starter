@@ -7,8 +7,8 @@
         <div class="flex flex-col justify-center">
 
             {{-- DELETE THE NEXT TWO LINES AND ADD YOUR MARKUP --}}
-            <p class="mb-2 opacity-50 typo-overline">Welcome</p>
-            <h1 class="typo-h1">Your Content Goes Here</h1>
+            <p class="mb-2 opacity-50 has-overline">Welcome</p>
+            <h1 class="has-h1">Your Content Goes Here</h1>
             {{-- DELETE THE NEXT TWO LINES AND ADD YOUR MARKUP --}}
 
             @php

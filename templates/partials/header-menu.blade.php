@@ -8,10 +8,10 @@
                     <img src="{{ esc_url( $logo[0] ) }}" alt="{{ get_bloginfo( 'name' ) }}">
                 </a>
             @else
-            <a href="{{ get_bloginfo( 'url' ) }}" title="{{ get_bloginfo( 'name' ) }}" class="typo-h2">
+            <a href="{{ get_bloginfo( 'url' ) }}" title="{{ get_bloginfo( 'name' ) }}" class="has-h2">
                 {{ get_bloginfo( 'name' ) }}
             </a>
-            <p class="typo-button typo-secondary-color">
+            <p class="has-button has-secondary-color">
                 {{ get_bloginfo( 'description' ) }}
             </p>
             @endif
@@ -26,7 +26,7 @@
     'container_class' => '',
     'menu_class' => 'flex',
     'theme_location' => 'header-menu',
-    'li_class' => 'typo-button',
+    'li_class' => 'has-button',
     'fallback_cb' => false,
     )
     ))

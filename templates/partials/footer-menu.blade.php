@@ -8,7 +8,7 @@
         'container_class' => '',
         'menu_class' => 'flex',
         'theme_location' => 'footer-menu',
-        'li_class' => 'typo-button',
+        'li_class' => 'has-button',
         'fallback_cb' => false,
         )
         ))
@@ -22,7 +22,7 @@
         'container_class' => '',
         'menu_class' => 'flex',
         'theme_location' => 'legal-menu',
-        'li_class' => 'typo-button',
+        'li_class' => 'has-button',
         'fallback_cb' => false,
         )
         ))
