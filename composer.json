@@ -1,18 +1,24 @@
 {
-    "name": "lukeraymonddowning/mountain-breeze",
-    "description": "A Wordpress theme implementing Tailwind CSS and Alpine JS, and removing jQuery once and for all.",
-    "type": "library",
+    "name": "raaaf/starter",
+    "description": "A WordPress theme implementing Tailwind CSS and Alpine JS, and removing jQuery once and for all.",
+    "type": "wordpress-theme",
     "license": "MIT",
     "authors": [
         {
-            "name": "Luke Downing",
-            "email": "lukeraymonddowning@gmail.com"
+            "name": "Rafael Alex",
+            "email": "a@rafaelalex.de"
         }
     ],
     "require": {
         "illuminate/view": "^8.0",
         "illuminate/events": "^8.0",
-        "illuminate/filesystem": "^8.0"
+        "illuminate/filesystem": "^8.0",
+        "illuminate/support": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "BukStuttgart\\": "src/"
+        }
     },
     "scripts": {
         "post-install-cmd": "npm install"
