@@ -6,8 +6,8 @@
 
             <a href="{{ esc_url(get_bloginfo('url')) }}" title="{{ esc_attr(get_bloginfo('name')) }}"
                 class="inline-block transition-opacity duration-300 hover:opacity-75">
-                <img src="{{ $logo ? esc_url($logo[0]) : esc_url(get_template_directory_uri() . '/assets/img/default-logo.png') }}"
-                    alt="{{ esc_attr(get_bloginfo('name')) }}" loading="lazy" width="200" height="50">
+                <img src="{{ $logo ? esc_url($logo[0]) : esc_url(get_template_directory_uri() . '/resources/img/default-logo.png') }}"
+                    alt="{{ esc_attr(get_bloginfo('name')) }}" loading="lazy" width="50" height="50" class="w-full max-w-[50px]">
             </a>
         </div>
     </div>
@@ -21,6 +21,6 @@
         'li_class' => 'has-button',
         'fallback_cb' => false,
         'items_wrap' => '<ul id="%1$s" class="%2$s" role="menubar" aria-label="Main Navigation">%3$s</ul>',
-    ]),
+    ])
 )
 </div>
