@@ -92,6 +92,10 @@ add_action('wp_enqueue_scripts', function () {
     </script>';
 }, 20);
 
+add_action('wp_enqueue_scripts', function () {
+    wp_enqueue_style('critical-css', get_stylesheet_directory_uri() . '/dist/critical.css', [], null, 'all');
+}, 1);
+
 // Optimize template loading
 add_filter('template_include', function ($template) {
     $templateName = wp_basename($template, '.php');
@@ -204,3 +208,24 @@ add_action('init', function () {
         remove_action('admin_bar_menu', 'wp_admin_bar_comments_menu', 60);
     }
 });
+
+// ADD nonce
+$nonce = wp_create_nonce('csp-nonce');
+
+// Theme json
+function theme_json_ld()
+{
+    $json_ld = [
+        "@context" => "https://schema.org",
+        "@type" => "WebSite",
+        "name" => get_bloginfo('name'),
+        "url" => home_url(),
+        "potentialAction" => [
+            "@type" => "SearchAction",
+            "target" => home_url() . "/?s={search_term_string}",
+            "query-input" => "required name=search_term_string"
+        ]
+    ];
+    echo '<script type="application/ld+json">' . json_encode($json_ld) . '</script>';
+}
+add_action('wp_head', 'theme_json_ld');

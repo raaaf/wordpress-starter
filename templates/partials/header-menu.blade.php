@@ -1,33 +1,26 @@
 <div class="flex items-center justify-between py-6">
     <div class="flex items-center justify-between">
         <div>
-            @if ( has_custom_logo() )
-            @php( $custom_logo_id = get_theme_mod( 'custom_logo' ) )
-            @php( $logo = wp_get_attachment_image_src( $custom_logo_id , 'full' ) )
-                <a href="{{ get_bloginfo( 'url' ) }}" title="{{ get_bloginfo( 'name' ) }}" class="inline-block transition-opacity duration-300 hover:opacity-75">
-                    <img src="{{ esc_url( $logo[0] ) }}" alt="{{ get_bloginfo( 'name' ) }}">
-                </a>
-            @else
-            <a href="{{ get_bloginfo( 'url' ) }}" title="{{ get_bloginfo( 'name' ) }}" class="has-h2">
-                {{ get_bloginfo( 'name' ) }}
-            </a>
-            <p class="has-button has-secondary-color">
-                {{ get_bloginfo( 'description' ) }}
-            </p>
-            @endif
-        </div>
+            @php($custom_logo_id = get_theme_mod('custom_logo'))
+            @php($logo = $custom_logo_id ? wp_get_attachment_image_src($custom_logo_id, 'full') : null)
 
+            <a href="{{ esc_url(get_bloginfo('url')) }}" title="{{ esc_attr(get_bloginfo('name')) }}"
+                class="inline-block transition-opacity duration-300 hover:opacity-75">
+                <img src="{{ $logo ? esc_url($logo[0]) : esc_url(get_template_directory_uri() . '/assets/img/default-logo.png') }}"
+                    alt="{{ esc_attr(get_bloginfo('name')) }}" loading="lazy" width="200" height="50">
+            </a>
+        </div>
     </div>
 
     @php(
-    wp_nav_menu(
-    array(
-    'container_id' => 'header-menu',
-    'container_class' => '',
-    'menu_class' => 'flex',
-    'theme_location' => 'header-menu',
-    'li_class' => 'has-button',
-    'fallback_cb' => false,
-    )
-    ))
+    wp_nav_menu([
+        'container_id' => 'header-menu',
+        'container_class' => 'site-header-menu',
+        'menu_class' => 'flex',
+        'theme_location' => 'header-menu',
+        'li_class' => 'has-button',
+        'fallback_cb' => false,
+        'items_wrap' => '<ul id="%1$s" class="%2$s" role="menubar" aria-label="Main Navigation">%3$s</ul>',
+    ]),
+)
 </div>
