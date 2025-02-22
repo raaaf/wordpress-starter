@@ -256,6 +256,9 @@
   .py-6 {
     padding-block: calc(var(--spacing) * 6);
   }
+  .font-sans {
+    font-family: var(--font-sans);
+  }
   .leading-none {
     --tw-leading: 1;
     line-height: 1;

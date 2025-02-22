@@ -2,7 +2,7 @@
 
 @section('content')
 
-<main class="p-4 bg-gray-100 md:p-8">
+<main class="p-4 font-sans bg-gray-100 md:p-8">
     <section>
         <div class="flex flex-col justify-center">
 

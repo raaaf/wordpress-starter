@@ -1,10 +1,21 @@
+@import "./fonts.css";
+
 @import "tailwindcss";
 @source "../templates";
 
-@import "./custom.css";
+@theme {
+  --font-sans: "Lato", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --brand-primary: oklch(0.72 0.11 178);
+}
 
 @layer base {
-  html {
+  ::selection {
+    background: var(--color-gray-100);
+  }
+
+  :root {
     -webkit-tap-highlight-color: transparent;
   }
 }

@@ -21,7 +21,7 @@ mix.options({
 
 mix.browserSync({
   files: ["resources/**/*", "templates/**/*", "index.php"],
-  proxy: "LOCAL-URL GOES HERE",
+  proxy: "http://buk-stuttgart.local",
   https: false,
 });
 
