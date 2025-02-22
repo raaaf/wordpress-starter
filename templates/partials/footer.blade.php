@@ -1,7 +1,6 @@
-<footer class="p-4 md:p-8">
-    @include('partials.footer-menu')
-</footer>
+@include('partials.footer-menu')
 
 @php(wp_footer())
 </body>
+
 </html>
