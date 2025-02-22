@@ -1,7 +1,6 @@
-<footer class="py-6 text-white bg-gray-800">
-    <div class="flex items-center justify-between">
-        <div>
-            @php(
+<footer class="flex items-center justify-between py-6">
+    <div>
+        @php(
     wp_nav_menu([
         'container_id' => 'footer-menu',
         'container_class' => 'site-footer-menu',
@@ -9,13 +8,13 @@
         'theme_location' => 'footer-menu',
         'li_class' => 'has-button',
         'fallback_cb' => false,
-        'items_wrap' => '<ul id="%1$s" class="%2$s" role="menubar" aria-label="Footer-Navigation">%3$s</ul>',
-    ]),
+        'items_wrap' => '<ul id="%1$s" class="%2$s" role="menubar" aria-label="Footer Navigation">%3$s</ul>',
+    ])
 )
-        </div>
+    </div>
 
-        <div>
-            @php(
+    <div>
+        @php(
     wp_nav_menu([
         'container_id' => 'legal-menu',
         'container_class' => 'site-footer-menu',
@@ -24,8 +23,7 @@
         'li_class' => 'has-button',
         'fallback_cb' => false,
         'items_wrap' => '<ul id="%1$s" class="%2$s" role="menubar" aria-label="Legal Stuff">%3$s</ul>',
-    ]),
+    ])
 )
-        </div>
     </div>
 </footer>
