@@ -1,24 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
-
-<main class="p-4 font-sans bg-gray-100 md:p-8">
-    <section>
-        <div class="flex flex-col justify-center">
-
-            {{-- DELETE THE NEXT TWO LINES AND ADD YOUR MARKUP --}}
-            <p class="mb-2 opacity-50 has-overline">Welcome</p>
-            <h1 class="has-h1">Your Content Goes Here</h1>
-            {{-- DELETE THE NEXT TWO LINES AND ADD YOUR MARKUP --}}
-
-            @php
-            if ( have_posts() ) : while ( have_posts() ) : the_post();
-            the_content();
-            endwhile;
-            endif;
-            @endphp
+    <h1 class="mb-4 text-3xl font-bold">Welcome to {{ get_bloginfo('name') }}</h1>
+    @if (have_posts())
+        <div class="space-y-6">
+            @while (have_posts()) @php(the_post())
+                <article class="p-4 bg-white rounded shadow">
+                    <h2 class="text-2xl font-semibold">
+                        <a href="{{ get_permalink() }}">{{ get_the_title() }}</a>
+                    </h2>
+                    <div class="text-sm text-gray-600">
+                        Published on {{ get_the_date() }} by {{ get_the_author() }}
+                    </div>
+                    <div class="mt-2">
+                        {!! get_the_excerpt() !!}
+                    </div>
+                </article>
+            @endwhile
         </div>
-    </section>
-</main>
-
+    @else
+        <p>No posts found.</p>
+    @endif
 @endsection
