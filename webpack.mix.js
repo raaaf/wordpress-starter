@@ -16,6 +16,7 @@ mix.copyDirectory("resources/fonts", "./fonts")
 mix.copyDirectory("resources/favicons", "./favicons")
 
 mix.options({
+    processCssUrls: false,
     postCss: [
         require('postcss-nested-ancestors'),
         require('postcss-nested'),

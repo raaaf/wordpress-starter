@@ -1,4 +1,5 @@
 const plugin = require('tailwindcss/plugin');
+const defaultTheme = require("tailwindcss/defaultTheme");
 const _ = require("lodash");
 const brand = require('./brand.json');
 
@@ -10,12 +11,46 @@ module.exports = {
         content: [
             './*.php',
             './*/*.php',
+            './**/*.php',
             './safelist.txt'
         ],
     },
     theme: {
+        fontFamily: {
+          sans: ["Gotham Pro", ...defaultTheme.fontFamily.sans],
+          serif: ["Gotham Pro", ...defaultTheme.fontFamily.serif],
+          mono: [...defaultTheme.fontFamily.mono],
+        },
         extend: {
-            colors: brand.colors
+            colors: brand.colors,
+            inset: {
+                full: "100%",
+                "1/6": "16.6666%",
+                "1/4": "25%",
+                "1/3": "33.3333%",
+                "1/2": "50%",
+                4: "4px",
+                8: "8px",
+                16: "16px",
+                32: "32px",
+                48: "48px"
+            },
+            height: {
+                80: "80vh",
+                20: "20vh"
+            },
+            minHeight: {
+                80: "80vh",
+                75: "75vh",
+                50: "50vh",
+                20: "20vh"
+            },
+            maxWidth: {
+                0: "none"
+            },
+            maxHeight: {
+                0: "0"
+            },
         },
     },
     plugins: [
