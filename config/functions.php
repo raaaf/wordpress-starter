@@ -78,15 +78,19 @@ add_action('wp_enqueue_scripts', function () {
         set_transient('theme_version', $theme_version, DAY_IN_SECONDS);
     }
 
-    // Remove jQuery if not needed
-    if (!function_exists('enablejQuery') || !enablejQuery()) {
-        wp_deregister_script('jquery');
-    }
-
-    // Load Laravel Mix compiled assets
+    // Load Laravel Mix assets
     wp_enqueue_style('tailwindcss', theme_get_mix_asset('dist/app.css'), [], $theme_version);
-    wp_enqueue_script('app', theme_get_mix_asset('dist/app.js'), ['jquery'], $theme_version, true);
-});
+
+    // Load main JS but defer for slow connections
+    echo '<script>
+        if (navigator.connection && navigator.connection.effectiveType === "4g") {
+            let script = document.createElement("script");
+            script.src = "' . theme_get_mix_asset('dist/app.js') . '";
+            script.defer = true;
+            document.body.appendChild(script);
+        }
+    </script>';
+}, 20);
 
 // Optimize template loading
 add_filter('template_include', function ($template) {
@@ -148,7 +152,7 @@ add_action('after_setup_theme', function () {
     add_theme_support('align-wide');
     add_theme_support('wp-block-styles');
     add_theme_support('editor-styles');
-    add_editor_style();
+    add_editor_style('dist/editor-style.css');
     add_theme_support('editor-color-palette');
     add_theme_support('editor-font-sizes');
 });
