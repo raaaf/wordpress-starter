@@ -52,7 +52,10 @@
                     <div class="mt-8">
                         <a href="{{ $button['url'] }}" 
                            target="{{ $button['target'] }}"
-                           class="inline-block px-8 py-4 bg-brand-primary text-white rounded-lg hover:bg-opacity-90 transition-all">
+                           class="inline-block px-8 py-4 bg-brand-primary text-white rounded-lg hover:bg-opacity-90 transition-all"
+                           pirsch-event="Hero_CTA_Click"
+                           pirsch-meta-key="hero_block"
+                           pirsch-meta-button-text="{{ $button['title'] }}">
                             {{ $button['title'] }}
                         </a>
                     </div>
