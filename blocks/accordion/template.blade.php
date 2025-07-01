@@ -14,11 +14,14 @@
                         $content = $item['content'] ?? '';
                         $itemId = 'accordion-' . $block['id'] . '-' . $index;
                     @endphp
-                    <div class="w-full px-6 mx-auto overflow-hidden border-b border-{{ $bgColor }} last:border-b-0">
+                    <div class="w-full px-6 mx-auto overflow-hidden border-b border-gray-200 last:border-b-0">
                         <button @click="active = active === {{ $index }} ? null : {{ $index }}"
                                 :aria-expanded="active === {{ $index }}"
                                 aria-controls="content-{{ $itemId }}"
-                                class="flex items-center justify-between w-full py-4 pr-10 mb-0 font-bold text-left">
+                                class="flex items-center justify-between w-full py-4 pr-10 mb-0 font-bold text-left"
+                                pirsch-event="Accordion_Toggle"
+                                pirsch-meta-key="accordion_block"
+                                pirsch-meta-item="{{ $title }}">
                             <span>{{ $title }}</span>
                             <svg class="w-5 h-5 transition-transform duration-200"
                                  :class="{ 'rotate-180': active === {{ $index }} }"

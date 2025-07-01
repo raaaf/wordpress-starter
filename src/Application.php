@@ -10,6 +10,7 @@ use WordpressStarter\Providers\MenuServiceProvider;
 use WordpressStarter\Providers\ThemeServiceProvider;
 use WordpressStarter\Providers\SecurityServiceProvider;
 use WordpressStarter\Providers\AcfServiceProvider;
+use WordpressStarter\Providers\AnalyticsServiceProvider;
 
 class Application
 {
@@ -39,6 +40,7 @@ class Application
             AcfServiceProvider::class,
             MenuServiceProvider::class,
             ThemeServiceProvider::class,
+            AnalyticsServiceProvider::class,
         ];
     }
 

@@ -3,6 +3,15 @@
     $content_2 = $fields['content_2'] ?? '';
     $content_3 = $fields['content_3'] ?? '';
     $bgColor = $fields['background_color'] ?? '';
+    // Map old color names to Tailwind equivalents if needed
+    $colorMap = [
+        'marine' => 'blue-700',
+        'primary' => 'blue-600',
+        'secondary' => 'gray-600'
+    ];
+    if (isset($colorMap[$bgColor])) {
+        $bgColor = $colorMap[$bgColor];
+    }
 @endphp
 
 <section class="{{ $classes }} px-6 three-columns md:px-8 {{ $bgColor ? 'bg-' . $bgColor : '' }}"

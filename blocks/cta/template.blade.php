@@ -2,16 +2,16 @@
     $title = $fields['title'] ?? '';
     $trimmed = str_replace(' ', '', $title);
     $cta = $fields['cta'] ?? null;
-    $bgColor = $fields['background_color'] ?? 'jade';
+    $bgColor = $fields['background_color'] ?? 'green-500';
     $content = $fields['content'] ?? '';
     
     $bgImage = 'bg-[url(./img/bg-effects-01.png)]';
-    if (in_array($bgColor, ['violett', 'marine'])) {
+    if (in_array($bgColor, ['purple-500', 'blue-700'])) {
         $bgImage = 'bg-[url(./img/bg-effects-03.png)]';
     }
 @endphp
 
-<section class="{{ $classes }} cta-block farbwelt-{{ $bgColor }} bg-{{ $bgColor }} relative overflow-hidden"
+<section class="{{ $classes }} cta-block bg-{{ $bgColor }} relative overflow-hidden"
          @if($anchor) id="{{ $anchor }}" @endif>
     <div class="relative z-10 grid items-center gap-12 px-8 py-20 mx-auto overflow-hidden max-w-7xl md:grid-cols-2 isolate md:px-16" 
          role="region" 
@@ -26,11 +26,11 @@
                 <div>
                     <a pirsch-event="CTA" 
                        pirsch-meta-key="cta_block"
-                       class="w-full lg:w-auto !no-underline inline-flex mt-4 items-center justify-center gap-2 px-6 py-2.5 border rounded-md bg-senf border-senf shadow-senf hover:bg-senf/90 relative transition ease-in-out"
+                       class="w-full lg:w-auto !no-underline inline-flex mt-4 items-center justify-center gap-2 px-6 py-2.5 border rounded-md bg-yellow-500 border-yellow-500 shadow-yellow-500/20 hover:bg-yellow-600 relative transition ease-in-out"
                        href="{{ $cta['url'] }}" 
                        target="{{ $cta['target'] }}" 
                        title="{{ $cta['title'] }}">
-                        <span class="text-base font-bold leading-none no-underline text-marine">{{ $cta['title'] }}</span>
+                        <span class="text-base font-bold leading-none no-underline text-blue-700">{{ $cta['title'] }}</span>
                     </a>
                 </div>
             @endif
