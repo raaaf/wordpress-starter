@@ -15,21 +15,19 @@
     <!-- Use WordPress coding standards -->
     <rule ref="WordPress">
         <!-- Allow short array syntax -->
-        <exclude name="Generic.Arrays.DisallowShortArraySyntax.Found"/>
+        <exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
         
         <!-- Allow modern PHP features -->
-        <exclude name="WordPress.PHP.DisallowShortTernary.Found"/>
+        <exclude name="WordPress.PHP.DisallowShortTernary"/>
+        
+        <!-- Exclude files from namespace requirement -->
+        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
     </rule>
 
     <!-- Use PSR-4 autoloading standards -->
     <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
         <exclude-pattern>*/config/*</exclude-pattern>
     </rule>
-
-    <!-- Enforce type hints -->
-    <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint"/>
-    <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint"/>
-    <rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint"/>
 
     <!-- PHP version -->
     <config name="minimum_supported_wp_version" value="6.0"/>

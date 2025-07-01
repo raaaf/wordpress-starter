@@ -15,6 +15,7 @@ class ThemeServiceProvider extends ServiceProvider
     {
         $this->addThemeSupport();
         $this->disableComments();
+        $this->disableGutenberg();
         $this->addTemplateFilter();
         $this->addStructuredData();
     }
@@ -83,6 +84,23 @@ class ThemeServiceProvider extends ServiceProvider
                 remove_action('admin_bar_menu', 'wp_admin_bar_comments_menu', 60);
             }
         });
+    }
+
+    private function disableGutenberg(): void
+    {
+        // Disable Gutenberg for posts
+        add_filter('use_block_editor_for_post', '__return_false', 10);
+        
+        // Disable Gutenberg for post types
+        add_filter('use_block_editor_for_post_type', '__return_false', 10);
+        
+        // Remove Gutenberg CSS
+        add_action('wp_enqueue_scripts', function (): void {
+            wp_dequeue_style('wp-block-library');
+            wp_dequeue_style('wp-block-library-theme');
+            wp_dequeue_style('wc-block-style'); // Remove WooCommerce block CSS
+            wp_dequeue_style('global-styles'); // Remove theme.json styles
+        }, 100);
     }
 
     private function addTemplateFilter(): void

@@ -6,6 +6,7 @@ namespace WordpressStarter\Providers;
 
 use WordpressStarter\Acf\Blocks;
 use WordpressStarter\Acf\Options;
+use WordpressStarter\Acf\FlexibleContent;
 use Illuminate\Support\Facades\Blade;
 
 class AcfServiceProvider extends ServiceProvider
@@ -20,6 +21,9 @@ class AcfServiceProvider extends ServiceProvider
         
         // Register options pages
         add_action('acf/init', [Options::class, 'register']);
+        
+        // Register flexible content fields
+        add_action('acf/init', [FlexibleContent::class, 'register']);
         
         // Initialize cache clearing
         Options::initCacheClearing();

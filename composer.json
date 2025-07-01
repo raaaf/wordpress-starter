@@ -47,5 +47,10 @@
             "@phpstan"
         ],
         "phpcs-config": "phpcs --config-set installed_paths vendor/wp-coding-standards/wpcs"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }
