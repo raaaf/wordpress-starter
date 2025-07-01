@@ -1,0 +1,20 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 6
+    paths:
+        - src
+        - config
+    excludePaths:
+        - vendor
+        - compiled
+        - node_modules
+    bootstrapFiles:
+        - vendor/autoload.php
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        - '#Function get_template_directory not found#'
+        - '#Function wp_#'
+        - '#Function get_field not found#'
+        - '#Function acf_#'

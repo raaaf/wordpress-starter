@@ -1,0 +1,14 @@
+{
+    "name": "cta",
+    "title": "Call to Action",
+    "description": "A call to action section with title, content and button",
+    "category": "theme",
+    "icon": "megaphone",
+    "keywords": ["cta", "call to action", "button", "conversion"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

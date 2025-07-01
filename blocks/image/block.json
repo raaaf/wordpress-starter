@@ -1,0 +1,14 @@
+{
+    "name": "image",
+    "title": "Image",
+    "description": "A single image with optional caption and border",
+    "category": "theme",
+    "icon": "format-image",
+    "keywords": ["image", "photo", "picture", "media"],
+    "supports": {
+        "align": ["full", "wide", "center"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

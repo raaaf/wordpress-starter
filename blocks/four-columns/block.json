@@ -1,0 +1,14 @@
+{
+    "name": "four-columns",
+    "title": "Four Columns",
+    "description": "A four column layout for content",
+    "category": "theme",
+    "icon": "columns",
+    "keywords": ["columns", "layout", "four", "grid"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

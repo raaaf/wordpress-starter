@@ -1,0 +1,14 @@
+{
+    "name": "one-column",
+    "title": "One Column",
+    "description": "A single column content block with optional label and background color",
+    "category": "theme",
+    "icon": "align-center",
+    "keywords": ["column", "content", "text", "single"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

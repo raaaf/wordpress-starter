@@ -1,0 +1,14 @@
+{
+    "name": "accordion",
+    "title": "Accordion",
+    "description": "An expandable accordion with multiple items",
+    "category": "theme",
+    "icon": "list-view",
+    "keywords": ["accordion", "faq", "expandable", "collapse"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}
