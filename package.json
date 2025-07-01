@@ -27,7 +27,7 @@
 		"@types/wordpress__blocks": "^12.5.14",
 		"@typescript-eslint/eslint-plugin": "^7.1.0",
 		"@typescript-eslint/parser": "^7.1.0",
-		"@vitejs/plugin-legacy": "^6.0.0",
+		"@vitejs/plugin-legacy": "^7.0.0",
 		"autoprefixer": "^10.4.20",
 		"cssnano": "^6.0.0",
 		"eslint": "^8.57.0",
