@@ -1,0 +1,10 @@
+{
+    "theme_name": "My WordPress Theme",
+    "theme_slug": "my-wordpress-theme",
+    "namespace": "MyWordPressTheme",
+    "dev_url": "http://my-wordpress-theme.local",
+    "author_name": "Your Name",
+    "author_email": "your@email.com",
+    "author_uri": "https://yourwebsite.com",
+    "repo_url": "https://github.com/yourusername/my-wordpress-theme"
+}

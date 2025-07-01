@@ -1,0 +1,88 @@
+<?php
+
+declare(strict_types=1);
+
+namespace WordpressStarter\Providers;
+
+use Illuminate\Container\Container;
+use Illuminate\View\Factory;
+use Illuminate\Events\Dispatcher;
+use Illuminate\View\FileViewFinder;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\View\Engines\PhpEngine;
+use Illuminate\View\Engines\EngineResolver;
+use Illuminate\View\Engines\CompilerEngine;
+use Illuminate\View\Compilers\BladeCompiler;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Facade;
+
+class BladeServiceProvider extends ServiceProvider
+{
+    private Container $container;
+    private Factory $viewFactory;
+
+    public function register(): void
+    {
+        $this->setupContainer();
+        $this->registerBladeEngine();
+        $this->setGlobalBladeInstance();
+    }
+
+    public function boot(): void
+    {
+        $this->registerBladeComponents();
+    }
+
+    private function setupContainer(): void
+    {
+        $this->container = new Container();
+        Facade::setFacadeApplication($this->container);
+    }
+
+    private function registerBladeEngine(): void
+    {
+        $filesystem = new Filesystem();
+        $compiler = new BladeCompiler($filesystem, $this->getCompiledPath());
+
+        $viewResolver = new EngineResolver();
+        $viewResolver->register('blade', fn() => new CompilerEngine($compiler));
+        $viewResolver->register('php', fn() => new PhpEngine($filesystem));
+
+        $this->container->singleton('blade.compiler', fn() => $compiler);
+        
+        $this->viewFactory = new Factory(
+            $viewResolver,
+            new FileViewFinder($filesystem, $this->getViewPaths()),
+            new Dispatcher()
+        );
+
+        $this->container->singleton('view', fn() => $this->viewFactory);
+    }
+
+    private function setGlobalBladeInstance(): void
+    {
+        $GLOBALS['blade'] = $this->viewFactory;
+    }
+
+    private function registerBladeComponents(): void
+    {
+        if (class_exists('Illuminate\View\Factory')) {
+            Blade::component('partials.the_loop', 'loop');
+        }
+    }
+
+    private function getViewPaths(): array
+    {
+        return [get_template_directory() . '/templates/'];
+    }
+
+    private function getCompiledPath(): string
+    {
+        return get_template_directory() . '/compiled/';
+    }
+
+    public function getViewFactory(): Factory
+    {
+        return $this->viewFactory;
+    }
+}

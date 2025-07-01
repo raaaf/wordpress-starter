@@ -4,17 +4,17 @@
 <head>
     <meta charset="@php(bloginfo('charset'))">
     <meta name="viewport" content="width=device-width">
-    <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'nonce-{{ $nonce }}' https://trusted.cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <link rel="pingback" href="{{ esc_url(get_bloginfo('pingback_url')) }}">
 
     {{-- Preload critical assets --}}
-    <link rel="preload" href="{{ theme_get_mix_asset('dist/app.css') }}" as="style">
-    <link rel="preload" href="{{ theme_get_mix_asset('dist/app.js') }}" as="script">
+    @if(!WP_DEBUG || !\WordpressStarter\Vite::isDevServerRunning())
+        <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/css/app.css') }}" as="style">
+        <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/js/app.js') }}" as="script">
+    @endif
 
     {{-- Remove no-js class when JS is enabled --}}
-    <script nonce="{{ $nonce }}">
+    <script>
         document.documentElement.classList.remove('no-js');
     </script>
 

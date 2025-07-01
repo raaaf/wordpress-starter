@@ -1,0 +1,14 @@
+{
+    "name": "one-third-two-thirds",
+    "title": "One Third / Two Thirds Columns",
+    "description": "A layout with one-third and two-thirds column split",
+    "category": "theme",
+    "icon": "align-left",
+    "keywords": ["columns", "layout", "asymmetric", "grid"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

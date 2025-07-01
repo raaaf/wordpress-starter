@@ -1,0 +1,14 @@
+{
+    "name": "two-columns-images",
+    "title": "Two Columns with Images",
+    "description": "Two column layout with alternating images and content",
+    "category": "theme",
+    "icon": "format-gallery",
+    "keywords": ["columns", "images", "layout", "gallery"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "name": "divider",
+    "title": "Divider",
+    "description": "A decorative divider with icon",
+    "category": "theme",
+    "icon": "minus",
+    "keywords": ["divider", "separator", "line", "break"],
+    "supports": {
+        "align": ["full", "wide", "center"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "name": "two-columns",
+    "title": "Two Columns",
+    "description": "A two column layout for content",
+    "category": "theme",
+    "icon": "columns",
+    "keywords": ["columns", "layout", "two", "grid"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

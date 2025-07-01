@@ -1,0 +1,14 @@
+{
+    "name": "hero",
+    "title": "Hero Section",
+    "description": "A hero section with title, content, and background image",
+    "category": "theme",
+    "icon": "cover-image",
+    "keywords": ["hero", "banner", "header"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

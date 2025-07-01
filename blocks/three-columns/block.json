@@ -1,0 +1,14 @@
+{
+    "name": "three-columns",
+    "title": "Three Columns",
+    "description": "A three column layout for content",
+    "category": "theme",
+    "icon": "columns",
+    "keywords": ["columns", "layout", "three", "grid"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

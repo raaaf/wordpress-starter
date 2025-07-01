@@ -10,17 +10,42 @@
         }
     ],
     "require": {
-        "illuminate/view": "^8.0",
-        "illuminate/events": "^8.0",
-        "illuminate/filesystem": "^8.0",
-        "illuminate/support": "^8.0"
+        "php": "^8.2",
+        "illuminate/view": "^11.0",
+        "illuminate/events": "^11.0",
+        "illuminate/filesystem": "^11.0",
+        "illuminate/support": "^11.0",
+        "illuminate/container": "^11.0"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.9",
+        "wp-coding-standards/wpcs": "^3.0",
+        "phpstan/phpstan": "^1.10",
+        "szepeviktor/phpstan-wordpress": "^1.3"
     },
     "autoload": {
         "psr-4": {
-            "BukStuttgart\\": "src/"
-        }
+            "WordpressStarter\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "scripts": {
-        "post-install-cmd": "npm install"
+        "post-install-cmd": [
+            "npm install",
+            "@phpcs-config"
+        ],
+        "post-update-cmd": [
+            "@phpcs-config"
+        ],
+        "phpcs": "phpcs",
+        "phpcs:fix": "phpcbf",
+        "phpstan": "phpstan analyze",
+        "lint": [
+            "@phpcs",
+            "@phpstan"
+        ],
+        "phpcs-config": "phpcs --config-set installed_paths vendor/wp-coding-standards/wpcs"
     }
 }

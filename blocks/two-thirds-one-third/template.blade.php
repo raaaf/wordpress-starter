@@ -1,0 +1,23 @@
+@php
+    $content_1 = $fields['content'] ?? '';
+    $content_2 = $fields['content_2'] ?? '';
+    $bgColor = $fields['background_color'] ?? 'gray-200';
+@endphp
+
+<section class="{{ $classes }} px-6 two-thirds-columns md:px-8"
+         @if($anchor) id="{{ $anchor }}" @endif>
+    <div class="max-w-6xl mx-auto">
+        <div class="grid items-center gap-8 md:grid-cols-1 lg:grid-cols-7">
+            <div class="order-last px-6 lg:p-8 md:p-0 lg:col-span-3 max-w-none text-marine prose prose-lg">
+                {!! $content_2 !!}
+            </div>
+            <div class="order-first h-auto overflow-hidden rounded-lg lg:col-span-4">
+                <div class="relative transition duration-200 border rounded-lg shadow-lg bg-{{ $bgColor }}/10 border-{{ $bgColor }}">
+                    <div class="relative z-10 p-8 max-w-none lg:p-16 lg:pb-12 text-marine prose prose-lg">
+                        {!! $content_1 !!}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
