@@ -198,43 +198,7 @@ class BlockFields
         acf_add_local_field_group([
             'key' => 'group_block_cta',
             'title' => 'Handlungsaufforderung (CTA)',
-            'fields' => [
-                FieldDefinitions::textField(
-                    'field_block_cta_title',
-                    'Überschrift',
-                    'title',
-                    true,
-                    'Die Hauptüberschrift des Call-to-Action Bereichs.',
-                    'z.B. Jetzt starten!'
-                ),
-                FieldDefinitions::wysiwygField(
-                    'field_block_cta_content',
-                    'Beschreibung',
-                    'content',
-                    false,
-                    null,
-                    'Kurzer Text, der zum Handeln auffordert.'
-                ),
-                FieldDefinitions::linkField(
-                    'field_block_cta_cta',
-                    'Button',
-                    'cta',
-                    true,
-                    'Der Call-to-Action Button mit Link und Text.'
-                ),
-                FieldDefinitions::selectField(
-                    'field_block_cta_background_color',
-                    'Hintergrundfarbe',
-                    'background_color',
-                    [
-                        'brand' => 'Markenfarbe',
-                        'brand-secondary' => 'Markenfarbe Sekundär',
-                    ],
-                    'brand',
-                    false,
-                    'Wähle die Hintergrundfarbe für diesen CTA-Bereich.'
-                ),
-            ],
+            'fields' => FieldDefinitions::ctaBlockFields('block_cta'),
             'location' => self::blockLocation('acf/cta'),
         ]);
     }

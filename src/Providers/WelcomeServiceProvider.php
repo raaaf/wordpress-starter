@@ -164,8 +164,10 @@ class WelcomeServiceProvider extends ServiceProvider
 
     /**
      * Create the styleguide page
+     *
+     * @return int Post ID on success, 0 on failure
      */
-    private function createStyleguidePage(): int|false
+    private function createStyleguidePage(): int
     {
         $content = $this->buildStyleguideContent();
 
@@ -177,7 +179,8 @@ class WelcomeServiceProvider extends ServiceProvider
             'post_author' => get_current_user_id(),
         ]);
 
-        return is_wp_error($pageId) ? false : $pageId;
+        // wp_insert_post returns 0 on failure (when wp_error param is false)
+        return $pageId;
     }
 
     /**

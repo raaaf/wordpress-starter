@@ -752,6 +752,58 @@ class FieldDefinitions
     }
 
     /**
+     * Get CTA Block fields (variant with WYSIWYG content and limited background colors)
+     *
+     * This variant is used for ACF blocks where:
+     * - Content needs rich text editing (WYSIWYG instead of textarea)
+     * - Button field is named 'cta' for template compatibility
+     * - Only brand colors are available (design constraint)
+     *
+     * @param string $prefix Key prefix
+     * @return array<int, array<string, mixed>>
+     */
+    public static function ctaBlockFields(string $prefix): array
+    {
+        return [
+            self::textField(
+                "field_{$prefix}_title",
+                'Überschrift',
+                'title',
+                true,
+                'Die Hauptüberschrift des Call-to-Action Bereichs.',
+                'z.B. Jetzt starten!'
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_content",
+                'Beschreibung',
+                'content',
+                false,
+                null,
+                'Kurzer Text, der zum Handeln auffordert.'
+            ),
+            self::linkField(
+                "field_{$prefix}_cta",
+                'Button',
+                'cta',
+                true,
+                'Der Call-to-Action Button mit Link und Text.'
+            ),
+            self::selectField(
+                "field_{$prefix}_background_color",
+                'Hintergrundfarbe',
+                'background_color',
+                [
+                    'brand' => 'Markenfarbe',
+                    'brand-secondary' => 'Markenfarbe Sekundär',
+                ],
+                'brand',
+                false,
+                'Wähle die Hintergrundfarbe für diesen CTA-Bereich.'
+            ),
+        ];
+    }
+
+    /**
      * Get Video layout fields
      *
      * @param string $prefix Key prefix

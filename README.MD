@@ -88,25 +88,31 @@ npm run dev
 ```
 wordpress-starter/
 ├── acf-json/           # ACF field group JSON files
-├── blocks/             # ACF Gutenberg blocks (13 blocks included)
-│   ├── accordion/     # Expandable accordion
+├── blocks/             # ACF Gutenberg blocks (27 blocks included)
+│   ├── accordion/     # Expandable accordion (FAQ)
+│   ├── before-after/  # Image comparison slider
+│   ├── cards/        # Feature cards with icons
+│   ├── contact-form/ # Contact Form 7 integration
 │   ├── cta/          # Call to action block
 │   ├── divider/      # Decorative divider
-│   ├── four-columns/ # Four column layout
+│   ├── gallery/      # Image gallery with lightbox
 │   ├── hero/         # Hero section with background
 │   ├── image/        # Single image block
-│   ├── one-column/   # Single column content
-│   ├── one-third-two-thirds/  # Asymmetric columns
-│   ├── three-columns/         # Three column layout
-│   ├── two-columns/           # Two equal columns
-│   ├── two-columns-images/    # Two columns with images
-│   ├── two-thirds-one-third/  # Asymmetric columns (reversed)
-│   └── video/        # Video embed block
+│   ├── logo-slider/  # Partner/client logos
+│   ├── map/          # Google Maps with GDPR consent
+│   ├── posts/        # Dynamic blog posts
+│   ├── pricing-table/# Pricing plans
+│   ├── stats/        # Animated counters
+│   ├── tabs/         # Tabbed content
+│   ├── table/        # Data table
+│   ├── team/         # Team members
+│   ├── testimonials/ # Customer quotes
+│   ├── timeline/     # Chronological events
+│   └── [layout blocks]/ # Column layouts (1-4 columns, asymmetric)
 ├── compiled/          # Blade template cache
 ├── config/            # Configuration files
 │   ├── app.php       # Application config
-│   ├── functions.php # Bootstrap file
-│   └── vite.php      # Vite integration
+│   └── functions.php # Bootstrap file
 ├── dist/             # Compiled assets (gitignored)
 ├── resources/        # Source assets
 │   ├── css/         # CSS files
@@ -118,28 +124,32 @@ wordpress-starter/
 │   └── fonts/       # Font files
 ├── src/              # PHP source code
 │   ├── Acf/         # ACF helper classes
-│   │   ├── Blocks.php   # Block registration
-│   │   ├── Fields.php   # Field helpers
-│   │   └── Options.php  # Options pages
+│   │   ├── BlockFields.php     # Block field registration
+│   │   ├── Blocks.php          # Block registration
+│   │   ├── FieldDefinitions.php # Shared field definitions
+│   │   ├── Fields.php          # Field helpers
+│   │   ├── FlexibleContent.php # Flexible content layouts
+│   │   └── Options.php         # Options pages
 │   ├── Providers/   # Service providers
 │   │   ├── AcfServiceProvider.php
+│   │   ├── AnalyticsServiceProvider.php
 │   │   ├── BladeServiceProvider.php
 │   │   ├── MenuServiceProvider.php
+│   │   ├── PluginServiceProvider.php
 │   │   ├── SecurityServiceProvider.php
-│   │   └── ThemeServiceProvider.php
+│   │   ├── ThemeServiceProvider.php
+│   │   └── WelcomeServiceProvider.php
 │   ├── types/       # TypeScript definitions
-│   │   ├── alpine.d.ts
-│   │   ├── global.d.ts
-│   │   └── wordpress.d.ts
 │   ├── Application.php
 │   ├── Config.php
 │   ├── Security.php
+│   ├── Vite.php
 │   └── helpers.php
 ├── templates/        # Blade templates
 │   ├── layouts/     # Layout templates
 │   └── partials/    # Partial templates
 ├── .env.example      # Environment example
-├── .eslintrc.json   # ESLint configuration
+├── eslint.config.js # ESLint 9 flat config
 ├── .gitignore       # Git ignore rules
 ├── .prettierrc      # Prettier configuration
 ├── composer.json    # PHP dependencies
@@ -193,6 +203,22 @@ composer phpstan
 
 # Run all PHP linters
 composer lint
+
+# Run PHP unit tests
+composer test
+```
+
+#### Testing
+```bash
+# Run all tests
+npm test
+composer test
+
+# Run JavaScript tests with coverage
+npm run test:coverage
+
+# Run PHP tests
+./vendor/bin/phpunit
 ```
 
 ### Service Providers
@@ -420,21 +446,42 @@ For Mac users, we recommend using [Local by Flywheel](https://localwp.com/) for 
 
 ### Pre-built ACF Blocks
 
-The theme includes 13 pre-configured ACF blocks:
+The theme includes 27 pre-configured ACF blocks:
 
-- **accordion** - Expandable accordion with multiple items
-- **cta** - Call to action section with title, content, and button
-- **divider** - Decorative divider with custom icon
-- **four-columns** - Four column content layout
-- **hero** - Hero section with background image and content
-- **image** - Single image with optional caption and border
+**Layout Blocks:**
 - **one-column** - Single column content block
-- **one-third-two-thirds** - Asymmetric two column layout (1/3 + 2/3)
-- **three-columns** - Three column content layout
 - **two-columns** - Two equal column layout
+- **three-columns** - Three column content layout
+- **four-columns** - Four column content layout
+- **one-third-two-thirds** - Asymmetric layout (1/3 + 2/3)
+- **two-thirds-one-third** - Asymmetric layout (2/3 + 1/3)
 - **two-columns-images** - Two columns with image support
-- **two-thirds-one-third** - Asymmetric two column layout (2/3 + 1/3)
-- **video** - Video embed from WordPress media or external sources (YouTube)
+
+**Content Blocks:**
+- **hero** - Hero section with background image
+- **accordion** - Expandable accordion (FAQ) with Schema.org markup
+- **cta** - Call to action with title, content, and button
+- **image** - Single image with optional caption
+- **video** - Video from WordPress media or YouTube/Vimeo
+- **divider** - Decorative divider / spacer
+
+**Interactive Blocks:**
+- **testimonials** - Customer quotes with repeater
+- **cards** - Feature cards with icons and links
+- **gallery** - Image gallery with medium-zoom lightbox
+- **logo-slider** - Partner/client logo carousel
+- **contact-form** - Contact Form 7 integration
+- **map** - Google Maps with GDPR consent
+- **tabs** - Tabbed content with Alpine.js
+
+**Additional Blocks:**
+- **pricing-table** - Pricing plans comparison
+- **team** - Team member profiles
+- **stats** - Animated number counters
+- **timeline** - Chronological events
+- **posts** - Dynamic blog post display
+- **before-after** - Image comparison slider
+- **table** - Data table with headers
 
 ### ACF Helper Functions
 
