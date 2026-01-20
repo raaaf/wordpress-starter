@@ -1,49 +1,21 @@
 import { defineConfig } from 'vite';
-import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 import legacy from '@vitejs/plugin-legacy';
-import viteCompression from 'vite-plugin-compression';
-import viteImagemin from 'vite-plugin-imagemin';
 import { visualizer } from 'rollup-plugin-visualizer';
+import tailwindcss from '@tailwindcss/postcss';
+import autoprefixer from 'autoprefixer';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Note: Compression (gzip/brotli) is handled by the web server/CDN
+// Image optimization can be added back when plugins support Vite 7
 
 export default defineConfig({
   plugins: [
     legacy({
       targets: ['defaults', 'not IE 11'],
-    }),
-    viteCompression({
-      algorithm: 'gzip',
-      ext: '.gz',
-    }),
-    viteCompression({
-      algorithm: 'brotliCompress',
-      ext: '.br',
-    }),
-    viteImagemin({
-      gifsicle: {
-        optimizationLevel: 7,
-        interlaced: false,
-      },
-      optipng: {
-        optimizationLevel: 7,
-      },
-      mozjpeg: {
-        quality: 80,
-      },
-      pngquant: {
-        quality: [0.8, 0.9],
-        speed: 4,
-      },
-      svgo: {
-        plugins: [
-          {
-            name: 'removeViewBox',
-          },
-          {
-            name: 'removeEmptyAttrs',
-            active: false,
-          },
-        ],
-      },
     }),
     visualizer({
       open: false,
@@ -61,9 +33,9 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       input: {
-        app: path.resolve(__dirname, 'resources/js/app.ts'),
-        styles: path.resolve(__dirname, 'resources/css/app.css'),
-        editor: path.resolve(__dirname, 'resources/css/editor-style.css'),
+        app: resolve(__dirname, 'resources/js/app.ts'),
+        styles: resolve(__dirname, 'resources/css/app.css'),
+        editor: resolve(__dirname, 'resources/css/editor-style.css'),
       },
       output: {
         manualChunks: {
@@ -92,10 +64,7 @@ export default defineConfig({
   },
   css: {
     postcss: {
-      plugins: [
-        require('@tailwindcss/postcss')(),
-        require('autoprefixer')(),
-      ],
+      plugins: [tailwindcss(), autoprefixer()],
     },
   },
 });

@@ -1,6 +1,7 @@
 {
 	"name": "wp-starter",
 	"version": "0.0.1",
+	"type": "module",
 	"description": "Wordpress-Starter-Theme based on Tailpress and MountainBreeze",
 	"author": "Rafael Alex",
 	"repository": {
@@ -16,36 +17,34 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"analyze": "vite build --mode analyze",
-		"lint": "eslint resources/js --ext .js,.ts",
-		"lint:fix": "eslint resources/js --ext .js,.ts --fix",
+		"lint": "eslint resources/js",
+		"lint:fix": "eslint resources/js --fix",
 		"format": "prettier --write \"resources/**/*.{js,ts,css,json}\"",
-		"prepare": "husky install"
+		"prepare": "husky"
 	},
 	"devDependencies": {
-		"@tailwindcss/postcss": "^4.0.8",
-		"@types/alpinejs": "^3.13.10",
-		"@types/wordpress__blocks": "^12.5.14",
-		"@typescript-eslint/eslint-plugin": "^7.1.0",
-		"@typescript-eslint/parser": "^7.1.0",
-		"@vitejs/plugin-legacy": "^7.0.0",
-		"autoprefixer": "^10.4.20",
-		"cssnano": "^6.0.0",
-		"eslint": "^8.57.0",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-plugin-prettier": "^5.1.3",
-		"husky": "^9.0.11",
-		"lint-staged": "^15.2.2",
+		"@eslint/js": "^9.18.0",
+		"@tailwindcss/postcss": "^4.1.18",
+		"@types/alpinejs": "^3.13.11",
+		"@types/wordpress__blocks": "^12.5.18",
+		"@vitejs/plugin-legacy": "^7.2.1",
+		"autoprefixer": "^10.4.23",
+		"cssnano": "^7.0.6",
+		"eslint": "^9.18.0",
+		"eslint-config-prettier": "^10.0.1",
+		"eslint-plugin-prettier": "^5.5.5",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.7",
 		"postcss": "^8.5.3",
-		"prettier": "^3.2.5",
-		"rollup-plugin-visualizer": "^5.12.0",
-		"tailwindcss": "^4.0.8",
-		"typescript": "^5.4.0",
-		"vite": "^7.0.0",
-		"vite-plugin-compression": "^0.5.1",
-		"vite-plugin-imagemin": "^0.6.1"
+		"prettier": "^3.8.0",
+		"rollup-plugin-visualizer": "^6.0.5",
+		"tailwindcss": "^4.1.18",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.21.0",
+		"vite": "^7.3.1"
 	},
 	"dependencies": {
-		"alpinejs": "^3.14.9"
+		"alpinejs": "^3.15.3"
 	},
 	"lint-staged": {
 		"*.{js,ts}": [

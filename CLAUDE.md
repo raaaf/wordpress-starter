@@ -4,15 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WP-Starter is a modern WordPress starter theme that removes jQuery dependency and leverages Laravel's Blade templating engine for improved developer experience. The theme has been modernized with Vite 7, Alpine.js v3.14.9 (bundled), Laravel 11 components, ACF Pro integration, TypeScript support, and comprehensive code quality tools.
+WP-Starter is a modern WordPress starter theme that removes jQuery dependency and leverages Laravel's Blade templating engine for improved developer experience. The theme has been modernized with Vite 7.3, Alpine.js v3.15 (bundled), Laravel 12 components, ACF Pro integration, TypeScript support, and comprehensive code quality tools.
 
 ## Key Technologies
 
 - WordPress theme development
-- Laravel Blade templating (via Illuminate v11 components)
-- TailwindCSS v4 with @tailwindcss/postcss
-- Vite 7 for ultra-fast asset compilation and HMR
-- Alpine.js v3.14.9 for reactive components (replaced jQuery)
+- Laravel Blade templating (via Illuminate v12 components)
+- TailwindCSS v4.1 with @tailwindcss/postcss
+- Vite 7.3 for ultra-fast asset compilation and HMR
+- Alpine.js v3.15 for reactive components (replaced jQuery)
 - PostCSS for CSS processing
 - PHP 8.2+ with strict types and modern features
 - ACF Pro with custom helpers and Blade directives
@@ -215,7 +215,7 @@ The theme uses Husky and lint-staged to run checks before commits:
 - Automatic formatting for CSS/JSON files
 
 ### Configuration Files
-- `.eslintrc.json` - ESLint configuration with TypeScript support
+- `eslint.config.js` - ESLint 9 flat config with TypeScript support
 - `.prettierrc` - Prettier code formatting rules
 - `phpcs.xml` - PHP CodeSniffer configuration
 - `phpstan.neon` - PHPStan static analysis configuration
