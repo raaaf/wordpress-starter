@@ -14,7 +14,7 @@
 
 <x-section :background="$background" :anchor="$anchor" class="{{ $classes }} testimonials">
     @if($title)
-        <h2 class="mb-12 text-3xl font-bold text-center text-content">{{ $title }}</h2>
+        <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if(!empty($testimonials))
@@ -27,7 +27,7 @@
                     </svg>
 
                     {{-- Quote --}}
-                    <blockquote class="flex-grow mb-6 text-lg italic text-content-secondary">
+                    <blockquote class="text-body-large italic flex-grow mb-6 text-content-secondary">
                         "{{ $testimonial['quote'] ?? '' }}"
                     </blockquote>
 
@@ -48,7 +48,7 @@
                         <div>
                             <div class="font-semibold text-content">{{ $testimonial['author'] ?? '' }}</div>
                             @if(!empty($testimonial['role']))
-                                <div class="text-sm text-content-secondary">{{ $testimonial['role'] }}</div>
+                                <div class="text-body-small text-content-secondary">{{ $testimonial['role'] }}</div>
                             @endif
                         </div>
                     </div>

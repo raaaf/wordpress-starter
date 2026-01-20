@@ -62,9 +62,16 @@
   --color-surface-success: var(--bg-success);
   --color-surface-success-strong: var(--bg-success-strong);
   --color-surface-warning: var(--bg-warning);
+  --color-surface-warning-strong: var(--bg-warning-strong);
   --color-surface-error: var(--bg-error);
+  --color-surface-error-strong: var(--bg-error-strong);
   --color-surface-disabled: var(--bg-disabled);
   --color-surface-overlay: var(--bg-overlay);
+
+  /* Status colors for hover/active states */
+  --color-error-dark: var(--color-error-dark);
+  --color-warning-dark: var(--color-warning-dark);
+  --color-success-dark: var(--color-success-dark);
 
   /* Text → content-* */
   --color-content: var(--text-primary);

@@ -14,7 +14,7 @@
 
 <x-section :background="$background" :anchor="$anchor" class="{{ $classes }} team-block">
     @if($title)
-        <h2 class="mb-12 text-3xl font-bold text-center text-content">{{ $title }}</h2>
+        <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if(!empty($members))
@@ -47,7 +47,7 @@
                     @endif
 
                     @if($name)
-                        <h3 class="mb-1 text-xl font-semibold text-content">{{ $name }}</h3>
+                        <h3 class="text-h4 mb-1 text-content">{{ $name }}</h3>
                     @endif
 
                     @if($position)

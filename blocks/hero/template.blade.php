@@ -44,7 +44,7 @@
          style="min-height: {{ esc_attr($min_height) }};">
         <div class="max-w-3xl">
             @if($title)
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-headline">
+                <h1 class="text-display mb-6 font-headline">
                     {!! $title !!}
                 </h1>
             @endif

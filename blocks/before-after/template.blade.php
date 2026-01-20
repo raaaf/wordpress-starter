@@ -18,7 +18,7 @@
 
 <x-section :background="$background" :anchor="$anchor" class="{{ $classes }} before-after-block">
     @if($title)
-        <h2 class="mb-8 text-3xl font-bold text-center text-content">{{ $title }}</h2>
+        <h2 class="text-h2 mb-8 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if($imageBefore && $imageAfter)
@@ -87,10 +87,10 @@
             </div>
 
             {{-- Labels --}}
-            <div class="absolute px-3 py-1 text-sm font-medium text-white rounded top-4 left-4 bg-black/50">
+            <div class="absolute px-3 py-1 text-body-small font-medium text-white rounded top-4 left-4 bg-black/50">
                 {{ $labelBefore }}
             </div>
-            <div class="absolute px-3 py-1 text-sm font-medium text-white rounded top-4 right-4 bg-black/50">
+            <div class="absolute px-3 py-1 text-body-small font-medium text-white rounded top-4 right-4 bg-black/50">
                 {{ $labelAfter }}
             </div>
         </div>

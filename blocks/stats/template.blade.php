@@ -14,7 +14,7 @@
 
 <x-section :background="$background" :anchor="$anchor" class="{{ $classes }} stats-block">
     @if($title)
-        <h2 class="mb-12 text-3xl font-bold text-center text-content">{{ $title }}</h2>
+        <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if(!empty($stats))
@@ -63,12 +63,12 @@
                         </div>
                     @endif
 
-                    <div class="mb-2 text-5xl font-bold text-content">
+                    <div class="text-display mb-2 text-content">
                         <span x-text="current.toLocaleString('de-DE')">0</span><span>{{ $suffix }}</span>
                     </div>
 
                     @if($label)
-                        <p class="text-lg text-content-secondary">{{ $label }}</p>
+                        <p class="text-body-large text-content-secondary">{{ $label }}</p>
                     @endif
                 </div>
             @endforeach

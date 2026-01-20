@@ -14,7 +14,7 @@
 
 <x-section :background="$background" :anchor="$anchor" class="{{ $classes }} cards">
     @if($title)
-        <h2 class="mb-12 text-3xl font-bold text-center text-content">{{ $title }}</h2>
+        <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if(!empty($cards))
@@ -39,7 +39,7 @@
 
                     {{-- Title --}}
                     @if(!empty($card['title']))
-                        <h3 class="mb-3 text-xl font-semibold text-content">{{ $card['title'] }}</h3>
+                        <h3 class="text-h4 mb-3 text-content">{{ $card['title'] }}</h3>
                     @endif
 
                     {{-- Content --}}

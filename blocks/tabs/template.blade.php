@@ -15,7 +15,7 @@
 
 <x-section :background="$background" :anchor="$anchor" class="{{ $classes }} tabs-block">
     @if($title)
-        <h2 class="mb-8 text-3xl font-bold text-center text-content">{{ $title }}</h2>
+        <h2 class="text-h2 mb-8 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if(!empty($tabs))

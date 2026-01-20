@@ -13,7 +13,7 @@
 
 <x-section :background="$background" :anchor="$anchor" class="{{ $classes }} timeline-block">
     @if($title)
-        <h2 class="mb-12 text-3xl font-bold text-center text-content">{{ $title }}</h2>
+        <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if(!empty($events))
@@ -44,7 +44,7 @@
                                 @endif
 
                                 @if($eventTitle)
-                                    <h3 class="mb-2 text-xl font-semibold text-content">{{ $eventTitle }}</h3>
+                                    <h3 class="text-h4 mb-2 text-content">{{ $eventTitle }}</h3>
                                 @endif
 
                                 @if($content)

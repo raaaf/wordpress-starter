@@ -24,7 +24,7 @@
         {{-- Left: Title, Content, Contact Info --}}
         <div>
             @if($title)
-                <h2 class="mb-6 text-3xl font-bold text-content">{{ $title }}</h2>
+                <h2 class="text-h2 mb-6 text-content">{{ $title }}</h2>
             @endif
 
             @if($content)
@@ -35,7 +35,7 @@
 
             @if($showContactInfo && ($companyName || $address || $phone || $email))
                 <div class="p-6 rounded-lg bg-surface-secondary">
-                    <h3 class="mb-4 text-lg font-semibold text-content">Kontaktdaten</h3>
+                    <h3 class="text-h5 mb-4 text-content">Kontaktdaten</h3>
 
                     @if($companyName)
                         <p class="mb-2 font-medium text-content">{{ $companyName }}</p>

@@ -14,7 +14,7 @@
 <x-section :background="$background" :anchor="$anchor" class="{{ $classes }} one-column">
     <div class="max-w-2xl mx-auto">
         @if($label)
-            <p class="text-sm font-semibold uppercase tracking-wider mb-4 text-content-secondary">{{ $label }}</p>
+            <p class="text-overline mb-4 text-content-secondary">{{ $label }}</p>
         @endif
         <x-prose>{!! $content !!}</x-prose>
     </div>

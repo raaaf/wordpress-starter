@@ -15,7 +15,7 @@
 
 <x-section :background="$background" :anchor="$anchor" padding="md" class="{{ $classes }} logo-slider">
     @if($title)
-        <h2 class="mb-8 text-2xl font-bold text-center text-content">{{ $title }}</h2>
+        <h2 class="text-h3 mb-8 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if(!empty($logos))
