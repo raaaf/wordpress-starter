@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\PluginInstaller;
+
 /**
  * Plugin Service Provider
  *
  * Manages plugin recommendations and requirements for the theme.
- * Shows admin notices for missing plugins and provides easy installation links.
+ * Provides a setup page for bulk plugin installation.
  */
 class PluginServiceProvider extends ServiceProvider
 {
+    private const SETUP_PAGE_SLUG = 'wp-starter-setup';
+    private const NONCE_ACTION = 'wp_starter_install_plugins';
+
     /**
      * Plugin definitions
      *
@@ -31,10 +36,174 @@ class PluginServiceProvider extends ServiceProvider
         $this->definePlugins();
     }
 
+    /**
+     * Selected plugins from setup script
+     *
+     * @var array<string>
+     */
+    private array $selectedPlugins = [];
+
+    /**
+     * Content setup options from setup script
+     *
+     * @var array<string, mixed>
+     */
+    private array $setupOptions = [];
+
     public function boot(): void
     {
+        $this->loadSetupConfig();
+
+        add_action('admin_menu', [$this, 'addSetupPage']);
         add_action('admin_notices', [$this, 'displayPluginNotices']);
         add_action('admin_init', [$this, 'handleDismissal']);
+        add_action('after_switch_theme', [$this, 'onThemeActivation']);
+        add_action('admin_init', [$this, 'maybeRedirectToSetup']);
+        add_action('admin_init', [$this, 'runContentSetup']);
+
+        // AJAX handlers
+        add_action('wp_ajax_wp_starter_install_plugin', [$this, 'ajaxInstallPlugin']);
+        add_action('wp_ajax_wp_starter_install_all_plugins', [$this, 'ajaxInstallAllPlugins']);
+    }
+
+    /**
+     * Load configuration from setup script
+     */
+    private function loadSetupConfig(): void
+    {
+        $pluginsConfigPath = get_template_directory() . '/config/plugins-to-install.php';
+        $setupOptionsPath = get_template_directory() . '/config/setup-options.php';
+
+        if (file_exists($pluginsConfigPath)) {
+            $this->selectedPlugins = include $pluginsConfigPath;
+        }
+
+        if (file_exists($setupOptionsPath)) {
+            $this->setupOptions = include $setupOptionsPath;
+        }
+    }
+
+    /**
+     * Run content setup on first theme activation
+     */
+    public function runContentSetup(): void
+    {
+        // Only run once
+        if (get_option('wp_starter_content_setup_complete')) {
+            return;
+        }
+
+        // Only run if we have setup options
+        if (empty($this->setupOptions)) {
+            return;
+        }
+
+        // Delete default WordPress content
+        if (!empty($this->setupOptions['delete_default_content'])) {
+            $this->deleteDefaultContent();
+        }
+
+        // Set permalink structure
+        if (!empty($this->setupOptions['set_permalink_structure'])) {
+            $this->setPermalinkStructure();
+        }
+
+        // Create default pages
+        if (!empty($this->setupOptions['create_pages']) && !empty($this->setupOptions['pages'])) {
+            $this->createDefaultPages($this->setupOptions['pages']);
+        }
+
+        // Mark as complete
+        update_option('wp_starter_content_setup_complete', true);
+    }
+
+    /**
+     * Delete default WordPress content
+     */
+    private function deleteDefaultContent(): void
+    {
+        // Delete "Hello World" post
+        $hello_world = get_page_by_path('hello-world', OBJECT, 'post');
+        if ($hello_world) {
+            wp_delete_post($hello_world->ID, true);
+        }
+
+        // Delete sample page
+        $sample_page = get_page_by_path('sample-page', OBJECT, 'page');
+        if ($sample_page) {
+            wp_delete_post($sample_page->ID, true);
+        }
+
+        // Delete default comment
+        $comment = get_comment(1);
+        if ($comment) {
+            wp_delete_comment(1, true);
+        }
+    }
+
+    /**
+     * Set permalink structure to /%postname%/
+     */
+    private function setPermalinkStructure(): void
+    {
+        global $wp_rewrite;
+
+        $wp_rewrite->set_permalink_structure('/%postname%/');
+        $wp_rewrite->flush_rules();
+    }
+
+    /**
+     * Create default pages
+     *
+     * @param array<string, array{title: string, template: string}> $pages
+     */
+    private function createDefaultPages(array $pages): void
+    {
+        $homePageId = null;
+
+        foreach ($pages as $slug => $pageData) {
+            // Check if page already exists
+            $existing = get_page_by_path($slug);
+            if ($existing) {
+                continue;
+            }
+
+            $pageId = wp_insert_post([
+                'post_title' => $pageData['title'],
+                'post_name' => $slug,
+                'post_status' => 'publish',
+                'post_type' => 'page',
+                'post_content' => '',
+            ]);
+
+            if ($pageId && !is_wp_error($pageId)) {
+                // Set page template if specified
+                if (!empty($pageData['template'])) {
+                    update_post_meta($pageId, '_wp_page_template', $pageData['template'] . '.blade.php');
+                }
+
+                // Track home page
+                if ($slug === 'home') {
+                    $homePageId = $pageId;
+                }
+
+                // Set legal pages in theme options (if ACF is active)
+                if (function_exists('update_field')) {
+                    if ($slug === 'privacy') {
+                        update_field('datenschutz_seite', $pageId, 'option');
+                        update_option('wp_page_for_privacy_policy', $pageId);
+                    } elseif ($slug === 'imprint') {
+                        update_field('impressum_seite', $pageId, 'option');
+                    }
+                }
+            }
+        }
+
+        // Set homepage as front page
+        if ($homePageId) {
+            update_option('show_on_front', 'page');
+            update_option('page_on_front', $homePageId);
+        }
     }
 
     /**
@@ -91,24 +260,6 @@ class PluginServiceProvider extends ServiceProvider
                 'check' => fn() => defined('WPMS_PLUGIN_VER'),
             ],
 
-            // === RECOMMENDED: Security & Backup ===
-            'solid-security' => [
-                'name' => 'Solid Security (ehem. iThemes)',
-                'slug' => 'solid-security',
-                'required' => false,
-                'description' => 'Umfassender Sicherheitsschutz für WordPress.',
-                'check' => fn() => class_exists('ITSEC_Core'),
-                'external' => 'https://developer.liquidweb.com/solid-security/',
-            ],
-            'solid-backups' => [
-                'name' => 'Solid Backups (ehem. BackupBuddy)',
-                'slug' => 'solid-backups',
-                'required' => false,
-                'description' => 'Automatische Backups und Migration.',
-                'check' => fn() => class_exists('pb_backupbuddy') || class_exists('SolidBackups'),
-                'external' => 'https://developer.liquidweb.com/solid-backups/',
-            ],
-
             // === RECOMMENDED: Performance & Analytics ===
             'wp-optimize' => [
                 'name' => 'WP-Optimize',
@@ -137,13 +288,392 @@ class PluginServiceProvider extends ServiceProvider
     }
 
     /**
+     * Get plugins organized by category
+     *
+     * @return array<string, array<string, array{name: string, slug: string, required: bool, description: string, check: callable, external?: string}>>
+     */
+    private function getPluginsByCategory(): array
+    {
+        return [
+            'Erforderlich' => array_filter($this->plugins, fn($p) => $p['required']),
+            'SEO & Content' => [
+                'wordpress-seo' => $this->plugins['wordpress-seo'],
+                'acf-content-analysis-for-yoast-seo' => $this->plugins['acf-content-analysis-for-yoast-seo'],
+                'acf-extended' => $this->plugins['acf-extended'],
+            ],
+            'Formulare & Kommunikation' => [
+                'contact-form-7' => $this->plugins['contact-form-7'],
+                'wp-mail-smtp' => $this->plugins['wp-mail-smtp'],
+            ],
+            'Performance & Analytics' => [
+                'wp-optimize' => $this->plugins['wp-optimize'],
+                'pirsch-analytics' => $this->plugins['pirsch-analytics'],
+            ],
+            'Admin' => [
+                'admin-site-enhancements' => $this->plugins['admin-site-enhancements'],
+            ],
+        ];
+    }
+
+    /**
+     * Add setup page to admin menu
+     */
+    public function addSetupPage(): void
+    {
+        add_theme_page(
+            __('Theme Setup', 'wp-starter'),
+            __('Theme Setup', 'wp-starter'),
+            'install_plugins',
+            self::SETUP_PAGE_SLUG,
+            [$this, 'renderSetupPage']
+        );
+    }
+
+    /**
+     * Handle theme activation
+     */
+    public function onThemeActivation(): void
+    {
+        // Set transient to redirect to setup page
+        set_transient('wp_starter_activation_redirect', true, 60);
+    }
+
+    /**
+     * Redirect to setup page after theme activation
+     */
+    public function maybeRedirectToSetup(): void
+    {
+        if (!get_transient('wp_starter_activation_redirect')) {
+            return;
+        }
+
+        delete_transient('wp_starter_activation_redirect');
+
+        // Don't redirect on bulk activation or AJAX
+        if (wp_doing_ajax() || isset($_GET['activate-multi'])) {
+            return;
+        }
+
+        wp_safe_redirect(admin_url('themes.php?page=' . self::SETUP_PAGE_SLUG));
+        exit;
+    }
+
+    /**
+     * Render the setup page
+     */
+    public function renderSetupPage(): void
+    {
+        $categories = $this->getPluginsByCategory();
+        $selectedPlugins = $this->getSelectedPlugins();
+        $missingSelectedPlugins = array_filter($selectedPlugins, fn($p) => !($p['check'])());
+        $hasConfig = $this->hasSetupConfig();
+
+        ?>
+        <div class="wrap">
+            <h1><?php esc_html_e('WP-Starter Theme Setup', 'wp-starter'); ?></h1>
+
+            <div class="wp-starter-setup-header" style="background: #fff; padding: 20px; margin: 20px 0; border-left: 4px solid #2271b1; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top: 0;"><?php esc_html_e('Willkommen beim WP-Starter Theme!', 'wp-starter'); ?></h2>
+                <?php if ($hasConfig): ?>
+                    <p><?php esc_html_e('Ihre vorkonfigurierten Plugins werden jetzt installiert.', 'wp-starter'); ?></p>
+                <?php else: ?>
+                    <p><?php esc_html_e('Installieren Sie die empfohlenen Plugins für die beste Erfahrung mit diesem Theme.', 'wp-starter'); ?></p>
+                <?php endif; ?>
+
+                <?php if (!empty($missingSelectedPlugins)): ?>
+                    <p>
+                        <button type="button" id="wp-starter-install-all" class="button button-primary button-hero">
+                            <?php
+                            printf(
+                                $hasConfig
+                                    ? esc_html__('Vorkonfigurierte Plugins installieren (%d)', 'wp-starter')
+                                    : esc_html__('Alle kostenlosen Plugins installieren (%d)', 'wp-starter'),
+                                count($missingSelectedPlugins)
+                            );
+                            ?>
+                        </button>
+                    </p>
+                <?php else: ?>
+                    <p style="color: #00a32a; font-weight: 600;">
+                        <span class="dashicons dashicons-yes-alt"></span>
+                        <?php esc_html_e('Alle ausgewählten Plugins sind installiert!', 'wp-starter'); ?>
+                    </p>
+                <?php endif; ?>
+            </div>
+
+            <div id="wp-starter-install-progress" style="display: none; background: #fff; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h3><?php esc_html_e('Installation läuft...', 'wp-starter'); ?></h3>
+                <div class="wp-starter-progress-bar" style="background: #ddd; height: 20px; border-radius: 3px; overflow: hidden;">
+                    <div class="wp-starter-progress-fill" style="background: #2271b1; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                </div>
+                <p class="wp-starter-progress-text" style="margin-top: 10px;"></p>
+                <div class="wp-starter-install-log" style="max-height: 200px; overflow-y: auto; margin-top: 15px; padding: 10px; background: #f6f7f7; font-family: monospace; font-size: 12px;"></div>
+            </div>
+
+            <?php foreach ($categories as $categoryName => $categoryPlugins): ?>
+                <div class="wp-starter-plugin-category" style="background: #fff; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                    <h2><?php echo esc_html($categoryName); ?></h2>
+                    <table class="wp-list-table widefat plugins">
+                        <tbody>
+                            <?php foreach ($categoryPlugins as $key => $plugin): ?>
+                                <?php
+                                $isActive = ($plugin['check'])();
+                                $isExternal = !empty($plugin['external']);
+                                $isInstalled = !$isExternal && PluginInstaller::isInstalled($plugin['slug']);
+                                ?>
+                                <tr class="<?php echo $isActive ? 'active' : 'inactive'; ?>" data-slug="<?php echo esc_attr($plugin['slug']); ?>">
+                                    <td class="plugin-title column-primary" style="padding: 15px;">
+                                        <strong><?php echo esc_html($plugin['name']); ?></strong>
+                                        <?php if ($isExternal): ?>
+                                            <span style="background: #d63638; color: #fff; padding: 2px 8px; border-radius: 3px; font-size: 11px; margin-left: 5px;">Premium</span>
+                                        <?php endif; ?>
+                                        <?php if ($plugin['required']): ?>
+                                            <span style="background: #dba617; color: #fff; padding: 2px 8px; border-radius: 3px; font-size: 11px; margin-left: 5px;">Erforderlich</span>
+                                        <?php endif; ?>
+                                        <p class="description" style="margin: 5px 0 0;"><?php echo esc_html($plugin['description']); ?></p>
+                                    </td>
+                                    <td class="column-status" style="padding: 15px; text-align: right; white-space: nowrap;">
+                                        <?php if ($isActive): ?>
+                                            <span style="color: #00a32a;"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Aktiv', 'wp-starter'); ?></span>
+                                        <?php elseif ($isExternal): ?>
+                                            <a href="<?php echo esc_url($plugin['external']); ?>" class="button" target="_blank" rel="noopener">
+                                                <?php esc_html_e('Website besuchen', 'wp-starter'); ?>
+                                                <span class="dashicons dashicons-external" style="line-height: 1.4;"></span>
+                                            </a>
+                                        <?php elseif ($isInstalled): ?>
+                                            <button type="button" class="button button-primary wp-starter-activate-plugin" data-slug="<?php echo esc_attr($plugin['slug']); ?>">
+                                                <?php esc_html_e('Aktivieren', 'wp-starter'); ?>
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="button" class="button button-primary wp-starter-install-plugin" data-slug="<?php echo esc_attr($plugin['slug']); ?>">
+                                                <?php esc_html_e('Installieren & Aktivieren', 'wp-starter'); ?>
+                                            </button>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endforeach; ?>
+
+            <div style="margin-top: 30px; text-align: center;">
+                <a href="<?php echo esc_url(admin_url()); ?>" class="button button-secondary button-hero">
+                    <?php esc_html_e('Zum Dashboard', 'wp-starter'); ?>
+                </a>
+            </div>
+        </div>
+
+        <script>
+        jQuery(document).ready(function($) {
+            var nonce = '<?php echo wp_create_nonce(self::NONCE_ACTION); ?>';
+
+            // Single plugin install
+            $('.wp-starter-install-plugin, .wp-starter-activate-plugin').on('click', function() {
+                var $button = $(this);
+                var slug = $button.data('slug');
+                var $row = $button.closest('tr');
+
+                $button.prop('disabled', true).text('<?php esc_html_e('Wird installiert...', 'wp-starter'); ?>');
+
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'wp_starter_install_plugin',
+                        slug: slug,
+                        nonce: nonce
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $row.removeClass('inactive').addClass('active');
+                            $button.replaceWith('<span style="color: #00a32a;"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Aktiv', 'wp-starter'); ?></span>');
+                        } else {
+                            $button.prop('disabled', false).text('<?php esc_html_e('Fehler - Erneut versuchen', 'wp-starter'); ?>');
+                            alert(response.data.message || '<?php esc_html_e('Installation fehlgeschlagen.', 'wp-starter'); ?>');
+                        }
+                    },
+                    error: function() {
+                        $button.prop('disabled', false).text('<?php esc_html_e('Fehler - Erneut versuchen', 'wp-starter'); ?>');
+                    }
+                });
+            });
+
+            // Install all plugins
+            $('#wp-starter-install-all').on('click', function() {
+                var $button = $(this);
+                var $progress = $('#wp-starter-install-progress');
+                var $progressBar = $progress.find('.wp-starter-progress-fill');
+                var $progressText = $progress.find('.wp-starter-progress-text');
+                var $log = $progress.find('.wp-starter-install-log');
+
+                var plugins = [];
+                $('.wp-starter-install-plugin').each(function() {
+                    plugins.push($(this).data('slug'));
+                });
+
+                if (plugins.length === 0) {
+                    alert('<?php esc_html_e('Alle Plugins sind bereits installiert!', 'wp-starter'); ?>');
+                    return;
+                }
+
+                $button.prop('disabled', true);
+                $progress.show();
+                $log.empty();
+
+                var total = plugins.length;
+                var completed = 0;
+
+                function installNext() {
+                    if (plugins.length === 0) {
+                        $progressText.text('<?php esc_html_e('Alle Plugins wurden installiert!', 'wp-starter'); ?>');
+                        $button.hide();
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                        return;
+                    }
+
+                    var slug = plugins.shift();
+                    $progressText.text('<?php esc_html_e('Installiere:', 'wp-starter'); ?> ' + slug);
+
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'wp_starter_install_plugin',
+                            slug: slug,
+                            nonce: nonce
+                        },
+                        success: function(response) {
+                            completed++;
+                            var percent = Math.round((completed / total) * 100);
+                            $progressBar.css('width', percent + '%');
+
+                            if (response.success) {
+                                $log.append('<div style="color: #00a32a;">&#10003; ' + slug + ' - <?php esc_html_e('Erfolgreich', 'wp-starter'); ?></div>');
+                            } else {
+                                $log.append('<div style="color: #d63638;">&#10007; ' + slug + ' - ' + (response.data.message || '<?php esc_html_e('Fehler', 'wp-starter'); ?>') + '</div>');
+                            }
+                            $log.scrollTop($log[0].scrollHeight);
+
+                            installNext();
+                        },
+                        error: function() {
+                            completed++;
+                            var percent = Math.round((completed / total) * 100);
+                            $progressBar.css('width', percent + '%');
+                            $log.append('<div style="color: #d63638;">&#10007; ' + slug + ' - <?php esc_html_e('Netzwerkfehler', 'wp-starter'); ?></div>');
+                            $log.scrollTop($log[0].scrollHeight);
+
+                            installNext();
+                        }
+                    });
+                }
+
+                installNext();
+            });
+        });
+        </script>
+        <?php
+    }
+
+    /**
+     * AJAX handler for single plugin installation
+     */
+    public function ajaxInstallPlugin(): void
+    {
+        check_ajax_referer(self::NONCE_ACTION, 'nonce');
+
+        if (!current_user_can('install_plugins')) {
+            wp_send_json_error(['message' => __('Keine Berechtigung.', 'wp-starter')]);
+        }
+
+        $slug = isset($_POST['slug']) ? sanitize_text_field(wp_unslash($_POST['slug'])) : '';
+
+        if (empty($slug)) {
+            wp_send_json_error(['message' => __('Kein Plugin angegeben.', 'wp-starter')]);
+        }
+
+        $result = PluginInstaller::installAndActivate($slug);
+
+        if ($result['success']) {
+            wp_send_json_success($result);
+        } else {
+            wp_send_json_error($result);
+        }
+    }
+
+    /**
+     * AJAX handler for bulk plugin installation
+     */
+    public function ajaxInstallAllPlugins(): void
+    {
+        check_ajax_referer(self::NONCE_ACTION, 'nonce');
+
+        if (!current_user_can('install_plugins')) {
+            wp_send_json_error(['message' => __('Keine Berechtigung.', 'wp-starter')]);
+        }
+
+        $selectedPlugins = $this->getSelectedPlugins();
+        $missingPlugins = array_filter($selectedPlugins, fn($p) => !($p['check'])());
+        $slugs = array_column($missingPlugins, 'slug');
+
+        $results = PluginInstaller::bulkInstallAndActivate($slugs);
+
+        wp_send_json_success(['results' => $results]);
+    }
+
+    /**
+     * Get only free (non-external) plugins
+     *
+     * @return array<string, array{name: string, slug: string, required: bool, description: string, check: callable}>
+     */
+    private function getFreePlugins(): array
+    {
+        return array_filter($this->plugins, fn($p) => empty($p['external']));
+    }
+
+    /**
+     * Get plugins selected in setup script (or all free plugins if no config)
+     *
+     * @return array<string, array{name: string, slug: string, required: bool, description: string, check: callable}>
+     */
+    private function getSelectedPlugins(): array
+    {
+        $freePlugins = $this->getFreePlugins();
+
+        // If no setup config, return all free plugins
+        if (empty($this->selectedPlugins)) {
+            return $freePlugins;
+        }
+
+        // Filter to only selected plugins
+        return array_filter(
+            $freePlugins,
+            fn($plugin, $key) => in_array($plugin['slug'], $this->selectedPlugins, true),
+            ARRAY_FILTER_USE_BOTH
+        );
+    }
+
+    /**
+     * Check if setup config exists
+     */
+    private function hasSetupConfig(): bool
+    {
+        return !empty($this->selectedPlugins) || !empty($this->setupOptions);
+    }
+
+    /**
      * Display admin notices for missing plugins
      */
     public function displayPluginNotices(): void
     {
-        // Don't show on plugin install page
+        // Don't show on plugin install page or setup page
         global $pagenow;
-        if ($pagenow === 'update.php' || $pagenow === 'plugins.php') {
+        $page = isset($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
+
+        if ($pagenow === 'update.php' || $pagenow === 'plugins.php' || $page === self::SETUP_PAGE_SLUG) {
             return;
         }
 
@@ -156,7 +686,7 @@ class PluginServiceProvider extends ServiceProvider
                 continue;
             }
 
-            if (!( $plugin['check'] )()) {
+            if (!($plugin['check'])()) {
                 if ($plugin['required']) {
                     $missingRequired[$key] = $plugin;
                 } else {
@@ -170,80 +700,55 @@ class PluginServiceProvider extends ServiceProvider
             $this->renderNotice($missingRequired, true);
         }
 
-        // Show recommended plugins notice
-        if (!empty($missingRecommended)) {
-            $this->renderNotice($missingRecommended, false);
+        // Show recommended plugins notice (link to setup page)
+        if (!empty($missingRecommended) && !$this->isDismissed('recommended')) {
+            $this->renderRecommendedNotice(count($missingRecommended));
         }
     }
 
     /**
-     * Render admin notice
+     * Render admin notice for required plugins
      *
      * @param array<string, array{name: string, slug: string, required: bool, description: string, check: callable, external?: string}> $plugins
      */
     private function renderNotice(array $plugins, bool $isRequired): void
     {
-        $type = $isRequired ? 'error' : 'warning';
-        $title = $isRequired
-            ? __('Erforderliche Plugins fehlen', 'wp-starter')
-            : __('Empfohlene Plugins', 'wp-starter');
-        $intro = $isRequired
-            ? __('Das Theme benötigt folgende Plugins für volle Funktionalität:', 'wp-starter')
-            : __('Folgende Plugins werden für optimale Funktionalität empfohlen:', 'wp-starter');
+        $setupUrl = admin_url('themes.php?page=' . self::SETUP_PAGE_SLUG);
 
-        $pluginListHtml = '';
-        foreach ($plugins as $key => $plugin) {
-            $isExternal = !empty($plugin['external']);
-            $url = $isExternal ? $plugin['external'] : $this->getInstallUrl($plugin['slug']);
-            $buttonText = $isExternal
-                ? __('Website besuchen', 'wp-starter')
-                : __('Installieren', 'wp-starter');
-            $buttonClass = $isExternal ? 'button button-small' : 'button button-small button-primary';
-            $target = $isExternal ? ' target="_blank" rel="noopener"' : '';
-            $premiumBadge = $isExternal ? ' <span style="background:#d63638;color:#fff;padding:2px 6px;border-radius:3px;font-size:11px;">Premium</span>' : '';
-
-            $pluginListHtml .= sprintf(
-                '<li><strong>%s</strong>%s - %s <a href="%s" class="%s"%s>%s</a></li>',
-                esc_html($plugin['name']),
-                $premiumBadge,
-                esc_html($plugin['description']),
-                esc_url($url),
-                esc_attr($buttonClass),
-                $target,
-                esc_html($buttonText)
-            );
-        }
-
-        $dismissHtml = '';
-        if (!$isRequired) {
-            $dismissUrl = wp_nonce_url(
-                add_query_arg('wp-starter-dismiss-plugins', '1'),
-                'wp-starter-dismiss-plugins'
-            );
-            $dismissHtml = sprintf(
-                '<p><a href="%s">%s</a></p>',
-                esc_url($dismissUrl),
-                esc_html__('Diese Empfehlung ausblenden', 'wp-starter')
-            );
-        }
+        $pluginNames = array_map(fn($p) => $p['name'], $plugins);
 
         printf(
-            '<div class="notice notice-%s"><p><strong>%s</strong></p><p>%s</p><ul style="list-style: disc; padding-left: 20px;">%s</ul>%s</div>',
-            esc_attr($type),
-            esc_html($title),
-            esc_html($intro),
-            wp_kses_post($pluginListHtml),
-            wp_kses_post($dismissHtml)
+            '<div class="notice notice-error"><p><strong>%s</strong></p><p>%s: %s</p><p><a href="%s" class="button button-primary">%s</a></p></div>',
+            esc_html__('Erforderliche Plugins fehlen', 'wp-starter'),
+            esc_html__('Das Theme benötigt folgende Plugins', 'wp-starter'),
+            esc_html(implode(', ', $pluginNames)),
+            esc_url($setupUrl),
+            esc_html__('Zum Theme Setup', 'wp-starter')
         );
     }
 
     /**
-     * Get plugin installation URL
+     * Render notice for recommended plugins
      */
-    private function getInstallUrl(string $slug): string
+    private function renderRecommendedNotice(int $count): void
     {
-        // For plugins in WordPress.org repository
-        return admin_url('plugin-install.php?s=' . urlencode($slug) . '&tab=search&type=term');
+        $setupUrl = admin_url('themes.php?page=' . self::SETUP_PAGE_SLUG);
+        $dismissUrl = wp_nonce_url(
+            add_query_arg('wp-starter-dismiss-plugins', '1'),
+            'wp-starter-dismiss-plugins'
+        );
+
+        printf(
+            '<div class="notice notice-info is-dismissible"><p>%s</p><p><a href="%s" class="button button-primary">%s</a> <a href="%s" style="margin-left: 10px;">%s</a></p></div>',
+            sprintf(
+                esc_html__('Es sind %d empfohlene Plugins für das WP-Starter Theme verfügbar.', 'wp-starter'),
+                $count
+            ),
+            esc_url($setupUrl),
+            esc_html__('Plugins anzeigen & installieren', 'wp-starter'),
+            esc_url($dismissUrl),
+            esc_html__('Ausblenden', 'wp-starter')
+        );
     }
 
     /**
@@ -281,7 +786,7 @@ class PluginServiceProvider extends ServiceProvider
     {
         $missing = [];
         foreach ($this->plugins as $key => $plugin) {
-            if ($plugin['required'] && !( $plugin['check'] )()) {
+            if ($plugin['required'] && !($plugin['check'])()) {
                 $missing[$key] = $plugin;
             }
         }

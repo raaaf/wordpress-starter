@@ -107,6 +107,7 @@
       "customFontSize": true,
       "dropCap": false,
       "fluid": true,
+      "fontWeight": true,
       "fontFamilies": [
         {
           "fontFamily": "var(--font-family-body, Inter), ui-sans-serif, system-ui, sans-serif",
@@ -174,28 +175,6 @@
           "slug": "display",
           "size": "var(--typography-display-size, 3.75rem)",
           "name": "Display (60px)"
-        }
-      ],
-      "fontWeights": [
-        {
-          "slug": "regular",
-          "value": "var(--font-weight-regular, 400)",
-          "name": "Regular"
-        },
-        {
-          "slug": "medium",
-          "value": "var(--font-weight-medium, 500)",
-          "name": "Medium"
-        },
-        {
-          "slug": "semibold",
-          "value": "var(--font-weight-semibold, 600)",
-          "name": "Semibold"
-        },
-        {
-          "slug": "bold",
-          "value": "var(--font-weight-bold, 700)",
-          "name": "Bold"
         }
       ]
     },
