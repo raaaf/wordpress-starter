@@ -6,6 +6,7 @@ namespace WordpressStarter;
 
 class Config
 {
+    /** @var array<string, mixed> */
     private static array $config = [];
     private static bool $loaded = false;
 

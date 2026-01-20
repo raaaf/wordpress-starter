@@ -2,7 +2,7 @@
 @yield('content')
 
 @if (defined('WP_DEBUG') && WP_DEBUG)
-    <div class="fixed p-2 text-xs text-white bg-black rounded shadow bottom-2 right-2">
+    <div class="fixed p-2 text-xs text-content-inverse bg-surface-inverse rounded shadow bottom-2 right-2">
         <span class="sm:hidden">xs</span>
         <span class="hidden sm:inline md:hidden">sm</span>
         <span class="hidden md:inline lg:hidden">md</span>

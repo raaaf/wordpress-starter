@@ -11,8 +11,7 @@ if (file_exists($autoload_path)) {
 // Load helper functions
 require_once __DIR__ . '/../src/helpers.php';
 
-// Initialize Vite integration
-require_once __DIR__ . '/vite.php';
+// Initialize Vite integration (autoloaded from src/Vite.php)
 WordpressStarter\Vite::init();
 
 // Bootstrap the application

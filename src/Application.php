@@ -14,7 +14,12 @@ use WordpressStarter\Providers\AnalyticsServiceProvider;
 
 class Application
 {
+    /** @var array<class-string<ServiceProvider>> */
     private array $providers = [];
+
+    /** @var array<class-string<ServiceProvider>, ServiceProvider> */
+    private array $providerInstances = [];
+
     private static ?self $instance = null;
 
     private function __construct()
@@ -46,25 +51,41 @@ class Application
 
     public function boot(): void
     {
+        // Phase 1: Instantiate and register all providers
         foreach ($this->providers as $providerClass) {
-            /** @var ServiceProvider $provider */
-            $provider = new $providerClass();
+            $provider = $this->resolveProvider($providerClass);
             $provider->register();
         }
 
+        // Phase 2: Boot all providers (after all are registered)
         foreach ($this->providers as $providerClass) {
-            /** @var ServiceProvider $provider */
-            $provider = new $providerClass();
+            $provider = $this->resolveProvider($providerClass);
             $provider->boot();
         }
     }
 
+    /**
+     * Get or create a provider instance (singleton per provider class)
+     *
+     * @param class-string<ServiceProvider> $providerClass
+     */
+    private function resolveProvider(string $providerClass): ServiceProvider
+    {
+        if (!isset($this->providerInstances[$providerClass])) {
+            $this->providerInstances[$providerClass] = new $providerClass();
+        }
+        return $this->providerInstances[$providerClass];
+    }
+
+    /**
+     * Get a registered provider instance
+     *
+     * @param class-string<ServiceProvider> $providerClass
+     */
     public function getProvider(string $providerClass): ?ServiceProvider
     {
-        foreach ($this->providers as $registeredClass) {
-            if ($registeredClass === $providerClass) {
-                return new $providerClass();
-            }
+        if (in_array($providerClass, $this->providers, true)) {
+            return $this->resolveProvider($providerClass);
         }
         return null;
     }

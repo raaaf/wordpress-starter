@@ -1,23 +1,21 @@
+{{--
+    Two Thirds / One Third Block
+
+    Uses shared components: x-section, x-grid, x-prose, x-card
+    Fields: content, content_2, background_color
+--}}
+
 @php
     $content_1 = $fields['content'] ?? '';
     $content_2 = $fields['content_2'] ?? '';
-    $bgColor = $fields['background_color'] ?? 'gray-200';
+    $background = $fields['background_color'] ?? 'primary';
 @endphp
 
-<section class="{{ $classes }} px-6 two-thirds-columns md:px-8"
-         @if($anchor) id="{{ $anchor }}" @endif>
-    <div class="max-w-6xl mx-auto">
-        <div class="grid items-center gap-8 md:grid-cols-1 lg:grid-cols-7">
-            <div class="order-last px-6 lg:p-8 md:p-0 lg:col-span-3 max-w-none text-blue-700 prose prose-lg">
-                {!! $content_2 !!}
-            </div>
-            <div class="order-first h-auto overflow-hidden rounded-lg lg:col-span-4">
-                <div class="relative transition duration-200 border rounded-lg shadow-lg bg-gray-200/10 border-gray-200">
-                    <div class="relative z-10 p-8 max-w-none lg:p-16 lg:pb-12 text-blue-700 prose prose-lg">
-                        {!! $content_1 !!}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} two-thirds-one-third">
+    <x-grid cols="2/3-1/3" gap="lg" align="items-center">
+        <x-card variant="outlined" padding="lg">
+            <x-prose>{!! $content_1 !!}</x-prose>
+        </x-card>
+        <x-prose>{!! $content_2 !!}</x-prose>
+    </x-grid>
+</x-section>

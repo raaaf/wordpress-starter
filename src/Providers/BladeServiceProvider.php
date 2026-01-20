@@ -67,11 +67,30 @@ class BladeServiceProvider extends ServiceProvider
 
     private function registerBladeComponents(): void
     {
-        if (class_exists('Illuminate\View\Factory')) {
-            Blade::component('partials.the_loop', 'loop');
+        if (!class_exists('Illuminate\View\Factory')) {
+            return;
+        }
+
+        // Core partials
+        Blade::component('partials.the_loop', 'loop');
+
+        // UI Components - use as <x-button>, <x-section>, etc.
+        $components = [
+            'components.button' => 'button',
+            'components.section' => 'section',
+            'components.grid' => 'grid',
+            'components.prose' => 'prose',
+            'components.card' => 'card',
+        ];
+
+        foreach ($components as $view => $alias) {
+            Blade::component($view, $alias);
         }
     }
 
+    /**
+     * @return array<int, string>
+     */
     private function getViewPaths(): array
     {
         return [get_template_directory() . '/templates/'];

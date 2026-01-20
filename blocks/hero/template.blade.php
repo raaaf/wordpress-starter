@@ -1,3 +1,10 @@
+{{--
+    Hero Block
+
+    Uses shared components: x-button, x-prose
+    Fields: title, content, background_image, overlay_opacity, text_color, min_height, content_alignment, cta_button
+--}}
+
 @php
     $title = $fields['title'] ?? '';
     $content = $fields['content'] ?? '';
@@ -6,58 +13,58 @@
     $text_color = $fields['text_color'] ?? 'white';
     $min_height = $fields['min_height'] ?? '500px';
     $alignment = $fields['content_alignment'] ?? 'center';
-    
+
     $image_url = '';
     if ($background_image) {
         $image = \WordpressStarter\Acf\Fields::image('background_image', 'full');
         $image_url = $image['url'] ?? '';
     }
+
+    $textClass = $text_color === 'white' ? 'text-content-inverse' : 'text-content';
 @endphp
 
-<div class="{{ $classes }} relative overflow-hidden" 
+<div class="{{ $classes }} relative overflow-hidden {{ $textClass }}"
      @if($anchor) id="{{ $anchor }}" @endif
      style="min-height: {{ $min_height }};">
-    
+
     {{-- Background Image --}}
     @if($image_url)
         <div class="absolute inset-0">
-            <img src="{{ $image_url }}" 
-                 alt="" 
+            <img src="{{ $image_url }}"
+                 alt=""
                  class="w-full h-full object-cover"
                  loading="lazy">
-            <div class="absolute inset-0 bg-black" 
+            <div class="absolute inset-0 bg-surface-overlay"
                  style="opacity: {{ $overlay_opacity / 100 }}"></div>
         </div>
     @endif
-    
+
     {{-- Content --}}
-    <div class="relative z-10 container mx-auto px-4 py-20 flex items-center justify-{{ $alignment }}" 
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-{{ $alignment }}"
          style="min-height: {{ $min_height }};">
-        <div class="max-w-3xl text-{{ $text_color }}">
+        <div class="max-w-3xl">
             @if($title)
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-headline">
                     {!! $title !!}
                 </h1>
             @endif
-            
+
             @if($content)
-                <div class="text-lg md:text-xl prose prose-lg prose-{{ $text_color }} max-w-none">
-                    {!! $content !!}
-                </div>
+                <x-prose size="lg">{!! $content !!}</x-prose>
             @endif
-            
+
             @hasfield('cta_button')
                 @php $button = \WordpressStarter\Acf\Fields::link('cta_button'); @endphp
                 @if($button)
                     <div class="mt-8">
-                        <a href="{{ $button['url'] }}" 
-                           target="{{ $button['target'] }}"
-                           class="inline-block px-8 py-4 bg-brand-primary text-white rounded-lg hover:bg-opacity-90 transition-all"
-                           pirsch-event="Hero_CTA_Click"
-                           pirsch-meta-key="hero_block"
-                           pirsch-meta-button-text="{{ $button['title'] }}">
-                            {{ $button['title'] }}
-                        </a>
+                        <x-button
+                            :url="$button['url']"
+                            :title="$button['title']"
+                            :target="$button['target']"
+                            variant="primary"
+                            size="lg"
+                            :analytics="['event' => 'Hero_CTA_Click', 'meta' => 'hero_block']"
+                        />
                     </div>
                 @endif
             @endhasfield

@@ -13,7 +13,7 @@
 
         {{-- Mobile menu button --}}
         <button @click="toggle()" 
-                class="lg:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary"
+                class="lg:hidden p-2 rounded-md hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-line-brand"
                 aria-label="Toggle navigation menu"
                 :aria-expanded="isOpen">
             <svg x-show="!isOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,14 +48,14 @@
          x-transition:leave-start="opacity-100 transform scale-100"
          x-transition:leave-end="opacity-0 transform scale-95"
          @click.away="close()"
-         class="absolute top-full left-0 right-0 bg-white shadow-lg rounded-md lg:hidden"
+         class="absolute top-full left-0 right-0 bg-surface shadow-lg rounded-md lg:hidden"
          style="display: none;">
         @php(
         wp_nav_menu([
             'container' => false,
             'menu_class' => 'py-2',
             'theme_location' => 'header-menu',
-            'li_class' => 'px-4 py-2 hover:bg-gray-50',
+            'li_class' => 'px-4 py-2 hover:bg-surface-secondary',
             'fallback_cb' => false,
             'items_wrap' => '<ul id="%1$s" class="%2$s" role="menu" aria-label="Mobile Navigation">%3$s</ul>',
         ])

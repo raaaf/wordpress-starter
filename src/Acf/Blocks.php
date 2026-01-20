@@ -58,6 +58,8 @@ class Blocks
 
     /**
      * Render block using Blade template
+     *
+     * @param array{name: string, align?: string, className?: string, anchor?: string, mode?: string, id?: string} $block
      */
     public static function renderBlock(array $block, string $content = '', bool $isPreview = false, int $postId = 0): void
     {
@@ -94,6 +96,8 @@ class Blocks
 
     /**
      * Get block classes
+     *
+     * @param array{name: string, align?: string, className?: string} $block
      */
     private static function getBlockClasses(array $block): string
     {
@@ -118,6 +122,9 @@ class Blocks
 
     /**
      * Register custom block categories
+     *
+     * @param array<int, array{slug: string, title: string, icon?: string}> $categories
+     * @return array<int, array{slug: string, title: string, icon?: string}>
      */
     public static function registerCategories(array $categories, \WP_Block_Editor_Context $context): array
     {

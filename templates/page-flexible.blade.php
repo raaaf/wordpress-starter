@@ -16,7 +16,7 @@ Template Name: Flexible Content
         @endwhile
     @else
         <div class="container mx-auto px-4 py-12">
-            <p class="text-center text-gray-500">{{ __('No content sections have been added yet.', 'wp-starter') }}</p>
+            <p class="text-center text-content-tertiary">{{ __('No content sections have been added yet.', 'wp-starter') }}</p>
         </div>
     @endif
 @endsection

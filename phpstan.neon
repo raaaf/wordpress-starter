@@ -2,23 +2,38 @@ includes:
     - vendor/szepeviktor/phpstan-wordpress/extension.neon
 
 parameters:
-    level: 5
+    level: 6
     parallel:
         maximumNumberOfProcesses: 1
     paths:
         - src
-        - config
     excludePaths:
         - vendor
         - compiled
         - node_modules
+        - config/functions.php
     bootstrapFiles:
         - vendor/autoload.php
     treatPhpDocTypesAsCertain: false
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
-        - '#Function wp_#'
+        # WordPress functions are handled by the WordPress extension
+        - '#Function get_template_directory not found#'
+        - '#Function get_stylesheet_directory not found#'
+        - '#Function wp_enqueue_#'
+        - '#Function add_action not found#'
+        - '#Function add_filter not found#'
+        - '#Function is_admin not found#'
+        - '#Function wp_doing_ajax not found#'
+        - '#Function get_theme_file_#'
+        # ACF functions
         - '#Function acf_#'
-        - '#Function get_fields not found#'
-        - '#argument\.type#'
-        - '#arguments\.count#'
+        - '#Function get_field#'
+        - '#Function get_sub_field#'
+        - '#Function have_rows#'
+        - '#Function the_row#'
+        - '#Function get_row_layout#'
+        # Config helper
+        - '#Function config not found#'
+        # WordPress cache functions
+        - '#Function wp_cache_#'

@@ -21,13 +21,13 @@
     @php(wp_head())
 </head>
 
-<body @php(body_class('bg-white antialiased'))>
+<body @php(body_class('bg-surface antialiased'))>
 
     @php(wp_body_open())
 
     {{-- Skip Link for Accessibility --}}
     <a href="#main-content"
-        class="absolute top-0 left-0 p-2 text-white transform -translate-y-full bg-black focus:translate-y-0">
+        class="absolute top-0 left-0 p-2 text-content-inverse transform -translate-y-full bg-surface-inverse focus:translate-y-0">
         Skip to content
     </a>
 

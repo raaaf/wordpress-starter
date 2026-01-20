@@ -35,6 +35,10 @@ class MenuServiceProvider extends ServiceProvider
         add_filter('nav_menu_submenu_css_class', [$this, 'addSubmenuClasses'], 10, 3);
     }
 
+    /**
+     * @param array<int, string> $classes
+     * @return array<int, string>
+     */
     public function addMenuItemClasses(array $classes, \WP_Post $item, \stdClass $args, int $depth): array
     {
         if (isset($args->li_class)) {
@@ -46,6 +50,10 @@ class MenuServiceProvider extends ServiceProvider
         return $classes;
     }
 
+    /**
+     * @param array<int, string> $classes
+     * @return array<int, string>
+     */
     public function addSubmenuClasses(array $classes, \stdClass $args, int $depth): array
     {
         if (isset($args->submenu_class)) {

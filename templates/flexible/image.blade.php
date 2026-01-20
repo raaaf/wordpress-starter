@@ -1,32 +1,39 @@
+{{--
+    Image - Flexible Content Layout
+
+    Uses shared components: x-section
+    Fields: image, caption, alignment
+--}}
+
 @php
     $image = get_sub_field('image');
     $caption = get_sub_field('caption');
     $alignment = get_sub_field('alignment') ?: 'center';
-    
-    $alignment_classes = [
+
+    $alignmentClasses = [
         'left' => 'mr-auto',
         'center' => 'mx-auto',
         'right' => 'ml-auto',
         'wide' => 'w-full max-w-screen-xl mx-auto',
         'full' => 'w-full',
     ];
-    
-    $container_class = $alignment === 'full' ? '' : 'container mx-auto px-4';
+
+    $useContainer = $alignment !== 'full';
 @endphp
 
-<div class="{{ $container_class }}">
-    <figure class="{{ $alignment_classes[$alignment] ?? 'mx-auto' }}">
+<x-section padding="md" :container="$useContainer">
+    <figure class="{{ $alignmentClasses[$alignment] ?? 'mx-auto' }}">
         @if($image)
-            <img src="{{ $image['url'] }}" 
-                 alt="{{ $image['alt'] }}" 
-                 class="w-full rounded-lg"
+            <img src="{{ $image['url'] }}"
+                 alt="{{ $image['alt'] }}"
+                 class="w-full rounded-lg shadow-xl"
                  loading="lazy">
         @endif
-        
+
         @if($caption)
-            <figcaption class="mt-2 text-sm text-gray-600 text-center">
+            <figcaption class="mt-4 text-sm text-content-secondary text-center">
                 {{ $caption }}
             </figcaption>
         @endif
     </figure>
-</div>
+</x-section>
