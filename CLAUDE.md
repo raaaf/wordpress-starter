@@ -37,12 +37,11 @@ The setup wizard will:
 2. Update PHP namespace across all files
 3. Let you select which plugins to auto-install
 4. Configure initial content options (pages, permalinks)
+5. Install dependencies automatically (composer install, npm install, npm run build)
 
-After setup:
+After setup, you can immediately activate the theme in WordPress. For development:
 ```bash
-composer dump-autoload  # Update autoloading for new namespace
-npm install             # Install dependencies
-npm run dev             # Start development
+npm run dev  # Start development with hot reload
 ```
 
 ## Essential Commands

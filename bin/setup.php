@@ -27,6 +27,7 @@ class ThemeSetup
     private string $themeDir;
     private array $config = [];
     private array $pluginSelections = [];
+    private bool $dependenciesInstalled = false;
 
     private array $defaults = [
         'theme_name' => 'WP-Starter',
@@ -95,6 +96,7 @@ class ThemeSetup
         $this->collectContentOptions();
         $this->confirmChanges();
         $this->applyChanges();
+        $this->runInstallCommands();
         $this->printSuccess();
     }
 
@@ -113,6 +115,7 @@ class ThemeSetup
         echo "  " . $this->color("1.", 'yellow') . " Set up theme information (name, author, etc.)\n";
         echo "  " . $this->color("2.", 'yellow') . " Select plugins to auto-install on first WordPress login\n";
         echo "  " . $this->color("3.", 'yellow') . " Configure initial content options\n";
+        echo "  " . $this->color("4.", 'yellow') . " Install dependencies (composer & npm)\n";
         echo "\n";
         echo $this->color("Press Ctrl+C at any time to cancel.\n", 'gray');
         echo "\n";
@@ -302,9 +305,117 @@ class ThemeSetup
         $this->task('Updating Blade templates', fn() => $this->updateBladeTemplates());
         $this->task('Updating block.json files', fn() => $this->updateBlockJsonFiles());
         $this->task('Updating CLAUDE.md', fn() => $this->updateClaudeMd());
+        $this->task('Updating documentation files', fn() => $this->updateDocumentation());
         $this->task('Saving plugin preferences', fn() => $this->savePluginPreferences());
         $this->task('Saving content options', fn() => $this->saveContentOptions());
         $this->task('Creating .env file', fn() => $this->createEnvFile());
+        $this->task('Removing old setup script', fn() => $this->removeOldSetupScript());
+    }
+
+    private function removeOldSetupScript(): void
+    {
+        $oldSetupPath = $this->themeDir . '/setup.php';
+        if (file_exists($oldSetupPath) && $oldSetupPath !== __FILE__) {
+            unlink($oldSetupPath);
+        }
+    }
+
+    private function runInstallCommands(): void
+    {
+        $this->printSection("Step 4: Installing Dependencies");
+
+        echo "The theme requires dependencies to be installed before it can be used.\n\n";
+
+        $runInstall = strtolower($this->prompt(
+            'Run install commands automatically?',
+            'y',
+            'composer install, npm install, npm run build (y/n)'
+        )) === 'y';
+
+        if (!$runInstall) {
+            echo "\n" . $this->color("Skipped. Run these commands manually:", 'yellow') . "\n";
+            echo "  " . $this->color("composer dump-autoload && composer install", 'cyan') . "\n";
+            echo "  " . $this->color("npm install && npm run build", 'cyan') . "\n";
+            return;
+        }
+
+        echo "\n";
+
+        // Check for required tools
+        $hasComposer = $this->commandExists('composer');
+        $hasNpm = $this->commandExists('npm');
+
+        if (!$hasComposer) {
+            echo $this->color("⚠ Composer not found. Please install Composer first.", 'yellow') . "\n";
+            echo "  " . $this->color("https://getcomposer.org/download/", 'cyan') . "\n\n";
+        }
+
+        if (!$hasNpm) {
+            echo $this->color("⚠ npm not found. Please install Node.js first.", 'yellow') . "\n";
+            echo "  " . $this->color("https://nodejs.org/", 'cyan') . "\n\n";
+        }
+
+        if (!$hasComposer && !$hasNpm) {
+            return;
+        }
+
+        // Run composer commands
+        if ($hasComposer) {
+            $this->runCommand('Updating Composer autoload', 'composer dump-autoload');
+            $this->runCommand('Installing PHP dependencies', 'composer install --no-interaction');
+        }
+
+        // Run npm commands
+        if ($hasNpm) {
+            $this->runCommand('Installing Node.js dependencies', 'npm install');
+
+            $buildAssets = strtolower($this->prompt(
+                'Build production assets now?',
+                'y',
+                'npm run build (y/n)'
+            )) === 'y';
+
+            if ($buildAssets) {
+                $this->runCommand('Building production assets', 'npm run build');
+            }
+
+            $this->dependenciesInstalled = true;
+        }
+
+        if ($hasComposer && !$hasNpm) {
+            $this->dependenciesInstalled = true;
+        }
+
+        echo "\n";
+    }
+
+    private function commandExists(string $command): bool
+    {
+        $check = strncasecmp(PHP_OS, 'WIN', 3) === 0 ? 'where' : 'which';
+        $result = shell_exec("{$check} {$command} 2>/dev/null");
+        return !empty(trim($result ?? ''));
+    }
+
+    private function runCommand(string $description, string $command): void
+    {
+        echo "  " . str_pad($description . "...", 40);
+
+        $output = [];
+        $returnCode = 0;
+
+        // Run command and capture output
+        exec("{$command} 2>&1", $output, $returnCode);
+
+        if ($returnCode === 0) {
+            echo $this->color("Done", 'green') . "\n";
+        } else {
+            echo $this->color("Failed", 'red') . "\n";
+            // Show first few lines of error output
+            $errorLines = array_slice($output, 0, 3);
+            foreach ($errorLines as $line) {
+                echo "     " . $this->color($line, 'gray') . "\n";
+            }
+        }
     }
 
     private function task(string $name, callable $callback): void
@@ -372,12 +483,20 @@ CSS;
             ]
         ];
 
-        // Update namespace in autoload
-        $oldNamespace = 'WordpressStarter\\';
+        // Update namespace in autoload PSR-4
         $newNamespace = $this->config['namespace'] . '\\';
 
-        if (isset($composer['autoload']['psr-4'][$oldNamespace])) {
-            unset($composer['autoload']['psr-4'][$oldNamespace]);
+        // Find and replace the existing namespace (handles both fresh setup and re-runs)
+        if (isset($composer['autoload']['psr-4'])) {
+            $existingNamespaces = array_keys($composer['autoload']['psr-4']);
+            foreach ($existingNamespaces as $existingNs) {
+                // Check if this namespace maps to src/ (our theme namespace)
+                if ($composer['autoload']['psr-4'][$existingNs] === 'src/') {
+                    unset($composer['autoload']['psr-4'][$existingNs]);
+                    break;
+                }
+            }
+            // Add the new namespace
             $composer['autoload']['psr-4'][$newNamespace] = 'src/';
         }
 
@@ -398,17 +517,33 @@ CSS;
             return;
         }
 
+        // Collect all PHP files that need namespace updates
         $phpFiles = array_merge(
             $this->findFiles($this->themeDir . '/src', '*.php'),
+            $this->findFiles($this->themeDir . '/tests', '*.php'),
             glob($this->themeDir . '/config/*.php') ?: []
         );
+
+        // Also check for root-level PHP files (excluding bin/setup.php itself)
+        $rootPhpFiles = glob($this->themeDir . '/*.php') ?: [];
+        foreach ($rootPhpFiles as $file) {
+            if (basename($file) !== 'setup.php') {
+                $phpFiles[] = $file;
+            }
+        }
 
         foreach ($phpFiles as $file) {
             $content = file_get_contents($file);
             $original = $content;
 
+            // Update namespace declarations
             $content = str_replace("namespace {$oldNamespace}", "namespace {$newNamespace}", $content);
+            // Update use statements
             $content = str_replace("use {$oldNamespace}\\", "use {$newNamespace}\\", $content);
+            // Update fully qualified class names in strings
+            $content = str_replace("'{$oldNamespace}\\\\", "'{$newNamespace}\\\\", $content);
+            $content = str_replace("\"{$oldNamespace}\\\\", "\"{$newNamespace}\\\\", $content);
+            // Update text domain
             $content = str_replace("'{$oldTextDomain}'", "'{$newTextDomain}'", $content);
 
             if ($content !== $original) {
@@ -419,10 +554,12 @@ CSS;
 
     private function updateBladeTemplates(): void
     {
+        $oldNamespace = 'WordpressStarter';
+        $newNamespace = $this->config['namespace'];
         $oldTextDomain = 'wp-starter';
         $newTextDomain = $this->config['text_domain'];
 
-        if ($oldTextDomain === $newTextDomain) {
+        if ($oldNamespace === $newNamespace && $oldTextDomain === $newTextDomain) {
             return;
         }
 
@@ -435,6 +572,9 @@ CSS;
             $content = file_get_contents($file);
             $original = $content;
 
+            // Update fully qualified namespace calls (e.g., \WordpressStarter\Vite::)
+            $content = str_replace("\\{$oldNamespace}\\", "\\{$newNamespace}\\", $content);
+            // Update text domain
             $content = str_replace("'{$oldTextDomain}'", "'{$newTextDomain}'", $content);
 
             if ($content !== $original) {
@@ -488,6 +628,45 @@ CSS;
         );
 
         file_put_contents($claudePath, $content);
+    }
+
+    private function updateDocumentation(): void
+    {
+        $oldNamespace = 'WordpressStarter';
+        $newNamespace = $this->config['namespace'];
+        $oldTextDomain = 'wp-starter';
+        $newTextDomain = $this->config['text_domain'];
+
+        if ($oldNamespace === $newNamespace && $oldTextDomain === $newTextDomain) {
+            return;
+        }
+
+        $docFiles = [
+            $this->themeDir . '/README.md',
+            $this->themeDir . '/README.MD',
+            $this->themeDir . '/CONTRIBUTING.md',
+            $this->themeDir . '/TROUBLESHOOTING.md',
+        ];
+
+        foreach ($docFiles as $docPath) {
+            if (!file_exists($docPath)) {
+                continue;
+            }
+
+            $content = file_get_contents($docPath);
+            $original = $content;
+
+            // Update namespace references in documentation
+            $content = str_replace("{$oldNamespace}\\", "{$newNamespace}\\", $content);
+            $content = str_replace("`{$oldNamespace}`", "`{$newNamespace}`", $content);
+            // Update text domain references
+            $content = str_replace("'{$oldTextDomain}'", "'{$newTextDomain}'", $content);
+            $content = str_replace("`{$oldTextDomain}`", "`{$newTextDomain}`", $content);
+
+            if ($content !== $original) {
+                file_put_contents($docPath, $content);
+            }
+        }
     }
 
     private function savePluginPreferences(): void
@@ -556,20 +735,38 @@ CSS;
         echo $this->color("╚══════════════════════════════════════════════════════════════════╝\n", 'green');
         echo "\n";
 
-        echo $this->color("Next Steps:\n", 'white', true);
-        echo "\n";
-        echo "  " . $this->color("1.", 'yellow') . " Update Composer autoloading:\n";
-        echo "     " . $this->color("composer dump-autoload", 'cyan') . "\n";
-        echo "\n";
-        echo "  " . $this->color("2.", 'yellow') . " Install npm dependencies:\n";
-        echo "     " . $this->color("npm install", 'cyan') . "\n";
-        echo "\n";
-        echo "  " . $this->color("3.", 'yellow') . " Start development:\n";
-        echo "     " . $this->color("npm run dev", 'cyan') . "\n";
-        echo "\n";
-        echo "  " . $this->color("4.", 'yellow') . " Activate the theme in WordPress\n";
-        echo "     The Theme Setup wizard will guide you through plugin installation.\n";
-        echo "\n";
+        if ($this->dependenciesInstalled) {
+            // Dependencies were installed automatically
+            echo $this->color("✓ All dependencies installed successfully!\n", 'green');
+            echo "\n";
+            echo $this->color("Next Steps:\n", 'white', true);
+            echo "\n";
+            echo "  " . $this->color("1.", 'yellow') . " Activate the theme in WordPress\n";
+            echo "     Go to: " . $this->color("Design → Themes", 'cyan') . "\n";
+            echo "\n";
+            echo "  " . $this->color("2.", 'yellow') . " Complete the Theme Setup\n";
+            echo "     The wizard will guide you through plugin installation.\n";
+            echo "\n";
+            echo "  " . $this->color("3.", 'yellow') . " For development with hot reload:\n";
+            echo "     " . $this->color("npm run dev", 'cyan') . "\n";
+            echo "\n";
+        } else {
+            // Dependencies were not installed - show manual steps
+            echo $this->color("Next Steps:\n", 'white', true);
+            echo "\n";
+            echo "  " . $this->color("1.", 'yellow') . " Update Composer autoloading:\n";
+            echo "     " . $this->color("composer dump-autoload", 'cyan') . "\n";
+            echo "\n";
+            echo "  " . $this->color("2.", 'yellow') . " Install dependencies:\n";
+            echo "     " . $this->color("composer install && npm install && npm run build", 'cyan') . "\n";
+            echo "\n";
+            echo "  " . $this->color("3.", 'yellow') . " Activate the theme in WordPress\n";
+            echo "     Go to: " . $this->color("Design → Themes", 'cyan') . "\n";
+            echo "\n";
+            echo "  " . $this->color("4.", 'yellow') . " For development with hot reload:\n";
+            echo "     " . $this->color("npm run dev", 'cyan') . "\n";
+            echo "\n";
+        }
 
         if (!empty(array_filter($this->pluginSelections))) {
             echo $this->color("Selected plugins will be auto-installed when you activate the theme.\n", 'gray');
