@@ -1,21 +1,134 @@
 @import "./fonts.css";
+@import "./tokens.css";
 
 @import "tailwindcss";
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
 @source "../templates";
+@source "../../blocks";
+@source "../../safelist.txt";
 
+/*
+ * Theme Configuration - TailwindCSS v4
+ *
+ * Maps Figma design tokens to Tailwind utilities.
+ * Tokens are auto-generated from: config/design-tokens/*.tokens.json
+ * Run: node scripts/transform-tokens.js to regenerate
+ */
 @theme {
-  --font-sans: "Lato", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --brand-primary: oklch(0.72 0.11 178);
+  /* Typography - from Figma tokens */
+  --font-sans: var(--font-family-body), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-headline: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Primitive Colors - Accent palette from Figma */
+  --color-accent-50: var(--color-accent-50);
+  --color-accent-100: var(--color-accent-100);
+  --color-accent-200: var(--color-accent-200);
+  --color-accent-300: var(--color-accent-300);
+  --color-accent-400: var(--color-accent-400);
+  --color-accent-500: var(--color-accent-500);
+  --color-accent-600: var(--color-accent-600);
+  --color-accent-700: var(--color-accent-700);
+  --color-accent-800: var(--color-accent-800);
+  --color-accent-900: var(--color-accent-900);
+
+  /* Primitive Colors - Primary from Figma */
+  --color-primary-50: var(--color-primary-50);
+  --color-primary-100: var(--color-primary-100);
+  --color-primary-200: var(--color-primary-200);
+  --color-primary-300: var(--color-primary-300);
+  --color-primary-400: var(--color-primary-400);
+  --color-primary-500: var(--color-primary-500);
+  --color-primary-600: var(--color-primary-600);
+  --color-primary-700: var(--color-primary-700);
+  --color-primary-800: var(--color-primary-800);
+  --color-primary-900: var(--color-primary-900);
+
+  /* ===== SEMANTIC TOKENS - Surface/Content Pattern ===== */
+
+  /* Backgrounds → surface-* */
+  --color-surface: var(--bg-primary);
+  --color-surface-secondary: var(--bg-secondary);
+  --color-surface-tertiary: var(--bg-tertiary);
+  --color-surface-inverse: var(--bg-inverse);
+  --color-surface-brand: var(--bg-brand);
+  --color-surface-brand-subtle: var(--bg-brand-subtle);
+  --color-surface-brand-hover: var(--bg-brand-hover);
+  --color-surface-brand-secondary: var(--bg-brand-secondary);
+  --color-surface-accent: var(--bg-accent);
+  --color-surface-accent-subtle: var(--bg-accent-subtle);
+  --color-surface-accent-hover: var(--bg-accent-hover);
+  --color-surface-success: var(--bg-success);
+  --color-surface-success-strong: var(--bg-success-strong);
+  --color-surface-warning: var(--bg-warning);
+  --color-surface-error: var(--bg-error);
+  --color-surface-disabled: var(--bg-disabled);
+  --color-surface-overlay: var(--bg-overlay);
+
+  /* Text → content-* */
+  --color-content: var(--text-primary);
+  --color-content-secondary: var(--text-secondary);
+  --color-content-tertiary: var(--text-tertiary);
+  --color-content-inverse: var(--text-inverse);
+  --color-content-brand: var(--text-brand);
+  --color-content-accent: var(--text-accent);
+  --color-content-link: var(--text-link);
+  --color-content-link-hover: var(--text-link-hover);
+  --color-content-success: var(--text-success);
+  --color-content-warning: var(--text-warning);
+  --color-content-error: var(--text-error);
+  --color-content-disabled: var(--text-disabled);
+  --color-content-on-color: var(--text-on-color);
+
+  /* Borders → line-* */
+  --color-line: var(--border-default);
+  --color-line-strong: var(--border-strong);
+  --color-line-subtle: var(--border-subtle);
+  --color-line-brand: var(--border-brand);
+  --color-line-accent: var(--border-accent);
+  --color-line-focus: var(--border-focus);
+  --color-line-success: var(--border-success);
+  --color-line-warning: var(--border-warning);
+  --color-line-error: var(--border-error);
+  --color-line-disabled: var(--border-disabled);
+
+  /* Icons → icon-* */
+  --color-icon: var(--icon-primary);
+  --color-icon-secondary: var(--icon-secondary);
+  --color-icon-inverse: var(--icon-inverse);
+  --color-icon-brand: var(--icon-brand);
+  --color-icon-accent: var(--icon-accent);
+  --color-icon-success: var(--icon-success);
+  --color-icon-warning: var(--icon-warning);
+  --color-icon-error: var(--icon-error);
+
+  /* Status Colors - direct mapping */
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
 }
 
 @layer base {
   ::selection {
-    background: var(--color-gray-100);
+    background: var(--color-accent-100);
+    color: var(--color-accent-900);
   }
 
   :root {
     -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+  }
+
+  a {
+    color: var(--text-link);
+  }
+
+  a:hover {
+    color: var(--text-link-hover);
   }
 }

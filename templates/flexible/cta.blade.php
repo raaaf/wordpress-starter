@@ -1,26 +1,37 @@
+{{--
+    CTA - Flexible Content Layout
+
+    Uses shared components: x-section, x-prose, x-button
+    Fields: title, content, button, background_color
+--}}
+
 @php
     $title = get_sub_field('title');
     $content = get_sub_field('content');
     $button = get_sub_field('button');
-    $background_color = get_sub_field('background_color') ?: '#f8f9fa';
+    $background = get_sub_field('background_color') ?: 'brand';
 @endphp
 
-<div class="container mx-auto px-4">
-    <div class="rounded-lg p-8 md:p-12 text-center" style="background-color: {{ $background_color }}">
+<x-section :background="$background" padding="lg">
+    <div class="text-center">
         @if($title)
             <h2 class="text-3xl md:text-4xl font-bold mb-4">{{ $title }}</h2>
         @endif
-        
+
         @if($content)
-            <p class="text-lg md:text-xl mb-8 max-w-2xl mx-auto">{{ $content }}</p>
+            <div class="max-w-2xl mx-auto mb-8">
+                <x-prose>{!! $content !!}</x-prose>
+            </div>
         @endif
-        
+
         @if($button)
-            <a href="{{ $button['url'] }}" 
-               target="{{ $button['target'] }}"
-               class="inline-block px-8 py-4 bg-brand-primary text-white rounded-lg hover:bg-opacity-90 transition-all">
-                {{ $button['title'] }}
-            </a>
+            <x-button
+                :url="$button['url']"
+                :title="$button['title']"
+                :target="$button['target'] ?? '_self'"
+                variant="primary"
+                size="lg"
+            />
         @endif
     </div>
-</div>
+</x-section>

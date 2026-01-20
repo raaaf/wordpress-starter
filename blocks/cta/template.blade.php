@@ -1,43 +1,55 @@
+{{--
+    CTA Block
+
+    Uses shared components: x-button, x-prose
+    Fields: title, content, cta, background_color
+--}}
+
 @php
     $title = $fields['title'] ?? '';
     $trimmed = str_replace(' ', '', $title);
     $cta = $fields['cta'] ?? null;
-    $bgColor = $fields['background_color'] ?? 'green-500';
     $content = $fields['content'] ?? '';
-    
-    $bgImage = 'bg-[url(./img/bg-effects-01.png)]';
-    if (in_array($bgColor, ['purple-500', 'blue-700'])) {
-        $bgImage = 'bg-[url(./img/bg-effects-03.png)]';
-    }
+    $background = $fields['background_color'] ?? 'brand';
+
+    $backgrounds = [
+        'brand' => 'bg-surface-brand',
+        'brand-secondary' => 'bg-surface-brand-secondary',
+    ];
+    $bgClass = $backgrounds[$background] ?? 'bg-surface-brand';
+
+    $bgImage = $background === 'brand-secondary'
+        ? 'bg-[url(./img/bg-effects-03.png)]'
+        : 'bg-[url(./img/bg-effects-01.png)]';
 @endphp
 
-<section class="{{ $classes }} cta-block bg-{{ $bgColor }} relative overflow-hidden"
+<section class="{{ $classes }} cta-block {{ $bgClass }} relative overflow-hidden text-content-inverse"
          @if($anchor) id="{{ $anchor }}" @endif>
-    <div class="relative z-10 grid items-center gap-12 px-8 py-20 mx-auto overflow-hidden max-w-7xl md:grid-cols-2 isolate md:px-16" 
-         role="region" 
+    <div class="relative z-10 grid items-center gap-12 px-8 py-20 mx-auto overflow-hidden max-w-7xl md:grid-cols-2 isolate md:px-16"
+         role="region"
          @if($trimmed) aria-labelledby="cta-title-{{ $trimmed }}" @endif>
         <div @if($trimmed) id="{{ $trimmed }}" @endif>
             @if($title)
-                <h2 id="cta-title-{{ $trimmed }}" class="!text-4xl/10 md:!text-5xl/14">
+                <h2 id="cta-title-{{ $trimmed }}" class="text-4xl md:text-5xl font-bold leading-tight">
                     {{ $title }}
                 </h2>
             @endif
             @if($cta)
-                <div>
-                    <a pirsch-event="CTA" 
-                       pirsch-meta-key="cta_block"
-                       class="w-full lg:w-auto !no-underline inline-flex mt-4 items-center justify-center gap-2 px-6 py-2.5 border rounded-md bg-yellow-500 border-yellow-500 shadow-yellow-500/20 hover:bg-yellow-600 relative transition ease-in-out"
-                       href="{{ $cta['url'] }}" 
-                       target="{{ $cta['target'] }}" 
-                       title="{{ $cta['title'] }}">
-                        <span class="text-base font-bold leading-none no-underline text-blue-700">{{ $cta['title'] }}</span>
-                    </a>
+                <div class="mt-6">
+                    <x-button
+                        :url="$cta['url']"
+                        :title="$cta['title']"
+                        :target="$cta['target']"
+                        variant="primary"
+                        size="lg"
+                        :analytics="['event' => 'CTA', 'meta' => 'cta_block']"
+                    />
                 </div>
             @endif
         </div>
         <div>
             @if($content)
-                {!! $content !!}
+                <x-prose>{!! $content !!}</x-prose>
             @endif
         </div>
     </div>

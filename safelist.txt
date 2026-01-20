@@ -6,13 +6,7 @@ has-primary-background-color
 has-secondary-background-color
 has-dark-background-color
 has-light-background-color
-has-h1
-has-h2
-has-h3
-has-h4
-has-subtitle
 has-button
-has-overline
 alignfull
 alignwide
 alignnone
@@ -21,3 +15,5 @@ alignright
 wp-block-button
 wp-caption
 wp-caption-text
+bg-surface-brand
+bg-surface-brand-secondary

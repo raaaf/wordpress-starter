@@ -1,22 +1,20 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
-import legacy from '@vitejs/plugin-legacy';
 import { visualizer } from 'rollup-plugin-visualizer';
-import tailwindcss from '@tailwindcss/postcss';
-import autoprefixer from 'autoprefixer';
+import tailwindcss from '@tailwindcss/vite';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Note: Compression (gzip/brotli) is handled by the web server/CDN
 // Image optimization can be added back when plugins support Vite 7
+// Legacy browser support removed - saves ~44KB (modern browsers only)
 
 export default defineConfig({
   plugins: [
-    legacy({
-      targets: ['defaults', 'not IE 11'],
-    }),
+    // TailwindCSS must be first for optimal performance
+    tailwindcss(),
     visualizer({
       open: false,
       filename: 'dist/bundle-analysis.html',
@@ -28,7 +26,7 @@ export default defineConfig({
     manifest: true,
     outDir: 'dist',
     assetsDir: 'assets',
-    minify: 'terser',
+    minify: 'esbuild', // esbuild is faster and built into Vite
     cssCodeSplit: true,
     sourcemap: false,
     rollupOptions: {
@@ -46,11 +44,9 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
+    // esbuild minify options (drop console/debugger in production)
+    esbuild: {
+      drop: ['console', 'debugger'],
     },
   },
   server: {
@@ -60,11 +56,6 @@ export default defineConfig({
     watch: {
       // Watch Blade templates
       ignored: ['!**/templates/**', '!**/config/**'],
-    },
-  },
-  css: {
-    postcss: {
-      plugins: [tailwindcss(), autoprefixer()],
     },
   },
 });

@@ -1,11 +1,17 @@
+{{--
+    Accordion Block
+
+    Uses shared components: x-section, x-prose
+    Fields: accordion (repeater), background_color
+--}}
+
 @php
     $accordion_items = $fields['accordion'] ?? [];
-    $bgColor = $fields['background_color'] ?? 'gray-200';
+    $background = $fields['background_color'] ?? 'primary';
 @endphp
 
 @if($accordion_items)
-    <section class="{{ $classes }} px-6 accordion md:px-8"
-             @if($anchor) id="{{ $anchor }}" @endif>
+    <x-section :background="$background" :anchor="$anchor" padding="md" class="{{ $classes }} accordion">
         <div class="max-w-2xl mx-auto">
             <div class="flex flex-col overflow-hidden" x-data="{ active: null }">
                 @foreach($accordion_items as $index => $item)
@@ -14,7 +20,7 @@
                         $content = $item['content'] ?? '';
                         $itemId = 'accordion-' . $block['id'] . '-' . $index;
                     @endphp
-                    <div class="w-full px-6 mx-auto overflow-hidden border-b border-gray-200 last:border-b-0">
+                    <div class="w-full px-6 mx-auto overflow-hidden border-b border-line last:border-b-0">
                         <button @click="active = active === {{ $index }} ? null : {{ $index }}"
                                 :aria-expanded="active === {{ $index }}"
                                 aria-controls="content-{{ $itemId }}"
@@ -32,12 +38,12 @@
                         <div x-show="active === {{ $index }}"
                              x-collapse
                              id="content-{{ $itemId }}"
-                             class="max-w-2xl mb-8 content lg:max-w-6xl prose prose-lg">
-                            {!! $content !!}
+                             class="mb-8">
+                            <x-prose>{!! $content !!}</x-prose>
                         </div>
                     </div>
                 @endforeach
             </div>
         </div>
-    </section>
+    </x-section>
 @endif

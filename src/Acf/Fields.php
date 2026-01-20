@@ -46,16 +46,20 @@ class Fields
 
     /**
      * Get repeater field as collection
+     *
+     * @return array<int, array<string, mixed>>
      */
     public static function repeater(string $field, mixed $postId = null): array
     {
         $value = self::get($field, $postId, []);
-        
+
         return is_array($value) ? $value : [];
     }
 
     /**
      * Get flexible content field
+     *
+     * @return array<int, array<string, mixed>>
      */
     public static function flexible(string $field, mixed $postId = null): array
     {
@@ -64,11 +68,13 @@ class Fields
 
     /**
      * Get group field
+     *
+     * @return array<string, mixed>
      */
     public static function group(string $field, mixed $postId = null): array
     {
         $value = self::get($field, $postId, []);
-        
+
         return is_array($value) ? $value : [];
     }
 
@@ -92,6 +98,8 @@ class Fields
 
     /**
      * Get image field with size
+     *
+     * @return array{url: string, width: int, height: int, alt: string}|null
      */
     public static function image(string $field, string $size = 'full', mixed $postId = null): ?array
     {
@@ -121,6 +129,8 @@ class Fields
 
     /**
      * Get responsive image HTML
+     *
+     * @param array<string, string> $attr
      */
     public static function responsiveImage(string $field, string $size = 'full', array $attr = [], mixed $postId = null): string
     {
@@ -135,6 +145,8 @@ class Fields
 
     /**
      * Get link field
+     *
+     * @return array{url: string, title: string, target: string}|null
      */
     public static function link(string $field, mixed $postId = null): ?array
     {

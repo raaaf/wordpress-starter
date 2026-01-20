@@ -1,9 +1,16 @@
+{{--
+    One Column - Flexible Content Layout
+
+    Uses shared components: x-section, x-prose
+    Fields: content
+--}}
+
 @php
     $content = get_sub_field('content');
 @endphp
 
-<div class="container mx-auto px-4">
-    <div class="prose prose-lg max-w-none">
-        {!! $content !!}
+<x-section>
+    <div class="max-w-2xl mx-auto">
+        <x-prose>{!! $content !!}</x-prose>
     </div>
-</div>
+</x-section>

@@ -1,36 +1,23 @@
+{{--
+    Four Columns Block
+
+    Uses shared components: x-section, x-grid, x-prose
+    Fields: content, content_2, content_3, content_4, background_color
+--}}
+
 @php
     $content_1 = $fields['content'] ?? '';
     $content_2 = $fields['content_2'] ?? '';
     $content_3 = $fields['content_3'] ?? '';
     $content_4 = $fields['content_4'] ?? '';
-    $bgColor = $fields['background_color'] ?? '';
-    // Map old color names to Tailwind equivalents if needed
-    $colorMap = [
-        'marine' => 'blue-700',
-        'primary' => 'blue-600',
-        'secondary' => 'gray-600'
-    ];
-    if (isset($colorMap[$bgColor])) {
-        $bgColor = $colorMap[$bgColor];
-    }
+    $background = $fields['background_color'] ?? 'primary';
 @endphp
 
-<section class="{{ $classes }} px-6 four-columns md:px-8 {{ $bgColor ? 'bg-' . $bgColor : '' }}"
-         @if($anchor) id="{{ $anchor }}" @endif>
-    <div class="max-w-6xl mx-auto">
-        <div class="relative grid gap-16 xl:gap-24 sm:grid-cols-2 lg:grid-cols-4 max-w-none">
-            <div class="prose prose-lg max-w-none">
-                {!! $content_1 !!}
-            </div>
-            <div class="prose prose-lg max-w-none">
-                {!! $content_2 !!}
-            </div>
-            <div class="prose prose-lg max-w-none">
-                {!! $content_3 !!}
-            </div>
-            <div class="prose prose-lg max-w-none">
-                {!! $content_4 !!}
-            </div>
-        </div>
-    </div>
-</section>
+<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} four-columns">
+    <x-grid cols="4" gap="xl">
+        <x-prose>{!! $content_1 !!}</x-prose>
+        <x-prose>{!! $content_2 !!}</x-prose>
+        <x-prose>{!! $content_3 !!}</x-prose>
+        <x-prose>{!! $content_4 !!}</x-prose>
+    </x-grid>
+</x-section>

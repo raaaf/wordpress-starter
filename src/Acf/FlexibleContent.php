@@ -67,7 +67,36 @@ class FlexibleContent
     }
 
     /**
+     * Get the background color field definition
+     *
+     * @param string $prefix Unique prefix for the field key
+     * @return array<string, mixed>
+     */
+    private static function getBackgroundColorField(string $prefix): array
+    {
+        return [
+            'key' => "field_{$prefix}_background_color",
+            'label' => 'Hintergrundfarbe',
+            'name' => 'background_color',
+            'type' => 'select',
+            'choices' => [
+                'primary' => 'Standard',
+                'secondary' => 'Sekundär',
+                'tertiary' => 'Tertiär',
+                'brand' => 'Brand',
+                'brand-subtle' => 'Brand Dezent',
+                'inverse' => 'Invers',
+            ],
+            'default_value' => 'primary',
+            'allow_null' => 0,
+            'ui' => 1,
+        ];
+    }
+
+    /**
      * Get all flexible content layouts
+     *
+     * @return array<int, array{key: string, name: string, label: string, display: string, sub_fields: array<int, array<string, mixed>>}>
      */
     private static function getLayouts(): array
     {
@@ -117,6 +146,7 @@ class FlexibleContent
                         'type' => 'link',
                         'return_format' => 'array',
                     ],
+                    self::getBackgroundColorField('hero'),
                 ],
             ],
 
@@ -137,6 +167,7 @@ class FlexibleContent
                         'toolbar' => 'full',
                         'media_upload' => 1,
                     ],
+                    self::getBackgroundColorField('one_column'),
                 ],
             ],
 
@@ -169,6 +200,7 @@ class FlexibleContent
                         'toolbar' => 'full',
                         'media_upload' => 1,
                     ],
+                    self::getBackgroundColorField('two_columns'),
                 ],
             ],
 
@@ -221,6 +253,7 @@ class FlexibleContent
                         'toolbar' => 'full',
                         'media_upload' => 1,
                     ],
+                    self::getBackgroundColorField('two_columns_images'),
                 ],
             ],
 
@@ -264,6 +297,7 @@ class FlexibleContent
                         'toolbar' => 'full',
                         'media_upload' => 1,
                     ],
+                    self::getBackgroundColorField('three_columns'),
                 ],
             ],
 
@@ -318,6 +352,7 @@ class FlexibleContent
                         'toolbar' => 'full',
                         'media_upload' => 1,
                     ],
+                    self::getBackgroundColorField('four_columns'),
                 ],
             ],
 
@@ -350,6 +385,7 @@ class FlexibleContent
                         'toolbar' => 'full',
                         'media_upload' => 1,
                     ],
+                    self::getBackgroundColorField('one_third_two_thirds'),
                 ],
             ],
 
@@ -382,6 +418,7 @@ class FlexibleContent
                         'toolbar' => 'full',
                         'media_upload' => 1,
                     ],
+                    self::getBackgroundColorField('two_thirds_one_third'),
                 ],
             ],
 
@@ -421,6 +458,7 @@ class FlexibleContent
                             ],
                         ],
                     ],
+                    self::getBackgroundColorField('accordion'),
                 ],
             ],
 
@@ -453,13 +491,7 @@ class FlexibleContent
                         'required' => 1,
                         'return_format' => 'array',
                     ],
-                    [
-                        'key' => 'field_cta_background_color',
-                        'label' => 'Background Color',
-                        'name' => 'background_color',
-                        'type' => 'color_picker',
-                        'default_value' => '#f8f9fa',
-                    ],
+                    self::getBackgroundColorField('cta'),
                 ],
             ],
 
@@ -527,6 +559,7 @@ class FlexibleContent
                         'preview_size' => 'medium',
                         'library' => 'all',
                     ],
+                    self::getBackgroundColorField('video'),
                 ],
             ],
 
@@ -567,6 +600,7 @@ class FlexibleContent
                         ],
                         'default_value' => 'center',
                     ],
+                    self::getBackgroundColorField('image'),
                 ],
             ],
 
@@ -601,6 +635,7 @@ class FlexibleContent
                         'step' => 10,
                         'append' => 'px',
                     ],
+                    self::getBackgroundColorField('divider'),
                 ],
             ],
         ];

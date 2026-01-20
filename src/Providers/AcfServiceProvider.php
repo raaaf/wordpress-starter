@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WordpressStarter\Providers;
 
 use WordpressStarter\Acf\Blocks;
+use WordpressStarter\Acf\BlockFields;
 use WordpressStarter\Acf\Options;
 use WordpressStarter\Acf\FlexibleContent;
 use Illuminate\Support\Facades\Blade;
@@ -24,7 +25,10 @@ class AcfServiceProvider extends ServiceProvider
         
         // Register flexible content fields
         add_action('acf/init', [FlexibleContent::class, 'register']);
-        
+
+        // Register block field groups
+        add_action('acf/init', [BlockFields::class, 'register']);
+
         // Initialize cache clearing
         Options::initCacheClearing();
     }
