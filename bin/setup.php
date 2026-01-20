@@ -225,6 +225,36 @@ class ThemeSetup
         $this->printSection("Step 3: Content Options");
         echo "Configure what should happen when WordPress is set up.\n\n";
 
+        $this->printSubSection("Company Information");
+        echo "  " . $this->color("These values will be used for contact info, footer, and copyright.\n\n", 'gray');
+
+        $this->config['company_name'] = $this->prompt(
+            'Company Name',
+            $this->config['theme_name'],
+            'For contact info and legal pages'
+        );
+
+        $this->config['company_address'] = $this->prompt(
+            'Address',
+            '',
+            'Street, City (optional)'
+        );
+
+        $this->config['company_phone'] = $this->prompt(
+            'Phone',
+            '',
+            '+49 123 456789 (optional)'
+        );
+
+        $this->config['company_email'] = $this->prompt(
+            'Email',
+            $this->config['author_email'],
+            'Contact email address'
+        );
+
+        echo "\n";
+        $this->printSubSection("Page Setup");
+
         $this->config['create_pages'] = strtolower($this->prompt(
             'Create default pages?',
             'y',
@@ -250,6 +280,21 @@ class ThemeSetup
             'y',
             'Changes to /%postname%/ structure (y/n)'
         )) === 'y';
+
+        echo "\n";
+        $this->printSubSection("Darstellung");
+
+        $colorSchemeChoice = $this->prompt(
+            'Farbschema',
+            's',
+            '[s]ystem (empfohlen), [l]ight, [d]ark'
+        );
+
+        $this->config['color_scheme'] = match (strtolower($colorSchemeChoice)) {
+            'l', 'light' => 'light',
+            'd', 'dark' => 'dark',
+            default => 'system',
+        };
     }
 
     private function confirmChanges(): void
@@ -280,6 +325,7 @@ class ThemeSetup
         echo "  Create pages:          " . ($this->config['create_pages'] ? $this->color('Yes', 'green') : $this->color('No', 'red')) . "\n";
         echo "  Delete default content: " . ($this->config['delete_default_content'] ? $this->color('Yes', 'green') : $this->color('No', 'red')) . "\n";
         echo "  Pretty permalinks:     " . ($this->config['set_permalink_structure'] ? $this->color('Yes', 'green') : $this->color('No', 'red')) . "\n";
+        echo "  Farbschema:            " . $this->color($this->config['color_scheme'] ?? 'system', 'cyan') . "\n";
         echo "\n";
 
         $confirm = $this->prompt(
@@ -702,6 +748,7 @@ CSS;
             'delete_default_content' => $this->config['delete_default_content'],
             'set_permalink_structure' => $this->config['set_permalink_structure'],
             'pages' => $this->config['create_pages'] ? $this->samplePages : [],
+            'color_scheme' => $this->config['color_scheme'] ?? 'system',
         ];
 
         $configContent = "<?php\n\n";

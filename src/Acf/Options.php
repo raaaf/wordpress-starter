@@ -43,9 +43,10 @@ class Options
         self::addSubPage('Social Media', 'social');
         self::addSubPage('Analytics', 'analytics');
         self::addSubPage('Rechtliches', 'legal');
+        self::addSubPage('Werkzeuge', 'tools');
 
-        // Register field groups for each page
-        add_action('acf/init', [self::class, 'registerFieldGroups']);
+        // Register field groups directly (we're already in acf/init)
+        self::registerFieldGroups();
     }
 
     /**
@@ -72,6 +73,7 @@ class Options
         self::registerSocialFields();
         self::registerAnalyticsFields();
         self::registerLegalFields();
+        self::registerToolsFields();
     }
 
     /**
@@ -161,6 +163,26 @@ class Options
                     'Link zur Google Maps Position (für "Anfahrt" Button).',
                     null,
                     'https://goo.gl/maps/...'
+                ),
+
+                // Tab: Darstellung
+                [
+                    'key' => 'field_options_tab_appearance',
+                    'label' => 'Darstellung',
+                    'type' => 'tab',
+                ],
+                FieldDefinitions::selectField(
+                    'field_options_color_scheme',
+                    'Farbschema',
+                    'color_scheme',
+                    [
+                        'system' => 'Systemeinstellung folgen',
+                        'light' => 'Hell (Light Mode)',
+                        'dark' => 'Dunkel (Dark Mode)',
+                    ],
+                    'system',
+                    false,
+                    'Bestimmt das Standard-Farbschema der Website. "Systemeinstellung" passt sich automatisch an die Browser-/OS-Einstellung des Besuchers an.'
                 ),
             ],
             'location' => [
@@ -416,6 +438,121 @@ class Options
                         'param' => 'options_page',
                         'operator' => '==',
                         'value' => 'theme-options-legal',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Tools Settings Fields
+     */
+    private static function registerToolsFields(): void
+    {
+        // Check if styleguide page exists
+        $styleguidePageId = get_option('wp_starter_styleguide_page_id');
+        $styleguidePost = $styleguidePageId ? get_post($styleguidePageId) : null;
+
+        // Check various states: exists, in trash, or missing
+        $styleguideExists = $styleguidePost && $styleguidePost->post_status !== 'trash';
+        $styleguideInTrash = $styleguidePost && $styleguidePost->post_status === 'trash';
+
+        // Build status message based on state
+        if ($styleguideInTrash) {
+            // Page is in trash - offer to restore or delete permanently
+            $restoreUrl = wp_nonce_url(
+                admin_url('?wp-starter-restore-styleguide=1'),
+                'wp-starter-restore-styleguide'
+            );
+            $deleteUrl = wp_nonce_url(
+                admin_url('?wp-starter-delete-styleguide=1'),
+                'wp-starter-delete-styleguide'
+            );
+            $statusMessage = sprintf(
+                '<div style="padding: 15px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #721c24;"><strong>⚠ Styleguide-Seite liegt im Papierkorb</strong></p>
+                    <p style="margin: 10px 0 0 0;">
+                        <a href="%s" class="button button-primary">Wiederherstellen</a>
+                        <a href="%s" class="button" onclick="return confirm(\'Styleguide-Seite endgültig löschen?\');">Endgültig löschen</a>
+                    </p>
+                </div>',
+                esc_url($restoreUrl),
+                esc_url($deleteUrl)
+            );
+        } elseif ($styleguideExists) {
+            $editUrl = get_edit_post_link((int) $styleguidePageId, 'raw');
+            $viewUrl = get_permalink((int) $styleguidePageId);
+            $statusMessage = sprintf(
+                '<div style="padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #155724;"><strong>✓ Styleguide-Seite existiert</strong></p>
+                    <p style="margin: 10px 0 0 0;">
+                        <a href="%s" class="button">Bearbeiten</a>
+                        <a href="%s" class="button" target="_blank">Ansehen</a>
+                    </p>
+                </div>',
+                esc_url($editUrl ?? ''),
+                esc_url($viewUrl ?? '')
+            );
+        } else {
+            // Clear the option if it references a non-existent page
+            if ($styleguidePageId && !$styleguidePost) {
+                delete_option('wp_starter_styleguide_page_id');
+            }
+            $createUrl = wp_nonce_url(
+                admin_url('?wp-starter-create-styleguide=1'),
+                'wp-starter-create-styleguide'
+            );
+            $statusMessage = sprintf(
+                '<div style="padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #856404;"><strong>Keine Styleguide-Seite vorhanden</strong></p>
+                    <p style="margin: 10px 0 0 0;">
+                        <a href="%s" class="button button-primary">Styleguide-Seite erstellen</a>
+                    </p>
+                </div>',
+                esc_url($createUrl)
+            );
+        }
+
+        // Regenerate option (always show)
+        $regenerateUrl = wp_nonce_url(
+            admin_url('?wp-starter-regenerate-styleguide=1'),
+            'wp-starter-regenerate-styleguide'
+        );
+        $regenerateMessage = sprintf(
+            '<div style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                <p style="margin: 0;"><strong>Styleguide neu generieren</strong></p>
+                <p style="margin: 10px 0; color: #6c757d;">Erstellt die Styleguide-Seite neu mit allen aktuellen Design-Tokens und Block-Beispielen. Die bestehende Seite wird ersetzt.</p>
+                <p style="margin: 0;">
+                    <a href="%s" class="button" onclick="return confirm(\'Styleguide-Seite wirklich neu erstellen? Die bestehende Seite wird gelöscht.\');">Neu generieren</a>
+                </p>
+            </div>',
+            esc_url($regenerateUrl)
+        );
+
+        acf_add_local_field_group([
+            'key' => 'group_options_tools',
+            'title' => 'Werkzeuge',
+            'fields' => [
+                // Styleguide Section
+                [
+                    'key' => 'field_options_tools_styleguide_heading',
+                    'label' => 'Styleguide',
+                    'type' => 'message',
+                    'message' => '<p>Der Styleguide zeigt alle verfügbaren Design-Elemente des Themes: Farben, Typografie, Abstände, Komponenten und ACF-Block-Beispiele.</p>',
+                ],
+                [
+                    'key' => 'field_options_tools_styleguide_status',
+                    'label' => '',
+                    'type' => 'message',
+                    'message' => $statusMessage . $regenerateMessage,
+                ],
+            ],
+            'location' => [
+                [
+                    [
+                        'param' => 'options_page',
+                        'operator' => '==',
+                        'value' => 'theme-options-tools',
                     ],
                 ],
             ],

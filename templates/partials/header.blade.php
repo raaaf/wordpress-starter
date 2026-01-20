@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html @php(language_attributes()) class="no-js">
+@php
+    $colorScheme = function_exists('get_field') ? (get_field('color_scheme', 'option') ?: 'system') : 'system';
+@endphp
+<html @php(language_attributes()) class="no-js"@if($colorScheme !== 'system') data-theme="{{ esc_attr($colorScheme) }}"@endif>
 
 <head>
     <meta charset="@php(bloginfo('charset'))">
@@ -34,8 +37,10 @@
         Skip to content
     </a>
 
-    <header class="p-4 md:p-8" role="banner">
-        <nav role="navigation" aria-label="Main Navigation">
-            @include('partials.header-menu')
-        </nav>
+    <header class="px-4 md:px-8" role="banner">
+        <div class="container mx-auto">
+            <nav role="navigation" aria-label="Main Navigation">
+                @include('partials.header-menu')
+            </nav>
+        </div>
     </header>
