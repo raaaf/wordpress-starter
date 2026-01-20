@@ -1,10 +1,10 @@
 {
     "name": "three-columns",
-    "title": "Three Columns",
-    "description": "A three column layout for content",
+    "title": "Drei Spalten",
+    "description": "Drei gleichbreite Spalten nebeneinander für Inhalte",
     "category": "theme",
     "icon": "columns",
-    "keywords": ["columns", "layout", "three", "grid"],
+    "keywords": ["spalten", "layout", "drei", "nebeneinander", "columns"],
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

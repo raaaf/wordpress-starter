@@ -1,10 +1,10 @@
 {
     "name": "hero",
-    "title": "Hero Section",
-    "description": "A hero section with title, content, and background image",
+    "title": "Hero-Bereich",
+    "description": "Großer Kopfbereich mit Titel, Inhalt und Hintergrundbild für den Seitenstart",
     "category": "theme",
     "icon": "cover-image",
-    "keywords": ["hero", "banner", "header"],
+    "keywords": ["hero", "banner", "header", "kopfbereich", "titelbild"],
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

@@ -1,10 +1,10 @@
 {
     "name": "four-columns",
-    "title": "Four Columns",
-    "description": "A four column layout for content",
+    "title": "Vier Spalten",
+    "description": "Vier gleichbreite Spalten nebeneinander für Inhalte",
     "category": "theme",
     "icon": "columns",
-    "keywords": ["columns", "layout", "four", "grid"],
+    "keywords": ["spalten", "layout", "vier", "nebeneinander", "columns"],
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

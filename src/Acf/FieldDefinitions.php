@@ -862,19 +862,19 @@ class FieldDefinitions
         return [
             self::wysiwygField(
                 "field_{$prefix}_column_1",
-                'Spalte 1 – schmal (1/3)',
+                'Linke Spalte (schmal)',
                 'column_1',
                 true,
                 '33.333',
-                'Inhalt der schmalen linken Spalte.'
+                'Inhalt der schmalen linken Spalte (ca. 1/3 der Breite).'
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
-                'Spalte 2 – breit (2/3)',
+                'Rechte Spalte (breit)',
                 'column_2',
                 true,
                 '66.667',
-                'Inhalt der breiten rechten Spalte.'
+                'Inhalt der breiten rechten Spalte (ca. 2/3 der Breite).'
             ),
             self::backgroundColorField($prefix),
         ];
@@ -891,19 +891,19 @@ class FieldDefinitions
         return [
             self::wysiwygField(
                 "field_{$prefix}_column_1",
-                'Spalte 1 – breit (2/3)',
+                'Linke Spalte (breit)',
                 'column_1',
                 true,
                 '66.667',
-                'Inhalt der breiten linken Spalte.'
+                'Inhalt der breiten linken Spalte (ca. 2/3 der Breite).'
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
-                'Spalte 2 – schmal (1/3)',
+                'Rechte Spalte (schmal)',
                 'column_2',
                 true,
                 '33.333',
-                'Inhalt der schmalen rechten Spalte.'
+                'Inhalt der schmalen rechten Spalte (ca. 1/3 der Breite).'
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1253,10 +1253,10 @@ class FieldDefinitions
             ),
             self::textField(
                 "field_{$prefix}_form_id",
-                'Contact Form 7 ID',
+                'Formular-ID',
                 'form_id',
                 true,
-                'Die ID des Contact Form 7 Formulars (zu finden im Shortcode).',
+                'So findest du die ID: Gehe zu Formulare → wähle dein Formular → die ID steht in der URL (z.B. post=123) oder im Shortcode [contact-form-7 id="123"]. Trage nur die Zahl ein.',
                 'z.B. 123'
             ),
             self::trueFalseField(
@@ -1297,9 +1297,9 @@ class FieldDefinitions
             ),
             self::urlField(
                 "field_{$prefix}_embed_url",
-                'Google Maps Embed-URL',
+                'Google Maps Einbettungs-URL',
                 'embed_url',
-                'Die Embed-URL von Google Maps (Teilen → Karte einbetten → nur die URL kopieren).',
+                'So geht\'s: 1) Google Maps öffnen 2) Standort suchen 3) Auf "Teilen" klicken 4) "Karte einbetten" wählen 5) Die URL aus dem HTML-Code kopieren (beginnt mit https://www.google.com/maps/embed). Der Block zeigt automatisch einen DSGVO-Hinweis.',
                 null,
                 'https://www.google.com/maps/embed?pb=...'
             ),
@@ -1602,7 +1602,7 @@ class FieldDefinitions
                         'Icon (Emoji)',
                         'icon',
                         false,
-                        'Optionales Emoji als Icon.',
+                        'Optionales Emoji als Icon. Emoji-Tastatur öffnen: Mac: Ctrl+Cmd+Leertaste, Windows: Win+Punkt (.)',
                         'z.B. 🏆, ⭐, 📈'
                     ),
                 ],

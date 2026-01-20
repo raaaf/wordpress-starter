@@ -1,10 +1,10 @@
 {
     "name": "one-third-two-thirds",
-    "title": "One Third / Two Thirds Columns",
-    "description": "A layout with one-third and two-thirds column split",
+    "title": "1/3 + 2/3 Spalten",
+    "description": "Asymmetrisches Layout: schmale linke Spalte, breite rechte Spalte",
     "category": "theme",
     "icon": "align-left",
-    "keywords": ["columns", "layout", "asymmetric", "grid"],
+    "keywords": ["spalten", "layout", "asymmetrisch", "drittel", "columns"],
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

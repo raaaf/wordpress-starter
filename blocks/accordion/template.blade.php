@@ -1,7 +1,7 @@
 {{--
     Accordion Block
 
-    Uses shared components: x-section, x-prose
+    Uses shared components: x-section, x-prose, x-icon
     Fields: accordion (repeater), background_color
     Includes: FAQ Schema for SEO, aria-live for accessibility
 --}}
@@ -62,11 +62,7 @@
                                     pirsch-meta-key="accordion_block"
                                     pirsch-meta-item="{{ esc_attr($title) }}">
                                 <span>{{ $title }}</span>
-                                <svg class="w-5 h-5 transition-transform duration-200"
-                                     :class="{ 'rotate-180': active === {{ $index }} }"
-                                     fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
+                                <x-icon name="chevron" size="lg" class="transition-transform duration-200" ::class="{ 'rotate-180': active === {{ $index }} }" />
                             </button>
                         </h3>
                         <div x-show="active === {{ $index }}"

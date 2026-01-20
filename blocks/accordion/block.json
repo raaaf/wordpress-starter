@@ -1,10 +1,10 @@
 {
     "name": "accordion",
-    "title": "Accordion",
-    "description": "An expandable accordion with multiple items",
+    "title": "Akkordeon (FAQ)",
+    "description": "Auf- und zuklappbare Elemente, ideal für häufige Fragen (FAQ)",
     "category": "theme",
     "icon": "list-view",
-    "keywords": ["accordion", "faq", "expandable", "collapse"],
+    "keywords": ["akkordeon", "faq", "fragen", "aufklappbar", "accordion"],
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

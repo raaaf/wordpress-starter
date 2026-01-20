@@ -1,7 +1,7 @@
 {{--
     Timeline Block
 
-    Uses shared components: x-section
+    Uses shared components: x-section, x-badge
     Fields: title, events (repeater: year, title, content, image), background_color
 --}}
 
@@ -38,9 +38,7 @@
                         <div class="w-full md:w-[calc(50%-2rem)] {{ $isEven ? 'md:text-right' : 'md:text-left' }}">
                             <div class="p-6 rounded-xl bg-surface-secondary">
                                 @if($year)
-                                    <span class="inline-block px-3 py-1 mb-3 text-sm font-semibold rounded-full bg-surface-brand text-content-inverse">
-                                        {{ $year }}
-                                    </span>
+                                    <x-badge variant="accent" size="md" class="mb-3">{{ $year }}</x-badge>
                                 @endif
 
                                 @if($eventTitle)

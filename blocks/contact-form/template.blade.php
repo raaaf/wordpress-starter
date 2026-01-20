@@ -1,7 +1,7 @@
 {{--
     Contact Form Block (Contact Form 7)
 
-    Uses shared components: x-section, x-grid
+    Uses shared components: x-section, x-grid, x-icon
     Fields: title, content, form_id, show_contact_info, background_color
 --}}
 
@@ -47,18 +47,14 @@
 
                     @if($phone)
                         <p class="flex items-center gap-2 mb-2 text-content-secondary">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                            </svg>
+                            <x-icon name="phone" size="lg" />
                             <a href="tel:{{ esc_attr(preg_replace('/[^0-9+]/', '', $phone)) }}" class="hover:text-content-link-hover">{{ esc_html($phone) }}</a>
                         </p>
                     @endif
 
                     @if($email)
                         <p class="flex items-center gap-2 text-content-secondary">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                            </svg>
+                            <x-icon name="mail" size="lg" />
                             <a href="mailto:{{ esc_attr($email) }}" class="hover:text-content-link-hover">{{ esc_html($email) }}</a>
                         </p>
                     @endif

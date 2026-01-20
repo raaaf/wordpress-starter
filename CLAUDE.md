@@ -205,7 +205,7 @@ Available under "Theme-Einstellungen" in WordPress admin:
 - **Header**: Sticky header, CTA button
 - **Footer**: Footer text, copyright, display toggles
 - **Social Media**: Repeater for social links (platform + URL)
-- **Analytics**: Pirsch, Google Analytics, Tag Manager IDs
+- **Analytics**: Pirsch Analytics (Cookie-frei, DSGVO-konform)
 - **Rechtliches**: Privacy, Imprint, Terms pages selection
 
 ### Blade Directives

@@ -1,7 +1,7 @@
 {{--
     Cards / Features Block
 
-    Uses shared components: x-section, x-grid, x-card
+    Uses shared components: x-section, x-grid, x-card, x-link
     Fields: title, cards (repeater: icon, title, content, link), columns, background_color
 --}}
 
@@ -52,16 +52,14 @@
                         @php
                             $link = $card['link'];
                         @endphp
-                        <a
-                            href="{{ $link['url'] ?? '#' }}"
-                            class="inline-flex items-center mt-auto font-medium text-content-link hover:text-content-link-hover"
-                            @if(!empty($link['target'])) target="{{ $link['target'] }}" @endif
+                        <x-link
+                            :url="$link['url'] ?? '#'"
+                            :target="$link['target'] ?? '_self'"
+                            iconRight="chevron"
+                            class="mt-auto"
                         >
                             {{ $link['title'] ?? 'Mehr erfahren' }}
-                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </a>
+                        </x-link>
                     @endif
                 </x-card>
             @endforeach

@@ -1,10 +1,10 @@
 {
     "name": "video",
     "title": "Video",
-    "description": "Embed a video from WordPress media library or external source",
+    "description": "Video aus der Mediathek oder von YouTube/Vimeo einbetten",
     "category": "theme",
     "icon": "video-alt3",
-    "keywords": ["video", "media", "youtube", "embed"],
+    "keywords": ["video", "media", "youtube", "vimeo", "film"],
     "supports": {
         "align": ["full", "wide", "center"],
         "mode": true,

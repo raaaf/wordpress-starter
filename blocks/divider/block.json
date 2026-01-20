@@ -1,10 +1,10 @@
 {
     "name": "divider",
-    "title": "Divider",
-    "description": "A decorative divider with icon",
+    "title": "Trenner / Abstand",
+    "description": "Dekorativer Trenner mit wählbarer Hintergrundfarbe für optische Gliederung",
     "category": "theme",
     "icon": "minus",
-    "keywords": ["divider", "separator", "line", "break"],
+    "keywords": ["trenner", "abstand", "linie", "separator", "divider"],
     "supports": {
         "align": ["full", "wide", "center"],
         "mode": true,

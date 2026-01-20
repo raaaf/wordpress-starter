@@ -1,10 +1,10 @@
 {
     "name": "two-columns",
-    "title": "Two Columns",
-    "description": "A two column layout for content",
+    "title": "Zwei Spalten",
+    "description": "Zwei gleichbreite Spalten nebeneinander für Inhalte",
     "category": "theme",
     "icon": "columns",
-    "keywords": ["columns", "layout", "two", "grid"],
+    "keywords": ["spalten", "layout", "zwei", "nebeneinander", "columns"],
     "supports": {
         "align": ["full", "wide"],
         "mode": true,
