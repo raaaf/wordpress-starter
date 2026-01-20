@@ -123,6 +123,7 @@
             @if($hasError) aria-invalid="true" @endif
             @if($displayHint) aria-describedby="{{ $inputId }}-hint" @endif
             @if($clearable)
+                x-ref="input"
                 x-on:input="hasValue = $event.target.value.length > 0"
             @endif
             class="{{ $baseClasses }} {{ $stateClasses }} {{ $sizeConfig['input'] }} {{ $sizeConfig['padding'] }} {{ $sizeConfig['paddingRight'] }} {{ $class }}"
@@ -133,7 +134,7 @@
             <button
                 type="button"
                 x-show="hasValue"
-                x-on:click="$refs.input ? $refs.input.value = '' : $el.previousElementSibling.value = ''; hasValue = false; $el.previousElementSibling.focus()"
+                x-on:click="$refs.input.value = ''; hasValue = false; $refs.input.focus()"
                 class="absolute {{ $sizeConfig['iconRight'] }} top-1/2 -translate-y-1/2 text-icon-secondary hover:text-icon transition-colors"
                 @if($disabled) disabled @endif
             >

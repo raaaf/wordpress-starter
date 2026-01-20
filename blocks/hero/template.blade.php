@@ -30,7 +30,7 @@
     {{-- Background Image --}}
     @if($image_url)
         <div class="absolute inset-0">
-            <img src="{{ $image_url }}"
+            <img src="{{ esc_url($image_url) }}"
                  alt=""
                  class="w-full h-full object-cover"
                  loading="lazy">
