@@ -4,10 +4,10 @@ A modern WordPress starter theme built with cutting-edge technologies and best p
 
 ## 🚀 Features
 
-- **Vite 7** - Lightning fast build tool with HMR
-- **Alpine.js v3.14.9** - Lightweight reactive framework (bundled, no CDN)
-- **TailwindCSS v4** - Utility-first CSS framework
-- **Laravel Blade** - Powerful templating engine via Illuminate v11
+- **Vite 7.3** - Lightning fast build tool with HMR
+- **Alpine.js v3.15** - Lightweight reactive framework (bundled, no CDN)
+- **TailwindCSS v4.1** - Utility-first CSS framework with text shadows
+- **Laravel Blade** - Powerful templating engine via Illuminate v12
 - **ACF Pro Integration** - Helper functions, Blade directives, and block support
 - **TypeScript** - Full TypeScript support with WordPress/ACF types
 - **PHP 8.2+** - Modern PHP with strict types
@@ -23,8 +23,8 @@ A modern WordPress starter theme built with cutting-edge technologies and best p
 
 - PHP 8.2 or higher
 - Composer
-- Node.js 18+ and npm
-- WordPress 6.0+
+- Node.js 20.19+ or 22.12+ and npm
+- WordPress 6.8+
 - ACF Pro 6.0+ (for ACF features)
 - Local by Flywheel (recommended for Mac development)
 

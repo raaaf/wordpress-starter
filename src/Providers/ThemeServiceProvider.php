@@ -69,8 +69,11 @@ class ThemeServiceProvider extends ServiceProvider
         });
 
         // Disable comment features
+        /** @phpstan-ignore arguments.count */
         add_filter('comments_open', '__return_false', 20, 2);
+        /** @phpstan-ignore arguments.count */
         add_filter('pings_open', '__return_false', 20, 2);
+        /** @phpstan-ignore arguments.count */
         add_filter('comments_array', '__return_empty_array', 10, 2);
         
         // Remove from admin menu

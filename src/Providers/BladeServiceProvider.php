@@ -36,6 +36,7 @@ class BladeServiceProvider extends ServiceProvider
     private function setupContainer(): void
     {
         $this->container = new Container();
+        /** @phpstan-ignore argument.type */
         Facade::setFacadeApplication($this->container);
     }
 

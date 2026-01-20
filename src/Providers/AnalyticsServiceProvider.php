@@ -20,6 +20,14 @@ class AnalyticsServiceProvider extends ServiceProvider
     }
 
     /**
+     * Bootstrap services.
+     */
+    public function boot(): void
+    {
+        // No bootstrap actions needed
+    }
+
+    /**
      * Render Pirsch Analytics script
      */
     public function renderPirschScript(): void

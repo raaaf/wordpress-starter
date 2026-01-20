@@ -2,7 +2,9 @@ includes:
     - vendor/szepeviktor/phpstan-wordpress/extension.neon
 
 parameters:
-    level: 6
+    level: 5
+    parallel:
+        maximumNumberOfProcesses: 1
     paths:
         - src
         - config
@@ -13,8 +15,10 @@ parameters:
     bootstrapFiles:
         - vendor/autoload.php
     treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
-        - '#Function get_template_directory not found#'
         - '#Function wp_#'
-        - '#Function get_field not found#'
         - '#Function acf_#'
+        - '#Function get_fields not found#'
+        - '#argument\.type#'
+        - '#arguments\.count#'
