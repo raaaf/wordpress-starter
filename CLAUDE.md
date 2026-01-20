@@ -92,6 +92,7 @@ Vite configuration (`vite.config.js`):
 ### Service Provider Architecture
 
 The theme uses a modern service provider pattern:
+- `PluginServiceProvider` - Plugin requirements and recommendations
 - `BladeServiceProvider` - Manages Blade templating engine
 - `MenuServiceProvider` - Registers navigation menus
 - `ThemeServiceProvider` - Core theme functionality
@@ -132,6 +133,48 @@ The theme implements several performance strategies:
 - ACF Pro is required for ACF features
 - Use Local by Flywheel for Mac development
 
+## Plugin Requirements
+
+The theme automatically displays admin notices for missing plugins via `PluginServiceProvider`.
+
+### Required Plugins (error notice)
+- **Advanced Custom Fields PRO** (Premium) - Required for all ACF blocks and theme options
+
+### Recommended Plugins (warning notice, dismissible)
+
+**SEO & Content:**
+- **Yoast SEO** - SEO optimization for all content
+- **ACF Content Analysis for Yoast SEO** - Integrates ACF fields into Yoast analysis
+- **ACF Extended** - Extends ACF with additional field types
+
+**Forms & Communication:**
+- **Contact Form 7** - For the contact form block
+- **WP Mail SMTP** - Reliable email delivery via SMTP
+
+**Security & Backup:**
+- **Solid Security** (Premium, ehem. iThemes) - Comprehensive WordPress security
+- **Solid Backups** (Premium, ehem. BackupBuddy) - Automatic backups and migration
+
+**Performance & Analytics:**
+- **WP-Optimize** - Database optimization and caching
+- **Pirsch Analytics** - Privacy-friendly website analytics
+
+**Admin:**
+- **Admin and Site Enhancements** - 60+ admin improvements incl. SVG upload
+
+### Adding New Plugin Requirements
+Edit `src/Providers/PluginServiceProvider.php` and add to the `$plugins` array:
+```php
+'plugin-slug' => [
+    'name' => 'Plugin Name',
+    'slug' => 'plugin-slug',  // WordPress.org slug
+    'required' => true,       // true = error notice, false = warning
+    'description' => 'Why this plugin is needed.',
+    'check' => fn() => class_exists('PluginClass'),  // Detection callback
+    'external' => 'https://example.com',  // Optional: URL for premium plugins
+],
+```
+
 ## Environment Configuration
 
 The theme supports environment-based configuration:
@@ -143,11 +186,31 @@ The theme supports environment-based configuration:
 
 ## ACF Integration
 
-The theme includes comprehensive ACF support:
+The theme includes comprehensive ACF support with programmatically defined fields.
+
+### Architecture
+
+All ACF fields are defined in PHP for better version control:
+- `src/Acf/FieldDefinitions.php` - Shared field definitions (single source of truth)
+- `src/Acf/FlexibleContent.php` - Page Builder layouts
+- `src/Acf/BlockFields.php` - Gutenberg block fields
+- `src/Acf/Options.php` - Theme options pages
+- `src/Acf/Fields.php` - Helper class for field access
+- `src/Acf/Blocks.php` - Block registration and rendering
+
+### Theme Options Pages
+
+Available under "Theme-Einstellungen" in WordPress admin:
+- **Allgemein**: Logo, Favicon, Contact info (company, address, phone, email)
+- **Header**: Sticky header, CTA button
+- **Footer**: Footer text, copyright, display toggles
+- **Social Media**: Repeater for social links (platform + URL)
+- **Analytics**: Pirsch, Google Analytics, Tag Manager IDs
+- **Rechtliches**: Privacy, Imprint, Terms pages selection
 
 ### Blade Directives
 - `@field('field_name')` - Output field value
-- `@option('option_name')` - Output option field
+- `@option('option_name')` - Output option field (cached for 1 hour)
 - `@hasfield('field_name')...@endhasfield` - Conditional display
 - `@repeater('field_name')...@endrepeater` - Loop through repeater
 - `@flexible('field_name')...@endflexible` - Loop through flexible content
@@ -161,36 +224,149 @@ use WordpressStarter\Acf\Fields;
 // Get field with default
 Fields::get('field_name', $postId, 'default');
 
-// Get option with caching
+// Get option with caching (1 hour cache)
 Fields::option('option_name', 'default');
 
-// Get image with size
+// Get image data (returns {url, width, height, alt})
 Fields::image('image_field', 'large', $postId);
+
+// Get responsive image HTML with srcset
+Fields::responsiveImage('image_field', 'large', ['class' => 'my-image'], $postId);
 
 // Get link field
 Fields::link('link_field', $postId);
+
+// Get link as HTML with proper rel attributes
+Fields::linkHtml('link_field', ['class' => 'btn'], $postId);
+
+// Check if field has value
+Fields::has('field_name', $postId);
+```
+
+### Usage in Block Templates
+
+Block templates receive a `$fields` array with all field values:
+```blade
+{{-- blocks/hero/template.blade.php --}}
+@php
+    $title = $fields['title'] ?? '';
+    $background = $fields['background_color'] ?? 'primary';
+@endphp
+
+<x-section :background="$background">
+    <h1>{{ $title }}</h1>
+</x-section>
+```
+
+### Usage in Flexible Content Templates
+
+Flexible content uses WordPress ACF functions:
+```blade
+{{-- templates/flexible/hero.blade.php --}}
+@php
+    $title = get_sub_field('title');
+    $cta = get_sub_field('cta');
+@endphp
+
+@if($title)
+    <h1>{{ $title }}</h1>
+@endif
+```
+
+### Adding New Fields
+
+Use `FieldDefinitions` for consistency:
+```php
+use WordpressStarter\Acf\FieldDefinitions;
+
+// Text field with placeholder
+FieldDefinitions::textField('field_key', 'Label', 'name', true, 'Instructions', 'Placeholder');
+
+// WYSIWYG editor
+FieldDefinitions::wysiwygField('field_key', 'Label', 'name', true, '50', 'Instructions');
+
+// Image field
+FieldDefinitions::imageField('field_key', 'Label', 'name', false, 'array', null, 'Instructions');
+
+// Background color (uses design tokens)
+FieldDefinitions::backgroundColorField('prefix');
+
+// Repeater
+FieldDefinitions::repeaterField('field_key', 'Label', 'name', $subFields, 'Add Item', 1);
 ```
 
 ### ACF Blocks
 - Blocks are auto-discovered from `blocks/` directory
 - Each block needs `block.json` and `template.blade.php`
 - Blocks use Blade templates for rendering
+- All block labels and instructions are in German
+- Blocks can declare plugin dependencies via `requires` in `block.json`
+
+### Plugin Dependencies
+
+Blocks can require plugins to be installed. Add `requires` to `block.json`:
+```json
+{
+    "name": "acf/my-block",
+    "requires": ["contact-form-7"]
+}
+```
+
+Available requirement keys:
+- `contact-form-7` - Contact Form 7 plugin
+- `woocommerce` - WooCommerce plugin
+- `acf-pro` - ACF Pro (automatically met)
+- Custom: `class:ClassName` or `function:function_name`
+
+Blocks with unmet requirements are automatically skipped during registration.
 
 ### Available Blocks
-The theme includes 13 pre-built ACF blocks:
-- `accordion` - Expandable accordion with multiple items
-- `cta` - Call to action section with title, content and button
-- `divider` - Decorative divider with icon
-- `four-columns` - Four column layout
-- `hero` - Hero section with background image
-- `image` - Single image with optional caption and border
-- `one-column` - Single column content
-- `one-third-two-thirds` - Asymmetric two column layout
-- `three-columns` - Three column layout
-- `two-columns` - Two equal columns
-- `two-columns-images` - Two columns with images
-- `two-thirds-one-third` - Asymmetric two column layout (reversed)
-- `video` - Embed video from WordPress media or external source
+The theme includes 27 pre-built ACF blocks:
+
+**Layout Blocks:**
+- `one-column` - Eine Spalte content
+- `two-columns` - Zwei Spalten equal columns
+- `three-columns` - Drei Spalten layout
+- `four-columns` - Vier Spalten layout
+- `one-third-two-thirds` - 1/3 + 2/3 asymmetric layout
+- `two-thirds-one-third` - 2/3 + 1/3 asymmetric layout
+- `two-columns-images` - Zwei Spalten mit Bildern
+
+**Content Blocks:**
+- `hero` - Hero-Bereich with background image
+- `accordion` - Akkordeon (FAQ) with expandable items
+- `cta` - Handlungsaufforderung with title, content and button
+- `image` - Bild with optional caption and border
+- `video` - Video from WordPress media or YouTube/Vimeo
+- `divider` - Trenner / Abstand with background color
+
+**Interactive Blocks:**
+- `testimonials` - Kundenstimmen with repeater (quote, author, role, image)
+- `cards` - Karten / Features with repeater (icon, title, content, link)
+- `gallery` - Bildergalerie with medium-zoom lightbox
+- `logo-slider` - Logo-Slider for partners/clients
+- `contact-form` - Contact Form 7 integration with contact info
+- `map` - Google Maps embed with GDPR consent
+- `tabs` - Tab-basierte Inhalte with Alpine.js
+
+**Additional Blocks:**
+- `pricing-table` - Preistabelle for packages and pricing plans
+- `team` - Teammitglieder with photo, name, position, contact
+- `stats` - Statistiken with animated number counters (Alpine.js)
+- `timeline` - Zeitstrahl for chronological events/history
+- `posts` - Beiträge dynamic blog post display with filters
+- `before-after` - Vorher/Nachher image comparison slider
+- `table` - Datentabelle with headers, rows, striped styling
+
+### Background Colors
+
+All blocks support these background colors (mapped to design tokens):
+- `primary` - Standard (Weiß)
+- `secondary` - Sekundär (Hellgrau)
+- `tertiary` - Tertiär
+- `brand` - Markenfarbe
+- `brand-subtle` - Markenfarbe Dezent
+- `inverse` - Dunkel (Invers)
 
 ## Code Quality
 
@@ -225,7 +401,9 @@ The theme uses Husky and lint-staged to run checks before commits:
 
 ## Block Editor Support
 
-Basic WordPress block editor support is included:
+The theme uses the Gutenberg Block Editor with ACF Blocks as the primary content system:
+- 27 custom ACF Blocks available under "Theme Blocks" category
 - Editor styles in `resources/css/editor-style.css`
 - Block editor CSS in `resources/css/block-editor.css`
-- Automatic CSS class generation based on theme.json settings
+- Full support for wide/full alignment
+- Flexible Content remains available for `page-flexible.blade.php` templates
