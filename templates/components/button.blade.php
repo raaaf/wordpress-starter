@@ -35,11 +35,12 @@
     $baseClasses = 'inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-all duration-200 no-underline cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus focus-visible:ring-offset-2';
 
     // Variants matching Figma design: Default → Hover → Active states
+    // All colors use semantic tokens for theme compatibility
     $variants = [
-        'primary' => 'bg-surface-accent text-content-on-color hover:bg-surface-accent-hover active:bg-accent-700 border border-transparent',
+        'primary' => 'bg-surface-accent text-content-on-color hover:bg-surface-accent-hover active:bg-surface-accent-active border border-transparent',
         'secondary' => 'bg-surface text-content hover:bg-surface-secondary active:bg-surface-tertiary border border-line',
         'ghost' => 'bg-transparent text-content hover:bg-surface-secondary active:bg-surface-tertiary border border-transparent',
-        'danger' => 'bg-surface-error-strong text-content-on-color hover:bg-error-dark active:bg-red-900 border border-transparent',
+        'danger' => 'bg-surface-error-strong text-content-on-color hover:bg-error-dark active:bg-surface-error-strong border border-transparent',
     ];
 
     // Disabled state overrides

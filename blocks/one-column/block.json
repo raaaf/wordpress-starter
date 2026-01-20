@@ -1,10 +1,10 @@
 {
     "name": "one-column",
-    "title": "One Column",
-    "description": "A single column content block with optional label and background color",
+    "title": "Eine Spalte",
+    "description": "Zentrierter Inhaltsbereich mit optionalem Label und Hintergrundfarbe",
     "category": "theme",
     "icon": "align-center",
-    "keywords": ["column", "content", "text", "single"],
+    "keywords": ["spalte", "inhalt", "text", "zentriert", "column"],
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

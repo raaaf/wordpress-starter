@@ -76,11 +76,23 @@ class BladeServiceProvider extends ServiceProvider
 
         // UI Components - use as <x-button>, <x-section>, etc.
         $components = [
+            // Layout components
             'components.button' => 'button',
             'components.section' => 'section',
             'components.grid' => 'grid',
             'components.prose' => 'prose',
             'components.card' => 'card',
+            // Form components
+            'components.input' => 'input',
+            'components.select' => 'select',
+            'components.textarea' => 'textarea',
+            'components.checkbox' => 'checkbox',
+            'components.radio' => 'radio',
+            'components.toggle' => 'toggle',
+            // UI components
+            'components.link' => 'link',
+            'components.badge' => 'badge',
+            'components.icon' => 'icon',
         ];
 
         foreach ($components as $view => $alias) {

@@ -332,63 +332,31 @@ class Options
 
     /**
      * Analytics Settings Fields
+     *
+     * Dieses Theme ist Cookie-frei und unterstützt nur DSGVO-konforme Analytics.
      */
     private static function registerAnalyticsFields(): void
     {
         acf_add_local_field_group([
             'key' => 'group_options_analytics',
-            'title' => 'Analytics & Tracking',
+            'title' => 'Analytics (Cookie-frei)',
             'fields' => [
-                // Pirsch Analytics
+                // Info-Nachricht
                 [
-                    'key' => 'field_options_tab_pirsch',
-                    'label' => 'Pirsch Analytics',
-                    'type' => 'tab',
+                    'key' => 'field_options_analytics_info',
+                    'label' => '',
+                    'name' => '',
+                    'type' => 'message',
+                    'message' => '<p><strong>Cookie-freie Website</strong></p><p>Dieses Theme verwendet ausschließlich DSGVO-konforme Analytics ohne Cookies. Pirsch Analytics respektiert die Privatsphäre deiner Besucher und benötigt keinen Cookie-Banner.</p>',
                 ],
+                // Pirsch Analytics
                 FieldDefinitions::textField(
                     'field_options_pirsch_code',
                     'Pirsch Site Code',
                     'pirsch_code',
                     false,
-                    'Der Pirsch Analytics Code für DSGVO-konforme Analyse.',
+                    'DSGVO-konforme Analyse ohne Cookies. Den Code findest du unter pirsch.io → Dashboard → Settings → Integration Code. Leer lassen wenn nicht benötigt.',
                     'z.B. abc123def456'
-                ),
-
-                // Google Analytics
-                [
-                    'key' => 'field_options_tab_google',
-                    'label' => 'Google Analytics',
-                    'type' => 'tab',
-                ],
-                FieldDefinitions::textField(
-                    'field_options_ga_id',
-                    'Google Analytics ID',
-                    'google_analytics_id',
-                    false,
-                    'Die Google Analytics 4 Measurement ID.',
-                    'G-XXXXXXXXXX'
-                ),
-                FieldDefinitions::trueFalseField(
-                    'field_options_ga_anonymize',
-                    'IP-Anonymisierung',
-                    'google_analytics_anonymize',
-                    true,
-                    'Anonymisiert IP-Adressen für besseren Datenschutz.'
-                ),
-
-                // Google Tag Manager
-                [
-                    'key' => 'field_options_tab_gtm',
-                    'label' => 'Tag Manager',
-                    'type' => 'tab',
-                ],
-                FieldDefinitions::textField(
-                    'field_options_gtm_id',
-                    'Google Tag Manager ID',
-                    'google_tag_manager_id',
-                    false,
-                    'Die Google Tag Manager Container ID.',
-                    'GTM-XXXXXXX'
                 ),
             ],
             'location' => [

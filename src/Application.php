@@ -12,6 +12,7 @@ use WordpressStarter\Providers\SecurityServiceProvider;
 use WordpressStarter\Providers\AcfServiceProvider;
 use WordpressStarter\Providers\AnalyticsServiceProvider;
 use WordpressStarter\Providers\PluginServiceProvider;
+use WordpressStarter\Providers\WelcomeServiceProvider;
 
 class Application
 {
@@ -42,6 +43,7 @@ class Application
     {
         $this->providers = [
             PluginServiceProvider::class,
+            WelcomeServiceProvider::class,
             SecurityServiceProvider::class,
             BladeServiceProvider::class,
             AcfServiceProvider::class,

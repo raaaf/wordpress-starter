@@ -59,6 +59,8 @@
   --color-surface-accent: var(--bg-accent);
   --color-surface-accent-subtle: var(--bg-accent-subtle);
   --color-surface-accent-hover: var(--bg-accent-hover);
+  --color-surface-accent-active: var(--bg-brand-active);
+  --color-surface-on-color: var(--bg-on-color);
   --color-surface-success: var(--bg-success);
   --color-surface-success-strong: var(--bg-success-strong);
   --color-surface-warning: var(--bg-warning);

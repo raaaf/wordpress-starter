@@ -1,10 +1,10 @@
 {
     "name": "image",
-    "title": "Image",
-    "description": "A single image with optional caption and border",
+    "title": "Bild",
+    "description": "Einzelnes Bild mit optionaler Bildunterschrift und Rahmen",
     "category": "theme",
     "icon": "format-image",
-    "keywords": ["image", "photo", "picture", "media"],
+    "keywords": ["bild", "foto", "grafik", "image", "picture"],
     "supports": {
         "align": ["full", "wide", "center"],
         "mode": true,

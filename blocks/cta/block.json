@@ -1,10 +1,10 @@
 {
     "name": "cta",
-    "title": "Call to Action",
-    "description": "A call to action section with title, content and button",
+    "title": "Handlungsaufforderung",
+    "description": "Auffälliger Bereich mit Titel, Text und Button zum Klicken",
     "category": "theme",
     "icon": "megaphone",
-    "keywords": ["cta", "call to action", "button", "conversion"],
+    "keywords": ["cta", "handlungsaufforderung", "button", "aktion", "call to action"],
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

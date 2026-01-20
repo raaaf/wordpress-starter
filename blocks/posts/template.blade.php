@@ -1,7 +1,7 @@
 {{--
     Blog Posts Block
 
-    Uses shared components: x-section
+    Uses shared components: x-section, x-link, x-card
     Fields: title, post_type, posts_per_page, category, show_excerpt, show_date, show_author, columns, background_color
 --}}
 
@@ -39,7 +39,7 @@
         <div class="grid gap-8 md:grid-cols-{{ $columns }}">
             @while($postsQuery->have_posts())
                 @php $postsQuery->the_post(); @endphp
-                <article class="overflow-hidden transition-shadow rounded-xl bg-surface-secondary hover:shadow-lg group">
+                <x-card variant="filled" padding="none" hoverable class="group">
                     @if(has_post_thumbnail())
                         <a href="{{ get_permalink() }}" class="block overflow-hidden aspect-video">
                             <img
@@ -77,14 +77,9 @@
                             </p>
                         @endif
 
-                        <a href="{{ get_permalink() }}" class="inline-flex items-center gap-2 font-medium text-content-link hover:text-content-link-hover">
-                            Weiterlesen
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </a>
+                        <x-link :url="get_permalink()" iconRight="chevron">Weiterlesen</x-link>
                     </div>
-                </article>
+                </x-card>
             @endwhile
         </div>
         @php wp_reset_postdata(); @endphp

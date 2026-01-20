@@ -1,10 +1,10 @@
 {
     "name": "two-columns-images",
-    "title": "Two Columns with Images",
-    "description": "Two column layout with alternating images and content",
+    "title": "Zwei Spalten mit Bildern",
+    "description": "Zwei-Spalten-Layout mit abwechselnden Bildern und Textinhalten",
     "category": "theme",
     "icon": "format-gallery",
-    "keywords": ["columns", "images", "layout", "gallery"],
+    "keywords": ["spalten", "bilder", "layout", "galerie", "columns"],
     "supports": {
         "align": ["full", "wide"],
         "mode": true,
