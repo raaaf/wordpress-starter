@@ -124,11 +124,44 @@
     background-color: var(--bg-primary);
   }
 
+  /* Links - WCAG 2.1 SC 1.4.1: Not distinguished by color alone */
   a {
     color: var(--text-link);
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   a:hover {
     color: var(--text-link-hover);
+  }
+
+  /* Remove underline from buttons/nav styled as links */
+  a.no-underline,
+  nav a,
+  header a,
+  footer a {
+    text-decoration: none;
+  }
+
+  /* Prose content links should be underlined */
+  .prose a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Focus-visible styles - WCAG 2.1 SC 2.4.7: Visible focus indicator */
+  :focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
+
+  /* Remove default outline when using custom focus styles */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Skip link focus styles */
+  a[href="#main-content"]:focus {
+    transform: translateY(0);
   }
 }

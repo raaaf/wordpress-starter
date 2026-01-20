@@ -1,0 +1,14 @@
+{
+    "name": "cards",
+    "title": "Karten / Features",
+    "description": "Wiederholbare Karten mit Icon, Titel und Text",
+    "category": "theme",
+    "icon": "grid-view",
+    "keywords": ["cards", "features", "karten", "services", "leistungen"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

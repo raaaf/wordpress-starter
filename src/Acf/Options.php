@@ -4,6 +4,16 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Acf;
 
+/**
+ * Registers ACF options pages and their field groups
+ *
+ * Provides theme-wide settings for:
+ * - Site Identity (Logo, Favicon)
+ * - Contact Information
+ * - Social Media Links
+ * - Analytics & Tracking
+ * - Legal Pages (Privacy, Imprint)
+ */
 class Options
 {
     /**
@@ -17,8 +27,8 @@ class Options
 
         // Main theme options
         acf_add_options_page([
-            'page_title' => __('Theme Options', 'wp-starter'),
-            'menu_title' => __('Theme Options', 'wp-starter'),
+            'page_title' => 'Theme-Einstellungen',
+            'menu_title' => 'Theme-Einstellungen',
             'menu_slug' => 'theme-options',
             'capability' => 'edit_posts',
             'redirect' => true,
@@ -26,11 +36,16 @@ class Options
             'position' => 2,
         ]);
 
-        // Sub pages
-        self::addSubPage('General', 'general');
+        // Sub pages with German labels
+        self::addSubPage('Allgemein', 'general');
         self::addSubPage('Header', 'header');
         self::addSubPage('Footer', 'footer');
         self::addSubPage('Social Media', 'social');
+        self::addSubPage('Analytics', 'analytics');
+        self::addSubPage('Rechtliches', 'legal');
+
+        // Register field groups for each page
+        add_action('acf/init', [self::class, 'registerFieldGroups']);
     }
 
     /**
@@ -43,6 +58,399 @@ class Options
             'menu_title' => $title,
             'parent_slug' => 'theme-options',
             'menu_slug' => 'theme-options-' . $slug,
+        ]);
+    }
+
+    /**
+     * Register all field groups for options pages
+     */
+    public static function registerFieldGroups(): void
+    {
+        self::registerGeneralFields();
+        self::registerHeaderFields();
+        self::registerFooterFields();
+        self::registerSocialFields();
+        self::registerAnalyticsFields();
+        self::registerLegalFields();
+    }
+
+    /**
+     * General Settings Fields
+     */
+    private static function registerGeneralFields(): void
+    {
+        acf_add_local_field_group([
+            'key' => 'group_options_general',
+            'title' => 'Allgemeine Einstellungen',
+            'fields' => [
+                // Site Identity Tab
+                [
+                    'key' => 'field_options_tab_identity',
+                    'label' => 'Website-Identität',
+                    'type' => 'tab',
+                ],
+                FieldDefinitions::imageField(
+                    'field_options_logo',
+                    'Logo',
+                    'site_logo',
+                    false,
+                    'array',
+                    null,
+                    'Das Hauptlogo der Website. Empfohlen: SVG oder PNG mit transparentem Hintergrund.'
+                ),
+                FieldDefinitions::imageField(
+                    'field_options_logo_dark',
+                    'Logo (Dunkler Hintergrund)',
+                    'site_logo_dark',
+                    false,
+                    'array',
+                    null,
+                    'Alternative Logo-Version für dunkle Hintergründe.'
+                ),
+                FieldDefinitions::imageField(
+                    'field_options_favicon',
+                    'Favicon',
+                    'site_favicon',
+                    false,
+                    'id',
+                    null,
+                    'Das Favicon für Browser-Tabs. Empfohlen: 512x512px PNG.'
+                ),
+
+                // Contact Tab
+                [
+                    'key' => 'field_options_tab_contact',
+                    'label' => 'Kontaktdaten',
+                    'type' => 'tab',
+                ],
+                FieldDefinitions::textField(
+                    'field_options_company_name',
+                    'Firmenname',
+                    'company_name',
+                    false,
+                    'Der vollständige Firmenname für Impressum und Footer.',
+                    'Musterfirma GmbH'
+                ),
+                FieldDefinitions::textareaField(
+                    'field_options_address',
+                    'Adresse',
+                    'address',
+                    3,
+                    'Die vollständige Geschäftsadresse.',
+                    "Musterstraße 123\n12345 Musterstadt"
+                ),
+                FieldDefinitions::textField(
+                    'field_options_phone',
+                    'Telefon',
+                    'phone',
+                    false,
+                    'Haupttelefonnummer für Kontakt.',
+                    '+49 123 456789'
+                ),
+                FieldDefinitions::emailField(
+                    'field_options_email',
+                    'E-Mail',
+                    'email',
+                    'Haupt-E-Mail-Adresse für Kontaktanfragen.',
+                    'info@example.com'
+                ),
+                FieldDefinitions::urlField(
+                    'field_options_maps_link',
+                    'Google Maps Link',
+                    'maps_link',
+                    'Link zur Google Maps Position (für "Anfahrt" Button).',
+                    null,
+                    'https://goo.gl/maps/...'
+                ),
+            ],
+            'location' => [
+                [
+                    [
+                        'param' => 'options_page',
+                        'operator' => '==',
+                        'value' => 'theme-options-general',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Header Settings Fields
+     */
+    private static function registerHeaderFields(): void
+    {
+        acf_add_local_field_group([
+            'key' => 'group_options_header',
+            'title' => 'Header-Einstellungen',
+            'fields' => [
+                FieldDefinitions::trueFalseField(
+                    'field_options_header_sticky',
+                    'Sticky Header',
+                    'header_sticky',
+                    true,
+                    'Header bleibt beim Scrollen oben fixiert.'
+                ),
+                FieldDefinitions::trueFalseField(
+                    'field_options_header_cta_show',
+                    'CTA-Button anzeigen',
+                    'header_cta_show',
+                    true,
+                    'Zeigt einen Call-to-Action Button im Header.'
+                ),
+                FieldDefinitions::linkField(
+                    'field_options_header_cta',
+                    'CTA-Button',
+                    'header_cta',
+                    false,
+                    'Link und Text für den Header-CTA-Button.'
+                ),
+            ],
+            'location' => [
+                [
+                    [
+                        'param' => 'options_page',
+                        'operator' => '==',
+                        'value' => 'theme-options-header',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Footer Settings Fields
+     */
+    private static function registerFooterFields(): void
+    {
+        acf_add_local_field_group([
+            'key' => 'group_options_footer',
+            'title' => 'Footer-Einstellungen',
+            'fields' => [
+                FieldDefinitions::wysiwygField(
+                    'field_options_footer_text',
+                    'Footer-Text',
+                    'footer_text',
+                    false,
+                    null,
+                    'Optionaler Text im Footer (z.B. Firmenbeschreibung).'
+                ),
+                FieldDefinitions::textField(
+                    'field_options_copyright',
+                    'Copyright-Text',
+                    'copyright_text',
+                    false,
+                    'Der Copyright-Hinweis. {year} wird automatisch durch das aktuelle Jahr ersetzt.',
+                    '© {year} Firmenname. Alle Rechte vorbehalten.'
+                ),
+                FieldDefinitions::trueFalseField(
+                    'field_options_footer_contact_show',
+                    'Kontaktdaten anzeigen',
+                    'footer_show_contact',
+                    true,
+                    'Zeigt Adresse, Telefon und E-Mail im Footer.'
+                ),
+                FieldDefinitions::trueFalseField(
+                    'field_options_footer_social_show',
+                    'Social Links anzeigen',
+                    'footer_show_social',
+                    true,
+                    'Zeigt die Social Media Icons im Footer.'
+                ),
+            ],
+            'location' => [
+                [
+                    [
+                        'param' => 'options_page',
+                        'operator' => '==',
+                        'value' => 'theme-options-footer',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Social Media Settings Fields
+     */
+    private static function registerSocialFields(): void
+    {
+        acf_add_local_field_group([
+            'key' => 'group_options_social',
+            'title' => 'Social Media Links',
+            'fields' => [
+                FieldDefinitions::repeaterField(
+                    'field_options_social_links',
+                    'Social Media Kanäle',
+                    'social_links',
+                    [
+                        FieldDefinitions::selectField(
+                            'field_options_social_platform',
+                            'Plattform',
+                            'platform',
+                            [
+                                'facebook' => 'Facebook',
+                                'instagram' => 'Instagram',
+                                'linkedin' => 'LinkedIn',
+                                'xing' => 'XING',
+                                'twitter' => 'X (Twitter)',
+                                'youtube' => 'YouTube',
+                                'tiktok' => 'TikTok',
+                                'pinterest' => 'Pinterest',
+                                'threads' => 'Threads',
+                            ],
+                            'linkedin',
+                            true,
+                            'Wähle die Social Media Plattform.'
+                        ),
+                        FieldDefinitions::urlField(
+                            'field_options_social_url',
+                            'Profil-URL',
+                            'url',
+                            'Der vollständige Link zu eurem Profil.',
+                            null,
+                            'https://linkedin.com/company/...'
+                        ),
+                    ],
+                    'Kanal hinzufügen',
+                    0,
+                    'table',
+                    'Füge alle Social Media Kanäle hinzu, die im Footer und Header angezeigt werden sollen.'
+                ),
+            ],
+            'location' => [
+                [
+                    [
+                        'param' => 'options_page',
+                        'operator' => '==',
+                        'value' => 'theme-options-social',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Analytics Settings Fields
+     */
+    private static function registerAnalyticsFields(): void
+    {
+        acf_add_local_field_group([
+            'key' => 'group_options_analytics',
+            'title' => 'Analytics & Tracking',
+            'fields' => [
+                // Pirsch Analytics
+                [
+                    'key' => 'field_options_tab_pirsch',
+                    'label' => 'Pirsch Analytics',
+                    'type' => 'tab',
+                ],
+                FieldDefinitions::textField(
+                    'field_options_pirsch_code',
+                    'Pirsch Site Code',
+                    'pirsch_code',
+                    false,
+                    'Der Pirsch Analytics Code für DSGVO-konforme Analyse.',
+                    'z.B. abc123def456'
+                ),
+
+                // Google Analytics
+                [
+                    'key' => 'field_options_tab_google',
+                    'label' => 'Google Analytics',
+                    'type' => 'tab',
+                ],
+                FieldDefinitions::textField(
+                    'field_options_ga_id',
+                    'Google Analytics ID',
+                    'google_analytics_id',
+                    false,
+                    'Die Google Analytics 4 Measurement ID.',
+                    'G-XXXXXXXXXX'
+                ),
+                FieldDefinitions::trueFalseField(
+                    'field_options_ga_anonymize',
+                    'IP-Anonymisierung',
+                    'google_analytics_anonymize',
+                    true,
+                    'Anonymisiert IP-Adressen für besseren Datenschutz.'
+                ),
+
+                // Google Tag Manager
+                [
+                    'key' => 'field_options_tab_gtm',
+                    'label' => 'Tag Manager',
+                    'type' => 'tab',
+                ],
+                FieldDefinitions::textField(
+                    'field_options_gtm_id',
+                    'Google Tag Manager ID',
+                    'google_tag_manager_id',
+                    false,
+                    'Die Google Tag Manager Container ID.',
+                    'GTM-XXXXXXX'
+                ),
+            ],
+            'location' => [
+                [
+                    [
+                        'param' => 'options_page',
+                        'operator' => '==',
+                        'value' => 'theme-options-analytics',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Legal Settings Fields
+     */
+    private static function registerLegalFields(): void
+    {
+        acf_add_local_field_group([
+            'key' => 'group_options_legal',
+            'title' => 'Rechtliche Einstellungen',
+            'fields' => [
+                FieldDefinitions::postObjectField(
+                    'field_options_privacy_page',
+                    'Datenschutz-Seite',
+                    'privacy_page',
+                    ['page'],
+                    'Wähle die Seite mit der Datenschutzerklärung.'
+                ),
+                FieldDefinitions::postObjectField(
+                    'field_options_imprint_page',
+                    'Impressum-Seite',
+                    'imprint_page',
+                    ['page'],
+                    'Wähle die Seite mit dem Impressum.'
+                ),
+                FieldDefinitions::postObjectField(
+                    'field_options_terms_page',
+                    'AGB-Seite',
+                    'terms_page',
+                    ['page'],
+                    'Optionale Seite mit den Allgemeinen Geschäftsbedingungen.'
+                ),
+                FieldDefinitions::wysiwygField(
+                    'field_options_cookie_notice',
+                    'Cookie-Hinweis',
+                    'cookie_notice_text',
+                    false,
+                    null,
+                    'Text für den Cookie-Hinweis Banner (falls verwendet).'
+                ),
+            ],
+            'location' => [
+                [
+                    [
+                        'param' => 'options_page',
+                        'operator' => '==',
+                        'value' => 'theme-options-legal',
+                    ],
+                ],
+            ],
         ]);
     }
 

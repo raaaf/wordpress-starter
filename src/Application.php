@@ -11,6 +11,7 @@ use WordpressStarter\Providers\ThemeServiceProvider;
 use WordpressStarter\Providers\SecurityServiceProvider;
 use WordpressStarter\Providers\AcfServiceProvider;
 use WordpressStarter\Providers\AnalyticsServiceProvider;
+use WordpressStarter\Providers\PluginServiceProvider;
 
 class Application
 {
@@ -40,6 +41,7 @@ class Application
     private function registerProviders(): void
     {
         $this->providers = [
+            PluginServiceProvider::class,
             SecurityServiceProvider::class,
             BladeServiceProvider::class,
             AcfServiceProvider::class,

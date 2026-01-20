@@ -1,0 +1,17 @@
+{
+    "name": "acf/posts",
+    "title": "Beiträge",
+    "description": "Dynamische Anzeige von Blog-Beiträgen",
+    "category": "starter-blocks",
+    "icon": "admin-post",
+    "keywords": ["posts", "beiträge", "blog", "news", "artikel"],
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "blocks/posts/template.blade.php"
+    },
+    "supports": {
+        "align": ["wide", "full"],
+        "anchor": true,
+        "jsx": true
+    }
+}

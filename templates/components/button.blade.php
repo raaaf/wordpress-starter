@@ -21,7 +21,7 @@
 ])
 
 @php
-    $baseClasses = 'inline-flex items-center justify-center gap-2 font-semibold rounded-md transition-all duration-200 no-underline';
+    $baseClasses = 'inline-flex items-center justify-center gap-2 font-semibold rounded-md transition-all duration-200 no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus focus-visible:ring-offset-2';
 
     $variants = [
         'primary' => 'bg-surface-accent text-content-on-color hover:bg-surface-accent-hover border border-line-accent',
@@ -41,12 +41,13 @@
     $sizeClass = $sizes[$size] ?? $sizes['md'];
 @endphp
 
-<a href="{{ $url }}"
-   target="{{ $target }}"
+<a href="{{ esc_url($url) }}"
+   target="{{ esc_attr($target) }}"
+   @if($target === '_blank') rel="noopener noreferrer" @endif
    @if($analytics)
-       pirsch-event="{{ $analytics['event'] ?? 'button_click' }}"
+       pirsch-event="{{ esc_attr($analytics['event'] ?? 'button_click') }}"
        @if(isset($analytics['meta']))
-           pirsch-meta-key="{{ $analytics['meta'] }}"
+           pirsch-meta-key="{{ esc_attr($analytics['meta']) }}"
        @endif
    @endif
    class="{{ $baseClasses }} {{ $variantClass }} {{ $sizeClass }} {{ $class }}">

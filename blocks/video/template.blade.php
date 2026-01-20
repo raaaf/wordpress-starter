@@ -2,7 +2,7 @@
     Video Block
 
     Uses shared components: x-section, x-button
-    Fields: source, video, url_to_video, background_color
+    Fields: source, video, video_url, background_color
 --}}
 
 @php
@@ -13,7 +13,7 @@
     if ($source === 'wordpress') {
         $video = $fields['video'] ?? '';
     } elseif ($source === 'external') {
-        $video = $fields['url_to_video'] ?? '';
+        $video = $fields['video_url'] ?? '';
         $video = str_replace('youtube.com', 'youtube-nocookie.com', $video);
     }
 @endphp
@@ -23,7 +23,7 @@
         @if($source === 'wordpress' && $video)
             <div class="flex items-center justify-center w-full overflow-hidden border-4 rounded-lg shadow-xl bg-surface-inverse aspect-video border-line">
                 <video preload="preload" controls loop autoplay playsinline class="w-full">
-                    <source src="{{ $video }}" type="video/mp4" />
+                    <source src="{{ esc_url($video) }}" type="video/mp4" />
                     Ihr Browser unterstützt das Video-Tag nicht.
                 </video>
             </div>
@@ -32,7 +32,7 @@
                 <iframe width="100%"
                         height="100%"
                         class="w-full video-iframe aspect-video [&:not([src])]:hidden [&[src]+.video-notice]:hidden"
-                        data-src="{{ $video }}?autoplay=0&mute=0&controls=1&modestbranding=0&rel=0&showinfo=0&playsinline=1&dnt=1"
+                        data-src="{{ esc_url($video . '?autoplay=0&mute=0&controls=1&modestbranding=0&rel=0&showinfo=0&playsinline=1&dnt=1') }}"
                         frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowfullscreen></iframe>

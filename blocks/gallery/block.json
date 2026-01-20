@@ -1,0 +1,14 @@
+{
+    "name": "gallery",
+    "title": "Galerie",
+    "description": "Bildergalerie mit Lightbox (medium-zoom)",
+    "category": "theme",
+    "icon": "format-gallery",
+    "keywords": ["gallery", "galerie", "images", "bilder", "lightbox"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}
