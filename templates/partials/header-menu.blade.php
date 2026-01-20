@@ -1,4 +1,4 @@
-<div x-data="navigation" class="relative">
+<div x-data="navigation" x-init="init()" @keydown.window="handleKeydown($event)" class="relative">
     <div class="flex items-center justify-between py-6">
         <div>
             @php($custom_logo_id = get_theme_mod('custom_logo'))
@@ -40,7 +40,7 @@
     </div>
 
     {{-- Mobile navigation --}}
-    <nav x-show="isOpen" 
+    <nav x-show="isOpen"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 transform scale-95"
          x-transition:enter-end="opacity-100 transform scale-100"
@@ -48,8 +48,9 @@
          x-transition:leave-start="opacity-100 transform scale-100"
          x-transition:leave-end="opacity-0 transform scale-95"
          @click.away="close()"
+         @keydown="trapFocus($event)"
          class="absolute top-full left-0 right-0 bg-surface shadow-lg rounded-md lg:hidden"
-         style="display: none;">
+         x-cloak>
         @php(
         wp_nav_menu([
             'container' => false,

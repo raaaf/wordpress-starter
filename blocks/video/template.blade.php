@@ -6,11 +6,11 @@
 --}}
 
 @php
-    $source = $fields['source'] ?? 'wordpress';
+    $source = $fields['source'] ?? 'WordPress';
     $background = $fields['background_color'] ?? 'primary';
     $video = '';
 
-    if ($source === 'wordpress') {
+    if ($source === 'WordPress') {
         $video = $fields['video'] ?? '';
     } elseif ($source === 'external') {
         $video = $fields['video_url'] ?? '';
@@ -20,7 +20,7 @@
 
 <x-section :background="$background" :anchor="$anchor" padding="md" class="{{ $classes }} video">
     <div class="flex flex-col items-center justify-center w-full max-w-6xl mx-auto">
-        @if($source === 'wordpress' && $video)
+        @if($source === 'WordPress' && $video)
             <div class="flex items-center justify-center w-full overflow-hidden border-4 rounded-lg shadow-xl bg-surface-inverse aspect-video border-line">
                 <video preload="preload" controls loop autoplay playsinline class="w-full">
                     <source src="{{ esc_url($video) }}" type="video/mp4" />

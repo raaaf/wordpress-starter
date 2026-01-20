@@ -56,7 +56,7 @@ class ThemeServiceProvider extends ServiceProvider
         add_action('admin_init', function (): void {
             global $pagenow;
             if ($pagenow === 'edit-comments.php') {
-                wp_redirect(admin_url());
+                wp_safe_redirect(admin_url());
                 exit;
             }
             remove_meta_box('dashboard_recent_comments', 'dashboard', 'normal');
@@ -109,15 +109,15 @@ class ThemeServiceProvider extends ServiceProvider
         add_action('wp_head', function (): void {
             // WebSite Schema
             $websiteSchema = [
-                "@context" => "https://schema.org",
-                "@type" => "WebSite",
-                "name" => get_bloginfo('name'),
-                "url" => home_url(),
-                "potentialAction" => [
-                    "@type" => "SearchAction",
-                    "target" => home_url() . "/?s={search_term_string}",
-                    "query-input" => "required name=search_term_string"
-                ]
+                '@context' => 'https://schema.org',
+                '@type' => 'WebSite',
+                'name' => get_bloginfo('name'),
+                'url' => home_url(),
+                'potentialAction' => [
+                    '@type' => 'SearchAction',
+                    'target' => home_url() . '/?s={search_term_string}',
+                    'query-input' => 'required name=search_term_string',
+                ],
             ];
             echo '<script type="application/ld+json">' . wp_json_encode($websiteSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
 
@@ -130,10 +130,10 @@ class ThemeServiceProvider extends ServiceProvider
 
                 if ($companyName) {
                     $orgSchema = [
-                        "@context" => "https://schema.org",
-                        "@type" => "Organization",
-                        "name" => $companyName,
-                        "url" => home_url(),
+                        '@context' => 'https://schema.org',
+                        '@type' => 'Organization',
+                        'name' => $companyName,
+                        'url' => home_url(),
                     ];
 
                     // Add logo if available
@@ -141,21 +141,21 @@ class ThemeServiceProvider extends ServiceProvider
                     if ($customLogoId) {
                         $logoUrl = wp_get_attachment_image_url($customLogoId, 'full');
                         if ($logoUrl) {
-                            $orgSchema["logo"] = $logoUrl;
+                            $orgSchema['logo'] = $logoUrl;
                         }
                     }
 
                     // Add contact info
                     if ($phone) {
-                        $orgSchema["telephone"] = $phone;
+                        $orgSchema['telephone'] = $phone;
                     }
                     if ($email) {
-                        $orgSchema["email"] = $email;
+                        $orgSchema['email'] = $email;
                     }
                     if ($address) {
-                        $orgSchema["address"] = [
-                            "@type" => "PostalAddress",
-                            "streetAddress" => $address
+                        $orgSchema['address'] = [
+                            '@type' => 'PostalAddress',
+                            'streetAddress' => $address,
                         ];
                     }
 
@@ -167,32 +167,32 @@ class ThemeServiceProvider extends ServiceProvider
             if (is_singular('post')) {
                 global $post;
                 $articleSchema = [
-                    "@context" => "https://schema.org",
-                    "@type" => "Article",
-                    "headline" => get_the_title(),
-                    "url" => get_permalink(),
-                    "datePublished" => get_the_date('c'),
-                    "dateModified" => get_the_modified_date('c'),
-                    "author" => [
-                        "@type" => "Person",
-                        "name" => get_the_author()
+                    '@context' => 'https://schema.org',
+                    '@type' => 'Article',
+                    'headline' => get_the_title(),
+                    'url' => get_permalink(),
+                    'datePublished' => get_the_date('c'),
+                    'dateModified' => get_the_modified_date('c'),
+                    'author' => [
+                        '@type' => 'Person',
+                        'name' => get_the_author(),
                     ],
-                    "publisher" => [
-                        "@type" => "Organization",
-                        "name" => get_bloginfo('name'),
-                        "url" => home_url()
-                    ]
+                    'publisher' => [
+                        '@type' => 'Organization',
+                        'name' => get_bloginfo('name'),
+                        'url' => home_url(),
+                    ],
                 ];
 
                 // Add featured image
                 if (has_post_thumbnail()) {
-                    $articleSchema["image"] = get_the_post_thumbnail_url($post, 'large');
+                    $articleSchema['image'] = get_the_post_thumbnail_url($post, 'large');
                 }
 
                 // Add excerpt as description
                 $excerpt = get_the_excerpt();
                 if ($excerpt) {
-                    $articleSchema["description"] = wp_strip_all_tags($excerpt);
+                    $articleSchema['description'] = wp_strip_all_tags($excerpt);
                 }
 
                 echo '<script type="application/ld+json">' . wp_json_encode($articleSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
@@ -220,7 +220,7 @@ class ThemeServiceProvider extends ServiceProvider
             }
 
             // Open Graph Tags
-            echo '<meta property="og:type" content="' . (is_singular('post') ? 'article' : 'website') . '">' . "\n";
+            echo '<meta property="og:type" content="' . ( is_singular('post') ? 'article' : 'website' ) . '">' . "\n";
             echo '<meta property="og:title" content="' . esc_attr($title) . '">' . "\n";
             if ($description) {
                 echo '<meta property="og:description" content="' . esc_attr($description) . '">' . "\n";
@@ -235,7 +235,7 @@ class ThemeServiceProvider extends ServiceProvider
             }
 
             // Twitter Card Tags
-            echo '<meta name="twitter:card" content="' . ($imageUrl ? 'summary_large_image' : 'summary') . '">' . "\n";
+            echo '<meta name="twitter:card" content="' . ( $imageUrl ? 'summary_large_image' : 'summary' ) . '">' . "\n";
             echo '<meta name="twitter:title" content="' . esc_attr($title) . '">' . "\n";
             if ($description) {
                 echo '<meta name="twitter:description" content="' . esc_attr($description) . '">' . "\n";

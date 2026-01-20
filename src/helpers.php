@@ -15,6 +15,7 @@ if (!function_exists('getBladeViewFactory')) {
 if (!function_exists('env')) {
     function env(string $key, mixed $default = null): mixed
     {
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Environment variables are server-side config, not user input
         $value = $_ENV[$key] ?? getenv($key);
         
         if ($value === false) {

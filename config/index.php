@@ -12,13 +12,14 @@ $templateName = $GLOBALS['template_name'] ?? 'index';
 try {
     $blade = getBladeViewFactory();
     if ($blade && $blade->exists($templateName)) {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blade template handles escaping via {{ }} syntax
         echo $blade->make($templateName)->render();
         return;
     }
 } catch (Exception $e) {
-    // Log the exception if needed:
+    // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Intentional error logging for debugging
     error_log('Blade rendering error: ' . $e->getMessage());
 }
 
 // Fallback: load the default template from your theme
-include locate_template($templateName . '.php', true);
+require locate_template($templateName . '.php', true);

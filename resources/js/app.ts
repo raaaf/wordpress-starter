@@ -7,18 +7,77 @@ import Alpine from 'alpinejs';
 
 export interface NavigationComponent {
   isOpen: boolean;
+  toggleButton: HTMLElement | null;
+  mobileNav: HTMLElement | null;
   toggle(): void;
   close(): void;
+  init(): void;
+  handleKeydown(event: KeyboardEvent): void;
+  trapFocus(event: KeyboardEvent): void;
+  getFocusableElements(): HTMLElement[];
 }
 
 export function createNavigationComponent(): NavigationComponent {
   return {
     isOpen: false,
+    toggleButton: null,
+    mobileNav: null,
+
+    init() {
+      this.toggleButton = this.$el.querySelector('[aria-label="Toggle navigation menu"]');
+      this.mobileNav = this.$el.querySelector('nav[x-show="isOpen"]');
+    },
+
     toggle() {
       this.isOpen = !this.isOpen;
+
+      if (this.isOpen) {
+        // Focus first focusable element in mobile nav after transition
+        this.$nextTick(() => {
+          const focusable = this.getFocusableElements();
+          if (focusable.length > 0) {
+            focusable[0].focus();
+          }
+        });
+      }
     },
+
     close() {
       this.isOpen = false;
+      // Return focus to toggle button
+      if (this.toggleButton) {
+        this.toggleButton.focus();
+      }
+    },
+
+    handleKeydown(event: KeyboardEvent) {
+      if (event.key === 'Escape' && this.isOpen) {
+        this.close();
+      }
+    },
+
+    trapFocus(event: KeyboardEvent) {
+      if (event.key !== 'Tab' || !this.isOpen) return;
+
+      const focusable = this.getFocusableElements();
+      if (focusable.length === 0) return;
+
+      const firstElement = focusable[0];
+      const lastElement = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    },
+
+    getFocusableElements(): HTMLElement[] {
+      if (!this.mobileNav) return [];
+      const selector = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      return Array.from(this.mobileNav.querySelectorAll<HTMLElement>(selector));
     },
   };
 }

@@ -232,7 +232,7 @@ class FieldDefinitions
      * @param string $key Unique field key
      * @param string $label Field label
      * @param string $name Field name
-     * @param array<string, string> $choices Select choices
+     * @param array<int|string, string> $choices Select choices (keys can be numeric or string)
      * @param string $defaultValue Default value
      * @param bool $required Whether field is required
      * @param string $instructions Field instructions

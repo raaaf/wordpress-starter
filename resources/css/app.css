@@ -135,6 +135,17 @@
     color: var(--text-link-hover);
   }
 
+  /* Visited links - subtle color change */
+  a:visited {
+    color: var(--text-link);
+    opacity: 0.85;
+  }
+
+  a:visited:hover {
+    color: var(--text-link-hover);
+    opacity: 1;
+  }
+
   /* Remove underline from buttons/nav styled as links */
   a.no-underline,
   nav a,
@@ -163,5 +174,10 @@
   /* Skip link focus styles */
   a[href="#main-content"]:focus {
     transform: translateY(0);
+  }
+
+  /* Alpine.js x-cloak - hide until Alpine is ready */
+  [x-cloak] {
+    display: none !important;
   }
 }
