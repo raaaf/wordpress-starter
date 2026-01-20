@@ -536,13 +536,17 @@ CSS;
             $content = file_get_contents($file);
             $original = $content;
 
-            // Update namespace declarations
+            // Update namespace declarations (namespace WordpressStarter;)
             $content = str_replace("namespace {$oldNamespace}", "namespace {$newNamespace}", $content);
-            // Update use statements
-            $content = str_replace("use {$oldNamespace}\\", "use {$newNamespace}\\", $content);
-            // Update fully qualified class names in strings
-            $content = str_replace("'{$oldNamespace}\\\\", "'{$newNamespace}\\\\", $content);
-            $content = str_replace("\"{$oldNamespace}\\\\", "\"{$newNamespace}\\\\", $content);
+
+            // Update escaped backslash patterns in PHP strings FIRST
+            // These are for Blade directive definitions like: "\\WordpressStarter\\Class"
+            $content = str_replace("\\\\{$oldNamespace}\\\\", "\\\\{$newNamespace}\\\\", $content);
+
+            // Update direct namespace references (WordpressStarter\Vite::init())
+            // This catches: use statements, direct calls, and any other references
+            $content = str_replace("{$oldNamespace}\\", "{$newNamespace}\\", $content);
+
             // Update text domain
             $content = str_replace("'{$oldTextDomain}'", "'{$newTextDomain}'", $content);
 
