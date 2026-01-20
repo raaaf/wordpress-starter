@@ -39,45 +39,23 @@ cd your-theme-name
 
 ### 2. Run Setup Script
 
-The theme includes an interactive setup script that will configure everything for your project:
+The theme includes an interactive setup wizard that configures everything for your project:
 
 ```bash
-php setup.php
+php bin/setup.php
 ```
 
-The setup script will:
-- Configure your theme name and text domain
-- Set up PHP namespace
-- Configure local development URL
-- Update all configuration files
-- Create style.css with proper headers
+The setup wizard will:
+1. Configure theme name, author, and metadata
+2. Update PHP namespace across all files
+3. Let you select plugins to auto-install on theme activation
+4. Configure initial content options (pages, permalinks)
+5. Install dependencies automatically (composer install, npm install, npm run build)
+6. Create `.env` file from example
 
-#### Using a Configuration File
+### 3. Activate Theme & Start Development
 
-You can also run the setup with a configuration file:
-
-```bash
-cp setup-config.json.example setup-config.json
-# Edit setup-config.json with your values
-php setup.php --config setup-config.json
-```
-
-### 3. Install Dependencies
-
-```bash
-composer install
-npm install
-```
-
-### 4. Configure Environment
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` file with your local development settings.
-
-### 5. Start Development
+After setup, activate the theme in WordPress (Design → Themes). For development with hot reload:
 
 ```bash
 npm run dev
@@ -158,9 +136,9 @@ wordpress-starter/
 ├── phpstan.neon    # PHPStan config
 ├── postcss.config.js # PostCSS config
 ├── safelist.txt    # TailwindCSS safelist
-├── setup.php       # Setup script
-├── setup-config.json.example # Setup config example
 ├── style.css       # Theme header (generated)
+├── bin/
+│   └── setup.php   # Interactive setup wizard
 ├── tsconfig.json   # TypeScript config
 ├── vite.config.js  # Vite configuration
 └── CLAUDE.md       # AI assistant guidelines
