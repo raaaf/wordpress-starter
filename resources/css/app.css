@@ -181,3 +181,119 @@
     display: none !important;
   }
 }
+
+/* ============================================
+   TYPOGRAPHY UTILITY CLASSES - From Figma
+   Usage: class="text-display", class="text-body-large", etc.
+   ============================================ */
+
+@layer utilities {
+  /* Display Heading - 60px / Bold */
+  .text-display {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-display-size);
+    font-weight: var(--typography-display-weight);
+    line-height: var(--typography-display-line-height);
+    letter-spacing: var(--typography-display-letter-spacing);
+  }
+
+  /* Heading 1 - 36px / Bold */
+  .text-h1 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h1-size);
+    font-weight: var(--typography-h1-weight);
+    line-height: var(--typography-h1-line-height);
+    letter-spacing: var(--typography-h1-letter-spacing);
+  }
+
+  /* Heading 2 - 30px / Semibold */
+  .text-h2 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h2-size);
+    font-weight: var(--typography-h2-weight);
+    line-height: var(--typography-h2-line-height);
+    letter-spacing: var(--typography-h2-letter-spacing);
+  }
+
+  /* Heading 3 - 24px / Semibold */
+  .text-h3 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h3-size);
+    font-weight: var(--typography-h3-weight);
+    line-height: var(--typography-h3-line-height);
+    letter-spacing: var(--typography-h3-letter-spacing);
+  }
+
+  /* Heading 4 - 20px / Semibold */
+  .text-h4 {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h4-size);
+    font-weight: var(--typography-h4-weight);
+    line-height: var(--typography-h4-line-height);
+    letter-spacing: var(--typography-h4-letter-spacing);
+  }
+
+  /* Heading 5 - 18px / Medium */
+  .text-h5 {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h5-size);
+    font-weight: var(--typography-h5-weight);
+    line-height: var(--typography-h5-line-height);
+    letter-spacing: var(--typography-h5-letter-spacing);
+  }
+
+  /* Body Large - 18px / Regular - Intro text */
+  .text-body-large {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-body-large-size);
+    font-weight: var(--typography-body-large-weight);
+    line-height: var(--typography-body-large-line-height);
+    letter-spacing: var(--typography-body-large-letter-spacing);
+  }
+
+  /* Body - 16px / Regular - Standard text */
+  .text-body {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-body-size);
+    font-weight: var(--typography-body-weight);
+    line-height: var(--typography-body-line-height);
+    letter-spacing: var(--typography-body-letter-spacing);
+  }
+
+  /* Body Small - 14px / Regular - Secondary text */
+  .text-body-small {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-body-small-size);
+    font-weight: var(--typography-body-small-weight);
+    line-height: var(--typography-body-small-line-height);
+    letter-spacing: var(--typography-body-small-letter-spacing);
+  }
+
+  /* Caption - 12px / Regular - Meta info */
+  .text-caption {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-caption-size);
+    font-weight: var(--typography-caption-weight);
+    line-height: var(--typography-caption-line-height);
+    letter-spacing: var(--typography-caption-letter-spacing);
+  }
+
+  /* Overline - 12px / Semibold / Uppercase */
+  .text-overline {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-overline-size);
+    font-weight: var(--typography-overline-weight);
+    line-height: var(--typography-overline-line-height);
+    letter-spacing: var(--typography-overline-letter-spacing);
+    text-transform: var(--typography-overline-transform);
+  }
+
+  /* Code - 14px / Mono */
+  .text-code {
+    font-family: var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: var(--typography-code-size);
+    font-weight: var(--typography-code-weight);
+    line-height: var(--typography-code-line-height);
+    letter-spacing: var(--typography-code-letter-spacing);
+  }
+}

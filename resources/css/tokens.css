@@ -121,6 +121,84 @@
   --font-family-headline: ColaborateLight;
   --font-family-body: Inter;
   --font-family-mono: JetBrains Mono;
+
+  /* ============================================
+     TYPOGRAPHY COMPOSITE TOKENS - From Figma
+     Usage: var(--typography-display-size), etc.
+     ============================================ */
+
+  /* Display Heading - 60px / Bold */
+  --typography-display-size: 3.75rem;
+  --typography-display-weight: 700;
+  --typography-display-line-height: 1.1;
+  --typography-display-letter-spacing: -0.02em;
+
+  /* Heading 1 - 36px / Bold */
+  --typography-h1-size: 2.25rem;
+  --typography-h1-weight: 700;
+  --typography-h1-line-height: 1.2;
+  --typography-h1-letter-spacing: -0.01em;
+
+  /* Heading 2 - 30px / Semibold */
+  --typography-h2-size: 1.875rem;
+  --typography-h2-weight: 600;
+  --typography-h2-line-height: 1.25;
+  --typography-h2-letter-spacing: -0.01em;
+
+  /* Heading 3 - 24px / Semibold */
+  --typography-h3-size: 1.5rem;
+  --typography-h3-weight: 600;
+  --typography-h3-line-height: 1.3;
+  --typography-h3-letter-spacing: 0;
+
+  /* Heading 4 - 20px / Semibold */
+  --typography-h4-size: 1.25rem;
+  --typography-h4-weight: 600;
+  --typography-h4-line-height: 1.4;
+  --typography-h4-letter-spacing: 0;
+
+  /* Heading 5 - 18px / Medium */
+  --typography-h5-size: 1.125rem;
+  --typography-h5-weight: 500;
+  --typography-h5-line-height: 1.4;
+  --typography-h5-letter-spacing: 0;
+
+  /* Body Large - 18px / Regular */
+  --typography-body-large-size: 1.125rem;
+  --typography-body-large-weight: 400;
+  --typography-body-large-line-height: 1.6;
+  --typography-body-large-letter-spacing: 0;
+
+  /* Body - 16px / Regular */
+  --typography-body-size: 1rem;
+  --typography-body-weight: 400;
+  --typography-body-line-height: 1.5;
+  --typography-body-letter-spacing: 0;
+
+  /* Body Small - 14px / Regular */
+  --typography-body-small-size: 0.875rem;
+  --typography-body-small-weight: 400;
+  --typography-body-small-line-height: 1.5;
+  --typography-body-small-letter-spacing: 0;
+
+  /* Caption - 12px / Regular */
+  --typography-caption-size: 0.75rem;
+  --typography-caption-weight: 400;
+  --typography-caption-line-height: 1.4;
+  --typography-caption-letter-spacing: 0;
+
+  /* Overline - 12px / Semibold / Uppercase */
+  --typography-overline-size: 0.75rem;
+  --typography-overline-weight: 600;
+  --typography-overline-line-height: 1.4;
+  --typography-overline-letter-spacing: 0.1em;
+  --typography-overline-transform: uppercase;
+
+  /* Code - 14px / Mono */
+  --typography-code-size: 0.875rem;
+  --typography-code-weight: 400;
+  --typography-code-line-height: 1.5;
+  --typography-code-letter-spacing: 0;
 }
 
 /* ============================================
