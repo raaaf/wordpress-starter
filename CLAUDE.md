@@ -14,7 +14,7 @@ WP-Starter is a modern WordPress starter theme that removes jQuery dependency an
 - Vite 7.3 for ultra-fast asset compilation and HMR
 - Alpine.js v3.15 for reactive components (replaced jQuery)
 - PostCSS for CSS processing
-- PHP 8.2+ with strict types and modern features
+- PHP 8.4+ with strict types and modern features (required by Laravel 12)
 - ACF Pro with custom helpers and Blade directives
 - TypeScript with full type definitions
 - Code quality tools (ESLint, Prettier, PHPCS, PHPStan)
@@ -128,7 +128,7 @@ The theme implements several performance strategies:
 - Configure local development in `.env` file (copy from `.env.example`)
 - Theme text domain: `wp-starter`
 - Namespace for PHP classes: `WordpressStarter\`
-- PHP 8.2+ is required with strict types enabled
+- PHP 8.4+ is required with strict types enabled (Laravel 12 dependency)
 - All service providers extend the base `ServiceProvider` class
 - ACF Pro is required for ACF features
 - Use Local by Flywheel for Mac development
