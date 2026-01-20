@@ -156,7 +156,7 @@ class PluginServiceProvider extends ServiceProvider
                 continue;
             }
 
-            if (!($plugin['check'])()) {
+            if (!( $plugin['check'] )()) {
                 if ($plugin['required']) {
                     $missingRequired[$key] = $plugin;
                 } else {
@@ -232,8 +232,8 @@ class PluginServiceProvider extends ServiceProvider
             esc_attr($type),
             esc_html($title),
             esc_html($intro),
-            $pluginListHtml, // Already escaped
-            $dismissHtml // Already escaped
+            wp_kses_post($pluginListHtml),
+            wp_kses_post($dismissHtml)
         );
     }
 
@@ -251,12 +251,15 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function handleDismissal(): void
     {
-        if (
-            isset($_GET['wp-starter-dismiss-plugins']) &&
-            wp_verify_nonce($_GET['_wpnonce'] ?? '', 'wp-starter-dismiss-plugins')
-        ) {
+        if (!isset($_GET['wp-starter-dismiss-plugins'])) {
+            return;
+        }
+
+        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
+
+        if (wp_verify_nonce($nonce, 'wp-starter-dismiss-plugins')) {
             update_option('wp_starter_dismissed_plugin_notice', true);
-            wp_redirect(remove_query_arg(['wp-starter-dismiss-plugins', '_wpnonce']));
+            wp_safe_redirect(remove_query_arg(['wp-starter-dismiss-plugins', '_wpnonce']));
             exit;
         }
     }
@@ -278,7 +281,7 @@ class PluginServiceProvider extends ServiceProvider
     {
         $missing = [];
         foreach ($this->plugins as $key => $plugin) {
-            if ($plugin['required'] && !($plugin['check'])()) {
+            if ($plugin['required'] && !( $plugin['check'] )()) {
                 $missing[$key] = $plugin;
             }
         }

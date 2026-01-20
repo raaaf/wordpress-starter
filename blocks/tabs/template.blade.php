@@ -42,20 +42,25 @@
                 @endforeach
             </div>
 
-            {{-- Tab Panels --}}
-            @foreach($tabs as $index => $tab)
-                <div
-                    x-show="activeTab === {{ $index }}"
-                    x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 translate-y-2"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    id="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"
-                    role="tabpanel"
-                    class="prose max-w-none text-content"
-                >
-                    {!! $tab['content'] ?? '' !!}
-                </div>
-            @endforeach
+            {{-- Tab Panels with aria-live for screen readers --}}
+            <div aria-live="polite" aria-atomic="true">
+                @foreach($tabs as $index => $tab)
+                    <div
+                        x-show="activeTab === {{ $index }}"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 translate-y-2"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-cloak
+                        id="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"
+                        role="tabpanel"
+                        :aria-hidden="activeTab !== {{ $index }}"
+                        :tabindex="activeTab === {{ $index }} ? 0 : -1"
+                        class="prose max-w-none text-content"
+                    >
+                        @kses($tab['content'] ?? '')
+                    </div>
+                @endforeach
+            </div>
         </div>
     @endif
 </x-section>

@@ -209,13 +209,25 @@ Available under "Theme-Einstellungen" in WordPress admin:
 - **Rechtliches**: Privacy, Imprint, Terms pages selection
 
 ### Blade Directives
-- `@field('field_name')` - Output field value
-- `@option('option_name')` - Output option field (cached for 1 hour)
+
+**Field Output (escaped by default for security - ACF 6.2.5+):**
+- `@field('field_name')` - Output escaped field value (safe for text)
+- `@fieldRaw('field_name')` - Output HTML field value with `wp_kses_post()` (for WYSIWYG)
+- `@option('option_name')` - Output escaped option field (cached for 1 hour)
+- `@optionRaw('option_name')` - Output HTML option field with `wp_kses_post()`
+
+**Conditionals & Loops:**
 - `@hasfield('field_name')...@endhasfield` - Conditional display
 - `@repeater('field_name')...@endrepeater` - Loop through repeater
 - `@flexible('field_name')...@endflexible` - Loop through flexible content
 - `@layout('layout_name')...@endlayout` - Check flexible content layout
 - `@group('field_name')...@endgroup` - Access group field
+
+**Block Helpers:**
+- `@innerblocks` - Render InnerBlocks for nested blocks
+- `@innerblocks(['allowedBlocks' => ['core/paragraph']])` - With options
+- `@blockwrapper($block)` - Output block wrapper attributes (alignment, colors, spacing)
+- `@kses($content)` - Sanitize HTML content with `wp_kses_post()`
 
 ### Helper Functions
 ```php
@@ -367,6 +379,63 @@ All blocks support these background colors (mapped to design tokens):
 - `brand` - Markenfarbe
 - `brand-subtle` - Markenfarbe Dezent
 - `inverse` - Dunkel (Invers)
+
+### Block Wrapper Attributes
+
+Use `$wrapper_attributes` in block templates for proper Gutenberg integration:
+```blade
+{{-- blocks/my-block/template.blade.php --}}
+<div {!! $wrapper_attributes !!}>
+    {{-- Block content --}}
+</div>
+```
+
+This automatically handles:
+- Block alignment classes
+- Gutenberg color palette (background/text colors)
+- Custom CSS classes from editor
+- Inline styles from spacing/typography controls
+
+### InnerBlocks Support
+
+For blocks that contain nested blocks:
+```blade
+{{-- blocks/container/template.blade.php --}}
+<div {!! $wrapper_attributes !!}>
+    @innerblocks(['allowedBlocks' => ['core/paragraph', 'core/heading', 'acf/cta']])
+</div>
+```
+
+InnerBlocks options:
+- `allowedBlocks` - Array of allowed block types
+- `template` - Default block template
+- `templateLock` - Lock template ('all', 'insert', or false)
+
+### REST API Integration
+
+ACF fields are available via REST API with proper security:
+- Fields accessible at `/wp-json/wp/v2/posts/{id}?_fields=acf`
+- Theme options endpoint: `/wp-json/theme/v1/options` (admin only)
+- Sensitive fields (analytics_, api_) are filtered from API responses
+
+### Block Bindings API (WordPress 6.5+)
+
+ACF fields can be used as dynamic block attributes via `acf/field` source:
+```html
+<!-- In block editor, bind paragraph content to ACF field -->
+<p data-wp-bind--textContent="acf/field::my_field_name"></p>
+```
+
+Supported field types: text, textarea, number, email, url, image, file
+
+### Field Validation
+
+Custom validation is automatically applied:
+- URL fields: Validates proper URL format
+- Email fields: Validates email format
+- Text/Textarea: Automatically sanitized on save
+
+Add custom validation in `AcfServiceProvider::registerValidationHooks()`.
 
 ## Code Quality
 

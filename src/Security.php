@@ -53,7 +53,7 @@ class Security
         // Script sources
         $scriptSrc = "'self' 'nonce-{$nonce}' 'unsafe-inline'";
         if ($isDevMode) {
-            $scriptSrc .= " http://localhost:5173";
+            $scriptSrc .= ' http://localhost:5173';
         }
         $directives[] = "script-src {$scriptSrc}";
 
@@ -64,7 +64,7 @@ class Security
         // Connect sources (API calls, WebSockets)
         $connectSrc = "'self'";
         if ($isDevMode) {
-            $connectSrc .= " http://localhost:5173 ws://localhost:5173";
+            $connectSrc .= ' http://localhost:5173 ws://localhost:5173';
         }
         $directives[] = "connect-src {$connectSrc}";
 

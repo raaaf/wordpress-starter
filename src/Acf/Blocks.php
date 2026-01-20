@@ -125,7 +125,9 @@ class Blocks
                 return class_exists($req['check']);
             }
 
+            // @phpstan-ignore-next-line (dynamic requirement checking - const structure is intentionally extensible)
             if ($req['type'] === 'function') {
+                // @phpstan-ignore-next-line
                 return function_exists($req['check']);
             }
         }
@@ -177,7 +179,7 @@ class Blocks
     public static function renderBlock(array $block, string $content = '', bool $isPreview = false, int $postId = 0): void
     {
         $blade = getBladeViewFactory();
-        
+
         if (!$blade) {
             echo '<!-- Blade not initialized -->';
             return;
@@ -186,10 +188,11 @@ class Blocks
         // Block data
         $blockName = str_replace('acf/', '', $block['name']);
         $templatePath = "blocks.{$blockName}.template";
-        
+
         // Check if template exists
         if (!$blade->exists($templatePath)) {
-            echo "<!-- Block template not found: {$templatePath} -->";
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML comment with no user input
+            echo '<!-- Block template not found: ' . esc_html($templatePath) . ' -->';
             return;
         }
 
@@ -201,10 +204,181 @@ class Blocks
             'post_id' => $postId,
             'classes' => self::getBlockClasses($block),
             'anchor' => $block['anchor'] ?? '',
+            'content' => $content, // InnerBlocks content
+            'wrapper_attributes' => self::getBlockWrapperAttributes($block),
         ];
 
-        // Render template
+        // Render template - Blade handles escaping via {{ }} syntax
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blade template handles escaping
         echo $blade->make($templatePath, $data)->render();
+    }
+
+    /**
+     * Get block wrapper attributes for Gutenberg integration
+     * Uses acf_block_wrapper_attributes() if available (ACF 6.0+)
+     *
+     * @param array{name: string, align?: string, className?: string, anchor?: string, id?: string, style?: array<string, mixed>, backgroundColor?: string, textColor?: string} $block
+     * @return string HTML attributes string
+     */
+    public static function getBlockWrapperAttributes(array $block): string
+    {
+        // Use ACF's native function if available (ACF 6.0+)
+        if (function_exists('acf_block_wrapper_attributes')) {
+            return acf_block_wrapper_attributes([
+                'class' => self::getBlockClasses($block),
+            ]);
+        }
+
+        // Fallback for older ACF versions
+        $attributes = [];
+
+        // ID/Anchor
+        if (!empty($block['anchor'])) {
+            $attributes['id'] = esc_attr($block['anchor']);
+        }
+
+        // Classes
+        $classes = self::getBlockClasses($block);
+
+        // Background color (Gutenberg color palette)
+        if (!empty($block['backgroundColor'])) {
+            $classes .= ' has-' . esc_attr($block['backgroundColor']) . '-background-color has-background';
+        }
+
+        // Text color (Gutenberg color palette)
+        if (!empty($block['textColor'])) {
+            $classes .= ' has-' . esc_attr($block['textColor']) . '-color has-text-color';
+        }
+
+        $attributes['class'] = $classes;
+
+        // Inline styles from Gutenberg
+        if (!empty($block['style'])) {
+            $styles = self::parseBlockStyles($block['style']);
+            if ($styles) {
+                $attributes['style'] = $styles;
+            }
+        }
+
+        // Build attributes string
+        $attrString = '';
+        foreach ($attributes as $key => $value) {
+            $attrString .= sprintf(' %s="%s"', esc_attr($key), esc_attr($value));
+        }
+
+        return trim($attrString);
+    }
+
+    /**
+     * Parse Gutenberg block styles to CSS string
+     *
+     * @param array<string, mixed> $styles
+     */
+    private static function parseBlockStyles(array $styles): string
+    {
+        $css = [];
+
+        // Spacing (padding/margin)
+        if (!empty($styles['spacing'])) {
+            foreach (['padding', 'margin'] as $property) {
+                if (!empty($styles['spacing'][$property])) {
+                    foreach ($styles['spacing'][$property] as $side => $value) {
+                        if ($value) {
+                            $css[] = "{$property}-{$side}: " . self::getCssValue($value);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Typography
+        if (!empty($styles['typography'])) {
+            if (!empty($styles['typography']['fontSize'])) {
+                $css[] = 'font-size: ' . self::getCssValue($styles['typography']['fontSize']);
+            }
+            if (!empty($styles['typography']['lineHeight'])) {
+                $css[] = 'line-height: ' . $styles['typography']['lineHeight'];
+            }
+        }
+
+        // Color
+        if (!empty($styles['color'])) {
+            if (!empty($styles['color']['background'])) {
+                $css[] = 'background-color: ' . $styles['color']['background'];
+            }
+            if (!empty($styles['color']['text'])) {
+                $css[] = 'color: ' . $styles['color']['text'];
+            }
+        }
+
+        return implode('; ', $css);
+    }
+
+    /**
+     * Convert CSS preset values to actual CSS values
+     */
+    private static function getCssValue(string $value): string
+    {
+        // Handle CSS preset values like "var:preset|spacing|50"
+        if (str_starts_with($value, 'var:')) {
+            $parts = explode('|', substr($value, 4));
+            if (count($parts) === 3) {
+                return "var(--wp--preset--{$parts[0]}--{$parts[2]})";
+            }
+        }
+
+        return $value;
+    }
+
+    /**
+     * Render InnerBlocks placeholder for use in templates
+     * Use this in block templates that support nested blocks
+     *
+     * @param array<string, mixed> $args InnerBlocks arguments
+     * @return string InnerBlocks markup
+     */
+    public static function renderInnerBlocks(array $args = []): string
+    {
+        $defaults = [
+            'allowedBlocks' => null,
+            'template' => null,
+            'templateLock' => false,
+            'renderAppender' => true,
+        ];
+
+        $args = array_merge($defaults, $args);
+
+        // Build InnerBlocks tag for JSX mode
+        $attributes = [];
+
+        if ($args['allowedBlocks'] !== null) {
+            $attributes['allowedBlocks'] = wp_json_encode($args['allowedBlocks']);
+        }
+
+        if ($args['template'] !== null) {
+            $attributes['template'] = wp_json_encode($args['template']);
+        }
+
+        if ($args['templateLock']) {
+            $attributes['templateLock'] = esc_attr($args['templateLock']);
+        }
+
+        $attrString = '';
+        foreach ($attributes as $key => $value) {
+            $attrString .= sprintf(' %s=\'%s\'', $key, $value);
+        }
+
+        return sprintf('<InnerBlocks%s />', $attrString);
+    }
+
+    /**
+     * Check if current block supports InnerBlocks
+     *
+     * @param array<string, mixed> $block
+     */
+    public static function supportsInnerBlocks(array $block): bool
+    {
+        return !empty($block['supports']['jsx']);
     }
 
     /**
@@ -215,21 +389,21 @@ class Blocks
     private static function getBlockClasses(array $block): string
     {
         $classes = ['acf-block'];
-        
+
         // Block name
         $blockName = str_replace('acf/', '', $block['name']);
         $classes[] = "block-{$blockName}";
-        
+
         // Alignment
         if (!empty($block['align'])) {
             $classes[] = "align{$block['align']}";
         }
-        
+
         // Custom classes
         if (!empty($block['className'])) {
             $classes[] = $block['className'];
         }
-        
+
         return implode(' ', $classes);
     }
 
