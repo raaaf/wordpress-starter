@@ -13,7 +13,7 @@
 
         {{-- Mobile menu button --}}
         <button @click="toggle()" 
-                class="lg:hidden p-2 rounded-md hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-line-brand"
+                class="lg:hidden p-2 rounded-md hover:bg-surface-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-line-focus"
                 aria-label="Toggle navigation menu"
                 :aria-expanded="isOpen">
             <svg x-show="!isOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

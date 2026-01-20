@@ -7,6 +7,9 @@
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <link rel="pingback" href="{{ esc_url(get_bloginfo('pingback_url')) }}">
 
+    {{-- Resource Hints for Performance --}}
+    <link rel="dns-prefetch" href="//api.pirsch.io">
+
     {{-- Preload critical assets --}}
     @if(!WP_DEBUG || !\WordpressStarter\Vite::isDevServerRunning())
         <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/css/app.css') }}" as="style">

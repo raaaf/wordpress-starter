@@ -1,0 +1,14 @@
+{
+    "name": "testimonials",
+    "title": "Kundenstimmen",
+    "description": "Zeigt Kundenbewertungen und Testimonials an",
+    "category": "theme",
+    "icon": "format-quote",
+    "keywords": ["testimonials", "reviews", "quotes", "kundenstimmen", "bewertungen"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

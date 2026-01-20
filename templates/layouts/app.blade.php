@@ -1,5 +1,7 @@
 @include('partials.header')
-@yield('content')
+<main id="main-content">
+    @yield('content')
+</main>
 
 @if (defined('WP_DEBUG') && WP_DEBUG)
     <div class="fixed p-2 text-xs text-content-inverse bg-surface-inverse rounded shadow bottom-2 right-2">

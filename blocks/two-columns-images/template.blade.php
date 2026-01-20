@@ -2,14 +2,14 @@
     Two Columns Images Block
 
     Uses shared components: x-section, x-prose
-    Fields: image, image_2, content, content_2, background_color
+    Fields: image_1, image_2, column_1, column_2, background_color
 --}}
 
 @php
-    $image = $fields['image'] ?? null;
+    $image_1 = $fields['image_1'] ?? null;
     $image_2 = $fields['image_2'] ?? null;
-    $content_1 = $fields['content'] ?? '';
-    $content_2 = $fields['content_2'] ?? '';
+    $column_1 = $fields['column_1'] ?? '';
+    $column_2 = $fields['column_2'] ?? '';
     $background = $fields['background_color'] ?? 'primary';
     $size = 'large';
 @endphp
@@ -21,13 +21,13 @@
             <div class="order-last h-full lg:overflow-hidden lg:order-first">
                 <div class="relative h-full transition duration-200 bg-surface-secondary/10">
                     <div class="relative z-10 p-8 lg:p-16 lg:pb-12">
-                        <x-prose>{!! $content_1 !!}</x-prose>
+                        <x-prose>{!! $column_1 !!}</x-prose>
                     </div>
                 </div>
             </div>
             <div class="order-first h-full lg:order-last">
-                @if($image)
-                    {!! \WordpressStarter\Acf\Fields::responsiveImage('image', $size, [
+                @if($image_1)
+                    {!! \WordpressStarter\Acf\Fields::responsiveImage('image_1', $size, [
                         'class' => 'w-full object-cover h-full bg-center !rounded-none'
                     ]) !!}
                 @endif
@@ -46,7 +46,7 @@
             <div class="h-full lg:overflow-hidden">
                 <div class="relative h-full transition duration-200 bg-surface-secondary/10">
                     <div class="relative z-10 p-8 lg:p-16 lg:pb-12">
-                        <x-prose>{!! $content_2 !!}</x-prose>
+                        <x-prose>{!! $column_2 !!}</x-prose>
                     </div>
                 </div>
             </div>

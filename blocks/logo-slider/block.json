@@ -1,0 +1,14 @@
+{
+    "name": "logo-slider",
+    "title": "Logo-Slider",
+    "description": "Zeigt Partner- oder Kundenlogos als Slider",
+    "category": "theme",
+    "icon": "slides",
+    "keywords": ["logos", "partner", "kunden", "slider", "referenzen"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

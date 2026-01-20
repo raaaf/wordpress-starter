@@ -1,0 +1,14 @@
+{
+    "name": "map",
+    "title": "Google Maps",
+    "description": "Zeigt einen Standort auf einer Google Map",
+    "category": "theme",
+    "icon": "location-alt",
+    "keywords": ["map", "karte", "google", "standort", "location"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

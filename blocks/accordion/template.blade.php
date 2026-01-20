@@ -23,11 +23,11 @@
                     <div class="w-full px-6 mx-auto overflow-hidden border-b border-line last:border-b-0">
                         <button @click="active = active === {{ $index }} ? null : {{ $index }}"
                                 :aria-expanded="active === {{ $index }}"
-                                aria-controls="content-{{ $itemId }}"
+                                aria-controls="content-{{ esc_attr($itemId) }}"
                                 class="flex items-center justify-between w-full py-4 pr-10 mb-0 font-bold text-left"
                                 pirsch-event="Accordion_Toggle"
                                 pirsch-meta-key="accordion_block"
-                                pirsch-meta-item="{{ $title }}">
+                                pirsch-meta-item="{{ esc_attr($title) }}">
                             <span>{{ $title }}</span>
                             <svg class="w-5 h-5 transition-transform duration-200"
                                  :class="{ 'rotate-180': active === {{ $index }} }"
@@ -37,7 +37,7 @@
                         </button>
                         <div x-show="active === {{ $index }}"
                              x-collapse
-                             id="content-{{ $itemId }}"
+                             id="content-{{ esc_attr($itemId) }}"
                              class="mb-8">
                             <x-prose>{!! $content !!}</x-prose>
                         </div>

@@ -128,19 +128,114 @@ class Fields
     }
 
     /**
-     * Get responsive image HTML
+     * Get responsive image HTML with automatic width/height and srcset
      *
      * @param array<string, string> $attr
      */
     public static function responsiveImage(string $field, string $size = 'full', array $attr = [], mixed $postId = null): string
     {
         $imageId = self::get($field, $postId);
-        
+
         if (!$imageId || is_array($imageId)) {
             return '';
         }
 
+        // Ensure loading="lazy" is set by default for CLS optimization
+        $attr = array_merge(['loading' => 'lazy', 'decoding' => 'async'], $attr);
+
         return wp_get_attachment_image($imageId, $size, false, $attr);
+    }
+
+    /**
+     * Get picture element with WebP support
+     * Falls back to original format if WebP not available
+     *
+     * @param array<string, string> $attr
+     */
+    public static function pictureWebP(string $field, string $size = 'full', array $attr = [], mixed $postId = null): string
+    {
+        $imageId = self::get($field, $postId);
+
+        if (!$imageId || is_array($imageId)) {
+            return '';
+        }
+
+        $image = wp_get_attachment_image_src($imageId, $size);
+        if (!$image) {
+            return '';
+        }
+
+        $alt = get_post_meta($imageId, '_wp_attachment_image_alt', true);
+        $srcset = wp_get_attachment_image_srcset($imageId, $size);
+        $sizes = wp_get_attachment_image_sizes($imageId, $size);
+
+        // Build attributes string
+        $attrString = '';
+        $defaultAttr = [
+            'loading' => 'lazy',
+            'decoding' => 'async',
+            'width' => $image[1],
+            'height' => $image[2],
+            'alt' => esc_attr($alt ?: ''),
+        ];
+
+        foreach (array_merge($defaultAttr, $attr) as $key => $value) {
+            $attrString .= sprintf(' %s="%s"', esc_attr($key), esc_attr($value));
+        }
+
+        // Check if WebP version exists (WordPress 5.8+ generates WebP)
+        $webpSrcset = self::getWebPSrcset($imageId, $size);
+
+        $html = '<picture>';
+
+        if ($webpSrcset) {
+            $html .= sprintf(
+                '<source type="image/webp" srcset="%s"%s>',
+                esc_attr($webpSrcset),
+                $sizes ? sprintf(' sizes="%s"', esc_attr($sizes)) : ''
+            );
+        }
+
+        $html .= sprintf(
+            '<img src="%s"%s%s%s>',
+            esc_url($image[0]),
+            $srcset ? sprintf(' srcset="%s"', esc_attr($srcset)) : '',
+            $sizes ? sprintf(' sizes="%s"', esc_attr($sizes)) : '',
+            $attrString
+        );
+
+        $html .= '</picture>';
+
+        return $html;
+    }
+
+    /**
+     * Get WebP srcset if available
+     */
+    private static function getWebPSrcset(int $imageId, string $size): string
+    {
+        $metadata = wp_get_attachment_metadata($imageId);
+
+        if (!$metadata || empty($metadata['sizes'])) {
+            return '';
+        }
+
+        // Check if WordPress has generated WebP versions (5.8+)
+        $uploadDir = wp_get_upload_dir();
+        $basePath = trailingslashit($uploadDir['basedir']) . dirname($metadata['file']) . '/';
+        $baseUrl = trailingslashit($uploadDir['baseurl']) . dirname($metadata['file']) . '/';
+
+        $webpSrcset = [];
+
+        foreach ($metadata['sizes'] as $sizeName => $sizeData) {
+            $webpFile = preg_replace('/\.(jpe?g|png)$/i', '.webp', $sizeData['file']);
+
+            if (file_exists($basePath . $webpFile)) {
+                $webpSrcset[] = $baseUrl . $webpFile . ' ' . $sizeData['width'] . 'w';
+            }
+        }
+
+        return implode(', ', $webpSrcset);
     }
 
     /**

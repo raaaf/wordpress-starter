@@ -24,8 +24,8 @@
 @endphp
 
 <div class="{{ $classes }} relative overflow-hidden {{ $textClass }}"
-     @if($anchor) id="{{ $anchor }}" @endif
-     style="min-height: {{ $min_height }};">
+     @if($anchor) id="{{ esc_attr($anchor) }}" @endif
+     style="min-height: {{ esc_attr($min_height) }};">
 
     {{-- Background Image --}}
     @if($image_url)
@@ -35,13 +35,13 @@
                  class="w-full h-full object-cover"
                  loading="lazy">
             <div class="absolute inset-0 bg-surface-overlay"
-                 style="opacity: {{ $overlay_opacity / 100 }}"></div>
+                 style="opacity: {{ esc_attr($overlay_opacity / 100) }}"></div>
         </div>
     @endif
 
     {{-- Content --}}
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-{{ $alignment }}"
-         style="min-height: {{ $min_height }};">
+         style="min-height: {{ esc_attr($min_height) }};">
         <div class="max-w-3xl">
             @if($title)
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-headline">

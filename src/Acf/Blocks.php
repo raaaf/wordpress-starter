@@ -7,6 +7,30 @@ namespace WordpressStarter\Acf;
 class Blocks
 {
     /**
+     * Plugin requirements mapping
+     * Maps requirement keys to their check functions/classes
+     *
+     * @var array<string, array{type: string, check: string, name: string}>
+     */
+    private const PLUGIN_REQUIREMENTS = [
+        'contact-form-7' => [
+            'type' => 'class',
+            'check' => 'WPCF7',
+            'name' => 'Contact Form 7',
+        ],
+        'woocommerce' => [
+            'type' => 'class',
+            'check' => 'WooCommerce',
+            'name' => 'WooCommerce',
+        ],
+        'acf-pro' => [
+            'type' => 'function',
+            'check' => 'acf_add_local_field_group',
+            'name' => 'Advanced Custom Fields PRO',
+        ],
+    ];
+
+    /**
      * Register ACF Gutenberg blocks
      */
     public static function register(): void
@@ -20,23 +44,28 @@ class Blocks
 
         // Auto-discover and register blocks
         $blocksDir = get_template_directory() . '/blocks';
-        
+
         if (!is_dir($blocksDir)) {
             return;
         }
 
         $blocks = glob($blocksDir . '/*/block.json');
-        
+
         foreach ($blocks as $blockConfig) {
             $blockData = json_decode(file_get_contents($blockConfig), true);
-            
+
             if (!$blockData) {
                 continue;
             }
 
             $blockDir = dirname($blockConfig);
             $blockName = basename($blockDir);
-            
+
+            // Check plugin requirements
+            if (!self::checkRequirements($blockData)) {
+                continue;
+            }
+
             // Merge with defaults
             $block = array_merge([
                 'name' => $blockName,
@@ -54,6 +83,90 @@ class Blocks
 
             acf_register_block_type($block);
         }
+    }
+
+    /**
+     * Check if block requirements are met
+     *
+     * @param array<string, mixed> $blockData Block configuration data
+     * @return bool True if all requirements are met
+     */
+    private static function checkRequirements(array $blockData): bool
+    {
+        // No requirements specified - always register
+        if (empty($blockData['requires'])) {
+            return true;
+        }
+
+        $requires = (array) $blockData['requires'];
+
+        foreach ($requires as $requirement) {
+            if (!self::isRequirementMet($requirement)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if a single requirement is met
+     *
+     * @param string $requirement Requirement key from PLUGIN_REQUIREMENTS
+     * @return bool True if requirement is met
+     */
+    private static function isRequirementMet(string $requirement): bool
+    {
+        // Check predefined requirements
+        if (isset(self::PLUGIN_REQUIREMENTS[$requirement])) {
+            $req = self::PLUGIN_REQUIREMENTS[$requirement];
+
+            if ($req['type'] === 'class') {
+                return class_exists($req['check']);
+            }
+
+            if ($req['type'] === 'function') {
+                return function_exists($req['check']);
+            }
+        }
+
+        // Allow custom class checks (class:ClassName)
+        if (str_starts_with($requirement, 'class:')) {
+            return class_exists(substr($requirement, 6));
+        }
+
+        // Allow custom function checks (function:function_name)
+        if (str_starts_with($requirement, 'function:')) {
+            return function_exists(substr($requirement, 9));
+        }
+
+        // Unknown requirement type - skip block to be safe
+        return false;
+    }
+
+    /**
+     * Get list of missing requirements for a block
+     *
+     * @param array<string, mixed> $blockData Block configuration data
+     * @return array<string> List of missing plugin names
+     */
+    public static function getMissingRequirements(array $blockData): array
+    {
+        $missing = [];
+
+        if (empty($blockData['requires'])) {
+            return $missing;
+        }
+
+        $requires = (array) $blockData['requires'];
+
+        foreach ($requires as $requirement) {
+            if (!self::isRequirementMet($requirement)) {
+                $missing[] = self::PLUGIN_REQUIREMENTS[$requirement]['name'] ?? $requirement;
+            }
+        }
+
+        return $missing;
     }
 
     /**

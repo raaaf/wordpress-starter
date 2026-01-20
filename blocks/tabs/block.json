@@ -1,0 +1,14 @@
+{
+    "name": "tabs",
+    "title": "Tabs",
+    "description": "Tab-basierte Inhaltsdarstellung",
+    "category": "theme",
+    "icon": "table-row-after",
+    "keywords": ["tabs", "reiter", "tabbed", "content"],
+    "supports": {
+        "align": ["full", "wide"],
+        "mode": true,
+        "jsx": true,
+        "anchor": true
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "name": "acf/pricing-table",
+    "title": "Preistabelle",
+    "description": "Preispakete und Angebote übersichtlich darstellen",
+    "category": "starter-blocks",
+    "icon": "money-alt",
+    "keywords": ["pricing", "preise", "pakete", "angebote", "tabelle"],
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "blocks/pricing-table/template.blade.php"
+    },
+    "supports": {
+        "align": ["wide", "full"],
+        "anchor": true,
+        "jsx": true
+    }
+}

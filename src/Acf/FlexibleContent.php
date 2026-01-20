@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Acf;
 
+/**
+ * Registers flexible content layouts for the Page Builder template
+ */
 class FlexibleContent
 {
     /**
@@ -25,14 +28,14 @@ class FlexibleContent
     {
         acf_add_local_field_group([
             'key' => 'group_page_builder',
-            'title' => 'Page Builder',
+            'title' => 'Seiteninhalt',
             'fields' => [
                 [
                     'key' => 'field_page_sections',
-                    'label' => 'Page Sections',
+                    'label' => 'Sektionen',
                     'name' => 'page_sections',
                     'type' => 'flexible_content',
-                    'instructions' => 'Build your page by adding content sections',
+                    'instructions' => 'Baue deine Seite, indem du Inhalts-Sektionen hinzufügst.',
                     'required' => 0,
                     'conditional_logic' => 0,
                     'wrapper' => [
@@ -41,7 +44,7 @@ class FlexibleContent
                         'id' => '',
                     ],
                     'layouts' => self::getLayouts(),
-                    'button_label' => 'Add Section',
+                    'button_label' => 'Sektion hinzufügen',
                     'min' => '',
                     'max' => '',
                 ],
@@ -67,576 +70,304 @@ class FlexibleContent
     }
 
     /**
-     * Get the background color field definition
-     *
-     * @param string $prefix Unique prefix for the field key
-     * @return array<string, mixed>
-     */
-    private static function getBackgroundColorField(string $prefix): array
-    {
-        return [
-            'key' => "field_{$prefix}_background_color",
-            'label' => 'Hintergrundfarbe',
-            'name' => 'background_color',
-            'type' => 'select',
-            'choices' => [
-                'primary' => 'Standard',
-                'secondary' => 'Sekundär',
-                'tertiary' => 'Tertiär',
-                'brand' => 'Brand',
-                'brand-subtle' => 'Brand Dezent',
-                'inverse' => 'Invers',
-            ],
-            'default_value' => 'primary',
-            'allow_null' => 0,
-            'ui' => 1,
-        ];
-    }
-
-    /**
      * Get all flexible content layouts
      *
-     * @return array<int, array{key: string, name: string, label: string, display: string, sub_fields: array<int, array<string, mixed>>}>
+     * @return array<int, array<string, mixed>>
      */
     private static function getLayouts(): array
     {
         return [
-            // Hero Section
-            [
-                'key' => 'layout_hero',
-                'name' => 'hero',
-                'label' => 'Hero',
-                'display' => 'block',
-                'sub_fields' => [
-                    [
-                        'key' => 'field_hero_title',
-                        'label' => 'Title',
-                        'name' => 'title',
-                        'type' => 'text',
-                        'required' => 1,
-                    ],
-                    [
-                        'key' => 'field_hero_subtitle',
-                        'label' => 'Subtitle',
-                        'name' => 'subtitle',
-                        'type' => 'text',
-                    ],
-                    [
-                        'key' => 'field_hero_content',
-                        'label' => 'Content',
-                        'name' => 'content',
-                        'type' => 'wysiwyg',
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    [
-                        'key' => 'field_hero_background_image',
-                        'label' => 'Background Image',
-                        'name' => 'background_image',
-                        'type' => 'image',
-                        'return_format' => 'array',
-                        'preview_size' => 'medium',
-                        'library' => 'all',
-                    ],
-                    [
-                        'key' => 'field_hero_cta',
-                        'label' => 'Call to Action',
-                        'name' => 'cta',
-                        'type' => 'link',
-                        'return_format' => 'array',
-                    ],
-                    self::getBackgroundColorField('hero'),
-                ],
-            ],
+            self::heroLayout(),
+            self::oneColumnLayout(),
+            self::twoColumnsLayout(),
+            self::twoColumnsImagesLayout(),
+            self::threeColumnsLayout(),
+            self::fourColumnsLayout(),
+            self::oneThirdTwoThirdsLayout(),
+            self::twoThirdsOneThirdLayout(),
+            self::accordionLayout(),
+            self::ctaLayout(),
+            self::videoLayout(),
+            self::imageLayout(),
+            self::dividerLayout(),
+        ];
+    }
 
-            // One Column
-            [
-                'key' => 'layout_one_column',
-                'name' => 'one_column',
-                'label' => 'One Column',
-                'display' => 'block',
-                'sub_fields' => [
-                    [
-                        'key' => 'field_one_column_content',
-                        'label' => 'Content',
-                        'name' => 'content',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    self::getBackgroundColorField('one_column'),
-                ],
-            ],
+    /**
+     * Hero Section layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function heroLayout(): array
+    {
+        return [
+            'key' => 'layout_hero',
+            'name' => 'hero',
+            'label' => 'Hero-Bereich',
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::heroFields('hero'),
+        ];
+    }
 
-            // Two Columns
-            [
-                'key' => 'layout_two_columns',
-                'name' => 'two_columns',
-                'label' => 'Two Columns',
-                'display' => 'block',
-                'sub_fields' => [
-                    [
-                        'key' => 'field_two_columns_left',
-                        'label' => 'Left Column',
-                        'name' => 'left_column',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '50'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    [
-                        'key' => 'field_two_columns_right',
-                        'label' => 'Right Column',
-                        'name' => 'right_column',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '50'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    self::getBackgroundColorField('two_columns'),
-                ],
+    /**
+     * One Column layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function oneColumnLayout(): array
+    {
+        return [
+            'key' => 'layout_one_column',
+            'name' => 'one_column',
+            'label' => 'Eine Spalte',
+            'display' => 'block',
+            'sub_fields' => [
+                FieldDefinitions::wysiwygField(
+                    'field_one_column_content',
+                    'Inhalt',
+                    'content',
+                    true,
+                    null,
+                    'Der Textinhalt dieser Sektion.'
+                ),
+                FieldDefinitions::backgroundColorField('one_column'),
             ],
+        ];
+    }
 
-            // Two Columns with Images
-            [
-                'key' => 'layout_two_columns_images',
-                'name' => 'two_columns_images',
-                'label' => 'Two Columns with Images',
-                'display' => 'block',
-                'sub_fields' => [
+    /**
+     * Two Columns layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function twoColumnsLayout(): array
+    {
+        return [
+            'key' => 'layout_two_columns',
+            'name' => 'two_columns',
+            'label' => 'Zwei Spalten',
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::twoColumnsFields('two_columns'),
+        ];
+    }
+
+    /**
+     * Two Columns with Images layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function twoColumnsImagesLayout(): array
+    {
+        return [
+            'key' => 'layout_two_columns_images',
+            'name' => 'two_columns_images',
+            'label' => 'Zwei Spalten mit Bildern',
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::twoColumnsImagesFields('two_columns_images'),
+        ];
+    }
+
+    /**
+     * Three Columns layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function threeColumnsLayout(): array
+    {
+        return [
+            'key' => 'layout_three_columns',
+            'name' => 'three_columns',
+            'label' => 'Drei Spalten',
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::threeColumnsFields('three_columns'),
+        ];
+    }
+
+    /**
+     * Four Columns layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function fourColumnsLayout(): array
+    {
+        return [
+            'key' => 'layout_four_columns',
+            'name' => 'four_columns',
+            'label' => 'Vier Spalten',
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::fourColumnsFields('four_columns'),
+        ];
+    }
+
+    /**
+     * One Third / Two Thirds layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function oneThirdTwoThirdsLayout(): array
+    {
+        return [
+            'key' => 'layout_one_third_two_thirds',
+            'name' => 'one_third_two_thirds',
+            'label' => '1/3 + 2/3 Spalten',
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::oneThirdTwoThirdsFields('one_third_two_thirds'),
+        ];
+    }
+
+    /**
+     * Two Thirds / One Third layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function twoThirdsOneThirdLayout(): array
+    {
+        return [
+            'key' => 'layout_two_thirds_one_third',
+            'name' => 'two_thirds_one_third',
+            'label' => '2/3 + 1/3 Spalten',
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::twoThirdsOneThirdFields('two_thirds_one_third'),
+        ];
+    }
+
+    /**
+     * Accordion layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function accordionLayout(): array
+    {
+        return [
+            'key' => 'layout_accordion',
+            'name' => 'accordion',
+            'label' => 'Akkordeon (FAQ)',
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::accordionFields('accordion'),
+        ];
+    }
+
+    /**
+     * CTA (Call to Action) layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function ctaLayout(): array
+    {
+        return [
+            'key' => 'layout_cta',
+            'name' => 'cta',
+            'label' => 'Handlungsaufforderung (CTA)',
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::ctaFields('cta'),
+        ];
+    }
+
+    /**
+     * Video layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function videoLayout(): array
+    {
+        return [
+            'key' => 'layout_video',
+            'name' => 'video',
+            'label' => 'Video',
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::videoFields('video'),
+        ];
+    }
+
+    /**
+     * Image layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function imageLayout(): array
+    {
+        return [
+            'key' => 'layout_image',
+            'name' => 'image',
+            'label' => 'Bild',
+            'display' => 'block',
+            'sub_fields' => [
+                FieldDefinitions::imageField(
+                    'field_image_image',
+                    'Bild',
+                    'image',
+                    true,
+                    'array',
+                    null,
+                    'Wähle oder lade ein Bild hoch.'
+                ),
+                FieldDefinitions::textField(
+                    'field_image_caption',
+                    'Bildunterschrift',
+                    'caption',
+                    false,
+                    'Optionale Bildunterschrift.',
+                    'z.B. Foto: Max Mustermann'
+                ),
+                FieldDefinitions::selectField(
+                    'field_image_alignment',
+                    'Ausrichtung',
+                    'alignment',
                     [
-                        'key' => 'field_two_columns_images_left_image',
-                        'label' => 'Left Image',
-                        'name' => 'left_image',
-                        'type' => 'image',
-                        'required' => 1,
-                        'wrapper' => ['width' => '50'],
-                        'return_format' => 'array',
-                        'preview_size' => 'medium',
-                        'library' => 'all',
+                        'left' => 'Links',
+                        'center' => 'Zentriert',
+                        'right' => 'Rechts',
+                        'wide' => 'Breit',
+                        'full' => 'Volle Breite',
                     ],
-                    [
-                        'key' => 'field_two_columns_images_left_content',
-                        'label' => 'Left Content',
-                        'name' => 'left_content',
-                        'type' => 'wysiwyg',
-                        'wrapper' => ['width' => '50'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    [
-                        'key' => 'field_two_columns_images_right_image',
-                        'label' => 'Right Image',
-                        'name' => 'right_image',
-                        'type' => 'image',
-                        'required' => 1,
-                        'wrapper' => ['width' => '50'],
-                        'return_format' => 'array',
-                        'preview_size' => 'medium',
-                        'library' => 'all',
-                    ],
-                    [
-                        'key' => 'field_two_columns_images_right_content',
-                        'label' => 'Right Content',
-                        'name' => 'right_content',
-                        'type' => 'wysiwyg',
-                        'wrapper' => ['width' => '50'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    self::getBackgroundColorField('two_columns_images'),
-                ],
+                    'center',
+                    false,
+                    'Wie soll das Bild ausgerichtet werden?'
+                ),
+                FieldDefinitions::backgroundColorField('image'),
             ],
+        ];
+    }
 
-            // Three Columns
-            [
-                'key' => 'layout_three_columns',
-                'name' => 'three_columns',
-                'label' => 'Three Columns',
-                'display' => 'block',
-                'sub_fields' => [
+    /**
+     * Divider layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function dividerLayout(): array
+    {
+        return [
+            'key' => 'layout_divider',
+            'name' => 'divider',
+            'label' => 'Trenner / Abstand',
+            'display' => 'block',
+            'sub_fields' => [
+                FieldDefinitions::selectField(
+                    'field_divider_style',
+                    'Stil',
+                    'style',
                     [
-                        'key' => 'field_three_columns_left',
-                        'label' => 'Left Column',
-                        'name' => 'left_column',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '33.333'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
+                        'line' => 'Linie',
+                        'dots' => 'Punkte',
+                        'wave' => 'Welle',
+                        'space' => 'Nur Abstand',
                     ],
-                    [
-                        'key' => 'field_three_columns_center',
-                        'label' => 'Center Column',
-                        'name' => 'center_column',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '33.333'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    [
-                        'key' => 'field_three_columns_right',
-                        'label' => 'Right Column',
-                        'name' => 'right_column',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '33.333'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    self::getBackgroundColorField('three_columns'),
-                ],
-            ],
-
-            // Four Columns
-            [
-                'key' => 'layout_four_columns',
-                'name' => 'four_columns',
-                'label' => 'Four Columns',
-                'display' => 'block',
-                'sub_fields' => [
-                    [
-                        'key' => 'field_four_columns_one',
-                        'label' => 'Column 1',
-                        'name' => 'column_1',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '25'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    [
-                        'key' => 'field_four_columns_two',
-                        'label' => 'Column 2',
-                        'name' => 'column_2',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '25'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    [
-                        'key' => 'field_four_columns_three',
-                        'label' => 'Column 3',
-                        'name' => 'column_3',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '25'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    [
-                        'key' => 'field_four_columns_four',
-                        'label' => 'Column 4',
-                        'name' => 'column_4',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '25'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    self::getBackgroundColorField('four_columns'),
-                ],
-            ],
-
-            // One Third / Two Thirds
-            [
-                'key' => 'layout_one_third_two_thirds',
-                'name' => 'one_third_two_thirds',
-                'label' => 'One Third / Two Thirds',
-                'display' => 'block',
-                'sub_fields' => [
-                    [
-                        'key' => 'field_one_third_left',
-                        'label' => 'Left Column (1/3)',
-                        'name' => 'left_column',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '33.333'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    [
-                        'key' => 'field_two_thirds_right',
-                        'label' => 'Right Column (2/3)',
-                        'name' => 'right_column',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '66.667'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    self::getBackgroundColorField('one_third_two_thirds'),
-                ],
-            ],
-
-            // Two Thirds / One Third
-            [
-                'key' => 'layout_two_thirds_one_third',
-                'name' => 'two_thirds_one_third',
-                'label' => 'Two Thirds / One Third',
-                'display' => 'block',
-                'sub_fields' => [
-                    [
-                        'key' => 'field_two_thirds_left',
-                        'label' => 'Left Column (2/3)',
-                        'name' => 'left_column',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '66.667'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    [
-                        'key' => 'field_one_third_right',
-                        'label' => 'Right Column (1/3)',
-                        'name' => 'right_column',
-                        'type' => 'wysiwyg',
-                        'required' => 1,
-                        'wrapper' => ['width' => '33.333'],
-                        'tabs' => 'all',
-                        'toolbar' => 'full',
-                        'media_upload' => 1,
-                    ],
-                    self::getBackgroundColorField('two_thirds_one_third'),
-                ],
-            ],
-
-            // Accordion
-            [
-                'key' => 'layout_accordion',
-                'name' => 'accordion',
-                'label' => 'Accordion',
-                'display' => 'block',
-                'sub_fields' => [
-                    [
-                        'key' => 'field_accordion_items',
-                        'label' => 'Accordion Items',
-                        'name' => 'items',
-                        'type' => 'repeater',
-                        'required' => 1,
-                        'min' => 1,
-                        'layout' => 'block',
-                        'button_label' => 'Add Item',
-                        'sub_fields' => [
-                            [
-                                'key' => 'field_accordion_item_title',
-                                'label' => 'Title',
-                                'name' => 'title',
-                                'type' => 'text',
-                                'required' => 1,
-                            ],
-                            [
-                                'key' => 'field_accordion_item_content',
-                                'label' => 'Content',
-                                'name' => 'content',
-                                'type' => 'wysiwyg',
-                                'required' => 1,
-                                'tabs' => 'all',
-                                'toolbar' => 'full',
-                                'media_upload' => 1,
-                            ],
-                        ],
-                    ],
-                    self::getBackgroundColorField('accordion'),
-                ],
-            ],
-
-            // CTA (Call to Action)
-            [
-                'key' => 'layout_cta',
-                'name' => 'cta',
-                'label' => 'Call to Action',
-                'display' => 'block',
-                'sub_fields' => [
-                    [
-                        'key' => 'field_cta_title',
-                        'label' => 'Title',
-                        'name' => 'title',
-                        'type' => 'text',
-                        'required' => 1,
-                    ],
-                    [
-                        'key' => 'field_cta_content',
-                        'label' => 'Content',
-                        'name' => 'content',
-                        'type' => 'textarea',
-                        'rows' => 3,
-                    ],
-                    [
-                        'key' => 'field_cta_button',
-                        'label' => 'Button',
-                        'name' => 'button',
-                        'type' => 'link',
-                        'required' => 1,
-                        'return_format' => 'array',
-                    ],
-                    self::getBackgroundColorField('cta'),
-                ],
-            ],
-
-            // Video
-            [
-                'key' => 'layout_video',
-                'name' => 'video',
-                'label' => 'Video',
-                'display' => 'block',
-                'sub_fields' => [
-                    [
-                        'key' => 'field_video_type',
-                        'label' => 'Video Type',
-                        'name' => 'video_type',
-                        'type' => 'select',
-                        'required' => 1,
-                        'choices' => [
-                            'youtube' => 'YouTube',
-                            'vimeo' => 'Vimeo',
-                            'self' => 'Self Hosted',
-                        ],
-                        'default_value' => 'youtube',
-                    ],
-                    [
-                        'key' => 'field_video_url',
-                        'label' => 'Video URL',
-                        'name' => 'video_url',
-                        'type' => 'url',
-                        'required' => 1,
-                        'conditional_logic' => [
-                            [
-                                [
-                                    'field' => 'field_video_type',
-                                    'operator' => '!=',
-                                    'value' => 'self',
-                                ],
-                            ],
-                        ],
-                    ],
-                    [
-                        'key' => 'field_video_file',
-                        'label' => 'Video File',
-                        'name' => 'video_file',
-                        'type' => 'file',
-                        'required' => 1,
-                        'return_format' => 'array',
-                        'library' => 'all',
-                        'mime_types' => 'mp4,webm,ogg',
-                        'conditional_logic' => [
-                            [
-                                [
-                                    'field' => 'field_video_type',
-                                    'operator' => '==',
-                                    'value' => 'self',
-                                ],
-                            ],
-                        ],
-                    ],
-                    [
-                        'key' => 'field_video_poster',
-                        'label' => 'Poster Image',
-                        'name' => 'poster_image',
-                        'type' => 'image',
-                        'return_format' => 'array',
-                        'preview_size' => 'medium',
-                        'library' => 'all',
-                    ],
-                    self::getBackgroundColorField('video'),
-                ],
-            ],
-
-            // Image
-            [
-                'key' => 'layout_image',
-                'name' => 'image',
-                'label' => 'Image',
-                'display' => 'block',
-                'sub_fields' => [
-                    [
-                        'key' => 'field_image_image',
-                        'label' => 'Image',
-                        'name' => 'image',
-                        'type' => 'image',
-                        'required' => 1,
-                        'return_format' => 'array',
-                        'preview_size' => 'large',
-                        'library' => 'all',
-                    ],
-                    [
-                        'key' => 'field_image_caption',
-                        'label' => 'Caption',
-                        'name' => 'caption',
-                        'type' => 'text',
-                    ],
-                    [
-                        'key' => 'field_image_alignment',
-                        'label' => 'Alignment',
-                        'name' => 'alignment',
-                        'type' => 'select',
-                        'choices' => [
-                            'left' => 'Left',
-                            'center' => 'Center',
-                            'right' => 'Right',
-                            'wide' => 'Wide',
-                            'full' => 'Full Width',
-                        ],
-                        'default_value' => 'center',
-                    ],
-                    self::getBackgroundColorField('image'),
-                ],
-            ],
-
-            // Divider
-            [
-                'key' => 'layout_divider',
-                'name' => 'divider',
-                'label' => 'Divider',
-                'display' => 'block',
-                'sub_fields' => [
-                    [
-                        'key' => 'field_divider_style',
-                        'label' => 'Style',
-                        'name' => 'style',
-                        'type' => 'select',
-                        'choices' => [
-                            'line' => 'Line',
-                            'dots' => 'Dots',
-                            'wave' => 'Wave',
-                            'space' => 'Empty Space',
-                        ],
-                        'default_value' => 'line',
-                    ],
-                    [
-                        'key' => 'field_divider_height',
-                        'label' => 'Height',
-                        'name' => 'height',
-                        'type' => 'number',
-                        'default_value' => 50,
-                        'min' => 10,
-                        'max' => 200,
-                        'step' => 10,
-                        'append' => 'px',
-                    ],
-                    self::getBackgroundColorField('divider'),
-                ],
+                    'line',
+                    false,
+                    'Wähle den visuellen Stil des Trenners.'
+                ),
+                FieldDefinitions::numberField(
+                    'field_divider_height',
+                    'Höhe',
+                    'height',
+                    50,
+                    10,
+                    200,
+                    10,
+                    'px',
+                    'Die Höhe des Trenners in Pixeln.'
+                ),
+                FieldDefinitions::backgroundColorField('divider'),
             ],
         ];
     }

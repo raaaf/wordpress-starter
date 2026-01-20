@@ -7,7 +7,7 @@
 
 @php
     $title = $fields['title'] ?? '';
-    $trimmed = str_replace(' ', '', $title);
+    $blockId = $block['id'] ?? uniqid('cta-');
     $cta = $fields['cta'] ?? null;
     $content = $fields['content'] ?? '';
     $background = $fields['background_color'] ?? 'brand';
@@ -24,13 +24,13 @@
 @endphp
 
 <section class="{{ $classes }} cta-block {{ $bgClass }} relative overflow-hidden text-content-inverse"
-         @if($anchor) id="{{ $anchor }}" @endif>
+         @if($anchor) id="{{ esc_attr($anchor) }}" @endif>
     <div class="relative z-10 grid items-center gap-12 px-8 py-20 mx-auto overflow-hidden max-w-7xl md:grid-cols-2 isolate md:px-16"
          role="region"
-         @if($trimmed) aria-labelledby="cta-title-{{ $trimmed }}" @endif>
-        <div @if($trimmed) id="{{ $trimmed }}" @endif>
+         @if($title) aria-labelledby="cta-title-{{ esc_attr($blockId) }}" @endif>
+        <div>
             @if($title)
-                <h2 id="cta-title-{{ $trimmed }}" class="text-4xl md:text-5xl font-bold leading-tight">
+                <h2 id="cta-title-{{ esc_attr($blockId) }}" class="text-4xl md:text-5xl font-bold leading-tight">
                     {{ $title }}
                 </h2>
             @endif
