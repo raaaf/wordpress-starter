@@ -113,6 +113,11 @@ class PluginServiceProvider extends ServiceProvider
             $this->createDefaultPages($this->setupOptions['pages']);
         }
 
+        // Set color scheme ACF option
+        if (!empty($this->setupOptions['color_scheme'])) {
+            update_option('options_color_scheme', $this->setupOptions['color_scheme']);
+        }
+
         // Mark as complete
         update_option('wp_starter_content_setup_complete', true);
     }
@@ -122,16 +127,18 @@ class PluginServiceProvider extends ServiceProvider
      */
     private function deleteDefaultContent(): void
     {
-        // Delete "Hello World" post
-        $hello_world = get_page_by_path('hello-world', OBJECT, 'post');
-        if ($hello_world) {
-            wp_delete_post($hello_world->ID, true);
+        // Delete "Hello World" post (ID 1 is always the default post)
+        // Works for all languages (en: hello-world, de: hallo-welt)
+        $default_post = get_post(1);
+        if ($default_post && $default_post->post_type === 'post') {
+            wp_delete_post(1, true);
         }
 
-        // Delete sample page
-        $sample_page = get_page_by_path('sample-page', OBJECT, 'page');
-        if ($sample_page) {
-            wp_delete_post($sample_page->ID, true);
+        // Delete sample page (ID 2 is always the default page)
+        // Works for all languages (en: sample-page, de: beispiel-seite)
+        $sample_page = get_post(2);
+        if ($sample_page && $sample_page->post_type === 'page') {
+            wp_delete_post(2, true);
         }
 
         // Delete default comment
@@ -284,6 +291,24 @@ class PluginServiceProvider extends ServiceProvider
                 'description' => 'Über 60 Admin-Verbesserungen inkl. SVG-Upload.',
                 'check' => fn() => defined('ASENHA_VERSION'),
             ],
+
+            // === RECOMMENDED: Security & Backup (Premium) ===
+            'solid-security' => [
+                'name' => 'Solid Security',
+                'slug' => 'solid-security',
+                'required' => false,
+                'description' => 'Umfassende WordPress-Sicherheit (ehem. iThemes Security).',
+                'check' => fn() => defined('ITSEC_CORE_VER') || class_exists('ITSEC_Core'),
+                'external' => 'https://developer.wordpress.org/plugins/solid-security/',
+            ],
+            'solid-backups' => [
+                'name' => 'Solid Backups',
+                'slug' => 'solid-backups',
+                'required' => false,
+                'description' => 'Automatische Backups und Migration (ehem. BackupBuddy).',
+                'check' => fn() => class_exists('pb_backupbuddy') || defined('JETRAIL_BUDDY_VER'),
+                'external' => 'https://developer.wordpress.org/plugins/backup-backup/',
+            ],
         ];
     }
 
@@ -308,6 +333,10 @@ class PluginServiceProvider extends ServiceProvider
             'Performance & Analytics' => [
                 'wp-optimize' => $this->plugins['wp-optimize'],
                 'pirsch-analytics' => $this->plugins['pirsch-analytics'],
+            ],
+            'Sicherheit & Backup' => [
+                'solid-security' => $this->plugins['solid-security'],
+                'solid-backups' => $this->plugins['solid-backups'],
             ],
             'Admin' => [
                 'admin-site-enhancements' => $this->plugins['admin-site-enhancements'],
@@ -363,6 +392,9 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function renderSetupPage(): void
     {
+        // Dismiss the styleguide welcome notice - user is already doing setup
+        update_option('wp_starter_welcome_dismissed', true);
+
         $categories = $this->getPluginsByCategory();
         $selectedPlugins = $this->getSelectedPlugins();
         $missingSelectedPlugins = array_filter($selectedPlugins, fn($p) => !($p['check'])());
@@ -401,14 +433,34 @@ class PluginServiceProvider extends ServiceProvider
                 <?php endif; ?>
             </div>
 
-            <div id="wp-starter-install-progress" style="display: none; background: #fff; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
-                <h3><?php esc_html_e('Installation läuft...', 'wp-starter'); ?></h3>
-                <div class="wp-starter-progress-bar" style="background: #ddd; height: 20px; border-radius: 3px; overflow: hidden;">
-                    <div class="wp-starter-progress-fill" style="background: #2271b1; height: 100%; width: 0%; transition: width 0.3s;"></div>
+            <div id="wp-starter-install-progress" style="display: none; background: #fff; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04); border-left: 4px solid #2271b1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0;"><?php esc_html_e('Installation läuft...', 'wp-starter'); ?></h3>
+                    <div style="text-align: right;">
+                        <span class="wp-starter-progress-counter" style="font-size: 14px; color: #50575e;"></span>
+                        <span class="wp-starter-elapsed-time" style="font-size: 12px; color: #787c82; display: block;"></span>
+                    </div>
                 </div>
-                <p class="wp-starter-progress-text" style="margin-top: 10px;"></p>
-                <div class="wp-starter-install-log" style="max-height: 200px; overflow-y: auto; margin-top: 15px; padding: 10px; background: #f6f7f7; font-family: monospace; font-size: 12px;"></div>
+                <div class="wp-starter-progress-bar" style="background: #ddd; height: 24px; border-radius: 4px; overflow: hidden; position: relative;">
+                    <div class="wp-starter-progress-fill" style="background: linear-gradient(90deg, #2271b1 0%, #135e96 100%); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                    <span class="wp-starter-progress-percent" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; font-weight: 600; color: #1d2327;"></span>
+                </div>
+                <div class="wp-starter-current-plugin" style="margin-top: 15px; padding: 12px; background: #f0f6fc; border-radius: 4px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="wp-starter-spinner" style="display: inline-block; width: 20px; height: 20px; border: 2px solid #2271b1; border-top-color: transparent; border-radius: 50%; animation: wp-starter-spin 1s linear infinite;"></span>
+                        <div>
+                            <strong class="wp-starter-plugin-name" style="display: block; color: #1d2327;"></strong>
+                            <span class="wp-starter-plugin-step" style="font-size: 12px; color: #50575e;"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="wp-starter-install-log" style="max-height: 200px; overflow-y: auto; margin-top: 15px; padding: 12px; background: #f6f7f7; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; line-height: 1.6;"></div>
             </div>
+            <style>
+                @keyframes wp-starter-spin {
+                    to { transform: rotate(360deg); }
+                }
+            </style>
 
             <?php foreach ($categories as $categoryName => $categoryPlugins): ?>
                 <div class="wp-starter-plugin-category" style="background: #fff; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
@@ -473,12 +525,14 @@ class PluginServiceProvider extends ServiceProvider
                 var $button = $(this);
                 var slug = $button.data('slug');
                 var $row = $button.closest('tr');
+                var originalText = $button.text();
 
                 $button.prop('disabled', true).text('<?php esc_html_e('Wird installiert...', 'wp-starter'); ?>');
 
                 $.ajax({
                     url: ajaxurl,
                     type: 'POST',
+                    timeout: 120000, // 2 minutes timeout for plugin installation
                     data: {
                         action: 'wp_starter_install_plugin',
                         slug: slug,
@@ -490,11 +544,19 @@ class PluginServiceProvider extends ServiceProvider
                             $button.replaceWith('<span style="color: #00a32a;"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Aktiv', 'wp-starter'); ?></span>');
                         } else {
                             $button.prop('disabled', false).text('<?php esc_html_e('Fehler - Erneut versuchen', 'wp-starter'); ?>');
-                            alert(response.data.message || '<?php esc_html_e('Installation fehlgeschlagen.', 'wp-starter'); ?>');
+                            var errorMsg = response.data && response.data.message ? response.data.message : '<?php esc_html_e('Installation fehlgeschlagen.', 'wp-starter'); ?>';
+                            console.error('Plugin install error:', errorMsg);
+                            alert(errorMsg);
                         }
                     },
-                    error: function() {
+                    error: function(xhr, status, error) {
                         $button.prop('disabled', false).text('<?php esc_html_e('Fehler - Erneut versuchen', 'wp-starter'); ?>');
+                        console.error('Plugin install AJAX error:', status, error, xhr.responseText);
+                        if (status === 'timeout') {
+                            alert('<?php esc_html_e('Die Installation hat zu lange gedauert. Bitte versuchen Sie es erneut.', 'wp-starter'); ?>');
+                        } else {
+                            alert('<?php esc_html_e('Netzwerkfehler bei der Installation. Bitte versuchen Sie es erneut.', 'wp-starter'); ?>');
+                        }
                     }
                 });
             });
@@ -504,12 +566,22 @@ class PluginServiceProvider extends ServiceProvider
                 var $button = $(this);
                 var $progress = $('#wp-starter-install-progress');
                 var $progressBar = $progress.find('.wp-starter-progress-fill');
-                var $progressText = $progress.find('.wp-starter-progress-text');
+                var $progressPercent = $progress.find('.wp-starter-progress-percent');
+                var $progressCounter = $progress.find('.wp-starter-progress-counter');
+                var $elapsedTime = $progress.find('.wp-starter-elapsed-time');
+                var $pluginName = $progress.find('.wp-starter-plugin-name');
+                var $pluginStep = $progress.find('.wp-starter-plugin-step');
+                var $currentPlugin = $progress.find('.wp-starter-current-plugin');
                 var $log = $progress.find('.wp-starter-install-log');
 
+                // Build plugin list with names
                 var plugins = [];
+                var pluginNames = {};
                 $('.wp-starter-install-plugin').each(function() {
-                    plugins.push($(this).data('slug'));
+                    var slug = $(this).data('slug');
+                    var name = $(this).closest('tr').find('strong').first().text();
+                    plugins.push(slug);
+                    pluginNames[slug] = name || slug;
                 });
 
                 if (plugins.length === 0) {
@@ -523,48 +595,117 @@ class PluginServiceProvider extends ServiceProvider
 
                 var total = plugins.length;
                 var completed = 0;
+                var startTime = Date.now();
+                var timerInterval;
+
+                // Update elapsed time every second
+                function updateElapsedTime() {
+                    var elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    var minutes = Math.floor(elapsed / 60);
+                    var seconds = elapsed % 60;
+                    $elapsedTime.text('<?php esc_html_e('Verstrichene Zeit:', 'wp-starter'); ?> ' +
+                        (minutes > 0 ? minutes + ' min ' : '') + seconds + ' s');
+                }
+                timerInterval = setInterval(updateElapsedTime, 1000);
+                updateElapsedTime();
+
+                function updateProgress(current, total, percent) {
+                    $progressBar.css('width', percent + '%');
+                    $progressPercent.text(percent + '%');
+                    $progressCounter.text('Plugin ' + current + ' / ' + total);
+                }
+
+                function logMessage(type, slug, message, details) {
+                    var name = pluginNames[slug] || slug;
+                    var timestamp = new Date().toLocaleTimeString('de-DE');
+                    var icon = type === 'success' ? '✓' : (type === 'error' ? '✗' : '○');
+                    var color = type === 'success' ? '#00a32a' : (type === 'error' ? '#d63638' : '#50575e');
+                    var html = '<div style="color: ' + color + '; padding: 4px 0; border-bottom: 1px solid #e0e0e0;">' +
+                        '<span style="color: #787c82; margin-right: 8px;">[' + timestamp + ']</span>' +
+                        '<strong>' + icon + ' ' + name + '</strong>';
+                    if (message) {
+                        html += ' <span style="color: #50575e;">— ' + message + '</span>';
+                    }
+                    if (details) {
+                        html += '<div style="font-size: 11px; color: #787c82; margin-left: 20px;">' + details + '</div>';
+                    }
+                    html += '</div>';
+                    $log.append(html);
+                    $log.scrollTop($log[0].scrollHeight);
+                }
 
                 function installNext() {
                     if (plugins.length === 0) {
-                        $progressText.text('<?php esc_html_e('Alle Plugins wurden installiert!', 'wp-starter'); ?>');
+                        clearInterval(timerInterval);
+                        $currentPlugin.html('<div style="display: flex; align-items: center; gap: 10px; color: #00a32a;">' +
+                            '<span class="dashicons dashicons-yes-alt" style="font-size: 24px;"></span>' +
+                            '<strong><?php esc_html_e('Alle Plugins wurden erfolgreich installiert!', 'wp-starter'); ?></strong></div>');
+                        $progress.find('h3').text('<?php esc_html_e('Installation abgeschlossen', 'wp-starter'); ?>');
+                        $progress.css('border-left-color', '#00a32a');
                         $button.hide();
+                        logMessage('success', '', '<?php esc_html_e('Installation abgeschlossen', 'wp-starter'); ?>',
+                            '<?php esc_html_e('Seite wird neu geladen...', 'wp-starter'); ?>');
                         setTimeout(function() {
                             location.reload();
-                        }, 1500);
+                        }, 2000);
                         return;
                     }
 
                     var slug = plugins.shift();
-                    $progressText.text('<?php esc_html_e('Installiere:', 'wp-starter'); ?> ' + slug);
+                    var currentNum = completed + 1;
+                    var percent = Math.round((completed / total) * 100);
+
+                    updateProgress(currentNum, total, percent);
+                    $pluginName.text(pluginNames[slug]);
+                    $pluginStep.text('<?php esc_html_e('Lade Plugin von WordPress.org herunter...', 'wp-starter'); ?>');
+                    logMessage('info', slug, '<?php esc_html_e('Installation gestartet', 'wp-starter'); ?>');
+
+                    // Simulate step updates (since we can't get real-time feedback from WP)
+                    var stepTimeout = setTimeout(function() {
+                        $pluginStep.text('<?php esc_html_e('Entpacke und installiere...', 'wp-starter'); ?>');
+                    }, 2000);
+                    var stepTimeout2 = setTimeout(function() {
+                        $pluginStep.text('<?php esc_html_e('Aktiviere Plugin...', 'wp-starter'); ?>');
+                    }, 4000);
 
                     $.ajax({
                         url: ajaxurl,
                         type: 'POST',
+                        timeout: 120000, // 2 minutes timeout for plugin installation
                         data: {
                             action: 'wp_starter_install_plugin',
                             slug: slug,
                             nonce: nonce
                         },
                         success: function(response) {
+                            clearTimeout(stepTimeout);
+                            clearTimeout(stepTimeout2);
                             completed++;
                             var percent = Math.round((completed / total) * 100);
-                            $progressBar.css('width', percent + '%');
+                            updateProgress(completed, total, percent);
 
                             if (response.success) {
-                                $log.append('<div style="color: #00a32a;">&#10003; ' + slug + ' - <?php esc_html_e('Erfolgreich', 'wp-starter'); ?></div>');
+                                var details = response.data && response.data.installed ?
+                                    '<?php esc_html_e('Neu installiert und aktiviert', 'wp-starter'); ?>' :
+                                    '<?php esc_html_e('Aktiviert', 'wp-starter'); ?>';
+                                logMessage('success', slug, '<?php esc_html_e('Erfolgreich', 'wp-starter'); ?>', details);
                             } else {
-                                $log.append('<div style="color: #d63638;">&#10007; ' + slug + ' - ' + (response.data.message || '<?php esc_html_e('Fehler', 'wp-starter'); ?>') + '</div>');
+                                var errorMsg = response.data && response.data.message ? response.data.message : '<?php esc_html_e('Unbekannter Fehler', 'wp-starter'); ?>';
+                                logMessage('error', slug, '<?php esc_html_e('Fehlgeschlagen', 'wp-starter'); ?>', errorMsg);
                             }
-                            $log.scrollTop($log[0].scrollHeight);
 
                             installNext();
                         },
-                        error: function() {
+                        error: function(xhr, status, error) {
+                            clearTimeout(stepTimeout);
+                            clearTimeout(stepTimeout2);
                             completed++;
                             var percent = Math.round((completed / total) * 100);
-                            $progressBar.css('width', percent + '%');
-                            $log.append('<div style="color: #d63638;">&#10007; ' + slug + ' - <?php esc_html_e('Netzwerkfehler', 'wp-starter'); ?></div>');
-                            $log.scrollTop($log[0].scrollHeight);
+                            updateProgress(completed, total, percent);
+                            var errorDetail = status === 'timeout' ?
+                                '<?php esc_html_e('Zeitüberschreitung', 'wp-starter'); ?>' :
+                                (status + (error ? ': ' + error : ''));
+                            logMessage('error', slug, '<?php esc_html_e('Netzwerkfehler', 'wp-starter'); ?>', errorDetail);
 
                             installNext();
                         }
