@@ -13,7 +13,7 @@
 
 <x-section :background="$background" :anchor="$anchor" class="{{ $classes }} pricing-table">
     @if($title)
-        <h2 class="mb-12 text-3xl font-bold text-center text-content">{{ $title }}</h2>
+        <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if(!empty($plans))
@@ -35,12 +35,12 @@
                     @endif
 
                     @if($name)
-                        <h3 class="mb-4 text-xl font-semibold {{ $isFeatured ? 'text-content-inverse' : 'text-content' }}">{{ $name }}</h3>
+                        <h3 class="text-h4 mb-4 {{ $isFeatured ? 'text-content-inverse' : 'text-content' }}">{{ $name }}</h3>
                     @endif
 
                     <div class="mb-6">
                         @if($price)
-                            <span class="text-4xl font-bold {{ $isFeatured ? 'text-content-inverse' : 'text-content' }}">{{ $price }}</span>
+                            <span class="text-h1 {{ $isFeatured ? 'text-content-inverse' : 'text-content' }}">{{ $price }}</span>
                         @endif
                         @if($period)
                             <span class="{{ $isFeatured ? 'text-content-inverse/80' : 'text-content-secondary' }}">/ {{ $period }}</span>

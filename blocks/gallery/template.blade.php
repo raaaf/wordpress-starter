@@ -15,7 +15,7 @@
 
 <x-section :background="$background" :anchor="$anchor" class="{{ $classes }} gallery">
     @if($title)
-        <h2 class="mb-12 text-3xl font-bold text-center text-content">{{ $title }}</h2>
+        <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if(!empty($images))
@@ -37,7 +37,7 @@
                             loading="lazy"
                         >
                         @if($caption)
-                            <figcaption class="absolute inset-x-0 bottom-0 p-3 text-sm text-white transition-opacity duration-300 opacity-0 bg-gradient-to-t from-black/70 to-transparent group-hover:opacity-100">
+                            <figcaption class="absolute inset-x-0 bottom-0 p-3 text-body-small text-white transition-opacity duration-300 opacity-0 bg-gradient-to-t from-black/70 to-transparent group-hover:opacity-100">
                                 {{ $caption }}
                             </figcaption>
                         @endif

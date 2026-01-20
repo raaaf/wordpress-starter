@@ -30,7 +30,7 @@
          @if($title) aria-labelledby="cta-title-{{ esc_attr($blockId) }}" @endif>
         <div>
             @if($title)
-                <h2 id="cta-title-{{ esc_attr($blockId) }}" class="text-4xl md:text-5xl font-bold leading-tight">
+                <h2 id="cta-title-{{ esc_attr($blockId) }}" class="text-display">
                     {{ $title }}
                 </h2>
             @endif

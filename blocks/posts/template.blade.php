@@ -32,7 +32,7 @@
 
 <x-section :background="$background" :anchor="$anchor" class="{{ $classes }} posts-block">
     @if($title)
-        <h2 class="mb-12 text-3xl font-bold text-center text-content">{{ $title }}</h2>
+        <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if($postsQuery->have_posts())
@@ -53,7 +53,7 @@
 
                     <div class="p-6">
                         @if($showDate || $showAuthor)
-                            <div class="flex items-center gap-4 mb-3 text-sm text-content-secondary">
+                            <div class="flex items-center gap-4 mb-3 text-body-small text-content-secondary">
                                 @if($showDate)
                                     <time datetime="{{ get_the_date('c') }}">
                                         {{ get_the_date('j. F Y') }}
@@ -65,7 +65,7 @@
                             </div>
                         @endif
 
-                        <h3 class="mb-3 text-xl font-semibold text-content">
+                        <h3 class="text-h4 mb-3 text-content">
                             <a href="{{ get_permalink() }}" class="hover:text-content-brand">
                                 {{ get_the_title() }}
                             </a>
