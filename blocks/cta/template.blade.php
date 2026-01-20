@@ -17,10 +17,6 @@
         'brand-secondary' => 'bg-surface-brand-secondary',
     ];
     $bgClass = $backgrounds[$background] ?? 'bg-surface-brand';
-
-    $bgImage = $background === 'brand-secondary'
-        ? 'bg-[url(./img/bg-effects-03.png)]'
-        : 'bg-[url(./img/bg-effects-01.png)]';
 @endphp
 
 <section class="{{ $classes }} cta-block {{ $bgClass }} relative overflow-hidden text-content-inverse"
@@ -53,5 +49,4 @@
             @endif
         </div>
     </div>
-    <div class="absolute -z-0 inset-0 {{ $bgImage }} bg-no-repeat bg-auto bg-center pointer-events-none"></div>
 </section>
