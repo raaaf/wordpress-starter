@@ -30,7 +30,7 @@
     $postsQuery = new WP_Query($args);
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} posts-block">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} posts-block">
     @if($title)
         <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif

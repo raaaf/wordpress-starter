@@ -14,7 +14,7 @@
     $background = $fields['background_color'] ?? 'primary';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} table-block">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} table-block">
     @if($title)
         <h2 class="text-h2 mb-8 text-center text-content">{{ $title }}</h2>
     @endif

@@ -12,7 +12,7 @@
     $background = $fields['background_color'] ?? 'primary';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} team-block">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} team-block">
     @if($title)
         <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
@@ -49,7 +49,9 @@
                     @endif
 
                     @if($position)
-                        <p class="mb-3 font-medium text-content-brand">{{ $position }}</p>
+                        <div class="mb-3">
+                            <x-badge variant="brand" style="outline" size="sm">{{ $position }}</x-badge>
+                        </div>
                     @endif
 
                     @if($bio)
@@ -59,14 +61,29 @@
                     @if($email || $linkedin)
                         <div class="flex justify-center gap-3">
                             @if($email)
-                                <a href="mailto:{{ $email }}" class="p-2 transition-colors rounded-lg bg-surface-secondary hover:bg-surface-brand hover:text-content-inverse" title="E-Mail">
+                                <x-button
+                                    url="mailto:{{ $email }}"
+                                    title=""
+                                    variant="secondary"
+                                    size="sm"
+                                    class="!p-2 !min-h-0 hover:!bg-surface-brand hover:!text-content-inverse"
+                                >
                                     <x-icon name="mail" size="lg" />
-                                </a>
+                                    <span class="sr-only">E-Mail</span>
+                                </x-button>
                             @endif
                             @if($linkedin)
-                                <a href="{{ $linkedin }}" target="_blank" rel="noopener noreferrer" class="p-2 transition-colors rounded-lg bg-surface-secondary hover:bg-surface-brand hover:text-content-inverse" title="LinkedIn">
+                                <x-button
+                                    url="{{ $linkedin }}"
+                                    title=""
+                                    target="_blank"
+                                    variant="secondary"
+                                    size="sm"
+                                    class="!p-2 !min-h-0 hover:!bg-surface-brand hover:!text-content-inverse"
+                                >
                                     <x-icon name="linkedin" size="lg" />
-                                </a>
+                                    <span class="sr-only">LinkedIn</span>
+                                </x-button>
                             @endif
                         </div>
                     @endif

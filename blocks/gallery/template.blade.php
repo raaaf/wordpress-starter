@@ -13,7 +13,7 @@
     $background = $fields['background_color'] ?? 'primary';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} gallery">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} gallery">
     @if($title)
         <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
@@ -33,11 +33,11 @@
                             src="{{ esc_url($thumb[0]) }}"
                             data-zoom-src="{{ esc_url($full[0]) }}"
                             alt="{{ esc_attr($alt ?: '') }}"
-                            class="object-cover w-full transition-transform duration-300 cursor-zoom-in aspect-square gallery-zoom group-hover:scale-105"
+                            class="object-cover w-full transition-transform duration-300 ease-in-out cursor-zoom-in aspect-square gallery-zoom group-hover:scale-105"
                             loading="lazy"
                         >
                         @if($caption)
-                            <figcaption class="absolute inset-x-0 bottom-0 p-3 text-body-small text-white transition-opacity duration-300 opacity-0 bg-gradient-to-t from-black/70 to-transparent group-hover:opacity-100">
+                            <figcaption class="absolute inset-x-0 bottom-0 p-3 text-body-small text-content-inverse transition-opacity duration-300 opacity-0 bg-gradient-to-t from-surface-inverse/70 to-transparent group-hover:opacity-100">
                                 {{ $caption }}
                             </figcaption>
                         @endif
@@ -48,13 +48,4 @@
     @endif
 </x-section>
 
-@pushOnce('scripts')
-<script type="module">
-    import mediumZoom from 'medium-zoom';
-    mediumZoom('.gallery-zoom', {
-        margin: 24,
-        background: 'rgba(0, 0, 0, 0.9)',
-        scrollOffset: 40,
-    });
-</script>
-@endPushOnce
+{{-- Gallery zoom is initialized in app.ts via initGalleryZoom() --}}

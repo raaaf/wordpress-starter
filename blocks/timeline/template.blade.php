@@ -1,7 +1,7 @@
 {{--
     Timeline Block
 
-    Uses shared components: x-section, x-badge
+    Uses shared components: x-section, x-badge, x-card
     Fields: title, events (repeater: year, title, content, image), background_color
 --}}
 
@@ -11,7 +11,7 @@
     $background = $fields['background_color'] ?? 'primary';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} timeline-block">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} timeline-block">
     @if($title)
         <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
@@ -36,7 +36,7 @@
 
                         {{-- Content card --}}
                         <div class="w-full md:w-[calc(50%-2rem)] {{ $isEven ? 'md:text-right' : 'md:text-left' }}">
-                            <div class="p-6 rounded-xl bg-surface-secondary">
+                            <x-card variant="filled" padding="lg" class="rounded-xl">
                                 @if($year)
                                     <x-badge variant="accent" size="md" class="mb-3">{{ $year }}</x-badge>
                                 @endif
@@ -59,7 +59,7 @@
                                         loading="lazy"
                                     >
                                 @endif
-                            </div>
+                            </x-card>
                         </div>
 
                         {{-- Spacer for other side --}}

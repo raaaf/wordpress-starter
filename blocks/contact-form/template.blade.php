@@ -1,7 +1,7 @@
 {{--
     Contact Form Block (Contact Form 7)
 
-    Uses shared components: x-section, x-grid, x-icon
+    Uses shared components: x-section, x-grid, x-icon, x-card, x-link
     Fields: title, content, form_id, show_contact_info, background_color
 --}}
 
@@ -19,7 +19,7 @@
     $email = \WordpressStarter\Acf\Fields::option('email', '');
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} contact-form">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} contact-form">
     <x-grid cols="2" gap="xl" class="items-start">
         {{-- Left: Title, Content, Contact Info --}}
         <div>
@@ -34,7 +34,7 @@
             @endif
 
             @if($showContactInfo && ($companyName || $address || $phone || $email))
-                <div class="p-6 rounded-lg bg-surface-secondary">
+                <x-card variant="filled" padding="lg">
                     <h3 class="text-h5 mb-4 text-content">Kontaktdaten</h3>
 
                     @if($companyName)
@@ -48,17 +48,17 @@
                     @if($phone)
                         <p class="flex items-center gap-2 mb-2 text-content-secondary">
                             <x-icon name="phone" size="lg" />
-                            <a href="tel:{{ esc_attr(preg_replace('/[^0-9+]/', '', $phone)) }}" class="hover:text-content-link-hover">{{ esc_html($phone) }}</a>
+                            <x-link url="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" variant="dark">{{ $phone }}</x-link>
                         </p>
                     @endif
 
                     @if($email)
                         <p class="flex items-center gap-2 text-content-secondary">
                             <x-icon name="mail" size="lg" />
-                            <a href="mailto:{{ esc_attr($email) }}" class="hover:text-content-link-hover">{{ esc_html($email) }}</a>
+                            <x-link url="mailto:{{ $email }}" variant="dark">{{ $email }}</x-link>
                         </p>
                     @endif
-                </div>
+                </x-card>
             @endif
         </div>
 

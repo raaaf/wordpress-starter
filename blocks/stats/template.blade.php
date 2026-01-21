@@ -10,15 +10,24 @@
     $title = $fields['title'] ?? '';
     $stats = $fields['stats'] ?? [];
     $background = $fields['background_color'] ?? 'brand';
+
+    // Use explicit grid classes to ensure Tailwind includes them
+    $statsCount = count($stats);
+    $gridClass = match(true) {
+        $statsCount >= 4 => 'md:grid-cols-4',
+        $statsCount === 3 => 'md:grid-cols-3',
+        $statsCount === 2 => 'md:grid-cols-2',
+        default => 'md:grid-cols-1',
+    };
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} stats-block">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} stats-block">
     @if($title)
         <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if(!empty($stats))
-        <div class="grid gap-8 text-center md:grid-cols-{{ min(count($stats), 4) }}">
+        <div class="grid gap-8 text-center {{ $gridClass }}">
             @foreach($stats as $stat)
                 @php
                     $number = intval($stat['number'] ?? 0);
@@ -26,40 +35,10 @@
                     $label = $stat['label'] ?? '';
                     $icon = $stat['icon'] ?? '';
                 @endphp
-                <div
-                    x-data="{
-                        target: {{ $number }},
-                        current: 0,
-                        duration: 2000,
-                        started: false,
-                        init() {
-                            const observer = new IntersectionObserver((entries) => {
-                                if (entries[0].isIntersecting && !this.started) {
-                                    this.started = true;
-                                    this.animate();
-                                }
-                            }, { threshold: 0.5 });
-                            observer.observe(this.$el);
-                        },
-                        animate() {
-                            const start = performance.now();
-                            const step = (timestamp) => {
-                                const progress = Math.min((timestamp - start) / this.duration, 1);
-                                this.current = Math.floor(progress * this.target);
-                                if (progress < 1) {
-                                    requestAnimationFrame(step);
-                                } else {
-                                    this.current = this.target;
-                                }
-                            };
-                            requestAnimationFrame(step);
-                        }
-                    }"
-                    class="p-6"
-                >
+                <div x-data="statsCounter({{ $number }})" class="p-6">
                     @if($icon)
-                        <div class="flex justify-center mb-4">
-                            <span class="text-4xl">{{ $icon }}</span>
+                        <div class="flex justify-center mb-4 text-content-brand">
+                            <x-icon :name="$icon" class="w-10 h-10" />
                         </div>
                     @endif
 

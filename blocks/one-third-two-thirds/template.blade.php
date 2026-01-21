@@ -11,11 +11,15 @@
     $background = $fields['background_color'] ?? 'primary';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} one-third-two-thirds">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} one-third-two-thirds">
     <x-grid cols="1/3-2/3" gap="lg" align="items-center">
-        <x-prose>{!! $column_1 !!}</x-prose>
-        <x-card variant="outlined" padding="lg">
-            <x-prose>{!! $column_2 !!}</x-prose>
-        </x-card>
+        <div class="md:col-span-1">
+            <x-prose>{!! $column_1 !!}</x-prose>
+        </div>
+        <div class="md:col-span-2">
+            <x-card variant="outlined" padding="lg">
+                <x-prose>{!! $column_2 !!}</x-prose>
+            </x-card>
+        </div>
     </x-grid>
 </x-section>

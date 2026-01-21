@@ -12,7 +12,7 @@
     $background = $fields['background_color'] ?? 'primary';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} cards">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} cards">
     @if($title)
         <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
@@ -23,18 +23,9 @@
                 <x-card variant="elevated" padding="lg" class="h-full">
                     {{-- Icon --}}
                     @if(!empty($card['icon']))
-                        @php
-                            $iconImage = wp_get_attachment_image_src($card['icon'], 'thumbnail');
-                        @endphp
-                        @if($iconImage)
-                            <div class="flex items-center justify-center w-16 h-16 mb-6 rounded-lg bg-surface-brand-subtle">
-                                <img
-                                    src="{{ $iconImage[0] }}"
-                                    alt=""
-                                    class="w-10 h-10"
-                                >
-                            </div>
-                        @endif
+                        <div class="flex items-center justify-center w-16 h-16 mb-6 rounded-lg bg-surface-brand-subtle text-content-brand">
+                            <x-icon :name="$card['icon']" size="xl" />
+                        </div>
                     @endif
 
                     {{-- Title --}}
