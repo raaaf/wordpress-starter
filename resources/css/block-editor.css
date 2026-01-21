@@ -1,15 +1,117 @@
+/**
+ * Editor styles to match frontend layout
+ * max-w-7xl = 80rem (1280px)
+ */
+
 .block-editor__typewriter {
     @apply font-sans;
 }
 
-.wp-block{
-    @apply max-w-screen-lg;
+/* Override Gutenberg default widths */
+.editor-styles-wrapper .wp-block {
+    max-width: 80rem !important; /* max-w-7xl */
 }
 
-.wp-block[data-align=wide] {
-    @apply max-w-screen-xl;
+.editor-styles-wrapper .wp-block[data-align=wide] {
+    max-width: 80rem !important;
 }
 
-.wp-block[data-align=full] {
-    @apply max-w-full;
+.editor-styles-wrapper .wp-block[data-align=full] {
+    max-width: 100% !important;
+}
+
+/* ACF blocks: full-width for backgrounds */
+.editor-styles-wrapper .wp-block[data-type^="acf/"] {
+    max-width: 100% !important;
+}
+
+.editor-styles-wrapper .wp-block-group,
+.editor-styles-wrapper .wp-block-cover {
+    max-width: 100% !important;
+}
+
+/* Editor canvas width */
+.editor-styles-wrapper {
+    max-width: 100% !important;
+}
+
+/* Block list layout */
+.is-root-container > .wp-block {
+    max-width: 80rem !important;
+}
+
+/* ==========================================================================
+   ACF Icon Radio Field Enhancement
+   ========================================================================== */
+
+/* Icon radio field container */
+.acf-icon-radio-field .acf-radio-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.acf-icon-radio-field .acf-radio-list li {
+    margin: 0 !important;
+}
+
+/* Hide the default radio input (inside label) */
+.acf-icon-radio-field .acf-radio-list input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+/* Style the label as icon button */
+.acf-icon-radio-field .acf-radio-list label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+.acf-icon-radio-field .acf-radio-list label:hover {
+    border-color: #007cba;
+    background: #f0f7fc;
+}
+
+/* Selected state - input is inside label, use :has() */
+.acf-icon-radio-field .acf-radio-list label:has(input[type="radio"]:checked) {
+    border-color: #007cba;
+    background: #007cba;
+    color: #fff;
+}
+
+.acf-icon-radio-field .acf-radio-list label:has(input[type="radio"]:checked) svg {
+    color: #fff;
+}
+
+/* Icon inside label */
+.acf-icon-radio-field .acf-radio-list label svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* "No icon" option - show text */
+.acf-icon-radio-field .acf-radio-list label[data-icon=""] {
+    width: auto;
+    padding: 0 12px;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Hide original text labels */
+.acf-icon-radio-field .acf-radio-list label .acf-icon-label-text {
+    display: none;
 }
