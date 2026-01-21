@@ -66,7 +66,7 @@ npm run dev
 ```
 wordpress-starter/
 ├── acf-json/           # ACF field group JSON files
-├── blocks/             # ACF Gutenberg blocks (27 blocks included)
+├── blocks/             # ACF Gutenberg blocks (28 blocks included)
 │   ├── accordion/     # Expandable accordion (FAQ)
 │   ├── before-after/  # Image comparison slider
 │   ├── cards/        # Feature cards with icons
@@ -281,6 +281,41 @@ Alpine.start();
 </div>
 ```
 
+### Design Tokens
+
+The theme uses a token-based design system in `resources/css/tokens.css`, auto-generated from Figma:
+
+**Light/Dark Mode:**
+```html
+<!-- Toggle dark mode -->
+<html data-theme="dark">
+```
+
+Or let it follow system preference automatically via `prefers-color-scheme`.
+
+**Semantic Tokens:**
+```css
+/* Background */
+background: var(--bg-primary);     /* White / Dark gray */
+background: var(--bg-brand);       /* Brand color */
+background: var(--bg-brand-subtle); /* Light brand tint */
+
+/* Text */
+color: var(--text-primary);   /* Main text */
+color: var(--text-secondary); /* Muted text */
+color: var(--text-brand);     /* Brand color */
+
+/* Border */
+border-color: var(--border-default);
+border-color: var(--border-brand);
+```
+
+**Component Tokens:**
+- Button sizes: `--button-sm-*`, `--button-md-*`, `--button-lg-*`
+- Input styles: `--input-sm-*`, `--input-md-*`, `--input-lg-*`
+- Card styles: `--card-*`
+- Shadows: `--shadow-button`, `--shadow-card`, `--shadow-input`
+
 ## 🚀 Production Build
 
 ```bash
@@ -424,7 +459,7 @@ For Mac users, we recommend using [Local by Flywheel](https://localwp.com/) for 
 
 ### Pre-built ACF Blocks
 
-The theme includes 27 pre-configured ACF blocks:
+The theme includes 28 pre-configured ACF blocks:
 
 **Layout Blocks:**
 - **one-column** - Single column content block
@@ -460,6 +495,7 @@ The theme includes 27 pre-configured ACF blocks:
 - **posts** - Dynamic blog post display
 - **before-after** - Image comparison slider
 - **table** - Data table with headers
+- **button** - Standalone CTA button
 
 ### ACF Helper Functions
 
