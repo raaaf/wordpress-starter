@@ -785,12 +785,12 @@ class ThemeSetup
         $runInstall = strtolower($this->prompt(
             'Run install commands automatically?',
             'y',
-            'composer install, npm install, npm run build (y/n)'
+            'composer update, npm install, npm run build (y/n)'
         )) === 'y';
 
         if (!$runInstall) {
             echo "\n" . $this->color("Skipped. Run these commands manually:", 'yellow') . "\n";
-            echo "  " . $this->color("composer dump-autoload && composer install", 'cyan') . "\n";
+            echo "  " . $this->color("composer dump-autoload && composer update", 'cyan') . "\n";
             echo "  " . $this->color("npm install && npm run build", 'cyan') . "\n";
             return;
         }
@@ -818,7 +818,8 @@ class ThemeSetup
         // Run composer commands
         if ($hasComposer) {
             $this->runCommand('Updating Composer autoload', 'composer dump-autoload');
-            $this->runCommand('Installing PHP dependencies', 'composer install --no-interaction');
+            // Use 'update' instead of 'install' because composer.json was modified with plugins
+            $this->runCommand('Installing PHP dependencies', 'composer update --no-interaction');
         }
 
         // Run npm commands
@@ -1519,7 +1520,7 @@ CSS;
             echo "     " . $this->color("composer dump-autoload", 'cyan') . "\n";
             echo "\n";
             echo "  " . $this->color("2.", 'yellow') . " Install dependencies:\n";
-            echo "     " . $this->color("composer install && npm install && npm run build", 'cyan') . "\n";
+            echo "     " . $this->color("composer update && npm install && npm run build", 'cyan') . "\n";
             echo "\n";
             echo "  " . $this->color("3.", 'yellow') . " Activate the theme in WordPress\n";
             echo "     Go to: " . $this->color("Design → Themes", 'cyan') . "\n";
@@ -1531,7 +1532,7 @@ CSS;
 
         if (!empty(array_filter($this->pluginSelections))) {
             $pluginCount = count(array_filter($this->pluginSelections));
-            echo $this->color("✓ {$pluginCount} plugins added to composer.json - will be installed with composer install.\n", 'green');
+            echo $this->color("✓ {$pluginCount} plugins added to composer.json - will be installed with composer update.\n", 'green');
             echo $this->color("  Note: ACF PRO must be installed manually (premium plugin).\n", 'gray');
             echo "\n";
         }
