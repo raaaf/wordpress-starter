@@ -9,8 +9,8 @@
     @param string $class - Additional CSS classes
 
     Available icons:
-    UI: calendar, check, chevron, close, eye, lock,
-        mail, minus, phone, plus, search, user, warning
+    UI: calendar, check, chevron, chevron-up, chevron-down, chevron-left, chevron-right,
+        close, eye, lock, mail, minus, phone, plus, search, user, warning
     Social: facebook, instagram, linkedin, x, xing, youtube
 
     Usage:
@@ -44,7 +44,7 @@
         $svgContent = preg_replace('/\s*(width|height)="[^"]*"/', '', $svgContent);
         $svgContent = preg_replace(
             '/<svg/',
-            '<svg class="' . $sizeClass . ' ' . $class . ' inline-block shrink-0" aria-hidden="true"',
+            '<svg class="icon ' . $sizeClass . ' ' . $class . ' inline-block shrink-0" aria-hidden="true"',
             $svgContent,
             1
         );

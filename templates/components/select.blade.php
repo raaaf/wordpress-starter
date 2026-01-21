@@ -91,7 +91,7 @@
     @endif
 
     {{-- Select wrapper --}}
-    <div class="relative">
+    <div class="select relative">
         <select
             name="{{ $name }}"
             id="{{ $selectId }}"
@@ -122,7 +122,7 @@
 
         {{-- Chevron icon --}}
         <div class="absolute {{ $iconSize }} top-1/2 -translate-y-1/2 pointer-events-none {{ $disabled ? 'text-icon-disabled' : 'text-icon-secondary' }}">
-            <x-icon name="chevron" class="w-full h-full" />
+            <x-icon name="chevron-down" class="w-full h-full" />
         </div>
     </div>
 

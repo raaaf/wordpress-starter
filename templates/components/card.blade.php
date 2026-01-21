@@ -99,7 +99,7 @@
 <{{ $tag }}
     @if($url && !$disabled) href="{{ esc_url($url) }}" @endif
     @if($disabled) aria-disabled="true" @endif
-    class="block rounded-[var(--card-radius)] overflow-hidden {{ $variantClass }} {{ $paddingClass }} {{ $interactiveClasses }} {{ $selectedClasses }} {{ $disabledClasses }} {{ $class }}"
+    class="card block rounded-[var(--card-radius)] overflow-hidden {{ $variantClass }} {{ $paddingClass }} {{ $interactiveClasses }} {{ $selectedClasses }} {{ $disabledClasses }} {{ $class }}"
 >
     @if($isStructuredCard)
         {{-- Image --}}

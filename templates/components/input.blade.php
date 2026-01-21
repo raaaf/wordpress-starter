@@ -89,7 +89,7 @@
     $radiusClass = $radiusClasses[$size] ?? $radiusClasses['md'];
 
     // Base input classes from Figma tokens
-    $baseClasses = 'w-full border bg-surface text-content placeholder:text-content-tertiary transition-all duration-200 focus:outline-none';
+    $baseClasses = 'input w-full border bg-surface text-content placeholder:text-content-tertiary transition-all duration-200 focus:outline-none';
 
     // State classes from Figma
     $stateClasses = match(true) {

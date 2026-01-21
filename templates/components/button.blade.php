@@ -33,7 +33,8 @@
 
 @php
     // Base classes - common to all buttons
-    $baseClasses = 'inline-flex items-center justify-center font-semibold transition-all duration-200 no-underline cursor-pointer select-none focus-visible:outline-none';
+    // 'button' class is used for editor CSS overrides (prevents WordPress link styling)
+    $baseClasses = 'button inline-flex items-center justify-center font-semibold transition-all duration-200 no-underline cursor-pointer select-none focus-visible:outline-none';
 
     // Variants matching Figma design with gradients and shadows
     $variants = [
@@ -78,6 +79,17 @@
             'active:shadow-[var(--shadow-inner)]',
             'focus-visible:shadow-[var(--shadow-focus-ring)]',
         ]),
+        'inverse' => implode(' ', [
+            'bg-surface',
+            'text-content-brand',
+            'border border-line',
+            'shadow-[var(--shadow-button)]',
+            'hover:bg-surface-secondary',
+            'hover:shadow-[var(--shadow-button-hover)]',
+            'active:bg-surface-tertiary',
+            'active:shadow-[var(--shadow-inner)]',
+            'focus-visible:shadow-[var(--shadow-focus-ring)]',
+        ]),
     ];
 
     // Disabled state overrides (same for all variants)
@@ -110,7 +122,7 @@
        @if($target === '_blank' && !$disabled) rel="noopener noreferrer" @endif
        @if($disabled) aria-disabled="true" tabindex="-1" @endif
        {!! $analyticsAttrs !!}
-       class="{{ $baseClasses }} {{ $variantClass }} {{ $sizeClass }} {{ $class }}">
+       {{ $attributes->merge(['class' => "{$baseClasses} {$variantClass} {$sizeClass} {$class}"]) }}>
         {{ $title }}
         {{ $slot ?? '' }}
     </a>
@@ -119,7 +131,7 @@
     <button type="{{ $type }}"
             @if($disabled) disabled aria-disabled="true" @endif
             {!! $analyticsAttrs !!}
-            class="{{ $baseClasses }} {{ $variantClass }} {{ $sizeClass }} {{ $class }}">
+            {{ $attributes->merge(['class' => "{$baseClasses} {$variantClass} {$sizeClass} {$class}"]) }}>
         {{ $title }}
         {{ $slot ?? '' }}
     </button>
