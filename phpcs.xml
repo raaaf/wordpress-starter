@@ -5,7 +5,6 @@
     <!-- Scan these files -->
     <file>./src</file>
     <file>./config</file>
-    <file>./blocks</file>
 
     <!-- Ignore vendor, compiled files, and Blade templates -->
     <exclude-pattern>*/vendor/*</exclude-pattern>

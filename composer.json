@@ -9,8 +9,16 @@
             "email": "a@rafaelalex.de"
         }
     ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://wpackagist.org",
+            "only": ["wpackagist-plugin/*"]
+        }
+    ],
     "require": {
         "php": "^8.4",
+        "composer/installers": "^2.0",
         "illuminate/view": "^12.0",
         "illuminate/events": "^12.0",
         "illuminate/filesystem": "^12.0",
@@ -66,7 +74,13 @@
     },
     "config": {
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "composer/installers": true
+        }
+    },
+    "extra": {
+        "installer-paths": {
+            "../../plugins/{$name}/": ["type:wordpress-plugin"]
         }
     }
 }
