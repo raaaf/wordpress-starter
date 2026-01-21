@@ -81,6 +81,7 @@ class ThemeSetup
         'contact' => ['title' => 'Kontakt', 'template' => ''],
         'privacy' => ['title' => 'Datenschutz', 'template' => ''],
         'imprint' => ['title' => 'Impressum', 'template' => ''],
+        'styleguide' => ['title' => 'Styleguide', 'template' => '', 'status' => 'private'],
     ];
 
     public function __construct()

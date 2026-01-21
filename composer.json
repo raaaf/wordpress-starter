@@ -15,7 +15,8 @@
         "illuminate/events": "^12.0",
         "illuminate/filesystem": "^12.0",
         "illuminate/support": "^12.0",
-        "illuminate/container": "^12.0"
+        "illuminate/container": "^12.0",
+        "ramsey/uuid": "^4.7"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^3.13",
@@ -56,6 +57,11 @@
         "lint": [
             "@phpcs",
             "@phpstan"
+        ],
+        "verify": [
+            "@phpcs",
+            "@phpstan",
+            "@test"
         ]
     },
     "config": {
