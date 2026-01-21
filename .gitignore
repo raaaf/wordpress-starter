@@ -63,7 +63,15 @@ Thumbs.db
 !.github/
 !.editorconfig
 !.phpcs.xml.dist
+!.prettierrc
 !.env.example
+
+# track test fixtures
+!tests/fixtures/.env
+!tests/fixtures/dist/
+!tests/fixtures/dist/.vite/
+!tests/fixtures/dist/.vite/manifest.json
+
 !README.md
 !CHANGELOG.md
 !composer.json
