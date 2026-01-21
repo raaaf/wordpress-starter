@@ -1,6 +1,13 @@
 // Alpine.js Component Context Types
 // These types extend the component interface with Alpine's magic properties
 
+// Type declaration for @alpinejs/collapse plugin
+declare module '@alpinejs/collapse' {
+  import { PluginCallback } from 'alpinejs';
+  const collapse: PluginCallback;
+  export default collapse;
+}
+
 export interface AlpineComponentContext {
   $el: HTMLElement;
   $refs: Record<string, HTMLElement>;
