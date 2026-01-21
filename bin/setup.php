@@ -1427,6 +1427,14 @@ CSS;
      */
     private function offerToSetupRemote(string $currentRemote): void
     {
+        // Check if we already collected a repo URL in step 1 (full mode)
+        $collectedUrl = $this->config['theme_uri'] ?? '';
+        if (!empty($collectedUrl) && !$this->isStarterRepo($collectedUrl)) {
+            echo "\n  " . $this->color("Using repository from setup: ", 'gray') . $this->color($collectedUrl, 'cyan') . "\n";
+            $this->setRemoteAndPush($collectedUrl, $currentRemote);
+            return;
+        }
+
         if (!empty($currentRemote)) {
             echo "\n  " . $this->color("⚠ Remote still points to starter template:", 'yellow') . "\n";
             echo "  " . $this->color($currentRemote, 'gray') . "\n\n";
@@ -1451,6 +1459,9 @@ CSS;
                     // Push to the new repo
                     $this->runCommand('Pushing to new repository', 'git push -u origin HEAD');
                     echo "\n  " . $this->color("✓ Pushed to new repository.", 'green') . "\n";
+                } else {
+                    echo "  " . $this->color("⚠ Repository creation failed. Try manually:", 'yellow') . "\n";
+                    echo "  " . $this->color("git remote set-url origin <your-repo-url>", 'cyan') . "\n";
                 }
             } elseif ($choice === 'e' || $choice === 'existing') {
                 $newUrl = $this->prompt(
@@ -1460,23 +1471,7 @@ CSS;
                 );
 
                 if (!empty($newUrl)) {
-                    if (!empty($currentRemote)) {
-                        shell_exec('git remote remove origin 2>/dev/null');
-                    }
-                    shell_exec('git remote add origin ' . escapeshellarg($newUrl));
-                    echo "  " . $this->color("✓ Remote updated to: {$newUrl}", 'green') . "\n";
-
-                    // Offer to push
-                    $doPush = strtolower($this->prompt(
-                        'Push to remote?',
-                        'y',
-                        '(y/n)'
-                    )) === 'y';
-
-                    if ($doPush) {
-                        $this->runCommand('Pushing to remote', 'git push -u origin HEAD');
-                        echo "\n  " . $this->color("✓ Pushed to remote repository.", 'green') . "\n";
-                    }
+                    $this->setRemoteAndPush($newUrl, $currentRemote);
                 }
             } else {
                 echo "  " . $this->color("Skipped. You can set up a remote later with:", 'gray') . "\n";
@@ -1493,25 +1488,46 @@ CSS;
             );
 
             if (!empty($newUrl)) {
-                if (!empty($currentRemote)) {
-                    shell_exec('git remote remove origin 2>/dev/null');
-                }
-                shell_exec('git remote add origin ' . escapeshellarg($newUrl));
-                echo "  " . $this->color("✓ Remote set to: {$newUrl}", 'green') . "\n";
-
-                $doPush = strtolower($this->prompt(
-                    'Push to remote?',
-                    'y',
-                    '(y/n)'
-                )) === 'y';
-
-                if ($doPush) {
-                    $this->runCommand('Pushing to remote', 'git push -u origin HEAD');
-                    echo "\n  " . $this->color("✓ Pushed to remote repository.", 'green') . "\n";
-                }
+                $this->setRemoteAndPush($newUrl, $currentRemote);
             } else {
                 echo "  " . $this->color("Skipped. You can set up a remote later with:", 'gray') . "\n";
                 echo "  " . $this->color("git remote set-url origin <your-repo-url>", 'cyan') . "\n";
+            }
+        }
+    }
+
+    /**
+     * Set git remote and push
+     */
+    private function setRemoteAndPush(string $newUrl, string $currentRemote): void
+    {
+        // Update remote
+        if (!empty($currentRemote)) {
+            shell_exec('git remote remove origin 2>/dev/null');
+        }
+        $result = shell_exec('git remote add origin ' . escapeshellarg($newUrl) . ' 2>&1');
+        if ($result && str_contains($result, 'error')) {
+            echo "  " . $this->color("⚠ Failed to set remote: {$result}", 'yellow') . "\n";
+            return;
+        }
+        echo "  " . $this->color("✓ Remote set to: {$newUrl}", 'green') . "\n";
+
+        // Push
+        $doPush = strtolower($this->prompt(
+            'Push to remote?',
+            'y',
+            '(y/n)'
+        )) === 'y';
+
+        if ($doPush) {
+            echo "  Pushing to remote...\n";
+            $pushResult = shell_exec('git push -u origin HEAD 2>&1');
+            if ($pushResult && (str_contains($pushResult, 'error') || str_contains($pushResult, 'fatal'))) {
+                echo "  " . $this->color("⚠ Push failed:", 'yellow') . "\n";
+                echo "  " . $this->color($pushResult, 'gray') . "\n";
+                echo "  " . $this->color("Try manually: git push -u origin HEAD", 'cyan') . "\n";
+            } else {
+                echo "  " . $this->color("✓ Pushed to remote repository.", 'green') . "\n";
             }
         }
     }
