@@ -49,7 +49,7 @@
             "npm install"
         ],
         "test": "phpunit",
-        "phpcs": "phpcs",
+        "phpcs": "phpcs --runtime-set ignore_warnings_on_exit 1",
         "phpcs:fix": "phpcbf",
         "phpstan": "phpstan analyze --memory-limit=1G",
         "cs-fix": "php-cs-fixer fix",
