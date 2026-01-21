@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80" fill="none">
+  <path d="M10 50C10 50 20 25 35 25C50 25 45 55 60 55" stroke="#0EA5E9" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="60" cy="55" r="6" fill="#0EA5E9"/>
+  <text x="75" y="48" font-family="system-ui, sans-serif" font-size="24" font-weight="600" fill="#1F2937">WaveIO</text>
+</svg>

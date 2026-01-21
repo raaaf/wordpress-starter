@@ -174,15 +174,23 @@ final class ViteTest extends TestCase
         $this->assertStringContainsString('editor-style-ghi789.css', $styles['editor-style']['src']);
     }
 
-    public function testEnqueueEditorAssetsSkipsInDevMode(): void
+    public function testEnqueueEditorAssetsLoadsFromDevServerInDevMode(): void
     {
         $this->setViteDevMode(true);
+        Config::set('vite', [
+            'dev_server' => [
+                'host' => 'localhost',
+                'port' => 5173,
+            ],
+        ]);
 
         Vite::enqueueEditorAssets();
 
         $styles = $this->getEnqueuedStyles();
 
-        $this->assertArrayNotHasKey('editor-style', $styles);
+        // In dev mode, editor-style is loaded from dev server
+        $this->assertArrayHasKey('editor-style', $styles);
+        $this->assertStringContainsString('localhost:5173', $styles['editor-style']['src']);
     }
 
     public function testInitRegistersEnqueueHooks(): void
@@ -190,6 +198,6 @@ final class ViteTest extends TestCase
         Vite::init();
 
         $this->assertActionAdded('wp_enqueue_scripts');
-        $this->assertActionAdded('admin_enqueue_scripts');
+        $this->assertActionAdded('enqueue_block_editor_assets');
     }
 }
