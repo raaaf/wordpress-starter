@@ -14,10 +14,156 @@ class ThemeServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->addThemeSupport();
+        $this->disableGlobalStyles();
         $this->disableComments();
         $this->addTemplateFilter();
+        $this->registerBladePageTemplates();
         $this->addStructuredData();
         $this->addOpenGraphTags();
+        $this->addFaviconSupport();
+        $this->addLoginLogoSupport();
+        $this->disableTexturizeForAlpine();
+    }
+
+    /**
+     * Fix wptexturize corruption in block comments only
+     *
+     * WordPress's wptexturize converts ASCII quotes and dashes to typographic
+     * characters. This is great for content, but breaks JSON in block comments.
+     *
+     * Instead of disabling wptexturize globally, we fix block comments after
+     * wptexturize runs, preserving nice typography for regular content.
+     *
+     * @see https://core.trac.wordpress.org/ticket/2647
+     * @see https://support.advancedcustomfields.com/forums/topic/turn-off-smart-curly-quotes/
+     */
+    private function disableTexturizeForAlpine(): void
+    {
+        // Fix block comments AFTER wptexturize runs (priority 99, after default 10)
+        add_filter('the_content', [$this, 'fixCorruptedBlockContent'], 99);
+
+        // Fix content when editing (before it's displayed in editor)
+        add_filter('content_edit_pre', [$this, 'fixCorruptedBlockContent'], 1);
+
+        // Fix content BEFORE saving to database (prevents corruption)
+        add_filter('content_save_pre', [$this, 'fixCorruptedBlockContent'], 1);
+        add_filter('wp_insert_post_data', function ($data) {
+            if (!empty($data['post_content'])) {
+                $data['post_content'] = $this->fixCorruptedBlockContent($data['post_content']);
+            }
+            return $data;
+        }, 99);
+
+        // Fix content before block parsing (runs before ACF parses blocks)
+        add_filter('the_posts', function ($posts) {
+            foreach ($posts as $post) {
+                if ($post->post_content && strpos($post->post_content, '<!-- wp:') !== false) {
+                    $post->post_content = $this->fixCorruptedBlockContent($post->post_content);
+                }
+            }
+            return $posts;
+        }, 1);
+
+        // Fix content when loaded via REST API (block editor uses REST)
+        add_filter('rest_prepare_page', [$this, 'fixRestContent'], 10, 3);
+        add_filter('rest_prepare_post', [$this, 'fixRestContent'], 10, 3);
+
+        // Add admin action to fix all corrupted content (one-time fix)
+        add_action('admin_init', [$this, 'fixCorruptedContentOnce']);
+    }
+
+    /**
+     * One-time fix for all corrupted content in the database
+     * Runs once when ?fix_block_quotes=1 is added to any admin URL
+     */
+    public function fixCorruptedContentOnce(): void
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Admin-only one-time fix command
+        if (!isset($_GET['fix_block_quotes']) || !current_user_can('manage_options')) {
+            return;
+        }
+
+        global $wpdb;
+
+        // Find all posts with block content
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-time fix command
+        $posts = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT ID, post_content FROM {$wpdb->posts}
+                 WHERE post_content LIKE %s
+                 AND (post_content LIKE %s OR post_content LIKE %s)",
+                '%<!-- wp:%',
+                '%"%',
+                '%"%'
+            )
+        );
+
+        $fixed = 0;
+        foreach ($posts as $post) {
+            $fixedContent = $this->fixCorruptedBlockContent($post->post_content);
+            if ($fixedContent !== $post->post_content) {
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-time fix command
+                $wpdb->update(
+                    $wpdb->posts,
+                    ['post_content' => $fixedContent],
+                    ['ID' => $post->ID]
+                );
+                ++$fixed;
+            }
+        }
+
+        add_action('admin_notices', function () use ($fixed): void {
+            echo '<div class="notice notice-success"><p>Fixed ' . esc_html( $fixed ) . ' posts with corrupted block quotes.</p></div>';
+        });
+    }
+
+    /**
+     * Fix corrupted content in REST API responses
+     */
+    public function fixRestContent(\WP_REST_Response $response, \WP_Post $post, \WP_REST_Request $request): \WP_REST_Response
+    {
+        $data = $response->get_data();
+
+        if (isset($data['content']['raw'])) {
+            $data['content']['raw'] = $this->fixCorruptedBlockContent($data['content']['raw']);
+            $response->set_data($data);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Fix block content corrupted by wptexturize
+     *
+     * Converts typographic quotes back to ASCII within block comments.
+     */
+    public function fixCorruptedBlockContent(string $content): string
+    {
+        // Only process if content has blocks
+        if (strpos($content, '<!-- wp:') === false) {
+            return $content;
+        }
+
+        // Fix corrupted quotes in block comments
+        // Match block comments: <!-- wp:... -->
+        // Use Unicode escape sequences to avoid encoding issues
+        $typographicChars = [
+            "\u{201C}", // " left double quote
+            "\u{201D}", // " right double quote
+            "\u{2018}", // ' left single quote
+            "\u{2019}", // ' right single quote
+            "\u{2013}", // – en dash
+            "\u{2014}", // — em dash
+        ];
+        $asciiChars = ['"', '"', "'", "'", '-', '-'];
+
+        return preg_replace_callback(
+            '/<!-- wp:(.*?) -->/s',
+            function ($matches) use ($typographicChars, $asciiChars) {
+                return str_replace($typographicChars, $asciiChars, $matches[0]);
+            },
+            $content
+        ) ?? $content;
     }
 
     private function setupThemeVersion(): void
@@ -42,12 +188,85 @@ class ThemeServiceProvider extends ServiceProvider
             ]);
             add_theme_support('post-thumbnails');
             add_theme_support('align-wide');
-            add_theme_support('wp-block-styles');
+            // Removed: wp-block-styles - we use Tailwind instead
             add_theme_support('editor-styles');
-            add_editor_style('dist/editor-style.css');
-            add_theme_support('editor-color-palette');
-            add_theme_support('editor-font-sizes');
+            // Note: Editor styles are loaded via Vite::enqueueEditorAssets() for proper font paths
+            // Note: editor-color-palette and editor-font-sizes are handled by theme.json
         });
+    }
+
+    /**
+     * Disable WordPress Global Styles on frontend
+     *
+     * WordPress generates inline CSS from theme.json that conflicts with Tailwind.
+     * We keep theme.json for Block Editor presets (colors, spacing) but remove
+     * the generated frontend styles.
+     *
+     * @see https://developer.wordpress.org/news/2023/07/how-to-disable-global-styles-and-block-supports/
+     */
+    private function disableGlobalStyles(): void
+    {
+        // Remove global styles actions after WordPress has registered them
+        add_action('wp_enqueue_scripts', function (): void {
+            // Remove the inline global-styles CSS
+            wp_dequeue_style('global-styles');
+            wp_deregister_style('global-styles');
+
+            // Remove core block CSS - we style blocks with Tailwind
+            wp_dequeue_style('wp-block-library');
+            wp_deregister_style('wp-block-library');
+        }, 100);
+
+        // Prevent global styles from being enqueued in footer
+        add_action('init', function (): void {
+            remove_action('wp_footer', 'wp_enqueue_global_styles', 1);
+        });
+
+        // Remove SVG filters for duotone (not needed with Tailwind)
+        add_action('init', function (): void {
+            remove_action('wp_body_open', 'wp_global_styles_render_svg_filters');
+        });
+
+        // Only allow ACF blocks on root level (Core blocks still work in InnerBlocks)
+        add_filter('allowed_block_types_all', [$this, 'filterAllowedBlocks'], 10, 2);
+    }
+
+    /**
+     * Filter allowed blocks to only show ACF blocks on root level
+     *
+     * Core blocks (paragraph, heading, list) are still available inside
+     * InnerBlocks of layout blocks - they're just hidden from the main inserter.
+     *
+     * @param bool|array<string> $allowedBlocks
+     * @param \WP_Block_Editor_Context $context
+     * @return array<string>
+     */
+    public function filterAllowedBlocks(bool|array $allowedBlocks, \WP_Block_Editor_Context $context): array
+    {
+        // Get all registered ACF blocks
+        $acfBlocks = [];
+        $blocksDir = get_template_directory() . '/blocks';
+
+        if (is_dir($blocksDir)) {
+            $blocks = glob($blocksDir . '/*/block.json');
+            foreach ($blocks as $blockConfig) {
+                $blockName = basename(dirname($blockConfig));
+                $acfBlocks[] = 'acf/' . $blockName;
+            }
+        }
+
+        // Core blocks allowed in InnerBlocks (text formatting essentials)
+        // These won't appear in main inserter but work inside layout blocks
+        $coreBlocksForInnerBlocks = [
+            'core/paragraph',
+            'core/heading',
+            'core/list',
+            'core/list-item',
+            'core/quote',
+            'core/separator',
+        ];
+
+        return array_merge($acfBlocks, $coreBlocksForInnerBlocks);
     }
 
     private function disableComments(): void
@@ -92,16 +311,158 @@ class ThemeServiceProvider extends ServiceProvider
     private function addTemplateFilter(): void
     {
         add_filter('template_include', function (string $template): string {
-            $templateName = wp_basename($template, '.php');
-            $templateName = wp_basename($templateName, '.blade');
+            $blade = $GLOBALS['blade'] ?? null;
 
-            if ($GLOBALS['blade']->exists($templateName)) {
+            if (!$blade) {
+                return $template;
+            }
+
+            // Try to determine the best template based on WordPress context
+            $templateName = $this->getBladeTemplateName($template);
+
+            if ($blade->exists($templateName)) {
                 $GLOBALS['template_name'] = $templateName;
                 return get_template_directory() . '/config/index.php';
             }
 
             return $template;
         });
+    }
+
+    /**
+     * Register Blade page templates with WordPress
+     *
+     * Scans templates directory for .blade.php files with "Template Name:" comment
+     * and registers them so they appear in the page template dropdown.
+     */
+    private function registerBladePageTemplates(): void
+    {
+        add_filter('theme_page_templates', function (array $templates): array {
+            $templatesDir = get_template_directory() . '/templates';
+
+            if (!is_dir($templatesDir)) {
+                return $templates;
+            }
+
+            $bladeFiles = glob($templatesDir . '/page-*.blade.php');
+            if (!$bladeFiles) {
+                return $templates;
+            }
+
+            foreach ($bladeFiles as $file) {
+                $filename = basename($file);
+                // Skip if already registered
+                if (isset($templates[$filename])) {
+                    continue;
+                }
+
+                // Read file and extract Template Name from comment
+                $content = file_get_contents($file);
+                if ($content && preg_match('/Template Name:\s*(.+)/i', $content, $matches)) {
+                    $templates[$filename] = trim($matches[1]);
+                }
+            }
+
+            return $templates;
+        });
+    }
+
+    /**
+     * Determine the Blade template name based on WordPress context
+     */
+    private function getBladeTemplateName(string $wpTemplate): string
+    {
+        $blade = $GLOBALS['blade'] ?? null;
+
+        if (!$blade) {
+            return wp_basename($wpTemplate, '.php');
+        }
+
+        // Check for page templates (custom template, page-{slug}, page-{id}, page)
+        if (is_page()) {
+            $pageId = get_queried_object_id();
+            $pageSlug = get_queried_object()->post_name ?? '';
+
+            // Check for custom page template (set via _wp_page_template meta)
+            $customTemplate = get_page_template_slug($pageId);
+            if ($customTemplate) {
+                // Remove .blade.php or .php extension to get template name
+                $templateName = wp_basename($customTemplate, '.blade.php');
+                $templateName = wp_basename($templateName, '.php');
+                if ($blade->exists($templateName)) {
+                    return $templateName;
+                }
+            }
+
+            // Check for page-{slug}.blade.php
+            if ($pageSlug && $blade->exists("page-{$pageSlug}")) {
+                return "page-{$pageSlug}";
+            }
+            // Check for page-{id}.blade.php
+            if ($pageId && $blade->exists("page-{$pageId}")) {
+                return "page-{$pageId}";
+            }
+            // Check for page.blade.php
+            if ($blade->exists('page')) {
+                return 'page';
+            }
+        }
+
+        // Check for single post templates (single-{post_type}, single)
+        if (is_single()) {
+            $postType = get_post_type();
+
+            // Check for single-{post_type}.blade.php
+            if ($postType && $blade->exists("single-{$postType}")) {
+                return "single-{$postType}";
+            }
+            // Check for single.blade.php
+            if ($blade->exists('single')) {
+                return 'single';
+            }
+        }
+
+        // Check for archive templates
+        if (is_archive()) {
+            if (is_category() && $blade->exists('category')) {
+                return 'category';
+            }
+            if (is_tag() && $blade->exists('tag')) {
+                return 'tag';
+            }
+            if (is_author() && $blade->exists('author')) {
+                return 'author';
+            }
+            if ($blade->exists('archive')) {
+                return 'archive';
+            }
+        }
+
+        // Check for search template
+        if (is_search() && $blade->exists('search')) {
+            return 'search';
+        }
+
+        // Check for 404 template
+        if (is_404() && $blade->exists('404')) {
+            return '404';
+        }
+
+        // Check for front page template
+        if (is_front_page() && $blade->exists('front-page')) {
+            return 'front-page';
+        }
+
+        // Check for home (blog) template
+        if (is_home() && $blade->exists('home')) {
+            return 'home';
+        }
+
+        // Fall back to extracting name from WordPress template
+        $templateName = wp_basename($wpTemplate, '.php');
+        $templateName = wp_basename($templateName, '.blade');
+
+        return $templateName;
     }
 
     private function addStructuredData(): void
@@ -119,7 +480,8 @@ class ThemeServiceProvider extends ServiceProvider
                     'query-input' => 'required name=search_term_string',
                 ],
             ];
-            echo '<script type="application/ld+json">' . wp_json_encode($websiteSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+            $nonce = $GLOBALS['csp_nonce'] ?? '';
+            echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($websiteSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
 
             // Organization Schema (from theme options)
             if (function_exists('get_field')) {
@@ -136,13 +498,19 @@ class ThemeServiceProvider extends ServiceProvider
                         'url' => home_url(),
                     ];
 
-                    // Add logo if available
-                    $customLogoId = get_theme_mod('custom_logo');
-                    if ($customLogoId) {
-                        $logoUrl = wp_get_attachment_image_url($customLogoId, 'full');
-                        if ($logoUrl) {
-                            $orgSchema['logo'] = $logoUrl;
+                    // Add logo if available (ACF first, then Customizer)
+                    $logoUrl = null;
+                    $acfLogo = get_field('site_logo', 'option');
+                    if ($acfLogo && !empty($acfLogo['url'])) {
+                        $logoUrl = $acfLogo['url'];
+                    } else {
+                        $customLogoId = get_theme_mod('custom_logo');
+                        if ($customLogoId) {
+                            $logoUrl = wp_get_attachment_image_url($customLogoId, 'full');
                         }
+                    }
+                    if ($logoUrl) {
+                        $orgSchema['logo'] = $logoUrl;
                     }
 
                     // Add contact info
@@ -159,7 +527,7 @@ class ThemeServiceProvider extends ServiceProvider
                         ];
                     }
 
-                    echo '<script type="application/ld+json">' . wp_json_encode($orgSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+                    echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($orgSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
                 }
             }
 
@@ -195,7 +563,7 @@ class ThemeServiceProvider extends ServiceProvider
                     $articleSchema['description'] = wp_strip_all_tags($excerpt);
                 }
 
-                echo '<script type="application/ld+json">' . wp_json_encode($articleSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+                echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($articleSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
             }
         });
     }
@@ -208,14 +576,24 @@ class ThemeServiceProvider extends ServiceProvider
             $url = is_singular() ? get_permalink() : home_url();
             $siteName = get_bloginfo('name');
 
-            // Get image
+            // Get image (post thumbnail, ACF logo, or Customizer logo)
             $imageUrl = '';
             if (is_singular() && has_post_thumbnail()) {
                 $imageUrl = get_the_post_thumbnail_url(null, 'large');
             } else {
-                $customLogoId = get_theme_mod('custom_logo');
-                if ($customLogoId) {
-                    $imageUrl = wp_get_attachment_image_url($customLogoId, 'full');
+                // Try ACF logo first
+                if (function_exists('get_field')) {
+                    $acfLogo = get_field('site_logo', 'option');
+                    if ($acfLogo && !empty($acfLogo['url'])) {
+                        $imageUrl = $acfLogo['url'];
+                    }
+                }
+                // Fallback to Customizer logo
+                if (!$imageUrl) {
+                    $customLogoId = get_theme_mod('custom_logo');
+                    if ($customLogoId) {
+                        $imageUrl = wp_get_attachment_image_url($customLogoId, 'full');
+                    }
                 }
             }
 
@@ -251,5 +629,123 @@ class ThemeServiceProvider extends ServiceProvider
                 echo '<meta property="article:author" content="' . esc_attr(get_the_author()) . '">' . "\n";
             }
         }, 5); // Priority 5 to run before wp_head outputs other meta
+    }
+
+    /**
+     * Add favicon support using ACF options
+     */
+    private function addFaviconSupport(): void
+    {
+        // Override WordPress site icon with ACF favicon
+        add_filter('get_site_icon_url', function (string $url, int $size, int $blogId): string {
+            if (!function_exists('get_field')) {
+                return $url;
+            }
+
+            $faviconId = get_field('site_favicon', 'option');
+            if (!$faviconId) {
+                return $url;
+            }
+
+            $faviconUrl = wp_get_attachment_image_url($faviconId, [$size, $size]);
+            return $faviconUrl ?: $url;
+        }, 10, 3);
+
+        // Add favicon meta tags if ACF favicon is set
+        add_action('wp_head', function (): void {
+            if (!function_exists('get_field')) {
+                return;
+            }
+
+            $faviconId = get_field('site_favicon', 'option');
+            if (!$faviconId) {
+                return;
+            }
+
+            // Don't output if WordPress already has a site icon
+            if (has_site_icon()) {
+                return;
+            }
+
+            $favicon16 = wp_get_attachment_image_url($faviconId, [16, 16]);
+            $favicon32 = wp_get_attachment_image_url($faviconId, [32, 32]);
+            $favicon180 = wp_get_attachment_image_url($faviconId, [180, 180]);
+            $favicon192 = wp_get_attachment_image_url($faviconId, [192, 192]);
+            $favicon512 = wp_get_attachment_image_url($faviconId, [512, 512]);
+
+            if ($favicon32) {
+                echo '<link rel="icon" type="image/png" sizes="32x32" href="' . esc_url($favicon32) . '">' . "\n";
+            }
+            if ($favicon16) {
+                echo '<link rel="icon" type="image/png" sizes="16x16" href="' . esc_url($favicon16) . '">' . "\n";
+            }
+            if ($favicon180) {
+                echo '<link rel="apple-touch-icon" sizes="180x180" href="' . esc_url($favicon180) . '">' . "\n";
+            }
+            if ($favicon192) {
+                echo '<link rel="icon" type="image/png" sizes="192x192" href="' . esc_url($favicon192) . '">' . "\n";
+            }
+            if ($favicon512) {
+                echo '<link rel="icon" type="image/png" sizes="512x512" href="' . esc_url($favicon512) . '">' . "\n";
+            }
+        }, 1);
+    }
+
+    /**
+     * Add custom login page logo using ACF options
+     */
+    private function addLoginLogoSupport(): void
+    {
+        // Custom login logo
+        add_action('login_enqueue_scripts', function (): void {
+            $logoUrl = $this->getLogoUrl();
+            if (!$logoUrl) {
+                return;
+            }
+            ?>
+            <style type="text/css">
+                #login h1 a, .login h1 a {
+                    background-image: url('<?php echo esc_url($logoUrl); ?>');
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    width: 100%;
+                    height: 80px;
+                }
+            </style>
+            <?php
+        });
+
+        // Custom login logo URL
+        add_filter('login_headerurl', function (): string {
+            return home_url();
+        });
+
+        // Custom login logo title
+        add_filter('login_headertext', function (): string {
+            return get_bloginfo('name');
+        });
+    }
+
+    /**
+     * Get logo URL from ACF options or Customizer
+     */
+    private function getLogoUrl(): ?string
+    {
+        // Try ACF option first
+        if (function_exists('get_field')) {
+            $acfLogo = get_field('site_logo', 'option');
+            if ($acfLogo && !empty($acfLogo['url'])) {
+                return $acfLogo['url'];
+            }
+        }
+
+        // Fallback to Customizer
+        $customLogoId = get_theme_mod('custom_logo');
+        if ($customLogoId) {
+            return wp_get_attachment_image_url($customLogoId, 'full');
+        }
+
+        return null;
     }
 }

@@ -12,6 +12,10 @@ namespace WordpressStarter;
  * - ACF Pro generates inline scripts for field initialization
  * - Block editor injects inline styles for block previews
  *
+ * NOTE: 'unsafe-eval' is required because:
+ * - Alpine.js evaluates x-data expressions as JavaScript
+ * - Block previews are rendered via REST API (not caught by is_admin())
+ *
  * To remove 'unsafe-inline' in the future:
  * 1. Add nonce attributes to all inline scripts/styles
  * 2. Use wp_script_add_data() with 'nonce' for registered scripts
@@ -35,6 +39,22 @@ class Security
     }
 
     /**
+     * Add 'unsafe-eval' to a CSP header's script-src directive.
+     * Required for Alpine.js to work in the block editor.
+     */
+    public static function addUnsafeEvalToCSP(string $csp): string
+    {
+        if (!str_contains($csp, "'unsafe-eval'")) {
+            $csp = preg_replace(
+                '/(script-src[^;]*)/',
+                "$1 'unsafe-eval'",
+                $csp
+            ) ?? $csp;
+        }
+        return $csp;
+    }
+
+    /**
      * Build the Content-Security-Policy header value.
      */
     public static function getCSPHeader(): string
@@ -45,13 +65,14 @@ class Security
         // Base directives
         $directives = [
             "default-src 'self'",
-            "font-src 'self' https://fonts.gstatic.com",
+            "font-src 'self' data: https://fonts.gstatic.com",
             "img-src 'self' data: https:",
-            "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com",
+            "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com",
         ];
 
         // Script sources
-        $scriptSrc = "'self' 'nonce-{$nonce}' 'unsafe-inline'";
+        // Note: 'unsafe-eval' is required for Alpine.js to evaluate x-data expressions
+        $scriptSrc = "'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'";
         if ($isDevMode) {
             $scriptSrc .= ' http://localhost:5173';
         }
@@ -67,6 +88,9 @@ class Security
             $connectSrc .= ' http://localhost:5173 ws://localhost:5173';
         }
         $directives[] = "connect-src {$connectSrc}";
+
+        // Worker sources (for WordPress emoji loader and other web workers)
+        $directives[] = "worker-src 'self' blob:";
 
         return implode('; ', $directives);
     }
@@ -88,6 +112,35 @@ class Security
             }
         });
 
+        // Add unsafe-eval to CSP for admin pages (needed for Alpine.js in block editor)
+        // This modifies any CSP header set by other plugins (e.g., Solid Security)
+        add_filter('wp_headers', function (array $headers): array {
+            if (is_admin() && isset($headers['Content-Security-Policy'])) {
+                $headers['Content-Security-Policy'] = self::addUnsafeEvalToCSP($headers['Content-Security-Policy']);
+            }
+            return $headers;
+        });
+
+        // Fallback: Also modify CSP headers set directly via header() function
+        // This runs late to override plugin-set headers
+        add_action('admin_init', function (): void {
+            // Use output buffering to capture and modify headers
+            if (!headers_sent()) {
+                header_register_callback(function (): void {
+                    $headers = headers_list();
+                    foreach ($headers as $header) {
+                        if (stripos($header, 'Content-Security-Policy:') === 0) {
+                            // Remove the old header and set a new one with unsafe-eval
+                            $csp = substr($header, strlen('Content-Security-Policy: '));
+                            header_remove('Content-Security-Policy');
+                            header('Content-Security-Policy: ' . Security::addUnsafeEvalToCSP($csp));
+                            break;
+                        }
+                    }
+                });
+            }
+        }, 1);
+
         // Make nonce available globally for templates
         $GLOBALS['csp_nonce'] = self::getNonce();
 
@@ -100,5 +153,19 @@ class Security
             $nonce = self::getNonce();
             return str_replace('<script ', "<script nonce=\"{$nonce}\" ", $tag);
         }, 10, 2);
+
+        // Add nonce to WordPress inline scripts (wp_add_inline_script)
+        add_filter('wp_inline_script_attributes', function (array $attributes): array {
+            $attributes['nonce'] = self::getNonce();
+            return $attributes;
+        });
+
+        // Add nonce to wp_print_inline_script_tag calls
+        add_filter('wp_script_attributes', function (array $attributes): array {
+            if (!isset($attributes['nonce'])) {
+                $attributes['nonce'] = self::getNonce();
+            }
+            return $attributes;
+        });
     }
 }

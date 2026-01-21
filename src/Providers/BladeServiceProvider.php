@@ -36,6 +36,8 @@ class BladeServiceProvider extends ServiceProvider
     private function setupContainer(): void
     {
         $this->container = new Container();
+        // Set as global instance so ComponentTagCompiler can find it
+        Container::setInstance($this->container);
         /** @phpstan-ignore argument.type */
         Facade::setFacadeApplication($this->container);
     }
@@ -50,14 +52,22 @@ class BladeServiceProvider extends ServiceProvider
         $viewResolver->register('php', fn() => new PhpEngine($filesystem));
 
         $this->container->singleton('blade.compiler', fn() => $compiler);
-        
+
+        $viewFinder = new FileViewFinder($filesystem, $this->getViewPaths());
         $this->viewFactory = new Factory(
             $viewResolver,
-            new FileViewFinder($filesystem, $this->getViewPaths()),
+            $viewFinder,
             new Dispatcher()
         );
 
+        // Set container on view factory for component resolution
+        $this->viewFactory->setContainer($this->container);
+
+        // Register view factory under multiple aliases for Laravel compatibility
         $this->container->singleton('view', fn() => $this->viewFactory);
+        $this->container->singleton(\Illuminate\Contracts\View\Factory::class, fn() => $this->viewFactory);
+        $this->container->singleton(\Illuminate\View\Factory::class, fn() => $this->viewFactory);
+        $this->container->singleton('view.finder', fn() => $viewFinder);
     }
 
     private function setGlobalBladeInstance(): void
@@ -105,7 +115,10 @@ class BladeServiceProvider extends ServiceProvider
      */
     private function getViewPaths(): array
     {
-        return [get_template_directory() . '/templates/'];
+        return [
+            get_template_directory() . '/templates/',
+            get_template_directory() . '/blocks/',
+        ];
     }
 
     private function getCompiledPath(): string
