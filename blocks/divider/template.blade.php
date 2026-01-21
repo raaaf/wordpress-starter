@@ -12,7 +12,7 @@
 @endphp
 
 <div {!! $wrapper_attributes !!}
-     class="{{ $classes }} divider py-8 lg:py-12"
+     class="divider {{ $classes }} py-8 lg:py-12"
      role="separator"
      aria-orientation="horizontal"
      @if($anchor && !$wrapper_attributes) id="{{ esc_attr($anchor) }}" @endif>

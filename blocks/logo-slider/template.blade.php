@@ -31,7 +31,7 @@
     }
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" padding="md" class="{{ $classes }} logo-slider">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" padding="md" class="logo-slider {{ $classes }}">
     @if($title)
         <h2 class="text-h3 mb-8 text-center text-content">{{ $title }}</h2>
     @endif

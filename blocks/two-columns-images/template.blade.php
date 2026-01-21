@@ -14,12 +14,12 @@
     $size = 'large';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" padding="lg" class="{{ $classes }} two-columns-images">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" padding="lg" class="two-columns-images {{ $classes }}">
     <div class="flex flex-col gap-8 lg:gap-24">
         {{-- First Row: Content Left, Image Right --}}
         <div class="relative grid items-stretch mx-auto overflow-hidden border rounded-lg border-line max-w-6xl lg:grid-cols-2">
             <div class="order-last h-full lg:overflow-hidden lg:order-first">
-                <div class="relative h-full transition duration-200 bg-surface-secondary/10">
+                <div class="relative h-full transition duration-200 bg-surface-secondary">
                     <div class="relative z-10 p-8 lg:p-16 lg:pb-12">
                         <x-prose>{!! $column_1 !!}</x-prose>
                     </div>
@@ -56,7 +56,7 @@
                 @endif
             </div>
             <div class="h-full lg:overflow-hidden">
-                <div class="relative h-full transition duration-200 bg-surface-secondary/10">
+                <div class="relative h-full transition duration-200 bg-surface-secondary">
                     <div class="relative z-10 p-8 lg:p-16 lg:pb-12">
                         <x-prose>{!! $column_2 !!}</x-prose>
                     </div>

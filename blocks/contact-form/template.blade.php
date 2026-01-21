@@ -19,7 +19,7 @@
     $email = \WordpressStarter\Acf\Fields::option('email', '');
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} contact-form">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="contact-form {{ $classes }}">
     <x-grid cols="2" gap="xl" class="items-start">
         {{-- Left: Title, Content, Contact Info --}}
         <div>

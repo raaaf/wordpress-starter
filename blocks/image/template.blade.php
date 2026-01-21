@@ -28,7 +28,7 @@
 @endphp
 
 @if($imageId)
-    <x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" padding="md" class="{{ $classes }} image">
+    <x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" padding="md" class="image-block {{ $classes }}">
         <div class="flex flex-col items-center justify-center max-w-6xl mx-auto group">
             <div class="relative overflow-hidden shadow-xl will-change-transform transition {{ $showBorder ? 'border-4 rounded-md border-line' : '' }} ease-in-out group lg:group-hover:shadow-2xl">
                 @php
@@ -42,7 +42,7 @@
                 @if ($alt && $showCaption)
                     <p id="img-desc-{{ $imageId }}"
                         class="absolute inset-0 z-20 flex items-end justify-center mx-4 my-0 bottom-[5%] lg:opacity-0 lg:group-hover:opacity-100 lg:transition lg:duration-1000 lg:ease-in-out lg:transform-gpu lg:translate-y-4 lg:group-hover:translate-y-0 pointer-events-none">
-                        <span class="max-w-xs px-3 py-1 text-content-inverse border-2 rounded-md bg-surface-brand/90 has-small-bold border-line-brand/20">
+                        <span class="max-w-xs px-3 py-1 text-content-inverse border-2 rounded-md bg-surface-brand border-line-brand has-small-bold">
                             {{ $alt }}
                         </span>
                     </p>

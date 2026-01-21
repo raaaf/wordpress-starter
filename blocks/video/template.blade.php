@@ -18,7 +18,7 @@
     }
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" padding="md" class="{{ $classes }} video">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" padding="md" class="video {{ $classes }}">
     <div class="flex flex-col items-center justify-center w-full max-w-6xl mx-auto">
         @if($source === 'wordpress' && $video)
             <div class="flex items-center justify-center w-full overflow-hidden border-4 rounded-lg shadow-xl bg-surface aspect-video border-line">
@@ -28,15 +28,21 @@
                 </video>
             </div>
         @elseif($source === 'external' && $video)
-            <div class="flex items-center justify-center w-full overflow-hidden border-4 rounded-lg shadow-xl bg-surface md:aspect-video border-line">
-                <iframe width="100%"
-                        height="100%"
-                        class="w-full video-iframe aspect-video [&:not([src])]:hidden [&[src]+.video-notice]:hidden"
-                        data-src="{{ esc_url($video . '?autoplay=0&mute=0&controls=1&modestbranding=0&rel=0&showinfo=0&playsinline=1&dnt=1') }}"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen></iframe>
-                <form class="p-8 lg:px-16 video-notice">
+            <div class="flex items-center justify-center w-full overflow-hidden border-4 rounded-lg shadow-xl bg-surface md:aspect-video border-line"
+                 x-data="{ loaded: false }">
+                {{-- Video iframe (shown after consent) --}}
+                <template x-if="loaded">
+                    <iframe width="100%"
+                            height="100%"
+                            class="w-full video-iframe aspect-video"
+                            src="{{ esc_url($video . '?autoplay=1&mute=0&controls=1&modestbranding=0&rel=0&showinfo=0&playsinline=1&dnt=1') }}"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen></iframe>
+                </template>
+
+                {{-- Consent notice (hidden after consent) --}}
+                <div x-show="!loaded" class="p-8 lg:px-16 video-notice">
                     <p class="text-center text-content">
                         Da YouTube persönliche Daten sammeln und Ihr Sehverhalten verfolgen kann, laden wir das Video
                         nur, wenn Sie der Verwendung von Cookies und
@@ -52,15 +58,14 @@
                     </p>
                     <div class="mt-8 mx-auto w-full flex justify-center">
                         <x-button
-                            url="#"
                             title="YouTube-Inhalte erlauben"
-                            variant="warning"
+                            variant="primary"
                             size="md"
-                            class="video-consent-btn"
+                            x-on:click="loaded = true"
                             :analytics="['event' => 'Video_Consent', 'meta' => 'video_block']"
                         />
                     </div>
-                </form>
+                </div>
             </div>
         @endif
     </div>

@@ -13,7 +13,7 @@
     $uniqueId = 'tabs-' . uniqid();
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} tabs-block">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="tabs {{ $classes }}">
     @if($title)
         <h2 class="text-h2 mb-8 text-center text-content">{{ $title }}</h2>
     @endif
