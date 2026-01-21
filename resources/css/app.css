@@ -49,6 +49,7 @@
 
   /* Backgrounds → surface-* */
   --color-surface: var(--bg-primary);
+  --color-surface-primary: var(--bg-primary);
   --color-surface-secondary: var(--bg-secondary);
   --color-surface-tertiary: var(--bg-tertiary);
   --color-surface-inverse: var(--bg-inverse);
@@ -163,6 +164,98 @@
     background-color: var(--bg-primary);
   }
 
+  /* ============================================
+     BASE HEADING STYLES
+     Default typography for all headings
+     ============================================ */
+
+  h1 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h1-size);
+    font-weight: var(--typography-h1-weight);
+    line-height: var(--typography-h1-line-height);
+    letter-spacing: var(--typography-h1-letter-spacing);
+    margin-top: 0;
+    margin-bottom: 0.5em;
+  }
+
+  h2 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h2-size);
+    font-weight: var(--typography-h2-weight);
+    line-height: var(--typography-h2-line-height);
+    letter-spacing: var(--typography-h2-letter-spacing);
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  h3 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h3-size);
+    font-weight: var(--typography-h3-weight);
+    line-height: var(--typography-h3-line-height);
+    letter-spacing: var(--typography-h3-letter-spacing);
+    margin-top: 1.25em;
+    margin-bottom: 0.5em;
+  }
+
+  h4 {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h4-size);
+    font-weight: var(--typography-h4-weight);
+    line-height: var(--typography-h4-line-height);
+    letter-spacing: var(--typography-h4-letter-spacing);
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+
+  h5 {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h5-size);
+    font-weight: var(--typography-h5-weight);
+    line-height: var(--typography-h5-line-height);
+    letter-spacing: var(--typography-h5-letter-spacing);
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+
+  h6 {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-body-size);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--typography-body-line-height);
+    letter-spacing: 0;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+
+  /* Paragraph spacing */
+  p {
+    margin-top: 0;
+    margin-bottom: 1em;
+  }
+
+  /* Remove top margin when heading is first child */
+  h1:first-child,
+  h2:first-child,
+  h3:first-child,
+  h4:first-child,
+  h5:first-child,
+  h6:first-child {
+    margin-top: 0;
+  }
+
+  /* Remove bottom margin on last elements */
+  h1:last-child,
+  h2:last-child,
+  h3:last-child,
+  h4:last-child,
+  h5:last-child,
+  h6:last-child,
+  p:last-child {
+    margin-bottom: 0;
+  }
+
   /* Links default to no underline - controlled by component classes */
   a {
     color: inherit;
@@ -201,6 +294,66 @@
   /* Alpine.js x-cloak - hide until Alpine is ready */
   [x-cloak] {
     display: none !important;
+  }
+
+  /* ============================================
+     SECTION SPACING
+     Consistent spacing between content sections
+     ============================================ */
+
+  /* CSS variable for section spacing - can be overridden */
+  :root {
+    --section-spacing: 6rem; /* 96px default, ~100px */
+  }
+
+  /* Add margin between consecutive sections */
+  #main-content section + section {
+    margin-top: var(--section-spacing);
+  }
+
+  /* No extra margin after hero blocks (they're edge-to-edge) */
+  #main-content .hero + section {
+    margin-top: 0;
+  }
+
+  /* Top spacing when page has no hero (first section is not hero) */
+  #main-content > article > .page-content > section:first-child:not(.hero):not([class*="hero"]),
+  #main-content > section:first-child:not(.hero):not([class*="hero"]) {
+    margin-top: var(--section-spacing);
+  }
+
+  /* Reset margin for hero as first element */
+  #main-content > article > .page-content > .hero:first-child,
+  #main-content > .hero:first-child,
+  #main-content > article > .page-content > section[class*="hero"]:first-child {
+    margin-top: 0;
+  }
+
+  /* Footer spacing - matches section spacing */
+  footer {
+    margin-top: var(--section-spacing);
+  }
+
+  /* Styleguide sections - consistent spacing */
+  .styleguide-section + .styleguide-section {
+    margin-top: var(--section-spacing);
+  }
+
+  /* Styleguide headings - bottom margin */
+  .styleguide-section > h2 {
+    margin-bottom: 1rem;
+  }
+
+  /* Styleguide description paragraph - spacing to content */
+  .styleguide-section > p {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Responsive section/footer spacing - smaller on mobile */
+  @media (max-width: 768px) {
+    :root {
+      --section-spacing: 4rem; /* 64px on mobile */
+    }
   }
 }
 
@@ -358,4 +511,28 @@
 /* Split variant uses CSS Grid (handled in template) */
 .hero--split {
   display: block;
+}
+
+/* ============================================
+   PROSE INHERIT COLORS
+   Makes prose inherit text colors from parent
+   ============================================ */
+
+.prose-inherit-colors {
+  --tw-prose-body: inherit;
+  --tw-prose-headings: inherit;
+  --tw-prose-lead: inherit;
+  --tw-prose-bold: inherit;
+  --tw-prose-counters: inherit;
+  --tw-prose-bullets: inherit;
+  color: inherit;
+}
+
+.prose-inherit-colors a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.prose-inherit-colors strong {
+  color: inherit;
 }

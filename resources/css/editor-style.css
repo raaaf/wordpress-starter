@@ -1,5 +1,14 @@
-@import "tailwindcss";
+/**
+ * Editor Styles Entry Point
+ *
+ * This is the main entry point for Gutenberg block editor styles.
+ * It imports block-editor.css which contains:
+ * - tokens-editor.css (light-mode only tokens - no dark mode)
+ * - Tailwind CSS with theme configuration
+ * - Typography and component styles
+ *
+ * Note: tokens.css is NOT imported here to avoid dark mode rules in the editor.
+ * The block-editor.css imports tokens-editor.css instead.
+ */
 
-@import "./fonts.css";
-@import "./tokens.css";
 @import "./block-editor.css";

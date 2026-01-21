@@ -1,7 +1,245 @@
 /**
- * Editor styles to match frontend layout
- * max-w-7xl = 80rem (1280px)
+ * Block Editor Styles
+ * Mirrors frontend styles for accurate Gutenberg preview
+ *
+ * This file imports the same tokens and styles as app.css,
+ * with editor-specific overrides.
  */
+
+@import "./fonts.css";
+@import "./tokens-editor.css";
+
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+@source "../templates";
+@source "../../blocks";
+@source "../../safelist.txt";
+
+/*
+ * Theme Configuration - TailwindCSS v4
+ * Same as app.css for consistent preview
+ */
+@theme {
+  /* Typography - from Figma tokens */
+  --font-sans: var(--font-family-body), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-headline: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Primitive Colors - Accent palette from Figma */
+  --color-accent-50: var(--color-accent-50);
+  --color-accent-100: var(--color-accent-100);
+  --color-accent-200: var(--color-accent-200);
+  --color-accent-300: var(--color-accent-300);
+  --color-accent-400: var(--color-accent-400);
+  --color-accent-500: var(--color-accent-500);
+  --color-accent-600: var(--color-accent-600);
+  --color-accent-700: var(--color-accent-700);
+  --color-accent-800: var(--color-accent-800);
+  --color-accent-900: var(--color-accent-900);
+
+  /* Primitive Colors - Primary from Figma */
+  --color-primary-50: var(--color-primary-50);
+  --color-primary-100: var(--color-primary-100);
+  --color-primary-200: var(--color-primary-200);
+  --color-primary-300: var(--color-primary-300);
+  --color-primary-400: var(--color-primary-400);
+  --color-primary-500: var(--color-primary-500);
+  --color-primary-600: var(--color-primary-600);
+  --color-primary-700: var(--color-primary-700);
+  --color-primary-800: var(--color-primary-800);
+  --color-primary-900: var(--color-primary-900);
+
+  /* ===== SEMANTIC TOKENS - Surface/Content Pattern ===== */
+
+  /* Backgrounds → surface-* */
+  --color-surface: var(--bg-primary);
+  --color-surface-primary: var(--bg-primary);
+  --color-surface-secondary: var(--bg-secondary);
+  --color-surface-tertiary: var(--bg-tertiary);
+  --color-surface-inverse: var(--bg-inverse);
+  --color-surface-brand: var(--bg-brand);
+  --color-surface-brand-subtle: var(--bg-brand-subtle);
+  --color-surface-brand-hover: var(--bg-brand-hover);
+  --color-surface-brand-secondary: var(--bg-brand-secondary);
+  --color-surface-accent: var(--bg-accent);
+  --color-surface-accent-subtle: var(--bg-accent-subtle);
+  --color-surface-accent-hover: var(--bg-accent-hover);
+  --color-surface-accent-active: var(--bg-brand-active);
+  --color-surface-on-color: var(--bg-on-color);
+  --color-surface-success: var(--bg-success);
+  --color-surface-success-strong: var(--bg-success-strong);
+  --color-surface-warning: var(--bg-warning);
+  --color-surface-warning-strong: var(--bg-warning-strong);
+  --color-surface-error: var(--bg-error);
+  --color-surface-error-strong: var(--bg-error-strong);
+  --color-surface-disabled: var(--bg-disabled);
+  --color-surface-overlay: var(--bg-overlay);
+
+  /* Status colors for hover/active states */
+  --color-error-dark: var(--color-error-dark);
+  --color-warning-dark: var(--color-warning-dark);
+  --color-success-dark: var(--color-success-dark);
+
+  /* Text → content-* */
+  --color-content: var(--text-primary);
+  --color-content-secondary: var(--text-secondary);
+  --color-content-tertiary: var(--text-tertiary);
+  --color-content-inverse: var(--text-inverse);
+  --color-content-brand: var(--text-brand);
+  --color-content-accent: var(--text-accent);
+  --color-content-link: var(--text-link);
+  --color-content-link-hover: var(--text-link-hover);
+  --color-content-success: var(--text-success);
+  --color-content-warning: var(--text-warning);
+  --color-content-error: var(--text-error);
+  --color-content-disabled: var(--text-disabled);
+  --color-content-on-color: var(--text-on-color);
+
+  /* Borders → line-* */
+  --color-line: var(--border-default);
+  --color-line-strong: var(--border-strong);
+  --color-line-subtle: var(--border-subtle);
+  --color-line-brand: var(--border-brand);
+  --color-line-accent: var(--border-accent);
+  --color-line-focus: var(--border-focus);
+  --color-line-success: var(--border-success);
+  --color-line-warning: var(--border-warning);
+  --color-line-error: var(--border-error);
+  --color-line-disabled: var(--border-disabled);
+
+  /* Icons → icon-* */
+  --color-icon: var(--icon-primary);
+  --color-icon-secondary: var(--icon-secondary);
+  --color-icon-inverse: var(--icon-inverse);
+  --color-icon-brand: var(--icon-brand);
+  --color-icon-accent: var(--icon-accent);
+  --color-icon-success: var(--icon-success);
+  --color-icon-warning: var(--icon-warning);
+  --color-icon-error: var(--icon-error);
+
+  /* Status Colors - direct mapping */
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+}
+
+/* ==========================================================================
+   FORCE LIGHT MODE IN EDITOR
+   The editor uses tokens-editor.css which contains only light mode values
+   (no dark mode or prefers-color-scheme rules)
+   ========================================================================== */
+
+/* Force light color scheme in editor */
+.editor-styles-wrapper,
+.block-editor-block-list__layout {
+    color-scheme: light !important;
+}
+
+/*
+ * Scope Tailwind color mappings to .editor-styles-wrapper
+ *
+ * Why this is needed:
+ * - Tailwind's @theme defines --color-content-inverse etc. on :root
+ * - These reference our tokens like var(--text-inverse)
+ * - But :root variable resolution can be affected by browser dark mode
+ * - By defining these mappings INSIDE .editor-styles-wrapper, we ensure
+ *   utility classes like .text-content-inverse resolve variables locally
+ *   where our light-mode-only tokens are properly scoped
+ */
+.editor-styles-wrapper {
+    /* Text → content-* (Tailwind semantic colors) */
+    --color-content: var(--text-primary);
+    --color-content-secondary: var(--text-secondary);
+    --color-content-tertiary: var(--text-tertiary);
+    --color-content-inverse: var(--text-inverse);
+    --color-content-brand: var(--text-brand);
+    --color-content-accent: var(--text-accent);
+    --color-content-link: var(--text-link);
+    --color-content-link-hover: var(--text-link-hover);
+    --color-content-success: var(--text-success);
+    --color-content-warning: var(--text-warning);
+    --color-content-error: var(--text-error);
+    --color-content-disabled: var(--text-disabled);
+    --color-content-on-color: var(--text-on-color);
+
+    /* Backgrounds → surface-* */
+    --color-surface: var(--bg-primary);
+    --color-surface-primary: var(--bg-primary);
+    --color-surface-secondary: var(--bg-secondary);
+    --color-surface-tertiary: var(--bg-tertiary);
+    --color-surface-inverse: var(--bg-inverse);
+    --color-surface-brand: var(--bg-brand);
+    --color-surface-brand-subtle: var(--bg-brand-subtle);
+    --color-surface-brand-hover: var(--bg-brand-hover);
+    --color-surface-brand-secondary: var(--bg-brand-secondary);
+    --color-surface-accent: var(--bg-accent);
+    --color-surface-accent-subtle: var(--bg-accent-subtle);
+    --color-surface-accent-hover: var(--bg-accent-hover);
+    --color-surface-accent-active: var(--bg-brand-active);
+    --color-surface-on-color: var(--bg-on-color);
+    --color-surface-success: var(--bg-success);
+    --color-surface-success-strong: var(--bg-success-strong);
+    --color-surface-warning: var(--bg-warning);
+    --color-surface-warning-strong: var(--bg-warning-strong);
+    --color-surface-error: var(--bg-error);
+    --color-surface-error-strong: var(--bg-error-strong);
+    --color-surface-disabled: var(--bg-disabled);
+    --color-surface-overlay: var(--bg-overlay);
+
+    /* Borders → line-* */
+    --color-line: var(--border-default);
+    --color-line-strong: var(--border-strong);
+    --color-line-subtle: var(--border-subtle);
+    --color-line-brand: var(--border-brand);
+    --color-line-accent: var(--border-accent);
+    --color-line-focus: var(--border-focus);
+    --color-line-success: var(--border-success);
+    --color-line-warning: var(--border-warning);
+    --color-line-error: var(--border-error);
+    --color-line-disabled: var(--border-disabled);
+
+    /* Icons → icon-* */
+    --color-icon: var(--icon-primary);
+    --color-icon-secondary: var(--icon-secondary);
+    --color-icon-inverse: var(--icon-inverse);
+    --color-icon-brand: var(--icon-brand);
+    --color-icon-accent: var(--icon-accent);
+    --color-icon-success: var(--icon-success);
+    --color-icon-warning: var(--icon-warning);
+    --color-icon-error: var(--icon-error);
+}
+
+/* ==========================================================================
+   OVERRIDE WORDPRESS THEME.JSON LINK STYLES
+   WordPress generates: :where(.editor-styles-wrapper) a:where(:not(.wp-element-button))
+   which applies link color/underline to ALL links including our buttons.
+   Our button component adds .button class, so we override link styles for it.
+   ========================================================================== */
+
+/* Reset WordPress link styles for button elements - high specificity */
+.editor-styles-wrapper a.button,
+.editor-styles-wrapper .button {
+    color: inherit !important;
+    text-decoration: none !important;
+}
+
+/* Ensure button text colors work correctly */
+.editor-styles-wrapper a.button.text-content-inverse,
+.editor-styles-wrapper a.button.text-content-on-color,
+.editor-styles-wrapper .button.text-content-inverse,
+.editor-styles-wrapper .button.text-content-on-color {
+    color: var(--text-inverse) !important;
+}
+
+/* Override for any link with no-underline class */
+.editor-styles-wrapper a.no-underline {
+    text-decoration: none !important;
+}
+
+/* ==========================================================================
+   EDITOR-SPECIFIC LAYOUT OVERRIDES
+   ========================================================================== */
 
 .block-editor__typewriter {
     @apply font-sans;
@@ -20,9 +258,11 @@
     max-width: 100% !important;
 }
 
-/* ACF blocks: full-width for backgrounds */
+/* ACF blocks: contained within editor viewport */
 .editor-styles-wrapper .wp-block[data-type^="acf/"] {
-    max-width: 100% !important;
+    max-width: 80rem !important;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .editor-styles-wrapper .wp-block-group,
@@ -38,6 +278,294 @@
 /* Block list layout */
 .is-root-container > .wp-block {
     max-width: 80rem !important;
+}
+
+/* ==========================================================================
+   SECTION SPACING IN EDITOR
+   Mirror frontend section spacing for accurate preview
+   ========================================================================== */
+
+/* Section spacing variable - matches frontend */
+.editor-styles-wrapper {
+    --section-spacing: 6rem; /* 96px default */
+}
+
+/* Add margin between consecutive ACF sections in editor */
+.editor-styles-wrapper .wp-block[data-type^="acf/"] + .wp-block[data-type^="acf/"] {
+    margin-top: var(--section-spacing);
+}
+
+/* Styleguide sections in editor */
+.editor-styles-wrapper .styleguide-section + .styleguide-section {
+    margin-top: var(--section-spacing);
+}
+
+/* Responsive section spacing in editor */
+@media (max-width: 768px) {
+    .editor-styles-wrapper {
+        --section-spacing: 4rem; /* 64px on mobile */
+    }
+}
+
+/* ==========================================================================
+   BASE STYLES - Mirror app.css @layer base
+   ========================================================================== */
+
+@layer base {
+  .editor-styles-wrapper {
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+  }
+
+  /* BASE HEADING STYLES */
+  .editor-styles-wrapper h1 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h1-size);
+    font-weight: var(--typography-h1-weight);
+    line-height: var(--typography-h1-line-height);
+    letter-spacing: var(--typography-h1-letter-spacing);
+    margin-top: 0;
+    margin-bottom: 0.5em;
+  }
+
+  .editor-styles-wrapper h2 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h2-size);
+    font-weight: var(--typography-h2-weight);
+    line-height: var(--typography-h2-line-height);
+    letter-spacing: var(--typography-h2-letter-spacing);
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .editor-styles-wrapper h3 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h3-size);
+    font-weight: var(--typography-h3-weight);
+    line-height: var(--typography-h3-line-height);
+    letter-spacing: var(--typography-h3-letter-spacing);
+    margin-top: 1.25em;
+    margin-bottom: 0.5em;
+  }
+
+  .editor-styles-wrapper h4 {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h4-size);
+    font-weight: var(--typography-h4-weight);
+    line-height: var(--typography-h4-line-height);
+    letter-spacing: var(--typography-h4-letter-spacing);
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+
+  .editor-styles-wrapper h5 {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h5-size);
+    font-weight: var(--typography-h5-weight);
+    line-height: var(--typography-h5-line-height);
+    letter-spacing: var(--typography-h5-letter-spacing);
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+
+  .editor-styles-wrapper h6 {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-body-size);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--typography-body-line-height);
+    letter-spacing: 0;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+
+  /* Paragraph spacing */
+  .editor-styles-wrapper p {
+    margin-top: 0;
+    margin-bottom: 1em;
+  }
+
+  /* Remove top margin when heading is first child */
+  .editor-styles-wrapper h1:first-child,
+  .editor-styles-wrapper h2:first-child,
+  .editor-styles-wrapper h3:first-child,
+  .editor-styles-wrapper h4:first-child,
+  .editor-styles-wrapper h5:first-child,
+  .editor-styles-wrapper h6:first-child {
+    margin-top: 0;
+  }
+
+  /* Remove bottom margin on last elements */
+  .editor-styles-wrapper h1:last-child,
+  .editor-styles-wrapper h2:last-child,
+  .editor-styles-wrapper h3:last-child,
+  .editor-styles-wrapper h4:last-child,
+  .editor-styles-wrapper h5:last-child,
+  .editor-styles-wrapper h6:last-child,
+  .editor-styles-wrapper p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Links default - controlled by component classes */
+  .editor-styles-wrapper a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Only underline links inside prose content - WCAG 2.1 SC 1.4.1 */
+  .editor-styles-wrapper .prose a:not(.no-underline) {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Focus-visible styles - WCAG 2.1 SC 2.4.7 */
+  .editor-styles-wrapper :focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
+
+  /* Alpine.js x-cloak */
+  .editor-styles-wrapper [x-cloak] {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   TYPOGRAPHY UTILITY CLASSES - From Figma (same as app.css)
+   ========================================================================== */
+
+@layer utilities {
+  /* Display Heading - 60px / Bold */
+  .text-display {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-display-size);
+    font-weight: var(--typography-display-weight);
+    line-height: var(--typography-display-line-height);
+    letter-spacing: var(--typography-display-letter-spacing);
+  }
+
+  /* Heading 1 - 36px / Bold */
+  .text-h1 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h1-size);
+    font-weight: var(--typography-h1-weight);
+    line-height: var(--typography-h1-line-height);
+    letter-spacing: var(--typography-h1-letter-spacing);
+  }
+
+  /* Heading 2 - 30px / Semibold */
+  .text-h2 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h2-size);
+    font-weight: var(--typography-h2-weight);
+    line-height: var(--typography-h2-line-height);
+    letter-spacing: var(--typography-h2-letter-spacing);
+  }
+
+  /* Heading 3 - 24px / Semibold */
+  .text-h3 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h3-size);
+    font-weight: var(--typography-h3-weight);
+    line-height: var(--typography-h3-line-height);
+    letter-spacing: var(--typography-h3-letter-spacing);
+  }
+
+  /* Heading 4 - 20px / Semibold */
+  .text-h4 {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h4-size);
+    font-weight: var(--typography-h4-weight);
+    line-height: var(--typography-h4-line-height);
+    letter-spacing: var(--typography-h4-letter-spacing);
+  }
+
+  /* Heading 5 - 18px / Medium */
+  .text-h5 {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-h5-size);
+    font-weight: var(--typography-h5-weight);
+    line-height: var(--typography-h5-line-height);
+    letter-spacing: var(--typography-h5-letter-spacing);
+  }
+
+  /* Body Large - 18px / Regular - Intro text */
+  .text-body-large {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-body-large-size);
+    font-weight: var(--typography-body-large-weight);
+    line-height: var(--typography-body-large-line-height);
+    letter-spacing: var(--typography-body-large-letter-spacing);
+  }
+
+  /* Body - 16px / Regular - Standard text */
+  .text-body {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-body-size);
+    font-weight: var(--typography-body-weight);
+    line-height: var(--typography-body-line-height);
+    letter-spacing: var(--typography-body-letter-spacing);
+  }
+
+  /* Body Small - 14px / Regular - Secondary text */
+  .text-body-small {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-body-small-size);
+    font-weight: var(--typography-body-small-weight);
+    line-height: var(--typography-body-small-line-height);
+    letter-spacing: var(--typography-body-small-letter-spacing);
+  }
+
+  /* Caption - 12px / Regular - Meta info */
+  .text-caption {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-caption-size);
+    font-weight: var(--typography-caption-weight);
+    line-height: var(--typography-caption-line-height);
+    letter-spacing: var(--typography-caption-letter-spacing);
+  }
+
+  /* Overline - 12px / Semibold / Uppercase */
+  .text-overline {
+    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-overline-size);
+    font-weight: var(--typography-overline-weight);
+    line-height: var(--typography-overline-line-height);
+    letter-spacing: var(--typography-overline-letter-spacing);
+    text-transform: var(--typography-overline-transform);
+  }
+
+  /* Code - 14px / Mono */
+  .text-code {
+    font-family: var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: var(--typography-code-size);
+    font-weight: var(--typography-code-weight);
+    line-height: var(--typography-code-line-height);
+    letter-spacing: var(--typography-code-letter-spacing);
+  }
+}
+
+/* ==========================================================================
+   PROSE INHERIT COLORS
+   Makes prose inherit text colors from parent (e.g., CTA block)
+   ========================================================================== */
+
+.prose-inherit-colors {
+    --tw-prose-body: inherit;
+    --tw-prose-headings: inherit;
+    --tw-prose-lead: inherit;
+    --tw-prose-bold: inherit;
+    --tw-prose-counters: inherit;
+    --tw-prose-bullets: inherit;
+    color: inherit;
+}
+
+.prose-inherit-colors a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.prose-inherit-colors strong {
+    color: inherit;
 }
 
 /* ==========================================================================
@@ -115,3 +643,4 @@
 .acf-icon-radio-field .acf-radio-list label .acf-icon-label-text {
     display: none;
 }
+
