@@ -27,7 +27,7 @@
     $imageAfter = $afterId ? wp_get_attachment_image_src($afterId, 'large') : null;
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} before-after-block">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="before-after {{ $classes }}">
     @if($title)
         <h2 class="text-h2 mb-8 text-center text-content">{{ $title }}</h2>
     @endif
@@ -61,7 +61,7 @@
 
             {{-- Slider handle --}}
             <div
-                class="absolute inset-y-0 w-1 -translate-x-1/2 cursor-ew-resize bg-surface/80 before-after-handle"
+                class="absolute inset-y-0 w-1 -translate-x-1/2 cursor-ew-resize bg-surface opacity-80 before-after-handle"
                 @if(!$is_preview)
                     :style="'left: ' + position + '%'"
                     @mousedown="handleMouseDown($event)"

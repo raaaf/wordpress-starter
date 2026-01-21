@@ -11,7 +11,7 @@
     $background = $fields['background_color'] ?? 'primary';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} one-column">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="one-column {{ $classes }}">
     <div class="max-w-2xl mx-auto">
         @if($label)
             <p class="text-overline mb-4 text-content-secondary">{{ $label }}</p>

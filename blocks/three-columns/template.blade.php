@@ -12,7 +12,7 @@
     $background = $fields['background_color'] ?? 'primary';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} three-columns">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="three-columns {{ $classes }}">
     <x-grid cols="3" gap="xl">
         <x-prose>{!! $column_1 !!}</x-prose>
         <x-prose>{!! $column_2 !!}</x-prose>

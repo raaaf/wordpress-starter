@@ -75,7 +75,7 @@
                 @endif
 
                 @if($copy)
-                    <p class="text-body-large text-content-secondary mt-4 max-w-2xl">{{ $copy }}</p>
+                    <p class="text-body-large max-w-2xl">{{ $copy }}</p>
                 @endif
 
                 @if(($cta_primary && !empty($cta_primary['url'])) || ($cta_secondary && !empty($cta_secondary['url'])))
@@ -124,7 +124,7 @@
                     @endif
 
                     @if($copy)
-                        <p class="text-body-large text-content-secondary mt-4 max-w-xl">{{ $copy }}</p>
+                        <p class="text-body-large max-w-xl">{{ $copy }}</p>
                     @endif
 
                     @if(($cta_primary && !empty($cta_primary['url'])) || ($cta_secondary && !empty($cta_secondary['url'])))
@@ -184,12 +184,12 @@
                          loading="lazy">
                 @endif
 
-                {{-- Overlay (opacity from slider, adapts to dark mode) --}}
-                <div class="absolute inset-0 bg-white dark:bg-neutral-900"
+                {{-- Overlay (opacity from slider, uses primary bg for light/dark mode) --}}
+                <div class="absolute inset-0 bg-surface-primary"
                      style="opacity: {{ esc_attr($overlay_opacity / 100) }}"></div>
 
                 {{-- Content --}}
-                <div class="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center min-h-[inherit] py-16 lg:py-20">
+                <div class="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center min-h-[inherit] py-16 lg:py-20 text-content">
                     @if($badge)
                         <x-badge variant="brand" size="md">{{ $badge }}</x-badge>
                     @endif
@@ -199,7 +199,7 @@
                     @endif
 
                     @if($copy)
-                        <p class="text-body-large text-content-secondary mt-4 max-w-2xl">{{ $copy }}</p>
+                        <p class="text-body-large max-w-2xl">{{ $copy }}</p>
                     @endif
 
                     @if(($cta_primary && !empty($cta_primary['url'])) || ($cta_secondary && !empty($cta_secondary['url'])))

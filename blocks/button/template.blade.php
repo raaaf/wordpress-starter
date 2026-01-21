@@ -22,7 +22,7 @@
 
 @if($button && !empty($button['url']))
     <div {!! $wrapper_attributes !!}
-         class="{{ $classes }} {{ $alignmentClasses }}"
+         class="button-block {{ $classes }} {{ $alignmentClasses }}"
          @if($anchor && !$wrapper_attributes) id="{{ esc_attr($anchor) }}" @endif>
         <x-button
             :url="$button['url']"
@@ -34,7 +34,7 @@
         />
     </div>
 @elseif($is_preview)
-    <div class="{{ $classes }} {{ $alignmentClasses }}">
+    <div class="button-block {{ $classes }} {{ $alignmentClasses }}">
         <x-button
             title="Button Vorschau"
             :variant="$variant"

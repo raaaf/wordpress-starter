@@ -17,7 +17,7 @@
     $directionsUrl = $address ? 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode($address) : '';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} map">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="map {{ $classes }}">
     @if($title)
         <h2 class="text-h2 mb-8 text-center text-content">{{ $title }}</h2>
     @endif
@@ -25,12 +25,12 @@
     @if($embedUrl)
         <div
             class="relative overflow-hidden rounded-lg"
-            @if(!$is_preview) x-data="{ loaded: false }" @endif
+            x-data="{ loaded: false }"
         >
             {{-- Consent notice for GDPR compliance --}}
             <div
-                @if(!$is_preview) x-show="!loaded" @endif
-                class="flex flex-col items-center justify-center p-8 text-center bg-surface-secondary"
+                x-show="!loaded"
+                class="flex flex-col items-center justify-center p-8 text-center bg-surface-secondary map-consent-notice"
                 style="height: {{ esc_attr($height) }}px;"
             >
                 <svg class="w-16 h-16 mb-4 text-content-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,25 +45,24 @@
                     title="Karte laden"
                     variant="primary"
                     size="md"
-                    @if(!$is_preview) x-on:click="loaded = true" @endif
+                    x-on:click="loaded = true"
+                    class="map-consent-btn"
                 />
             </div>
 
             {{-- Map iframe (loaded after consent) --}}
-            @if(!$is_preview)
-                <template x-if="loaded">
-                    <iframe
-                        src="{{ esc_url($embedUrl) }}"
-                        width="100%"
-                        height="{{ esc_attr($height) }}"
-                        style="border:0;"
-                        allowfullscreen=""
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade"
-                        class="rounded-lg"
-                    ></iframe>
-                </template>
-            @endif
+            <template x-if="loaded">
+                <iframe
+                    src="{{ esc_url($embedUrl) }}"
+                    width="100%"
+                    height="{{ esc_attr($height) }}"
+                    style="border:0;"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    class="rounded-lg"
+                ></iframe>
+            </template>
         </div>
 
         @if($showDirections && $directionsUrl)

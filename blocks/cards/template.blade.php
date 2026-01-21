@@ -12,7 +12,7 @@
     $background = $fields['background_color'] ?? 'primary';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} cards">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="cards {{ $classes }}">
     @if($title)
         <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
@@ -46,7 +46,6 @@
                         <x-link
                             :url="$link['url'] ?? '#'"
                             :target="$link['target'] ?? '_self'"
-                            iconRight="chevron"
                             class="mt-auto"
                         >
                             {{ $link['title'] ?? 'Mehr erfahren' }}

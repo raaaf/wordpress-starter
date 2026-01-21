@@ -19,7 +19,7 @@
     };
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} pricing-table">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="pricing-table {{ $classes }}">
     @if($title)
         <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
@@ -51,7 +51,7 @@
                             <span class="text-h1 {{ $isFeatured ? 'text-content-inverse' : 'text-content' }}">{{ $price }}</span>
                         @endif
                         @if($period)
-                            <span class="{{ $isFeatured ? 'text-content-inverse/80' : 'text-content-secondary' }}">/ {{ $period }}</span>
+                            <span class="{{ $isFeatured ? 'text-content-inverse opacity-80' : 'text-content-secondary' }}">/ {{ $period }}</span>
                         @endif
                     </div>
 

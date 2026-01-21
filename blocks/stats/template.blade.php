@@ -21,7 +21,7 @@
     };
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} stats-block">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="stats {{ $classes }}">
     @if($title)
         <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif

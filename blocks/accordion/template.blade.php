@@ -39,7 +39,7 @@
         {!! wp_json_encode($faqSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
     </script>
 
-    <x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" padding="md" class="{{ $classes }} accordion">
+    <x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" padding="md" class="accordion {{ $classes }}">
         <div class="max-w-2xl mx-auto">
             {{-- aria-live region announces changes to screen readers --}}
             <div class="flex flex-col overflow-hidden"

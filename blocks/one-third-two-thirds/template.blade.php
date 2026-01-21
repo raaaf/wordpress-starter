@@ -11,7 +11,7 @@
     $background = $fields['background_color'] ?? 'primary';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} one-third-two-thirds">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="one-third-two-thirds {{ $classes }}">
     <x-grid cols="1/3-2/3" gap="lg" align="items-center">
         <div class="md:col-span-1">
             <x-prose>{!! $column_1 !!}</x-prose>
