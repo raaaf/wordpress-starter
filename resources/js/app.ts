@@ -1,5 +1,7 @@
-// Import Alpine.js
+// Import Alpine.js and plugins
 import Alpine from 'alpinejs';
+import collapse from '@alpinejs/collapse';
+import mediumZoom from 'medium-zoom';
 
 // ============================================
 // Navigation Component
@@ -83,6 +85,55 @@ export function createNavigationComponent(): NavigationComponent {
 }
 
 // ============================================
+// Stats Counter Component
+// ============================================
+
+export interface StatsCounterComponent {
+  target: number;
+  current: number;
+  duration: number;
+  started: boolean;
+  init(): void;
+  animate(): void;
+}
+
+export function createStatsCounterComponent(target: number): StatsCounterComponent {
+  return {
+    target,
+    current: 0,
+    duration: 2000,
+    started: false,
+
+    init() {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && !this.started) {
+            this.started = true;
+            this.animate();
+          }
+        },
+        { threshold: 0.5 }
+      );
+      observer.observe(this.$el);
+    },
+
+    animate() {
+      const start = performance.now();
+      const step = (timestamp: number) => {
+        const progress = Math.min((timestamp - start) / this.duration, 1);
+        this.current = Math.floor(progress * this.target);
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          this.current = this.target;
+        }
+      };
+      requestAnimationFrame(step);
+    },
+  };
+}
+
+// ============================================
 // Pirsch Analytics Tracking
 // ============================================
 
@@ -137,17 +188,210 @@ export function initPirschTracking(): void {
 }
 
 // ============================================
+// Video Consent Handler
+// ============================================
+
+export function initVideoConsent(): void {
+  document.querySelectorAll<HTMLElement>('.video-consent-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const container = btn.closest('.video');
+      const iframe = container?.querySelector<HTMLIFrameElement>('iframe[data-src]');
+      if (iframe) {
+        const src = iframe.getAttribute('data-src');
+        if (src) {
+          iframe.setAttribute('src', src);
+        }
+      }
+    });
+  });
+}
+
+// ============================================
+// Gallery Lightbox
+// ============================================
+
+export function initGalleryZoom(): void {
+  const zoomElements = document.querySelectorAll('.gallery-zoom');
+  if (zoomElements.length > 0) {
+    mediumZoom('.gallery-zoom', {
+      margin: 24,
+      background: 'rgba(0, 0, 0, 0.9)',
+      scrollOffset: 40,
+    });
+  }
+}
+
+// ============================================
+// Before/After Slider Component
+// ============================================
+
+export interface BeforeAfterComponent {
+  position: number;
+  init(): void;
+  handleMouseDown(event: MouseEvent): void;
+  handleTouchStart(event: TouchEvent): void;
+}
+
+export function createBeforeAfterComponent(): BeforeAfterComponent {
+  return {
+    position: 50,
+
+    init() {
+      // Component initialized
+    },
+
+    handleMouseDown(event: MouseEvent) {
+      event.preventDefault();
+      // Find the main container (the element with x-data)
+      const handle = (event.target as HTMLElement).closest('.before-after-handle');
+      const container = handle?.parentElement;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+
+      const onMove = (e: MouseEvent) => {
+        this.position = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+      };
+
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    },
+
+    handleTouchStart(event: TouchEvent) {
+      event.preventDefault();
+      // Find the main container (the element with x-data)
+      const handle = (event.target as HTMLElement).closest('.before-after-handle');
+      const container = handle?.parentElement;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+
+      const onMove = (e: TouchEvent) => {
+        const touch = e.touches[0];
+        this.position = Math.max(
+          0,
+          Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100)
+        );
+      };
+
+      const onEnd = () => {
+        document.removeEventListener('touchmove', onMove as EventListener);
+        document.removeEventListener('touchend', onEnd);
+      };
+
+      document.addEventListener('touchmove', onMove as EventListener);
+      document.addEventListener('touchend', onEnd);
+    },
+  };
+}
+
+// ============================================
+// Logo Slider Component
+// ============================================
+
+export interface LogoSliderLogo {
+  image: string;
+  link: string;
+  name: string;
+}
+
+export interface LogoSliderComponent {
+  logos: LogoSliderLogo[];
+  autoplay: boolean;
+  currentIndex: number;
+  paused: boolean;
+  intervalId: ReturnType<typeof setInterval> | null;
+  init(): void;
+  pause(): void;
+  resume(): void;
+}
+
+export function createLogoSliderComponent(
+  logos: LogoSliderLogo[],
+  autoplay: boolean
+): LogoSliderComponent {
+  return {
+    logos,
+    autoplay,
+    currentIndex: 0,
+    paused: false,
+    intervalId: null,
+
+    init() {
+      if (this.autoplay && this.logos.length > 1) {
+        this.intervalId = setInterval(() => {
+          if (!this.paused) {
+            this.currentIndex = (this.currentIndex + 1) % this.logos.length;
+          }
+        }, 3000);
+      }
+    },
+
+    pause() {
+      this.paused = true;
+    },
+
+    resume() {
+      this.paused = false;
+    },
+  };
+}
+
+// ============================================
 // Initialize Application
 // ============================================
 
 // Make Alpine available globally
 window.Alpine = Alpine;
 
+// Register Alpine plugins
+Alpine.plugin(collapse);
+
 // Register Alpine components
 Alpine.data('navigation', createNavigationComponent);
+Alpine.data('statsCounter', (target: number) => createStatsCounterComponent(target));
+Alpine.data('beforeAfterSlider', createBeforeAfterComponent);
+Alpine.data('logoSlider', (logos: LogoSliderLogo[], autoplay: boolean) =>
+  createLogoSliderComponent(logos, autoplay)
+);
 
 // Start Alpine
 Alpine.start();
 
-// Initialize Pirsch tracking on DOM ready
-document.addEventListener('DOMContentLoaded', initPirschTracking);
+// ============================================
+// Header Height for Hero Block
+// ============================================
+
+/**
+ * Measures the header height and sets a CSS custom property.
+ * Used by Hero block for viewport-relative min-height calculations.
+ */
+export function initHeaderHeight(): void {
+  const header = document.querySelector('header');
+  if (!header) return;
+
+  const updateHeight = (): void => {
+    document.documentElement.style.setProperty('--header-height', `${header.offsetHeight}px`);
+  };
+
+  // Set initial value
+  updateHeight();
+
+  // Update on resize using ResizeObserver (more efficient than window resize)
+  const observer = new ResizeObserver(updateHeight);
+  observer.observe(header);
+}
+
+// Initialize features on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  initHeaderHeight();
+  initPirschTracking();
+  initVideoConsent();
+  initGalleryZoom();
+});
