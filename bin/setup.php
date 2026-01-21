@@ -27,7 +27,11 @@ class ThemeSetup
     private string $themeDir;
     private array $config = [];
     private array $pluginSelections = [];
+    private array $blockSelections = [];
+    private array $socialLinks = [];
     private bool $dependenciesInstalled = false;
+    private ?string $detectedSiteName = null;
+    private bool $quickSetup = false;
 
     private array $defaults = [
         'theme_name' => 'WP-Starter',
@@ -41,6 +45,86 @@ class ThemeSetup
         'text_domain' => 'wp-starter',
         'namespace' => 'WordpressStarter',
         'package_name' => 'raaaf/starter',
+    ];
+
+    /** @var array<string, string[]> Block presets for quick selection */
+    private array $blockPresets = [
+        'minimal' => [
+            'hero', 'one-column', 'two-columns', 'image', 'cta', 'contact-form',
+        ],
+        'standard' => [
+            // Layout (all 7)
+            'one-column', 'two-columns', 'three-columns', 'four-columns',
+            'one-third-two-thirds', 'two-thirds-one-third', 'two-columns-images',
+            // Content (all 6)
+            'hero', 'accordion', 'cta', 'image', 'video', 'divider',
+            // Interactive (6 of 7 - skip map for GDPR simplicity)
+            'testimonials', 'cards', 'gallery', 'logo-slider', 'contact-form', 'tabs',
+            // Additional (4 most common)
+            'team', 'stats', 'posts', 'button',
+        ],
+        'full' => [], // Empty means all blocks
+    ];
+
+    private array $socialPlatforms = [
+        'linkedin' => 'LinkedIn',
+        'instagram' => 'Instagram',
+        'facebook' => 'Facebook',
+        'xing' => 'XING',
+        'twitter' => 'X (Twitter)',
+        'youtube' => 'YouTube',
+        'tiktok' => 'TikTok',
+    ];
+
+    private array $availableBlocks = [
+        'layout' => [
+            'name' => 'Layout Blocks',
+            'blocks' => [
+                'one-column' => 'Einspaltig',
+                'two-columns' => 'Zweispaltig',
+                'three-columns' => 'Dreispaltig',
+                'four-columns' => 'Vierspaltig',
+                'one-third-two-thirds' => '1/3 + 2/3',
+                'two-thirds-one-third' => '2/3 + 1/3',
+                'two-columns-images' => 'Zweispaltig mit Bildern',
+            ],
+        ],
+        'content' => [
+            'name' => 'Content Blocks',
+            'blocks' => [
+                'hero' => 'Hero Section',
+                'accordion' => 'Akkordeon/FAQ',
+                'cta' => 'Call to Action',
+                'image' => 'Bild',
+                'video' => 'Video',
+                'divider' => 'Trenner',
+            ],
+        ],
+        'interactive' => [
+            'name' => 'Interaktive Blocks',
+            'blocks' => [
+                'testimonials' => 'Testimonials',
+                'cards' => 'Karten',
+                'gallery' => 'Galerie',
+                'logo-slider' => 'Logo-Slider',
+                'contact-form' => 'Kontaktformular',
+                'map' => 'Google Maps',
+                'tabs' => 'Tabs',
+            ],
+        ],
+        'additional' => [
+            'name' => 'Weitere Blocks',
+            'blocks' => [
+                'pricing-table' => 'Preistabelle',
+                'team' => 'Team',
+                'stats' => 'Statistiken',
+                'timeline' => 'Timeline',
+                'posts' => 'Blog-Beiträge',
+                'before-after' => 'Vorher/Nachher',
+                'table' => 'Tabelle',
+                'button' => 'Button',
+            ],
+        ],
     ];
 
     private array $availablePlugins = [
@@ -87,6 +171,59 @@ class ThemeSetup
     public function __construct()
     {
         $this->themeDir = getcwd();
+        $this->detectedSiteName = $this->detectLocalSiteName();
+        $this->detectGitUser();
+    }
+
+    /**
+     * Detect git user name and email from git config
+     */
+    private function detectGitUser(): void
+    {
+        $gitName = trim(shell_exec('git config user.name 2>/dev/null') ?? '');
+        $gitEmail = trim(shell_exec('git config user.email 2>/dev/null') ?? '');
+
+        if (!empty($gitName)) {
+            $this->defaults['author'] = $gitName;
+        }
+        if (!empty($gitEmail)) {
+            $this->defaults['author_email'] = $gitEmail;
+        }
+    }
+
+    /**
+     * Detect Local by Flywheel site name from directory structure
+     */
+    private function detectLocalSiteName(): ?string
+    {
+        $cwd = getcwd();
+
+        // Check for typical Local by Flywheel path patterns
+        // macOS: ~/Local Sites/SiteName/app/public/wp-content/themes/theme-name
+        // Windows: C:\Users\...\Local Sites\SiteName\app\public\wp-content\themes\theme-name
+        if (preg_match('#[/\\\\]Local Sites[/\\\\]([^/\\\\]+)[/\\\\]#i', $cwd, $matches)) {
+            return $matches[1];
+        }
+
+        // Alternative: Check if we're in a typical WordPress themes directory
+        // and try to get the site name from wp-config or directory
+        $parentDir = dirname($cwd);
+        if (basename($parentDir) === 'themes') {
+            // We're in wp-content/themes/theme-name
+            $wpContentDir = dirname($parentDir);
+            $publicDir = dirname($wpContentDir);
+
+            // Check for Local by Flywheel structure
+            if (basename($publicDir) === 'public' || basename($publicDir) === 'htdocs') {
+                $appDir = dirname($publicDir);
+                if (basename($appDir) === 'app') {
+                    $siteDir = dirname($appDir);
+                    return basename($siteDir);
+                }
+            }
+        }
+
+        return null;
     }
 
     public function run(): void
@@ -94,10 +231,14 @@ class ThemeSetup
         $this->printHeader();
         $this->collectThemeInfo();
         $this->collectPluginPreferences();
+        $this->collectBlockPreferences();
         $this->collectContentOptions();
+        $this->collectSocialMedia();
+        $this->collectAnalytics();
         $this->confirmChanges();
         $this->applyChanges();
         $this->runInstallCommands();
+        $this->initGitRepo();
         $this->printSuccess();
     }
 
@@ -112,90 +253,149 @@ class ThemeSetup
         echo $this->color("║                                                                  ║\n", 'cyan');
         echo $this->color("╚══════════════════════════════════════════════════════════════════╝\n", 'cyan');
         echo "\n";
-        echo "This wizard will help you:\n";
-        echo "  " . $this->color("1.", 'yellow') . " Set up theme information (name, author, etc.)\n";
-        echo "  " . $this->color("2.", 'yellow') . " Select plugins to auto-install on first WordPress login\n";
-        echo "  " . $this->color("3.", 'yellow') . " Configure initial content options\n";
-        echo "  " . $this->color("4.", 'yellow') . " Install dependencies (composer & npm)\n";
+
+        // Show detected info
+        $detections = [];
+        if ($this->detectedSiteName) {
+            $detections[] = "Site: " . $this->color($this->detectedSiteName, 'green');
+        }
+        if ($this->defaults['author'] !== 'Rafael Alex') {
+            $detections[] = "Author: " . $this->color($this->defaults['author'], 'green');
+        }
+        if (!empty($detections)) {
+            echo "  " . $this->color("✓ Auto-detected: ", 'gray') . implode(', ', $detections) . "\n\n";
+        }
+
+        echo "Choose setup mode:\n\n";
+        echo "  " . $this->color("[q]", 'yellow') . " " . $this->color("Quick Setup", 'white', true) . " - Just theme name, uses smart defaults\n";
+        echo "      " . $this->color("(Standard blocks, recommended plugins, skip optional config)", 'gray') . "\n\n";
+        echo "  " . $this->color("[f]", 'yellow') . " " . $this->color("Full Setup", 'white', true) . "  - Configure everything step by step\n";
+        echo "      " . $this->color("(All options, block selection, social media, analytics)", 'gray') . "\n\n";
+
+        $mode = strtolower($this->prompt('Setup mode', 'q', '[q]uick or [f]ull'));
+        $this->quickSetup = ($mode !== 'f' && $mode !== 'full');
+
+        if ($this->quickSetup) {
+            echo "\n  " . $this->color("→ Quick Setup selected", 'green') . "\n";
+        } else {
+            echo "\n  " . $this->color("→ Full Setup selected", 'cyan') . "\n";
+        }
         echo "\n";
-        echo $this->color("Press Ctrl+C at any time to cancel.\n", 'gray');
-        echo "\n";
-        $this->pressEnterToContinue();
     }
 
     private function collectThemeInfo(): void
     {
         $this->printSection("Step 1: Theme Information");
-        echo "Configure the basic theme details.\n";
-        echo $this->color("(Press Enter to keep default value shown in brackets)\n\n", 'gray');
+
+        // Use detected Local site name as default if available
+        $defaultThemeName = $this->detectedSiteName ?? $this->defaults['theme_name'];
 
         $this->config['theme_name'] = $this->prompt(
             'Theme Name',
-            $this->defaults['theme_name'],
+            $defaultThemeName,
             'The display name of your theme'
         );
 
-        $this->config['theme_slug'] = $this->prompt(
-            'Theme Slug',
-            $this->slugify($this->config['theme_name']),
-            'Lowercase with hyphens, used for folders and IDs'
-        );
+        // Auto-derive other values from theme name
+        $this->config['theme_slug'] = $this->slugify($this->config['theme_name']);
+        $this->config['text_domain'] = $this->config['theme_slug'];
+        $this->config['namespace'] = $this->pascalCase($this->config['theme_name']);
+        $this->config['description'] = 'WordPress theme for ' . $this->config['theme_name'];
+        $this->config['version'] = '1.0.0';
 
-        $this->config['text_domain'] = $this->prompt(
-            'Text Domain',
-            $this->config['theme_slug'],
-            'Used for translations (usually same as slug)'
-        );
+        if ($this->quickSetup) {
+            // Quick mode: use all defaults
+            $this->config['author'] = $this->defaults['author'];
+            $this->config['author_email'] = $this->defaults['author_email'];
+            $this->config['author_uri'] = $this->defaults['author_uri'];
+            $this->config['theme_uri'] = '';
+            $this->config['package_name'] = strtolower($this->slugify($this->config['author']) . '/' . $this->config['theme_slug']);
 
-        $this->config['namespace'] = $this->prompt(
-            'PHP Namespace',
-            $this->pascalCase($this->config['theme_name']),
-            'PascalCase, for PHP classes'
-        );
+            echo "\n  " . $this->color("Using defaults:", 'gray') . "\n";
+            echo "  • Slug: " . $this->color($this->config['theme_slug'], 'cyan') . "\n";
+            echo "  • Author: " . $this->color($this->config['author'], 'cyan') . "\n";
+            echo "  • Email: " . $this->color($this->config['author_email'], 'cyan') . "\n";
+        } else {
+            // Full mode: ask everything
+            echo $this->color("(Press Enter to keep default value shown in brackets)\n\n", 'gray');
 
-        $this->config['description'] = $this->prompt(
-            'Description',
-            $this->defaults['description'],
-            'Short description of your theme'
-        );
+            $this->config['theme_slug'] = $this->prompt(
+                'Theme Slug',
+                $this->config['theme_slug'],
+                'Lowercase with hyphens'
+            );
 
-        echo "\n";
-        $this->printSubSection("Author Information");
+            $this->config['text_domain'] = $this->prompt(
+                'Text Domain',
+                $this->config['theme_slug'],
+                'For translations'
+            );
 
-        $this->config['author'] = $this->prompt(
-            'Author Name',
-            $this->defaults['author']
-        );
+            $this->config['namespace'] = $this->prompt(
+                'PHP Namespace',
+                $this->config['namespace'],
+                'PascalCase'
+            );
 
-        $this->config['author_email'] = $this->prompt(
-            'Author Email',
-            $this->defaults['author_email']
-        );
+            $this->config['description'] = $this->prompt(
+                'Description',
+                $this->config['description']
+            );
 
-        $this->config['author_uri'] = $this->prompt(
-            'Author Website',
-            $this->defaults['author_uri']
-        );
+            echo "\n";
+            $this->printSubSection("Author Information");
 
-        echo "\n";
-        $this->printSubSection("Repository & Version");
+            $this->config['author'] = $this->prompt(
+                'Author Name',
+                $this->defaults['author']
+            );
 
-        $this->config['theme_uri'] = $this->collectRepositoryUrl();
+            $this->config['author_email'] = $this->promptWithValidation(
+                'Author Email',
+                $this->defaults['author_email'],
+                'email',
+                'Valid email address'
+            );
 
-        $this->config['version'] = $this->prompt(
-            'Initial Version',
-            '1.0.0'
-        );
+            $this->config['author_uri'] = $this->promptWithValidation(
+                'Author Website',
+                $this->defaults['author_uri'],
+                'url',
+                'https://...'
+            );
 
-        $this->config['package_name'] = $this->prompt(
-            'Composer Package',
-            strtolower($this->slugify($this->config['author']) . '/' . $this->config['theme_slug']),
-            'Format: vendor/package'
-        );
+            echo "\n";
+            $this->printSubSection("Repository & Version");
+
+            $this->config['theme_uri'] = $this->collectRepositoryUrl();
+
+            $this->config['version'] = $this->prompt(
+                'Initial Version',
+                '1.0.0'
+            );
+
+            $this->config['package_name'] = $this->prompt(
+                'Composer Package',
+                strtolower($this->slugify($this->config['author']) . '/' . $this->config['theme_slug']),
+                'vendor/package'
+            );
+        }
     }
 
     private function collectPluginPreferences(): void
     {
+        if ($this->quickSetup) {
+            // Quick mode: select recommended plugins automatically
+            $recommendedPlugins = ['wordpress-seo', 'contact-form-7', 'wp-mail-smtp', 'admin-site-enhancements'];
+            foreach ($this->availablePlugins as $category) {
+                foreach ($category['plugins'] as $slug => $plugin) {
+                    $this->pluginSelections[$slug] = in_array($slug, $recommendedPlugins, true);
+                }
+            }
+            echo "\n  " . $this->color("Using recommended plugins:", 'gray') . " Yoast SEO, Contact Form 7, WP Mail SMTP, Admin Enhancements\n";
+            return;
+        }
+
         $this->printSection("Step 2: Plugin Selection");
         echo "Select which plugins should be " . $this->color("auto-installed", 'green') . " when you first\n";
         echo "activate the theme in WordPress.\n\n";
@@ -220,7 +420,22 @@ class ThemeSetup
 
     private function collectContentOptions(): void
     {
-        $this->printSection("Step 3: Content Options");
+        if ($this->quickSetup) {
+            // Quick mode: use theme name as company, enable all defaults
+            $this->config['company_name'] = $this->config['theme_name'];
+            $this->config['company_address'] = '';
+            $this->config['company_phone'] = '';
+            $this->config['company_email'] = $this->config['author_email'] ?? $this->defaults['author_email'];
+            $this->config['create_pages'] = true;
+            $this->config['delete_default_content'] = true;
+            $this->config['set_permalink_structure'] = true;
+            $this->config['color_scheme'] = 'system';
+
+            echo "\n  " . $this->color("Content options:", 'gray') . " Standardseiten werden erstellt, pretty permalinks aktiviert\n";
+            return;
+        }
+
+        $this->printSection("Step 4: Content Options");
         echo "Configure what should happen when WordPress is set up.\n\n";
 
         $this->printSubSection("Company Information");
@@ -246,7 +461,7 @@ class ThemeSetup
 
         $this->config['company_email'] = $this->prompt(
             'Email',
-            $this->config['author_email'],
+            $this->config['author_email'] ?? $this->defaults['author_email'],
             'Contact email address'
         );
 
@@ -295,8 +510,169 @@ class ThemeSetup
         };
     }
 
+    private function collectBlockPreferences(): void
+    {
+        // Get all block slugs
+        $allBlockSlugs = [];
+        foreach ($this->availableBlocks as $category) {
+            foreach ($category['blocks'] as $slug => $name) {
+                $allBlockSlugs[] = $slug;
+            }
+        }
+
+        if ($this->quickSetup) {
+            // Quick mode: use standard preset
+            $this->applyBlockPreset('standard', $allBlockSlugs);
+            $keptCount = count(array_filter($this->blockSelections));
+            echo "\n  " . $this->color("Using standard blocks:", 'gray') . " {$keptCount} blocks selected\n";
+            return;
+        }
+
+        $this->printSection("Step 3: Block Selection");
+        echo "Das Theme enthält " . $this->color("28 ACF Blocks", 'cyan') . ". Wähle ein Preset oder einzeln:\n\n";
+
+        echo "  " . $this->color("[m]", 'yellow') . " Minimal    - 6 Blocks  (Hero, Spalten, Bild, CTA, Kontakt)\n";
+        echo "  " . $this->color("[s]", 'yellow') . " Standard   - 23 Blocks (Alle außer Pricing, Timeline, Map, Before/After, Table)\n";
+        echo "  " . $this->color("[f]", 'yellow') . " Full       - 28 Blocks (Alle behalten)\n";
+        echo "  " . $this->color("[c]", 'yellow') . " Custom     - Einzeln auswählen\n\n";
+
+        $choice = strtolower($this->prompt('Block-Auswahl', 's', '[m]inimal, [s]tandard, [f]ull, [c]ustom'));
+
+        if ($choice === 'm' || $choice === 'minimal') {
+            $this->applyBlockPreset('minimal', $allBlockSlugs);
+            echo "  " . $this->color("✓ Minimal: 6 Blocks ausgewählt.", 'green') . "\n";
+        } elseif ($choice === 'f' || $choice === 'full') {
+            $this->applyBlockPreset('full', $allBlockSlugs);
+            echo "  " . $this->color("✓ Full: Alle 28 Blocks behalten.", 'green') . "\n";
+        } elseif ($choice === 'c' || $choice === 'custom') {
+            echo "\n";
+            foreach ($this->availableBlocks as $categoryKey => $category) {
+                $this->printSubSection($category['name']);
+
+                foreach ($category['blocks'] as $slug => $name) {
+                    $answer = $this->prompt(
+                        $name,
+                        'y',
+                        'behalten? (y/n)'
+                    );
+                    $this->blockSelections[$slug] = strtolower($answer) === 'y' || strtolower($answer) === 'yes';
+                }
+                echo "\n";
+            }
+        } else {
+            // Default to standard
+            $this->applyBlockPreset('standard', $allBlockSlugs);
+            echo "  " . $this->color("✓ Standard: 23 Blocks ausgewählt.", 'green') . "\n";
+        }
+    }
+
+    /**
+     * Apply a block preset
+     *
+     * @param string $preset Preset name (minimal, standard, full)
+     * @param string[] $allBlockSlugs All available block slugs
+     */
+    private function applyBlockPreset(string $preset, array $allBlockSlugs): void
+    {
+        $presetBlocks = $this->blockPresets[$preset] ?? [];
+
+        foreach ($allBlockSlugs as $slug) {
+            // Empty preset means keep all
+            $this->blockSelections[$slug] = empty($presetBlocks) || in_array($slug, $presetBlocks, true);
+        }
+    }
+
+    private function collectSocialMedia(): void
+    {
+        if ($this->quickSetup) {
+            // Skip in quick mode
+            echo "\n  " . $this->color("Social Media:", 'gray') . " Übersprungen (kann später in Theme-Einstellungen konfiguriert werden)\n";
+            return;
+        }
+
+        $this->printSection("Step 5: Social Media");
+        echo "Füge deine Social Media Profile hinzu (erscheinen im Footer).\n";
+        echo $this->color("Leer lassen um zu überspringen.\n\n", 'gray');
+
+        foreach ($this->socialPlatforms as $key => $name) {
+            $url = $this->prompt(
+                $name,
+                '',
+                "URL zu deinem {$name} Profil"
+            );
+
+            if (!empty($url)) {
+                // Validate URL
+                if (!$this->isValidUrl($url)) {
+                    echo "  " . $this->color("⚠ Ungültige URL, übersprungen.", 'yellow') . "\n";
+                    continue;
+                }
+                $this->socialLinks[] = [
+                    'platform' => $key,
+                    'url' => $url,
+                ];
+            }
+        }
+
+        if (empty($this->socialLinks)) {
+            echo "\n  " . $this->color("Keine Social Media Links konfiguriert.", 'gray') . "\n";
+        } else {
+            echo "\n  " . $this->color("✓ " . count($this->socialLinks) . " Social Media Links konfiguriert.", 'green') . "\n";
+        }
+    }
+
+    private function collectAnalytics(): void
+    {
+        if ($this->quickSetup) {
+            // Skip in quick mode
+            $this->config['pirsch_code'] = '';
+            echo "\n  " . $this->color("Analytics:", 'gray') . " Übersprungen (kann später in Theme-Einstellungen konfiguriert werden)\n";
+            return;
+        }
+
+        $this->printSection("Step 6: Analytics");
+        echo "Das Theme unterstützt " . $this->color("Pirsch Analytics", 'cyan') . " - DSGVO-konform & cookie-frei.\n";
+        echo $this->color("https://pirsch.io - Kein Cookie-Banner erforderlich!\n\n", 'gray');
+
+        $this->config['pirsch_code'] = $this->prompt(
+            'Pirsch Site Code',
+            '',
+            'Aus pirsch.io Dashboard (oder leer lassen)'
+        );
+
+        if (empty($this->config['pirsch_code'])) {
+            echo "  " . $this->color("Kein Analytics konfiguriert. Kann später hinzugefügt werden.", 'gray') . "\n";
+        } else {
+            echo "  " . $this->color("✓ Pirsch Analytics wird aktiviert.", 'green') . "\n";
+        }
+    }
+
     private function confirmChanges(): void
     {
+        if ($this->quickSetup) {
+            // Quick mode: minimal summary, auto-confirm
+            echo "\n";
+            $this->printSection("Quick Setup Summary");
+            echo "  Theme:   " . $this->color($this->config['theme_name'], 'green') . "\n";
+            echo "  Slug:    " . $this->color($this->config['theme_slug'], 'cyan') . "\n";
+            echo "  Author:  {$this->config['author']}\n";
+            echo "  Blocks:  " . $this->color(count(array_filter($this->blockSelections)) . " (standard)", 'cyan') . "\n";
+            echo "  Plugins: " . $this->color(count(array_filter($this->pluginSelections)) . " (recommended)", 'cyan') . "\n";
+            echo "\n";
+
+            $confirm = $this->prompt(
+                $this->color('Apply?', 'yellow'),
+                'y',
+                '(y/n)'
+            );
+
+            if (strtolower($confirm) !== 'y' && strtolower($confirm) !== 'yes') {
+                echo "\n" . $this->color("Setup cancelled.", 'red') . "\n";
+                exit(1);
+            }
+            return;
+        }
+
         $this->printSection("Configuration Summary");
 
         echo $this->color("Theme Settings:\n", 'white', true);
@@ -319,11 +695,38 @@ class ThemeSetup
         }
         echo "\n";
 
+        echo $this->color("Blocks:\n", 'white', true);
+        $selectedBlocks = array_filter($this->blockSelections);
+        $removedBlocks = array_filter($this->blockSelections, fn($v) => !$v);
+        echo "  " . $this->color(count($selectedBlocks) . " behalten", 'green');
+        if (!empty($removedBlocks)) {
+            echo ", " . $this->color(count($removedBlocks) . " entfernen", 'yellow');
+        }
+        echo "\n\n";
+
         echo $this->color("Content Options:\n", 'white', true);
         echo "  Create pages:          " . ($this->config['create_pages'] ? $this->color('Yes', 'green') : $this->color('No', 'red')) . "\n";
         echo "  Delete default content: " . ($this->config['delete_default_content'] ? $this->color('Yes', 'green') : $this->color('No', 'red')) . "\n";
         echo "  Pretty permalinks:     " . ($this->config['set_permalink_structure'] ? $this->color('Yes', 'green') : $this->color('No', 'red')) . "\n";
         echo "  Farbschema:            " . $this->color($this->config['color_scheme'] ?? 'system', 'cyan') . "\n";
+        echo "\n";
+
+        echo $this->color("Social Media:\n", 'white', true);
+        if (empty($this->socialLinks)) {
+            echo "  " . $this->color("Nicht konfiguriert", 'gray') . "\n";
+        } else {
+            foreach ($this->socialLinks as $link) {
+                echo "  " . $this->color("✓", 'green') . " {$this->socialPlatforms[$link['platform']]}\n";
+            }
+        }
+        echo "\n";
+
+        echo $this->color("Analytics:\n", 'white', true);
+        if (empty($this->config['pirsch_code'])) {
+            echo "  " . $this->color("Nicht konfiguriert", 'gray') . "\n";
+        } else {
+            echo "  " . $this->color("✓", 'green') . " Pirsch Analytics\n";
+        }
         echo "\n";
 
         $confirm = $this->prompt(
@@ -352,6 +755,8 @@ class ThemeSetup
         $this->task('Updating documentation files', fn() => $this->updateDocumentation());
         $this->task('Saving plugin preferences', fn() => $this->savePluginPreferences());
         $this->task('Saving content options', fn() => $this->saveContentOptions());
+        $this->task('Saving ACF options (prefill)', fn() => $this->saveAcfOptions());
+        $this->task('Removing unused blocks', fn() => $this->removeUnusedBlocks());
         $this->task('Creating .env file', fn() => $this->createEnvFile());
         $this->task('Removing old setup script', fn() => $this->removeOldSetupScript());
     }
@@ -366,7 +771,7 @@ class ThemeSetup
 
     private function runInstallCommands(): void
     {
-        $this->printSection("Step 4: Installing Dependencies");
+        $this->printSection("Step 7: Installing Dependencies");
 
         echo "The theme requires dependencies to be installed before it can be used.\n\n";
 
@@ -855,6 +1260,120 @@ CSS;
         file_put_contents($this->themeDir . '/config/setup-options.php', $configContent);
     }
 
+    /**
+     * Save ACF options that will be pre-filled on theme activation
+     */
+    private function saveAcfOptions(): void
+    {
+        $acfOptions = [
+            // General settings
+            'company_name' => $this->config['company_name'] ?? '',
+            'address' => $this->config['company_address'] ?? '',
+            'phone' => $this->config['company_phone'] ?? '',
+            'email' => $this->config['company_email'] ?? '',
+            'color_scheme' => $this->config['color_scheme'] ?? 'system',
+
+            // Footer copyright
+            'copyright_text' => '© {year} ' . ($this->config['company_name'] ?? $this->config['theme_name']) . '. Alle Rechte vorbehalten.',
+
+            // Social links
+            'social_links' => $this->socialLinks,
+
+            // Analytics
+            'pirsch_code' => $this->config['pirsch_code'] ?? '',
+        ];
+
+        $configContent = "<?php\n\n";
+        $configContent .= "declare(strict_types=1);\n\n";
+        $configContent .= "/**\n";
+        $configContent .= " * Auto-generated by setup script - " . date('Y-m-d H:i:s') . "\n";
+        $configContent .= " * ACF options to pre-fill on theme activation\n";
+        $configContent .= " *\n";
+        $configContent .= " * @return array<string, mixed>\n";
+        $configContent .= " */\n";
+        $configContent .= "return " . var_export($acfOptions, true) . ";\n";
+
+        file_put_contents($this->themeDir . '/config/acf-options.php', $configContent);
+    }
+
+    /**
+     * Remove blocks that were not selected
+     */
+    private function removeUnusedBlocks(): void
+    {
+        $blocksDir = $this->themeDir . '/blocks';
+        $removedBlocks = array_keys(array_filter($this->blockSelections, fn($v) => !$v));
+
+        foreach ($removedBlocks as $blockSlug) {
+            $blockPath = $blocksDir . '/' . $blockSlug;
+            if (is_dir($blockPath)) {
+                $this->deleteDirectory($blockPath);
+            }
+        }
+    }
+
+    /**
+     * Recursively delete a directory
+     */
+    private function deleteDirectory(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $files = array_diff(scandir($dir), ['.', '..']);
+        foreach ($files as $file) {
+            $path = $dir . '/' . $file;
+            is_dir($path) ? $this->deleteDirectory($path) : unlink($path);
+        }
+        rmdir($dir);
+    }
+
+    /**
+     * Initialize git repository after setup
+     */
+    private function initGitRepo(): void
+    {
+        $this->printSection("Step 8: Git Repository");
+
+        // Check if already a git repo
+        if (is_dir($this->themeDir . '/.git')) {
+            echo "  " . $this->color("Git repository already exists.", 'gray') . "\n";
+
+            $makeCommit = strtolower($this->prompt(
+                'Create initial commit with setup changes?',
+                'y',
+                '(y/n)'
+            )) === 'y';
+
+            if ($makeCommit) {
+                $this->runCommand('Staging all changes', 'git add .');
+                $commitMsg = 'Initial theme setup: ' . $this->config['theme_name'];
+                $this->runCommand('Creating commit', "git commit -m " . escapeshellarg($commitMsg));
+            }
+            return;
+        }
+
+        $initGit = strtolower($this->prompt(
+            'Initialize git repository?',
+            'y',
+            '(y/n)'
+        )) === 'y';
+
+        if (!$initGit) {
+            echo "  " . $this->color("Skipped.", 'gray') . "\n";
+            return;
+        }
+
+        $this->runCommand('Initializing git', 'git init');
+        $this->runCommand('Staging all files', 'git add .');
+
+        $commitMsg = 'Initial theme setup: ' . $this->config['theme_name'];
+        $this->runCommand('Creating initial commit', "git commit -m " . escapeshellarg($commitMsg));
+
+        echo "\n  " . $this->color("✓ Git repository initialized with initial commit.", 'green') . "\n";
+    }
+
     private function createEnvFile(): void
     {
         $envExample = $this->themeDir . '/.env.example';
@@ -864,7 +1383,35 @@ CSS;
             return;
         }
 
-        copy($envExample, $envFile);
+        $content = file_get_contents($envExample);
+
+        // Build local URL from site name (Local by Flywheel convention)
+        $localUrl = 'http://wordpressstarter.local';
+        if ($this->detectedSiteName) {
+            // Local by Flywheel uses sitename.local format
+            $slug = $this->slugify($this->detectedSiteName);
+            $localUrl = "http://{$slug}.local";
+        } elseif (!empty($this->config['theme_slug'])) {
+            $localUrl = "http://{$this->config['theme_slug']}.local";
+        }
+
+        // Replace values with collected config
+        $replacements = [
+            'BROWSERSYNC_PROXY=http://wordpressstarter.local' => "BROWSERSYNC_PROXY={$localUrl}",
+            'THEME_VERSION=0.0.1' => "THEME_VERSION={$this->config['version']}",
+            'THEME_TEXT_DOMAIN=wp-starter' => "THEME_TEXT_DOMAIN={$this->config['text_domain']}",
+        ];
+
+        // Add Pirsch ID if configured
+        if (!empty($this->config['pirsch_code'])) {
+            $replacements['PIRSCH_ID='] = "PIRSCH_ID={$this->config['pirsch_code']}";
+        }
+
+        foreach ($replacements as $search => $replace) {
+            $content = str_replace($search, $replace, $content);
+        }
+
+        file_put_contents($envFile, $content);
     }
 
     private function printSuccess(): void
@@ -930,6 +1477,56 @@ CSS;
 
         $input = trim(fgets(STDIN));
         return $input !== '' ? $input : $default;
+    }
+
+    /**
+     * Prompt with validation - keeps asking until valid input or empty (uses default)
+     */
+    private function promptWithValidation(string $question, string $default, string $type, string $hint = ''): string
+    {
+        while (true) {
+            $value = $this->prompt($question, $default, $hint);
+
+            // Empty value uses default, which we assume is valid
+            if ($value === $default) {
+                return $value;
+            }
+
+            // Validate based on type
+            $isValid = match ($type) {
+                'email' => $this->isValidEmail($value),
+                'url' => $this->isValidUrl($value),
+                default => true,
+            };
+
+            if ($isValid) {
+                return $value;
+            }
+
+            // Show error and retry
+            $errorMsg = match ($type) {
+                'email' => 'Ungültige E-Mail-Adresse. Bitte erneut eingeben.',
+                'url' => 'Ungültige URL (muss mit http:// oder https:// beginnen). Bitte erneut eingeben.',
+                default => 'Ungültige Eingabe. Bitte erneut eingeben.',
+            };
+            echo "  " . $this->color("⚠ {$errorMsg}", 'yellow') . "\n";
+        }
+    }
+
+    /**
+     * Validate email address
+     */
+    private function isValidEmail(string $email): bool
+    {
+        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    /**
+     * Validate URL
+     */
+    private function isValidUrl(string $url): bool
+    {
+        return filter_var($url, FILTER_VALIDATE_URL) !== false;
     }
 
     private function pressEnterToContinue(): void

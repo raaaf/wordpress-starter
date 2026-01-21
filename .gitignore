@@ -14,6 +14,12 @@
 .env
 .env.local
 
+# Generated config files (project-specific, created by setup script)
+/config/plugins-to-install.php
+/config/setup-options.php
+/config/acf-options.php
+/config/acf-options.php.processed
+
 # ignore all files starting with . or ~
 .*
 ~*
