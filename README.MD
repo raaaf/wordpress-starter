@@ -33,7 +33,7 @@ A modern WordPress starter theme built with cutting-edge technologies and best p
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/wordpress-starter.git your-theme-name
+git clone https://github.com/raaaf/starter.git your-theme-name
 cd your-theme-name
 ```
 
