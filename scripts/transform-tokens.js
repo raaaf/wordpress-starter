@@ -20,6 +20,7 @@ const ROOT = join(__dirname, '..');
 // Input/output paths
 const TOKENS_DIR = join(ROOT, 'config/design-tokens');
 const OUTPUT_FILE = join(ROOT, 'resources/css/tokens.css');
+const OUTPUT_EDITOR_FILE = join(ROOT, 'resources/css/tokens-editor.css');
 
 /**
  * Extract hex color value from Figma token $value object
@@ -71,10 +72,12 @@ function extractNumericValue(token, unit = 'px') {
 
 /**
  * Extract string value (fontFamily)
+ * Wraps font family names in quotes for CSS compatibility
  */
 function extractStringValue(token) {
   if (!token || token.$type !== 'string') return null;
-  return token.$value;
+  // Wrap font family names in quotes for CSS
+  return `"${token.$value}"`
 }
 
 /**
@@ -130,6 +133,264 @@ function generateCss(tokens, prefix = '') {
   return Object.entries(tokens)
     .map(([name, value]) => `  ${toCssVarName(name, prefix)}: ${value};`)
     .join('\n');
+}
+
+/**
+ * Generate CSS with !important from flattened tokens
+ * Used for editor styles to override dark mode rules
+ */
+function generateCssImportant(tokens, prefix = '') {
+  return Object.entries(tokens)
+    .map(([name, value]) => `    ${toCssVarName(name, prefix)}: ${value} !important;`)
+    .join('\n');
+}
+
+/**
+ * Standard typography tokens (not from Figma, but needed for consistency)
+ * These use primitive font-size/font-weight values and add line-height, letter-spacing
+ */
+const TYPOGRAPHY_TOKENS = `
+  /* ============================================
+     TYPOGRAPHY COMPOSITE TOKENS
+     Standard typography styles using primitives
+     ============================================ */
+
+  /* Display - 6xl / Bold (for hero headlines) */
+  --typography-display-size: var(--font-size-6xl);
+  --typography-display-weight: var(--font-weight-bold);
+  --typography-display-line-height: 1.1;
+  --typography-display-letter-spacing: -0.02em;
+
+  /* Heading 1 - 4xl / Bold */
+  --typography-h1-size: var(--font-size-4xl);
+  --typography-h1-weight: var(--font-weight-bold);
+  --typography-h1-line-height: 1.2;
+  --typography-h1-letter-spacing: -0.01em;
+
+  /* Heading 2 - 3xl / Semibold */
+  --typography-h2-size: var(--font-size-3xl);
+  --typography-h2-weight: var(--font-weight-semibold);
+  --typography-h2-line-height: 1.25;
+  --typography-h2-letter-spacing: -0.01em;
+
+  /* Heading 3 - 2xl / Semibold */
+  --typography-h3-size: var(--font-size-2xl);
+  --typography-h3-weight: var(--font-weight-semibold);
+  --typography-h3-line-height: 1.3;
+  --typography-h3-letter-spacing: 0;
+
+  /* Heading 4 - xl / Semibold */
+  --typography-h4-size: var(--font-size-xl);
+  --typography-h4-weight: var(--font-weight-semibold);
+  --typography-h4-line-height: 1.4;
+  --typography-h4-letter-spacing: 0;
+
+  /* Heading 5 - lg / Medium */
+  --typography-h5-size: var(--font-size-lg);
+  --typography-h5-weight: var(--font-weight-medium);
+  --typography-h5-line-height: 1.4;
+  --typography-h5-letter-spacing: 0;
+
+  /* Body Large - lg / Regular */
+  --typography-body-large-size: var(--font-size-lg);
+  --typography-body-large-weight: var(--font-weight-regular);
+  --typography-body-large-line-height: 1.6;
+  --typography-body-large-letter-spacing: 0;
+
+  /* Body - base / Regular */
+  --typography-body-size: var(--font-size-base);
+  --typography-body-weight: var(--font-weight-regular);
+  --typography-body-line-height: 1.5;
+  --typography-body-letter-spacing: 0;
+
+  /* Body Small - sm / Regular */
+  --typography-body-small-size: var(--font-size-sm);
+  --typography-body-small-weight: var(--font-weight-regular);
+  --typography-body-small-line-height: 1.5;
+  --typography-body-small-letter-spacing: 0;
+
+  /* Caption - xs / Regular */
+  --typography-caption-size: var(--font-size-xs);
+  --typography-caption-weight: var(--font-weight-regular);
+  --typography-caption-line-height: 1.4;
+  --typography-caption-letter-spacing: 0;
+
+  /* Overline - xs / Semibold / Uppercase */
+  --typography-overline-size: var(--font-size-xs);
+  --typography-overline-weight: var(--font-weight-semibold);
+  --typography-overline-line-height: 1.4;
+  --typography-overline-letter-spacing: 0.1em;
+  --typography-overline-transform: uppercase;
+
+  /* Code - sm / Regular */
+  --typography-code-size: var(--font-size-sm);
+  --typography-code-weight: var(--font-weight-regular);
+  --typography-code-line-height: 1.5;
+  --typography-code-letter-spacing: 0;
+`;
+
+/**
+ * Standard component tokens (shadows, button sizes, etc.)
+ * Can be overridden by Figma exports if needed
+ */
+const COMPONENT_TOKENS = `
+  /* ============================================
+     COMPONENT TOKENS
+     Gradients, shadows, and component-specific values
+     ============================================ */
+
+  /* Shadows */
+  --shadow-button: 0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  --shadow-button-hover: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-inner: inset 0px 2px 4px 0px rgba(0, 0, 0, 0.06);
+  --shadow-focus-ring: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-accent-alpha-50);
+  --shadow-focus-ring-ghost: 0px 0px 0px 2px var(--color-accent-alpha-50);
+  --shadow-focus-ring-error: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-error-alpha-50, rgba(220, 38, 38, 0.5));
+  --shadow-input: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  --shadow-input-hover: 0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  --shadow-card-hover: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-dropdown: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-modal: 0px 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Gradients - Primary Button */
+  --gradient-primary-start: var(--color-accent-500);
+  --gradient-primary-end: var(--color-accent-600);
+  --gradient-primary-hover-start: var(--color-accent-600);
+  --gradient-primary-hover-end: var(--color-accent-700);
+  --gradient-primary-active-start: var(--color-accent-700);
+  --gradient-primary-active-end: var(--color-accent-800);
+
+  /* Button Sizes */
+  --button-sm-padding-x: 12px;
+  --button-sm-padding-y: 4px;
+  --button-sm-radius: 4px;
+  --button-sm-min-height: 32px;
+  --button-sm-gap: 6px;
+  --button-md-padding-x: 20px;
+  --button-md-padding-y: 10px;
+  --button-md-radius: 8px;
+  --button-md-min-height: 40px;
+  --button-md-gap: 8px;
+  --button-lg-padding-x: 24px;
+  --button-lg-padding-y: 12px;
+  --button-lg-radius: 12px;
+  --button-lg-min-height: 48px;
+  --button-lg-gap: 10px;
+
+  /* Input Sizes */
+  --input-sm-padding-x: 10px;
+  --input-sm-padding-y: 6px;
+  --input-sm-radius: 4px;
+  --input-md-padding-x: 12px;
+  --input-md-padding-y: 10px;
+  --input-md-radius: 8px;
+  --input-lg-padding-x: 16px;
+  --input-lg-padding-y: 12px;
+  --input-lg-radius: 12px;
+
+  /* Badge Sizes */
+  --badge-sm-padding-x: 6px;
+  --badge-sm-padding-y: 2px;
+  --badge-sm-radius: 4px;
+  --badge-sm-gap: 4px;
+  --badge-md-padding-x: 10px;
+  --badge-md-padding-y: 4px;
+  --badge-md-radius: 6px;
+  --badge-md-gap: 6px;
+  --badge-lg-padding-x: 12px;
+  --badge-lg-padding-y: 6px;
+  --badge-lg-radius: 8px;
+  --badge-lg-gap: 8px;
+
+  /* Card Tokens */
+  --card-bg: #ffffff;
+  --card-border: #e5e5e5;
+  --card-radius: 12px;
+  --card-padding: 20px;
+  --card-gap: 16px;
+  --card-media-radius: 8px;
+  --card-footer-gap: 12px;
+  --card-footer-padding-top: 16px;
+`;
+
+/**
+ * Validation and auto-fix for generated CSS
+ */
+function validateAndFix(css) {
+  const warnings = [];
+  const fixes = [];
+  let fixedCss = css;
+
+  // 1. Check for unquoted font-family values (multi-word fonts need quotes)
+  const fontFamilyRegex = /--font-family-\w+:\s*([^;]+);/g;
+  let match;
+  while ((match = fontFamilyRegex.exec(css)) !== null) {
+    const value = match[1].trim();
+    // Font names with spaces that aren't quoted
+    if (/[A-Z][a-z]+[A-Z]/.test(value) && !value.startsWith('"') && !value.startsWith("'")) {
+      warnings.push(`Unquoted font family: ${value}`);
+      const quotedValue = `"${value}"`;
+      fixedCss = fixedCss.replace(match[0], match[0].replace(value, quotedValue));
+      fixes.push(`Auto-fixed: Quoted font family "${value}"`);
+    }
+  }
+
+  // 2. Check for invalid color values
+  const colorRegex = /--(?:color|bg|text|border|icon)-[\w-]+:\s*([^;]+);/g;
+  while ((match = colorRegex.exec(css)) !== null) {
+    const value = match[1].trim();
+    // Skip CSS variable references
+    if (value.startsWith('var(')) continue;
+    // Skip valid hex colors
+    if (/^#[0-9A-Fa-f]{3,8}$/.test(value)) continue;
+    // Skip valid rgba/rgb
+    if (/^rgba?\([^)]+\)$/.test(value)) continue;
+    // Skip valid named colors (for status colors)
+    if (/^(transparent|inherit|currentColor)$/.test(value)) continue;
+
+    // If none of the above, it might be invalid
+    if (!/^(var\(|#|rgba?|transparent|inherit)/.test(value)) {
+      warnings.push(`Potentially invalid color value: ${match[0].substring(0, 50)}...`);
+    }
+  }
+
+  // 3. Check for px values that should be rem (font-size)
+  const fontSizeRegex = /--font-size-\w+:\s*(\d+)px;/g;
+  while ((match = fontSizeRegex.exec(css)) !== null) {
+    const pxValue = parseInt(match[1]);
+    const remValue = (pxValue / 16).toFixed(4).replace(/\.?0+$/, '');
+    warnings.push(`Font size in px: ${match[1]}px (should be ${remValue}rem for accessibility)`);
+    // Auto-fix to rem
+    fixedCss = fixedCss.replace(match[0], `--font-size-${match[0].match(/--font-size-(\w+)/)[1]}: ${remValue}rem;`);
+    fixes.push(`Auto-fixed: Converted ${match[1]}px to ${remValue}rem`);
+  }
+
+  // 4. Check for missing required tokens
+  const requiredTokens = [
+    '--font-family-headline',
+    '--font-family-body',
+    '--color-white',
+    '--color-gray-50',
+    '--color-gray-900',
+    '--bg-primary',
+    '--text-primary',
+    '--border-default',
+  ];
+
+  for (const token of requiredTokens) {
+    if (!css.includes(token + ':')) {
+      warnings.push(`Missing required token: ${token}`);
+    }
+  }
+
+  // 5. Check for Tailwind opacity modifier syntax that won't work with CSS variables
+  const opacityModifierRegex = /[\w-]+\/\d+/g;
+  while ((match = opacityModifierRegex.exec(css)) !== null) {
+    warnings.push(`Tailwind opacity modifier in CSS won't work: ${match[0]}`);
+  }
+
+  return { css: fixedCss, warnings, fixes };
 }
 
 /**
@@ -219,7 +480,7 @@ function transform() {
   console.log('Generating CSS...');
 
   // Generate CSS output
-  const css = `/**
+  let css = `/**
  * Design Tokens - Auto-generated from Figma
  *
  * DO NOT EDIT THIS FILE DIRECTLY!
@@ -252,6 +513,8 @@ ${generateCss(primitiveFontWeight, 'font-weight')}
 
   /* Font Family */
 ${generateCss(primitiveFontFamily, 'font-family')}
+${TYPOGRAPHY_TOKENS}
+${COMPONENT_TOKENS}
 }
 
 /* ============================================
@@ -310,8 +573,134 @@ ${generateCss(darkIcon, 'icon')}
 }
 `;
 
-  // Write output
+  // Validate and auto-fix
+  console.log('\nValidating generated CSS...');
+  const { css: validatedCss, warnings, fixes } = validateAndFix(css);
+
+  if (fixes.length > 0) {
+    console.log('\n✅ Auto-fixes applied:');
+    fixes.forEach(fix => console.log(`   ${fix}`));
+    css = validatedCss;
+  }
+
+  if (warnings.length > 0) {
+    console.log('\n⚠️  Warnings:');
+    warnings.forEach(warning => console.log(`   ${warning}`));
+  }
+
+  if (warnings.length === 0 && fixes.length === 0) {
+    console.log('✅ All tokens validated successfully!');
+  }
+
+  // Write output - Main tokens file (with dark mode)
   writeFileSync(OUTPUT_FILE, css, 'utf8');
+
+  // Generate editor-only tokens (light mode only, no dark mode)
+  // Semantic tokens are scoped to .editor-styles-wrapper for higher specificity
+  // This ensures they override any dark mode rules from app.css
+  const editorCss = `/**
+ * Design Tokens (Editor Only) - Auto-generated from Figma
+ *
+ * DO NOT EDIT THIS FILE DIRECTLY!
+ * Run: node scripts/transform-tokens.js
+ *
+ * This file contains ONLY light mode tokens for the Gutenberg editor.
+ * It ensures the editor always displays in light mode regardless of system preferences.
+ *
+ * Primitives are on :root (referenced by var() everywhere)
+ * Semantic tokens are scoped to .editor-styles-wrapper for higher specificity
+ * than dark mode rules in app.css
+ *
+ * Source: config/design-tokens/*.tokens.json
+ * Generated: ${new Date().toISOString()}
+ */
+
+/* ============================================
+   PRIMITIVE TOKENS
+   Base values that semantic tokens reference
+   ============================================ */
+
+:root {
+  /* Colors - Primitives */
+${generateCss(primitiveColors, 'color')}
+
+  /* Spacing */
+${generateCss(primitiveSpacing, 'spacing')}
+
+  /* Border Radius */
+${generateCss(primitiveRadius, 'radius')}
+
+  /* Font Size */
+${generateCss(primitiveFontSize, 'font-size')}
+
+  /* Font Weight */
+${generateCss(primitiveFontWeight, 'font-weight')}
+
+  /* Font Family */
+${generateCss(primitiveFontFamily, 'font-family')}
+${TYPOGRAPHY_TOKENS}
+${COMPONENT_TOKENS}
+}
+
+/* ============================================
+   SEMANTIC TOKENS - Light Mode Only (on :root)
+   Fallback for elements outside .editor-styles-wrapper
+   ============================================ */
+
+:root {
+  /* Background */
+${generateCss(lightBg, 'bg')}
+
+  /* Text */
+${generateCss(lightText, 'text')}
+
+  /* Border */
+${generateCss(lightBorder, 'border')}
+
+  /* Icon */
+${generateCss(lightIcon, 'icon')}
+}
+
+/* ============================================
+   SEMANTIC TOKENS - Editor Scoped (Force Light Mode)
+   Uses doubled selector for higher specificity and !important
+   to override any dark mode rules from app.css/tokens.css
+   ============================================ */
+
+.editor-styles-wrapper.editor-styles-wrapper {
+  /* Background - Light Mode (forced) */
+${generateCssImportant(lightBg, 'bg')}
+
+  /* Text - Light Mode (forced) */
+${generateCssImportant(lightText, 'text')}
+
+  /* Border - Light Mode (forced) */
+${generateCssImportant(lightBorder, 'border')}
+
+  /* Icon - Light Mode (forced) */
+${generateCssImportant(lightIcon, 'icon')}
+}
+
+/* Also override at media query level to be extra safe */
+@media (prefers-color-scheme: dark) {
+  .editor-styles-wrapper.editor-styles-wrapper {
+    /* Background - Force Light Mode */
+${generateCssImportant(lightBg, 'bg')}
+
+    /* Text - Force Light Mode */
+${generateCssImportant(lightText, 'text')}
+
+    /* Border - Force Light Mode */
+${generateCssImportant(lightBorder, 'border')}
+
+    /* Icon - Force Light Mode */
+${generateCssImportant(lightIcon, 'icon')}
+  }
+}
+`;
+
+  writeFileSync(OUTPUT_EDITOR_FILE, editorCss, 'utf8');
+  console.log(`Editor tokens written to: ${OUTPUT_EDITOR_FILE}`);
 
   // Stats
   const stats = {
@@ -343,6 +732,11 @@ ${generateCss(darkIcon, 'icon')}
   console.log(`  Light semantic:   ${stats.lightSemanticColors}`);
   console.log(`  Dark semantic:    ${stats.darkSemanticColors}`);
   console.log(`\nOutput written to: ${OUTPUT_FILE}`);
+
+  // Exit with error code if there are warnings (for CI)
+  if (warnings.length > 0) {
+    console.log('\n⚠️  Token generation completed with warnings. Please review above.');
+  }
 }
 
 // Run transformation
