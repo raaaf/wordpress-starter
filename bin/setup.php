@@ -1402,15 +1402,9 @@ CSS;
         // Check if origin remote exists
         $remoteUrl = trim(shell_exec('git remote get-url origin 2>/dev/null') ?? '');
 
-        if (empty($remoteUrl)) {
-            return;
-        }
-
-        // Don't offer to push to the starter template repo
-        if ($this->isStarterRepo($remoteUrl)) {
-            echo "\n  " . $this->color("⚠ Remote still points to starter template.", 'yellow') . "\n";
-            echo "  " . $this->color("Run setup again with Full mode to create your own repository,", 'gray') . "\n";
-            echo "  " . $this->color("or manually add a remote: git remote set-url origin <your-repo-url>", 'gray') . "\n";
+        // If remote points to starter template, offer to set up own repo
+        if (empty($remoteUrl) || $this->isStarterRepo($remoteUrl)) {
+            $this->offerToSetupRemote($remoteUrl);
             return;
         }
 
@@ -1425,6 +1419,100 @@ CSS;
         if ($doPush) {
             $this->runCommand('Pushing to remote', 'git push -u origin HEAD');
             echo "\n  " . $this->color("✓ Pushed to remote repository.", 'green') . "\n";
+        }
+    }
+
+    /**
+     * Offer to set up own repository when remote is missing or points to starter
+     */
+    private function offerToSetupRemote(string $currentRemote): void
+    {
+        if (!empty($currentRemote)) {
+            echo "\n  " . $this->color("⚠ Remote still points to starter template:", 'yellow') . "\n";
+            echo "  " . $this->color($currentRemote, 'gray') . "\n\n";
+        } else {
+            echo "\n  " . $this->color("No remote repository configured.", 'gray') . "\n\n";
+        }
+
+        $hasGh = $this->isGhAuthenticated();
+
+        if ($hasGh) {
+            $choice = $this->prompt(
+                'Set up your own repository?',
+                'c',
+                '[c]reate GitHub repo, [e]nter URL, [s]kip'
+            );
+
+            $choice = strtolower($choice);
+
+            if ($choice === 'c' || $choice === 'create') {
+                $repoUrl = $this->createGitHubRepo();
+                if (!empty($repoUrl)) {
+                    // Push to the new repo
+                    $this->runCommand('Pushing to new repository', 'git push -u origin HEAD');
+                    echo "\n  " . $this->color("✓ Pushed to new repository.", 'green') . "\n";
+                }
+            } elseif ($choice === 'e' || $choice === 'existing') {
+                $newUrl = $this->prompt(
+                    'Repository URL',
+                    '',
+                    'https://github.com/username/repo'
+                );
+
+                if (!empty($newUrl)) {
+                    if (!empty($currentRemote)) {
+                        shell_exec('git remote remove origin 2>/dev/null');
+                    }
+                    shell_exec('git remote add origin ' . escapeshellarg($newUrl));
+                    echo "  " . $this->color("✓ Remote updated to: {$newUrl}", 'green') . "\n";
+
+                    // Offer to push
+                    $doPush = strtolower($this->prompt(
+                        'Push to remote?',
+                        'y',
+                        '(y/n)'
+                    )) === 'y';
+
+                    if ($doPush) {
+                        $this->runCommand('Pushing to remote', 'git push -u origin HEAD');
+                        echo "\n  " . $this->color("✓ Pushed to remote repository.", 'green') . "\n";
+                    }
+                }
+            } else {
+                echo "  " . $this->color("Skipped. You can set up a remote later with:", 'gray') . "\n";
+                echo "  " . $this->color("git remote set-url origin <your-repo-url>", 'cyan') . "\n";
+            }
+        } else {
+            echo "  " . $this->color("Tip: Install GitHub CLI (gh) to create repos automatically.", 'gray') . "\n";
+            echo "  " . $this->color("https://cli.github.com/", 'cyan') . "\n\n";
+
+            $newUrl = $this->prompt(
+                'Enter repository URL',
+                '',
+                'Leave empty to skip'
+            );
+
+            if (!empty($newUrl)) {
+                if (!empty($currentRemote)) {
+                    shell_exec('git remote remove origin 2>/dev/null');
+                }
+                shell_exec('git remote add origin ' . escapeshellarg($newUrl));
+                echo "  " . $this->color("✓ Remote set to: {$newUrl}", 'green') . "\n";
+
+                $doPush = strtolower($this->prompt(
+                    'Push to remote?',
+                    'y',
+                    '(y/n)'
+                )) === 'y';
+
+                if ($doPush) {
+                    $this->runCommand('Pushing to remote', 'git push -u origin HEAD');
+                    echo "\n  " . $this->color("✓ Pushed to remote repository.", 'green') . "\n";
+                }
+            } else {
+                echo "  " . $this->color("Skipped. You can set up a remote later with:", 'gray') . "\n";
+                echo "  " . $this->color("git remote set-url origin <your-repo-url>", 'cyan') . "\n";
+            }
         }
     }
 
