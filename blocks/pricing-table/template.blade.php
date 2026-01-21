@@ -9,15 +9,23 @@
     $title = $fields['title'] ?? '';
     $plans = $fields['plans'] ?? [];
     $background = $fields['background_color'] ?? 'primary';
+
+    // Use explicit grid classes to ensure Tailwind includes them
+    $planCount = count($plans);
+    $gridClass = match(true) {
+        $planCount >= 3 => 'md:grid-cols-3',
+        $planCount === 2 => 'md:grid-cols-2',
+        default => 'md:grid-cols-1',
+    };
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} pricing-table">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} pricing-table">
     @if($title)
         <h2 class="text-h2 mb-12 text-center text-content">{{ $title }}</h2>
     @endif
 
     @if(!empty($plans))
-        <div class="grid gap-8 md:grid-cols-{{ min(count($plans), 3) }}">
+        <div class="grid gap-8 {{ $gridClass }}">
             @foreach($plans as $plan)
                 @php
                     $isFeatured = $plan['is_featured'] ?? false;

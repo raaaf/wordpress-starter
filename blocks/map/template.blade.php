@@ -1,7 +1,7 @@
 {{--
     Google Maps Block
 
-    Uses shared components: x-section
+    Uses shared components: x-section, x-button, x-link
     Fields: title, address, embed_url, height, show_directions_link, background_color
 --}}
 
@@ -17,7 +17,7 @@
     $directionsUrl = $address ? 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode($address) : '';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} map">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" class="{{ $classes }} map">
     @if($title)
         <h2 class="text-h2 mb-8 text-center text-content">{{ $title }}</h2>
     @endif
@@ -25,11 +25,11 @@
     @if($embedUrl)
         <div
             class="relative overflow-hidden rounded-lg"
-            x-data="{ loaded: false }"
+            @if(!$is_preview) x-data="{ loaded: false }" @endif
         >
             {{-- Consent notice for GDPR compliance --}}
             <div
-                x-show="!loaded"
+                @if(!$is_preview) x-show="!loaded" @endif
                 class="flex flex-col items-center justify-center p-8 text-center bg-surface-secondary"
                 style="height: {{ esc_attr($height) }}px;"
             >
@@ -39,44 +39,41 @@
                 </svg>
                 <p class="mb-4 text-content-secondary">
                     Zum Anzeigen der Karte wird Google Maps geladen.<br>
-                    Es gelten die <a href="https://policies.google.com/privacy" target="_blank" class="underline hover:text-content-link-hover">Datenschutzbestimmungen von Google</a>.
+                    Es gelten die <x-link url="https://policies.google.com/privacy" target="_blank">Datenschutzbestimmungen von Google</x-link>.
                 </p>
-                <button
-                    @click="loaded = true"
-                    class="px-6 py-2 font-medium transition-colors rounded-lg bg-surface-brand text-content-inverse hover:bg-surface-brand-hover"
-                >
-                    Karte laden
-                </button>
+                <x-button
+                    title="Karte laden"
+                    variant="primary"
+                    size="md"
+                    @if(!$is_preview) x-on:click="loaded = true" @endif
+                />
             </div>
 
             {{-- Map iframe (loaded after consent) --}}
-            <template x-if="loaded">
-                <iframe
-                    src="{{ esc_url($embedUrl) }}"
-                    width="100%"
-                    height="{{ esc_attr($height) }}"
-                    style="border:0;"
-                    allowfullscreen=""
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
-                    class="rounded-lg"
-                ></iframe>
-            </template>
+            @if(!$is_preview)
+                <template x-if="loaded">
+                    <iframe
+                        src="{{ esc_url($embedUrl) }}"
+                        width="100%"
+                        height="{{ esc_attr($height) }}"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        class="rounded-lg"
+                    ></iframe>
+                </template>
+            @endif
         </div>
 
         @if($showDirections && $directionsUrl)
             <div class="mt-4 text-center">
-                <a
-                    href="{{ esc_url($directionsUrl) }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-flex items-center gap-2 font-medium text-content-link hover:text-content-link-hover"
-                >
+                <x-link url="{{ $directionsUrl }}" target="_blank" variant="accent" size="md">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                     </svg>
                     Route planen
-                </a>
+                </x-link>
             </div>
         @endif
     @else

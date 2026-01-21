@@ -21,8 +21,9 @@
 @endphp
 
 @if($button && !empty($button['url']))
-    <div class="{{ $classes }} {{ $alignmentClasses }}"
-         @if($anchor) id="{{ esc_attr($anchor) }}" @endif>
+    <div {!! $wrapper_attributes !!}
+         class="{{ $classes }} {{ $alignmentClasses }}"
+         @if($anchor && !$wrapper_attributes) id="{{ esc_attr($anchor) }}" @endif>
         <x-button
             :url="$button['url']"
             :title="$button['title'] ?: 'Mehr erfahren'"

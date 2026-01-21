@@ -1,16 +1,16 @@
 {{--
     Video Block
 
-    Uses shared components: x-section, x-button
+    Uses shared components: x-section, x-button, x-link
     Fields: source, video, video_url, background_color
 --}}
 
 @php
-    $source = $fields['source'] ?? 'WordPress';
+    $source = $fields['source'] ?? 'wordpress';
     $background = $fields['background_color'] ?? 'primary';
     $video = '';
 
-    if ($source === 'WordPress') {
+    if ($source === 'wordpress') {
         $video = $fields['video'] ?? '';
     } elseif ($source === 'external') {
         $video = $fields['video_url'] ?? '';
@@ -18,17 +18,17 @@
     }
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" padding="md" class="{{ $classes }} video">
+<x-section :background="$background" :anchor="$anchor" :wrapperAttributes="$wrapper_attributes" padding="md" class="{{ $classes }} video">
     <div class="flex flex-col items-center justify-center w-full max-w-6xl mx-auto">
-        @if($source === 'WordPress' && $video)
-            <div class="flex items-center justify-center w-full overflow-hidden border-4 rounded-lg shadow-xl bg-surface-inverse aspect-video border-line">
+        @if($source === 'wordpress' && $video)
+            <div class="flex items-center justify-center w-full overflow-hidden border-4 rounded-lg shadow-xl bg-surface aspect-video border-line">
                 <video preload="preload" controls loop autoplay playsinline class="w-full">
                     <source src="{{ esc_url($video) }}" type="video/mp4" />
                     Ihr Browser unterstützt das Video-Tag nicht.
                 </video>
             </div>
         @elseif($source === 'external' && $video)
-            <div class="flex items-center justify-center w-full overflow-hidden border-4 rounded-lg shadow-xl bg-surface-inverse md:aspect-video border-line">
+            <div class="flex items-center justify-center w-full overflow-hidden border-4 rounded-lg shadow-xl bg-surface md:aspect-video border-line">
                 <iframe width="100%"
                         height="100%"
                         class="w-full video-iframe aspect-video [&:not([src])]:hidden [&[src]+.video-notice]:hidden"
@@ -40,12 +40,15 @@
                     <p class="text-center text-content">
                         Da YouTube persönliche Daten sammeln und Ihr Sehverhalten verfolgen kann, laden wir das Video
                         nur, wenn Sie der Verwendung von Cookies und
-                        ähnlichen Technologien zustimmen, wie in der <a href="https://www.youtube.com/t/privacy"
+                        ähnlichen Technologien zustimmen, wie in der <x-link
+                            url="https://www.youtube.com/t/privacy"
                             target="_blank"
-                            class="text-content-link hover:text-content-link-hover"
+                            variant="accent"
+                            size="md"
                             pirsch-event="Privacy_Policy_Click"
                             pirsch-meta-key="video_block"
-                            pirsch-meta-link-type="youtube_privacy">Datenschutzrichtlinie</a> beschrieben.
+                            pirsch-meta-link-type="youtube_privacy"
+                        >Datenschutzrichtlinie</x-link> beschrieben.
                     </p>
                     <div class="mt-8 mx-auto w-full flex justify-center">
                         <x-button
