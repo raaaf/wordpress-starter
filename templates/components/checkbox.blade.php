@@ -26,7 +26,7 @@
     $checkboxId = $id ?? $name;
 @endphp
 
-<label class="inline-flex items-center gap-2 cursor-pointer {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }} {{ $class }}">
+<label class="checkbox inline-flex items-center gap-2 cursor-pointer {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }} {{ $class }}">
     <span class="relative flex items-center justify-center">
         <input
             type="checkbox"

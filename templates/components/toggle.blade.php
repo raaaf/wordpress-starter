@@ -22,7 +22,7 @@
     $toggleId = $id ?? $name;
 @endphp
 
-<label class="inline-flex items-center gap-3 cursor-pointer {{ $disabled ? 'cursor-not-allowed' : '' }} {{ $class }}">
+<label class="toggle inline-flex items-center gap-3 cursor-pointer {{ $disabled ? 'cursor-not-allowed' : '' }} {{ $class }}">
     <span class="relative">
         <input
             type="checkbox"

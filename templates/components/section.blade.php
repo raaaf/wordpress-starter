@@ -42,7 +42,7 @@
 
 <section {!! $wrapperAttributes !!}
          @if($anchor && !$wrapperAttributes) id="{{ esc_attr($anchor) }}" @endif
-         class="{{ $bgClass }} {{ $paddingClass }} {{ $class }}">
+         class="section {{ $bgClass }} {{ $paddingClass }} {{ $class }}">
     @if($container)
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {{ $slot }}

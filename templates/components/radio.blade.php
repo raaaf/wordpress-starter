@@ -24,7 +24,7 @@
     $radioId = $id ?? $name . '_' . $value;
 @endphp
 
-<label class="inline-flex items-center gap-2 cursor-pointer {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }} {{ $class }}">
+<label class="radio inline-flex items-center gap-2 cursor-pointer {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }} {{ $class }}">
     <span class="relative flex items-center justify-center">
         <input
             type="radio"

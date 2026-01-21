@@ -2,10 +2,10 @@
 @php
     $colorScheme = function_exists('get_field') ? (get_field('color_scheme', 'option') ?: 'system') : 'system';
 @endphp
-<html @php(language_attributes()) class="no-js"@if($colorScheme !== 'system') data-theme="{{ esc_attr($colorScheme) }}"@endif>
+<html {!! get_language_attributes() !!} class="no-js"@if($colorScheme !== 'system') data-theme="{{ esc_attr($colorScheme) }}"@endif>
 
 <head>
-    <meta charset="@php(bloginfo('charset'))">
+    <meta charset="{{ get_bloginfo('charset') }}">
     <meta name="viewport" content="width=device-width">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <link rel="pingback" href="{{ esc_url(get_bloginfo('pingback_url')) }}">
@@ -24,12 +24,12 @@
         document.documentElement.classList.remove('no-js');
     </script>
 
-    @php(wp_head())
+    @php wp_head(); @endphp
 </head>
 
-<body @php(body_class('bg-surface antialiased'))>
+<body class="{{ implode(' ', get_body_class('bg-surface antialiased')) }}">
 
-    @php(wp_body_open())
+    @php wp_body_open(); @endphp
 
     {{-- Skip Link for Accessibility --}}
     <a href="#main-content"
