@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WordpressStarter\Acf;
+namespace StiftungsNavigatorGmbH\Acf;
 
 class Blocks
 {
@@ -42,6 +42,14 @@ class Blocks
         // Register block categories
         add_filter('block_categories_all', [self::class, 'registerCategories'], 10, 2);
 
+        // Force edit mode for all ACF blocks via filter (most reliable method)
+        add_filter('acf/register_block_type_args', [self::class, 'forceEditMode']);
+
+        // ACF Extended: Dynamic block titles based on field values
+        if (class_exists('ACFE')) {
+            add_filter('acfe/block_title', [self::class, 'getBlockTitle'], 10, 3);
+        }
+
         // Auto-discover and register blocks
         $blocksDir = get_template_directory() . '/blocks';
 
@@ -77,12 +85,18 @@ class Blocks
                 'category' => $autoCategory,
                 'icon' => self::getBlockIcon($blockName),
                 'keywords' => self::getBlockKeywords($blockName),
-                'supports' => [
-                    'align' => true,
-                    'mode' => true,
-                    'jsx' => true,
-                ],
             ], $blockData);
+
+            // Force edit mode for all blocks to avoid CSS conflicts in Gutenberg iframe
+            // This MUST be set after merge to override any block.json settings
+            $block['mode'] = 'edit';
+
+            // Merge supports, keeping block.json values but forcing mode off
+            $block['supports'] = array_merge(
+                ['align' => true, 'jsx' => true],
+                $block['supports'] ?? [],
+                ['mode' => false] // Force disable mode switching - must be last
+            );
 
             // Only override category if not explicitly set in block.json
             if (empty($blockData['category']) || $blockData['category'] === 'theme') {
@@ -450,6 +464,92 @@ class Blocks
     }
 
     /**
+     * Force edit mode for all ACF blocks
+     *
+     * This filter runs on ALL ACF block registrations and ensures
+     * edit mode is enforced regardless of block.json settings.
+     *
+     * @param array<string, mixed> $args Block registration arguments
+     * @return array<string, mixed>
+     */
+    public static function forceEditMode(array $args): array
+    {
+        // Force edit mode - no preview rendering
+        $args['mode'] = 'edit';
+
+        // Disable mode switching in supports
+        if (!isset($args['supports'])) {
+            $args['supports'] = [];
+        }
+        $args['supports']['mode'] = false;
+
+        return $args;
+    }
+
+    /**
+     * Generate dynamic block title from field values (ACF Extended)
+     *
+     * This makes blocks easier to identify in the editor by showing
+     * the actual content (like heading text) instead of just "Hero".
+     *
+     * @param string $title The default block title
+     * @param array<string, mixed> $block Block data including 'data' with field values
+     * @param int $postId The post ID
+     * @return string The dynamic block title
+     */
+    public static function getBlockTitle(string $title, array $block, int $postId): string
+    {
+        // Block data contains field values in the 'data' key
+        $data = $block['data'] ?? [];
+        if (empty($data)) {
+            return $title;
+        }
+
+        // Priority list of fields to use as title
+        $titleFields = [
+            'title',
+            'heading',
+            'headline',
+            'name',
+            'label',
+            'text',
+            'question', // for accordion items
+        ];
+
+        foreach ($titleFields as $fieldName) {
+            if (!empty($data[$fieldName]) && is_string($data[$fieldName])) {
+                $fieldTitle = wp_strip_all_tags($data[$fieldName]);
+                // Truncate long titles
+                if (mb_strlen($fieldTitle) > 50) {
+                    $fieldTitle = mb_substr($fieldTitle, 0, 47) . '...';
+                }
+                return $title . ': ' . $fieldTitle;
+            }
+        }
+
+        // Check for nested title in first repeater item (e.g., accordion items)
+        foreach ($data as $key => $value) {
+            // Skip ACF internal keys
+            if (str_starts_with($key, '_') || $key === 'field_') {
+                continue;
+            }
+            if (is_array($value) && !empty($value[0]) && is_array($value[0])) {
+                foreach ($titleFields as $nestedField) {
+                    if (!empty($value[0][$nestedField]) && is_string($value[0][$nestedField])) {
+                        $fieldTitle = wp_strip_all_tags($value[0][$nestedField]);
+                        if (mb_strlen($fieldTitle) > 50) {
+                            $fieldTitle = mb_substr($fieldTitle, 0, 47) . '...';
+                        }
+                        return $title . ': ' . $fieldTitle;
+                    }
+                }
+            }
+        }
+
+        return $title;
+    }
+
+    /**
      * Register custom block categories
      *
      * Places theme block categories at the TOP of the inserter for maximum visibility.
@@ -464,27 +564,27 @@ class Blocks
         $themeCategories = [
             [
                 'slug' => 'theme-layout',
-                'title' => '📐 ' . __('Layout', 'wp-starter'),
+                'title' => '📐 ' . __('Layout', 'stiftungs-navigator-gmbh'),
                 'icon' => 'columns',
             ],
             [
                 'slug' => 'theme-content',
-                'title' => '📝 ' . __('Inhalte', 'wp-starter'),
+                'title' => '📝 ' . __('Inhalte', 'stiftungs-navigator-gmbh'),
                 'icon' => 'editor-alignleft',
             ],
             [
                 'slug' => 'theme-media',
-                'title' => '🖼️ ' . __('Medien', 'wp-starter'),
+                'title' => '🖼️ ' . __('Medien', 'stiftungs-navigator-gmbh'),
                 'icon' => 'format-gallery',
             ],
             [
                 'slug' => 'theme-interactive',
-                'title' => '✨ ' . __('Interaktiv', 'wp-starter'),
+                'title' => '✨ ' . __('Interaktiv', 'stiftungs-navigator-gmbh'),
                 'icon' => 'star-filled',
             ],
             [
                 'slug' => 'theme',
-                'title' => '🎨 ' . __('Theme Blocks', 'wp-starter'),
+                'title' => '🎨 ' . __('Theme Blocks', 'stiftungs-navigator-gmbh'),
                 'icon' => 'layout',
             ],
         ];
@@ -661,11 +761,6 @@ class Blocks
             'category' => 'theme',
             'icon' => 'block-default',
             'keywords' => [],
-            'supports' => [
-                'align' => true,
-                'mode' => true,
-                'jsx' => true,
-            ],
         ];
         
         file_put_contents($blockDir . '/block.json', json_encode($blockJson, JSON_PRETTY_PRINT));
@@ -679,7 +774,7 @@ class Blocks
 
 <div class="{{ $classes }}" @if($anchor) id="{{ $anchor }}" @endif>
     @if($is_preview)
-        <p>{{ __('Block preview', 'wp-starter') }}</p>
+        <p>{{ __('Block preview', 'stiftungs-navigator-gmbh') }}</p>
     @else
         {{-- Block content here --}}
     @endif

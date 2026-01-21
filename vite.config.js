@@ -32,9 +32,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         app: resolve(__dirname, 'resources/js/app.ts'),
-        'editor-js': resolve(__dirname, 'resources/js/editor.ts'),
         styles: resolve(__dirname, 'resources/css/app.css'),
-        editor: resolve(__dirname, 'resources/css/editor-style.css'),
+        // Note: Editor CSS/JS removed - all ACF blocks use edit mode (no preview rendering)
+        // ACF field UI styling is handled via inline CSS in PHP
       },
       output: {
         manualChunks: {
@@ -52,8 +52,10 @@ export default defineConfig({
   },
   server: {
     origin: process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173',
+    host: true, // Listen on all interfaces
     port: parseInt(process.env.VITE_DEV_SERVER_PORT) || 5173,
     strictPort: true,
+    cors: true,
     watch: {
       // Watch Blade templates
       ignored: ['!**/templates/**', '!**/config/**'],
