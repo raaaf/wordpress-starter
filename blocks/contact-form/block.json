@@ -1,18 +1,21 @@
 {
-    "name": "acf/contact-form",
+    "name": "contact-form",
     "title": "Kontaktformular",
     "description": "Integriert ein Contact Form 7 Formular",
-    "category": "starter-blocks",
+    "category": "theme",
     "icon": "email",
     "keywords": ["contact", "form", "kontakt", "formular", "cf7"],
     "requires": ["contact-form-7"],
-    "acf": {
-        "mode": "preview",
-        "renderTemplate": "blocks/contact-form/template.blade.php"
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
     },
     "supports": {
         "align": ["full", "wide"],
-        "anchor": true,
-        "jsx": true
+        "mode": true,
+        "jsx": true,
+        "anchor": true
     }
 }

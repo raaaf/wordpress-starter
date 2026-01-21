@@ -5,6 +5,12 @@
     "category": "theme",
     "icon": "format-quote",
     "keywords": ["testimonials", "reviews", "quotes", "kundenstimmen", "bewertungen"],
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
+    },
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

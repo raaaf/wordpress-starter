@@ -1,17 +1,20 @@
 {
-    "name": "acf/posts",
+    "name": "posts",
     "title": "Beiträge",
     "description": "Dynamische Anzeige von Blog-Beiträgen",
-    "category": "starter-blocks",
+    "category": "theme",
     "icon": "admin-post",
     "keywords": ["posts", "beiträge", "blog", "news", "artikel"],
-    "acf": {
-        "mode": "preview",
-        "renderTemplate": "blocks/posts/template.blade.php"
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
     },
     "supports": {
         "align": ["wide", "full"],
-        "anchor": true,
-        "jsx": true
+        "mode": true,
+        "jsx": true,
+        "anchor": true
     }
 }

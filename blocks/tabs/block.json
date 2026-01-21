@@ -5,6 +5,12 @@
     "category": "theme",
     "icon": "table-row-after",
     "keywords": ["tabs", "reiter", "tabbed", "content"],
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
+    },
     "supports": {
         "align": ["full", "wide"],
         "mode": true,
