@@ -60,6 +60,7 @@ class PluginServiceProvider extends ServiceProvider
         add_action('after_switch_theme', [$this, 'onThemeActivation']);
         add_action('admin_init', [$this, 'maybeRedirectToSetup']);
         add_action('admin_init', [$this, 'runContentSetup']);
+        add_action('admin_init', [$this, 'handleRerunContentSetup']);
 
         // AJAX handlers
         add_action('wp_ajax_wp_starter_install_plugin', [$this, 'ajaxInstallPlugin']);
@@ -132,6 +133,70 @@ class PluginServiceProvider extends ServiceProvider
 
         // Mark as complete
         update_option('wp_starter_content_setup_complete', true);
+    }
+
+    /**
+     * Handle manual re-run of content setup from Tools page
+     */
+    public function handleRerunContentSetup(): void
+    {
+        if (!isset($_GET['wp-starter-rerun-content-setup'])) {
+            return;
+        }
+
+        // Verify nonce and capability
+        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'wp-starter-rerun-content-setup')) {
+            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
+        }
+
+        // Reload setup options
+        $this->loadSetupConfig();
+
+        if (empty($this->setupOptions)) {
+            // Create default options if config file doesn't exist
+            $this->setupOptions = [
+                'create_pages' => true,
+                'pages' => [
+                    'home' => ['title' => 'Startseite', 'template' => 'page-home'],
+                    'about' => ['title' => 'Über uns', 'template' => ''],
+                    'services' => ['title' => 'Leistungen', 'template' => ''],
+                    'contact' => ['title' => 'Kontakt', 'template' => ''],
+                    'privacy' => ['title' => 'Datenschutz', 'template' => ''],
+                    'imprint' => ['title' => 'Impressum', 'template' => ''],
+                ],
+                'menu_assignments' => [
+                    'header-menu' => ['about', 'services', 'contact'],
+                    'legal-menu' => ['privacy', 'imprint'],
+                    'footer-menu' => ['about', 'services', 'contact'],
+                ],
+            ];
+        }
+
+        // Reset the completion flag so content setup runs again
+        delete_option('wp_starter_content_setup_complete');
+
+        // Create pages (skips existing ones)
+        $createdPageIds = [];
+        if (!empty($this->setupOptions['pages'])) {
+            $createdPageIds = $this->createDefaultPages($this->setupOptions['pages']);
+        }
+
+        // Create menus and assign pages
+        if (!empty($createdPageIds) && !empty($this->setupOptions['menu_assignments'])) {
+            $this->createDefaultMenus($createdPageIds, $this->setupOptions['menu_assignments']);
+        }
+
+        // Mark as complete
+        update_option('wp_starter_content_setup_complete', true);
+
+        // Redirect back to tools page with success message
+        wp_safe_redirect(admin_url('admin.php?page=theme-options-tools&content-setup=success'));
+        exit;
     }
 
     /**

@@ -712,10 +712,53 @@ class Options
             esc_url($regenerateUrl)
         );
 
+        // Content Setup section
+        $contentSetupComplete = get_option('wp_starter_content_setup_complete');
+        $contentSetupUrl = wp_nonce_url(
+            admin_url('?wp-starter-rerun-content-setup=1'),
+            'wp-starter-rerun-content-setup'
+        );
+
+        if ($contentSetupComplete) {
+            $contentSetupMessage = sprintf(
+                '<div style="padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #155724;"><strong>✓ Content-Setup wurde bereits ausgeführt</strong></p>
+                    <p style="margin: 10px 0 0 0;">
+                        <a href="%s" class="button" onclick="return confirm(\'Content-Setup wirklich erneut ausführen? Bestehende Seiten bleiben erhalten, fehlende werden erstellt.\');">Erneut ausführen</a>
+                    </p>
+                </div>',
+                esc_url($contentSetupUrl)
+            );
+        } else {
+            $contentSetupMessage = sprintf(
+                '<div style="padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #856404;"><strong>Content-Setup wurde noch nicht ausgeführt</strong></p>
+                    <p style="margin: 10px 0; color: #856404;">Erstellt Standardseiten (Startseite, Über uns, Kontakt, etc.) und richtet Menüs ein.</p>
+                    <p style="margin: 10px 0 0 0;">
+                        <a href="%s" class="button button-primary">Content-Setup jetzt ausführen</a>
+                    </p>
+                </div>',
+                esc_url($contentSetupUrl)
+            );
+        }
+
         acf_add_local_field_group([
             'key' => 'group_options_tools',
             'title' => 'Werkzeuge',
             'fields' => [
+                // Content Setup Section
+                [
+                    'key' => 'field_options_tools_content_heading',
+                    'label' => 'Content-Setup',
+                    'type' => 'message',
+                    'message' => '<p>Erstellt Standardseiten und richtet die Navigation ein.</p>',
+                ],
+                [
+                    'key' => 'field_options_tools_content_status',
+                    'label' => '',
+                    'type' => 'message',
+                    'message' => $contentSetupMessage,
+                ],
                 // Styleguide Section
                 [
                     'key' => 'field_options_tools_styleguide_heading',
