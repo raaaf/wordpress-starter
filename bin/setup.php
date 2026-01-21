@@ -180,10 +180,7 @@ class ThemeSetup
         echo "\n";
         $this->printSubSection("Repository & Version");
 
-        $this->config['theme_uri'] = $this->prompt(
-            'Theme/Repository URL',
-            $this->defaults['theme_uri']
-        );
+        $this->config['theme_uri'] = $this->collectRepositoryUrl();
 
         $this->config['version'] = $this->prompt(
             'Initial Version',
@@ -441,6 +438,99 @@ class ThemeSetup
         $check = strncasecmp(PHP_OS, 'WIN', 3) === 0 ? 'where' : 'which';
         $result = shell_exec("{$check} {$command} 2>/dev/null");
         return !empty(trim($result ?? ''));
+    }
+
+    private function isGhAuthenticated(): bool
+    {
+        if (!$this->commandExists('gh')) {
+            return false;
+        }
+        $result = shell_exec('gh auth status 2>&1');
+        return str_contains($result ?? '', 'Logged in to');
+    }
+
+    private function collectRepositoryUrl(): string
+    {
+        $hasGh = $this->isGhAuthenticated();
+
+        if ($hasGh) {
+            echo "  " . $this->color("GitHub CLI detected and authenticated.", 'green') . "\n\n";
+
+            $choice = $this->prompt(
+                'GitHub Repository',
+                'c',
+                '[c]reate new, [e]xisting URL, [s]kip'
+            );
+
+            $choice = strtolower($choice);
+
+            if ($choice === 'c' || $choice === 'create') {
+                return $this->createGitHubRepo();
+            } elseif ($choice === 'e' || $choice === 'existing') {
+                return $this->prompt(
+                    'Repository URL',
+                    '',
+                    'https://github.com/username/repo'
+                );
+            } else {
+                echo "  " . $this->color("Skipped. You can add a repository later.", 'gray') . "\n";
+                return '';
+            }
+        } else {
+            echo "  " . $this->color("Tip: Install GitHub CLI (gh) to create repos automatically.", 'gray') . "\n";
+            echo "  " . $this->color("https://cli.github.com/", 'cyan') . "\n\n";
+
+            $choice = $this->prompt(
+                'Repository URL',
+                '',
+                'Enter URL or leave empty to skip'
+            );
+
+            return $choice;
+        }
+    }
+
+    private function createGitHubRepo(): string
+    {
+        $repoName = $this->prompt(
+            'Repository name',
+            $this->config['theme_slug'],
+            'Will be created on GitHub'
+        );
+
+        $visibility = $this->prompt(
+            'Visibility',
+            'private',
+            '[private] or [public]'
+        );
+        $visibility = strtolower($visibility) === 'public' ? 'public' : 'private';
+
+        $description = $this->config['description'] ?? 'WordPress theme';
+
+        echo "\n  Creating GitHub repository...\n";
+
+        $command = sprintf(
+            'gh repo create %s --description %s --%s --source=. --remote=origin 2>&1',
+            escapeshellarg($repoName),
+            escapeshellarg($description),
+            $visibility
+        );
+
+        $output = shell_exec($command);
+
+        // Extract repo URL from output
+        if (preg_match('/https:\/\/github\.com\/[^\s]+/', $output, $matches)) {
+            $repoUrl = rtrim($matches[0], '/');
+            echo "  " . $this->color("✓ Repository created: {$repoUrl}", 'green') . "\n\n";
+            return $repoUrl;
+        } else {
+            echo "  " . $this->color("⚠ Could not create repository: {$output}", 'yellow') . "\n";
+            return $this->prompt(
+                'Enter repository URL manually',
+                '',
+                'Or leave empty to skip'
+            );
+        }
     }
 
     private function runCommand(string $description, string $command): void
