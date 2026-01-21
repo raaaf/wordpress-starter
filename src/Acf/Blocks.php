@@ -66,20 +66,28 @@ class Blocks
                 continue;
             }
 
-            // Merge with defaults
+            // Determine the best category for this block
+            $autoCategory = self::getBlockCategory($blockName);
+
+            // Merge with defaults - auto-assign category if not specified in block.json
             $block = array_merge([
                 'name' => $blockName,
                 'title' => ucfirst(str_replace('-', ' ', $blockName)),
                 'render_callback' => [self::class, 'renderBlock'],
-                'category' => 'theme',
-                'icon' => 'block-default',
-                'keywords' => [],
+                'category' => $autoCategory,
+                'icon' => self::getBlockIcon($blockName),
+                'keywords' => self::getBlockKeywords($blockName),
                 'supports' => [
                     'align' => true,
                     'mode' => true,
                     'jsx' => true,
                 ],
             ], $blockData);
+
+            // Only override category if not explicitly set in block.json
+            if (empty($blockData['category']) || $blockData['category'] === 'theme') {
+                $block['category'] = $autoCategory;
+            }
 
             acf_register_block_type($block);
         }
@@ -178,39 +186,73 @@ class Blocks
      */
     public static function renderBlock(array $block, string $content = '', bool $isPreview = false, int $postId = 0): void
     {
-        $blade = getBladeViewFactory();
+        try {
+            $blade = getBladeViewFactory();
 
-        if (!$blade) {
-            echo '<!-- Blade not initialized -->';
-            return;
+            if (!$blade) {
+                self::renderError('Blade not initialized', $isPreview);
+                return;
+            }
+
+            // Block data
+            $blockName = str_replace('acf/', '', $block['name']);
+            $templatePath = "{$blockName}.template";
+
+            // Check if template exists
+            if (!$blade->exists($templatePath)) {
+                self::renderError("Template not found: {$templatePath}", $isPreview);
+                return;
+            }
+
+            // Prepare data for template
+            // Use get_fields() from postmeta, fallback to block data attribute (for programmatic blocks)
+            $fields = get_fields();
+            if (empty($fields) && !empty($block['data'])) {
+                $fields = $block['data'];
+            }
+
+            $data = [
+                'block' => $block,
+                'fields' => $fields ?: [],
+                'is_preview' => $isPreview,
+                'post_id' => $postId,
+                'classes' => self::getBlockClasses($block),
+                'anchor' => $block['anchor'] ?? '',
+                'content' => $content, // InnerBlocks content
+                'wrapper_attributes' => self::getBlockWrapperAttributes($block),
+            ];
+
+            // Render template - Blade handles escaping via {{ }} syntax
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blade template handles escaping
+            echo $blade->make($templatePath, $data)->render();
+        } catch (\Throwable $e) {
+            self::renderError($e->getMessage(), $isPreview);
+
+            // Log error in debug mode
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                error_log('WP-Starter Block Error [' . ( $block['name'] ?? 'unknown' ) . ']: ' . $e->getMessage());
+            }
         }
+    }
 
-        // Block data
-        $blockName = str_replace('acf/', '', $block['name']);
-        $templatePath = "blocks.{$blockName}.template";
+    /**
+     * Render an error message for block rendering failures.
+     *
+     * @param string $message Error message to display
+     * @param bool $isPreview Whether the block is being rendered in preview mode
+     */
+    private static function renderError(string $message, bool $isPreview): void
+    {
+        // Always output HTML comment for debugging
+        echo '<!-- Block Error: ' . esc_html($message) . ' -->';
 
-        // Check if template exists
-        if (!$blade->exists($templatePath)) {
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML comment with no user input
-            echo '<!-- Block template not found: ' . esc_html($templatePath) . ' -->';
-            return;
+        // Show visible error in preview mode or when debug is enabled
+        if ($isPreview || ( defined('WP_DEBUG') && WP_DEBUG )) {
+            echo '<div class="acf-block-error" style="padding: 1rem; background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; border-radius: 4px; margin: 0.5rem 0;">';
+            echo '<strong>Block Error:</strong> ' . esc_html($message);
+            echo '</div>';
         }
-
-        // Prepare data for template
-        $data = [
-            'block' => $block,
-            'fields' => get_fields() ?: [],
-            'is_preview' => $isPreview,
-            'post_id' => $postId,
-            'classes' => self::getBlockClasses($block),
-            'anchor' => $block['anchor'] ?? '',
-            'content' => $content, // InnerBlocks content
-            'wrapper_attributes' => self::getBlockWrapperAttributes($block),
-        ];
-
-        // Render template - Blade handles escaping via {{ }} syntax
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blade template handles escaping
-        echo $blade->make($templatePath, $data)->render();
     }
 
     /**
@@ -386,7 +428,7 @@ class Blocks
      *
      * @param array{name: string, align?: string, className?: string} $block
      */
-    private static function getBlockClasses(array $block): string
+    public static function getBlockClasses(array $block): string
     {
         $classes = ['acf-block'];
 
@@ -410,18 +452,190 @@ class Blocks
     /**
      * Register custom block categories
      *
+     * Places theme block categories at the TOP of the inserter for maximum visibility.
+     * Categories are ordered by frequency of use.
+     *
      * @param array<int, array{slug: string, title: string, icon?: string}> $categories
      * @return array<int, array{slug: string, title: string, icon?: string}>
      */
     public static function registerCategories(array $categories, \WP_Block_Editor_Context $context): array
     {
-        return array_merge([
+        // Theme categories - placed FIRST in the inserter
+        $themeCategories = [
+            [
+                'slug' => 'theme-layout',
+                'title' => '📐 ' . __('Layout', 'wp-starter'),
+                'icon' => 'columns',
+            ],
+            [
+                'slug' => 'theme-content',
+                'title' => '📝 ' . __('Inhalte', 'wp-starter'),
+                'icon' => 'editor-alignleft',
+            ],
+            [
+                'slug' => 'theme-media',
+                'title' => '🖼️ ' . __('Medien', 'wp-starter'),
+                'icon' => 'format-gallery',
+            ],
+            [
+                'slug' => 'theme-interactive',
+                'title' => '✨ ' . __('Interaktiv', 'wp-starter'),
+                'icon' => 'star-filled',
+            ],
             [
                 'slug' => 'theme',
-                'title' => __('Theme Blocks', 'wp-starter'),
+                'title' => '🎨 ' . __('Theme Blocks', 'wp-starter'),
                 'icon' => 'layout',
             ],
-        ], $categories);
+        ];
+
+        return array_merge($themeCategories, $categories);
+    }
+
+    /**
+     * Get the appropriate category for a block based on its type
+     *
+     * @param string $blockName The block name (without acf/ prefix)
+     * @return string The category slug
+     */
+    public static function getBlockCategory(string $blockName): string
+    {
+        // Layout blocks
+        $layoutBlocks = [
+            'one-column', 'two-columns', 'three-columns', 'four-columns',
+            'one-third-two-thirds', 'two-thirds-one-third', 'two-columns-images',
+            'divider',
+        ];
+
+        // Content blocks
+        $contentBlocks = [
+            'hero', 'cta', 'accordion', 'cards', 'testimonials', 'team',
+            'pricing-table', 'stats', 'timeline', 'table', 'posts',
+        ];
+
+        // Media blocks
+        $mediaBlocks = [
+            'image', 'video', 'gallery', 'logo-slider', 'before-after',
+        ];
+
+        // Interactive blocks
+        $interactiveBlocks = [
+            'tabs', 'contact-form', 'map',
+        ];
+
+        if (in_array($blockName, $layoutBlocks, true)) {
+            return 'theme-layout';
+        }
+
+        if (in_array($blockName, $contentBlocks, true)) {
+            return 'theme-content';
+        }
+
+        if (in_array($blockName, $mediaBlocks, true)) {
+            return 'theme-media';
+        }
+
+        if (in_array($blockName, $interactiveBlocks, true)) {
+            return 'theme-interactive';
+        }
+
+        return 'theme';
+    }
+
+    /**
+     * Get an appropriate icon for a block based on its type
+     *
+     * @param string $blockName The block name (without acf/ prefix)
+     * @return string Dashicon name
+     */
+    public static function getBlockIcon(string $blockName): string
+    {
+        $icons = [
+            // Layout
+            'one-column' => 'align-center',
+            'two-columns' => 'columns',
+            'three-columns' => 'grid-view',
+            'four-columns' => 'screenoptions',
+            'one-third-two-thirds' => 'align-pull-left',
+            'two-thirds-one-third' => 'align-pull-right',
+            'two-columns-images' => 'format-gallery',
+            'divider' => 'minus',
+
+            // Content
+            'hero' => 'superhero-alt',
+            'cta' => 'megaphone',
+            'accordion' => 'list-view',
+            'cards' => 'grid-view',
+            'testimonials' => 'format-quote',
+            'team' => 'groups',
+            'pricing-table' => 'money-alt',
+            'stats' => 'chart-bar',
+            'timeline' => 'backup',
+            'table' => 'editor-table',
+            'posts' => 'admin-post',
+
+            // Media
+            'image' => 'format-image',
+            'video' => 'video-alt3',
+            'gallery' => 'images-alt2',
+            'logo-slider' => 'slides',
+            'before-after' => 'image-flip-horizontal',
+
+            // Interactive
+            'tabs' => 'category',
+            'contact-form' => 'email-alt',
+            'map' => 'location-alt',
+        ];
+
+        return $icons[$blockName] ?? 'block-default';
+    }
+
+    /**
+     * Get relevant keywords for a block to improve search
+     *
+     * @param string $blockName The block name (without acf/ prefix)
+     * @return array<string> Keywords in German
+     */
+    public static function getBlockKeywords(string $blockName): array
+    {
+        $keywords = [
+            // Layout
+            'one-column' => ['spalte', 'layout', 'zentral', 'column'],
+            'two-columns' => ['spalten', 'layout', '2', 'zweispaltig', 'columns'],
+            'three-columns' => ['spalten', 'layout', '3', 'dreispaltig', 'columns'],
+            'four-columns' => ['spalten', 'layout', '4', 'vierspaltig', 'columns'],
+            'one-third-two-thirds' => ['spalten', 'asymmetrisch', 'sidebar'],
+            'two-thirds-one-third' => ['spalten', 'asymmetrisch', 'sidebar'],
+            'two-columns-images' => ['bild', 'text', 'spalten', 'media'],
+            'divider' => ['trenner', 'abstand', 'linie', 'spacer'],
+
+            // Content
+            'hero' => ['header', 'banner', 'kopf', 'teaser', 'intro'],
+            'cta' => ['button', 'aktion', 'call to action', 'aufforderung'],
+            'accordion' => ['faq', 'aufklappen', 'fragen', 'antworten'],
+            'cards' => ['karten', 'features', 'boxen', 'icons'],
+            'testimonials' => ['referenzen', 'zitate', 'kunden', 'bewertungen'],
+            'team' => ['mitarbeiter', 'personen', 'über uns', 'kontakt'],
+            'pricing-table' => ['preise', 'tarife', 'pakete', 'kosten'],
+            'stats' => ['zahlen', 'statistik', 'counter', 'daten'],
+            'timeline' => ['zeitstrahl', 'historie', 'verlauf', 'chronik'],
+            'table' => ['tabelle', 'daten', 'liste', 'übersicht'],
+            'posts' => ['blog', 'artikel', 'beiträge', 'news'],
+
+            // Media
+            'image' => ['bild', 'foto', 'grafik', 'picture'],
+            'video' => ['film', 'youtube', 'vimeo', 'media'],
+            'gallery' => ['galerie', 'bilder', 'fotos', 'lightbox'],
+            'logo-slider' => ['partner', 'kunden', 'logos', 'carousel'],
+            'before-after' => ['vergleich', 'vorher', 'nachher', 'slider'],
+
+            // Interactive
+            'tabs' => ['reiter', 'register', 'navigation', 'wechseln'],
+            'contact-form' => ['kontakt', 'formular', 'email', 'nachricht'],
+            'map' => ['karte', 'standort', 'google', 'anfahrt'],
+        ];
+
+        return $keywords[$blockName] ?? [$blockName];
     }
 
     /**

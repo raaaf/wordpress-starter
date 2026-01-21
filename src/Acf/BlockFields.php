@@ -20,7 +20,8 @@ class BlockFields
             return;
         }
 
-        add_action('acf/init', [self::class, 'registerFieldGroups']);
+        // Call directly since we're already inside acf/init
+        self::registerFieldGroups();
     }
 
     /**
@@ -61,6 +62,9 @@ class BlockFields
         self::registerPostsBlock();
         self::registerBeforeAfterBlock();
         self::registerTableBlock();
+
+        // Component Blocks
+        self::registerButtonBlock();
 
         // Conditional Blocks (require plugins)
         if (class_exists('WPCF7')) {
@@ -442,6 +446,23 @@ class BlockFields
             'title' => 'Tabelle',
             'fields' => FieldDefinitions::tableFields('block_table'),
             'location' => self::blockLocation('acf/table'),
+        ]);
+    }
+
+    // =========================================================================
+    // COMPONENT BLOCKS
+    // =========================================================================
+
+    /**
+     * Button Block
+     */
+    private static function registerButtonBlock(): void
+    {
+        acf_add_local_field_group([
+            'key' => 'group_block_button',
+            'title' => 'Button',
+            'fields' => FieldDefinitions::buttonFields('block_button'),
+            'location' => self::blockLocation('acf/button'),
         ]);
     }
 
