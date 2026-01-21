@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace StiftungsNavigatorGmbH\Providers;
+namespace WordpressStarter\Providers;
 
 class ThemeServiceProvider extends ServiceProvider
 {
@@ -13,6 +13,9 @@ class ThemeServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Disable Gutenberg completely - use Classic Editor with ACF Flexible Content
+        \WordpressStarter\EditorConfig::init();
+
         $this->addThemeSupport();
         $this->disableGlobalStyles();
         $this->disableComments();
@@ -22,150 +25,7 @@ class ThemeServiceProvider extends ServiceProvider
         $this->addOpenGraphTags();
         $this->addFaviconSupport();
         $this->addLoginLogoSupport();
-        $this->disableTexturizeForAlpine();
         $this->syncAcfWithWordPress();
-        // Note: Editor style overrides removed - all ACF blocks are in edit mode (no preview rendering)
-    }
-
-    /**
-     * Fix wptexturize corruption in block comments only
-     *
-     * WordPress's wptexturize converts ASCII quotes and dashes to typographic
-     * characters. This is great for content, but breaks JSON in block comments.
-     *
-     * Instead of disabling wptexturize globally, we fix block comments after
-     * wptexturize runs, preserving nice typography for regular content.
-     *
-     * @see https://core.trac.wordpress.org/ticket/2647
-     * @see https://support.advancedcustomfields.com/forums/topic/turn-off-smart-curly-quotes/
-     */
-    private function disableTexturizeForAlpine(): void
-    {
-        // Fix block comments AFTER wptexturize runs (priority 99, after default 10)
-        add_filter('the_content', [$this, 'fixCorruptedBlockContent'], 99);
-
-        // Fix content when editing (before it's displayed in editor)
-        add_filter('content_edit_pre', [$this, 'fixCorruptedBlockContent'], 1);
-
-        // Fix content BEFORE saving to database (prevents corruption)
-        add_filter('content_save_pre', [$this, 'fixCorruptedBlockContent'], 1);
-        add_filter('wp_insert_post_data', function ($data) {
-            if (!empty($data['post_content'])) {
-                $data['post_content'] = $this->fixCorruptedBlockContent($data['post_content']);
-            }
-            return $data;
-        }, 99);
-
-        // Fix content before block parsing (runs before ACF parses blocks)
-        add_filter('the_posts', function ($posts) {
-            foreach ($posts as $post) {
-                if ($post->post_content && strpos($post->post_content, '<!-- wp:') !== false) {
-                    $post->post_content = $this->fixCorruptedBlockContent($post->post_content);
-                }
-            }
-            return $posts;
-        }, 1);
-
-        // Fix content when loaded via REST API (block editor uses REST)
-        add_filter('rest_prepare_page', [$this, 'fixRestContent'], 10, 3);
-        add_filter('rest_prepare_post', [$this, 'fixRestContent'], 10, 3);
-
-        // Add admin action to fix all corrupted content (one-time fix)
-        add_action('admin_init', [$this, 'fixCorruptedContentOnce']);
-    }
-
-    /**
-     * One-time fix for all corrupted content in the database
-     * Runs once when ?fix_block_quotes=1 is added to any admin URL
-     */
-    public function fixCorruptedContentOnce(): void
-    {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Admin-only one-time fix command
-        if (!isset($_GET['fix_block_quotes']) || !current_user_can('manage_options')) {
-            return;
-        }
-
-        global $wpdb;
-
-        // Find all posts with block content
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-time fix command
-        $posts = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT ID, post_content FROM {$wpdb->posts}
-                 WHERE post_content LIKE %s
-                 AND (post_content LIKE %s OR post_content LIKE %s)",
-                '%<!-- wp:%',
-                '%"%',
-                '%"%'
-            )
-        );
-
-        $fixed = 0;
-        foreach ($posts as $post) {
-            $fixedContent = $this->fixCorruptedBlockContent($post->post_content);
-            if ($fixedContent !== $post->post_content) {
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-time fix command
-                $wpdb->update(
-                    $wpdb->posts,
-                    ['post_content' => $fixedContent],
-                    ['ID' => $post->ID]
-                );
-                ++$fixed;
-            }
-        }
-
-        add_action('admin_notices', function () use ($fixed): void {
-            echo '<div class="notice notice-success"><p>Fixed ' . esc_html( $fixed ) . ' posts with corrupted block quotes.</p></div>';
-        });
-    }
-
-    /**
-     * Fix corrupted content in REST API responses
-     */
-    public function fixRestContent(\WP_REST_Response $response, \WP_Post $post, \WP_REST_Request $request): \WP_REST_Response
-    {
-        $data = $response->get_data();
-
-        if (isset($data['content']['raw'])) {
-            $data['content']['raw'] = $this->fixCorruptedBlockContent($data['content']['raw']);
-            $response->set_data($data);
-        }
-
-        return $response;
-    }
-
-    /**
-     * Fix block content corrupted by wptexturize
-     *
-     * Converts typographic quotes back to ASCII within block comments.
-     */
-    public function fixCorruptedBlockContent(string $content): string
-    {
-        // Only process if content has blocks
-        if (strpos($content, '<!-- wp:') === false) {
-            return $content;
-        }
-
-        // Fix corrupted quotes in block comments
-        // Match block comments: <!-- wp:... -->
-        // Use Unicode escape sequences to avoid encoding issues
-        $typographicChars = [
-            "\u{201C}", // " left double quote
-            "\u{201D}", // " right double quote
-            "\u{2018}", // ' left single quote
-            "\u{2019}", // ' right single quote
-            "\u{2013}", // – en dash
-            "\u{2014}", // — em dash
-        ];
-        $asciiChars = ['"', '"', "'", "'", '-', '-'];
-
-        return preg_replace_callback(
-            '/<!-- wp:(.*?) -->/s',
-            function ($matches) use ($typographicChars, $asciiChars) {
-                return str_replace($typographicChars, $asciiChars, $matches[0]);
-            },
-            $content
-        ) ?? $content;
     }
 
     private function setupThemeVersion(): void
@@ -190,10 +50,6 @@ class ThemeServiceProvider extends ServiceProvider
             ]);
             add_theme_support('post-thumbnails');
             add_theme_support('align-wide');
-            // Removed: wp-block-styles - we use Tailwind instead
-            // Note: Editor styles removed - all ACF blocks use edit mode (no preview rendering)
-            // add_theme_support('editor-styles') and add_editor_style() are not needed
-            // ACF field UI styling is handled via inline CSS in Vite::enqueueEditorAssets()
         });
     }
 
@@ -228,47 +84,6 @@ class ThemeServiceProvider extends ServiceProvider
         add_action('init', function (): void {
             remove_action('wp_body_open', 'wp_global_styles_render_svg_filters');
         });
-
-        // Only allow ACF blocks on root level (Core blocks still work in InnerBlocks)
-        add_filter('allowed_block_types_all', [$this, 'filterAllowedBlocks'], 10, 2);
-    }
-
-    /**
-     * Filter allowed blocks to only show ACF blocks on root level
-     *
-     * Core blocks (paragraph, heading, list) are still available inside
-     * InnerBlocks of layout blocks - they're just hidden from the main inserter.
-     *
-     * @param bool|array<string> $allowedBlocks
-     * @param \WP_Block_Editor_Context $context
-     * @return array<string>
-     */
-    public function filterAllowedBlocks(bool|array $allowedBlocks, \WP_Block_Editor_Context $context): array
-    {
-        // Get all registered ACF blocks
-        $acfBlocks = [];
-        $blocksDir = get_template_directory() . '/blocks';
-
-        if (is_dir($blocksDir)) {
-            $blocks = glob($blocksDir . '/*/block.json');
-            foreach ($blocks as $blockConfig) {
-                $blockName = basename(dirname($blockConfig));
-                $acfBlocks[] = 'acf/' . $blockName;
-            }
-        }
-
-        // Core blocks allowed in InnerBlocks (text formatting essentials)
-        // These won't appear in main inserter but work inside layout blocks
-        $coreBlocksForInnerBlocks = [
-            'core/paragraph',
-            'core/heading',
-            'core/list',
-            'core/list-item',
-            'core/quote',
-            'core/separator',
-        ];
-
-        return array_merge($acfBlocks, $coreBlocksForInnerBlocks);
     }
 
     private function disableComments(): void
@@ -836,5 +651,4 @@ class ThemeServiceProvider extends ServiceProvider
             update_option('site_icon', $acfFavicon);
         }
     }
-
 }

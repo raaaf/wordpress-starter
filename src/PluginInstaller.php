@@ -92,6 +92,7 @@ class PluginInstaller
         // Install the plugin using quiet skin to suppress output
         $skin = self::createQuietSkin();
         $upgrader = new \Plugin_Upgrader($skin);
+        /** @var object{download_link: string} $api */
         $result = $upgrader->install($api->download_link);
 
         if (is_wp_error($result)) {
@@ -101,8 +102,10 @@ class PluginInstaller
             ];
         }
 
-        // Check for skin errors
+        // Check for skin errors (methods defined in anonymous class)
+        // @phpstan-ignore method.notFound
         if ($skin->has_errors()) {
+            // @phpstan-ignore method.notFound
             $errors = $skin->get_errors();
             $errorMessage = is_wp_error($errors[0])
                 ? $errors[0]->get_error_message()

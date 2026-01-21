@@ -71,11 +71,19 @@ class PluginServiceProvider extends ServiceProvider
      */
     private function loadSetupConfig(): void
     {
-        $pluginsConfigPath = get_template_directory() . '/config/plugins-to-install.php';
         $setupOptionsPath = get_template_directory() . '/config/setup-options.php';
 
-        if (file_exists($pluginsConfigPath)) {
-            $this->selectedPlugins = include $pluginsConfigPath;
+        // Plugins are now managed via composer.json - read them from there
+        $composerPath = get_template_directory() . '/composer.json';
+        if (file_exists($composerPath)) {
+            $composer = json_decode(file_get_contents($composerPath), true);
+            if (isset($composer['require'])) {
+                foreach ($composer['require'] as $package => $version) {
+                    if (str_starts_with($package, 'wpackagist-plugin/')) {
+                        $this->selectedPlugins[] = str_replace('wpackagist-plugin/', '', $package);
+                    }
+                }
+            }
         }
 
         if (file_exists($setupOptionsPath)) {
@@ -299,7 +307,7 @@ class PluginServiceProvider extends ServiceProvider
 
                 if ($existingItems) {
                     foreach ($existingItems as $item) {
-                        if ((int) $item->object_id === $pageId && $item->object === 'page') {
+                        if ( (int) $item->object_id === $pageId && $item->object === 'page') {
                             $alreadyInMenu = true;
                             break;
                         }
@@ -521,22 +529,19 @@ class PluginServiceProvider extends ServiceProvider
 
             <div class="wp-starter-setup-header" style="background: #fff; padding: 20px; margin: 20px 0; border-left: 4px solid #2271b1; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
                 <h2 style="margin-top: 0;"><?php esc_html_e('Willkommen beim WP-Starter Theme!', 'wp-starter'); ?></h2>
-                <?php if ($hasConfig) : ?>
-                    <p><?php esc_html_e('Ihre vorkonfigurierten Plugins werden jetzt installiert.', 'wp-starter'); ?></p>
-                <?php else : ?>
-                    <p><?php esc_html_e('Installieren Sie die empfohlenen Plugins für die beste Erfahrung mit diesem Theme.', 'wp-starter'); ?></p>
-                <?php endif; ?>
+                <p><?php esc_html_e('Plugins werden über Composer verwaltet. Führen Sie "composer install" aus, um die konfigurierten Plugins zu installieren.', 'wp-starter'); ?></p>
+                <p style="color: #50575e; font-size: 13px;">
+                    <span class="dashicons dashicons-info-outline"></span>
+                    <?php esc_html_e('ACF PRO muss manuell installiert werden (Premium-Plugin).', 'wp-starter'); ?>
+                </p>
 
                 <?php if (!empty($missingSelectedPlugins)) : ?>
                     <p>
                         <button type="button" id="wp-starter-install-all" class="button button-primary button-hero">
                             <?php
                             printf(
-                                $hasConfig
-                                    // translators: %d is the number of preconfigured plugins to install
-                                    ? esc_html__('Vorkonfigurierte Plugins installieren (%d)', 'wp-starter')
-                                    // translators: %d is the number of free plugins to install
-                                    : esc_html__('Alle kostenlosen Plugins installieren (%d)', 'wp-starter'),
+                                // translators: %d is the number of plugins to activate/install
+                                esc_html__('Plugins aktivieren (%d)', 'wp-starter'),
                                 count($missingSelectedPlugins)
                             );
                             ?>
@@ -545,7 +550,7 @@ class PluginServiceProvider extends ServiceProvider
                 <?php else : ?>
                     <p style="color: #00a32a; font-weight: 600;">
                         <span class="dashicons dashicons-yes-alt"></span>
-                        <?php esc_html_e('Alle ausgewählten Plugins sind installiert!', 'wp-starter'); ?>
+                        <?php esc_html_e('Alle Plugins sind aktiv!', 'wp-starter'); ?>
                     </p>
                 <?php endif; ?>
             </div>
@@ -1002,7 +1007,7 @@ class PluginServiceProvider extends ServiceProvider
             sprintf(
                 // translators: %d is the number of recommended plugins available
                 esc_html__('Es sind %d empfohlene Plugins für das WP-Starter Theme verfügbar.', 'wp-starter'),
-                esc_html( $count )
+                (int) $count
             ),
             esc_url($setupUrl),
             esc_html__('Plugins anzeigen & installieren', 'wp-starter'),

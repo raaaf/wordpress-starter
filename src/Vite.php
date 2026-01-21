@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace StiftungsNavigatorGmbH;
+namespace WordpressStarter;
 
 /**
  * Vite Asset Management
@@ -23,8 +23,8 @@ class Vite
         // Frontend assets (wp_enqueue_scripts only fires on frontend)
         add_action('wp_enqueue_scripts', [self::class, 'enqueueAssets']);
 
-        // Editor JavaScript only (CSS is handled via add_editor_style in ThemeServiceProvider)
-        add_action('enqueue_block_editor_assets', [self::class, 'enqueueEditorAssets']);
+        // Admin assets for ACF field enhancements
+        add_action('admin_enqueue_scripts', [self::class, 'enqueueAdminAssets']);
 
         // Add type="module" to Vite scripts
         add_filter('script_loader_tag', [self::class, 'addModuleType'], 10, 3);
@@ -82,28 +82,20 @@ class Vite
     }
 
     /**
-     * Enqueue editor assets.
-     *
-     * Note: All ACF blocks are set to edit mode (no preview rendering).
-     * This means we don't need Alpine.js or complex CSS for block previews.
-     * Only minimal admin UI CSS is loaded here.
+     * Enqueue admin assets for ACF field enhancements.
      */
-    public static function enqueueEditorAssets(): void
+    public static function enqueueAdminAssets(): void
     {
-        // All ACF blocks are in edit mode - no preview rendering.
-        // Admin UI CSS for ACF field enhancements is loaded inline below.
+        // Only load on ACF-related pages
+        $screen = get_current_screen();
+        if (!$screen) {
+            return;
+        }
 
-        // ACF Icon Radio Field CSS (admin UI enhancement)
-        wp_add_inline_style('wp-block-editor', self::getAcfIconRadioCss());
-
-        // Force edit mode script - ensures all ACF blocks show form fields
-        wp_enqueue_script(
-            'acf-force-edit-mode',
-            get_theme_file_uri('resources/js/editor-force-edit.js'),
-            ['wp-blocks', 'wp-data', 'wp-element'],
-            null,
-            true
-        );
+        // Load ACF Icon Radio CSS on post/page edit screens
+        if (in_array($screen->base, ['post', 'page'], true) || $screen->is_block_editor) {
+            wp_add_inline_style('acf-input', self::getAcfIconRadioCss());
+        }
     }
 
     /**
