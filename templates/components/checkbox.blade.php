@@ -40,10 +40,10 @@
         />
 
         {{-- Custom checkbox --}}
-        <span class="w-5 h-5 rounded border-2 transition-all duration-200
+        <span class="w-5 h-5 rounded-[var(--radius-sm)] border-2 transition-all duration-200 flex items-center justify-center
             {{ $disabled
                 ? 'border-line-disabled bg-surface-disabled'
-                : 'border-line hover:border-line-strong peer-focus-visible:ring-2 peer-focus-visible:ring-line-focus peer-focus-visible:ring-offset-2'
+                : 'border-line hover:border-line-strong peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
             }}
             peer-checked:bg-surface-accent peer-checked:border-surface-accent
             {{ $disabled ? 'peer-checked:bg-surface-disabled peer-checked:border-line-disabled' : '' }}
@@ -72,7 +72,7 @@
 </label>
 
 @if($indeterminate)
-<script>
+<script nonce="{{ $GLOBALS['csp_nonce'] ?? '' }}">
     document.querySelector('[data-indeterminate="true"]').indeterminate = true;
 </script>
 @endif

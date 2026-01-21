@@ -1,7 +1,7 @@
 {{--
     Badge Component - Based on Figma Design System
 
-    @param string $variant - gray, accent, success, warning, error (default: gray)
+    @param string $variant - gray, brand, success, warning, error (default: gray)
     @param string $style - filled, outline (default: filled)
     @param string $size - sm, md, lg (default: md)
     @param bool $dot - Show status dot
@@ -21,10 +21,11 @@
 ])
 
 @php
+    // Sizes from Figma tokens - subtle border radius per Figma design
     $sizes = [
-        'sm' => 'px-2 py-0.5 text-xs gap-1',
-        'md' => 'px-2.5 py-1 text-sm gap-1.5',
-        'lg' => 'px-3 py-1.5 text-base gap-2',
+        'sm' => 'px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] text-xs gap-[var(--badge-sm-gap)] rounded-md',
+        'md' => 'px-[var(--badge-md-padding-x)] py-[var(--badge-md-padding-y)] text-sm gap-[var(--badge-md-gap)] rounded-md',
+        'lg' => 'px-[var(--badge-lg-padding-x)] py-[var(--badge-lg-padding-y)] text-base gap-[var(--badge-lg-gap)] rounded-lg',
     ];
 
     $iconSizes = [
@@ -39,10 +40,11 @@
         'lg' => 'w-2.5 h-2.5',
     ];
 
-    // Filled variants
+    // Filled variants (renamed accent to brand for Figma consistency)
     $filledVariants = [
         'gray' => 'bg-surface-tertiary text-content',
-        'accent' => 'bg-surface-accent text-content-on-color',
+        'brand' => 'bg-surface-accent text-content-on-color',
+        'accent' => 'bg-surface-accent text-content-on-color', // Alias for backwards compatibility
         'success' => 'bg-surface-success-strong text-content-on-color',
         'warning' => 'bg-surface-warning-strong text-content-on-color',
         'error' => 'bg-surface-error-strong text-content-on-color',
@@ -51,7 +53,8 @@
     // Outline variants
     $outlineVariants = [
         'gray' => 'bg-transparent text-content border border-line',
-        'accent' => 'bg-surface-accent-subtle text-content-accent border border-line-accent',
+        'brand' => 'bg-surface-accent-subtle text-content-accent border border-line-accent',
+        'accent' => 'bg-surface-accent-subtle text-content-accent border border-line-accent', // Alias
         'success' => 'bg-surface-success text-content-success border border-line-success',
         'warning' => 'bg-surface-warning text-content-warning border border-line-warning',
         'error' => 'bg-surface-error text-content-error border border-line-error',
@@ -60,6 +63,7 @@
     // Dot colors - use semantic tokens for theme compatibility
     $dotColors = [
         'gray' => 'bg-content-secondary',
+        'brand' => $style === 'filled' ? 'bg-surface-on-color' : 'bg-content-accent',
         'accent' => $style === 'filled' ? 'bg-surface-on-color' : 'bg-content-accent',
         'success' => $style === 'filled' ? 'bg-surface-on-color' : 'bg-content-success',
         'warning' => $style === 'filled' ? 'bg-surface-on-color' : 'bg-content-warning',
@@ -74,7 +78,7 @@
     $dotColor = $dotColors[$variant] ?? $dotColors['gray'];
 @endphp
 
-<span class="inline-flex items-center font-medium rounded-full {{ $variantClass }} {{ $sizeClass }} {{ $class }}">
+<span class="inline-flex w-fit items-center font-medium {{ $variantClass }} {{ $sizeClass }} {{ $class }}">
     @if($dot)
         <span class="rounded-full {{ $dotSize }} {{ $dotColor }}"></span>
     @endif

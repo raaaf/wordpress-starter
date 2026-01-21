@@ -16,9 +16,9 @@
     @param string $class - Additional CSS classes
 
     States from Figma:
-    - Default: Gray border
-    - Hover: Darker border
-    - Focus: Orange border with ring
+    - Default: Gray border with subtle shadow
+    - Hover: Stronger border, enhanced shadow
+    - Focus: Brand border with focus ring
     - Error: Red border, red hint text
     - Disabled: Gray background, muted text
 --}}
@@ -60,14 +60,22 @@
     $sizeClass = $sizes[$size] ?? $sizes['md'];
     $iconSize = $iconSizes[$size] ?? $iconSizes['md'];
 
-    // Base select classes
-    $baseClasses = 'w-full rounded-lg border bg-surface text-content appearance-none cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0';
+    // Radius classes from Figma tokens
+    $radiusClasses = [
+        'sm' => 'rounded-[var(--input-sm-radius)]',
+        'md' => 'rounded-[var(--input-md-radius)]',
+        'lg' => 'rounded-[var(--input-lg-radius)]',
+    ];
+    $radiusClass = $radiusClasses[$size] ?? $radiusClasses['md'];
 
-    // State classes
+    // Base select classes from Figma tokens
+    $baseClasses = 'w-full border bg-surface text-content appearance-none cursor-pointer transition-all duration-200 focus:outline-none';
+
+    // State classes from Figma
     $stateClasses = match(true) {
         $disabled => 'border-line-disabled bg-surface-disabled text-content-disabled cursor-not-allowed',
-        $hasError => 'border-line-error focus:border-line-error focus:ring-line-error/30',
-        default => 'border-line hover:border-line-strong focus:border-line-focus focus:ring-line-focus/30',
+        $hasError => 'border-line-error shadow-[var(--shadow-input)] focus:border-line-error focus:shadow-[var(--shadow-focus-ring)]',
+        default => 'border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]',
     };
 @endphp
 
@@ -91,7 +99,7 @@
             @if($disabled) disabled @endif
             @if($hasError) aria-invalid="true" @endif
             @if($displayHint) aria-describedby="{{ $selectId }}-hint" @endif
-            class="{{ $baseClasses }} {{ $stateClasses }} {{ $sizeClass }} {{ $class }}"
+            class="{{ $baseClasses }} {{ $radiusClass }} {{ $stateClasses }} {{ $sizeClass }} {{ $class }}"
         >
             @if($placeholder)
                 <option value="" disabled {{ !$selected ? 'selected' : '' }}>{{ $placeholder }}</option>

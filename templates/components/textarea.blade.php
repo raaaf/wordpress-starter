@@ -16,9 +16,9 @@
     @param string $class - Additional CSS classes
 
     States from Figma:
-    - Default: Gray border
-    - Hover: Darker border
-    - Focus: Orange border with ring
+    - Default: Gray border with subtle shadow
+    - Hover: Stronger border, enhanced shadow
+    - Focus: Brand border with focus ring
     - Error: Red border, red hint text
     - Disabled: Gray background, muted text
 --}}
@@ -44,18 +44,18 @@
     $hasError = $error || $errorMessage;
     $displayHint = $hasError && $errorMessage ? $errorMessage : $hint;
 
-    // Size classes
+    // Size classes from Figma tokens
     $sizes = [
         'sm' => [
-            'textarea' => 'text-sm px-3 py-2',
+            'textarea' => 'text-sm px-[var(--input-sm-padding-x)] py-[var(--input-sm-padding-y)] rounded-[var(--input-sm-radius)]',
             'rows' => 3,
         ],
         'md' => [
-            'textarea' => 'text-base px-4 py-3',
+            'textarea' => 'text-base px-[var(--input-md-padding-x)] py-[var(--input-md-padding-y)] rounded-[var(--input-md-radius)]',
             'rows' => 4,
         ],
         'lg' => [
-            'textarea' => 'text-lg px-5 py-4',
+            'textarea' => 'text-lg px-[var(--input-lg-padding-x)] py-[var(--input-lg-padding-y)] rounded-[var(--input-lg-radius)]',
             'rows' => 5,
         ],
     ];
@@ -63,14 +63,14 @@
     $sizeConfig = $sizes[$size] ?? $sizes['md'];
     $actualRows = $rows ?? $sizeConfig['rows'];
 
-    // Base textarea classes
-    $baseClasses = 'w-full rounded-lg border bg-surface text-content placeholder:text-content-tertiary resize-y transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0';
+    // Base textarea classes from Figma
+    $baseClasses = 'w-full border bg-surface text-content placeholder:text-content-tertiary resize-y transition-all duration-200 focus:outline-none';
 
-    // State classes
+    // State classes from Figma
     $stateClasses = match(true) {
         $disabled => 'border-line-disabled bg-surface-disabled text-content-disabled cursor-not-allowed resize-none',
-        $hasError => 'border-line-error focus:border-line-error focus:ring-line-error/30',
-        default => 'border-line hover:border-line-strong focus:border-line-focus focus:ring-line-focus/30',
+        $hasError => 'border-line-error shadow-[var(--shadow-input)] focus:border-line-error focus:shadow-[var(--shadow-focus-ring)]',
+        default => 'border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]',
     };
 @endphp
 

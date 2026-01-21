@@ -19,9 +19,9 @@
     @param string $class - Additional CSS classes for input
 
     States from Figma:
-    - Default: Gray border
-    - Hover: Darker border
-    - Focus: Orange border with ring
+    - Default: Gray border with subtle shadow
+    - Hover: Stronger border, enhanced shadow
+    - Focus: Brand border with focus ring
     - Error: Red border, red hint text
     - Disabled: Gray background, muted text
 --}}
@@ -80,14 +80,22 @@
 
     $sizeConfig = $sizes[$size] ?? $sizes['md'];
 
-    // Base input classes
-    $baseClasses = 'w-full rounded-lg border bg-surface text-content placeholder:text-content-tertiary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0';
+    // Radius classes from Figma tokens
+    $radiusClasses = [
+        'sm' => 'rounded-[var(--input-sm-radius)]',
+        'md' => 'rounded-[var(--input-md-radius)]',
+        'lg' => 'rounded-[var(--input-lg-radius)]',
+    ];
+    $radiusClass = $radiusClasses[$size] ?? $radiusClasses['md'];
 
-    // State classes
+    // Base input classes from Figma tokens
+    $baseClasses = 'w-full border bg-surface text-content placeholder:text-content-tertiary transition-all duration-200 focus:outline-none';
+
+    // State classes from Figma
     $stateClasses = match(true) {
         $disabled => 'border-line-disabled bg-surface-disabled text-content-disabled cursor-not-allowed',
-        $hasError => 'border-line-error focus:border-line-error focus:ring-line-error/30',
-        default => 'border-line hover:border-line-strong focus:border-line-focus focus:ring-line-focus/30',
+        $hasError => 'border-line-error shadow-[var(--shadow-input)] focus:border-line-error focus:shadow-[var(--shadow-focus-ring)]',
+        default => 'border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]',
     };
 @endphp
 
@@ -126,7 +134,7 @@
                 x-ref="input"
                 x-on:input="hasValue = $event.target.value.length > 0"
             @endif
-            class="{{ $baseClasses }} {{ $stateClasses }} {{ $sizeConfig['input'] }} {{ $sizeConfig['padding'] }} {{ $sizeConfig['paddingRight'] }} {{ $class }}"
+            class="{{ $baseClasses }} {{ $radiusClass }} {{ $stateClasses }} {{ $sizeConfig['input'] }} {{ $sizeConfig['padding'] }} {{ $sizeConfig['paddingRight'] }} {{ $class }}"
         />
 
         {{-- Right icon or clear button --}}

@@ -16,11 +16,11 @@
     {{-- Preload critical assets --}}
     @if(!WP_DEBUG || !\WordpressStarter\Vite::isDevServerRunning())
         <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/css/app.css') }}" as="style">
-        <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/js/app.js') }}" as="script">
+        <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/js/app.ts') }}" as="script" crossorigin>
     @endif
 
     {{-- Remove no-js class when JS is enabled --}}
-    <script>
+    <script nonce="{{ $GLOBALS['csp_nonce'] ?? '' }}">
         document.documentElement.classList.remove('no-js');
     </script>
 
@@ -33,11 +33,15 @@
 
     {{-- Skip Link for Accessibility --}}
     <a href="#main-content"
-        class="absolute top-0 left-0 p-2 text-content-inverse transform -translate-y-full bg-surface-inverse focus:translate-y-0">
-        Skip to content
+        class="absolute top-0 left-0 p-2 text-content-inverse no-underline transform -translate-y-full bg-surface-inverse focus:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus rounded">
+        {{ __('Zum Inhalt springen', 'wp-starter') }}
     </a>
 
-    <header class="px-4 md:px-8" role="banner">
+    @php
+        $headerSticky = function_exists('get_field') ? get_field('header_sticky', 'option') : false;
+    @endphp
+
+    <header class="px-4 md:px-8 bg-surface {{ $headerSticky ? 'sticky top-0 z-50 shadow-sm' : '' }}" role="banner">
         <div class="container mx-auto">
             <nav role="navigation" aria-label="Main Navigation">
                 @include('partials.header-menu')

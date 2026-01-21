@@ -37,7 +37,7 @@
         <span class="block w-11 h-6 rounded-full transition-all duration-200
             {{ $disabled
                 ? 'bg-surface-disabled'
-                : 'bg-surface-tertiary peer-checked:bg-surface-accent peer-focus-visible:ring-2 peer-focus-visible:ring-line-focus peer-focus-visible:ring-offset-2'
+                : 'bg-surface-tertiary peer-checked:bg-surface-accent peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
             }}
         "></span>
 
