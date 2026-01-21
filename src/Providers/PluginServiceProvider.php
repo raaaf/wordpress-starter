@@ -109,8 +109,14 @@ class PluginServiceProvider extends ServiceProvider
         }
 
         // Create default pages
+        $createdPageIds = [];
         if (!empty($this->setupOptions['create_pages']) && !empty($this->setupOptions['pages'])) {
-            $this->createDefaultPages($this->setupOptions['pages']);
+            $createdPageIds = $this->createDefaultPages($this->setupOptions['pages']);
+        }
+
+        // Create default menus and assign pages
+        if (!empty($createdPageIds) && !empty($this->setupOptions['menu_assignments'])) {
+            $this->createDefaultMenus($createdPageIds, $this->setupOptions['menu_assignments']);
         }
 
         // Note: color_scheme is handled by WelcomeServiceProvider via ACF's update_field()
@@ -161,15 +167,20 @@ class PluginServiceProvider extends ServiceProvider
      * Create default pages
      *
      * @param array<string, array{title: string, template: string, status?: string}> $pages
+     * @return array<string, int> Map of page slug to page ID
      */
-    private function createDefaultPages(array $pages): void
+    private function createDefaultPages(array $pages): array
     {
         $homePageId = null;
+        $createdPages = [];
 
         foreach ($pages as $slug => $pageData) {
             // Check if page already exists
             $existing = get_page_by_path($slug);
             if ($existing) {
+                // Store existing page ID for menu creation
+                $createdPages[$slug] = $existing->ID;
+
                 // If styleguide exists, store its ID
                 if ($slug === 'styleguide') {
                     update_option('wp_starter_styleguide_page_id', $existing->ID);
@@ -189,6 +200,9 @@ class PluginServiceProvider extends ServiceProvider
             ]);
 
             if ($pageId && !is_wp_error($pageId)) {
+                // Store created page ID for menu creation
+                $createdPages[$slug] = $pageId;
+
                 // Set page template if specified
                 if (!empty($pageData['template'])) {
                     update_post_meta($pageId, '_wp_page_template', $pageData['template'] . '.blade.php');
@@ -223,6 +237,94 @@ class PluginServiceProvider extends ServiceProvider
             update_option('show_on_front', 'page');
             update_option('page_on_front', $homePageId);
         }
+
+        return $createdPages;
+    }
+
+    /**
+     * Create default menus and populate them with pages
+     *
+     * @param array<string, int> $pageIds Map of page slug to page ID
+     * @param array<string, string[]> $menuAssignments Map of menu location to page slugs
+     */
+    private function createDefaultMenus(array $pageIds, array $menuAssignments): void
+    {
+        // Get registered menu locations
+        $locations = get_registered_nav_menus();
+        $menuLocations = get_nav_menu_locations();
+
+        foreach ($menuAssignments as $location => $pageSlugs) {
+            // Skip if this location isn't registered
+            if (!isset($locations[$location])) {
+                continue;
+            }
+
+            // Create menu name based on location
+            $menuName = $locations[$location];
+
+            // Check if menu already exists
+            $existingMenu = wp_get_nav_menu_object($menuName);
+
+            if ($existingMenu) {
+                $menuId = $existingMenu->term_id;
+            } else {
+                // Create new menu
+                $menuId = wp_create_nav_menu($menuName);
+
+                if (is_wp_error($menuId)) {
+                    continue;
+                }
+            }
+
+            // Assign menu to location
+            $menuLocations[$location] = $menuId;
+
+            // Add pages to menu in order
+            $position = 0;
+            foreach ($pageSlugs as $pageSlug) {
+                if (!isset($pageIds[$pageSlug])) {
+                    continue;
+                }
+
+                $pageId = $pageIds[$pageSlug];
+                $page = get_post($pageId);
+
+                if (!$page) {
+                    continue;
+                }
+
+                // Check if this page is already in the menu
+                $existingItems = wp_get_nav_menu_items($menuId);
+                $alreadyInMenu = false;
+
+                if ($existingItems) {
+                    foreach ($existingItems as $item) {
+                        if ((int) $item->object_id === $pageId && $item->object === 'page') {
+                            $alreadyInMenu = true;
+                            break;
+                        }
+                    }
+                }
+
+                if ($alreadyInMenu) {
+                    continue;
+                }
+
+                $position += 10;
+
+                wp_update_nav_menu_item($menuId, 0, [
+                    'menu-item-object-id' => $pageId,
+                    'menu-item-object' => 'page',
+                    'menu-item-type' => 'post_type',
+                    'menu-item-status' => 'publish',
+                    'menu-item-title' => $page->post_title,
+                    'menu-item-position' => $position,
+                ]);
+            }
+        }
+
+        // Save menu locations
+        set_theme_mod('nav_menu_locations', $menuLocations);
     }
 
     /**

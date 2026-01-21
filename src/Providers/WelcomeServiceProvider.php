@@ -19,6 +19,7 @@ class WelcomeServiceProvider extends ServiceProvider
     private const OPTION_ACF_PREFILL_PENDING = 'wp_starter_acf_prefill_pending';
     private const NONCE_CREATE = 'wp-starter-create-styleguide';
     private const NONCE_DISMISS = 'wp-starter-dismiss-welcome';
+    private const NONCE_IMPORT_OPTIONS = 'wp-starter-import-options';
 
     /** @var array<string, int> Imported placeholder image IDs */
     private array $imageIds = [];
@@ -34,6 +35,7 @@ class WelcomeServiceProvider extends ServiceProvider
     public function boot(): void
     {
         add_action('admin_notices', [$this, 'displayWelcomeNotice']);
+        add_action('admin_notices', [$this, 'displayImportOptionsNotice']);
         add_action('admin_init', [$this, 'handleNoticeActions']);
     }
 
@@ -217,6 +219,98 @@ class WelcomeServiceProvider extends ServiceProvider
         $this->handleRestoreStyleguide();
         $this->handleDeleteStyleguide();
         $this->handleDismiss();
+        $this->handleImportOptions();
+    }
+
+    /**
+     * Handle manual import of ACF options from config file
+     */
+    private function handleImportOptions(): void
+    {
+        if (!isset($_GET['wp-starter-import-options'])) {
+            return;
+        }
+
+        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
+
+        if (!wp_verify_nonce($nonce, self::NONCE_IMPORT_OPTIONS)) {
+            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('Sie haben keine Berechtigung für diese Aktion.', 'wp-starter'));
+        }
+
+        // Force the prefill by setting the pending flag
+        update_option(self::OPTION_ACF_PREFILL_PENDING, true);
+        $this->prefillAcfOptions();
+
+        // Redirect to dashboard with success message
+        $redirectUrl = admin_url('index.php?options-imported=1');
+        wp_safe_redirect($redirectUrl);
+        exit;
+    }
+
+    /**
+     * Display notice when ACF options config exists but hasn't been imported
+     */
+    public function displayImportOptionsNotice(): void
+    {
+        // Only show to admins
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        // Show success message if just imported
+        if (isset($_GET['options-imported']) && $_GET['options-imported'] === '1') {
+            ?>
+            <div class="notice notice-success is-dismissible">
+                <p><strong><?php esc_html_e('Theme-Einstellungen wurden aus der Setup-Konfiguration importiert!', 'wp-starter'); ?></strong></p>
+            </div>
+            <?php
+            return;
+        }
+
+        // Check if config file exists (not yet processed)
+        $configPath = get_stylesheet_directory() . '/config/acf-options.php';
+        if (!file_exists($configPath)) {
+            return;
+        }
+
+        // Show on dashboard and theme-related pages
+        $screen = get_current_screen();
+        $relevantPages = [
+            'dashboard',
+            'themes',
+            'plugins',
+        ];
+        $isRelevantPage = $screen && (
+            in_array($screen->id, $relevantPages, true) ||
+            str_contains($screen->id ?? '', 'theme-settings') ||
+            str_contains($screen->id ?? '', 'options')
+        );
+
+        if (!$isRelevantPage) {
+            return;
+        }
+
+        $importUrl = wp_nonce_url(
+            admin_url('admin.php?wp-starter-import-options=1'),
+            self::NONCE_IMPORT_OPTIONS
+        );
+        ?>
+        <div class="notice notice-info">
+            <p>
+                <strong><?php esc_html_e('Setup-Konfiguration gefunden!', 'wp-starter'); ?></strong>
+                <?php esc_html_e('Die Theme-Einstellungen aus dem Setup-Wizard wurden noch nicht importiert.', 'wp-starter'); ?>
+            </p>
+            <p>
+                <a href="<?php echo esc_url($importUrl); ?>" class="button button-primary">
+                    <?php esc_html_e('Einstellungen jetzt importieren', 'wp-starter'); ?>
+                </a>
+            </p>
+        </div>
+        <?php
     }
 
     /**
@@ -603,6 +697,23 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
+     * Wrap content blocks in a section (wp:group) for proper spacing
+     *
+     * @param string $title Section heading text
+     * @param string $content The block content to wrap
+     * @param int $headingLevel Heading level (2, 3, or 4)
+     * @param string|null $description Optional description paragraph
+     * @return string Wrapped section markup
+     */
+    private function generateSection(string $title, string $content, int $headingLevel = 3, ?string $description = null): string
+    {
+        $heading = $this->generateHeading($title, $headingLevel);
+        $desc = $description ? "\n\n" . $this->generateParagraph($description) : '';
+
+        return "<!-- wp:group {\"tagName\":\"section\",\"className\":\"styleguide-section\"} -->\n<section class=\"wp-block-group styleguide-section\">\n\n{$heading}{$desc}\n\n{$content}\n\n</section>\n<!-- /wp:group -->";
+    }
+
+    /**
      * Generate all styleguide content
      *
      * @return string Complete page content with all blocks
@@ -615,264 +726,264 @@ class WelcomeServiceProvider extends ServiceProvider
         // TEIL 1: DESIGN SYSTEM - GRUNDLAGEN
         // =====================================================================
 
-        $blocks[] = $this->generateHeading('Design System');
-        $blocks[] = $this->generateParagraph('Alle grundlegenden Design-Tokens und Stilregeln des Themes.');
-        $blocks[] = $this->generateSeparator();
+        $blocks[] = $this->generateSection(
+            'Design System',
+            $this->generateParagraph('Alle grundlegenden Design-Tokens und Stilregeln des Themes.'),
+            2
+        );
 
         // 1.1 Typografie
-        $blocks[] = $this->generateHeading('Typografie', 3);
-        $blocks[] = $this->generateParagraph('Alle verfügbaren Typografie-Klassen des Design Systems.');
-        $blocks[] = $this->generateTypographySection();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection(
+            'Typografie',
+            $this->generateTypographySection(),
+            3,
+            'Alle verfügbaren Typografie-Klassen des Design Systems.'
+        );
 
         // 1.2 Farben
-        $blocks[] = $this->generateHeading('Farben', 3);
-        $blocks[] = $this->generateParagraph('Die semantischen Farbklassen für Hintergründe, Text und Rahmen.');
-        $blocks[] = $this->generateColorsSection();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection(
+            'Farben',
+            $this->generateColorsSection(),
+            3,
+            'Die semantischen Farbklassen für Hintergründe, Text und Rahmen.'
+        );
 
         // 1.3 Schatten
-        $blocks[] = $this->generateHeading('Schatten', 3);
-        $blocks[] = $this->generateParagraph('Definierte Schatten-Tokens für verschiedene UI-Elemente.');
-        $blocks[] = $this->generateShadowsSection();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection(
+            'Schatten',
+            $this->generateShadowsSection(),
+            3,
+            'Definierte Schatten-Tokens für verschiedene UI-Elemente.'
+        );
 
         // 1.4 Verläufe
-        $blocks[] = $this->generateHeading('Verläufe (Gradients)', 3);
-        $blocks[] = $this->generateParagraph('Farbverläufe für Buttons und Hintergründe.');
-        $blocks[] = $this->generateGradientsSection();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection(
+            'Verläufe (Gradients)',
+            $this->generateGradientsSection(),
+            3,
+            'Farbverläufe für Buttons und Hintergründe.'
+        );
 
         // 1.5 Abstände & Radien
-        $blocks[] = $this->generateHeading('Abstände & Radien', 3);
-        $blocks[] = $this->generateParagraph('Spacing-Scale und Border-Radius-Werte für konsistente Layouts.');
-        $blocks[] = $this->generateSpacingSection();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection(
+            'Abstände & Radien',
+            $this->generateSpacingSection(),
+            3,
+            'Spacing-Scale und Border-Radius-Werte für konsistente Layouts.'
+        );
 
         // =====================================================================
         // TEIL 2: DESIGN SYSTEM - KOMPONENTEN
         // =====================================================================
 
-        $blocks[] = $this->generateSeparator();
-        $blocks[] = $this->generateHeading('UI-Komponenten');
-        $blocks[] = $this->generateParagraph('Wiederverwendbare Blade-Komponenten für die Gestaltung.');
-
-        // 2.1 Buttons, Badges, Links, etc.
-        $blocks[] = $this->generateComponentsSection();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection(
+            'UI-Komponenten',
+            $this->generateComponentsSection(),
+            2,
+            'Wiederverwendbare Blade-Komponenten für die Gestaltung.'
+        );
 
         // 2.2 Layout-Helfer
-        $blocks[] = $this->generateHeading('Layout-Helfer', 3);
-        $blocks[] = $this->generateParagraph('Grid, Section und Prose Komponenten für strukturierte Layouts.');
-        $blocks[] = $this->generateLayoutHelpersSection();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection(
+            'Layout-Helfer',
+            $this->generateLayoutHelpersSection(),
+            3,
+            'Grid, Section und Prose Komponenten für strukturierte Layouts.'
+        );
 
         // =====================================================================
         // TEIL 3: ACF BLÖCKE - HERO & EINFÜHRUNG
         // =====================================================================
 
-        $blocks[] = $this->generateSeparator();
-        $blocks[] = $this->generateHeading('ACF Blöcke');
-        $blocks[] = $this->generateParagraph('Alle 28 verfügbaren Gutenberg-Blöcke des Themes.');
+        $blocks[] = $this->generateSection(
+            'ACF Blöcke',
+            $this->generateParagraph('Alle 28 verfügbaren Gutenberg-Blöcke des Themes.'),
+            2
+        );
 
         // 3.1 Hero
-        $blocks[] = $this->generateHeading('Hero-Bereich', 3);
-        $blocks[] = $this->generateParagraph('Ein großer Kopfbereich für den Seitenstart mit Hintergrundbild.');
-        $blocks[] = $this->generateHeroBlock();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection(
+            'Hero-Bereich',
+            $this->generateHeroBlock(),
+            3,
+            'Ein großer Kopfbereich für den Seitenstart mit Hintergrundbild.'
+        );
 
         // =====================================================================
         // TEIL 4: ACF BLÖCKE - LAYOUT & TEXT
         // =====================================================================
 
-        $blocks[] = $this->generateSeparator();
-        $blocks[] = $this->generateHeading('Layout & Text');
-        $blocks[] = $this->generateParagraph('Verschiedene Spalten-Layouts für die Inhaltsstrukturierung.');
+        $blocks[] = $this->generateSection(
+            'Layout & Text',
+            $this->generateParagraph('Verschiedene Spalten-Layouts für die Inhaltsstrukturierung.'),
+            2
+        );
 
         // 4.1 Eine Spalte
-        $blocks[] = $this->generateHeading('Eine Spalte', 4);
-        $blocks[] = $this->generateOneColumnBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Eine Spalte', $this->generateOneColumnBlock(), 4);
 
         // 4.2 Zwei Spalten
-        $blocks[] = $this->generateHeading('Zwei Spalten', 4);
-        $blocks[] = $this->generateTwoColumnsBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Zwei Spalten', $this->generateTwoColumnsBlock(), 4);
 
         // 4.3 Drei Spalten
-        $blocks[] = $this->generateHeading('Drei Spalten', 4);
-        $blocks[] = $this->generateThreeColumnsBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Drei Spalten', $this->generateThreeColumnsBlock(), 4);
 
         // 4.4 Vier Spalten
-        $blocks[] = $this->generateHeading('Vier Spalten', 4);
-        $blocks[] = $this->generateFourColumnsBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Vier Spalten', $this->generateFourColumnsBlock(), 4);
 
         // 4.5 Ein Drittel + Zwei Drittel
-        $blocks[] = $this->generateHeading('Ein Drittel + Zwei Drittel', 4);
-        $blocks[] = $this->generateOneThirdTwoThirdsBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Ein Drittel + Zwei Drittel', $this->generateOneThirdTwoThirdsBlock(), 4);
 
         // 4.6 Zwei Drittel + Ein Drittel
-        $blocks[] = $this->generateHeading('Zwei Drittel + Ein Drittel', 4);
-        $blocks[] = $this->generateTwoThirdsOneThirdBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Zwei Drittel + Ein Drittel', $this->generateTwoThirdsOneThirdBlock(), 4);
 
         // 4.7 Zwei Spalten mit Bildern
-        $blocks[] = $this->generateHeading('Zwei Spalten mit Bildern', 4);
-        $blocks[] = $this->generateTwoColumnsImagesBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Zwei Spalten mit Bildern', $this->generateTwoColumnsImagesBlock(), 4);
 
         // 4.8 Trenner
-        $blocks[] = $this->generateHeading('Trenner', 4);
-        $blocks[] = $this->generateParagraph('Ein einfacher Trennbereich mit Hintergrundfarbe.');
-        $blocks[] = $this->generateDividerBlock();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection(
+            'Trenner',
+            $this->generateDividerBlock(),
+            4,
+            'Ein einfacher Trennbereich mit Hintergrundfarbe.'
+        );
 
         // =====================================================================
         // TEIL 5: ACF BLÖCKE - INTERAKTIVE ELEMENTE
         // =====================================================================
 
-        $blocks[] = $this->generateSeparator();
-        $blocks[] = $this->generateHeading('Interaktive Elemente');
-        $blocks[] = $this->generateParagraph('Blöcke mit Benutzerinteraktion wie Akkordeons, Tabs und Buttons.');
+        $blocks[] = $this->generateSection(
+            'Interaktive Elemente',
+            $this->generateParagraph('Blöcke mit Benutzerinteraktion wie Akkordeons, Tabs und Buttons.'),
+            2
+        );
 
         // 5.1 Button Block
-        $blocks[] = $this->generateHeading('Button', 4);
-        $blocks[] = $this->generateParagraph('Standalone Button-Block für flexible Platzierung.');
-        $blocks[] = $this->generateButtonBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection(
+            'Button',
+            $this->generateButtonBlock(),
+            4,
+            'Standalone Button-Block für flexible Platzierung.'
+        );
 
         // 5.2 Akkordeon
-        $blocks[] = $this->generateHeading('Akkordeon (FAQ)', 4);
-        $blocks[] = $this->generateAccordionBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Akkordeon (FAQ)', $this->generateAccordionBlock(), 4);
 
         // 5.3 Tabs
-        $blocks[] = $this->generateHeading('Tabs', 4);
-        $blocks[] = $this->generateTabsBlock();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection('Tabs', $this->generateTabsBlock(), 4);
 
         // =====================================================================
         // TEIL 6: ACF BLÖCKE - KARTEN & INHALTE
         // =====================================================================
 
-        $blocks[] = $this->generateSeparator();
-        $blocks[] = $this->generateHeading('Karten & Inhalte');
-        $blocks[] = $this->generateParagraph('Blöcke zur Darstellung von Features, Team, Preisen und mehr.');
+        $blocks[] = $this->generateSection(
+            'Karten & Inhalte',
+            $this->generateParagraph('Blöcke zur Darstellung von Features, Team, Preisen und mehr.'),
+            2
+        );
 
         // 6.1 Karten / Features
-        $blocks[] = $this->generateHeading('Karten / Features', 4);
-        $blocks[] = $this->generateCardsBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Karten / Features', $this->generateCardsBlock(), 4);
 
         // 6.2 Kundenstimmen
-        $blocks[] = $this->generateHeading('Kundenstimmen', 4);
-        $blocks[] = $this->generateTestimonialsBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Kundenstimmen', $this->generateTestimonialsBlock(), 4);
 
         // 6.3 Team
-        $blocks[] = $this->generateHeading('Team', 4);
-        $blocks[] = $this->generateTeamBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Team', $this->generateTeamBlock(), 4);
 
         // 6.4 Statistiken
-        $blocks[] = $this->generateHeading('Statistiken', 4);
-        $blocks[] = $this->generateStatsBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Statistiken', $this->generateStatsBlock(), 4);
 
         // 6.5 Preistabelle
-        $blocks[] = $this->generateHeading('Preistabelle', 4);
-        $blocks[] = $this->generatePricingBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Preistabelle', $this->generatePricingBlock(), 4);
 
         // 6.6 Zeitstrahl
-        $blocks[] = $this->generateHeading('Zeitstrahl', 4);
-        $blocks[] = $this->generateTimelineBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Zeitstrahl', $this->generateTimelineBlock(), 4);
 
         // 6.7 Beiträge
-        $blocks[] = $this->generateHeading('Beiträge / Blog', 4);
-        $blocks[] = $this->generateParagraph('Zeigt automatisch die neuesten Beiträge an.');
-        $blocks[] = $this->generatePostsBlock();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection(
+            'Beiträge / Blog',
+            $this->generatePostsBlock(),
+            4,
+            'Zeigt automatisch die neuesten Beiträge an.'
+        );
 
         // =====================================================================
         // TEIL 7: ACF BLÖCKE - MEDIEN
         // =====================================================================
 
-        $blocks[] = $this->generateSeparator();
-        $blocks[] = $this->generateHeading('Medien');
-        $blocks[] = $this->generateParagraph('Blöcke für Bilder, Videos und Galerien.');
+        $blocks[] = $this->generateSection(
+            'Medien',
+            $this->generateParagraph('Blöcke für Bilder, Videos und Galerien.'),
+            2
+        );
 
         // 7.1 Bild
-        $blocks[] = $this->generateHeading('Bild', 4);
-        $blocks[] = $this->generateImageBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Bild', $this->generateImageBlock(), 4);
 
         // 7.2 Galerie
-        $blocks[] = $this->generateHeading('Galerie', 4);
-        $blocks[] = $this->generateGalleryBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Galerie', $this->generateGalleryBlock(), 4);
 
         // 7.3 Vorher/Nachher
-        $blocks[] = $this->generateHeading('Vorher/Nachher', 4);
-        $blocks[] = $this->generateBeforeAfterBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Vorher/Nachher', $this->generateBeforeAfterBlock(), 4);
 
         // 7.4 Video
-        $blocks[] = $this->generateHeading('Video', 4);
-        $blocks[] = $this->generateVideoBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection('Video', $this->generateVideoBlock(), 4);
 
         // 7.5 Logo-Slider
-        $blocks[] = $this->generateHeading('Logo-Slider', 4);
-        $blocks[] = $this->generateLogoSliderBlock();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection('Logo-Slider', $this->generateLogoSliderBlock(), 4);
 
         // =====================================================================
         // TEIL 8: ACF BLÖCKE - KONTAKT & STANDORT
         // =====================================================================
 
-        $blocks[] = $this->generateSeparator();
-        $blocks[] = $this->generateHeading('Kontakt & Standort');
-        $blocks[] = $this->generateParagraph('Blöcke für Kontaktformulare und Kartenansichten.');
+        $blocks[] = $this->generateSection(
+            'Kontakt & Standort',
+            $this->generateParagraph('Blöcke für Kontaktformulare und Kartenansichten.'),
+            2
+        );
 
         // 8.1 Kontaktformular
-        $blocks[] = $this->generateHeading('Kontaktformular', 4);
-        $blocks[] = $this->generateParagraph('Integration mit Contact Form 7. Zeigt Kontaktdaten aus den Theme-Optionen.');
-        $blocks[] = $this->generateContactFormBlock();
-        $blocks[] = $this->generateSpacer();
+        $blocks[] = $this->generateSection(
+            'Kontaktformular',
+            $this->generateContactFormBlock(),
+            4,
+            'Integration mit Contact Form 7. Zeigt Kontaktdaten aus den Theme-Optionen.'
+        );
 
         // 8.2 Karte
-        $blocks[] = $this->generateHeading('Google Maps Karte', 4);
-        $blocks[] = $this->generateParagraph('DSGVO-konform: Karte wird erst nach Zustimmung geladen.');
-        $blocks[] = $this->generateMapBlock();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection(
+            'Google Maps Karte',
+            $this->generateMapBlock(),
+            4,
+            'DSGVO-konform: Karte wird erst nach Zustimmung geladen.'
+        );
 
         // =====================================================================
         // TEIL 9: ACF BLÖCKE - CALL-TO-ACTION
         // =====================================================================
 
-        $blocks[] = $this->generateSeparator();
-        $blocks[] = $this->generateHeading('Call-to-Action');
-        $blocks[] = $this->generateParagraph('Auffällige Handlungsaufforderungen für wichtige Konversionen.');
+        $blocks[] = $this->generateSection(
+            'Call-to-Action',
+            $this->generateParagraph('Auffällige Handlungsaufforderungen für wichtige Konversionen.'),
+            2
+        );
 
         // 9.1 CTA Block
-        $blocks[] = $this->generateCtaBlock();
-        $blocks[] = $this->generateSpacer(60);
+        $blocks[] = $this->generateSection('CTA Block', $this->generateCtaBlock(), 4);
 
         // =====================================================================
         // TEIL 10: ACF BLÖCKE - DATEN & TABELLEN
         // =====================================================================
 
-        $blocks[] = $this->generateSeparator();
-        $blocks[] = $this->generateHeading('Daten & Tabellen');
-        $blocks[] = $this->generateParagraph('Strukturierte Darstellung von tabellarischen Daten.');
+        $blocks[] = $this->generateSection(
+            'Daten & Tabellen',
+            $this->generateParagraph('Strukturierte Darstellung von tabellarischen Daten.'),
+            2
+        );
 
         // 10.1 Tabelle
-        $blocks[] = $this->generateTableBlock();
+        $blocks[] = $this->generateSection('Tabelle', $this->generateTableBlock(), 4);
 
         return implode("\n\n", $blocks);
     }
@@ -889,16 +1000,22 @@ class WelcomeServiceProvider extends ServiceProvider
         $imageId = $this->getImageId(1);
 
         return $this->generateAcfBlock('hero', [
+            'variant' => 'background',
+            'badge' => 'Design System',
             'title' => 'Willkommen auf unserer Website',
-            'subtitle' => 'Ihr Partner für innovative Lösungen',
-            'content' => '<p>Wir bieten Ihnen maßgeschneiderte Lösungen für Ihre individuellen Anforderungen. Mit langjähriger Erfahrung und einem engagierten Team stehen wir Ihnen zur Seite.</p>',
+            'copy' => 'Wir bieten Ihnen maßgeschneiderte Lösungen für Ihre individuellen Anforderungen. Mit langjähriger Erfahrung und einem engagierten Team stehen wir Ihnen zur Seite.',
             'background_image' => $imageId,
-            'cta' => [
+            'overlay_opacity' => 70,
+            'cta_primary' => [
                 'title' => 'Mehr erfahren',
-                'url' => '#',
+                'url' => '#features',
                 'target' => '',
             ],
-            'background_color' => 'primary',
+            'cta_secondary' => [
+                'title' => 'Kontakt aufnehmen',
+                'url' => '#kontakt',
+                'target' => '',
+            ],
         ], ['align' => 'full']);
     }
 
@@ -1276,7 +1393,11 @@ class WelcomeServiceProvider extends ServiceProvider
         $imageId = $this->getImageId(1);
 
         return $this->generateAcfBlock('image', [
-            'image' => $imageId,
+            'image' => [
+                'ID' => $imageId,
+                'id' => $imageId,
+                'alt' => 'Beispielbild für den Styleguide',
+            ],
             'show_border' => true,
             'show_caption' => true,
             'background_color' => 'primary',
@@ -1779,46 +1900,56 @@ class WelcomeServiceProvider extends ServiceProvider
         $html .= '<span class="text-content-disabled underline underline-offset-2 cursor-not-allowed">Disabled Link</span>';
         $html .= '</div></div>';
 
-        // Icons
+        // Icons - using inline SVGs for reliable rendering
         $html .= '<div><h4 class="text-h4 mb-4 text-content">Icons</h4>';
         $html .= '<p class="text-body-small text-content-secondary mb-4">Verfügbare Icons aus <code class="text-code bg-surface-tertiary px-1 rounded">resources/icons/</code>. Icons erben die Textfarbe via <code class="text-code bg-surface-tertiary px-1 rounded">currentColor</code>.</p>';
         $html .= '<div class="grid grid-cols-4 md:grid-cols-8 gap-4 p-6 bg-surface-secondary rounded-lg">';
 
         $icons = [
-            'calendar' => 'Kalender',
-            'check' => 'Häkchen',
-            'chevron' => 'Pfeil',
-            'close' => 'Schließen',
-            'eye' => 'Auge',
-            'lock' => 'Schloss',
-            'mail' => 'E-Mail',
-            'minus' => 'Minus',
-            'phone' => 'Telefon',
-            'plus' => 'Plus',
-            'search' => 'Suche',
-            'user' => 'Benutzer',
-            'warning' => 'Warnung',
-            'facebook' => 'Facebook',
-            'instagram' => 'Instagram',
-            'linkedin' => 'LinkedIn',
-            'x' => 'X (Twitter)',
-            'xing' => 'Xing',
-            'youtube' => 'YouTube',
+            'calendar', 'check', 'chevron', 'chevron-up', 'chevron-down', 'chevron-left', 'chevron-right',
+            'close', 'eye', 'lock', 'mail', 'minus', 'phone', 'plus', 'search', 'user', 'warning',
+            'facebook', 'instagram', 'linkedin', 'x', 'xing', 'youtube',
         ];
 
-        foreach ($icons as $name => $label) {
+        $iconDir = get_template_directory() . '/resources/icons/';
+        foreach ($icons as $name) {
+            $iconPath = $iconDir . $name . '.svg';
+            $iconSvg = '';
+            if (file_exists($iconPath)) {
+                $iconSvg = file_get_contents($iconPath);
+                // Remove width/height and add classes
+                $iconSvg = preg_replace('/\s*(width|height)="[^"]*"/', '', $iconSvg);
+                $iconSvg = preg_replace(
+                    '/<svg/',
+                    '<svg class="w-6 h-6 inline-block shrink-0" aria-hidden="true"',
+                    $iconSvg,
+                    1
+                );
+            }
             $html .= sprintf(
-                '<div class="flex flex-col items-center gap-2 p-3"><svg class="w-6 h-6 text-content" aria-hidden="true"><use href="#icon-%s"></use></svg><span class="text-caption text-content-secondary">%s</span></div>',
-                esc_attr($name),
+                '<div class="flex flex-col items-center gap-2 p-3 text-icon-primary">%s<span class="text-caption text-content-secondary">%s</span></div>',
+                $iconSvg,
                 esc_html($name)
             );
         }
         $html .= '</div>';
+
+        // Icon color variants
         $html .= '<div class="flex flex-wrap items-center gap-6 p-6 mt-4 bg-surface-secondary rounded-lg">';
-        $html .= '<span class="flex items-center gap-2 text-content"><svg class="w-4 h-4"><use href="#icon-check"></use></svg> Icon mit Text</span>';
-        $html .= '<span class="flex items-center gap-2 text-content-success"><svg class="w-5 h-5"><use href="#icon-check"></use></svg> Success</span>';
-        $html .= '<span class="flex items-center gap-2 text-content-error"><svg class="w-5 h-5"><use href="#icon-warning"></use></svg> Error</span>';
-        $html .= '<span class="flex items-center gap-2 text-content-brand"><svg class="w-6 h-6"><use href="#icon-mail"></use></svg> Brand</span>';
+
+        // Helper to get inline SVG
+        $getIcon = function($name, $class = 'w-5 h-5') use ($iconDir) {
+            $path = $iconDir . $name . '.svg';
+            if (!file_exists($path)) return '';
+            $svg = file_get_contents($path);
+            $svg = preg_replace('/\s*(width|height)="[^"]*"/', '', $svg);
+            return preg_replace('/<svg/', '<svg class="' . $class . ' inline-block shrink-0" aria-hidden="true"', $svg, 1);
+        };
+
+        $html .= '<span class="flex items-center gap-2 text-icon-primary">' . $getIcon('check', 'w-4 h-4') . ' Icon mit Text</span>';
+        $html .= '<span class="flex items-center gap-2 text-icon-success">' . $getIcon('check') . ' Success</span>';
+        $html .= '<span class="flex items-center gap-2 text-icon-error">' . $getIcon('warning') . ' Error</span>';
+        $html .= '<span class="flex items-center gap-2 text-icon-brand">' . $getIcon('mail', 'w-6 h-6') . ' Brand</span>';
         $html .= '</div></div>';
 
         // Toggle
