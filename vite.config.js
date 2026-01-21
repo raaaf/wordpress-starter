@@ -32,12 +32,13 @@ export default defineConfig({
     rollupOptions: {
       input: {
         app: resolve(__dirname, 'resources/js/app.ts'),
+        'editor-js': resolve(__dirname, 'resources/js/editor.ts'),
         styles: resolve(__dirname, 'resources/css/app.css'),
         editor: resolve(__dirname, 'resources/css/editor-style.css'),
       },
       output: {
         manualChunks: {
-          vendor: ['alpinejs'],
+          vendor: ['alpinejs', '@alpinejs/collapse', 'medium-zoom'],
         },
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',

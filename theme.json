@@ -107,7 +107,6 @@
       "customFontSize": true,
       "dropCap": false,
       "fluid": true,
-      "fontWeight": true,
       "fontFamilies": [
         {
           "fontFamily": "var(--font-family-body, Inter), ui-sans-serif, system-ui, sans-serif",
@@ -252,8 +251,8 @@
       "units": ["%", "px", "em", "rem", "vh", "vw"]
     },
     "layout": {
-      "contentSize": "42rem",
-      "wideSize": "64rem"
+      "contentSize": "80rem",
+      "wideSize": "80rem"
     },
     "border": {
       "color": true,
