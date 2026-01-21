@@ -1389,10 +1389,10 @@ class WelcomeServiceProvider extends ServiceProvider
     {
         return $this->generateLayout('cta', [
             'title' => 'Bereit loszulegen?',
-            'content' => '<p>Kontaktieren Sie uns noch heute für ein unverbindliches Beratungsgespräch. Wir freuen uns darauf, gemeinsam mit Ihnen Ihre Ziele zu erreichen.</p>',
-            'cta' => [
+            'content' => 'Kontaktieren Sie uns noch heute für ein unverbindliches Beratungsgespräch. Wir freuen uns darauf, gemeinsam mit Ihnen Ihre Ziele zu erreichen.',
+            'button' => [
                 'title' => 'Jetzt Kontakt aufnehmen',
-                'url' => '#',
+                'url' => '#kontakt',
                 'target' => '',
             ],
             'background_color' => 'brand',
