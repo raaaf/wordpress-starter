@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80" fill="none">
+  <path d="M35 15L58 55H12L35 15Z" fill="#F59E0B"/>
+  <path d="M35 28L46 48H24L35 28Z" fill="white"/>
+  <text x="70" y="48" font-family="system-ui, sans-serif" font-size="24" font-weight="600" fill="#1F2937">Apex</text>
+</svg>

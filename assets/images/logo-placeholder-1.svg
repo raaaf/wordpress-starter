@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80" fill="none">
+  <rect x="10" y="15" width="50" height="50" rx="8" fill="#3B82F6"/>
+  <path d="M35 30L45 45H25L35 30Z" fill="white"/>
+  <circle cx="35" cy="50" r="5" fill="white"/>
+  <text x="70" y="48" font-family="system-ui, sans-serif" font-size="24" font-weight="600" fill="#1F2937">TechFlow</text>
+</svg>
