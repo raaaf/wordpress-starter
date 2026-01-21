@@ -914,6 +914,13 @@ class ThemeSetup
 
         echo "\n  Creating GitHub repository...\n";
 
+        // Remove old origin if it exists (e.g., from cloning the starter repo)
+        $existingOrigin = trim(shell_exec('git remote get-url origin 2>/dev/null') ?? '');
+        if (!empty($existingOrigin)) {
+            shell_exec('git remote remove origin 2>/dev/null');
+            echo "  " . $this->color("Removed old origin: {$existingOrigin}", 'gray') . "\n";
+        }
+
         $command = sprintf(
             'gh repo create %s --description %s --%s --source=. --remote=origin 2>&1',
             escapeshellarg($repoName),
@@ -1392,6 +1399,14 @@ CSS;
             return;
         }
 
+        // Don't offer to push to the starter template repo
+        if ($this->isStarterRepo($remoteUrl)) {
+            echo "\n  " . $this->color("⚠ Remote still points to starter template.", 'yellow') . "\n";
+            echo "  " . $this->color("Run setup again with Full mode to create your own repository,", 'gray') . "\n";
+            echo "  " . $this->color("or manually add a remote: git remote set-url origin <your-repo-url>", 'gray') . "\n";
+            return;
+        }
+
         echo "\n  " . $this->color("Remote found: ", 'gray') . $this->color($remoteUrl, 'cyan') . "\n";
 
         $doPush = strtolower($this->prompt(
@@ -1404,6 +1419,25 @@ CSS;
             $this->runCommand('Pushing to remote', 'git push -u origin HEAD');
             echo "\n  " . $this->color("✓ Pushed to remote repository.", 'green') . "\n";
         }
+    }
+
+    /**
+     * Check if a URL points to the starter template repository
+     */
+    private function isStarterRepo(string $url): bool
+    {
+        $starterPatterns = [
+            'raaaf/starter',
+            'github.com/raaaf/starter',
+        ];
+
+        foreach ($starterPatterns as $pattern) {
+            if (str_contains(strtolower($url), strtolower($pattern))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function createEnvFile(): void
