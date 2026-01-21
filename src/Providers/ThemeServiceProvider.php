@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WordpressStarter\Providers;
+namespace StiftungsNavigatorGmbH\Providers;
 
 class ThemeServiceProvider extends ServiceProvider
 {
@@ -23,6 +23,8 @@ class ThemeServiceProvider extends ServiceProvider
         $this->addFaviconSupport();
         $this->addLoginLogoSupport();
         $this->disableTexturizeForAlpine();
+        $this->syncAcfWithWordPress();
+        // Note: Editor style overrides removed - all ACF blocks are in edit mode (no preview rendering)
     }
 
     /**
@@ -189,9 +191,9 @@ class ThemeServiceProvider extends ServiceProvider
             add_theme_support('post-thumbnails');
             add_theme_support('align-wide');
             // Removed: wp-block-styles - we use Tailwind instead
-            add_theme_support('editor-styles');
-            // Note: Editor styles are loaded via Vite::enqueueEditorAssets() for proper font paths
-            // Note: editor-color-palette and editor-font-sizes are handled by theme.json
+            // Note: Editor styles removed - all ACF blocks use edit mode (no preview rendering)
+            // add_theme_support('editor-styles') and add_editor_style() are not needed
+            // ACF field UI styling is handled via inline CSS in Vite::enqueueEditorAssets()
         });
     }
 
@@ -748,4 +750,91 @@ class ThemeServiceProvider extends ServiceProvider
 
         return null;
     }
+
+    /**
+     * Sync ACF options with WordPress core settings
+     *
+     * When logo/favicon are set in ACF Theme Options, this syncs them to
+     * WordPress core settings so SEO plugins, social sharing, and other
+     * WordPress features use the correct images.
+     */
+    private function syncAcfWithWordPress(): void
+    {
+        // Sync on ACF options save
+        add_action('acf/save_post', function ($postId): void {
+            if ($postId !== 'options') {
+                return;
+            }
+
+            $this->syncLogoToWordPress();
+            $this->syncFaviconToWordPress();
+        }, 20);
+
+        // Also sync on init if values exist but aren't synced
+        add_action('init', function (): void {
+            if (!function_exists('get_field')) {
+                return;
+            }
+
+            // Only sync if ACF values exist but WordPress values don't match
+            $this->maybeInitialSync();
+        }, 20);
+    }
+
+    /**
+     * Sync ACF logo to WordPress custom_logo theme mod
+     */
+    private function syncLogoToWordPress(): void
+    {
+        if (!function_exists('get_field')) {
+            return;
+        }
+
+        $acfLogo = get_field('site_logo', 'option');
+
+        if ($acfLogo && !empty($acfLogo['ID'])) {
+            // Set the WordPress custom_logo to the ACF logo
+            set_theme_mod('custom_logo', $acfLogo['ID']);
+        }
+    }
+
+    /**
+     * Sync ACF favicon to WordPress site_icon option
+     */
+    private function syncFaviconToWordPress(): void
+    {
+        if (!function_exists('get_field')) {
+            return;
+        }
+
+        $faviconId = get_field('site_favicon', 'option');
+
+        if ($faviconId) {
+            // Set the WordPress site_icon to the ACF favicon
+            update_option('site_icon', $faviconId);
+        }
+    }
+
+    /**
+     * Initial sync if ACF values exist but WordPress values don't
+     */
+    private function maybeInitialSync(): void
+    {
+        // Sync logo if ACF has one but WordPress doesn't
+        $acfLogo = get_field('site_logo', 'option');
+        $wpLogo = get_theme_mod('custom_logo');
+
+        if ($acfLogo && !empty($acfLogo['ID']) && !$wpLogo) {
+            set_theme_mod('custom_logo', $acfLogo['ID']);
+        }
+
+        // Sync favicon if ACF has one but WordPress doesn't
+        $acfFavicon = get_field('site_favicon', 'option');
+        $wpSiteIcon = get_option('site_icon');
+
+        if ($acfFavicon && !$wpSiteIcon) {
+            update_option('site_icon', $acfFavicon);
+        }
+    }
+
 }
