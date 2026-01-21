@@ -1,17 +1,20 @@
 {
-    "name": "acf/team",
+    "name": "team",
     "title": "Team",
     "description": "Teammitglieder mit Foto, Name und Position anzeigen",
-    "category": "starter-blocks",
+    "category": "theme",
     "icon": "groups",
     "keywords": ["team", "mitarbeiter", "personen", "staff", "mitglieder"],
-    "acf": {
-        "mode": "preview",
-        "renderTemplate": "blocks/team/template.blade.php"
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
     },
     "supports": {
         "align": ["wide", "full"],
-        "anchor": true,
-        "jsx": true
+        "mode": true,
+        "jsx": true,
+        "anchor": true
     }
 }

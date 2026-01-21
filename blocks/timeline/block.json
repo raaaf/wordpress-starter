@@ -1,17 +1,20 @@
 {
-    "name": "acf/timeline",
+    "name": "timeline",
     "title": "Zeitstrahl",
     "description": "Chronologische Darstellung von Ereignissen oder Prozessschritten",
-    "category": "starter-blocks",
+    "category": "theme",
     "icon": "backup",
     "keywords": ["timeline", "zeitstrahl", "historie", "prozess", "schritte"],
-    "acf": {
-        "mode": "preview",
-        "renderTemplate": "blocks/timeline/template.blade.php"
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
     },
     "supports": {
         "align": ["wide", "full"],
-        "anchor": true,
-        "jsx": true
+        "mode": true,
+        "jsx": true,
+        "anchor": true
     }
 }

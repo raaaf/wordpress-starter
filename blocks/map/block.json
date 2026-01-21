@@ -5,6 +5,12 @@
     "category": "theme",
     "icon": "location-alt",
     "keywords": ["map", "karte", "google", "standort", "location"],
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
+    },
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

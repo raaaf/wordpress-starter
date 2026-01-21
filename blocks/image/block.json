@@ -5,6 +5,12 @@
     "category": "theme",
     "icon": "format-image",
     "keywords": ["bild", "foto", "grafik", "image", "picture"],
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
+    },
     "supports": {
         "align": ["full", "wide", "center"],
         "mode": true,

@@ -5,6 +5,12 @@
     "category": "theme",
     "icon": "cover-image",
     "keywords": ["hero", "banner", "header", "kopfbereich", "titelbild"],
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
+    },
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

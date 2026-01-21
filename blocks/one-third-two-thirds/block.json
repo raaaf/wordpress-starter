@@ -5,6 +5,12 @@
     "category": "theme",
     "icon": "align-left",
     "keywords": ["spalten", "layout", "asymmetrisch", "drittel", "columns"],
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
+    },
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

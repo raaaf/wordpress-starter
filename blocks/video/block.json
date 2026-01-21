@@ -5,6 +5,12 @@
     "category": "theme",
     "icon": "video-alt3",
     "keywords": ["video", "media", "youtube", "vimeo", "film"],
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
+    },
     "supports": {
         "align": ["full", "wide", "center"],
         "mode": true,

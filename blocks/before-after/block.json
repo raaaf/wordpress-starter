@@ -1,17 +1,20 @@
 {
-    "name": "acf/before-after",
+    "name": "before-after",
     "title": "Vorher/Nachher",
     "description": "Bildvergleichs-Slider für Vorher/Nachher-Ansichten",
-    "category": "starter-blocks",
+    "category": "theme",
     "icon": "image-flip-horizontal",
     "keywords": ["before", "after", "vorher", "nachher", "vergleich", "slider"],
-    "acf": {
-        "mode": "preview",
-        "renderTemplate": "blocks/before-after/template.blade.php"
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
     },
     "supports": {
         "align": ["wide", "full"],
-        "anchor": true,
-        "jsx": true
+        "mode": true,
+        "jsx": true,
+        "anchor": true
     }
 }

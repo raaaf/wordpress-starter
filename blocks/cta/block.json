@@ -5,6 +5,12 @@
     "category": "theme",
     "icon": "megaphone",
     "keywords": ["cta", "handlungsaufforderung", "button", "aktion", "call to action"],
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
+    },
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

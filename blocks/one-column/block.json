@@ -5,6 +5,12 @@
     "category": "theme",
     "icon": "align-center",
     "keywords": ["spalte", "inhalt", "text", "zentriert", "column"],
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
+    },
     "supports": {
         "align": ["full", "wide"],
         "mode": true,

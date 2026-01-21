@@ -1,17 +1,20 @@
 {
-    "name": "acf/table",
+    "name": "table",
     "title": "Tabelle",
     "description": "Datentabelle mit anpassbarem Styling",
-    "category": "starter-blocks",
+    "category": "theme",
     "icon": "editor-table",
     "keywords": ["table", "tabelle", "daten", "liste", "übersicht"],
-    "acf": {
-        "mode": "preview",
-        "renderTemplate": "blocks/table/template.blade.php"
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
     },
     "supports": {
         "align": ["wide", "full"],
-        "anchor": true,
-        "jsx": true
+        "mode": true,
+        "jsx": true,
+        "anchor": true
     }
 }

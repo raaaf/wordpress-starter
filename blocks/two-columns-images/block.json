@@ -5,6 +5,12 @@
     "category": "theme",
     "icon": "format-gallery",
     "keywords": ["spalten", "bilder", "layout", "galerie", "columns"],
+    "attributes": {
+        "align": {
+            "type": "string",
+            "default": "full"
+        }
+    },
     "supports": {
         "align": ["full", "wide"],
         "mode": true,
