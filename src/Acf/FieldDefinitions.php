@@ -27,6 +27,32 @@ class FieldDefinitions
     ];
 
     /**
+     * Theme icon choices from resources/icons/
+     */
+    public const THEME_ICONS = [
+        '' => '— Kein Icon —',
+        'calendar' => 'Kalender',
+        'check' => 'Häkchen',
+        'chevron' => 'Pfeil',
+        'close' => 'Schließen',
+        'eye' => 'Auge',
+        'lock' => 'Schloss',
+        'mail' => 'E-Mail',
+        'minus' => 'Minus',
+        'phone' => 'Telefon',
+        'plus' => 'Plus',
+        'search' => 'Suche',
+        'user' => 'Person',
+        'warning' => 'Warnung',
+        'facebook' => 'Facebook',
+        'instagram' => 'Instagram',
+        'linkedin' => 'LinkedIn',
+        'x' => 'X (Twitter)',
+        'xing' => 'Xing',
+        'youtube' => 'YouTube',
+    ];
+
+    /**
      * Get background color field definition
      *
      * @param string $prefix Unique prefix for the field key
@@ -128,8 +154,9 @@ class FieldDefinitions
      * @param string $name Field name
      * @param bool $required Whether field is required
      * @param string $returnFormat Return format (id, array, url)
-     * @param string|null $width Wrapper width percentage
+     * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
      * @param string $instructions Field instructions
+     * @param string|null $width Wrapper width percentage
      * @return array<string, mixed>
      */
     public static function imageField(
@@ -138,8 +165,9 @@ class FieldDefinitions
         string $name,
         bool $required = false,
         string $returnFormat = 'array',
-        ?string $width = null,
-        string $instructions = ''
+        ?array $conditionalLogic = null,
+        string $instructions = '',
+        ?string $width = null
     ): array {
         $field = [
             'key' => $key,
@@ -152,6 +180,10 @@ class FieldDefinitions
             'preview_size' => 'medium',
             'library' => 'all',
         ];
+
+        if ($conditionalLogic !== null) {
+            $field['conditional_logic'] = $conditionalLogic;
+        }
 
         if ($width !== null) {
             $field['wrapper'] = ['width' => $width];
@@ -261,6 +293,77 @@ class FieldDefinitions
     }
 
     /**
+     * Get button group field definition
+     *
+     * @param string $key Unique field key
+     * @param string $label Field label
+     * @param string $name Field name
+     * @param array<string, string> $choices Choices array (value => label)
+     * @param string $defaultValue Default selected value
+     * @param string $instructions Field instructions
+     * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
+     * @return array<string, mixed>
+     */
+    public static function buttonGroupField(
+        string $key,
+        string $label,
+        string $name,
+        array $choices,
+        string $defaultValue = '',
+        string $instructions = '',
+        ?array $conditionalLogic = null
+    ): array {
+        $field = [
+            'key' => $key,
+            'label' => $label,
+            'name' => $name,
+            'type' => 'button_group',
+            'instructions' => $instructions,
+            'choices' => $choices,
+            'default_value' => $defaultValue,
+            'return_format' => 'value',
+            'layout' => 'horizontal',
+        ];
+
+        if ($conditionalLogic !== null) {
+            $field['conditional_logic'] = $conditionalLogic;
+        }
+
+        return $field;
+    }
+
+    /**
+     * Get icon radio field definition (horizontal layout with icon previews)
+     *
+     * @param string $key Unique field key
+     * @param string $label Field label
+     * @param string $name Field name
+     * @param string $instructions Field instructions
+     * @return array<string, mixed>
+     */
+    public static function iconRadioField(
+        string $key,
+        string $label,
+        string $name,
+        string $instructions = ''
+    ): array {
+        return [
+            'key' => $key,
+            'label' => $label,
+            'name' => $name,
+            'type' => 'radio',
+            'instructions' => $instructions,
+            'choices' => self::THEME_ICONS,
+            'default_value' => '',
+            'layout' => 'horizontal',
+            'return_format' => 'value',
+            'wrapper' => [
+                'class' => 'acf-icon-radio-field',
+            ],
+        ];
+    }
+
+    /**
      * Get file field definition
      *
      * @param string $key Unique field key
@@ -331,6 +434,136 @@ class FieldDefinitions
     }
 
     /**
+     * Get tab field definition for grouping fields
+     *
+     * @param string $key Unique field key
+     * @param string $label Tab label
+     * @param string $placement Tab placement (top or left)
+     * @return array<string, mixed>
+     */
+    public static function tabField(
+        string $key,
+        string $label,
+        string $placement = 'top'
+    ): array {
+        return [
+            'key' => $key,
+            'label' => $label,
+            'type' => 'tab',
+            'placement' => $placement,
+            'endpoint' => 0,
+        ];
+    }
+
+    /**
+     * Get message field definition for displaying help text
+     *
+     * @param string $key Unique field key
+     * @param string $message The message content (HTML allowed)
+     * @param string $label Optional label above the message
+     * @return array<string, mixed>
+     */
+    public static function messageField(
+        string $key,
+        string $message,
+        string $label = ''
+    ): array {
+        return [
+            'key' => $key,
+            'label' => $label,
+            'type' => 'message',
+            'message' => $message,
+            'new_lines' => 'wpautop',
+            'esc_html' => 0,
+        ];
+    }
+
+    /**
+     * Get styled info box field for contextual help messages
+     *
+     * @param string $key Unique field key
+     * @param string $message The message content (HTML allowed)
+     * @param string $type Box type: info, success, warning, tip
+     * @return array<string, mixed>
+     */
+    public static function infoBoxField(
+        string $key,
+        string $message,
+        string $type = 'info'
+    ): array {
+        $icons = [
+            'info' => 'dashicons-info',
+            'success' => 'dashicons-yes-alt',
+            'warning' => 'dashicons-warning',
+            'tip' => 'dashicons-lightbulb',
+        ];
+
+        $colors = [
+            'info' => '#0073aa',
+            'success' => '#00a32a',
+            'warning' => '#dba617',
+            'tip' => '#8c5ed5',
+        ];
+
+        $bgColors = [
+            'info' => '#f0f6fc',
+            'success' => '#edfaef',
+            'warning' => '#fcf9e8',
+            'tip' => '#f5f0fa',
+        ];
+
+        $icon = $icons[$type] ?? $icons['info'];
+        $color = $colors[$type] ?? $colors['info'];
+        $bgColor = $bgColors[$type] ?? $bgColors['info'];
+
+        return [
+            'key' => $key,
+            'label' => '',
+            'type' => 'message',
+            'message' => sprintf(
+                '<div style="display: flex; align-items: flex-start; gap: 12px; padding: 16px; background: %s; border-radius: 6px; border-left: 4px solid %s;">
+                    <span class="dashicons %s" style="color: %s; margin-top: 2px;"></span>
+                    <div style="flex: 1;">%s</div>
+                </div>',
+                $bgColor,
+                $color,
+                $icon,
+                $color,
+                $message
+            ),
+            'new_lines' => '',
+            'esc_html' => 0,
+        ];
+    }
+
+    /**
+     * Get accordion field definition for collapsible sections inside repeaters
+     *
+     * @param string $key Unique field key
+     * @param string $label Accordion section label
+     * @param bool $open Whether the accordion is open by default
+     * @param bool $multiExpand Allow multiple sections to be open at once
+     * @param bool $endpoint Whether this is an endpoint (closes previous accordion)
+     * @return array<string, mixed>
+     */
+    public static function accordionField(
+        string $key,
+        string $label,
+        bool $open = false,
+        bool $multiExpand = true,
+        bool $endpoint = false
+    ): array {
+        return [
+            'key' => $key,
+            'label' => $label,
+            'type' => 'accordion',
+            'open' => $open ? 1 : 0,
+            'multi_expand' => $multiExpand ? 1 : 0,
+            'endpoint' => $endpoint ? 1 : 0,
+        ];
+    }
+
+    /**
      * Get number field definition
      *
      * @param string $key Unique field key
@@ -369,6 +602,56 @@ class FieldDefinitions
 
         if ($append !== '') {
             $field['append'] = $append;
+        }
+
+        return $field;
+    }
+
+    /**
+     * Get range slider field definition
+     *
+     * @param string $key Unique field key
+     * @param string $label Field label
+     * @param string $name Field name
+     * @param int $min Minimum value
+     * @param int $max Maximum value
+     * @param int $step Step increment
+     * @param int $defaultValue Default value
+     * @param string $instructions Field instructions
+     * @param string $append Text to append (e.g., '%')
+     * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
+     * @return array<string, mixed>
+     */
+    public static function rangeField(
+        string $key,
+        string $label,
+        string $name,
+        int $min = 0,
+        int $max = 100,
+        int $step = 1,
+        int $defaultValue = 50,
+        string $instructions = '',
+        string $append = '',
+        ?array $conditionalLogic = null
+    ): array {
+        $field = [
+            'key' => $key,
+            'label' => $label,
+            'name' => $name,
+            'type' => 'range',
+            'instructions' => $instructions,
+            'default_value' => $defaultValue,
+            'min' => $min,
+            'max' => $max,
+            'step' => $step,
+        ];
+
+        if ($append !== '') {
+            $field['append'] = $append;
+        }
+
+        if ($conditionalLogic !== null) {
+            $field['conditional_logic'] = $conditionalLogic;
         }
 
         return $field;
@@ -512,14 +795,75 @@ class FieldDefinitions
     // =========================================================================
 
     /**
-     * Get Hero layout fields
+     * Get Hero layout fields with 3 variants: centered, split, background
      *
      * @param string $prefix Key prefix (e.g., 'hero' or 'block_hero')
      * @return array<int, array<string, mixed>>
      */
     public static function heroFields(string $prefix): array
     {
+        // Conditional logic helpers
+        $showOnSplit = [
+            [
+                [
+                    'field' => "field_{$prefix}_variant",
+                    'operator' => '==',
+                    'value' => 'split',
+                ],
+            ],
+        ];
+
+        $showOnBackground = [
+            [
+                [
+                    'field' => "field_{$prefix}_variant",
+                    'operator' => '==',
+                    'value' => 'background',
+                ],
+            ],
+        ];
+
+        $showOnCenteredOrSplit = [
+            [
+                [
+                    'field' => "field_{$prefix}_variant",
+                    'operator' => '==',
+                    'value' => 'centered',
+                ],
+            ],
+            [
+                [
+                    'field' => "field_{$prefix}_variant",
+                    'operator' => '==',
+                    'value' => 'split',
+                ],
+            ],
+        ];
+
         return [
+            // Variante (bestimmt welche Felder sichtbar sind)
+            self::buttonGroupField(
+                "field_{$prefix}_variant",
+                'Variante',
+                'variant',
+                [
+                    'centered' => 'Zentriert',
+                    'split' => 'Geteilt',
+                    'background' => 'Hintergrund',
+                ],
+                'centered',
+                'Wähle das Layout für den Hero-Bereich.'
+            ),
+
+            // Inhalt
+            self::textField(
+                "field_{$prefix}_badge",
+                'Badge',
+                'badge',
+                false,
+                'Optionaler Badge-Text über der Überschrift.',
+                'z.B. NEU, Coming Soon...'
+            ),
             self::textField(
                 "field_{$prefix}_title",
                 'Überschrift',
@@ -528,39 +872,92 @@ class FieldDefinitions
                 'Die Hauptüberschrift des Hero-Bereichs.',
                 'z.B. Willkommen bei...'
             ),
-            self::textField(
-                "field_{$prefix}_subtitle",
-                'Unterüberschrift',
-                'subtitle',
-                false,
-                'Optionale Unterüberschrift oder Slogan.',
-                'z.B. Ihr Partner für...'
+            self::textareaField(
+                "field_{$prefix}_copy",
+                'Copy',
+                'copy',
+                3,
+                'Kurzer Beschreibungstext unter der Überschrift.',
+                'z.B. Wir helfen Ihnen...'
             ),
-            self::wysiwygField(
-                "field_{$prefix}_content",
-                'Inhalt',
-                'content',
+
+            // Buttons (nebeneinander)
+            [
+                'key' => "field_{$prefix}_cta_primary",
+                'label' => 'Primärer Button',
+                'name' => 'cta_primary',
+                'type' => 'link',
+                'instructions' => 'Haupt-Button (orange, auffällig).',
+                'required' => 0,
+                'return_format' => 'array',
+                'wrapper' => ['width' => '50'],
+            ],
+            [
+                'key' => "field_{$prefix}_cta_secondary",
+                'label' => 'Sekundärer Button',
+                'name' => 'cta_secondary',
+                'type' => 'link',
+                'instructions' => 'Zweiter Button (dezent, Outline-Stil).',
+                'required' => 0,
+                'return_format' => 'array',
+                'wrapper' => ['width' => '50'],
+            ],
+
+            // Bild (nur bei Split-Variante)
+            self::imageField(
+                "field_{$prefix}_image",
+                'Bild',
+                'image',
                 false,
-                null,
-                'Optionaler Fließtext unter der Überschrift.'
+                'array',
+                $showOnSplit,
+                'Empfohlene Größe: mindestens 960×800 Pixel (6:5).'
             ),
+
+            // Hintergrundbild (nur bei Background-Variante)
             self::imageField(
                 "field_{$prefix}_background_image",
                 'Hintergrundbild',
                 'background_image',
                 false,
                 'array',
-                null,
-                'Empfohlene Größe: mindestens 1920x800 Pixel.'
+                $showOnBackground,
+                'Empfohlene Größe: mindestens 1920×1080 Pixel (16:9).'
             ),
-            self::linkField(
-                "field_{$prefix}_cta",
-                'Call-to-Action Button',
-                'cta',
-                false,
-                'Link und Text für den Haupt-Button.'
+
+            // Overlay-Transparenz (nur bei Background-Variante)
+            self::rangeField(
+                "field_{$prefix}_overlay_opacity",
+                'Overlay-Transparenz',
+                'overlay_opacity',
+                0,
+                100,
+                5,
+                80,
+                '0% = transparent, 100% = vollständig deckend.',
+                '%',
+                $showOnBackground
             ),
-            self::backgroundColorField($prefix),
+
+            // Hintergrundfarbe (nur bei Centered und Split)
+            [
+                'key' => "field_{$prefix}_background_color",
+                'label' => 'Hintergrundfarbe',
+                'name' => 'background_color',
+                'type' => 'select',
+                'instructions' => 'Wähle eine Hintergrundfarbe für den Hero-Bereich.',
+                'choices' => [
+                    'primary' => 'Standard (Weiß)',
+                    'secondary' => 'Sekundär (Hellgrau)',
+                    'tertiary' => 'Tertiär',
+                    'brand' => 'Markenfarbe',
+                    'brand-subtle' => 'Markenfarbe Dezent',
+                    'inverse' => 'Dunkel (Invers)',
+                ],
+                'default_value' => 'primary',
+                'ui' => 1,
+                'conditional_logic' => $showOnCenteredOrSplit,
+            ],
         ];
     }
 
@@ -689,6 +1086,12 @@ class FieldDefinitions
                 'Accordion-Einträge',
                 'accordion',
                 [
+                    self::iconRadioField(
+                        "field_{$prefix}_accordion_icon",
+                        'Icon',
+                        'icon',
+                        'Optionales Icon vor dem Titel.'
+                    ),
                     self::textField(
                         "field_{$prefix}_accordion_title",
                         'Titel',
@@ -812,16 +1215,15 @@ class FieldDefinitions
     public static function videoFields(string $prefix): array
     {
         return [
-            self::selectField(
+            self::buttonGroupField(
                 "field_{$prefix}_source",
                 'Video-Quelle',
                 'source',
                 [
-                    'wordpress' => 'Mediathek (selbst gehostet)',
+                    'wordpress' => 'Mediathek',
                     'external' => 'YouTube / Vimeo',
                 ],
                 'wordpress',
-                true,
                 'Wähle, woher das Video kommt.'
             ),
             self::fileField(
@@ -872,20 +1274,26 @@ class FieldDefinitions
                 null,
                 'Das anzuzeigende Bild.'
             ),
-            self::trueFalseField(
-                "field_{$prefix}_show_border",
-                'Rahmen anzeigen',
-                'show_border',
-                true,
-                'Zeigt einen dezenten Rahmen um das Bild.'
-            ),
-            self::trueFalseField(
-                "field_{$prefix}_show_caption",
-                'Bildunterschrift anzeigen',
-                'show_caption',
-                true,
-                'Zeigt die in der Mediathek hinterlegte Bildunterschrift.'
-            ),
+            [
+                'key' => "field_{$prefix}_show_border",
+                'label' => 'Rahmen anzeigen',
+                'name' => 'show_border',
+                'type' => 'true_false',
+                'instructions' => 'Zeigt einen dezenten Rahmen um das Bild.',
+                'default_value' => 1,
+                'ui' => 1,
+                'wrapper' => ['width' => '50'],
+            ],
+            [
+                'key' => "field_{$prefix}_show_caption",
+                'label' => 'Bildunterschrift anzeigen',
+                'name' => 'show_caption',
+                'type' => 'true_false',
+                'instructions' => 'Zeigt die in der Mediathek hinterlegte Bildunterschrift.',
+                'default_value' => 1,
+                'ui' => 1,
+                'wrapper' => ['width' => '50'],
+            ],
             self::backgroundColorField($prefix),
         ];
     }
@@ -899,7 +1307,18 @@ class FieldDefinitions
     public static function dividerFields(string $prefix): array
     {
         return [
-            self::backgroundColorField($prefix),
+            self::buttonGroupField(
+                "field_{$prefix}_variant",
+                'Variante',
+                'variant',
+                [
+                    'line' => 'Linie',
+                    'logo' => 'Mit Logo',
+                    'dots' => 'Punkte',
+                ],
+                'line',
+                'Wähle das Aussehen des Trenners.'
+            ),
         ];
     }
 
@@ -976,8 +1395,9 @@ class FieldDefinitions
                 'image_1',
                 true,
                 'id',
-                '50',
-                'Bild für die linke Karte.'
+                null,
+                'Bild für die linke Karte.',
+                '50'
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_1",
@@ -993,8 +1413,9 @@ class FieldDefinitions
                 'image_2',
                 true,
                 'id',
-                '50',
-                'Bild für die rechte Karte.'
+                null,
+                'Bild für die rechte Karte.',
+                '50'
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
@@ -1073,17 +1494,16 @@ class FieldDefinitions
                 'block',
                 'Füge Kundenstimmen und Bewertungen hinzu.'
             ),
-            self::selectField(
+            self::buttonGroupField(
                 "field_{$prefix}_columns",
                 'Spalten',
                 'columns',
                 [
-                    '1' => '1 Spalte',
-                    '2' => '2 Spalten',
-                    '3' => '3 Spalten',
+                    '1' => '1',
+                    '2' => '2',
+                    '3' => '3',
                 ],
                 '3',
-                false,
                 'Anzahl der Spalten für die Darstellung.'
             ),
             self::backgroundColorField($prefix),
@@ -1112,14 +1532,11 @@ class FieldDefinitions
                 'Karten',
                 'cards',
                 [
-                    self::imageField(
+                    self::iconRadioField(
                         "field_{$prefix}_card_icon",
                         'Icon',
                         'icon',
-                        false,
-                        'id',
-                        null,
-                        'Icon oder kleines Bild für die Karte.'
+                        'Wähle ein Icon aus dem Theme.'
                     ),
                     self::textField(
                         "field_{$prefix}_card_title",
@@ -1150,17 +1567,16 @@ class FieldDefinitions
                 'block',
                 'Füge beliebig viele Karten hinzu.'
             ),
-            self::selectField(
+            self::buttonGroupField(
                 "field_{$prefix}_columns",
                 'Spalten',
                 'columns',
                 [
-                    '2' => '2 Spalten',
-                    '3' => '3 Spalten',
-                    '4' => '4 Spalten',
+                    '2' => '2',
+                    '3' => '3',
+                    '4' => '4',
                 ],
                 '3',
-                false,
                 'Anzahl der Spalten für die Darstellung.'
             ),
             self::backgroundColorField($prefix),
@@ -1196,18 +1612,17 @@ class FieldDefinitions
                 'library' => 'all',
                 'min' => 1,
             ],
-            self::selectField(
+            self::buttonGroupField(
                 "field_{$prefix}_columns",
                 'Spalten',
                 'columns',
                 [
-                    '2' => '2 Spalten',
-                    '3' => '3 Spalten',
-                    '4' => '4 Spalten',
-                    '5' => '5 Spalten',
+                    '2' => '2',
+                    '3' => '3',
+                    '4' => '4',
+                    '5' => '5',
                 ],
                 '3',
-                false,
                 'Anzahl der Spalten für die Darstellung.'
             ),
             self::backgroundColorField($prefix),
@@ -1287,6 +1702,24 @@ class FieldDefinitions
     public static function contactFormFields(string $prefix): array
     {
         return [
+            // Tab: Formular
+            self::tabField("field_{$prefix}_tab_form", 'Formular'),
+            self::messageField(
+                "field_{$prefix}_form_help",
+                '<strong>So findest du die Formular-ID:</strong><br>1) Gehe zu <em>Formulare</em> im Menü<br>2) Wähle dein Formular aus<br>3) Die ID steht in der URL (z.B. post=<strong>123</strong>) oder im Shortcode'
+            ),
+            [
+                'key' => "field_{$prefix}_form_id",
+                'label' => 'Formular-ID',
+                'name' => 'form_id',
+                'type' => 'text',
+                'instructions' => 'Trage nur die Zahl ein.',
+                'placeholder' => 'z.B. 123',
+                'required' => 1,
+            ],
+
+            // Tab: Inhalt
+            self::tabField("field_{$prefix}_tab_content", 'Inhalt'),
             self::textField(
                 "field_{$prefix}_title",
                 'Überschrift',
@@ -1303,14 +1736,9 @@ class FieldDefinitions
                 null,
                 'Optionaler Text über dem Formular.'
             ),
-            self::textField(
-                "field_{$prefix}_form_id",
-                'Formular-ID',
-                'form_id',
-                true,
-                'So findest du die ID: Gehe zu Formulare → wähle dein Formular → die ID steht in der URL (z.B. post=123) oder im Shortcode [contact-form-7 id="123"]. Trage nur die Zahl ein.',
-                'z.B. 123'
-            ),
+
+            // Tab: Optionen
+            self::tabField("field_{$prefix}_tab_options", 'Optionen'),
             self::trueFalseField(
                 "field_{$prefix}_show_contact_info",
                 'Kontaktdaten anzeigen',
@@ -1331,6 +1759,34 @@ class FieldDefinitions
     public static function mapFields(string $prefix): array
     {
         return [
+            // Tab: Karte
+            self::tabField("field_{$prefix}_tab_map", 'Karte'),
+            self::messageField(
+                "field_{$prefix}_map_help",
+                '<strong>So bekommst du die Einbettungs-URL:</strong><br>1) Öffne <a href="https://maps.google.com" target="_blank">Google Maps</a><br>2) Suche deinen Standort<br>3) Klicke auf "Teilen" → "Karte einbetten"<br>4) Kopiere die URL aus dem HTML-Code (beginnt mit https://www.google.com/maps/embed)'
+            ),
+            self::urlField(
+                "field_{$prefix}_embed_url",
+                'Google Maps Einbettungs-URL',
+                'embed_url',
+                'Der Block zeigt automatisch einen DSGVO-Hinweis.',
+                null,
+                'https://www.google.com/maps/embed?pb=...'
+            ),
+            self::numberField(
+                "field_{$prefix}_height",
+                'Höhe',
+                'height',
+                400,
+                200,
+                800,
+                50,
+                'px',
+                'Höhe der Karte in Pixeln.'
+            ),
+
+            // Tab: Inhalt
+            self::tabField("field_{$prefix}_tab_content", 'Inhalt'),
             self::textField(
                 "field_{$prefix}_title",
                 'Überschrift',
@@ -1347,25 +1803,6 @@ class FieldDefinitions
                 'Die vollständige Adresse (für den "Route planen" Link).',
                 'Musterstraße 123, 12345 Musterstadt'
             ),
-            self::urlField(
-                "field_{$prefix}_embed_url",
-                'Google Maps Einbettungs-URL',
-                'embed_url',
-                'So geht\'s: 1) Google Maps öffnen 2) Standort suchen 3) Auf "Teilen" klicken 4) "Karte einbetten" wählen 5) Die URL aus dem HTML-Code kopieren (beginnt mit https://www.google.com/maps/embed). Der Block zeigt automatisch einen DSGVO-Hinweis.',
-                null,
-                'https://www.google.com/maps/embed?pb=...'
-            ),
-            self::numberField(
-                "field_{$prefix}_height",
-                'Höhe',
-                'height',
-                400,
-                200,
-                800,
-                50,
-                'px',
-                'Höhe der Karte in Pixeln.'
-            ),
             self::trueFalseField(
                 "field_{$prefix}_show_directions_link",
                 '"Route planen" Link anzeigen',
@@ -1373,6 +1810,9 @@ class FieldDefinitions
                 true,
                 'Zeigt einen Link zum Planen der Route an.'
             ),
+
+            // Tab: Darstellung
+            self::tabField("field_{$prefix}_tab_style", 'Darstellung'),
             self::backgroundColorField($prefix),
         ];
     }
@@ -1399,6 +1839,12 @@ class FieldDefinitions
                 'Tabs',
                 'tabs',
                 [
+                    self::iconRadioField(
+                        "field_{$prefix}_tab_icon",
+                        'Icon',
+                        'icon',
+                        'Optionales Icon neben dem Tab-Titel.'
+                    ),
                     self::textField(
                         "field_{$prefix}_tab_title",
                         'Tab-Titel',
@@ -1451,30 +1897,46 @@ class FieldDefinitions
                 'Preispakete',
                 'plans',
                 [
-                    self::textField(
-                        "field_{$prefix}_plan_name",
-                        'Paketname',
-                        'name',
-                        true,
-                        'Name des Pakets.',
-                        'z.B. Basic, Professional, Enterprise'
-                    ),
-                    self::textField(
-                        "field_{$prefix}_plan_price",
-                        'Preis',
-                        'price',
-                        true,
-                        'Der Preis inkl. Währung.',
-                        'z.B. 49€, 199€, Auf Anfrage'
-                    ),
-                    self::textField(
-                        "field_{$prefix}_plan_period",
-                        'Zeitraum',
-                        'period',
+                    // Accordion: Preis (offen)
+                    self::accordionField("field_{$prefix}_acc_price", 'Preis', true),
+                    [
+                        'key' => "field_{$prefix}_plan_name",
+                        'label' => 'Paketname',
+                        'name' => 'name',
+                        'type' => 'text',
+                        'instructions' => 'Name des Pakets.',
+                        'placeholder' => 'z.B. Basic, Professional',
+                        'required' => 1,
+                        'wrapper' => ['width' => '40'],
+                    ],
+                    [
+                        'key' => "field_{$prefix}_plan_price",
+                        'label' => 'Preis',
+                        'name' => 'price',
+                        'type' => 'text',
+                        'instructions' => 'Der Preis inkl. Währung.',
+                        'placeholder' => 'z.B. 49€',
+                        'required' => 1,
+                        'wrapper' => ['width' => '30'],
+                    ],
+                    [
+                        'key' => "field_{$prefix}_plan_period",
+                        'label' => 'Zeitraum',
+                        'name' => 'period',
+                        'type' => 'text',
+                        'instructions' => 'Abrechnungszeitraum.',
+                        'placeholder' => 'z.B. / Monat',
+                        'wrapper' => ['width' => '30'],
+                    ],
+                    self::trueFalseField(
+                        "field_{$prefix}_plan_featured",
+                        'Hervorheben',
+                        'is_featured',
                         false,
-                        'Der Abrechnungszeitraum.',
-                        'z.B. Monat, Jahr, einmalig'
+                        'Dieses Paket als "Empfohlen" hervorheben.'
                     ),
+                    // Accordion: Leistungen
+                    self::accordionField("field_{$prefix}_acc_features", 'Leistungen'),
                     self::wysiwygField(
                         "field_{$prefix}_plan_features",
                         'Leistungen',
@@ -1483,6 +1945,8 @@ class FieldDefinitions
                         null,
                         'Liste der enthaltenen Leistungen (als Aufzählung).'
                     ),
+                    // Accordion: Aktion
+                    self::accordionField("field_{$prefix}_acc_cta", 'Aktion'),
                     self::linkField(
                         "field_{$prefix}_plan_cta",
                         'Button',
@@ -1490,13 +1954,8 @@ class FieldDefinitions
                         false,
                         'Call-to-Action Button für dieses Paket.'
                     ),
-                    self::trueFalseField(
-                        "field_{$prefix}_plan_featured",
-                        'Hervorheben',
-                        'is_featured',
-                        false,
-                        'Dieses Paket als "Empfohlen" hervorheben.'
-                    ),
+                    // Accordion Ende
+                    self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
                 ],
                 'Paket hinzufügen',
                 1,
@@ -1529,6 +1988,8 @@ class FieldDefinitions
                 'Teammitglieder',
                 'members',
                 [
+                    // Accordion: Person (offen)
+                    self::accordionField("field_{$prefix}_acc_person", 'Person', true),
                     self::imageField(
                         "field_{$prefix}_member_image",
                         'Foto',
@@ -1554,6 +2015,8 @@ class FieldDefinitions
                         'Jobtitel oder Rolle.',
                         'z.B. Geschäftsführer'
                     ),
+                    // Accordion: Details
+                    self::accordionField("field_{$prefix}_acc_details", 'Details'),
                     self::textareaField(
                         "field_{$prefix}_member_bio",
                         'Kurzbiografie',
@@ -1562,38 +2025,44 @@ class FieldDefinitions
                         'Optionale kurze Beschreibung.',
                         'z.B. Seit 2020 im Unternehmen...'
                     ),
-                    self::emailField(
-                        "field_{$prefix}_member_email",
-                        'E-Mail',
-                        'email',
-                        'Direkte E-Mail-Adresse.',
-                        'max@beispiel.de'
-                    ),
-                    self::urlField(
-                        "field_{$prefix}_member_linkedin",
-                        'LinkedIn',
-                        'linkedin',
-                        'Link zum LinkedIn-Profil.',
-                        null,
-                        'https://linkedin.com/in/...'
-                    ),
+                    // Accordion: Kontakt
+                    self::accordionField("field_{$prefix}_acc_contact", 'Kontakt'),
+                    [
+                        'key' => "field_{$prefix}_member_email",
+                        'label' => 'E-Mail',
+                        'name' => 'email',
+                        'type' => 'email',
+                        'instructions' => 'Direkte E-Mail-Adresse.',
+                        'placeholder' => 'max@beispiel.de',
+                        'wrapper' => ['width' => '50'],
+                    ],
+                    [
+                        'key' => "field_{$prefix}_member_linkedin",
+                        'label' => 'LinkedIn',
+                        'name' => 'linkedin',
+                        'type' => 'url',
+                        'instructions' => 'Link zum LinkedIn-Profil.',
+                        'placeholder' => 'https://linkedin.com/in/...',
+                        'wrapper' => ['width' => '50'],
+                    ],
+                    // Accordion Ende
+                    self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
                 ],
                 'Mitglied hinzufügen',
                 1,
                 'block',
                 'Füge Teammitglieder hinzu.'
             ),
-            self::selectField(
+            self::buttonGroupField(
                 "field_{$prefix}_columns",
                 'Spalten',
                 'columns',
                 [
-                    '2' => '2 Spalten',
-                    '3' => '3 Spalten',
-                    '4' => '4 Spalten',
+                    '2' => '2',
+                    '3' => '3',
+                    '4' => '4',
                 ],
                 '3',
-                false,
                 'Anzahl der Spalten für die Darstellung.'
             ),
             self::backgroundColorField($prefix),
@@ -1649,13 +2118,11 @@ class FieldDefinitions
                         'Was diese Zahl bedeutet.',
                         'z.B. Zufriedene Kunden'
                     ),
-                    self::textField(
+                    self::iconRadioField(
                         "field_{$prefix}_stat_icon",
-                        'Icon (Emoji)',
+                        'Icon',
                         'icon',
-                        false,
-                        'Optionales Emoji als Icon. Emoji-Tastatur öffnen: Mac: Ctrl+Cmd+Leertaste, Windows: Win+Punkt (.)',
-                        'z.B. 🏆, ⭐, 📈'
+                        'Optionales Icon für diese Statistik.'
                     ),
                 ],
                 'Statistik hinzufügen',
@@ -1689,22 +2156,30 @@ class FieldDefinitions
                 'Ereignisse',
                 'events',
                 [
-                    self::textField(
-                        "field_{$prefix}_event_year",
-                        'Jahr / Datum',
-                        'year',
-                        true,
-                        'Zeitpunkt des Ereignisses.',
-                        'z.B. 2020, Januar 2021, Phase 1'
-                    ),
-                    self::textField(
-                        "field_{$prefix}_event_title",
-                        'Titel',
-                        'title',
-                        true,
-                        'Kurzer Titel des Ereignisses.',
-                        'z.B. Firmengründung'
-                    ),
+                    // Accordion: Event (offen)
+                    self::accordionField("field_{$prefix}_acc_event", 'Event', true),
+                    [
+                        'key' => "field_{$prefix}_event_year",
+                        'label' => 'Jahr / Datum',
+                        'name' => 'year',
+                        'type' => 'text',
+                        'instructions' => 'Zeitpunkt des Ereignisses.',
+                        'placeholder' => 'z.B. 2020',
+                        'required' => 1,
+                        'wrapper' => ['width' => '30'],
+                    ],
+                    [
+                        'key' => "field_{$prefix}_event_title",
+                        'label' => 'Titel',
+                        'name' => 'title',
+                        'type' => 'text',
+                        'instructions' => 'Kurzer Titel des Ereignisses.',
+                        'placeholder' => 'z.B. Firmengründung',
+                        'required' => 1,
+                        'wrapper' => ['width' => '70'],
+                    ],
+                    // Accordion: Details
+                    self::accordionField("field_{$prefix}_acc_details", 'Details'),
                     self::wysiwygField(
                         "field_{$prefix}_event_content",
                         'Beschreibung',
@@ -1722,6 +2197,8 @@ class FieldDefinitions
                         null,
                         'Optionales Bild zum Ereignis.'
                     ),
+                    // Accordion Ende
+                    self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
                 ],
                 'Ereignis hinzufügen',
                 2,
@@ -1740,7 +2217,20 @@ class FieldDefinitions
      */
     public static function postsFields(string $prefix): array
     {
+        // Conditional: Show category only for posts
+        $showOnPosts = [
+            [
+                [
+                    'field' => "field_{$prefix}_post_type",
+                    'operator' => '==',
+                    'value' => 'post',
+                ],
+            ],
+        ];
+
         return [
+            // Tab: Inhalt
+            self::tabField("field_{$prefix}_tab_content", 'Inhalt'),
             self::textField(
                 "field_{$prefix}_title",
                 'Überschrift',
@@ -1749,7 +2239,7 @@ class FieldDefinitions
                 'Optionale Überschrift über den Beiträgen.',
                 'z.B. Aktuelle Neuigkeiten'
             ),
-            self::selectField(
+            self::buttonGroupField(
                 "field_{$prefix}_post_type",
                 'Beitragstyp',
                 'post_type',
@@ -1758,19 +2248,7 @@ class FieldDefinitions
                     'page' => 'Seiten',
                 ],
                 'post',
-                false,
                 'Welcher Beitragstyp angezeigt werden soll.'
-            ),
-            self::numberField(
-                "field_{$prefix}_posts_per_page",
-                'Anzahl',
-                'posts_per_page',
-                3,
-                1,
-                12,
-                1,
-                'Beiträge',
-                'Wie viele Beiträge angezeigt werden sollen.'
             ),
             [
                 'key' => "field_{$prefix}_category",
@@ -1782,39 +2260,65 @@ class FieldDefinitions
                 'field_type' => 'select',
                 'allow_null' => 1,
                 'return_format' => 'id',
+                'conditional_logic' => $showOnPosts,
             ],
-            self::trueFalseField(
-                "field_{$prefix}_show_excerpt",
-                'Auszug anzeigen',
-                'show_excerpt',
-                true,
-                'Zeigt einen kurzen Textauszug an.'
+            self::numberField(
+                "field_{$prefix}_posts_per_page",
+                'Anzahl',
+                'posts_per_page',
+                3,
+                1,
+                12,
+                1,
+                'Beiträge',
+                'Wie viele Beiträge angezeigt werden sollen.'
             ),
-            self::trueFalseField(
-                "field_{$prefix}_show_date",
-                'Datum anzeigen',
-                'show_date',
-                true,
-                'Zeigt das Veröffentlichungsdatum an.'
-            ),
-            self::trueFalseField(
-                "field_{$prefix}_show_author",
-                'Autor anzeigen',
-                'show_author',
-                false,
-                'Zeigt den Autorennamen an.'
-            ),
-            self::selectField(
+
+            // Tab: Anzeige
+            self::tabField("field_{$prefix}_tab_display", 'Anzeige'),
+            [
+                'key' => "field_{$prefix}_show_excerpt",
+                'label' => 'Auszug',
+                'name' => 'show_excerpt',
+                'type' => 'true_false',
+                'instructions' => 'Zeigt einen kurzen Textauszug an.',
+                'default_value' => 1,
+                'ui' => 1,
+                'wrapper' => ['width' => '33'],
+            ],
+            [
+                'key' => "field_{$prefix}_show_date",
+                'label' => 'Datum',
+                'name' => 'show_date',
+                'type' => 'true_false',
+                'instructions' => 'Zeigt das Veröffentlichungsdatum an.',
+                'default_value' => 1,
+                'ui' => 1,
+                'wrapper' => ['width' => '33'],
+            ],
+            [
+                'key' => "field_{$prefix}_show_author",
+                'label' => 'Autor',
+                'name' => 'show_author',
+                'type' => 'true_false',
+                'instructions' => 'Zeigt den Autorennamen an.',
+                'default_value' => 0,
+                'ui' => 1,
+                'wrapper' => ['width' => '34'],
+            ],
+
+            // Tab: Layout
+            self::tabField("field_{$prefix}_tab_layout", 'Layout'),
+            self::buttonGroupField(
                 "field_{$prefix}_columns",
                 'Spalten',
                 'columns',
                 [
-                    '2' => '2 Spalten',
-                    '3' => '3 Spalten',
-                    '4' => '4 Spalten',
+                    '2' => '2',
+                    '3' => '3',
+                    '4' => '4',
                 ],
                 '3',
-                false,
                 'Anzahl der Spalten für die Darstellung.'
             ),
             self::backgroundColorField($prefix),
@@ -1844,8 +2348,9 @@ class FieldDefinitions
                 'image_before',
                 true,
                 'id',
-                '50',
-                'Das "Vorher"-Bild (links).'
+                null,
+                'Das "Vorher"-Bild (links).',
+                '50'
             ),
             self::imageField(
                 "field_{$prefix}_image_after",
@@ -1853,25 +2358,28 @@ class FieldDefinitions
                 'image_after',
                 true,
                 'id',
-                '50',
-                'Das "Nachher"-Bild (rechts). Sollte gleiche Maße haben.'
+                null,
+                'Das "Nachher"-Bild (rechts). Sollte gleiche Maße haben.',
+                '50'
             ),
-            self::textField(
-                "field_{$prefix}_label_before",
-                'Label Vorher',
-                'label_before',
-                false,
-                'Text für das Vorher-Label.',
-                'Vorher'
-            ),
-            self::textField(
-                "field_{$prefix}_label_after",
-                'Label Nachher',
-                'label_after',
-                false,
-                'Text für das Nachher-Label.',
-                'Nachher'
-            ),
+            [
+                'key' => "field_{$prefix}_label_before",
+                'label' => 'Label Vorher',
+                'name' => 'label_before',
+                'type' => 'text',
+                'instructions' => 'Text für das Vorher-Label.',
+                'placeholder' => 'Vorher',
+                'wrapper' => ['width' => '50'],
+            ],
+            [
+                'key' => "field_{$prefix}_label_after",
+                'label' => 'Label Nachher',
+                'name' => 'label_after',
+                'type' => 'text',
+                'instructions' => 'Text für das Nachher-Label.',
+                'placeholder' => 'Nachher',
+                'wrapper' => ['width' => '50'],
+            ],
             self::backgroundColorField($prefix),
         ];
     }
@@ -1942,21 +2450,82 @@ class FieldDefinitions
                 'row',
                 'Füge Datenzeilen hinzu.'
             ),
-            self::trueFalseField(
-                "field_{$prefix}_striped",
-                'Gestreifte Zeilen',
-                'striped',
-                true,
-                'Abwechselnde Hintergrundfarben für bessere Lesbarkeit.'
-            ),
-            self::trueFalseField(
-                "field_{$prefix}_bordered",
-                'Mit Rahmen',
-                'bordered',
-                false,
-                'Zeigt Rahmenlinien um die Zellen.'
-            ),
+            [
+                'key' => "field_{$prefix}_striped",
+                'label' => 'Gestreifte Zeilen',
+                'name' => 'striped',
+                'type' => 'true_false',
+                'instructions' => 'Abwechselnde Hintergrundfarben für bessere Lesbarkeit.',
+                'default_value' => 1,
+                'ui' => 1,
+                'wrapper' => ['width' => '50'],
+            ],
+            [
+                'key' => "field_{$prefix}_bordered",
+                'label' => 'Mit Rahmen',
+                'name' => 'bordered',
+                'type' => 'true_false',
+                'instructions' => 'Zeigt Rahmenlinien um die Zellen.',
+                'default_value' => 0,
+                'ui' => 1,
+                'wrapper' => ['width' => '50'],
+            ],
             self::backgroundColorField($prefix),
+        ];
+    }
+
+    // =========================================================================
+    // COMPONENT BLOCKS
+    // =========================================================================
+
+    /**
+     * Get Button block fields
+     *
+     * @param string $prefix Key prefix
+     * @return array<int, array<string, mixed>>
+     */
+    public static function buttonFields(string $prefix): array
+    {
+        return [
+            self::linkField(
+                "field_{$prefix}_button",
+                'Button Link',
+                'button',
+                true,
+                'Der Link und Text des Buttons.'
+            ),
+            self::buttonGroupField(
+                "field_{$prefix}_variant",
+                'Variante',
+                'variant',
+                [
+                    'primary' => 'Primary',
+                    'secondary' => 'Secondary',
+                    'ghost' => 'Ghost',
+                    'danger' => 'Danger',
+                ],
+                'primary',
+                'Visueller Stil des Buttons.'
+            ),
+            self::buttonGroupField(
+                "field_{$prefix}_size",
+                'Größe',
+                'size',
+                [
+                    'sm' => 'Klein',
+                    'md' => 'Mittel',
+                    'lg' => 'Groß',
+                ],
+                'md',
+                'Größe des Buttons.'
+            ),
+            self::trueFalseField(
+                "field_{$prefix}_full_width",
+                'Volle Breite',
+                'full_width',
+                false,
+                'Button nimmt die volle verfügbare Breite ein.'
+            ),
         ];
     }
 }

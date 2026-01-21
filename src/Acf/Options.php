@@ -36,30 +36,52 @@ class Options
             'position' => 2,
         ]);
 
-        // Sub pages with German labels
-        self::addSubPage('Allgemein', 'general');
-        self::addSubPage('Header', 'header');
-        self::addSubPage('Footer', 'footer');
-        self::addSubPage('Social Media', 'social');
-        self::addSubPage('Analytics', 'analytics');
-        self::addSubPage('Rechtliches', 'legal');
-        self::addSubPage('Werkzeuge', 'tools');
+        // Sub pages with German labels and icons
+        self::addSubPage('Allgemein', 'general', 'dashicons-admin-home');
+        self::addSubPage('Header', 'header', 'dashicons-arrow-up-alt');
+        self::addSubPage('Footer', 'footer', 'dashicons-arrow-down-alt');
+        self::addSubPage('Social Media', 'social', 'dashicons-share');
+        self::addSubPage('Analytics', 'analytics', 'dashicons-chart-bar');
+        self::addSubPage('Werkzeuge', 'tools', 'dashicons-admin-tools');
 
         // Register field groups directly (we're already in acf/init)
         self::registerFieldGroups();
+
+        // Register dynamic field filters
+        self::registerFieldFilters();
     }
 
     /**
-     * Add options sub page
+     * Register ACF field filters for dynamic choices
      */
-    private static function addSubPage(string $title, string $slug): void
+    private static function registerFieldFilters(): void
     {
-        acf_add_options_sub_page([
+        // Populate footer menu select with registered nav menus
+        add_filter('acf/load_field/key=field_options_footer_nav_menu', function (array $field): array {
+            $locations = get_registered_nav_menus();
+            $field['choices'] = [];
+
+            foreach ($locations as $location => $description) {
+                $field['choices'][$location] = $description;
+            }
+
+            return $field;
+        });
+    }
+
+    /**
+     * Add options sub page with optional icon
+     */
+    private static function addSubPage(string $title, string $slug, string $icon = ''): void
+    {
+        $config = [
             'page_title' => $title,
-            'menu_title' => $title,
+            'menu_title' => $icon ? '<span class="dashicons ' . $icon . '" style="font-size: 16px; width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></span>' . $title : $title,
             'parent_slug' => 'theme-options',
             'menu_slug' => 'theme-options-' . $slug,
-        ]);
+        ];
+
+        acf_add_options_sub_page($config);
     }
 
     /**
@@ -72,7 +94,6 @@ class Options
         self::registerFooterFields();
         self::registerSocialFields();
         self::registerAnalyticsFields();
-        self::registerLegalFields();
         self::registerToolsFields();
     }
 
@@ -91,23 +112,34 @@ class Options
                     'label' => 'Website-Identität',
                     'type' => 'tab',
                 ],
-                FieldDefinitions::imageField(
-                    'field_options_logo',
-                    'Logo',
-                    'site_logo',
-                    false,
-                    'array',
-                    null,
-                    'Das Hauptlogo der Website. Empfohlen: SVG oder PNG mit transparentem Hintergrund.'
+                FieldDefinitions::infoBoxField(
+                    'field_options_identity_info',
+                    '<strong>Website-Identität</strong><br>Logo und Favicon erscheinen im Header, Footer und Browser-Tab. Für beste Ergebnisse verwende SVG-Dateien oder PNGs mit transparentem Hintergrund.',
+                    'info'
                 ),
-                FieldDefinitions::imageField(
-                    'field_options_logo_dark',
-                    'Logo (Dunkler Hintergrund)',
-                    'site_logo_dark',
-                    false,
-                    'array',
-                    null,
-                    'Alternative Logo-Version für dunkle Hintergründe.'
+                array_merge(
+                    FieldDefinitions::imageField(
+                        'field_options_logo',
+                        'Logo',
+                        'site_logo',
+                        false,
+                        'array',
+                        null,
+                        'Das Hauptlogo der Website.'
+                    ),
+                    ['wrapper' => ['width' => '50']]
+                ),
+                array_merge(
+                    FieldDefinitions::imageField(
+                        'field_options_logo_dark',
+                        'Logo (Dunkel)',
+                        'site_logo_dark',
+                        false,
+                        'array',
+                        null,
+                        'Für dunkle Hintergründe.'
+                    ),
+                    ['wrapper' => ['width' => '50']]
                 ),
                 FieldDefinitions::imageField(
                     'field_options_favicon',
@@ -119,12 +151,18 @@ class Options
                     'Das Favicon für Browser-Tabs. Empfohlen: 512x512px PNG.'
                 ),
 
-                // Contact Tab
+                // Contact Tab (default selected)
                 [
                     'key' => 'field_options_tab_contact',
                     'label' => 'Kontaktdaten',
                     'type' => 'tab',
+                    'selected' => 1,
                 ],
+                FieldDefinitions::infoBoxField(
+                    'field_options_contact_info',
+                    '<strong>Kontaktdaten</strong><br>Diese Daten werden im Footer und auf der Kontaktseite verwendet. Halte sie aktuell!',
+                    'info'
+                ),
                 FieldDefinitions::textField(
                     'field_options_company_name',
                     'Firmenname',
@@ -141,20 +179,26 @@ class Options
                     'Die vollständige Geschäftsadresse.',
                     "Musterstraße 123\n12345 Musterstadt"
                 ),
-                FieldDefinitions::textField(
-                    'field_options_phone',
-                    'Telefon',
-                    'phone',
-                    false,
-                    'Haupttelefonnummer für Kontakt.',
-                    '+49 123 456789'
+                array_merge(
+                    FieldDefinitions::textField(
+                        'field_options_phone',
+                        'Telefon',
+                        'phone',
+                        false,
+                        'Haupttelefonnummer.',
+                        '+49 123 456789'
+                    ),
+                    ['wrapper' => ['width' => '50']]
                 ),
-                FieldDefinitions::emailField(
-                    'field_options_email',
-                    'E-Mail',
-                    'email',
-                    'Haupt-E-Mail-Adresse für Kontaktanfragen.',
-                    'info@example.com'
+                array_merge(
+                    FieldDefinitions::emailField(
+                        'field_options_email',
+                        'E-Mail',
+                        'email',
+                        'Haupt-E-Mail-Adresse.',
+                        'info@example.com'
+                    ),
+                    ['wrapper' => ['width' => '50']]
                 ),
                 FieldDefinitions::urlField(
                     'field_options_maps_link',
@@ -206,26 +250,50 @@ class Options
             'key' => 'group_options_header',
             'title' => 'Header-Einstellungen',
             'fields' => [
-                FieldDefinitions::trueFalseField(
-                    'field_options_header_sticky',
-                    'Sticky Header',
-                    'header_sticky',
-                    true,
-                    'Header bleibt beim Scrollen oben fixiert.'
+                FieldDefinitions::infoBoxField(
+                    'field_options_header_tip',
+                    '<strong>Tipp:</strong> Ein CTA-Button im Header erhöht die Conversion-Rate. Verwende eine klare Handlungsaufforderung wie "Jetzt anfragen" oder "Termin buchen".',
+                    'tip'
                 ),
-                FieldDefinitions::trueFalseField(
-                    'field_options_header_cta_show',
-                    'CTA-Button anzeigen',
-                    'header_cta_show',
-                    true,
-                    'Zeigt einen Call-to-Action Button im Header.'
+                array_merge(
+                    FieldDefinitions::trueFalseField(
+                        'field_options_header_sticky',
+                        'Sticky Header',
+                        'header_sticky',
+                        true,
+                        'Header bleibt beim Scrollen oben fixiert.'
+                    ),
+                    ['wrapper' => ['width' => '50']]
                 ),
-                FieldDefinitions::linkField(
-                    'field_options_header_cta',
-                    'CTA-Button',
-                    'header_cta',
-                    false,
-                    'Link und Text für den Header-CTA-Button.'
+                array_merge(
+                    FieldDefinitions::trueFalseField(
+                        'field_options_header_cta_show',
+                        'CTA-Button anzeigen',
+                        'header_cta_show',
+                        true,
+                        'Zeigt einen Call-to-Action Button im Header.'
+                    ),
+                    ['wrapper' => ['width' => '50']]
+                ),
+                array_merge(
+                    FieldDefinitions::linkField(
+                        'field_options_header_cta',
+                        'CTA-Button',
+                        'header_cta',
+                        false,
+                        'Link und Text für den Header-CTA-Button.'
+                    ),
+                    [
+                        'conditional_logic' => [
+                            [
+                                [
+                                    'field' => 'field_options_header_cta_show',
+                                    'operator' => '==',
+                                    'value' => '1',
+                                ],
+                            ],
+                        ],
+                    ]
                 ),
             ],
             'location' => [
@@ -249,6 +317,33 @@ class Options
             'key' => 'group_options_footer',
             'title' => 'Footer-Einstellungen',
             'fields' => [
+                // === Spalte 1: Logo & Info ===
+                [
+                    'key' => 'field_options_footer_tab_info',
+                    'label' => 'Info-Spalte',
+                    'type' => 'tab',
+                    'selected' => 1,
+                ],
+                array_merge(
+                    FieldDefinitions::trueFalseField(
+                        'field_options_footer_logo_show',
+                        'Logo anzeigen',
+                        'footer_show_logo',
+                        true,
+                        'Zeigt das Site-Logo im Footer.'
+                    ),
+                    ['wrapper' => ['width' => '50']]
+                ),
+                array_merge(
+                    FieldDefinitions::trueFalseField(
+                        'field_options_footer_company_show',
+                        'Firmenname anzeigen',
+                        'footer_show_company',
+                        true,
+                        'Zeigt den Firmennamen.'
+                    ),
+                    ['wrapper' => ['width' => '50']]
+                ),
                 FieldDefinitions::wysiwygField(
                     'field_options_footer_text',
                     'Footer-Text',
@@ -257,6 +352,145 @@ class Options
                     null,
                     'Optionaler Text im Footer (z.B. Firmenbeschreibung).'
                 ),
+
+                // === Spalte 2: Navigation ===
+                [
+                    'key' => 'field_options_footer_tab_nav',
+                    'label' => 'Navigation',
+                    'type' => 'tab',
+                ],
+                FieldDefinitions::trueFalseField(
+                    'field_options_footer_nav_show',
+                    'Navigation anzeigen',
+                    'footer_show_nav',
+                    true,
+                    'Zeigt das Footer-Navigationsmenü.'
+                ),
+                array_merge(
+                    FieldDefinitions::textField(
+                        'field_options_footer_nav_title',
+                        'Überschrift',
+                        'footer_nav_title',
+                        false,
+                        'Überschrift über dem Menü.',
+                        'Navigation'
+                    ),
+                    [
+                        'wrapper' => ['width' => '50'],
+                        'conditional_logic' => [
+                            [['field' => 'field_options_footer_nav_show', 'operator' => '==', 'value' => '1']],
+                        ],
+                    ]
+                ),
+                array_merge(
+                    [
+                        'key' => 'field_options_footer_nav_menu',
+                        'label' => 'Menü',
+                        'name' => 'footer_nav_menu',
+                        'type' => 'select',
+                        'instructions' => 'Welches Menü anzeigen.',
+                        'required' => 0,
+                        'choices' => [],
+                        'default_value' => 'footer-menu',
+                        'allow_null' => 0,
+                        'ui' => 1,
+                    ],
+                    [
+                        'wrapper' => ['width' => '50'],
+                        'conditional_logic' => [
+                            [['field' => 'field_options_footer_nav_show', 'operator' => '==', 'value' => '1']],
+                        ],
+                    ]
+                ),
+
+                // === Spalte 3: Kontakt ===
+                [
+                    'key' => 'field_options_footer_tab_contact',
+                    'label' => 'Kontakt',
+                    'type' => 'tab',
+                ],
+                FieldDefinitions::trueFalseField(
+                    'field_options_footer_contact_show',
+                    'Kontaktdaten anzeigen',
+                    'footer_show_contact',
+                    true,
+                    'Zeigt Adresse, Telefon und E-Mail.'
+                ),
+                array_merge(
+                    FieldDefinitions::infoBoxField(
+                        'field_options_footer_contact_info',
+                        'Verwendet Daten aus den <a href="' . \admin_url('admin.php?page=theme-options-general') . '">allgemeinen Einstellungen</a> (Kontaktdaten Tab).',
+                        'info'
+                    ),
+                    [
+                        'conditional_logic' => [
+                            [['field' => 'field_options_footer_contact_show', 'operator' => '==', 'value' => '1']],
+                        ],
+                    ]
+                ),
+                array_merge(
+                    FieldDefinitions::textField(
+                        'field_options_footer_contact_title',
+                        'Kontakt-Überschrift',
+                        'footer_contact_title',
+                        false,
+                        'Überschrift über den Kontaktdaten.',
+                        'Kontakt'
+                    ),
+                    [
+                        'conditional_logic' => [
+                            [['field' => 'field_options_footer_contact_show', 'operator' => '==', 'value' => '1']],
+                        ],
+                    ]
+                ),
+
+                // === Spalte 4: Social ===
+                [
+                    'key' => 'field_options_footer_tab_social',
+                    'label' => 'Social Media',
+                    'type' => 'tab',
+                ],
+                FieldDefinitions::trueFalseField(
+                    'field_options_footer_social_show',
+                    'Social Links anzeigen',
+                    'footer_show_social',
+                    true,
+                    'Zeigt die Social Media Icons im Footer.'
+                ),
+                array_merge(
+                    FieldDefinitions::infoBoxField(
+                        'field_options_footer_social_info',
+                        'Verwendet Icons aus den <a href="' . \admin_url('admin.php?page=theme-options-social') . '">Social Media Einstellungen</a>.',
+                        'info'
+                    ),
+                    [
+                        'conditional_logic' => [
+                            [['field' => 'field_options_footer_social_show', 'operator' => '==', 'value' => '1']],
+                        ],
+                    ]
+                ),
+                array_merge(
+                    FieldDefinitions::textField(
+                        'field_options_footer_social_title',
+                        'Social-Überschrift',
+                        'footer_social_title',
+                        false,
+                        'Überschrift über den Icons.',
+                        'Folge uns'
+                    ),
+                    [
+                        'conditional_logic' => [
+                            [['field' => 'field_options_footer_social_show', 'operator' => '==', 'value' => '1']],
+                        ],
+                    ]
+                ),
+
+                // === Untere Leiste ===
+                [
+                    'key' => 'field_options_footer_tab_bottom',
+                    'label' => 'Untere Leiste',
+                    'type' => 'tab',
+                ],
                 FieldDefinitions::textField(
                     'field_options_copyright',
                     'Copyright-Text',
@@ -266,18 +500,11 @@ class Options
                     '© {year} Firmenname. Alle Rechte vorbehalten.'
                 ),
                 FieldDefinitions::trueFalseField(
-                    'field_options_footer_contact_show',
-                    'Kontaktdaten anzeigen',
-                    'footer_show_contact',
+                    'field_options_footer_legal_show',
+                    'Rechtliches Menü anzeigen',
+                    'footer_show_legal',
                     true,
-                    'Zeigt Adresse, Telefon und E-Mail im Footer.'
-                ),
-                FieldDefinitions::trueFalseField(
-                    'field_options_footer_social_show',
-                    'Social Links anzeigen',
-                    'footer_show_social',
-                    true,
-                    'Zeigt die Social Media Icons im Footer.'
+                    'Zeigt das Legal-Menü (Impressum, Datenschutz) in der unteren Leiste.'
                 ),
             ],
             'location' => [
@@ -301,43 +528,54 @@ class Options
             'key' => 'group_options_social',
             'title' => 'Social Media Links',
             'fields' => [
+                FieldDefinitions::infoBoxField(
+                    'field_options_social_info',
+                    '<strong>Social Media</strong><br>Diese Icons werden im Footer angezeigt (wenn aktiviert). Die Reihenfolge hier bestimmt die Anzeige-Reihenfolge.',
+                    'info'
+                ),
                 FieldDefinitions::repeaterField(
                     'field_options_social_links',
                     'Social Media Kanäle',
                     'social_links',
                     [
-                        FieldDefinitions::selectField(
-                            'field_options_social_platform',
-                            'Plattform',
-                            'platform',
-                            [
-                                'facebook' => 'Facebook',
-                                'instagram' => 'Instagram',
-                                'linkedin' => 'LinkedIn',
-                                'xing' => 'XING',
-                                'twitter' => 'X (Twitter)',
-                                'youtube' => 'YouTube',
-                                'tiktok' => 'TikTok',
-                                'pinterest' => 'Pinterest',
-                                'threads' => 'Threads',
-                            ],
-                            'linkedin',
-                            true,
-                            'Wähle die Social Media Plattform.'
+                        array_merge(
+                            FieldDefinitions::selectField(
+                                'field_options_social_platform',
+                                'Plattform',
+                                'platform',
+                                [
+                                    'facebook' => 'Facebook',
+                                    'instagram' => 'Instagram',
+                                    'linkedin' => 'LinkedIn',
+                                    'xing' => 'XING',
+                                    'twitter' => 'X (Twitter)',
+                                    'youtube' => 'YouTube',
+                                    'tiktok' => 'TikTok',
+                                    'pinterest' => 'Pinterest',
+                                    'threads' => 'Threads',
+                                ],
+                                'linkedin',
+                                true,
+                                ''
+                            ),
+                            ['wrapper' => ['width' => '40']]
                         ),
-                        FieldDefinitions::urlField(
-                            'field_options_social_url',
-                            'Profil-URL',
-                            'url',
-                            'Der vollständige Link zu eurem Profil.',
-                            null,
-                            'https://linkedin.com/company/...'
+                        array_merge(
+                            FieldDefinitions::urlField(
+                                'field_options_social_url',
+                                'Profil-URL',
+                                'url',
+                                '',
+                                null,
+                                'https://linkedin.com/company/...'
+                            ),
+                            ['wrapper' => ['width' => '60']]
                         ),
                     ],
                     'Kanal hinzufügen',
                     0,
                     'table',
-                    'Füge alle Social Media Kanäle hinzu, die im Footer und Header angezeigt werden sollen.'
+                    ''
                 ),
             ],
             'location' => [
@@ -363,21 +601,17 @@ class Options
             'key' => 'group_options_analytics',
             'title' => 'Analytics (Cookie-frei)',
             'fields' => [
-                // Info-Nachricht
-                [
-                    'key' => 'field_options_analytics_info',
-                    'label' => '',
-                    'name' => '',
-                    'type' => 'message',
-                    'message' => '<p><strong>Cookie-freie Website</strong></p><p>Dieses Theme verwendet ausschließlich DSGVO-konforme Analytics ohne Cookies. Pirsch Analytics respektiert die Privatsphäre deiner Besucher und benötigt keinen Cookie-Banner.</p>',
-                ],
-                // Pirsch Analytics
+                FieldDefinitions::infoBoxField(
+                    'field_options_analytics_success',
+                    '<strong>Cookie-freie Website</strong><br>Dieses Theme verwendet ausschließlich DSGVO-konforme Analytics ohne Cookies. Kein Cookie-Banner erforderlich!',
+                    'success'
+                ),
                 FieldDefinitions::textField(
                     'field_options_pirsch_code',
                     'Pirsch Site Code',
                     'pirsch_code',
                     false,
-                    'DSGVO-konforme Analyse ohne Cookies. Den Code findest du unter pirsch.io → Dashboard → Settings → Integration Code. Leer lassen wenn nicht benötigt.',
+                    'Den Code findest du unter <a href="https://pirsch.io" target="_blank">pirsch.io</a> → Dashboard → Settings → Integration Code. Leer lassen wenn nicht benötigt.',
                     'z.B. abc123def456'
                 ),
             ],
@@ -387,57 +621,6 @@ class Options
                         'param' => 'options_page',
                         'operator' => '==',
                         'value' => 'theme-options-analytics',
-                    ],
-                ],
-            ],
-        ]);
-    }
-
-    /**
-     * Legal Settings Fields
-     */
-    private static function registerLegalFields(): void
-    {
-        acf_add_local_field_group([
-            'key' => 'group_options_legal',
-            'title' => 'Rechtliche Einstellungen',
-            'fields' => [
-                FieldDefinitions::postObjectField(
-                    'field_options_privacy_page',
-                    'Datenschutz-Seite',
-                    'privacy_page',
-                    ['page'],
-                    'Wähle die Seite mit der Datenschutzerklärung.'
-                ),
-                FieldDefinitions::postObjectField(
-                    'field_options_imprint_page',
-                    'Impressum-Seite',
-                    'imprint_page',
-                    ['page'],
-                    'Wähle die Seite mit dem Impressum.'
-                ),
-                FieldDefinitions::postObjectField(
-                    'field_options_terms_page',
-                    'AGB-Seite',
-                    'terms_page',
-                    ['page'],
-                    'Optionale Seite mit den Allgemeinen Geschäftsbedingungen.'
-                ),
-                FieldDefinitions::wysiwygField(
-                    'field_options_cookie_notice',
-                    'Cookie-Hinweis',
-                    'cookie_notice_text',
-                    false,
-                    null,
-                    'Text für den Cookie-Hinweis Banner (falls verwendet).'
-                ),
-            ],
-            'location' => [
-                [
-                    [
-                        'param' => 'options_page',
-                        'operator' => '==',
-                        'value' => 'theme-options-legal',
                     ],
                 ],
             ],
@@ -480,8 +663,8 @@ class Options
                 esc_url($deleteUrl)
             );
         } elseif ($styleguideExists) {
-            $editUrl = get_edit_post_link((int) $styleguidePageId, 'raw');
-            $viewUrl = get_permalink((int) $styleguidePageId);
+            $editUrl = get_edit_post_link( (int) $styleguidePageId, 'raw');
+            $viewUrl = get_permalink( (int) $styleguidePageId);
             $statusMessage = sprintf(
                 '<div style="padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
                     <p style="margin: 0; color: #155724;"><strong>✓ Styleguide-Seite existiert</strong></p>
@@ -564,7 +747,11 @@ class Options
      */
     public static function clearCache(): void
     {
-        wp_cache_delete_group('theme');
+        if (function_exists('wp_cache_delete_group')) {
+            \wp_cache_delete_group('theme');
+        } elseif (function_exists('wp_cache_flush')) {
+            \wp_cache_flush();
+        }
     }
 
     /**
