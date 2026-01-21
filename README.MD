@@ -10,7 +10,7 @@ A modern WordPress starter theme built with cutting-edge technologies and best p
 - **Laravel Blade** - Powerful templating engine via Illuminate v12
 - **ACF Pro Integration** - Helper functions, Blade directives, and block support
 - **TypeScript** - Full TypeScript support with WordPress/ACF types
-- **PHP 8.2+** - Modern PHP with strict types
+- **PHP 8.4+** - Modern PHP with strict types (required for Laravel 12)
 - **Service Provider Architecture** - Clean, modular code organization
 - **Code Quality Tools** - ESLint, Prettier, PHPCS, PHPStan
 - **Performance Optimizations** - Image optimization, compression, code splitting
@@ -21,7 +21,7 @@ A modern WordPress starter theme built with cutting-edge technologies and best p
 
 ## 📋 Requirements
 
-- PHP 8.2 or higher
+- PHP 8.4 or higher
 - Composer
 - Node.js 20.19+ or 22.12+ and npm
 - WordPress 6.8+
@@ -209,6 +209,8 @@ The theme uses a service provider architecture for clean code organization:
 - `SecurityServiceProvider` - Security headers and CSP
 - `AcfServiceProvider` - ACF integration, blocks, and directives
 - `AnalyticsServiceProvider` - Pirsch Analytics integration
+- `PluginServiceProvider` - Auto-install required plugins on activation
+- `WelcomeServiceProvider` - Theme activation welcome notice
 
 ### Adding New Features
 
