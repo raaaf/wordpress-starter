@@ -8,6 +8,7 @@ Guidance for Claude Code when working with this WordPress starter theme.
 - **Text Domain:** `wp-starter`
 - **PHP:** 8.4+ with strict types
 - **Dev Server:** `npm run dev` (localhost:5173)
+- **Editor:** Classic Editor + ACF Flexible Content (Gutenberg disabled)
 
 ## Essential Commands
 
@@ -23,13 +24,13 @@ composer lint     # PHP linting (phpcs + phpstan)
 ### Directory Structure
 ```
 src/                    # PHP source code
-├── Acf/               # ACF: Blocks, Fields, Options
+├── Acf/               # ACF: FlexibleContent, Fields, Options
 ├── Providers/         # Service providers
-blocks/                # ACF Gutenberg blocks (28 blocks)
 templates/             # Blade templates
 ├── layouts/          # Base layouts
 ├── partials/         # Reusable partials
 ├── components/       # Blade components
+├── flexible/         # Flexible Content layouts (28 layouts)
 resources/
 ├── css/              # TailwindCSS + tokens.css
 ├── js/               # TypeScript + Alpine.js
@@ -39,8 +40,27 @@ resources/
 - **Blade** (Laravel Illuminate v12) - Templates extend `layouts.app`
 - **Alpine.js** (bundled, no CDN) - Interactive components
 - **TailwindCSS v4.1** - Utility-first CSS
-- **ACF Pro** - Custom blocks and fields
+- **ACF Pro** - Flexible Content page builder
+- **ACF Extended** (FREE) - Enhanced Flexible Content UX
 - **Vite 7.3** - Asset compilation with HMR
+
+## Plugin Management
+
+Plugins are managed via **Composer** using [wpackagist.org](https://wpackagist.org).
+
+**Install configured plugins:**
+```bash
+composer install
+```
+
+**Add a new plugin:**
+```bash
+composer require wpackagist-plugin/plugin-slug
+```
+
+Plugins are installed to `wp-content/plugins/` via `composer/installers`.
+
+**Note:** ACF PRO is a premium plugin and must be installed manually.
 
 ## Design Tokens
 
@@ -61,31 +81,50 @@ background: var(--bg-surface);
 color: var(--text-content);
 ```
 
-## ACF Blocks
+## ACF Flexible Content
 
-28 blocks in `blocks/` directory. Each block has:
-- `block.json` - Configuration
-- `template.blade.php` - Blade template
+All pages use Flexible Content as the primary content builder. 28 layouts in `templates/flexible/`.
 
-### Block Template Pattern
+### Layout Categories (ACF Extended)
+| Category | Layouts |
+|----------|---------|
+| Header | hero |
+| Layout | one-column, two-columns, three-columns, four-columns, one-third-two-thirds, two-thirds-one-third, two-columns-images |
+| Inhalte | accordion, tabs, cta, button |
+| Medien | image, video, gallery, before-after |
+| Interaktiv | testimonials, cards, stats, timeline, team, pricing-table |
+| Formulare | contact-form, map |
+| Beiträge | posts, table |
+| Sonstiges | divider, logo-slider |
+
+### Flexible Template Pattern
 ```blade
+{{-- templates/flexible/example.blade.php --}}
 @php
-    $title = $fields['title'] ?? '';
-    $bgColor = $fields['background_color'] ?? 'primary';
+    $title = get_sub_field('title');
+    $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-<div {!! $wrapper_attributes !!}>
-    <h2>{{ $title }}</h2>
-</div>
+<x-section :background="$background">
+    @if($title)
+        <h2>{{ $title }}</h2>
+    @endif
+</x-section>
 ```
 
 ### Background Colors
-All blocks support: `primary`, `secondary`, `tertiary`, `brand`, `brand-subtle`, `inverse`
+All layouts support: `primary`, `secondary`, `tertiary`, `brand`, `brand-subtle`, `inverse`
 
-### InnerBlocks
-```blade
-@innerblocks(['allowedBlocks' => ['core/paragraph', 'core/heading']])
-```
+## ACF Extended Features
+
+ACF Extended (FREE) enhances the editing experience:
+- **Modal Selection** - Choose layouts in visual grid modal
+- **Modal Edit** - Edit layouts in large modal
+- **Copy/Paste** - Copy layouts between pages
+- **Layout Categories** - Organized layout picker
+- **Layout Thumbnails** - Optional visual previews in `resources/images/layouts/`
+
+Configuration in `src/Acf/AcfExtended.php`.
 
 ## Blade Directives
 
@@ -99,9 +138,9 @@ All blocks support: `primary`, `secondary`, `tertiary`, `brand`, `brand-subtle`,
 - `@hasfield('name')...@endhasfield`
 - `@repeater('name')...@endrepeater`
 
-**Blocks:**
-- `@innerblocks` / `@innerblocks($options)`
-- `@blockwrapper($block)`
+**Flexible Content:**
+- `@flexible('field_name')...@endflexible`
+- `@layout('layout_name')...@endlayout`
 
 ## ACF Field Definitions
 
@@ -139,44 +178,34 @@ Defined in `resources/js/app.ts`:
 - `logoSlider` - Partner logo carousel
 - `beforeAfter` - Image comparison slider
 
-## Adding New Blocks
+## Adding New Layouts
 
-1. Create `blocks/block-name/block.json`:
-```json
+1. Add layout method in `src/Acf/FlexibleContent.php`:
+```php
+private static function myNewLayout(): array
 {
-    "name": "acf/block-name",
-    "title": "Block Title",
-    "description": "Description",
-    "category": "theme-blocks",
-    "icon": "dashicons-icon",
-    "supports": {
-        "align": ["wide", "full"],
-        "anchor": true
-    },
-    "acf": {
-        "mode": "preview",
-        "renderTemplate": "blocks/block-name/template.blade.php"
-    }
+    return [
+        'key' => 'layout_my_new',
+        'name' => 'my_new',
+        'label' => 'Mein neues Layout',
+        'display' => 'block',
+        'sub_fields' => FieldDefinitions::myNewFields('flex_my_new'),
+        'acfe_flexible_category' => self::CATEGORIES['content'],
+    ];
 }
 ```
 
-2. Create `blocks/block-name/template.blade.php`
-3. Add fields in `src/Acf/BlockFields.php`
+2. Add field definitions in `src/Acf/FieldDefinitions.php`
 
-## Plugin Dependencies
+3. Create template `templates/flexible/my-new.blade.php`
 
-Blocks can require plugins via `block.json`:
-```json
-{
-    "requires": ["contact-form-7"]
-}
-```
+4. Register layout in `getLayouts()` array
 
 ## Important Notes
 
 - All service providers in `src/Providers/` auto-registered
 - ACF fields defined in PHP, not JSON (version control)
-- Block labels/instructions in German
-- Use `$wrapper_attributes` in block templates for Gutenberg integration
+- Field labels/instructions in German
+- Gutenberg is disabled - use Classic Editor
 - Never edit `dist/` directly - always through Vite
 - Clear `compiled/` if Blade cache issues

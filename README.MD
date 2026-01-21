@@ -8,7 +8,7 @@ A modern WordPress starter theme built with cutting-edge technologies and best p
 - **Alpine.js v3.15** - Lightweight reactive framework (bundled, no CDN)
 - **TailwindCSS v4.1** - Utility-first CSS framework with text shadows
 - **Laravel Blade** - Powerful templating engine via Illuminate v12
-- **ACF Pro Integration** - Helper functions, Blade directives, and block support
+- **ACF Pro + ACF Extended** - Flexible Content page builder with enhanced UX
 - **TypeScript** - Full TypeScript support with WordPress/ACF types
 - **PHP 8.4+** - Modern PHP with strict types (required for Laravel 12)
 - **Service Provider Architecture** - Clean, modular code organization
@@ -66,27 +66,6 @@ npm run dev
 ```
 wordpress-starter/
 ├── acf-json/           # ACF field group JSON files
-├── blocks/             # ACF Gutenberg blocks (28 blocks included)
-│   ├── accordion/     # Expandable accordion (FAQ)
-│   ├── before-after/  # Image comparison slider
-│   ├── cards/        # Feature cards with icons
-│   ├── contact-form/ # Contact Form 7 integration
-│   ├── cta/          # Call to action block
-│   ├── divider/      # Decorative divider
-│   ├── gallery/      # Image gallery with lightbox
-│   ├── hero/         # Hero section with background
-│   ├── image/        # Single image block
-│   ├── logo-slider/  # Partner/client logos
-│   ├── map/          # Google Maps with GDPR consent
-│   ├── posts/        # Dynamic blog posts
-│   ├── pricing-table/# Pricing plans
-│   ├── stats/        # Animated counters
-│   ├── tabs/         # Tabbed content
-│   ├── table/        # Data table
-│   ├── team/         # Team members
-│   ├── testimonials/ # Customer quotes
-│   ├── timeline/     # Chronological events
-│   └── [layout blocks]/ # Column layouts (1-4 columns, asymmetric)
 ├── compiled/          # Blade template cache
 ├── config/            # Configuration files
 │   ├── app.php       # Application config
@@ -95,18 +74,16 @@ wordpress-starter/
 ├── resources/        # Source assets
 │   ├── css/         # CSS files
 │   │   ├── app.css          # Main stylesheet
-│   │   ├── editor-style.css # Editor styles
-│   │   └── block-editor.css # Block editor styles
+│   │   └── editor-style.css # Editor styles
 │   ├── js/          # TypeScript/JavaScript files
 │   │   └── app.ts   # Main TypeScript entry
 │   └── fonts/       # Font files
 ├── src/              # PHP source code
 │   ├── Acf/         # ACF helper classes
-│   │   ├── BlockFields.php     # Block field registration
-│   │   ├── Blocks.php          # Block registration
+│   │   ├── AcfExtended.php     # ACF Extended configuration
 │   │   ├── FieldDefinitions.php # Shared field definitions
 │   │   ├── Fields.php          # Field helpers
-│   │   ├── FlexibleContent.php # Flexible content layouts
+│   │   ├── FlexibleContent.php # Flexible Content layouts (28 layouts)
 │   │   └── Options.php         # Options pages
 │   ├── Providers/   # Service providers
 │   │   ├── AcfServiceProvider.php
@@ -120,11 +97,14 @@ wordpress-starter/
 │   ├── types/       # TypeScript definitions
 │   ├── Application.php
 │   ├── Config.php
+│   ├── EditorConfig.php # Classic Editor configuration
 │   ├── Security.php
 │   ├── Vite.php
 │   └── helpers.php
 ├── templates/        # Blade templates
 │   ├── layouts/     # Layout templates
+│   ├── flexible/    # Flexible Content layout templates (28 templates)
+│   ├── components/  # Blade components
 │   └── partials/    # Partial templates
 ├── .env.example      # Environment example
 ├── eslint.config.js # ESLint 9 flat config
@@ -430,7 +410,8 @@ Edit `config/app.php` for theme-specific settings.
 
 1. **Local JSON**: Field groups are automatically synced to `acf-json/`
 2. **Options Pages**: Configured in `src/Acf/Options.php`
-3. **Blocks**: Add new blocks in `blocks/` directory
+3. **Flexible Content**: Layouts defined in `src/Acf/FlexibleContent.php`
+4. **ACF Extended**: Configuration in `src/Acf/AcfExtended.php`
 
 ### TypeScript Configuration
 
@@ -450,54 +431,88 @@ For Mac users, we recommend using [Local by Flywheel](https://localwp.com/) for 
 4. Run the setup script
 5. Activate the theme in WordPress admin
 
-## 🎨 Working with ACF
+## 🎨 Working with ACF Flexible Content
 
-### Creating ACF Blocks
+The theme uses **Classic Editor + ACF Flexible Content** as the page builder. Gutenberg is disabled.
 
-1. Create a new directory in `blocks/`
-2. Add `block.json` with block configuration
-3. Create `template.blade.php` for the block template
-4. The block will be auto-registered
+### Page Builder Architecture
 
-### Pre-built ACF Blocks
+- **28 Flexible Content layouts** defined in `src/Acf/FlexibleContent.php`
+- **ACF Extended (FREE)** provides enhanced UX with modal selection, copy/paste, and categories
+- Templates in `templates/flexible/` render each layout
 
-The theme includes 28 pre-configured ACF blocks:
+### Pre-built Layouts
 
-**Layout Blocks:**
-- **one-column** - Single column content block
-- **two-columns** - Two equal column layout
-- **three-columns** - Three column content layout
-- **four-columns** - Four column content layout
-- **one-third-two-thirds** - Asymmetric layout (1/3 + 2/3)
-- **two-thirds-one-third** - Asymmetric layout (2/3 + 1/3)
-- **two-columns-images** - Two columns with image support
+**Layout:**
+- **one-column** - Single column content
+- **two-columns** - Two equal columns
+- **three-columns** - Three column layout
+- **four-columns** - Four column layout
+- **one-third-two-thirds** - Asymmetric (1/3 + 2/3)
+- **two-thirds-one-third** - Asymmetric (2/3 + 1/3)
+- **two-columns-images** - Columns with images
 
-**Content Blocks:**
-- **hero** - Hero section with background image
-- **accordion** - Expandable accordion (FAQ) with Schema.org markup
-- **cta** - Call to action with title, content, and button
-- **image** - Single image with optional caption
-- **video** - Video from WordPress media or YouTube/Vimeo
-- **divider** - Decorative divider / spacer
+**Content:**
+- **hero** - Hero section with background
+- **accordion** - Expandable FAQ with Schema.org
+- **cta** - Call to action
+- **image** - Single image
+- **video** - Media or YouTube/Vimeo
+- **divider** - Decorative spacer
+- **button** - Standalone CTA
 
-**Interactive Blocks:**
-- **testimonials** - Customer quotes with repeater
-- **cards** - Feature cards with icons and links
-- **gallery** - Image gallery with medium-zoom lightbox
-- **logo-slider** - Partner/client logo carousel
+**Interactive:**
+- **testimonials** - Customer quotes
+- **cards** - Feature cards with icons
+- **gallery** - Image gallery with lightbox
+- **logo-slider** - Partner logo carousel
 - **contact-form** - Contact Form 7 integration
 - **map** - Google Maps with GDPR consent
-- **tabs** - Tabbed content with Alpine.js
+- **tabs** - Tabbed content
 
-**Additional Blocks:**
-- **pricing-table** - Pricing plans comparison
+**Data:**
+- **pricing-table** - Pricing plans
 - **team** - Team member profiles
-- **stats** - Animated number counters
+- **stats** - Animated counters
 - **timeline** - Chronological events
-- **posts** - Dynamic blog post display
+- **posts** - Dynamic blog posts
 - **before-after** - Image comparison slider
-- **table** - Data table with headers
-- **button** - Standalone CTA button
+- **table** - Data table
+
+### Creating New Layouts
+
+1. Add layout method in `src/Acf/FlexibleContent.php`:
+```php
+private static function myNewLayout(): array
+{
+    return [
+        'key' => 'layout_my_new',
+        'name' => 'my_new',
+        'label' => 'My New Layout',
+        'display' => 'block',
+        'sub_fields' => FieldDefinitions::myNewFields('flex_my_new'),
+        'acfe_flexible_category' => self::CATEGORIES['content'],
+    ];
+}
+```
+
+2. Add field definitions in `src/Acf/FieldDefinitions.php`
+
+3. Create template `templates/flexible/my-new.blade.php`:
+```blade
+@php
+    $title = get_sub_field('title');
+    $background = get_sub_field('background_color') ?: 'primary';
+@endphp
+
+<x-section :background="$background">
+    @if($title)
+        <h2>{{ $title }}</h2>
+    @endif
+</x-section>
+```
+
+4. Register in `getLayouts()` array
 
 ### ACF Helper Functions
 
