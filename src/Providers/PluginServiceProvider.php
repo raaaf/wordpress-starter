@@ -113,10 +113,8 @@ class PluginServiceProvider extends ServiceProvider
             $this->createDefaultPages($this->setupOptions['pages']);
         }
 
-        // Set color scheme ACF option
-        if (!empty($this->setupOptions['color_scheme'])) {
-            update_option('options_color_scheme', $this->setupOptions['color_scheme']);
-        }
+        // Note: color_scheme is handled by WelcomeServiceProvider via ACF's update_field()
+        // to ensure proper field validation and formatting
 
         // Mark as complete
         update_option('wp_starter_content_setup_complete', true);
