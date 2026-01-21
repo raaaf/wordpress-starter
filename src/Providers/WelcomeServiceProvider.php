@@ -2028,10 +2028,38 @@ class WelcomeServiceProvider extends ServiceProvider
         return $this->generateLayout('contact_form', [
             'title' => 'Kontaktieren Sie uns',
             'content' => '<p>Haben Sie Fragen oder möchten Sie mehr erfahren? Füllen Sie einfach das Formular aus und wir melden uns schnellstmöglich bei Ihnen.</p>',
-            'form_id' => '',
+            'form_id' => $this->getFirstContactForm7Id(),
             'show_contact_info' => true,
             'background_color' => 'secondary',
         ]);
+    }
+
+    /**
+     * Get the first Contact Form 7 form ID
+     *
+     * @return int|string Empty string if CF7 not installed or no forms exist
+     */
+    private function getFirstContactForm7Id(): int|string
+    {
+        // Check if CF7 is active
+        if (!class_exists('WPCF7')) {
+            return '';
+        }
+
+        // Query for CF7 forms (they're stored as 'wpcf7_contact_form' post type)
+        $forms = get_posts([
+            'post_type' => 'wpcf7_contact_form',
+            'posts_per_page' => 1,
+            'orderby' => 'ID',
+            'order' => 'ASC',
+            'post_status' => 'publish',
+        ]);
+
+        if (!empty($forms)) {
+            return $forms[0]->ID;
+        }
+
+        return '';
     }
 
     /**
