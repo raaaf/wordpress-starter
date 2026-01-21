@@ -199,6 +199,82 @@
   --typography-code-weight: 400;
   --typography-code-line-height: 1.5;
   --typography-code-letter-spacing: 0;
+
+  /* ============================================
+     COMPONENT TOKENS - From Figma
+     Gradients, shadows, and component-specific values
+     ============================================ */
+
+  /* Gradients - Primary Button */
+  --gradient-primary-start: #FF6B35;
+  --gradient-primary-end: #E5541D;
+  --gradient-primary-hover-start: #E5541D;
+  --gradient-primary-hover-end: #C43D0A;
+  --gradient-primary-active-start: #C43D0A;
+  --gradient-primary-active-end: #9C3008;
+
+  /* Shadows */
+  --shadow-button: 0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  --shadow-button-hover: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-inner: inset 0px 2px 4px 0px rgba(0, 0, 0, 0.06);
+  --shadow-focus-ring: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-accent-alpha-50);
+  --shadow-focus-ring-ghost: 0px 0px 0px 2px var(--color-accent-alpha-50);
+  --shadow-input: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  --shadow-input-hover: 0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  --shadow-card-hover: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  /* Button Sizes */
+  --button-sm-padding-x: 12px;
+  --button-sm-padding-y: 4px;
+  --button-sm-radius: 4px;
+  --button-sm-min-height: 32px;
+  --button-sm-gap: 6px;
+  --button-md-padding-x: 20px;
+  --button-md-padding-y: 10px;
+  --button-md-radius: 8px;
+  --button-md-min-height: 40px;
+  --button-md-gap: 8px;
+  --button-lg-padding-x: 24px;
+  --button-lg-padding-y: 12px;
+  --button-lg-radius: 12px;
+  --button-lg-min-height: 48px;
+  --button-lg-gap: 10px;
+
+  /* Input Sizes */
+  --input-sm-padding-x: 10px;
+  --input-sm-padding-y: 6px;
+  --input-sm-radius: 4px;
+  --input-md-padding-x: 12px;
+  --input-md-padding-y: 10px;
+  --input-md-radius: 8px;
+  --input-lg-padding-x: 16px;
+  --input-lg-padding-y: 12px;
+  --input-lg-radius: 12px;
+
+  /* Badge Sizes */
+  --badge-sm-padding-x: 6px;
+  --badge-sm-padding-y: 2px;
+  --badge-sm-radius: 4px;
+  --badge-sm-gap: 4px;
+  --badge-md-padding-x: 10px;
+  --badge-md-padding-y: 4px;
+  --badge-md-radius: 6px;
+  --badge-md-gap: 6px;
+  --badge-lg-padding-x: 12px;
+  --badge-lg-padding-y: 6px;
+  --badge-lg-radius: 8px;
+  --badge-lg-gap: 8px;
+
+  /* Card Tokens */
+  --card-bg: #ffffff;
+  --card-border: #e5e5e5;
+  --card-radius: 12px;
+  --card-padding: 20px;
+  --card-gap: 16px;
+  --card-media-radius: 8px;
+  --card-footer-gap: 12px;
+  --card-footer-padding-top: 16px;
 }
 
 /* ============================================

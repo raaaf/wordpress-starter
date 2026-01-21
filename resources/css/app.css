@@ -118,6 +118,32 @@
   --color-error: var(--color-error);
 }
 
+/* ============================================
+   GUTENBERG ALIGNMENT SUPPORT
+   Required for full-width backgrounds with useRootPaddingAwareAlignments
+   ============================================ */
+
+.alignfull {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(-50vw + 50%);
+}
+
+.alignwide {
+  width: calc(100% + 2 * var(--wp--preset--spacing--4, 1rem));
+  max-width: calc(100vw - 2 * var(--wp--preset--spacing--4, 1rem));
+  margin-left: calc(-1 * var(--wp--preset--spacing--4, 1rem));
+}
+
+/* Ensure content within full-width blocks stays readable */
+.alignfull > .max-w-7xl,
+.alignwide > .max-w-7xl {
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--wp--preset--spacing--4, 1rem);
+  padding-right: var(--wp--preset--spacing--4, 1rem);
+}
+
 @layer base {
   ::selection {
     background: var(--color-accent-100);
@@ -126,6 +152,10 @@
 
   :root {
     -webkit-tap-highlight-color: transparent;
+
+    /* Hero block - Header height for viewport calculation */
+    /* Fallback value, overridden by JavaScript ResizeObserver */
+    --header-height: 80px;
   }
 
   body {
@@ -133,38 +163,21 @@
     background-color: var(--bg-primary);
   }
 
-  /* Links - WCAG 2.1 SC 1.4.1: Not distinguished by color alone */
+  /* Links default to no underline - controlled by component classes */
   a {
-    color: var(--text-link);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-
-  a:hover {
-    color: var(--text-link-hover);
-  }
-
-  /* Visited links - subtle color change */
-  a:visited {
-    color: var(--text-link);
-    opacity: 0.85;
-  }
-
-  a:visited:hover {
-    color: var(--text-link-hover);
-    opacity: 1;
-  }
-
-  /* Remove underline from buttons/nav styled as links */
-  a.no-underline,
-  nav a,
-  header a,
-  footer a {
+    color: inherit;
     text-decoration: none;
   }
 
-  /* Prose content links should be underlined */
-  .prose a {
+  /* Buttons reset - controlled by component classes */
+  button {
+    background-color: transparent;
+    color: inherit;
+    border-radius: 0;
+  }
+
+  /* Only underline links inside prose content - WCAG 2.1 SC 1.4.1 */
+  .prose a:not(.no-underline) {
     text-decoration: underline;
     text-underline-offset: 2px;
   }
@@ -305,4 +318,44 @@
     line-height: var(--typography-code-line-height);
     letter-spacing: var(--typography-code-letter-spacing);
   }
+}
+
+/* ============================================
+   MEDIUM-ZOOM LIGHTBOX STYLES
+   ============================================ */
+
+/* Zoomed image styling */
+.medium-zoom-image--opened {
+  border-radius: 0.5rem;
+}
+
+/* Gallery hover effect - ensure transition works */
+.gallery figure img {
+  transition: transform 300ms ease-in-out;
+}
+
+.gallery figure:hover img {
+  transform: scale(1.05);
+}
+
+/* ============================================
+   HERO BLOCK STYLES
+   ============================================ */
+
+/* Base hero styles */
+.hero {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Centered and background variants */
+.hero--centered,
+.hero--background {
+  justify-content: center;
+  align-items: center;
+}
+
+/* Split variant uses CSS Grid (handled in template) */
+.hero--split {
+  display: block;
 }
