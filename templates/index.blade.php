@@ -1,24 +1,26 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1 class="mb-4 text-3xl font-bold">Welcome to {{ get_bloginfo('name') }}</h1>
-    @if (have_posts())
-        <div class="space-y-6">
-            @while (have_posts()) @php(the_post())
-                <article class="p-4 bg-surface rounded shadow">
-                    <h2 class="text-2xl font-semibold">
-                        <a href="{{ get_permalink() }}">{{ get_the_title() }}</a>
-                    </h2>
-                    <div class="text-sm text-content-secondary">
-                        Published on {{ get_the_date() }} by {{ get_the_author() }}
-                    </div>
-                    <div class="mt-2">
-                        {!! get_the_excerpt() !!}
-                    </div>
-                </article>
-            @endwhile
-        </div>
-    @else
-        <p>No posts found.</p>
-    @endif
+    <x-section padding="lg">
+        <h1 class="mb-8 text-3xl font-bold">{{ __('Willkommen bei', 'wp-starter') }} {{ get_bloginfo('name') }}</h1>
+        @if (have_posts())
+            <div class="space-y-6">
+                @while (have_posts()) @php(the_post())
+                    <x-card variant="default" hoverable :url="get_permalink()" padding="md">
+                        <h2 class="text-2xl font-semibold text-content mb-2">
+                            {{ get_the_title() }}
+                        </h2>
+                        <div class="text-sm text-content-secondary mb-3">
+                            {{ sprintf(__('Veröffentlicht am %s von %s', 'wp-starter'), get_the_date(), get_the_author()) }}
+                        </div>
+                        <div class="text-content-secondary">
+                            {!! get_the_excerpt() !!}
+                        </div>
+                    </x-card>
+                @endwhile
+            </div>
+        @else
+            <p class="text-content-secondary">{{ __('Keine Beiträge gefunden.', 'wp-starter') }}</p>
+        @endif
+    </x-section>
 @endsection

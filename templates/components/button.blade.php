@@ -12,10 +12,10 @@
     @param array $analytics - ['event' => 'name', 'meta' => 'value'] for Pirsch
 
     States from Figma:
-    - Default: Base appearance
-    - Hover: Slightly darker background
-    - Active: Even darker background (pressed)
-    - Focus: Orange focus ring
+    - Default: Gradient background with shadow
+    - Hover: Darker gradient, enhanced shadow
+    - Active: Darkest gradient with inner shadow
+    - Focus: Focus ring using accent-alpha-50
     - Disabled: Greyed out, no interaction
 --}}
 
@@ -32,25 +32,62 @@
 ])
 
 @php
-    $baseClasses = 'inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-all duration-200 no-underline cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus focus-visible:ring-offset-2';
+    // Base classes - common to all buttons
+    $baseClasses = 'inline-flex items-center justify-center font-semibold transition-all duration-200 no-underline cursor-pointer select-none focus-visible:outline-none';
 
-    // Variants matching Figma design: Default → Hover → Active states
-    // All colors use semantic tokens for theme compatibility
+    // Variants matching Figma design with gradients and shadows
     $variants = [
-        'primary' => 'bg-surface-accent text-content-on-color hover:bg-surface-accent-hover active:bg-surface-accent-active border border-transparent',
-        'secondary' => 'bg-surface text-content hover:bg-surface-secondary active:bg-surface-tertiary border border-line',
-        'ghost' => 'bg-transparent text-content hover:bg-surface-secondary active:bg-surface-tertiary border border-transparent',
-        'danger' => 'bg-surface-error-strong text-content-on-color hover:bg-error-dark active:bg-surface-error-strong border border-transparent',
+        'primary' => implode(' ', [
+            'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)]',
+            'text-content-inverse',
+            'border border-line',
+            'shadow-[var(--shadow-button)]',
+            'hover:from-[var(--gradient-primary-hover-start)] hover:to-[var(--gradient-primary-hover-end)]',
+            'hover:shadow-[var(--shadow-button-hover)]',
+            'active:from-[var(--gradient-primary-active-start)] active:to-[var(--gradient-primary-active-end)]',
+            'active:shadow-[var(--shadow-inner)]',
+            'focus-visible:shadow-[var(--shadow-focus-ring)]',
+        ]),
+        'secondary' => implode(' ', [
+            'bg-surface-secondary',
+            'text-content',
+            'border border-line',
+            'shadow-[var(--shadow-button)]',
+            'hover:border-line-strong',
+            'hover:shadow-[var(--shadow-button-hover)]',
+            'active:bg-surface-tertiary',
+            'active:shadow-[var(--shadow-inner)]',
+            'focus-visible:shadow-[var(--shadow-focus-ring)]',
+        ]),
+        'ghost' => implode(' ', [
+            'bg-transparent',
+            'text-content',
+            'border border-transparent',
+            'hover:bg-surface-tertiary',
+            'active:bg-surface-secondary',
+            'active:border-line',
+            'focus-visible:shadow-[var(--shadow-focus-ring-ghost)]',
+        ]),
+        'danger' => implode(' ', [
+            'bg-surface-error-strong',
+            'text-content-on-color',
+            'border border-transparent',
+            'shadow-[var(--shadow-button)]',
+            'hover:bg-error-dark',
+            'hover:shadow-[var(--shadow-button-hover)]',
+            'active:shadow-[var(--shadow-inner)]',
+            'focus-visible:shadow-[var(--shadow-focus-ring)]',
+        ]),
     ];
 
-    // Disabled state overrides
-    $disabledClasses = 'bg-surface-disabled text-content-disabled border-line-disabled cursor-not-allowed hover:bg-surface-disabled active:bg-surface-disabled';
+    // Disabled state overrides (same for all variants)
+    $disabledClasses = 'bg-surface-disabled text-content-disabled border border-line-disabled cursor-not-allowed shadow-none hover:bg-surface-disabled hover:shadow-none active:bg-surface-disabled';
 
-    // Sizes matching Figma: sm, md, lg
+    // Sizes matching Figma with CSS variables
     $sizes = [
-        'sm' => 'px-3 py-1.5 text-sm min-h-8',
-        'md' => 'px-4 py-2 text-base min-h-10',
-        'lg' => 'px-6 py-3 text-lg min-h-12',
+        'sm' => 'px-[var(--button-sm-padding-x)] py-[var(--button-sm-padding-y)] text-xs min-h-[var(--button-sm-min-height)] gap-[var(--button-sm-gap)] rounded-[var(--button-sm-radius)]',
+        'md' => 'px-[var(--button-md-padding-x)] py-[var(--button-md-padding-y)] text-sm min-h-[var(--button-md-min-height)] gap-[var(--button-md-gap)] rounded-[var(--button-md-radius)]',
+        'lg' => 'px-[var(--button-lg-padding-x)] py-[var(--button-lg-padding-y)] text-base min-h-[var(--button-lg-min-height)] gap-[var(--button-lg-gap)] rounded-[var(--button-lg-radius)]',
     ];
 
     $variantClass = $disabled ? $disabledClasses : ($variants[$variant] ?? $variants['primary']);

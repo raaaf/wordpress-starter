@@ -6,6 +6,7 @@
     @param string $anchor - HTML ID for anchor links
     @param string $class - Additional CSS classes
     @param bool $container - Wrap content in container (default: true)
+    @param string $wrapperAttributes - Gutenberg block wrapper attributes (for ACF blocks)
 --}}
 
 @props([
@@ -14,6 +15,7 @@
     'anchor' => null,
     'class' => '',
     'container' => true,
+    'wrapperAttributes' => '',
 ])
 
 @php
@@ -38,7 +40,8 @@
     $paddingClass = $paddings[$padding] ?? $paddings['lg'];
 @endphp
 
-<section @if($anchor) id="{{ esc_attr($anchor) }}" @endif
+<section {!! $wrapperAttributes !!}
+         @if($anchor && !$wrapperAttributes) id="{{ esc_attr($anchor) }}" @endif
          class="{{ $bgClass }} {{ $paddingClass }} {{ $class }}">
     @if($container)
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -13,8 +13,17 @@
     @param string $subtitle - Card subtitle
     @param string $description - Card description
     @param string $size - sm, md, lg (affects spacing and image height)
-    @param bool $hoverable - Add hover effect (orange border)
+    @param bool $hoverable - Add hover effect (brand border)
     @param string $url - Make entire card clickable
+    @param bool $disabled - Disabled state
+
+    States from Figma:
+    - Default: Subtle shadow
+    - Hover: Brand border, enhanced shadow
+    - Active: Pressed effect with inner shadow
+    - Focus: Focus ring for accessibility
+    - Selected: Brand border, enhanced shadow (persistent)
+    - Disabled: Muted colors, no interaction
 --}}
 
 @props([
@@ -29,27 +38,30 @@
     'size' => 'md',
     'hoverable' => false,
     'url' => null,
+    'disabled' => false,
+    'selected' => false,
 ])
 
 @php
+    // Variants from Figma
     $variants = [
-        'default' => 'bg-surface',
-        'elevated' => 'bg-surface shadow-lg',
-        'outlined' => 'bg-surface border border-line',
+        'default' => 'bg-[var(--card-bg,#ffffff)] border border-[var(--card-border,#e5e5e5)] shadow-[var(--shadow-card)]',
+        'elevated' => 'bg-[var(--card-bg,#ffffff)] shadow-lg',
+        'outlined' => 'bg-[var(--card-bg,#ffffff)] border border-line',
         'filled' => 'bg-surface-secondary',
     ];
 
     $sizes = [
         'sm' => ['padding' => 'p-4', 'imageHeight' => 'h-32', 'gap' => 'gap-3'],
-        'md' => ['padding' => 'p-5', 'imageHeight' => 'h-40', 'gap' => 'gap-4'],
-        'lg' => ['padding' => 'p-6', 'imageHeight' => 'h-48', 'gap' => 'gap-5'],
+        'md' => ['padding' => 'p-[var(--card-padding)]', 'imageHeight' => 'h-40', 'gap' => 'gap-[var(--card-gap)]'],
+        'lg' => ['padding' => 'p-8', 'imageHeight' => 'h-48', 'gap' => 'gap-5'],
     ];
 
     // Legacy padding support
     $legacyPaddings = [
         'none' => '',
         'sm' => 'p-4',
-        'md' => 'p-6',
+        'md' => 'p-[var(--card-padding)]',
         'lg' => 'p-8',
     ];
 
@@ -60,18 +72,39 @@
     $isStructuredCard = $image || $title || $subtitle || $description;
     $paddingClass = $isStructuredCard ? '' : ($legacyPaddings[$padding] ?? $legacyPaddings['md']);
 
-    $hoverClass = $hoverable ? 'transition-all duration-200 hover:border-line-accent hover:shadow-md cursor-pointer' : '';
-    $tag = $url ? 'a' : 'div';
+    // Interactive states (hover, active, focus)
+    $isInteractive = $hoverable || $url;
+    $interactiveClasses = $isInteractive && !$disabled
+        ? implode(' ', [
+            'transition-all duration-200 cursor-pointer',
+            'hover:border-line-brand hover:shadow-[var(--shadow-card-hover)]',
+            'active:shadow-[var(--shadow-inner)] active:scale-[0.99]',
+            'focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]',
+        ])
+        : '';
+
+    // Disabled state
+    $disabledClasses = $disabled
+        ? 'opacity-60 cursor-not-allowed'
+        : '';
+
+    // Selected state (from Figma)
+    $selectedClasses = $selected && !$disabled
+        ? 'border-line-brand shadow-[var(--shadow-card-hover)]'
+        : '';
+
+    $tag = $url && !$disabled ? 'a' : 'div';
 @endphp
 
 <{{ $tag }}
-    @if($url) href="{{ esc_url($url) }}" @endif
-    class="block rounded-xl overflow-hidden {{ $variantClass }} {{ $paddingClass }} {{ $hoverClass }} {{ $class }}"
+    @if($url && !$disabled) href="{{ esc_url($url) }}" @endif
+    @if($disabled) aria-disabled="true" @endif
+    class="block rounded-[var(--card-radius)] overflow-hidden {{ $variantClass }} {{ $paddingClass }} {{ $interactiveClasses }} {{ $selectedClasses }} {{ $disabledClasses }} {{ $class }}"
 >
     @if($isStructuredCard)
         {{-- Image --}}
         @if($image)
-            <div class="w-full {{ $sizeConfig['imageHeight'] }} overflow-hidden">
+            <div class="w-full {{ $sizeConfig['imageHeight'] }} overflow-hidden rounded-[var(--card-media-radius,8px)]">
                 <img src="{{ esc_url($image) }}" alt="{{ esc_attr($imageAlt) }}" class="w-full h-full object-cover" loading="lazy" />
             </div>
         @endif
@@ -95,7 +128,7 @@
 
             {{-- Actions slot --}}
             @if(isset($actions))
-                <div class="flex items-center gap-3 mt-auto pt-2">
+                <div class="flex items-center gap-[var(--card-footer-gap,12px)] mt-auto pt-[var(--card-footer-padding-top,16px)]">
                     {{ $actions }}
                 </div>
             @endif

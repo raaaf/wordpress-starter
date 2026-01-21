@@ -9,6 +9,12 @@
     @param string $iconRight - Icon name for right side
     @param bool $disabled - Disabled state
     @param string $class - Additional CSS classes
+
+    States from Figma:
+    - Default: Underlined link with accent/dark color
+    - Hover: Color shifts to hover variant
+    - Visited: Tertiary text color
+    - Disabled: Muted color, no interaction
 --}}
 
 @props([
@@ -36,8 +42,8 @@
     ];
 
     $variants = [
-        'accent' => 'text-content-link hover:text-content-link-hover',
-        'dark' => 'text-content hover:text-content-secondary',
+        'accent' => 'text-content-link hover:text-content-link-hover visited:text-content-tertiary',
+        'dark' => 'text-content hover:text-content-secondary visited:text-content-tertiary',
     ];
 
     $sizeClass = $sizes[$size] ?? $sizes['md'];
@@ -51,7 +57,7 @@
    target="{{ esc_attr($target) }}"
    @if($target === '_blank' && !$disabled) rel="noopener noreferrer" @endif
    @if($disabled) aria-disabled="true" tabindex="-1" @endif
-   class="inline-flex items-center font-medium underline underline-offset-2 transition-colors duration-200 {{ $variantClass }} {{ $sizeClass }} {{ $class }}">
+   class="inline-flex items-center font-medium underline underline-offset-2 transition-colors duration-200 focus-visible:shadow-[var(--shadow-focus-ring-ghost)] focus-visible:outline-none {{ $variantClass }} {{ $sizeClass }} {{ $class }}">
     @if($iconLeft)
         <x-icon name="{{ $iconLeft }}" class="{{ $iconSize }}" />
     @endif
