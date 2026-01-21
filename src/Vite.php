@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WordpressStarter;
+namespace ForeignThemeA;
 
 /**
  * Vite Asset Management
@@ -20,7 +20,10 @@ class Vite
     {
         self::$isDev = defined('WP_DEBUG') && WP_DEBUG && self::isDevServerRunning();
 
+        // Frontend assets (wp_enqueue_scripts only fires on frontend)
         add_action('wp_enqueue_scripts', [self::class, 'enqueueAssets']);
+
+        // Editor JavaScript only (CSS is handled via add_editor_style in ThemeServiceProvider)
         add_action('enqueue_block_editor_assets', [self::class, 'enqueueEditorAssets']);
 
         // Add type="module" to Vite scripts
@@ -32,7 +35,7 @@ class Vite
      */
     public static function addModuleType(string $tag, string $handle, string $src): string
     {
-        $moduleHandles = ['app-js', 'editor-js', 'vite-client', 'vite-client-editor'];
+        $moduleHandles = ['app-js', 'vite-client'];
 
         if (in_array($handle, $moduleHandles, true)) {
             // Remove existing type attribute first, then add type="module"
@@ -45,6 +48,7 @@ class Vite
 
     public static function enqueueAssets(): void
     {
+        // This hook (wp_enqueue_scripts) only fires on frontend, never in admin/editor
         if (self::$isDev) {
             $host = config('vite.dev_server.host', 'localhost');
             $port = config('vite.dev_server.port', 5173);
@@ -53,7 +57,10 @@ class Vite
             // Development mode - inject Vite client
             wp_enqueue_script('vite-client', "{$devServerUrl}/@vite/client", [], null, false);
 
-            // Load assets from dev server
+            // Load CSS from dev server (separate entry point, not imported in JS)
+            wp_enqueue_style('app-css', "{$devServerUrl}/resources/css/app.css", [], null);
+
+            // Load JS from dev server
             wp_enqueue_script('app-js', "{$devServerUrl}/resources/js/app.ts", [], null, true);
         } else {
             // Production mode - use manifest
@@ -74,53 +81,95 @@ class Vite
         }
     }
 
+    /**
+     * Enqueue editor assets.
+     *
+     * Note: All ACF blocks are set to edit mode (no preview rendering).
+     * This means we don't need Alpine.js or complex CSS for block previews.
+     * Only minimal admin UI CSS is loaded here.
+     */
     public static function enqueueEditorAssets(): void
     {
-        if (self::$isDev) {
-            $host = config('vite.dev_server.host', 'localhost');
-            $port = config('vite.dev_server.port', 5173);
-            $devServerUrl = "http://{$host}:{$port}";
+        // All ACF blocks are in edit mode - no preview rendering.
+        // Admin UI CSS for ACF field enhancements is loaded inline below.
 
-            // Development mode - inject Vite client for HMR
-            wp_enqueue_script('vite-client-editor', "{$devServerUrl}/@vite/client", [], null, false);
+        // ACF Icon Radio Field CSS (admin UI enhancement)
+        wp_add_inline_style('wp-block-editor', self::getAcfIconRadioCss());
 
-            // Development mode - load CSS from dev server
-            wp_enqueue_style('editor-style', "{$devServerUrl}/resources/css/editor-style.css", [], null);
-            wp_enqueue_style('app-css-editor', "{$devServerUrl}/resources/css/app.css", [], null);
+        // Force edit mode script - ensures all ACF blocks show form fields
+        wp_enqueue_script(
+            'acf-force-edit-mode',
+            get_theme_file_uri('resources/js/editor-force-edit.js'),
+            ['wp-blocks', 'wp-data', 'wp-element'],
+            null,
+            true
+        );
+    }
 
-            // Development mode - load editor JS (Alpine.js for block previews)
-            wp_enqueue_script('editor-js', "{$devServerUrl}/resources/js/editor.ts", [], null, true);
-
-            // Add inline script BEFORE the module to pass data (wp_localize_script doesn't work with ES modules)
-            wp_add_inline_script('editor-js', 'window.themeData = ' . wp_json_encode([
-                'themeUrl' => get_template_directory_uri(),
-            ]) . ';', 'before');
-        } else {
-            self::loadManifest();
-
-            // Load editor-specific styles
-            if (isset(self::$manifest['resources/css/editor-style.css'])) {
-                $cssFile = self::$manifest['resources/css/editor-style.css']['file'];
-                wp_enqueue_style('editor-style', get_theme_file_uri('dist/' . $cssFile), [], null);
-            }
-
-            // Load main app CSS for block previews (needed for TailwindCSS classes)
-            if (isset(self::$manifest['resources/css/app.css'])) {
-                $cssFile = self::$manifest['resources/css/app.css']['file'];
-                wp_enqueue_style('app-css-editor', get_theme_file_uri('dist/' . $cssFile), [], null);
-            }
-
-            // Load editor JS (Alpine.js for block previews)
-            if (isset(self::$manifest['resources/js/editor.ts'])) {
-                $jsFile = self::$manifest['resources/js/editor.ts']['file'];
-                wp_enqueue_script('editor-js', get_theme_file_uri('dist/' . $jsFile), [], null, true);
-
-                // Localize theme URL for icon loading
-                wp_localize_script('editor-js', 'themeData', [
-                    'themeUrl' => get_template_directory_uri(),
-                ]);
-            }
-        }
+    /**
+     * Get CSS for ACF Icon Radio Field enhancement.
+     * This styles the admin UI for icon selection fields.
+     */
+    private static function getAcfIconRadioCss(): string
+    {
+        return <<<'CSS'
+/* ACF Icon Radio Field Enhancement */
+.acf-icon-radio-field .acf-radio-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.acf-icon-radio-field .acf-radio-list li {
+    margin: 0 !important;
+}
+.acf-icon-radio-field .acf-radio-list input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+.acf-icon-radio-field .acf-radio-list label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+.acf-icon-radio-field .acf-radio-list label:hover {
+    border-color: #007cba;
+    background: #f0f7fc;
+}
+.acf-icon-radio-field .acf-radio-list label:has(input[type="radio"]:checked) {
+    border-color: #007cba;
+    background: #007cba;
+    color: #fff;
+}
+.acf-icon-radio-field .acf-radio-list label:has(input[type="radio"]:checked) svg {
+    color: #fff;
+}
+.acf-icon-radio-field .acf-radio-list label svg {
+    width: 20px;
+    height: 20px;
+}
+.acf-icon-radio-field .acf-radio-list label[data-icon=""] {
+    width: auto;
+    padding: 0 12px;
+    font-size: 12px;
+    color: #666;
+}
+.acf-icon-radio-field .acf-radio-list label .acf-icon-label-text {
+    display: none;
+}
+CSS;
     }
 
     private static function loadManifest(): void
