@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WordpressStarter;
 
+use Illuminate\Container\Container;
 use WordpressStarter\Providers\ServiceProvider;
 use WordpressStarter\Providers\BladeServiceProvider;
 use WordpressStarter\Providers\MenuServiceProvider;
@@ -24,8 +25,17 @@ class Application
 
     private static ?self $instance = null;
 
+    private Container $container;
+
     private function __construct()
     {
+        // Initialize the container
+        $this->container = new Container();
+        Container::setInstance($this->container);
+
+        // Register self in container
+        $this->container->instance(self::class, $this);
+
         // Load configuration first
         Config::load();
         $this->registerProviders();
@@ -92,5 +102,60 @@ class Application
             return $this->resolveProvider($providerClass);
         }
         return null;
+    }
+
+    /**
+     * Get the IoC container instance.
+     */
+    public function getContainer(): Container
+    {
+        return $this->container;
+    }
+
+    /**
+     * Resolve a class from the container.
+     *
+     * @template T
+     * @param class-string<T> $abstract
+     * @return T
+     */
+    public function make(string $abstract): mixed
+    {
+        return $this->container->make($abstract);
+    }
+
+    /**
+     * Register a binding in the container.
+     *
+     * @param string $abstract
+     * @param \Closure|string|null $concrete
+     */
+    public function bind(string $abstract, \Closure|string|null $concrete = null, bool $shared = false): void
+    {
+        $this->container->bind($abstract, $concrete, $shared);
+    }
+
+    /**
+     * Register a shared binding (singleton) in the container.
+     *
+     * @param string $abstract
+     * @param \Closure|string|null $concrete
+     */
+    public function singleton(string $abstract, \Closure|string|null $concrete = null): void
+    {
+        $this->container->singleton($abstract, $concrete);
+    }
+
+    /**
+     * Register an existing instance in the container.
+     *
+     * @template T
+     * @param string $abstract
+     * @param T $instance
+     * @return T
+     */
+    public function instance(string $abstract, mixed $instance): mixed
+    {
+        return $this->container->instance($abstract, $instance);
     }
 }

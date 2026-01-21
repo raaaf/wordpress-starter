@@ -162,7 +162,7 @@ class PluginServiceProvider extends ServiceProvider
     /**
      * Create default pages
      *
-     * @param array<string, array{title: string, template: string}> $pages
+     * @param array<string, array{title: string, template: string, status?: string}> $pages
      */
     private function createDefaultPages(array $pages): void
     {
@@ -172,13 +172,20 @@ class PluginServiceProvider extends ServiceProvider
             // Check if page already exists
             $existing = get_page_by_path($slug);
             if ($existing) {
+                // If styleguide exists, store its ID
+                if ($slug === 'styleguide') {
+                    update_option('wp_starter_styleguide_page_id', $existing->ID);
+                }
                 continue;
             }
+
+            // Determine post status (default: publish, styleguide: private)
+            $postStatus = $pageData['status'] ?? 'publish';
 
             $pageId = wp_insert_post([
                 'post_title' => $pageData['title'],
                 'post_name' => $slug,
-                'post_status' => 'publish',
+                'post_status' => $postStatus,
                 'post_type' => 'page',
                 'post_content' => '',
             ]);
@@ -192,6 +199,13 @@ class PluginServiceProvider extends ServiceProvider
                 // Track home page
                 if ($slug === 'home') {
                     $homePageId = $pageId;
+                }
+
+                // Track styleguide page
+                if ($slug === 'styleguide') {
+                    update_option('wp_starter_styleguide_page_id', $pageId);
+                    // Dismiss the welcome notice since styleguide is created
+                    update_option('wp_starter_welcome_dismissed', true);
                 }
 
                 // Set legal pages in theme options (if ACF is active)
@@ -379,6 +393,7 @@ class PluginServiceProvider extends ServiceProvider
         delete_transient('wp_starter_activation_redirect');
 
         // Don't redirect on bulk activation or AJAX
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Core WordPress bulk activation parameter
         if (wp_doing_ajax() || isset($_GET['activate-multi'])) {
             return;
         }
@@ -397,7 +412,7 @@ class PluginServiceProvider extends ServiceProvider
 
         $categories = $this->getPluginsByCategory();
         $selectedPlugins = $this->getSelectedPlugins();
-        $missingSelectedPlugins = array_filter($selectedPlugins, fn($p) => !($p['check'])());
+        $missingSelectedPlugins = array_filter($selectedPlugins, fn($p) => !( $p['check'] )());
         $hasConfig = $this->hasSetupConfig();
 
         ?>
@@ -406,26 +421,28 @@ class PluginServiceProvider extends ServiceProvider
 
             <div class="wp-starter-setup-header" style="background: #fff; padding: 20px; margin: 20px 0; border-left: 4px solid #2271b1; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
                 <h2 style="margin-top: 0;"><?php esc_html_e('Willkommen beim WP-Starter Theme!', 'wp-starter'); ?></h2>
-                <?php if ($hasConfig): ?>
+                <?php if ($hasConfig) : ?>
                     <p><?php esc_html_e('Ihre vorkonfigurierten Plugins werden jetzt installiert.', 'wp-starter'); ?></p>
-                <?php else: ?>
+                <?php else : ?>
                     <p><?php esc_html_e('Installieren Sie die empfohlenen Plugins für die beste Erfahrung mit diesem Theme.', 'wp-starter'); ?></p>
                 <?php endif; ?>
 
-                <?php if (!empty($missingSelectedPlugins)): ?>
+                <?php if (!empty($missingSelectedPlugins)) : ?>
                     <p>
                         <button type="button" id="wp-starter-install-all" class="button button-primary button-hero">
                             <?php
                             printf(
                                 $hasConfig
+                                    // translators: %d is the number of preconfigured plugins to install
                                     ? esc_html__('Vorkonfigurierte Plugins installieren (%d)', 'wp-starter')
+                                    // translators: %d is the number of free plugins to install
                                     : esc_html__('Alle kostenlosen Plugins installieren (%d)', 'wp-starter'),
                                 count($missingSelectedPlugins)
                             );
                             ?>
                         </button>
                     </p>
-                <?php else: ?>
+                <?php else : ?>
                     <p style="color: #00a32a; font-weight: 600;">
                         <span class="dashicons dashicons-yes-alt"></span>
                         <?php esc_html_e('Alle ausgewählten Plugins sind installiert!', 'wp-starter'); ?>
@@ -462,41 +479,41 @@ class PluginServiceProvider extends ServiceProvider
                 }
             </style>
 
-            <?php foreach ($categories as $categoryName => $categoryPlugins): ?>
+            <?php foreach ($categories as $categoryName => $categoryPlugins) : ?>
                 <div class="wp-starter-plugin-category" style="background: #fff; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
                     <h2><?php echo esc_html($categoryName); ?></h2>
                     <table class="wp-list-table widefat plugins">
                         <tbody>
-                            <?php foreach ($categoryPlugins as $key => $plugin): ?>
+                            <?php foreach ($categoryPlugins as $key => $plugin) : ?>
                                 <?php
-                                $isActive = ($plugin['check'])();
+                                $isActive = ( $plugin['check'] )();
                                 $isExternal = !empty($plugin['external']);
                                 $isInstalled = !$isExternal && PluginInstaller::isInstalled($plugin['slug']);
                                 ?>
                                 <tr class="<?php echo $isActive ? 'active' : 'inactive'; ?>" data-slug="<?php echo esc_attr($plugin['slug']); ?>">
                                     <td class="plugin-title column-primary" style="padding: 15px;">
                                         <strong><?php echo esc_html($plugin['name']); ?></strong>
-                                        <?php if ($isExternal): ?>
+                                        <?php if ($isExternal) : ?>
                                             <span style="background: #d63638; color: #fff; padding: 2px 8px; border-radius: 3px; font-size: 11px; margin-left: 5px;">Premium</span>
                                         <?php endif; ?>
-                                        <?php if ($plugin['required']): ?>
+                                        <?php if ($plugin['required']) : ?>
                                             <span style="background: #dba617; color: #fff; padding: 2px 8px; border-radius: 3px; font-size: 11px; margin-left: 5px;">Erforderlich</span>
                                         <?php endif; ?>
                                         <p class="description" style="margin: 5px 0 0;"><?php echo esc_html($plugin['description']); ?></p>
                                     </td>
                                     <td class="column-status" style="padding: 15px; text-align: right; white-space: nowrap;">
-                                        <?php if ($isActive): ?>
+                                        <?php if ($isActive) : ?>
                                             <span style="color: #00a32a;"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Aktiv', 'wp-starter'); ?></span>
-                                        <?php elseif ($isExternal): ?>
+                                        <?php elseif ($isExternal) : ?>
                                             <a href="<?php echo esc_url($plugin['external']); ?>" class="button" target="_blank" rel="noopener">
                                                 <?php esc_html_e('Website besuchen', 'wp-starter'); ?>
                                                 <span class="dashicons dashicons-external" style="line-height: 1.4;"></span>
                                             </a>
-                                        <?php elseif ($isInstalled): ?>
+                                        <?php elseif ($isInstalled) : ?>
                                             <button type="button" class="button button-primary wp-starter-activate-plugin" data-slug="<?php echo esc_attr($plugin['slug']); ?>">
                                                 <?php esc_html_e('Aktivieren', 'wp-starter'); ?>
                                             </button>
-                                        <?php else: ?>
+                                        <?php else : ?>
                                             <button type="button" class="button button-primary wp-starter-install-plugin" data-slug="<?php echo esc_attr($plugin['slug']); ?>">
                                                 <?php esc_html_e('Installieren & Aktivieren', 'wp-starter'); ?>
                                             </button>
@@ -518,7 +535,7 @@ class PluginServiceProvider extends ServiceProvider
 
         <script>
         jQuery(document).ready(function($) {
-            var nonce = '<?php echo wp_create_nonce(self::NONCE_ACTION); ?>';
+            var nonce = '<?php echo esc_attr( wp_create_nonce( self::NONCE_ACTION ) ); ?>';
 
             // Single plugin install
             $('.wp-starter-install-plugin, .wp-starter-activate-plugin').on('click', function() {
@@ -757,7 +774,7 @@ class PluginServiceProvider extends ServiceProvider
         }
 
         $selectedPlugins = $this->getSelectedPlugins();
-        $missingPlugins = array_filter($selectedPlugins, fn($p) => !($p['check'])());
+        $missingPlugins = array_filter($selectedPlugins, fn($p) => !( $p['check'] )());
         $slugs = array_column($missingPlugins, 'slug');
 
         $results = PluginInstaller::bulkInstallAndActivate($slugs);
@@ -812,6 +829,7 @@ class PluginServiceProvider extends ServiceProvider
     {
         // Don't show on plugin install page or setup page
         global $pagenow;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading page parameter for display logic only
         $page = isset($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
 
         if ($pagenow === 'update.php' || $pagenow === 'plugins.php' || $page === self::SETUP_PAGE_SLUG) {
@@ -827,7 +845,7 @@ class PluginServiceProvider extends ServiceProvider
                 continue;
             }
 
-            if (!($plugin['check'])()) {
+            if (!( $plugin['check'] )()) {
                 if ($plugin['required']) {
                     $missingRequired[$key] = $plugin;
                 } else {
@@ -882,8 +900,9 @@ class PluginServiceProvider extends ServiceProvider
         printf(
             '<div class="notice notice-info is-dismissible"><p>%s</p><p><a href="%s" class="button button-primary">%s</a> <a href="%s" style="margin-left: 10px;">%s</a></p></div>',
             sprintf(
+                // translators: %d is the number of recommended plugins available
                 esc_html__('Es sind %d empfohlene Plugins für das WP-Starter Theme verfügbar.', 'wp-starter'),
-                $count
+                esc_html( $count )
             ),
             esc_url($setupUrl),
             esc_html__('Plugins anzeigen & installieren', 'wp-starter'),
@@ -927,7 +946,7 @@ class PluginServiceProvider extends ServiceProvider
     {
         $missing = [];
         foreach ($this->plugins as $key => $plugin) {
-            if ($plugin['required'] && !($plugin['check'])()) {
+            if ($plugin['required'] && !( $plugin['check'] )()) {
                 $missing[$key] = $plugin;
             }
         }

@@ -44,9 +44,24 @@ class PluginInstaller
             ];
         }
 
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/misc.php';
         require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
         require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
         require_once ABSPATH . 'wp-admin/includes/class-plugin-upgrader.php';
+
+        // Initialize WP_Filesystem - required for plugin installation
+        if (!function_exists('WP_Filesystem')) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+        }
+
+        // Use direct filesystem access (no FTP credentials needed for local)
+        if (!WP_Filesystem(false, false, true)) {
+            return [
+                'success' => false,
+                'message' => __('Dateisystem konnte nicht initialisiert werden.', 'wp-starter'),
+            ];
+        }
 
         // Get plugin info from WordPress.org
         $api = plugins_api('plugin_information', [
@@ -74,8 +89,8 @@ class PluginInstaller
             ];
         }
 
-        // Install the plugin
-        $skin = new QuietSkin();
+        // Install the plugin using quiet skin to suppress output
+        $skin = self::createQuietSkin();
         $upgrader = new \Plugin_Upgrader($skin);
         $result = $upgrader->install($api->download_link);
 
@@ -104,6 +119,9 @@ class PluginInstaller
                 'message' => __('Installation fehlgeschlagen.', 'wp-starter'),
             ];
         }
+
+        // Clear plugin cache so WordPress sees the newly installed plugin
+        wp_clean_plugins_cache();
 
         return [
             'success' => true,
@@ -253,67 +271,58 @@ class PluginInstaller
 
         return $results;
     }
-}
 
-/**
- * Quiet Skin for Plugin Upgrader
- *
- * Suppresses output during plugin installation for AJAX requests.
- * Errors are stored for later retrieval.
- */
-class QuietSkin extends \WP_Upgrader_Skin
-{
+
     /**
-     * Stored errors
+     * Create a quiet skin for silent plugin installation
      *
-     * @var array<string|\WP_Error>
-     */
-    private array $errors = [];
-
-    public function feedback($feedback, ...$args): void
-    {
-        // Suppress output
-    }
-
-    public function header(): void
-    {
-        // Suppress output
-    }
-
-    public function footer(): void
-    {
-        // Suppress output
-    }
-
-    /**
-     * Store errors for later retrieval
+     * Uses an anonymous class to avoid autoload issues with WP_Upgrader_Skin
      *
-     * @param string|\WP_Error $errors
+     * @return \WP_Upgrader_Skin
      */
-    public function error($errors): void
+    private static function createQuietSkin(): \WP_Upgrader_Skin
     {
-        if (is_string($errors)) {
-            $this->errors[] = $errors;
-        } elseif (is_wp_error($errors)) {
-            $this->errors[] = $errors;
-        }
-    }
+        return new class() extends \WP_Upgrader_Skin {
+            /** @var array<string|\WP_Error> */
+            private array $errors = [];
 
-    /**
-     * Get stored errors
-     *
-     * @return array<string|\WP_Error>
-     */
-    public function get_errors(): array
-    {
-        return $this->errors;
-    }
+            public function feedback($feedback, ...$args): void
+            {
+                // Suppress output
+            }
 
-    /**
-     * Check if there are errors
-     */
-    public function has_errors(): bool
-    {
-        return !empty($this->errors);
+            public function header(): void
+            {
+                // Suppress output
+            }
+
+            public function footer(): void
+            {
+                // Suppress output
+            }
+
+            /**
+             * @param string|\WP_Error $errors
+             */
+            public function error($errors): void
+            {
+                if (is_string($errors)) {
+                    $this->errors[] = $errors;
+                } elseif (is_wp_error($errors)) {
+                    $this->errors[] = $errors;
+                }
+            }
+
+            /** @return array<string|\WP_Error> */
+            public function get_errors(): array
+            {
+                return $this->errors;
+            }
+
+            public function has_errors(): bool
+            {
+                return !empty($this->errors);
+            }
+        };
     }
 }
