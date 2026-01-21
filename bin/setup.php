@@ -1350,6 +1350,9 @@ CSS;
                 $this->runCommand('Staging all changes', 'git add .');
                 $commitMsg = 'Initial theme setup: ' . $this->config['theme_name'];
                 $this->runCommand('Creating commit', "git commit -m " . escapeshellarg($commitMsg));
+
+                // Check if remote exists and offer to push
+                $this->offerToPush();
             }
             return;
         }
@@ -1372,6 +1375,35 @@ CSS;
         $this->runCommand('Creating initial commit', "git commit -m " . escapeshellarg($commitMsg));
 
         echo "\n  " . $this->color("✓ Git repository initialized with initial commit.", 'green') . "\n";
+
+        // Check if remote exists and offer to push
+        $this->offerToPush();
+    }
+
+    /**
+     * Check if a remote exists and offer to push
+     */
+    private function offerToPush(): void
+    {
+        // Check if origin remote exists
+        $remoteUrl = trim(shell_exec('git remote get-url origin 2>/dev/null') ?? '');
+
+        if (empty($remoteUrl)) {
+            return;
+        }
+
+        echo "\n  " . $this->color("Remote found: ", 'gray') . $this->color($remoteUrl, 'cyan') . "\n";
+
+        $doPush = strtolower($this->prompt(
+            'Push to remote?',
+            'y',
+            '(y/n)'
+        )) === 'y';
+
+        if ($doPush) {
+            $this->runCommand('Pushing to remote', 'git push -u origin HEAD');
+            echo "\n  " . $this->color("✓ Pushed to remote repository.", 'green') . "\n";
+        }
     }
 
     private function createEnvFile(): void
