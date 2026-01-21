@@ -55,38 +55,76 @@ class Security
     }
 
     /**
+     * Get localhost sources for CSP in development environments.
+     *
+     * CSP doesn't support port wildcards, so we list common development ports.
+     * Includes both localhost and 127.0.0.1 for maximum compatibility.
+     *
+     * @return string Space-prefixed localhost sources or empty string in production
+     */
+    private static function getLocalSources(): string
+    {
+        $isLocalEnv = defined('WP_ENVIRONMENT_TYPE') && WP_ENVIRONMENT_TYPE === 'local';
+
+        if (!$isLocalEnv) {
+            return '';
+        }
+
+        // Common development server ports
+        $ports = [
+            3000,  // React, Next.js, generic dev servers
+            3001,  // Alternative React port
+            4173,  // Vite preview
+            5173,  // Vite dev server (default)
+            5174,  // Vite alternative port
+            8000,  // Python, PHP built-in server
+            8080,  // Common alternative port
+            8888,  // Jupyter, some PHP setups
+            9000,  // PHP-FPM, some dev servers
+        ];
+
+        $hosts = ['localhost', '127.0.0.1'];
+        $protocols = ['http', 'ws']; // HTTP and WebSocket
+
+        $sources = [];
+        foreach ($hosts as $host) {
+            foreach ($ports as $port) {
+                foreach ($protocols as $protocol) {
+                    $sources[] = "{$protocol}://{$host}:{$port}";
+                }
+            }
+        }
+
+        return ' ' . implode(' ', $sources);
+    }
+
+    /**
      * Build the Content-Security-Policy header value.
      */
     public static function getCSPHeader(): string
     {
         $nonce = self::getNonce();
-        $isDevMode = defined('WP_DEBUG') && WP_DEBUG && Vite::isDevServerRunning();
+        $localSources = self::getLocalSources();
 
         // Base directives
         $directives = [
-            "default-src 'self'",
-            "font-src 'self' data: https://fonts.gstatic.com",
-            "img-src 'self' data: https:",
+            "default-src 'self'" . $localSources,
+            "font-src 'self' data: https://fonts.gstatic.com" . $localSources,
+            "img-src 'self' data: https:" . $localSources,
             "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com",
         ];
 
         // Script sources
         // Note: 'unsafe-eval' is required for Alpine.js to evaluate x-data expressions
-        $scriptSrc = "'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'";
-        if ($isDevMode) {
-            $scriptSrc .= ' http://localhost:5173';
-        }
+        $scriptSrc = "'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'" . $localSources;
         $directives[] = "script-src {$scriptSrc}";
 
         // Style sources (unsafe-inline needed for WordPress/ACF inline styles)
-        $styleSrc = "'self' 'unsafe-inline' https://fonts.googleapis.com";
+        $styleSrc = "'self' 'unsafe-inline' https://fonts.googleapis.com" . $localSources;
         $directives[] = "style-src {$styleSrc}";
 
         // Connect sources (API calls, WebSockets)
-        $connectSrc = "'self'";
-        if ($isDevMode) {
-            $connectSrc .= ' http://localhost:5173 ws://localhost:5173';
-        }
+        $connectSrc = "'self'" . $localSources;
         $directives[] = "connect-src {$connectSrc}";
 
         // Worker sources (for WordPress emoji loader and other web workers)

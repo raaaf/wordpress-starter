@@ -44,15 +44,21 @@ resources/
 
 ## Design Tokens
 
-Auto-generated from Figma in `resources/css/tokens.css`:
-- **Light/Dark Mode** via `data-theme="dark"` or `prefers-color-scheme`
-- **Semantic tokens:** `--bg-*`, `--text-*`, `--border-*`, `--icon-*`
-- **Component tokens:** buttons, inputs, badges, cards, typography
+Auto-generated from Figma in `resources/css/tokens.css`. See [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) for full documentation.
+
+**Update tokens:**
+```bash
+# Export from Figma → config/design-tokens/*.tokens.json
+npm run tokens        # Generate CSS
+npm run tokens:watch  # Watch mode
+```
+
+**Semantic tokens:** `--bg-*`, `--text-*`, `--border-*`, `--icon-*`
 
 Usage:
 ```css
-background: var(--bg-primary);
-color: var(--text-secondary);
+background: var(--bg-surface);
+color: var(--text-content);
 ```
 
 ## ACF Blocks

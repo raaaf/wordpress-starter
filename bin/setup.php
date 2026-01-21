@@ -168,6 +168,13 @@ class ThemeSetup
         'styleguide' => ['title' => 'Styleguide', 'template' => '', 'status' => 'private'],
     ];
 
+    /** @var array<string, string[]> Menu assignments: menu location => page slugs */
+    private array $menuAssignments = [
+        'header-menu' => ['about', 'services', 'contact'],
+        'legal-menu'  => ['privacy', 'imprint'],
+        'footer-menu' => ['about', 'services', 'contact'],
+    ];
+
     public function __construct()
     {
         $this->themeDir = getcwd();
@@ -1251,6 +1258,7 @@ CSS;
             'delete_default_content' => $this->config['delete_default_content'],
             'set_permalink_structure' => $this->config['set_permalink_structure'],
             'pages' => $this->config['create_pages'] ? $this->samplePages : [],
+            'menu_assignments' => $this->config['create_pages'] ? $this->menuAssignments : [],
             'color_scheme' => $this->config['color_scheme'] ?? 'system',
         ];
 
@@ -1527,6 +1535,11 @@ CSS;
             echo $this->color("Selected plugins will be auto-installed when you activate the theme.\n", 'gray');
             echo "\n";
         }
+
+        echo $this->color("💡 Tip: ", 'yellow') . "Add this to your " . $this->color("wp-config.php", 'cyan') . " for auto-debug when Vite runs:\n";
+        echo $this->color("   \$vite_dev = @fsockopen('localhost', 5173, \$e, \$m, 0.1) !== false;\n", 'gray');
+        echo $this->color("   define('WP_DEBUG', \$vite_dev);\n", 'gray');
+        echo "\n";
 
         echo $this->color("To revert all changes: ", 'gray') . $this->color("git checkout .", 'cyan') . "\n";
         echo "\n";

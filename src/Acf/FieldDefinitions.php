@@ -1191,18 +1191,6 @@ class FieldDefinitions
                 true,
                 'Der Call-to-Action Button mit Link und Text.'
             ),
-            self::selectField(
-                "field_{$prefix}_background_color",
-                'Hintergrundfarbe',
-                'background_color',
-                [
-                    'brand' => 'Markenfarbe',
-                    'brand-secondary' => 'Markenfarbe Sekundär',
-                ],
-                'brand',
-                false,
-                'Wähle die Hintergrundfarbe für diesen CTA-Bereich.'
-            ),
         ];
     }
 
