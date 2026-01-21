@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace WordpressStarter\Acf;
 
 /**
- * Shared ACF field definitions used by both FlexibleContent and BlockFields
+ * Shared ACF field definitions for Flexible Content layouts
  *
- * This class provides reusable field configurations to eliminate code duplication
- * between flexible content layouts and Gutenberg blocks.
+ * This class provides reusable field configurations for all
+ * flexible content layouts used in the page builder.
  *
  * All labels are in German for better user experience in German-speaking projects.
  */
@@ -298,7 +298,7 @@ class FieldDefinitions
      * @param string $key Unique field key
      * @param string $label Field label
      * @param string $name Field name
-     * @param array<string, string> $choices Choices array (value => label)
+     * @param array<int|string, string> $choices Choices array (value => label)
      * @param string $defaultValue Default selected value
      * @param string $instructions Field instructions
      * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
