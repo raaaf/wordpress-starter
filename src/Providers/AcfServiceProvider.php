@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
-use WordpressStarter\Acf\Blocks;
-use WordpressStarter\Acf\BlockFields;
+use WordpressStarter\Acf\AcfExtended;
 use WordpressStarter\Acf\Options;
 use WordpressStarter\Acf\FlexibleContent;
 use Illuminate\Support\Facades\Blade;
@@ -17,17 +16,14 @@ class AcfServiceProvider extends ServiceProvider
         // Set up ACF JSON save/load points
         $this->setupAcfJson();
 
-        // Register ACF blocks
-        add_action('acf/init', [Blocks::class, 'register']);
+        // Configure ACF Extended for better Flexible Content UX
+        AcfExtended::init();
 
         // Register options pages
         add_action('acf/init', [Options::class, 'register']);
 
         // Register flexible content fields
         add_action('acf/init', [FlexibleContent::class, 'register']);
-
-        // Register block field groups
-        add_action('acf/init', [BlockFields::class, 'register']);
 
         // Initialize cache clearing
         Options::initCacheClearing();
@@ -37,16 +33,13 @@ class AcfServiceProvider extends ServiceProvider
 
         // Register field validation hooks
         $this->registerValidationHooks();
-
-        // Register Block Bindings API (WordPress 6.5+)
-        $this->registerBlockBindings();
     }
 
     public function boot(): void
     {
         // Register Blade directives
         $this->registerBladeDirectives();
-        
+
         // Add ACF admin styles
         $this->addAdminStyles();
     }
@@ -54,17 +47,17 @@ class AcfServiceProvider extends ServiceProvider
     private function setupAcfJson(): void
     {
         $jsonPath = get_template_directory() . '/acf-json';
-        
+
         // Create directory if it doesn't exist
         if (!is_dir($jsonPath)) {
             wp_mkdir_p($jsonPath);
         }
-        
+
         // Set save point
         add_filter('acf/settings/save_json', function () use ($jsonPath) {
             return $jsonPath;
         });
-        
+
         // Set load point
         add_filter('acf/settings/load_json', function ($paths) use ($jsonPath) {
             unset($paths[0]);
@@ -152,19 +145,6 @@ class AcfServiceProvider extends ServiceProvider
         // @kses directive - sanitize WYSIWYG content
         Blade::directive('kses', function ($expression) {
             return "<?php echo wp_kses_post({$expression}); ?>";
-        });
-
-        // @innerblocks directive - render InnerBlocks for nested blocks
-        Blade::directive('innerblocks', function ($expression) {
-            if (empty($expression)) {
-                return '<?php echo \\WordpressStarter\\Acf\\Blocks::renderInnerBlocks(); ?>';
-            }
-            return "<?php echo \\WordpressStarter\\Acf\\Blocks::renderInnerBlocks({$expression}); ?>";
-        });
-
-        // @blockwrapper directive - output block wrapper attributes
-        Blade::directive('blockwrapper', function ($expression) {
-            return "<?php echo \\WordpressStarter\\Acf\\Blocks::getBlockWrapperAttributes({$expression}); ?>";
         });
     }
 
@@ -270,32 +250,5 @@ class AcfServiceProvider extends ServiceProvider
         add_filter('acf/update_value/type=textarea', function ($value, $postId, $field) {
             return sanitize_textarea_field($value);
         }, 10, 3);
-    }
-
-    /**
-     * Register Block Bindings API support (WordPress 6.5+)
-     * Allows ACF fields to be used as dynamic block attributes
-     *
-     * @see https://www.advancedcustomfields.com/blog/acf-6-2-8
-     */
-    private function registerBlockBindings(): void
-    {
-        // Only register if WordPress 6.5+ and ACF supports it
-        if (!function_exists('register_block_bindings_source')) {
-            return;
-        }
-
-        // ACF already registers 'acf/field' source in ACF 6.2.8+
-        // This filter allows customizing which fields are accessible
-        add_filter('acf/rest_api/field_settings/show_in_rest', function ($showInRest, $field) {
-            // Allow specific field types in REST API for block bindings
-            $allowedTypes = ['text', 'textarea', 'number', 'email', 'url', 'image', 'file'];
-
-            if (in_array($field['type'], $allowedTypes, true)) {
-                return true;
-            }
-
-            return $showInRest;
-        }, 10, 2);
     }
 }

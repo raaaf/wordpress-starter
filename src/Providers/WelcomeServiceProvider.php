@@ -8,7 +8,7 @@ namespace WordpressStarter\Providers;
  * Welcome Service Provider
  *
  * Shows a welcome notice after theme activation and offers to create
- * a styleguide reference page with real ACF blocks.
+ * a styleguide reference page with ACF Flexible Content layouts.
  */
 class WelcomeServiceProvider extends ServiceProvider
 {
@@ -286,8 +286,8 @@ class WelcomeServiceProvider extends ServiceProvider
         ];
         $isRelevantPage = $screen && (
             in_array($screen->id, $relevantPages, true) ||
-            str_contains($screen->id ?? '', 'theme-settings') ||
-            str_contains($screen->id ?? '', 'options')
+            str_contains($screen->id, 'theme-settings') ||
+            str_contains($screen->id, 'options')
         );
 
         if (!$isRelevantPage) {
@@ -478,7 +478,7 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Create the styleguide page with real ACF Gutenberg blocks
+     * Create the styleguide page with ACF Flexible Content layouts
      *
      * @return int Post ID on success, 0 on failure
      */
@@ -487,12 +487,10 @@ class WelcomeServiceProvider extends ServiceProvider
         // Import placeholder images first
         $this->importPlaceholderImages();
 
-        // Generate the block content
-        $content = $this->generateStyleguideContent();
-
+        // Create page with empty content (ACF handles the content)
         $pageId = wp_insert_post([
             'post_title' => __('Styleguide', 'wp-starter'),
-            'post_content' => $content,
+            'post_content' => '',
             'post_status' => 'private',
             'post_type' => 'page',
             'post_author' => get_current_user_id(),
@@ -500,6 +498,13 @@ class WelcomeServiceProvider extends ServiceProvider
 
         if (!$pageId || is_wp_error($pageId)) {
             return 0;
+        }
+
+        // Generate and save the flexible content layouts
+        $layouts = $this->generateStyleguideLayouts();
+
+        if (function_exists('update_field')) {
+            update_field('page_sections', $layouts, $pageId);
         }
 
         return $pageId;
@@ -620,386 +625,227 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate unique block ID
+     * Generate a Flexible Content layout array
      *
-     * @return string Unique block ID
+     * @param string $layoutName Layout name (e.g., 'hero', 'one_column')
+     * @param array<string, mixed> $data Layout field data
+     * @return array<string, mixed> Layout array for ACF Flexible Content
      */
-    private function generateBlockId(): string
+    private function generateLayout(string $layoutName, array $data): array
     {
-        return 'block_' . substr(md5( (string) microtime(true) . wp_rand()), 0, 13);
+        return array_merge(['acf_fc_layout' => $layoutName], $data);
     }
 
     /**
-     * Generate ACF block markup
+     * Generate all styleguide layouts for ACF Flexible Content
      *
-     * @param string $blockName Block name without acf/ prefix
-     * @param array<string, mixed> $data Block data
-     * @param array<string, mixed> $attrs Additional attributes
-     * @return string Block markup
+     * @return array<int, array<string, mixed>> Array of layout arrays
      */
-    private function generateAcfBlock(string $blockName, array $data, array $attrs = []): string
+    private function generateStyleguideLayouts(): array
     {
-        $blockAttrs = array_merge([
-            'id' => $this->generateBlockId(),
-            'name' => "acf/{$blockName}",
-            'data' => $data,
-            'mode' => 'preview',
-        ], $attrs);
-
-        $json = wp_json_encode($blockAttrs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-        return "<!-- wp:acf/{$blockName} {$json} /-->";
-    }
-
-    /**
-     * Generate a WordPress heading block
-     *
-     * @param string $text Heading text
-     * @param int $level Heading level (1-6)
-     * @return string Block markup
-     */
-    private function generateHeading(string $text, int $level = 2): string
-    {
-        $tag = "h{$level}";
-        return "<!-- wp:heading {\"level\":{$level}} -->\n<{$tag} class=\"wp-block-heading\">{$text}</{$tag}>\n<!-- /wp:heading -->";
-    }
-
-    /**
-     * Generate a WordPress paragraph block
-     *
-     * @param string $text Paragraph text
-     * @return string Block markup
-     */
-    private function generateParagraph(string $text): string
-    {
-        return "<!-- wp:paragraph -->\n<p>{$text}</p>\n<!-- /wp:paragraph -->";
-    }
-
-    /**
-     * Generate a WordPress separator block
-     *
-     * @return string Block markup
-     */
-    private function generateSeparator(): string
-    {
-        return "<!-- wp:separator {\"className\":\"is-style-wide\"} -->\n<hr class=\"wp-block-separator has-alpha-channel-opacity is-style-wide\"/>\n<!-- /wp:separator -->";
-    }
-
-    /**
-     * Generate a WordPress spacer block
-     *
-     * @param int $height Height in pixels
-     * @return string Block markup
-     */
-    private function generateSpacer(int $height = 40): string
-    {
-        return "<!-- wp:spacer {\"height\":\"{$height}px\"} -->\n<div style=\"height:{$height}px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer -->";
-    }
-
-    /**
-     * Wrap content blocks in a section (wp:group) for proper spacing
-     *
-     * @param string $title Section heading text
-     * @param string $content The block content to wrap
-     * @param int $headingLevel Heading level (2, 3, or 4)
-     * @param string|null $description Optional description paragraph
-     * @return string Wrapped section markup
-     */
-    private function generateSection(string $title, string $content, int $headingLevel = 3, ?string $description = null): string
-    {
-        $heading = $this->generateHeading($title, $headingLevel);
-        $desc = $description ? "\n\n" . $this->generateParagraph($description) : '';
-
-        return "<!-- wp:group {\"tagName\":\"section\",\"className\":\"styleguide-section\"} -->\n<section class=\"wp-block-group styleguide-section\">\n\n{$heading}{$desc}\n\n{$content}\n\n</section>\n<!-- /wp:group -->";
-    }
-
-    /**
-     * Generate all styleguide content
-     *
-     * @return string Complete page content with all blocks
-     */
-    private function generateStyleguideContent(): string
-    {
-        $blocks = [];
+        $layouts = [];
 
         // =====================================================================
         // TEIL 1: DESIGN SYSTEM - GRUNDLAGEN
         // =====================================================================
 
-        $blocks[] = $this->generateSection(
-            'Design System',
-            $this->generateParagraph('Alle grundlegenden Design-Tokens und Stilregeln des Themes.'),
-            2
-        );
+        // Intro
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => '',
+            'content' => '<h2>Design System</h2><p>Alle grundlegenden Design-Tokens und Stilregeln des Themes.</p>',
+            'background_color' => 'primary',
+        ]);
 
         // 1.1 Typografie
-        $blocks[] = $this->generateSection(
-            'Typografie',
-            $this->generateTypographySection(),
-            3,
-            'Alle verfügbaren Typografie-Klassen des Design Systems.'
-        );
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => 'Typografie',
+            'content' => '<h3>Typografie</h3><p>Alle verfügbaren Typografie-Klassen des Design Systems.</p>' . $this->generateTypographyHtml(),
+            'background_color' => 'secondary',
+        ]);
 
         // 1.2 Farben
-        $blocks[] = $this->generateSection(
-            'Farben',
-            $this->generateColorsSection(),
-            3,
-            'Die semantischen Farbklassen für Hintergründe, Text und Rahmen.'
-        );
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => 'Farben',
+            'content' => '<h3>Farben</h3><p>Die semantischen Farbklassen für Hintergründe, Text und Rahmen.</p>' . $this->generateColorsHtml(),
+            'background_color' => 'primary',
+        ]);
 
         // 1.3 Schatten
-        $blocks[] = $this->generateSection(
-            'Schatten',
-            $this->generateShadowsSection(),
-            3,
-            'Definierte Schatten-Tokens für verschiedene UI-Elemente.'
-        );
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => 'Schatten',
+            'content' => '<h3>Schatten</h3><p>Definierte Schatten-Tokens für verschiedene UI-Elemente.</p>' . $this->generateShadowsHtml(),
+            'background_color' => 'secondary',
+        ]);
 
         // 1.4 Verläufe
-        $blocks[] = $this->generateSection(
-            'Verläufe (Gradients)',
-            $this->generateGradientsSection(),
-            3,
-            'Farbverläufe für Buttons und Hintergründe.'
-        );
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => 'Verläufe',
+            'content' => '<h3>Verläufe (Gradients)</h3><p>Farbverläufe für Buttons und Hintergründe.</p>' . $this->generateGradientsHtml(),
+            'background_color' => 'primary',
+        ]);
 
         // 1.5 Abstände & Radien
-        $blocks[] = $this->generateSection(
-            'Abstände & Radien',
-            $this->generateSpacingSection(),
-            3,
-            'Spacing-Scale und Border-Radius-Werte für konsistente Layouts.'
-        );
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => 'Abstände',
+            'content' => '<h3>Abstände &amp; Radien</h3><p>Spacing-Scale und Border-Radius-Werte für konsistente Layouts.</p>' . $this->generateSpacingHtml(),
+            'background_color' => 'secondary',
+        ]);
 
         // =====================================================================
         // TEIL 2: DESIGN SYSTEM - KOMPONENTEN
         // =====================================================================
 
-        $blocks[] = $this->generateSection(
-            'UI-Komponenten',
-            $this->generateComponentsSection(),
-            2,
-            'Wiederverwendbare Blade-Komponenten für die Gestaltung.'
-        );
+        // UI Components
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => 'UI-Komponenten',
+            'content' => '<h2>UI-Komponenten</h2><p>Wiederverwendbare Blade-Komponenten für die Gestaltung.</p>' . $this->generateComponentsHtml(),
+            'background_color' => 'primary',
+        ]);
 
-        // 2.2 Layout-Helfer
-        $blocks[] = $this->generateSection(
-            'Layout-Helfer',
-            $this->generateLayoutHelpersSection(),
-            3,
-            'Grid, Section und Prose Komponenten für strukturierte Layouts.'
-        );
-
-        // =====================================================================
-        // TEIL 3: ACF BLÖCKE - HERO & EINFÜHRUNG
-        // =====================================================================
-
-        $blocks[] = $this->generateSection(
-            'ACF Blöcke',
-            $this->generateParagraph('Alle 28 verfügbaren Gutenberg-Blöcke des Themes.'),
-            2
-        );
-
-        // 3.1 Hero
-        $blocks[] = $this->generateSection(
-            'Hero-Bereich',
-            $this->generateHeroBlock(),
-            3,
-            'Ein großer Kopfbereich für den Seitenstart mit Hintergrundbild.'
-        );
+        // Layout Helpers
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => 'Layout-Helfer',
+            'content' => '<h3>Layout-Helfer</h3><p>Grid, Section und Prose Komponenten für strukturierte Layouts.</p>' . $this->generateLayoutHelpersHtml(),
+            'background_color' => 'secondary',
+        ]);
 
         // =====================================================================
-        // TEIL 4: ACF BLÖCKE - LAYOUT & TEXT
+        // TEIL 3: FLEXIBLE CONTENT LAYOUTS - HERO
         // =====================================================================
 
-        $blocks[] = $this->generateSection(
-            'Layout & Text',
-            $this->generateParagraph('Verschiedene Spalten-Layouts für die Inhaltsstrukturierung.'),
-            2
-        );
+        // Intro for layouts section
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => '',
+            'content' => '<h2>Flexible Content Layouts</h2><p>Alle 28 verfügbaren Layouts für den Seitenaufbau.</p>',
+            'background_color' => 'primary',
+        ]);
 
-        // 4.1 Eine Spalte
-        $blocks[] = $this->generateSection('Eine Spalte', $this->generateOneColumnBlock(), 4);
-
-        // 4.2 Zwei Spalten
-        $blocks[] = $this->generateSection('Zwei Spalten', $this->generateTwoColumnsBlock(), 4);
-
-        // 4.3 Drei Spalten
-        $blocks[] = $this->generateSection('Drei Spalten', $this->generateThreeColumnsBlock(), 4);
-
-        // 4.4 Vier Spalten
-        $blocks[] = $this->generateSection('Vier Spalten', $this->generateFourColumnsBlock(), 4);
-
-        // 4.5 Ein Drittel + Zwei Drittel
-        $blocks[] = $this->generateSection('Ein Drittel + Zwei Drittel', $this->generateOneThirdTwoThirdsBlock(), 4);
-
-        // 4.6 Zwei Drittel + Ein Drittel
-        $blocks[] = $this->generateSection('Zwei Drittel + Ein Drittel', $this->generateTwoThirdsOneThirdBlock(), 4);
-
-        // 4.7 Zwei Spalten mit Bildern
-        $blocks[] = $this->generateSection('Zwei Spalten mit Bildern', $this->generateTwoColumnsImagesBlock(), 4);
-
-        // 4.8 Trenner
-        $blocks[] = $this->generateSection(
-            'Trenner',
-            $this->generateDividerBlock(),
-            4,
-            'Ein einfacher Trennbereich mit Hintergrundfarbe.'
-        );
+        // Hero
+        $layouts[] = $this->getHeroLayoutData();
 
         // =====================================================================
-        // TEIL 5: ACF BLÖCKE - INTERAKTIVE ELEMENTE
+        // TEIL 4: LAYOUT & TEXT
         // =====================================================================
 
-        $blocks[] = $this->generateSection(
-            'Interaktive Elemente',
-            $this->generateParagraph('Blöcke mit Benutzerinteraktion wie Akkordeons, Tabs und Buttons.'),
-            2
-        );
+        // Section intro
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => '',
+            'content' => '<h2>Layout &amp; Text</h2><p>Verschiedene Spalten-Layouts für die Inhaltsstrukturierung.</p>',
+            'background_color' => 'secondary',
+        ]);
 
-        // 5.1 Button Block
-        $blocks[] = $this->generateSection(
-            'Button',
-            $this->generateButtonBlock(),
-            4,
-            'Standalone Button-Block für flexible Platzierung.'
-        );
-
-        // 5.2 Akkordeon
-        $blocks[] = $this->generateSection('Akkordeon (FAQ)', $this->generateAccordionBlock(), 4);
-
-        // 5.3 Tabs
-        $blocks[] = $this->generateSection('Tabs', $this->generateTabsBlock(), 4);
+        // Column layouts
+        $layouts[] = $this->getOneColumnLayoutData();
+        $layouts[] = $this->getTwoColumnsLayoutData();
+        $layouts[] = $this->getThreeColumnsLayoutData();
+        $layouts[] = $this->getFourColumnsLayoutData();
+        $layouts[] = $this->getOneThirdTwoThirdsLayoutData();
+        $layouts[] = $this->getTwoThirdsOneThirdLayoutData();
+        $layouts[] = $this->getTwoColumnsImagesLayoutData();
+        $layouts[] = $this->getDividerLayoutData();
 
         // =====================================================================
-        // TEIL 6: ACF BLÖCKE - KARTEN & INHALTE
+        // TEIL 5: INTERAKTIVE ELEMENTE
         // =====================================================================
 
-        $blocks[] = $this->generateSection(
-            'Karten & Inhalte',
-            $this->generateParagraph('Blöcke zur Darstellung von Features, Team, Preisen und mehr.'),
-            2
-        );
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => '',
+            'content' => '<h2>Interaktive Elemente</h2><p>Layouts mit Benutzerinteraktion wie Akkordeons, Tabs und Buttons.</p>',
+            'background_color' => 'primary',
+        ]);
 
-        // 6.1 Karten / Features
-        $blocks[] = $this->generateSection('Karten / Features', $this->generateCardsBlock(), 4);
-
-        // 6.2 Kundenstimmen
-        $blocks[] = $this->generateSection('Kundenstimmen', $this->generateTestimonialsBlock(), 4);
-
-        // 6.3 Team
-        $blocks[] = $this->generateSection('Team', $this->generateTeamBlock(), 4);
-
-        // 6.4 Statistiken
-        $blocks[] = $this->generateSection('Statistiken', $this->generateStatsBlock(), 4);
-
-        // 6.5 Preistabelle
-        $blocks[] = $this->generateSection('Preistabelle', $this->generatePricingBlock(), 4);
-
-        // 6.6 Zeitstrahl
-        $blocks[] = $this->generateSection('Zeitstrahl', $this->generateTimelineBlock(), 4);
-
-        // 6.7 Beiträge
-        $blocks[] = $this->generateSection(
-            'Beiträge / Blog',
-            $this->generatePostsBlock(),
-            4,
-            'Zeigt automatisch die neuesten Beiträge an.'
-        );
+        $layouts[] = $this->getButtonLayoutData();
+        $layouts[] = $this->getAccordionLayoutData();
+        $layouts[] = $this->getTabsLayoutData();
 
         // =====================================================================
-        // TEIL 7: ACF BLÖCKE - MEDIEN
+        // TEIL 6: KARTEN & INHALTE
         // =====================================================================
 
-        $blocks[] = $this->generateSection(
-            'Medien',
-            $this->generateParagraph('Blöcke für Bilder, Videos und Galerien.'),
-            2
-        );
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => '',
+            'content' => '<h2>Karten &amp; Inhalte</h2><p>Layouts zur Darstellung von Features, Team, Preisen und mehr.</p>',
+            'background_color' => 'secondary',
+        ]);
 
-        // 7.1 Bild
-        $blocks[] = $this->generateSection('Bild', $this->generateImageBlock(), 4);
-
-        // 7.2 Galerie
-        $blocks[] = $this->generateSection('Galerie', $this->generateGalleryBlock(), 4);
-
-        // 7.3 Vorher/Nachher
-        $blocks[] = $this->generateSection('Vorher/Nachher', $this->generateBeforeAfterBlock(), 4);
-
-        // 7.4 Video
-        $blocks[] = $this->generateSection('Video', $this->generateVideoBlock(), 4);
-
-        // 7.5 Logo-Slider
-        $blocks[] = $this->generateSection('Logo-Slider', $this->generateLogoSliderBlock(), 4);
+        $layouts[] = $this->getCardsLayoutData();
+        $layouts[] = $this->getTestimonialsLayoutData();
+        $layouts[] = $this->getTeamLayoutData();
+        $layouts[] = $this->getStatsLayoutData();
+        $layouts[] = $this->getPricingLayoutData();
+        $layouts[] = $this->getTimelineLayoutData();
+        $layouts[] = $this->getPostsLayoutData();
 
         // =====================================================================
-        // TEIL 8: ACF BLÖCKE - KONTAKT & STANDORT
+        // TEIL 7: MEDIEN
         // =====================================================================
 
-        $blocks[] = $this->generateSection(
-            'Kontakt & Standort',
-            $this->generateParagraph('Blöcke für Kontaktformulare und Kartenansichten.'),
-            2
-        );
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => '',
+            'content' => '<h2>Medien</h2><p>Layouts für Bilder, Videos und Galerien.</p>',
+            'background_color' => 'primary',
+        ]);
 
-        // 8.1 Kontaktformular
-        $blocks[] = $this->generateSection(
-            'Kontaktformular',
-            $this->generateContactFormBlock(),
-            4,
-            'Integration mit Contact Form 7. Zeigt Kontaktdaten aus den Theme-Optionen.'
-        );
-
-        // 8.2 Karte
-        $blocks[] = $this->generateSection(
-            'Google Maps Karte',
-            $this->generateMapBlock(),
-            4,
-            'DSGVO-konform: Karte wird erst nach Zustimmung geladen.'
-        );
+        $layouts[] = $this->getImageLayoutData();
+        $layouts[] = $this->getGalleryLayoutData();
+        $layouts[] = $this->getBeforeAfterLayoutData();
+        $layouts[] = $this->getVideoLayoutData();
+        $layouts[] = $this->getLogoSliderLayoutData();
 
         // =====================================================================
-        // TEIL 9: ACF BLÖCKE - CALL-TO-ACTION
+        // TEIL 8: KONTAKT & STANDORT
         // =====================================================================
 
-        $blocks[] = $this->generateSection(
-            'Call-to-Action',
-            $this->generateParagraph('Auffällige Handlungsaufforderungen für wichtige Konversionen.'),
-            2
-        );
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => '',
+            'content' => '<h2>Kontakt &amp; Standort</h2><p>Layouts für Kontaktformulare und Kartenansichten.</p>',
+            'background_color' => 'secondary',
+        ]);
 
-        // 9.1 CTA Block
-        $blocks[] = $this->generateSection('CTA Block', $this->generateCtaBlock(), 4);
+        $layouts[] = $this->getContactFormLayoutData();
+        $layouts[] = $this->getMapLayoutData();
 
         // =====================================================================
-        // TEIL 10: ACF BLÖCKE - DATEN & TABELLEN
+        // TEIL 9: CALL-TO-ACTION
         // =====================================================================
 
-        $blocks[] = $this->generateSection(
-            'Daten & Tabellen',
-            $this->generateParagraph('Strukturierte Darstellung von tabellarischen Daten.'),
-            2
-        );
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => '',
+            'content' => '<h2>Call-to-Action</h2><p>Auffällige Handlungsaufforderungen für wichtige Konversionen.</p>',
+            'background_color' => 'primary',
+        ]);
 
-        // 10.1 Tabelle
-        $blocks[] = $this->generateSection('Tabelle', $this->generateTableBlock(), 4);
+        $layouts[] = $this->getCtaLayoutData();
 
-        return implode("\n\n", $blocks);
+        // =====================================================================
+        // TEIL 10: DATEN & TABELLEN
+        // =====================================================================
+
+        $layouts[] = $this->generateLayout('one_column', [
+            'label' => '',
+            'content' => '<h2>Daten &amp; Tabellen</h2><p>Strukturierte Darstellung von tabellarischen Daten.</p>',
+            'background_color' => 'secondary',
+        ]);
+
+        $layouts[] = $this->getTableLayoutData();
+
+        return $layouts;
     }
 
     // =========================================================================
-    // BLOCK GENERATORS
+    // LAYOUT DATA GENERATORS
     // =========================================================================
 
     /**
-     * Generate Hero block
+     * Get Hero layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateHeroBlock(): string
+    private function getHeroLayoutData(): array
     {
         $imageId = $this->getImageId(1);
 
-        return $this->generateAcfBlock('hero', [
+        return $this->generateLayout('hero', [
             'variant' => 'background',
             'badge' => 'Design System',
             'title' => 'Willkommen auf unserer Website',
@@ -1016,15 +862,17 @@ class WelcomeServiceProvider extends ServiceProvider
                 'url' => '#kontakt',
                 'target' => '',
             ],
-        ], ['align' => 'full']);
+        ]);
     }
 
     /**
-     * Generate One Column block
+     * Get One Column layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateOneColumnBlock(): string
+    private function getOneColumnLayoutData(): array
     {
-        return $this->generateAcfBlock('one-column', [
+        return $this->generateLayout('one_column', [
             'label' => 'Über uns',
             'content' => '<h3>Einspaltiger Inhalt</h3><p>Dies ist ein Beispiel für einen einspaltigen Textblock. Hier können Sie längere Texte, Überschriften und andere Inhalte platzieren. Der Text fließt über die gesamte verfügbare Breite.</p><p>Nutzen Sie dieses Layout für Einleitungstexte, ausführliche Beschreibungen oder wichtige Mitteilungen, die die volle Aufmerksamkeit des Lesers erfordern.</p>',
             'background_color' => 'primary',
@@ -1032,11 +880,13 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Two Columns block
+     * Get Two Columns layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateTwoColumnsBlock(): string
+    private function getTwoColumnsLayoutData(): array
     {
-        return $this->generateAcfBlock('two-columns', [
+        return $this->generateLayout('two_columns', [
             'column_1' => '<h4>Linke Spalte</h4><p>Dies ist der Inhalt der linken Spalte. Beide Spalten haben die gleiche Breite (50/50). Ideal für vergleichende Darstellungen oder parallele Informationen.</p>',
             'column_2' => '<h4>Rechte Spalte</h4><p>Dies ist der Inhalt der rechten Spalte. Die Spalten passen sich automatisch an die Bildschirmgröße an und werden auf mobilen Geräten untereinander angezeigt.</p>',
             'background_color' => 'secondary',
@@ -1044,11 +894,13 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Three Columns block
+     * Get Three Columns layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateThreeColumnsBlock(): string
+    private function getThreeColumnsLayoutData(): array
     {
-        return $this->generateAcfBlock('three-columns', [
+        return $this->generateLayout('three_columns', [
             'column_1' => '<h4>Spalte 1</h4><p>Erste von drei gleichmäßig verteilten Spalten. Perfekt für die Darstellung von drei Hauptthemen oder Produkten.</p>',
             'column_2' => '<h4>Spalte 2</h4><p>Die mittlere Spalte eignet sich gut für das wichtigste Element, da sie automatisch im Fokus des Betrachters liegt.</p>',
             'column_3' => '<h4>Spalte 3</h4><p>Die dritte Spalte rundet das Layout ab. Auf kleineren Bildschirmen stapeln sich die Spalten vertikal.</p>',
@@ -1057,11 +909,13 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Four Columns block
+     * Get Four Columns layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateFourColumnsBlock(): string
+    private function getFourColumnsLayoutData(): array
     {
-        return $this->generateAcfBlock('four-columns', [
+        return $this->generateLayout('four_columns', [
             'column_1' => '<h4>Spalte 1</h4><p>Erste von vier Spalten für kompakte Inhalte.</p>',
             'column_2' => '<h4>Spalte 2</h4><p>Zweite Spalte mit kurzem Inhalt.</p>',
             'column_3' => '<h4>Spalte 3</h4><p>Dritte Spalte für weitere Infos.</p>',
@@ -1071,11 +925,13 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate One Third Two Thirds block
+     * Get One Third Two Thirds layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateOneThirdTwoThirdsBlock(): string
+    private function getOneThirdTwoThirdsLayoutData(): array
     {
-        return $this->generateAcfBlock('one-third-two-thirds', [
+        return $this->generateLayout('one_third_two_thirds', [
             'column_1' => '<h4>Schmal</h4><p>Diese schmale Spalte (1/3) eignet sich für Nebensachen, Navigationen oder ergänzende Informationen.</p>',
             'column_2' => '<h4>Breit</h4><p>Die breite Spalte (2/3) nimmt den Hauptinhalt auf. Dieses asymmetrische Layout lenkt die Aufmerksamkeit auf den wichtigeren Teil und eignet sich gut für Artikel mit Seitenleiste.</p>',
             'background_color' => 'primary',
@@ -1083,11 +939,13 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Two Thirds One Third block
+     * Get Two Thirds One Third layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateTwoThirdsOneThirdBlock(): string
+    private function getTwoThirdsOneThirdLayoutData(): array
     {
-        return $this->generateAcfBlock('two-thirds-one-third', [
+        return $this->generateLayout('two_thirds_one_third', [
             'column_1' => '<h4>Hauptinhalt</h4><p>Die breite linke Spalte (2/3) enthält den Hauptinhalt. Dieses Layout ist das Gegenstück zum vorherigen Block und bietet Flexibilität bei der Seitengestaltung.</p>',
             'column_2' => '<h4>Sidebar</h4><p>Die schmalere rechte Spalte (1/3) kann für Zusatzinformationen genutzt werden.</p>',
             'background_color' => 'secondary',
@@ -1095,14 +953,16 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Two Columns with Images block
+     * Get Two Columns with Images layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateTwoColumnsImagesBlock(): string
+    private function getTwoColumnsImagesLayoutData(): array
     {
         $image1 = $this->getImageId(2);
         $image2 = $this->getImageId(3);
 
-        return $this->generateAcfBlock('two-columns-images', [
+        return $this->generateLayout('two_columns_images', [
             'image_1' => $image1,
             'column_1' => '<h4>Projekt A</h4><p>Beschreibung des ersten Projekts mit Bild. Die Karte kombiniert visuelle und textliche Elemente.</p>',
             'image_2' => $image2,
@@ -1112,11 +972,13 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Accordion block
+     * Get Accordion layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateAccordionBlock(): string
+    private function getAccordionLayoutData(): array
     {
-        return $this->generateAcfBlock('accordion', [
+        return $this->generateLayout('accordion', [
             'accordion' => [
                 [
                     'title' => 'Was bieten Sie an?',
@@ -1140,11 +1002,13 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Tabs block
+     * Get Tabs layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateTabsBlock(): string
+    private function getTabsLayoutData(): array
     {
-        return $this->generateAcfBlock('tabs', [
+        return $this->generateLayout('tabs', [
             'title' => '',
             'tabs' => [
                 [
@@ -1165,15 +1029,17 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Cards block
+     * Get Cards layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateCardsBlock(): string
+    private function getCardsLayoutData(): array
     {
         $icon1 = $this->getImageId(4);
         $icon2 = $this->getImageId(5);
         $icon3 = $this->getImageId(6);
 
-        return $this->generateAcfBlock('cards', [
+        return $this->generateLayout('cards', [
             'title' => 'Unsere Leistungen',
             'cards' => [
                 [
@@ -1201,14 +1067,16 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Testimonials block
+     * Get Testimonials layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateTestimonialsBlock(): string
+    private function getTestimonialsLayoutData(): array
     {
         $image1 = $this->getImageId(1);
         $image2 = $this->getImageId(2);
 
-        return $this->generateAcfBlock('testimonials', [
+        return $this->generateLayout('testimonials', [
             'title' => 'Das sagen unsere Kunden',
             'testimonials' => [
                 [
@@ -1230,15 +1098,17 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Team block
+     * Get Team layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateTeamBlock(): string
+    private function getTeamLayoutData(): array
     {
         $image1 = $this->getImageId(3);
         $image2 = $this->getImageId(4);
         $image3 = $this->getImageId(5);
 
-        return $this->generateAcfBlock('team', [
+        return $this->generateLayout('team', [
             'title' => 'Unser Team',
             'members' => [
                 [
@@ -1272,36 +1142,38 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Stats block
+     * Get Stats layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateStatsBlock(): string
+    private function getStatsLayoutData(): array
     {
-        return $this->generateAcfBlock('stats', [
+        return $this->generateLayout('stats', [
             'title' => 'Zahlen & Fakten',
             'stats' => [
                 [
                     'number' => 250,
                     'suffix' => '+',
                     'label' => 'Zufriedene Kunden',
-                    'icon' => '👥',
+                    'icon' => '',
                 ],
                 [
                     'number' => 15,
                     'suffix' => '',
                     'label' => 'Jahre Erfahrung',
-                    'icon' => '📅',
+                    'icon' => '',
                 ],
                 [
                     'number' => 500,
                     'suffix' => '+',
                     'label' => 'Projekte abgeschlossen',
-                    'icon' => '✅',
+                    'icon' => '',
                 ],
                 [
                     'number' => 98,
                     'suffix' => '%',
                     'label' => 'Kundenzufriedenheit',
-                    'icon' => '⭐',
+                    'icon' => '',
                 ],
             ],
             'background_color' => 'brand',
@@ -1309,11 +1181,13 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Pricing block
+     * Get Pricing layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generatePricingBlock(): string
+    private function getPricingLayoutData(): array
     {
-        return $this->generateAcfBlock('pricing-table', [
+        return $this->generateLayout('pricing_table', [
             'title' => 'Unsere Pakete',
             'plans' => [
                 [
@@ -1346,14 +1220,16 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Timeline block
+     * Get Timeline layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateTimelineBlock(): string
+    private function getTimelineLayoutData(): array
     {
         $image1 = $this->getImageId(1);
         $image2 = $this->getImageId(2);
 
-        return $this->generateAcfBlock('timeline', [
+        return $this->generateLayout('timeline', [
             'title' => 'Unsere Geschichte',
             'events' => [
                 [
@@ -1386,18 +1262,16 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Image block
+     * Get Image layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateImageBlock(): string
+    private function getImageLayoutData(): array
     {
         $imageId = $this->getImageId(1);
 
-        return $this->generateAcfBlock('image', [
-            'image' => [
-                'ID' => $imageId,
-                'id' => $imageId,
-                'alt' => 'Beispielbild für den Styleguide',
-            ],
+        return $this->generateLayout('image', [
+            'image' => $imageId,
             'show_border' => true,
             'show_caption' => true,
             'background_color' => 'primary',
@@ -1405,9 +1279,11 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Gallery block
+     * Get Gallery layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateGalleryBlock(): string
+    private function getGalleryLayoutData(): array
     {
         $images = [];
         for ($i = 1; $i <= 6; $i++) {
@@ -1417,7 +1293,7 @@ class WelcomeServiceProvider extends ServiceProvider
             }
         }
 
-        return $this->generateAcfBlock('gallery', [
+        return $this->generateLayout('gallery', [
             'title' => 'Bildergalerie',
             'images' => $images,
             'columns' => '3',
@@ -1426,14 +1302,16 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Before/After block
+     * Get Before/After layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateBeforeAfterBlock(): string
+    private function getBeforeAfterLayoutData(): array
     {
         $imageBefore = $this->getImageId(1);
         $imageAfter = $this->getImageId(2);
 
-        return $this->generateAcfBlock('before-after', [
+        return $this->generateLayout('before_after', [
             'title' => 'Vorher vs. Nachher',
             'image_before' => $imageBefore,
             'image_after' => $imageAfter,
@@ -1444,13 +1322,15 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Video block
+     * Get Video layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateVideoBlock(): string
+    private function getVideoLayoutData(): array
     {
         $poster = $this->getImageId(3);
 
-        return $this->generateAcfBlock('video', [
+        return $this->generateLayout('video', [
             'source' => 'external',
             'video' => '',
             'video_url' => 'https://www.youtube.com/embed/dQw4w9WgXcQ',
@@ -1460,9 +1340,11 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Logo Slider block
+     * Get Logo Slider layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateLogoSliderBlock(): string
+    private function getLogoSliderLayoutData(): array
     {
         $logos = [];
         for ($i = 1; $i <= 6; $i++) {
@@ -1490,7 +1372,7 @@ class WelcomeServiceProvider extends ServiceProvider
             }
         }
 
-        return $this->generateAcfBlock('logo-slider', [
+        return $this->generateLayout('logo_slider', [
             'title' => 'Unsere Partner',
             'logos' => $logos,
             'autoplay' => true,
@@ -1499,11 +1381,13 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate CTA block
+     * Get CTA layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateCtaBlock(): string
+    private function getCtaLayoutData(): array
     {
-        return $this->generateAcfBlock('cta', [
+        return $this->generateLayout('cta', [
             'title' => 'Bereit loszulegen?',
             'content' => '<p>Kontaktieren Sie uns noch heute für ein unverbindliches Beratungsgespräch. Wir freuen uns darauf, gemeinsam mit Ihnen Ihre Ziele zu erreichen.</p>',
             'cta' => [
@@ -1516,21 +1400,25 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Divider block
+     * Get Divider layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateDividerBlock(): string
+    private function getDividerLayoutData(): array
     {
-        return $this->generateAcfBlock('divider', [
+        return $this->generateLayout('divider', [
             'background_color' => 'brand-subtle',
         ]);
     }
 
     /**
-     * Generate Table block
+     * Get Table layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateTableBlock(): string
+    private function getTableLayoutData(): array
     {
-        return $this->generateAcfBlock('table', [
+        return $this->generateLayout('table', [
             'title' => 'Preisübersicht',
             'headers' => [
                 ['label' => 'Leistung'],
@@ -1578,9 +1466,9 @@ class WelcomeServiceProvider extends ServiceProvider
     // =========================================================================
 
     /**
-     * Generate Typography section
+     * Generate Typography HTML for styleguide
      */
-    private function generateTypographySection(): string
+    private function generateTypographyHtml(): string
     {
         $html = '<div class="space-y-6 p-8 bg-surface-secondary rounded-xl">';
 
@@ -1614,13 +1502,13 @@ class WelcomeServiceProvider extends ServiceProvider
 
         $html .= '</div>';
 
-        return "<!-- wp:html -->\n{$html}\n<!-- /wp:html -->";
+        return $html;
     }
 
     /**
-     * Generate Colors section
+     * Generate Colors HTML for styleguide
      */
-    private function generateColorsSection(): string
+    private function generateColorsHtml(): string
     {
         $html = '<div class="space-y-8">';
 
@@ -1698,13 +1586,13 @@ class WelcomeServiceProvider extends ServiceProvider
 
         $html .= '</div>';
 
-        return "<!-- wp:html -->\n{$html}\n<!-- /wp:html -->";
+        return $html;
     }
 
     /**
-     * Generate Shadows section
+     * Generate Shadows HTML for styleguide
      */
-    private function generateShadowsSection(): string
+    private function generateShadowsHtml(): string
     {
         $html = '<div class="space-y-6">';
         $html .= '<div class="grid grid-cols-2 md:grid-cols-4 gap-6">';
@@ -1731,13 +1619,13 @@ class WelcomeServiceProvider extends ServiceProvider
 
         $html .= '</div></div>';
 
-        return "<!-- wp:html -->\n{$html}\n<!-- /wp:html -->";
+        return $html;
     }
 
     /**
-     * Generate Gradients section
+     * Generate Gradients HTML for styleguide
      */
-    private function generateGradientsSection(): string
+    private function generateGradientsHtml(): string
     {
         $html = '<div class="space-y-6">';
         $html .= '<div class="grid grid-cols-2 md:grid-cols-3 gap-6">';
@@ -1760,13 +1648,13 @@ class WelcomeServiceProvider extends ServiceProvider
 
         $html .= '</div></div>';
 
-        return "<!-- wp:html -->\n{$html}\n<!-- /wp:html -->";
+        return $html;
     }
 
     /**
-     * Generate Spacing section
+     * Generate Spacing HTML for styleguide
      */
-    private function generateSpacingSection(): string
+    private function generateSpacingHtml(): string
     {
         $html = '<div class="space-y-8">';
 
@@ -1827,13 +1715,13 @@ class WelcomeServiceProvider extends ServiceProvider
 
         $html .= '</div>';
 
-        return "<!-- wp:html -->\n{$html}\n<!-- /wp:html -->";
+        return $html;
     }
 
     /**
-     * Generate Components section
+     * Generate Components HTML for styleguide
      */
-    private function generateComponentsSection(): string
+    private function generateComponentsHtml(): string
     {
         $html = '<div class="space-y-12">';
 
@@ -1938,9 +1826,11 @@ class WelcomeServiceProvider extends ServiceProvider
         $html .= '<div class="flex flex-wrap items-center gap-6 p-6 mt-4 bg-surface-secondary rounded-lg">';
 
         // Helper to get inline SVG
-        $getIcon = function($name, $class = 'w-5 h-5') use ($iconDir) {
+        $getIcon = function ($name, $class = 'w-5 h-5') use ($iconDir) {
             $path = $iconDir . $name . '.svg';
-            if (!file_exists($path)) return '';
+            if (!file_exists($path)) {
+				return '';
+            }
             $svg = file_get_contents($path);
             $svg = preg_replace('/\s*(width|height)="[^"]*"/', '', $svg);
             return preg_replace('/<svg/', '<svg class="' . $class . ' inline-block shrink-0" aria-hidden="true"', $svg, 1);
@@ -1975,13 +1865,13 @@ class WelcomeServiceProvider extends ServiceProvider
 
         $html .= '</div>';
 
-        return "<!-- wp:html -->\n{$html}\n<!-- /wp:html -->";
+        return $html;
     }
 
     /**
-     * Generate Layout Helpers section
+     * Generate Layout Helpers HTML for styleguide
      */
-    private function generateLayoutHelpersSection(): string
+    private function generateLayoutHelpersHtml(): string
     {
         $html = '<div class="space-y-8">';
 
@@ -2048,7 +1938,7 @@ class WelcomeServiceProvider extends ServiceProvider
 
         $html .= '</div>';
 
-        return "<!-- wp:html -->\n{$html}\n<!-- /wp:html -->";
+        return $html;
     }
 
     /**
@@ -2106,15 +1996,17 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     // =========================================================================
-    // ADDITIONAL BLOCK GENERATORS
+    // ADDITIONAL LAYOUT DATA GENERATORS
     // =========================================================================
 
     /**
-     * Generate Button block
+     * Get Button layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateButtonBlock(): string
+    private function getButtonLayoutData(): array
     {
-        return $this->generateAcfBlock('button', [
+        return $this->generateLayout('button', [
             'button' => [
                 'title' => 'Jetzt starten',
                 'url' => '#',
@@ -2127,11 +2019,13 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Contact Form block
+     * Get Contact Form layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateContactFormBlock(): string
+    private function getContactFormLayoutData(): array
     {
-        return $this->generateAcfBlock('contact-form', [
+        return $this->generateLayout('contact_form', [
             'title' => 'Kontaktieren Sie uns',
             'content' => '<p>Haben Sie Fragen oder möchten Sie mehr erfahren? Füllen Sie einfach das Formular aus und wir melden uns schnellstmöglich bei Ihnen.</p>',
             'form_id' => '',
@@ -2141,11 +2035,13 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Map block
+     * Get Map layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generateMapBlock(): string
+    private function getMapLayoutData(): array
     {
-        return $this->generateAcfBlock('map', [
+        return $this->generateLayout('map', [
             'title' => 'So finden Sie uns',
             'address' => 'Musterstraße 123, 12345 Berlin, Deutschland',
             'embed_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2427.924165409515!2d13.404954!3d52.520008!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47a84e373f035901%3A0x42120465b5e3b70!2sBerlin!5e0!3m2!1sde!2sde!4v1234567890',
@@ -2156,11 +2052,13 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Generate Posts block
+     * Get Posts layout data
+     *
+     * @return array<string, mixed>
      */
-    private function generatePostsBlock(): string
+    private function getPostsLayoutData(): array
     {
-        return $this->generateAcfBlock('posts', [
+        return $this->generateLayout('posts', [
             'title' => 'Aktuelle Beiträge',
             'post_type' => 'post',
             'posts_per_page' => 3,
