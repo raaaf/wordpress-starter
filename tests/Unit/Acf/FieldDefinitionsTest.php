@@ -238,7 +238,8 @@ final class FieldDefinitionsTest extends TestCase
     {
         $fields = FieldDefinitions::ctaBlockFields('block_cta');
 
-        $this->assertCount(4, $fields);
+        // Returns 3 fields (background color now handled at layout level)
+        $this->assertCount(3, $fields);
 
         // Title field
         $titleField = $fields[0];
@@ -263,19 +264,6 @@ final class FieldDefinitionsTest extends TestCase
         $this->assertSame('cta', $buttonField['name']);
         $this->assertSame('link', $buttonField['type']);
         $this->assertSame(1, $buttonField['required']);
-
-        // Background color (limited to brand colors only)
-        $bgField = $fields[3];
-        $this->assertSame('field_block_cta_background_color', $bgField['key']);
-        $this->assertSame('Hintergrundfarbe', $bgField['label']);
-        $this->assertSame('background_color', $bgField['name']);
-        $this->assertSame('select', $bgField['type']);
-        $this->assertSame('brand', $bgField['default_value']);
-
-        // Should only have 2 color choices
-        $this->assertCount(2, $bgField['choices']);
-        $this->assertArrayHasKey('brand', $bgField['choices']);
-        $this->assertArrayHasKey('brand-secondary', $bgField['choices']);
     }
 
     public function testCtaBlockFieldsUsesWysiwygInsteadOfTextarea(): void
