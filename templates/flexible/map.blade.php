@@ -94,8 +94,8 @@
                     referrerpolicy="no-referrer-when-downgrade"
                     class="rounded-lg"
                     title="{{ __('Google Maps Karte', 'wp-starter') }}{{ $address ? ': ' . esc_attr($address) : '' }}"
-                    @load="iframeLoaded = true"
-                    @error="iframeError = true"
+                    x-on:load="iframeLoaded = true"
+                    x-on:error="iframeError = true"
                 ></iframe>
             </template>
         </div>

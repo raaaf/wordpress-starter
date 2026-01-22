@@ -87,6 +87,8 @@ class ThemeServiceProvider extends ServiceProvider
                 'jquery-core',      // jQuery must load synchronously for inline scripts
                 'jquery-migrate',
                 'wp-polyfill',      // Polyfills must load first
+                'wp-hooks',         // Required by wp-i18n (defines wp.hooks)
+                'wp-i18n',          // Required by inline translation scripts (Contact Form 7, etc.)
             ];
 
             if (in_array($handle, $noDeferHandles, true)) {

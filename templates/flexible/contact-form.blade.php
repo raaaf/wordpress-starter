@@ -13,10 +13,10 @@
     $background = get_sub_field('background_color') ?: 'primary';
 
     // Get contact info from theme options
-    $companyName = \StiftungsNavigatorGmbH\Acf\Fields::option('company_name', '');
-    $address = \StiftungsNavigatorGmbH\Acf\Fields::option('address', '');
-    $phone = \StiftungsNavigatorGmbH\Acf\Fields::option('phone', '');
-    $email = \StiftungsNavigatorGmbH\Acf\Fields::option('email', '');
+    $companyName = \WordpressStarter\Acf\Fields::option('company_name', '');
+    $address = \WordpressStarter\Acf\Fields::option('address', '');
+    $phone = \WordpressStarter\Acf\Fields::option('phone', '');
+    $email = \WordpressStarter\Acf\Fields::option('email', '');
 @endphp
 
 <x-section :background="$background" class="contact-form">
