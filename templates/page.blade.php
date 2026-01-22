@@ -10,9 +10,21 @@
                     </header>
                 @endunless
 
-                <div class="page-content container mx-auto px-4">
-                    @php(the_content())
-                </div>
+                {{-- Render ACF Flexible Content if available --}}
+                @if(have_rows('page_sections'))
+                    @while(have_rows('page_sections'))
+                        @php(the_row())
+                        @php($layout = get_row_layout())
+                        @includeIf('flexible.' . str_replace('_', '-', $layout))
+                    @endwhile
+                @endif
+
+                {{-- Render standard WordPress content if available --}}
+                @if(get_the_content())
+                    <div class="page-content container mx-auto px-4">
+                        @php(the_content())
+                    </div>
+                @endif
             </article>
         @endwhile
     @endif

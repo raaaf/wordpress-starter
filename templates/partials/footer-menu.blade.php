@@ -77,7 +77,7 @@
             @if($showNav)
                 <div>
                     <h3 class="text-lg font-semibold text-content mb-4">{{ $navTitle }}</h3>
-                    <nav>
+                    <nav class="footer-nav">
                         <?php
                         wp_nav_menu([
                             'container' => false,
@@ -181,7 +181,7 @@
 
                 {{-- Legal Menu --}}
                 @if($showLegal)
-                    <nav>
+                    <nav class="legal-nav">
                         <?php
                         wp_nav_menu([
                             'container' => false,
