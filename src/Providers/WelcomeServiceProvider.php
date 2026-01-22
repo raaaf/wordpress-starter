@@ -395,6 +395,10 @@ class WelcomeServiceProvider extends ServiceProvider
             wp_delete_post( (int) $existingPageId, true);
         }
 
+        // Clear cached images so they get re-uploaded (including SVGs)
+        delete_option(self::OPTION_IMAGES);
+        $this->imageIds = [];
+
         // Create new styleguide page
         $pageId = $this->createStyleguidePage();
 
@@ -500,6 +504,9 @@ class WelcomeServiceProvider extends ServiceProvider
             return 0;
         }
 
+        // Set the page template to Flexible Content
+        update_post_meta($pageId, '_wp_page_template', 'page-flexible.blade.php');
+
         // Generate and save the flexible content layouts
         $layouts = $this->generateStyleguideLayouts();
 
@@ -550,7 +557,7 @@ class WelcomeServiceProvider extends ServiceProvider
             }
         }
 
-        // Import logo placeholder images (SVG may not work, use JPG fallback)
+        // Import logo placeholder SVGs
         for ($i = 1; $i <= 6; $i++) {
             $file = $assetsDir . "logo-placeholder-{$i}.svg";
             if (file_exists($file)) {
@@ -583,9 +590,21 @@ class WelcomeServiceProvider extends ServiceProvider
             return null;
         }
 
-        $filetype = wp_check_filetype($filename);
+        // Get mime type - handle SVGs explicitly
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        if ($ext === 'svg') {
+            $mimeType = 'image/svg+xml';
+        } else {
+            $filetype = wp_check_filetype($filename);
+            $mimeType = $filetype['type'];
+        }
+
+        if (empty($mimeType)) {
+            return null;
+        }
+
         $attachment = [
-            'post_mime_type' => $filetype['type'],
+            'post_mime_type' => $mimeType,
             'post_title' => $title,
             'post_content' => '',
             'post_status' => 'inherit',
@@ -596,8 +615,11 @@ class WelcomeServiceProvider extends ServiceProvider
             return null;
         }
 
-        $attachData = wp_generate_attachment_metadata($attachmentId, $newFilePath);
-        wp_update_attachment_metadata($attachmentId, $attachData);
+        // Generate metadata (skip for SVGs - they don't have standard image dimensions)
+        if ($ext !== 'svg') {
+            $attachData = wp_generate_attachment_metadata($attachmentId, $newFilePath);
+            wp_update_attachment_metadata($attachmentId, $attachData);
+        }
 
         return $attachmentId;
     }
@@ -750,11 +772,10 @@ class WelcomeServiceProvider extends ServiceProvider
 
         $layouts[] = $this->generateLayout('one_column', [
             'label' => '',
-            'content' => '<h2>Interaktive Elemente</h2><p>Layouts mit Benutzerinteraktion wie Akkordeons, Tabs und Buttons.</p>',
+            'content' => '<h2>Interaktive Elemente</h2><p>Layouts mit Benutzerinteraktion wie Akkordeons und Tabs.</p>',
             'background_color' => 'primary',
         ]);
 
-        $layouts[] = $this->getButtonLayoutData();
         $layouts[] = $this->getAccordionLayoutData();
         $layouts[] = $this->getTabsLayoutData();
 
@@ -1013,14 +1034,17 @@ class WelcomeServiceProvider extends ServiceProvider
             'tabs' => [
                 [
                     'title' => 'Übersicht',
+                    'icon' => 'eye',
                     'content' => '<h4>Allgemeine Informationen</h4><p>Dies ist der Inhalt des ersten Tabs. Tabs eignen sich hervorragend, um zusammengehörige Informationen zu strukturieren und übersichtlich darzustellen, ohne die Seite mit zu viel Text zu überladen.</p>',
                 ],
                 [
                     'title' => 'Funktionen',
+                    'icon' => 'check',
                     'content' => '<h4>Unsere Funktionen</h4><ul><li>Automatische Anpassung an alle Geräte</li><li>Schnelle Ladezeiten</li><li>Benutzerfreundliche Oberfläche</li><li>Regelmäßige Updates</li></ul>',
                 ],
                 [
                     'title' => 'Preise',
+                    'icon' => 'calendar',
                     'content' => '<h4>Preisgestaltung</h4><p>Unsere Preise richten sich nach dem Umfang Ihrer Anforderungen. Kontaktieren Sie uns für ein individuelles Angebot.</p>',
                 ],
             ],
@@ -1035,27 +1059,23 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function getCardsLayoutData(): array
     {
-        $icon1 = $this->getImageId(4);
-        $icon2 = $this->getImageId(5);
-        $icon3 = $this->getImageId(6);
-
         return $this->generateLayout('cards', [
             'title' => 'Unsere Leistungen',
             'cards' => [
                 [
-                    'icon' => $icon1,
+                    'icon' => 'user',
                     'title' => 'Beratung',
                     'content' => 'Professionelle Beratung für Ihre individuellen Anforderungen und Ziele.',
                     'link' => ['title' => 'Mehr erfahren', 'url' => '#', 'target' => ''],
                 ],
                 [
-                    'icon' => $icon2,
+                    'icon' => 'check',
                     'title' => 'Umsetzung',
                     'content' => 'Zuverlässige Umsetzung Ihrer Projekte mit modernsten Technologien.',
                     'link' => ['title' => 'Details ansehen', 'url' => '#', 'target' => ''],
                 ],
                 [
-                    'icon' => $icon3,
+                    'icon' => 'phone',
                     'title' => 'Support',
                     'content' => 'Langfristige Betreuung und schneller Support für Ihren Erfolg.',
                     'link' => ['title' => 'Kontakt', 'url' => '#', 'target' => ''],
@@ -1176,7 +1196,7 @@ class WelcomeServiceProvider extends ServiceProvider
                     'icon' => '',
                 ],
             ],
-            'background_color' => 'brand',
+            'background_color' => 'secondary',
         ]);
     }
 
@@ -1192,7 +1212,7 @@ class WelcomeServiceProvider extends ServiceProvider
             'plans' => [
                 [
                     'name' => 'Starter',
-                    'price' => '49€',
+                    'price' => '49 EUR',
                     'period' => 'Monat',
                     'features' => '<ul><li>Grundfunktionen</li><li>E-Mail Support</li><li>5 Projekte</li><li>1 Benutzer</li></ul>',
                     'cta' => ['title' => 'Auswählen', 'url' => '#', 'target' => ''],
@@ -1200,7 +1220,7 @@ class WelcomeServiceProvider extends ServiceProvider
                 ],
                 [
                     'name' => 'Professional',
-                    'price' => '99€',
+                    'price' => '99 EUR',
                     'period' => 'Monat',
                     'features' => '<ul><li>Alle Funktionen</li><li>Prioritäts-Support</li><li>Unbegrenzte Projekte</li><li>5 Benutzer</li><li>API-Zugang</li></ul>',
                     'cta' => ['title' => 'Auswählen', 'url' => '#', 'target' => ''],
@@ -1272,7 +1292,7 @@ class WelcomeServiceProvider extends ServiceProvider
 
         return $this->generateLayout('image', [
             'image' => $imageId,
-            'show_border' => true,
+            'show_border' => false,
             'show_caption' => true,
             'background_color' => 'primary',
         ]);
@@ -1328,13 +1348,10 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function getVideoLayoutData(): array
     {
-        $poster = $this->getImageId(3);
-
         return $this->generateLayout('video', [
             'source' => 'external',
             'video' => '',
-            'video_url' => 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-            'poster' => $poster,
+            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
             'background_color' => 'primary',
         ]);
     }
@@ -1395,7 +1412,6 @@ class WelcomeServiceProvider extends ServiceProvider
                 'url' => '#kontakt',
                 'target' => '',
             ],
-            'background_color' => 'brand',
         ]);
     }
 
@@ -1998,25 +2014,6 @@ class WelcomeServiceProvider extends ServiceProvider
     // =========================================================================
     // ADDITIONAL LAYOUT DATA GENERATORS
     // =========================================================================
-
-    /**
-     * Get Button layout data
-     *
-     * @return array<string, mixed>
-     */
-    private function getButtonLayoutData(): array
-    {
-        return $this->generateLayout('button', [
-            'button' => [
-                'title' => 'Jetzt starten',
-                'url' => '#',
-                'target' => '',
-            ],
-            'variant' => 'primary',
-            'size' => 'md',
-            'full_width' => false,
-        ]);
-    }
 
     /**
      * Get Contact Form layout data
