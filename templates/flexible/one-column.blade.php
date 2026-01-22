@@ -9,7 +9,7 @@
     $content = get_sub_field('content');
 @endphp
 
-<x-section>
+<x-section class="one-column">
     <div class="max-w-2xl mx-auto">
         <x-prose>{!! $content !!}</x-prose>
     </div>

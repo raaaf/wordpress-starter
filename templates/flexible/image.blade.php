@@ -2,37 +2,45 @@
     Image - Flexible Content Layout
 
     Uses shared components: x-section
-    Fields: image, caption, alignment
+    ACF Fields: image (ID), show_border, show_caption, background_color
 --}}
 
 @php
-    $image = get_sub_field('image');
-    $caption = get_sub_field('caption');
-    $alignment = get_sub_field('alignment') ?: 'center';
+    $imageId = get_sub_field('image');
+    $showBorder = get_sub_field('show_border');
+    $showCaption = get_sub_field('show_caption');
+    $background = get_sub_field('background_color') ?: 'primary';
 
-    $alignmentClasses = [
-        'left' => 'mr-auto',
-        'center' => 'mx-auto',
-        'right' => 'ml-auto',
-        'wide' => 'w-full max-w-screen-xl mx-auto',
-        'full' => 'w-full',
-    ];
+    // Get image data from ID
+    $image = null;
+    $caption = '';
+    if ($imageId) {
+        $image = [
+            'url' => wp_get_attachment_url($imageId),
+            'alt' => get_post_meta($imageId, '_wp_attachment_image_alt', true) ?: '',
+        ];
+        // Get caption from attachment
+        $attachment = get_post($imageId);
+        if ($attachment) {
+            $caption = $attachment->post_excerpt;
+        }
+    }
 
-    $useContainer = $alignment !== 'full';
+    $borderClass = $showBorder ? 'border border-line' : '';
 @endphp
 
-<x-section padding="md" :container="$useContainer">
-    <figure class="{{ $alignmentClasses[$alignment] ?? 'mx-auto' }}">
-        @if($image)
+<x-section :background="$background" padding="md" class="image">
+    <figure class="mx-auto max-w-4xl">
+        @if($image && !empty($image['url']))
             <img src="{{ $image['url'] }}"
-                 alt="{{ $image['alt'] }}"
-                 class="w-full rounded-lg shadow-xl"
+                 alt="{{ $image['alt'] ?? '' }}"
+                 class="w-full rounded-lg shadow-xl {{ $borderClass }}"
                  loading="lazy">
         @endif
 
-        @if($caption)
+        @if($showCaption && ($caption || !empty($image['alt'])))
             <figcaption class="mt-4 text-sm text-content-secondary text-center">
-                {{ $caption }}
+                {{ $caption ?: $image['alt'] }}
             </figcaption>
         @endif
     </figure>

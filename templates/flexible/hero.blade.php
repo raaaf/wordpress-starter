@@ -1,60 +1,193 @@
 {{--
     Hero - Flexible Content Layout
 
-    Uses shared components: x-section, x-prose, x-button
-    Fields: title, subtitle, content, background_image, cta
+    Variants: centered, split, background
+    ACF Fields: variant, badge, title, copy, cta_primary, cta_secondary, image, background_image, background_color
 --}}
 
 @php
+    $variant = get_sub_field('variant') ?: 'centered';
+    $badge = get_sub_field('badge');
     $title = get_sub_field('title');
-    $subtitle = get_sub_field('subtitle');
-    $content = get_sub_field('content');
+    $copy = get_sub_field('copy');
+    $cta_primary = get_sub_field('cta_primary');
+    $cta_secondary = get_sub_field('cta_secondary');
+    $image = get_sub_field('image');
     $background_image = get_sub_field('background_image');
-    $cta = get_sub_field('cta');
+    $background_color = get_sub_field('background_color') ?: 'primary';
+    $overlay_opacity = get_sub_field('overlay_opacity');
+    $overlay_opacity = is_numeric($overlay_opacity) ? (int) $overlay_opacity : 70;
 
-    $image_url = $background_image ? ($background_image['url'] ?? '') : '';
+    // Convert 0-100 to 0-1 for CSS opacity
+    $overlay_opacity_css = $overlay_opacity / 100;
+
+    // Handle ID vs array format for images
+    if (is_numeric($image)) {
+        $image = [
+            'url' => wp_get_attachment_url($image),
+            'alt' => get_post_meta($image, '_wp_attachment_image_alt', true) ?: '',
+        ];
+    }
+
+    if (is_numeric($background_image)) {
+        $background_image = [
+            'url' => wp_get_attachment_url($background_image),
+            'alt' => get_post_meta($background_image, '_wp_attachment_image_alt', true) ?: '',
+        ];
+    }
 @endphp
 
-<div class="relative overflow-hidden text-text-inverse" style="min-height: 500px;">
-    {{-- Background Image --}}
-    @if($image_url)
-        <div class="absolute inset-0">
-            <img src="{{ $image_url }}"
-                 alt=""
-                 class="w-full h-full object-cover"
-                 loading="lazy">
-            <div class="absolute inset-0 bg-bg-overlay" style="opacity: 0.5"></div>
-        </div>
-    @endif
+@if($variant === 'background')
+    {{-- BACKGROUND VARIANT: Full-width image with overlay --}}
+    <section class="hero hero--background relative overflow-hidden flex items-center" style="min-height: calc(100vh - var(--header-height, 80px)); min-height: calc(100dvh - var(--header-height, 80px));">
+        @if($background_image && !empty($background_image['url']))
+            <div class="absolute inset-0">
+                <img src="{{ $background_image['url'] }}"
+                     alt="{{ $background_image['alt'] ?? '' }}"
+                     class="w-full h-full object-cover">
+                {{-- Overlay with configurable opacity --}}
+                <div class="absolute inset-0" style="background: rgba(255, 255, 255, {{ $overlay_opacity_css }});"></div>
+            </div>
+        @else
+            <div class="absolute inset-0 bg-surface-brand"></div>
+        @endif
 
-    {{-- Content --}}
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center" style="min-height: 500px;">
-        <div class="max-w-3xl text-center">
-            @if($subtitle)
-                <p class="text-sm font-semibold uppercase tracking-wider mb-4">{{ $subtitle }}</p>
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center text-center w-full">
+            <div class="max-w-3xl">
+                @if($badge)
+                    <x-badge variant="brand" style="outline" size="md" class="mb-4">{{ $badge }}</x-badge>
+                @endif
+
+                @if($title)
+                    <h1 class="text-display mb-6 text-content">
+                        {!! $title !!}
+                    </h1>
+                @endif
+
+                @if($copy)
+                    <p class="text-body-large mb-8 text-content-secondary">{{ $copy }}</p>
+                @endif
+
+                @if($cta_primary || $cta_secondary)
+                    <div class="flex flex-wrap gap-4 justify-center">
+                        @if($cta_primary)
+                            <x-button
+                                :url="$cta_primary['url']"
+                                :title="$cta_primary['title']"
+                                :target="$cta_primary['target'] ?? '_self'"
+                                variant="primary"
+                                size="lg"
+                            />
+                        @endif
+                        @if($cta_secondary)
+                            <x-button
+                                :url="$cta_secondary['url']"
+                                :title="$cta_secondary['title']"
+                                :target="$cta_secondary['target'] ?? '_self'"
+                                variant="secondary"
+                                size="lg"
+                            />
+                        @endif
+                    </div>
+                @endif
+            </div>
+        </div>
+    </section>
+
+@elseif($variant === 'split')
+    {{-- SPLIT VARIANT: Content left, image right --}}
+    <x-section :background="$background_color" padding="lg" class="hero hero--split">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                @if($badge)
+                    <x-badge variant="accent" size="md" class="mb-4">{{ $badge }}</x-badge>
+                @endif
+
+                @if($title)
+                    <h1 class="text-4xl md:text-5xl font-bold mb-6 text-content">
+                        {!! $title !!}
+                    </h1>
+                @endif
+
+                @if($copy)
+                    <p class="text-lg mb-8 text-content-secondary">{{ $copy }}</p>
+                @endif
+
+                @if($cta_primary || $cta_secondary)
+                    <div class="flex flex-wrap gap-4">
+                        @if($cta_primary)
+                            <x-button
+                                :url="$cta_primary['url']"
+                                :title="$cta_primary['title']"
+                                :target="$cta_primary['target'] ?? '_self'"
+                                variant="primary"
+                                size="lg"
+                            />
+                        @endif
+                        @if($cta_secondary)
+                            <x-button
+                                :url="$cta_secondary['url']"
+                                :title="$cta_secondary['title']"
+                                :target="$cta_secondary['target'] ?? '_self'"
+                                variant="secondary"
+                                size="lg"
+                            />
+                        @endif
+                    </div>
+                @endif
+            </div>
+
+            @if($image && !empty($image['url']))
+                <div class="relative">
+                    <img src="{{ $image['url'] }}"
+                         alt="{{ $image['alt'] ?? '' }}"
+                         class="w-full h-auto rounded-2xl shadow-xl"
+                         loading="lazy">
+                </div>
+            @endif
+        </div>
+    </x-section>
+
+@else
+    {{-- CENTERED VARIANT (default): Centered content --}}
+    <x-section :background="$background_color" padding="xl" class="hero hero--centered">
+        <div class="max-w-3xl mx-auto text-center">
+            @if($badge)
+                <x-badge variant="accent" size="md" class="mb-4">{{ $badge }}</x-badge>
             @endif
 
             @if($title)
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-headline">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-content">
                     {!! $title !!}
                 </h1>
             @endif
 
-            @if($content)
-                <x-prose size="lg">{!! $content !!}</x-prose>
+            @if($copy)
+                <p class="text-lg md:text-xl mb-8 text-content-secondary">{{ $copy }}</p>
             @endif
 
-            @if($cta)
-                <div class="mt-8">
-                    <x-button
-                        :url="$cta['url']"
-                        :title="$cta['title']"
-                        :target="$cta['target'] ?? '_self'"
-                        variant="primary"
-                        size="lg"
-                    />
+            @if($cta_primary || $cta_secondary)
+                <div class="flex flex-wrap gap-4 justify-center">
+                    @if($cta_primary)
+                        <x-button
+                            :url="$cta_primary['url']"
+                            :title="$cta_primary['title']"
+                            :target="$cta_primary['target'] ?? '_self'"
+                            variant="primary"
+                            size="lg"
+                        />
+                    @endif
+                    @if($cta_secondary)
+                        <x-button
+                            :url="$cta_secondary['url']"
+                            :title="$cta_secondary['title']"
+                            :target="$cta_secondary['target'] ?? '_self'"
+                            variant="outline"
+                            size="lg"
+                        />
+                    @endif
                 </div>
             @endif
         </div>
-    </div>
-</div>
+    </x-section>
+@endif
