@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6b21fc3dad518012de5d664560bfe7fa",
+    "content-hash": "8df0bb8ecfbacb67a09fdea2ccadc5c5",
     "packages": [
         {
             "name": "brick/math",
@@ -2346,6 +2346,24 @@
             },
             "type": "wordpress-plugin",
             "homepage": "https://wordpress.org/plugins/contact-form-7/"
+        },
+        {
+            "name": "wpackagist-plugin/webp-express",
+            "version": "0.25.14",
+            "source": {
+                "type": "svn",
+                "url": "https://plugins.svn.wordpress.org/webp-express/",
+                "reference": "tags/0.25.14"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://downloads.wordpress.org/plugin/webp-express.0.25.14.zip"
+            },
+            "require": {
+                "composer/installers": "^1.0 || ^2.0"
+            },
+            "type": "wordpress-plugin",
+            "homepage": "https://wordpress.org/plugins/webp-express/"
         },
         {
             "name": "wpackagist-plugin/wordpress-seo",
