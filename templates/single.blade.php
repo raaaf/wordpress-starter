@@ -14,7 +14,7 @@
 
                 @if (has_post_thumbnail())
                     <figure class="mb-8">
-                        {!! get_the_post_thumbnail(null, 'large', ['class' => 'w-full h-auto rounded-lg']) !!}
+                        {!! get_the_post_thumbnail(null, 'content', ['class' => 'w-full h-auto rounded-lg']) !!}
                     </figure>
                 @endif
 

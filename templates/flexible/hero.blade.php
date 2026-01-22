@@ -23,7 +23,7 @@
 
     // Handle ID vs array format for images - include dimensions
     if (is_numeric($image)) {
-        $imageSrc = wp_get_attachment_image_src($image, 'large');
+        $imageSrc = wp_get_attachment_image_src($image, 'hero-split');
         $image = [
             'url' => $imageSrc ? $imageSrc[0] : wp_get_attachment_url($image),
             'alt' => get_post_meta($image, '_wp_attachment_image_alt', true) ?: '',

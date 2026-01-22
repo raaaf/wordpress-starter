@@ -1,0 +1,93 @@
+<?php
+
+declare(strict_types=1);
+
+namespace WordpressStarter\Providers;
+
+/**
+ * Image Service Provider
+ *
+ * Registers custom image sizes optimized for the theme layouts
+ * and disables unused WordPress default sizes to save storage.
+ */
+class ImageServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        // No registrations needed
+    }
+
+    public function boot(): void
+    {
+        $this->registerImageSizes();
+        $this->disableUnusedDefaultSizes();
+        $this->addImageSizesToDropdown();
+    }
+
+    /**
+     * Register custom image sizes optimized for theme layouts
+     *
+     * All sizes are 2x for retina display support.
+     */
+    private function registerImageSizes(): void
+    {
+        add_action('after_setup_theme', function (): void {
+            // Content images (max-w-4xl = 896px, 2x retina)
+            add_image_size('content', 1792, 0, false);
+
+            // Hero split / two-column (50% of max-w-7xl = 640px, 2x retina)
+            add_image_size('hero-split', 1280, 0, false);
+
+            // Card thumbnail - 16:9 for posts/video cards (2x retina)
+            add_image_size('card-video', 768, 432, true);
+
+            // Gallery thumbnail - square grid display (2x retina)
+            add_image_size('gallery-thumb', 800, 800, true);
+
+            // Team portrait - square (2x retina)
+            add_image_size('team-portrait', 768, 768, true);
+
+            // Avatar - small square for testimonials (2x retina)
+            add_image_size('avatar', 96, 96, true);
+
+            // Logo - constrained height for logo slider (2x retina)
+            add_image_size('logo', 256, 128, false);
+
+            // Set default featured image size to card-video (16:9)
+            set_post_thumbnail_size(768, 432, true);
+        });
+    }
+
+    /**
+     * Disable WordPress default sizes we don't use to save storage
+     */
+    private function disableUnusedDefaultSizes(): void
+    {
+        add_filter('intermediate_image_sizes_advanced', function (array $sizes): array {
+            // Keep: thumbnail (WordPress admin), medium_large (fallback), large (fallback)
+            // Remove: medium (replaced by team-portrait), 1536x1536, 2048x2048 (not needed)
+            unset($sizes['medium']);
+            unset($sizes['1536x1536']);
+            unset($sizes['2048x2048']);
+            return $sizes;
+        });
+    }
+
+    /**
+     * Add custom sizes to media library dropdown for manual selection
+     */
+    private function addImageSizesToDropdown(): void
+    {
+        add_filter('image_size_names_choose', function (array $sizes): array {
+            return array_merge($sizes, [
+                'content' => __('Inhaltsbereich (groß)', 'wp-starter'),
+                'hero-split' => __('Hero / Zweispaltig', 'wp-starter'),
+                'card-video' => __('Karte (16:9)', 'wp-starter'),
+                'gallery-thumb' => __('Galerie (Quadrat)', 'wp-starter'),
+                'team-portrait' => __('Team Portrait', 'wp-starter'),
+                'avatar' => __('Avatar', 'wp-starter'),
+                'logo' => __('Logo', 'wp-starter'),
+            ]);
+        });
+    }
+}

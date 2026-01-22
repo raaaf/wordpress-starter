@@ -12,8 +12,10 @@ use WordpressStarter\Providers\ThemeServiceProvider;
 use WordpressStarter\Providers\SecurityServiceProvider;
 use WordpressStarter\Providers\AcfServiceProvider;
 use WordpressStarter\Providers\AnalyticsServiceProvider;
+use WordpressStarter\Providers\ImageServiceProvider;
 use WordpressStarter\Providers\PluginServiceProvider;
 use WordpressStarter\Providers\WelcomeServiceProvider;
+use WordpressStarter\Providers\ThemeUpdateProvider;
 
 class Application
 {
@@ -59,7 +61,9 @@ class Application
             AcfServiceProvider::class,
             MenuServiceProvider::class,
             ThemeServiceProvider::class,
+            ImageServiceProvider::class,
             AnalyticsServiceProvider::class,
+            ThemeUpdateProvider::class,
         ];
     }
 

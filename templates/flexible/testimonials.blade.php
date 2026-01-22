@@ -35,7 +35,7 @@
                     <div class="flex items-center gap-4 mt-auto">
                         @if(!empty($testimonial['image']))
                             @php
-                                $image = wp_get_attachment_image_src($testimonial['image'], 'thumbnail');
+                                $image = wp_get_attachment_image_src($testimonial['image'], 'avatar');
                             @endphp
                             @if($image)
                                 <img

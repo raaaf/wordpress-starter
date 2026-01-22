@@ -22,7 +22,7 @@
         <x-grid :cols="$columns" gap="md">
             @foreach($images as $image)
                 @php
-                    $thumb = wp_get_attachment_image_src($image['ID'] ?? $image, 'medium_large');
+                    $thumb = wp_get_attachment_image_src($image['ID'] ?? $image, 'gallery-thumb');
                     $full = wp_get_attachment_image_src($image['ID'] ?? $image, 'full');
                     $alt = get_post_meta($image['ID'] ?? $image, '_wp_attachment_image_alt', true);
                     $caption = wp_get_attachment_caption($image['ID'] ?? $image);

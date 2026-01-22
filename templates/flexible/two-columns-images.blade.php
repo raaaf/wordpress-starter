@@ -12,18 +12,24 @@
     $column_2 = get_sub_field('column_2');
     $background = get_sub_field('background_color') ?: 'primary';
 
-    // Handle ID vs array format for images
+    // Handle ID vs array format for images with proper sizing
     if (is_numeric($image_1)) {
+        $imgSrc1 = wp_get_attachment_image_src($image_1, 'hero-split');
         $image_1 = [
-            'url' => wp_get_attachment_url($image_1),
+            'url' => $imgSrc1 ? $imgSrc1[0] : wp_get_attachment_url($image_1),
             'alt' => get_post_meta($image_1, '_wp_attachment_image_alt', true) ?: '',
+            'width' => $imgSrc1 ? $imgSrc1[1] : '',
+            'height' => $imgSrc1 ? $imgSrc1[2] : '',
         ];
     }
 
     if (is_numeric($image_2)) {
+        $imgSrc2 = wp_get_attachment_image_src($image_2, 'hero-split');
         $image_2 = [
-            'url' => wp_get_attachment_url($image_2),
+            'url' => $imgSrc2 ? $imgSrc2[0] : wp_get_attachment_url($image_2),
             'alt' => get_post_meta($image_2, '_wp_attachment_image_alt', true) ?: '',
+            'width' => $imgSrc2 ? $imgSrc2[1] : '',
+            'height' => $imgSrc2 ? $imgSrc2[2] : '',
         ];
     }
 @endphp
@@ -34,6 +40,7 @@
             @if($image_1 && !empty($image_1['url']))
                 <img src="{{ $image_1['url'] }}"
                      alt="{{ $image_1['alt'] ?? '' }}"
+                     @if(!empty($image_1['width']) && !empty($image_1['height']))width="{{ $image_1['width'] }}" height="{{ $image_1['height'] }}"@endif
                      class="w-full object-cover"
                      loading="lazy">
             @endif
@@ -45,6 +52,7 @@
             @if($image_2 && !empty($image_2['url']))
                 <img src="{{ $image_2['url'] }}"
                      alt="{{ $image_2['alt'] ?? '' }}"
+                     @if(!empty($image_2['width']) && !empty($image_2['height']))width="{{ $image_2['width'] }}" height="{{ $image_2['height'] }}"@endif
                      class="w-full object-cover"
                      loading="lazy">
             @endif

@@ -21,7 +21,7 @@
             if (is_array($logoId)) {
                 $logoId = $logoId['ID'] ?? $logoId['id'] ?? null;
             }
-            $logoUrl = $logoId ? wp_get_attachment_url($logoId) : '';
+            $logoUrl = $logoId ? wp_get_attachment_image_url($logoId, 'logo') : '';
             if ($logoUrl) {
                 $logoData[] = [
                     'url' => $logoUrl,

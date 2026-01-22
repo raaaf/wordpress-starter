@@ -22,7 +22,7 @@
                 } else {
                     $custom_logo_id = get_theme_mod('custom_logo');
                     if ($custom_logo_id) {
-                        $logo_data = wp_get_attachment_image_src($custom_logo_id, 'full');
+                        $logo_data = wp_get_attachment_image_src($custom_logo_id, 'logo');
                         if ($logo_data) {
                             $logo_url = $logo_data[0];
                             $logo_width = $logo_data[1];

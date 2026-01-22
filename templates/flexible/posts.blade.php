@@ -55,11 +55,11 @@
                         @if(has_post_thumbnail())
                             @php
                                 $thumbId = get_post_thumbnail_id(get_the_ID());
-                                $thumbSrc = wp_get_attachment_image_src($thumbId, 'medium_large');
+                                $thumbSrc = wp_get_attachment_image_src($thumbId, 'card-video');
                             @endphp
                             <div class="block overflow-hidden aspect-video">
                                 <img
-                                    src="{{ $thumbSrc ? $thumbSrc[0] : get_the_post_thumbnail_url(get_the_ID(), 'medium_large') }}"
+                                    src="{{ $thumbSrc ? $thumbSrc[0] : get_the_post_thumbnail_url(get_the_ID(), 'card-video') }}"
                                     alt="{{ get_the_title() }}"
                                     @if($thumbSrc)width="{{ $thumbSrc[1] }}" height="{{ $thumbSrc[2] }}"@endif
                                     class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
