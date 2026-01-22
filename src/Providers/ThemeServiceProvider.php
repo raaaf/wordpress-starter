@@ -555,8 +555,13 @@ class ThemeServiceProvider extends ServiceProvider
                     ->name($item['name']);
 
                 // Only add item URL if not the current page (last item)
+                // item() expects a Thing object with @id, not a plain string
                 if (!empty($item['url'])) {
-                    $listItem->item($item['url']);
+                    $listItem->item(
+                        Schema::thing()
+                            ->setProperty('@id', $item['url'])
+                            ->name($item['name'])
+                    );
                 }
 
                 $listItems[] = $listItem;
@@ -652,6 +657,7 @@ class ThemeServiceProvider extends ServiceProvider
             }
         } elseif (is_search()) {
             $items[] = [
+                // translators: %s is the search query term.
                 'name' => sprintf(__('Suchergebnisse für: %s', 'wp-starter'), get_search_query()),
                 'url' => '',
             ];
