@@ -72,6 +72,30 @@ class FlexibleContent
                     'button_label' => 'Sektion hinzufügen',
                     'min' => '',
                     'max' => '',
+
+                    // ACF Extended: Modal for selecting layouts
+                    'acfe_flexible_modal' => [
+                        'acfe_flexible_modal_enabled' => true,
+                        'acfe_flexible_modal_title' => 'Sektion auswählen',
+                        'acfe_flexible_modal_col' => '4',
+                        'acfe_flexible_modal_categories' => true,
+                    ],
+
+                    // ACF Extended: Modal for editing layouts
+                    'acfe_flexible_modal_edit' => [
+                        'acfe_flexible_modal_edit_enabled' => true,
+                        'acfe_flexible_modal_edit_size' => 'large',
+                    ],
+
+                    // ACF Extended: Additional features
+                    'acfe_flexible_copy_paste' => true,
+                    'acfe_flexible_layouts_state' => 'collapse',
+                    'acfe_flexible_stylised_button' => true,
+                    'acfe_flexible_title_edition' => true,
+                    'acfe_flexible_layouts_templates' => false,
+                    'acfe_flexible_layouts_previews' => false,
+                    'acfe_flexible_hide_empty_message' => false,
+                    'acfe_flexible_empty_message' => '',
                 ],
             ],
             'location' => [
@@ -114,11 +138,10 @@ class FlexibleContent
             self::oneThirdTwoThirdsLayout(),
             self::twoThirdsOneThirdLayout(),
 
-            // Content (4)
+            // Content (3)
             self::accordionLayout(),
             self::tabsLayout(),
             self::ctaLayout(),
-            self::buttonLayout(),
 
             // Media (4)
             self::imageLayout(),
@@ -353,23 +376,6 @@ class FlexibleContent
             'label' => 'Handlungsaufforderung (CTA)',
             'display' => 'block',
             'sub_fields' => FieldDefinitions::ctaFields('flex_cta'),
-            'acfe_flexible_category' => self::CATEGORIES['content'],
-        ];
-    }
-
-    /**
-     * Button layout
-     *
-     * @return array<string, mixed>
-     */
-    private static function buttonLayout(): array
-    {
-        return [
-            'key' => 'layout_button',
-            'name' => 'button',
-            'label' => 'Button',
-            'display' => 'block',
-            'sub_fields' => FieldDefinitions::buttonFields('flex_button'),
             'acfe_flexible_category' => self::CATEGORIES['content'],
         ];
     }

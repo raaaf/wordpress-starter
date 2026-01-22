@@ -1150,7 +1150,6 @@ class FieldDefinitions
                 true,
                 'Der Call-to-Action Button mit Link und Text.'
             ),
-            self::backgroundColorField($prefix),
         ];
     }
 
@@ -1231,15 +1230,6 @@ class FieldDefinitions
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'external']]],
                 'https://www.youtube.com/watch?v=...'
             ),
-            self::imageField(
-                "field_{$prefix}_poster",
-                'Vorschaubild',
-                'poster',
-                false,
-                'array',
-                null,
-                'Wird angezeigt, bevor das Video geladen wird.'
-            ),
             self::backgroundColorField($prefix),
         ];
     }
@@ -1296,17 +1286,30 @@ class FieldDefinitions
     {
         return [
             self::buttonGroupField(
-                "field_{$prefix}_variant",
-                'Variante',
-                'variant',
+                "field_{$prefix}_style",
+                'Stil',
+                'style',
                 [
                     'line' => 'Linie',
-                    'logo' => 'Mit Logo',
                     'dots' => 'Punkte',
+                    'wave' => 'Welle',
+                    'space' => 'Abstand',
                 ],
                 'line',
                 'Wähle das Aussehen des Trenners.'
             ),
+            [
+                'key' => "field_{$prefix}_height",
+                'label' => 'Höhe',
+                'name' => 'height',
+                'type' => 'number',
+                'instructions' => 'Höhe in Pixel (Standard: 50)',
+                'default_value' => 50,
+                'min' => 10,
+                'max' => 200,
+                'step' => 10,
+                'append' => 'px',
+            ],
         ];
     }
 
@@ -2462,58 +2465,4 @@ class FieldDefinitions
         ];
     }
 
-    // =========================================================================
-    // COMPONENT BLOCKS
-    // =========================================================================
-
-    /**
-     * Get Button block fields
-     *
-     * @param string $prefix Key prefix
-     * @return array<int, array<string, mixed>>
-     */
-    public static function buttonFields(string $prefix): array
-    {
-        return [
-            self::linkField(
-                "field_{$prefix}_button",
-                'Button Link',
-                'button',
-                true,
-                'Der Link und Text des Buttons.'
-            ),
-            self::buttonGroupField(
-                "field_{$prefix}_variant",
-                'Variante',
-                'variant',
-                [
-                    'primary' => 'Primary',
-                    'secondary' => 'Secondary',
-                    'ghost' => 'Ghost',
-                    'danger' => 'Danger',
-                ],
-                'primary',
-                'Visueller Stil des Buttons.'
-            ),
-            self::buttonGroupField(
-                "field_{$prefix}_size",
-                'Größe',
-                'size',
-                [
-                    'sm' => 'Klein',
-                    'md' => 'Mittel',
-                    'lg' => 'Groß',
-                ],
-                'md',
-                'Größe des Buttons.'
-            ),
-            self::trueFalseField(
-                "field_{$prefix}_full_width",
-                'Volle Breite',
-                'full_width',
-                false,
-                'Button nimmt die volle verfügbare Breite ein.'
-            ),
-        ];
-    }
 }
