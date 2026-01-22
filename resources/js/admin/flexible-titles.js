@@ -2,12 +2,24 @@
  * Auto-generate layout titles for ACF Extended Flexible Content
  * Extracts text from content fields and displays as layout subtitle
  */
+/* global acf, tinymce */
 (function () {
   'use strict';
 
   // Fields to check for title content, in priority order
   const TITLE_FIELDS = ['title', 'heading', 'headline', 'name', 'label'];
-  const CONTENT_FIELDS = ['content', 'text', 'description', 'wysiwyg', 'message', 'column_1', 'column_2', 'column_left', 'column_right', 'copy'];
+  const CONTENT_FIELDS = [
+    'content',
+    'text',
+    'description',
+    'wysiwyg',
+    'message',
+    'column_1',
+    'column_2',
+    'column_left',
+    'column_right',
+    'copy',
+  ];
   const MAX_LENGTH = 40;
 
   /**
@@ -68,7 +80,7 @@
           if (body && body.textContent && body.textContent.trim()) {
             return truncate(body.textContent, MAX_LENGTH);
           }
-        } catch (e) {
+        } catch {
           // Cross-origin iframe, skip
         }
       }
@@ -118,7 +130,8 @@
     if (!previewSpan && handle) {
       previewSpan = document.createElement('span');
       previewSpan.className = 'layout-preview-text';
-      previewSpan.style.cssText = 'color: #888; font-weight: normal; margin-left: 5px; font-size: 13px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; min-width: 0;';
+      previewSpan.style.cssText =
+        'color: #888; font-weight: normal; margin-left: 5px; font-size: 13px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; min-width: 0;';
       titleEl.after(previewSpan);
     }
     if (previewSpan) {
@@ -134,12 +147,12 @@
     const layoutSelectors = [
       '.acf-flexible-content .layout',
       '.acf-flexible-content .acf-layout',
-      '[data-layout]'
+      '[data-layout]',
     ];
 
     const allLayouts = new Set();
     for (const selector of layoutSelectors) {
-      document.querySelectorAll(selector).forEach(l => allLayouts.add(l));
+      document.querySelectorAll(selector).forEach((l) => allLayouts.add(l));
     }
 
     allLayouts.forEach(updateLayoutTitle);
@@ -168,7 +181,6 @@
 
     // Check if ACF is available
     if (typeof acf !== 'undefined') {
-
       // Update when layouts are reordered, added, or duplicated
       acf.addAction('sortstop', debouncedUpdate);
       acf.addAction('append', debouncedUpdate);
@@ -209,7 +221,7 @@
     });
 
     const flexibleContainers = document.querySelectorAll('.acf-flexible-content');
-    flexibleContainers.forEach(container => {
+    flexibleContainers.forEach((container) => {
       observer.observe(container, { childList: true, subtree: true });
     });
   }

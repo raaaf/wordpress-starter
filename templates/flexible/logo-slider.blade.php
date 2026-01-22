@@ -46,8 +46,32 @@
                 x-data="{ paused: false }"
                 @mouseenter="paused = true"
                 @mouseleave="paused = false"
+                @focusin="paused = true"
+                @focusout="paused = false"
             @endif
+            role="region"
+            aria-label="{{ __('Partner-Logos Karussell', 'wp-starter') }}"
         >
+            @if($autoplay)
+                {{-- Accessible pause button --}}
+                <button
+                    type="button"
+                    @click="paused = !paused"
+                    @keydown.enter.prevent="paused = !paused"
+                    @keydown.space.prevent="paused = !paused"
+                    class="absolute top-2 right-20 z-20 p-2 rounded-lg bg-surface/80 text-content-secondary hover:text-content hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus transition-colors"
+                    :aria-label="paused ? '{{ __('Animation fortsetzen', 'wp-starter') }}' : '{{ __('Animation pausieren', 'wp-starter') }}'"
+                    :aria-pressed="paused"
+                >
+                    <svg x-show="!paused" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <svg x-show="paused" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </button>
+            @endif
             {{-- Gradient overlays for seamless edges --}}
             <div class="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-surface-primary to-transparent z-10 pointer-events-none"></div>
             <div class="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-surface-primary to-transparent z-10 pointer-events-none"></div>

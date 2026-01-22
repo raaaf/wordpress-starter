@@ -48,14 +48,31 @@ export function createNavigationComponent(): NavigationComponent {
         toggle.className = 'submenu-toggle';
         toggle.setAttribute('aria-expanded', 'false');
         toggle.setAttribute('aria-label', 'Untermenü öffnen');
-        toggle.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+        toggle.innerHTML =
+          '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+
+        const toggleSubmenu = () => {
+          const isExpanded = submenu.classList.toggle('is-open');
+          toggle.setAttribute('aria-expanded', String(isExpanded));
+          toggle.setAttribute(
+            'aria-label',
+            isExpanded ? 'Untermenü schließen' : 'Untermenü öffnen'
+          );
+        };
 
         toggle.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          const isExpanded = submenu.classList.toggle('is-open');
-          toggle.setAttribute('aria-expanded', String(isExpanded));
-          toggle.setAttribute('aria-label', isExpanded ? 'Untermenü schließen' : 'Untermenü öffnen');
+          toggleSubmenu();
+        });
+
+        // Explicit keyboard support for Enter and Space keys
+        toggle.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSubmenu();
+          }
         });
 
         item.appendChild(toggle);
@@ -245,13 +262,53 @@ export function initVideoConsent(): void {
 
 export function initGalleryZoom(): void {
   const zoomElements = document.querySelectorAll('.gallery-zoom');
-  if (zoomElements.length > 0) {
-    mediumZoom('.gallery-zoom', {
-      margin: 24,
-      background: 'rgba(0, 0, 0, 0.9)',
-      scrollOffset: 40,
+  if (zoomElements.length === 0) return;
+
+  let lastFocusedElement: HTMLElement | null = null;
+
+  const zoom = mediumZoom('.gallery-zoom', {
+    margin: 24,
+    background: 'rgba(0, 0, 0, 0.9)',
+    scrollOffset: 40,
+  });
+
+  // Focus management: store last focused element before opening
+  zoom.on('open', () => {
+    lastFocusedElement = document.activeElement as HTMLElement;
+    // Focus the zoomed image for screen reader announcement
+    const zoomedImage = document.querySelector('.medium-zoom-image--opened') as HTMLElement;
+    if (zoomedImage) {
+      zoomedImage.setAttribute('tabindex', '-1');
+      zoomedImage.focus();
+    }
+  });
+
+  // Focus management: return focus to trigger element on close
+  zoom.on('close', () => {
+    if (lastFocusedElement) {
+      lastFocusedElement.focus();
+      lastFocusedElement = null;
+    }
+  });
+
+  // Escape key is handled by medium-zoom by default
+  // Add keyboard instruction for screen readers
+  zoomElements.forEach((el) => {
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute(
+      'aria-label',
+      (el.getAttribute('alt') || 'Bild') + ' - Klicken oder Enter zum Vergrößern'
+    );
+
+    // Allow Enter key to trigger zoom
+    el.addEventListener('keydown', (e) => {
+      if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') {
+        e.preventDefault();
+        zoom.open({ target: el as HTMLImageElement });
+      }
     });
-  }
+  });
 }
 
 // ============================================
