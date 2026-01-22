@@ -13,8 +13,16 @@
     $showExcerpt = get_sub_field('show_excerpt') ?? true;
     $showDate = get_sub_field('show_date') ?? true;
     $showAuthor = get_sub_field('show_author') ?? false;
-    $columns = get_sub_field('columns') ?: 3;
+    $columns = (int) (get_sub_field('columns') ?: 3);
     $background = get_sub_field('background_color') ?: 'primary';
+
+    // Use explicit grid classes to ensure Tailwind includes them (same pattern as stats.blade.php)
+    $gridClass = match(true) {
+        $columns >= 4 => 'md:grid-cols-4',
+        $columns === 3 => 'md:grid-cols-3',
+        $columns === 2 => 'md:grid-cols-2',
+        default => 'md:grid-cols-1',
+    };
 
     // Query posts
     $args = [
@@ -36,57 +44,59 @@
     @endif
 
     @if($postsQuery->have_posts())
-        <div class="grid gap-8 md:grid-cols-{{ $columns }}">
+        <ul class="grid gap-8 {{ $gridClass }}" role="list">
             @while($postsQuery->have_posts())
                 @php $postsQuery->the_post(); @endphp
-                <x-card variant="filled" padding="none" hoverable class="group relative cursor-pointer">
-                    {{-- Stretched link for entire card --}}
-                    <a href="{{ get_permalink() }}" class="absolute inset-0 z-0" aria-hidden="true"></a>
+                <li>
+                    <x-card variant="filled" padding="none" hoverable class="group relative cursor-pointer h-full">
+                        {{-- Stretched link for entire card --}}
+                        <a href="{{ get_permalink() }}" class="absolute inset-0 z-0" aria-hidden="true"></a>
 
-                    @if(has_post_thumbnail())
-                        <div class="block overflow-hidden aspect-video">
-                            <img
-                                src="{{ get_the_post_thumbnail_url(get_the_ID(), 'medium_large') }}"
-                                alt="{{ get_the_title() }}"
-                                class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-                                loading="lazy"
-                            >
-                        </div>
-                    @endif
-
-                    <div class="p-6">
-                        @if($showDate || $showAuthor)
-                            <div class="flex items-center gap-4 mb-3">
-                                @if($showDate)
-                                    <x-badge variant="gray" style="outline" size="sm">
-                                        <time datetime="{{ get_the_date('c') }}">
-                                            {{ get_the_date('j. F Y') }}
-                                        </time>
-                                    </x-badge>
-                                @endif
-                                @if($showAuthor)
-                                    <span class="text-body-small text-content-secondary">von {{ get_the_author() }}</span>
-                                @endif
+                        @if(has_post_thumbnail())
+                            <div class="block overflow-hidden aspect-video">
+                                <img
+                                    src="{{ get_the_post_thumbnail_url(get_the_ID(), 'medium_large') }}"
+                                    alt="{{ get_the_title() }}"
+                                    class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                                    loading="lazy"
+                                >
                             </div>
                         @endif
 
-                        <h3 class="text-h4 mb-3 text-content transition-colors duration-200 group-hover:text-content-brand">
-                            {{ get_the_title() }}
-                        </h3>
+                        <div class="p-6">
+                            @if($showDate || $showAuthor)
+                                <div class="flex items-center gap-4 mb-3">
+                                    @if($showDate)
+                                        <x-badge variant="gray" style="outline" size="sm">
+                                            <time datetime="{{ get_the_date('c') }}">
+                                                {{ get_the_date('j. F Y') }}
+                                            </time>
+                                        </x-badge>
+                                    @endif
+                                    @if($showAuthor)
+                                        <span class="text-body-small text-content-secondary">{{ __('von', 'wp-starter') }} {{ get_the_author() }}</span>
+                                    @endif
+                                </div>
+                            @endif
 
-                        @if($showExcerpt)
-                            <p class="mb-4 text-content-secondary line-clamp-3">
-                                {{ wp_trim_words(get_the_excerpt(), 20) }}
-                            </p>
-                        @endif
+                            <h3 class="text-h4 mb-3 text-content transition-colors duration-200 group-hover:text-content-brand">
+                                {{ get_the_title() }}
+                            </h3>
 
-                        <x-link :url="get_permalink()" iconRight="chevron-right" :ariaLabel="__('Weiterlesen:', 'wp-starter') . ' ' . get_the_title()" class="relative z-10 group-hover:text-content-brand">Weiterlesen</x-link>
-                    </div>
-                </x-card>
+                            @if($showExcerpt)
+                                <p class="mb-4 text-content-secondary line-clamp-3">
+                                    {{ wp_trim_words(get_the_excerpt(), 20) }}
+                                </p>
+                            @endif
+
+                            <x-link :url="get_permalink()" iconRight="chevron-right" :ariaLabel="__('Weiterlesen:', 'wp-starter') . ' ' . get_the_title()" class="relative z-10 group-hover:text-content-brand">{{ __('Weiterlesen', 'wp-starter') }}</x-link>
+                        </div>
+                    </x-card>
+                </li>
             @endwhile
-        </div>
+        </ul>
         @php wp_reset_postdata(); @endphp
     @else
-        <p class="text-center text-content-secondary">Keine Beiträge gefunden.</p>
+        <p class="text-center text-content-secondary">{{ __('Keine Beiträge gefunden.', 'wp-starter') }}</p>
     @endif
 </x-section>

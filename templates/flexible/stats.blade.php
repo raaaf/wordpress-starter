@@ -35,19 +35,25 @@
                     $label = $stat['label'] ?? '';
                     $icon = $stat['icon'] ?? '';
                 @endphp
-                <div x-data="statsCounter({{ $number }})" class="p-6">
+                <div
+                    x-data="statsCounter({{ $number }})"
+                    class="p-6"
+                    role="group"
+                    aria-label="{{ $label ?: __('Statistik', 'wp-starter') }}"
+                >
                     @if($icon)
                         <div class="flex justify-center mb-4 text-content-brand">
-                            <x-icon :name="$icon" class="w-10 h-10" />
+                            <x-icon :name="$icon" class="w-10 h-10" aria-hidden="true" />
                         </div>
                     @endif
 
-                    <div class="text-display mb-2 text-content">
-                        <span x-text="current.toLocaleString('de-DE')">0</span><span>{{ $suffix }}</span>
+                    <div class="text-display mb-2 text-content" role="status" aria-live="polite" aria-atomic="true">
+                        <span x-text="current.toLocaleString('de-DE')" aria-hidden="true">0</span><span aria-hidden="true">{{ $suffix }}</span>
+                        <span class="sr-only" x-text="`${current.toLocaleString('de-DE')}{{ $suffix }}`">{{ $number }}{{ $suffix }}</span>
                     </div>
 
                     @if($label)
-                        <p class="text-body-large text-content-secondary">{{ $label }}</p>
+                        <p class="text-body-large text-content-secondary" id="stat-label-{{ $loop->index }}">{{ $label }}</p>
                     @endif
                 </div>
             @endforeach

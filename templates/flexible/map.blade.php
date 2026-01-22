@@ -25,7 +25,8 @@
     @if($embedUrl)
         <div
             class="relative overflow-hidden rounded-lg"
-            x-data="{ loaded: false }"
+            x-data="{ loaded: false, iframeLoaded: false, iframeError: false }"
+            style="min-height: {{ esc_attr($height) }}px;"
         >
             {{-- Consent notice for GDPR compliance --}}
             <div
@@ -38,11 +39,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
                 <p class="mb-4 text-content-secondary">
-                    Zum Anzeigen der Karte wird Google Maps geladen.<br>
-                    Es gelten die <x-link url="https://policies.google.com/privacy" target="_blank">Datenschutzbestimmungen von Google</x-link>.
+                    {{ __('Zum Anzeigen der Karte wird Google Maps geladen.', 'wp-starter') }}<br>
+                    {{ __('Es gelten die', 'wp-starter') }} <x-link url="https://policies.google.com/privacy" target="_blank">{{ __('Datenschutzbestimmungen von Google', 'wp-starter') }}</x-link>.
                 </p>
                 <x-button
-                    title="Karte laden"
+                    :title="__('Karte laden', 'wp-starter')"
                     variant="primary"
                     size="md"
                     x-on:click="loaded = true"
@@ -50,8 +51,39 @@
                 />
             </div>
 
+            {{-- Loading indicator --}}
+            <div
+                x-show="loaded && !iframeLoaded && !iframeError"
+                class="absolute inset-0 flex flex-col items-center justify-center bg-surface-secondary"
+                style="height: {{ esc_attr($height) }}px;"
+                role="status"
+                aria-live="polite"
+            >
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-line border-t-line-brand mb-4"></div>
+                <span class="text-content-secondary">{{ __('Karte wird geladen...', 'wp-starter') }}</span>
+            </div>
+
+            {{-- Error state --}}
+            <div
+                x-show="iframeError"
+                x-cloak
+                class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-surface-secondary"
+                style="height: {{ esc_attr($height) }}px;"
+            >
+                <svg class="w-16 h-16 mb-4 text-content-error" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <p class="mb-4 text-content-secondary">{{ __('Die Karte konnte nicht geladen werden.', 'wp-starter') }}</p>
+                <x-button
+                    :title="__('Erneut versuchen', 'wp-starter')"
+                    variant="secondary"
+                    size="md"
+                    x-on:click="iframeError = false; iframeLoaded = false"
+                />
+            </div>
+
             {{-- Map iframe (loaded after consent) --}}
-            <template x-if="loaded">
+            <template x-if="loaded && !iframeError">
                 <iframe
                     src="{{ esc_url($embedUrl) }}"
                     width="100%"
@@ -62,6 +94,8 @@
                     referrerpolicy="no-referrer-when-downgrade"
                     class="rounded-lg"
                     title="{{ __('Google Maps Karte', 'wp-starter') }}{{ $address ? ': ' . esc_attr($address) : '' }}"
+                    @load="iframeLoaded = true"
+                    @error="iframeError = true"
                 ></iframe>
             </template>
         </div>
@@ -72,7 +106,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                     </svg>
-                    Route planen
+                    {{ __('Route planen', 'wp-starter') }}
                 </x-link>
             </div>
         @endif

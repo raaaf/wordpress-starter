@@ -41,6 +41,10 @@ shadow-[var(--shadow-focus-ring-ghost)]
 shadow-[var(--shadow-focus-ring-error)]
 md:grid-cols-[1fr_2fr]
 md:grid-cols-[2fr_1fr]
+md:grid-cols-1
+md:grid-cols-2
+md:grid-cols-3
+md:grid-cols-4
 peer-checked:translate-x-5
 peer-checked:bg-surface-accent
 lg:min-h-[500px]

@@ -43,26 +43,26 @@
 ])
 
 @php
-    // Variants from Figma
+    // Variants from Figma - use semantic token fallbacks instead of hardcoded hex values
     $variants = [
-        'default' => 'bg-[var(--card-bg,#ffffff)] border border-[var(--card-border,#e5e5e5)] shadow-[var(--shadow-card)]',
-        'elevated' => 'bg-[var(--card-bg,#ffffff)] shadow-lg',
-        'outlined' => 'bg-[var(--card-bg,#ffffff)] border border-line',
+        'default' => 'bg-[var(--card-bg,var(--bg-primary))] border border-[var(--card-border,var(--border-default))] shadow-[var(--shadow-card)]',
+        'elevated' => 'bg-[var(--card-bg,var(--bg-primary))] shadow-lg',
+        'outlined' => 'bg-[var(--card-bg,var(--bg-primary))] border border-line',
         'filled' => 'bg-surface-secondary',
     ];
 
     $sizes = [
-        'sm' => ['padding' => 'p-4', 'imageHeight' => 'h-32', 'gap' => 'gap-3'],
+        'sm' => ['padding' => 'p-[var(--spacing-4)]', 'imageHeight' => 'h-32', 'gap' => 'gap-[var(--spacing-3)]'],
         'md' => ['padding' => 'p-[var(--card-padding)]', 'imageHeight' => 'h-40', 'gap' => 'gap-[var(--card-gap)]'],
-        'lg' => ['padding' => 'p-8', 'imageHeight' => 'h-48', 'gap' => 'gap-5'],
+        'lg' => ['padding' => 'p-[var(--spacing-8)]', 'imageHeight' => 'h-48', 'gap' => 'gap-[var(--spacing-5)]'],
     ];
 
-    // Legacy padding support
+    // Legacy padding support - use token references
     $legacyPaddings = [
         'none' => '',
-        'sm' => 'p-4',
+        'sm' => 'p-[var(--spacing-4)]',
         'md' => 'p-[var(--card-padding)]',
-        'lg' => 'p-8',
+        'lg' => 'p-[var(--spacing-8)]',
     ];
 
     $sizeConfig = $sizes[$size] ?? $sizes['md'];
