@@ -61,6 +61,8 @@ class PluginServiceProvider extends ServiceProvider
         add_action('admin_init', [$this, 'maybeRedirectToSetup']);
         add_action('admin_init', [$this, 'runContentSetup']);
         add_action('admin_init', [$this, 'handleRerunContentSetup']);
+        add_action('admin_init', [$this, 'handleGenerateDemoPosts']);
+        add_action('admin_init', [$this, 'handleDeleteDemoPosts']);
 
         // AJAX handlers
         add_action('wp_ajax_wp_starter_install_plugin', [$this, 'ajaxInstallPlugin']);
@@ -128,6 +130,11 @@ class PluginServiceProvider extends ServiceProvider
             $this->createDefaultMenus($createdPageIds, $this->setupOptions['menu_assignments']);
         }
 
+        // Create sample blog posts
+        if (!empty($this->setupOptions['create_posts']) && !empty($this->setupOptions['posts'])) {
+            $this->createDefaultPosts($this->setupOptions['posts']);
+        }
+
         // Note: color_scheme is handled by WelcomeServiceProvider via ACF's update_field()
         // to ensure proper field validation and formatting
 
@@ -180,6 +187,9 @@ class PluginServiceProvider extends ServiceProvider
         // Reset the completion flag so content setup runs again
         delete_option('wp_starter_content_setup_complete');
 
+        // Clear cached styleguide images so they get re-uploaded (including SVGs)
+        delete_option('wp_starter_styleguide_images');
+
         // Create pages (skips existing ones)
         $createdPageIds = [];
         if (!empty($this->setupOptions['pages'])) {
@@ -191,11 +201,144 @@ class PluginServiceProvider extends ServiceProvider
             $this->createDefaultMenus($createdPageIds, $this->setupOptions['menu_assignments']);
         }
 
+        // Create sample blog posts (skips existing ones)
+        if (!empty($this->setupOptions['create_posts']) && !empty($this->setupOptions['posts'])) {
+            $this->createDefaultPosts($this->setupOptions['posts']);
+        }
+
         // Mark as complete
         update_option('wp_starter_content_setup_complete', true);
 
         // Redirect back to tools page with success message
         wp_safe_redirect(admin_url('admin.php?page=theme-options-tools&content-setup=success'));
+        exit;
+    }
+
+    /**
+     * Handle demo posts generation from Tools page
+     */
+    public function handleGenerateDemoPosts(): void
+    {
+        if (!isset($_GET['wp-starter-generate-demo-posts'])) {
+            return;
+        }
+
+        // Verify nonce and capability
+        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'wp-starter-generate-demo-posts')) {
+            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
+        }
+
+        // German sample blog posts
+        $samplePosts = [
+            [
+                'title' => 'Willkommen auf unserem neuen Blog',
+                'content' => '<p>Wir freuen uns, Sie auf unserem neuen Blog begrüßen zu dürfen! Hier werden wir regelmäßig spannende Einblicke, hilfreiche Tipps und aktuelle Neuigkeiten aus unserer Branche teilen.</p><p>Bleiben Sie dran für interessante Artikel und lassen Sie uns wissen, welche Themen Sie besonders interessieren.</p>',
+                'excerpt' => 'Wir freuen uns, Sie auf unserem neuen Blog begrüßen zu dürfen! Hier finden Sie regelmäßig spannende Einblicke und hilfreiche Tipps.',
+            ],
+            [
+                'title' => '5 Tipps für mehr Produktivität im Arbeitsalltag',
+                'content' => '<p>In der heutigen schnelllebigen Arbeitswelt ist es wichtiger denn je, produktiv zu bleiben. Hier sind fünf bewährte Tipps:</p><ol><li><strong>Priorisieren Sie Ihre Aufgaben</strong> - Beginnen Sie jeden Tag mit einer klaren To-Do-Liste.</li><li><strong>Minimieren Sie Ablenkungen</strong> - Schalten Sie unnötige Benachrichtigungen aus.</li><li><strong>Nutzen Sie die Pomodoro-Technik</strong> - Arbeiten Sie in fokussierten 25-Minuten-Blöcken.</li><li><strong>Machen Sie regelmäßig Pausen</strong> - Kurze Pausen steigern die Konzentration.</li><li><strong>Reflektieren Sie am Ende des Tages</strong> - Was hat gut funktioniert, was nicht?</li></ol>',
+                'excerpt' => 'Entdecken Sie fünf bewährte Strategien, die Ihnen helfen, im Arbeitsalltag produktiver zu sein.',
+            ],
+            [
+                'title' => 'Die Zukunft der digitalen Transformation',
+                'content' => '<p>Die digitale Transformation verändert grundlegend, wie Unternehmen arbeiten und mit ihren Kunden interagieren. Von künstlicher Intelligenz bis hin zu Cloud-Computing – die technologischen Möglichkeiten scheinen grenzenlos.</p><p>Unternehmen, die heute in innovative Technologien investieren, werden morgen die Nase vorn haben. Dabei geht es nicht nur um die Einführung neuer Tools, sondern um einen kulturellen Wandel in der gesamten Organisation.</p>',
+                'excerpt' => 'Erfahren Sie, wie die digitale Transformation die Geschäftswelt verändert und was das für Ihr Unternehmen bedeutet.',
+            ],
+            [
+                'title' => 'Nachhaltigkeit im Unternehmen: Mehr als nur ein Trend',
+                'content' => '<p>Nachhaltigkeit ist längst kein Nischenthema mehr – sie ist zu einem zentralen Faktor für den Unternehmenserfolg geworden. Kunden, Mitarbeiter und Investoren erwarten zunehmend, dass Unternehmen Verantwortung für ihre ökologischen und sozialen Auswirkungen übernehmen.</p><p>Von der Reduzierung des CO2-Fußabdrucks über nachhaltige Lieferketten bis hin zu sozialen Initiativen – die Möglichkeiten sind vielfältig. Der Schlüssel liegt darin, Nachhaltigkeit authentisch in die Unternehmensstrategie zu integrieren.</p>',
+                'excerpt' => 'Warum Nachhaltigkeit mehr als ein Trend ist und wie Unternehmen davon profitieren können.',
+            ],
+            [
+                'title' => 'Remote Work: Best Practices für verteilte Teams',
+                'content' => '<p>Die Arbeit im Home-Office hat sich für viele Unternehmen vom Notfall-Modus zur neuen Normalität entwickelt. Doch verteilte Teams erfolgreich zu führen, erfordert neue Ansätze und Tools.</p><p>Regelmäßige Video-Calls, klare Kommunikationsrichtlinien und die richtigen Kollaborationstools sind dabei nur der Anfang. Ebenso wichtig sind Vertrauen, Flexibilität und ein starker Teamgeist – auch über die Distanz hinweg.</p>',
+                'excerpt' => 'Praktische Tipps und Best Practices für die erfolgreiche Zusammenarbeit in verteilten Teams.',
+            ],
+        ];
+
+        // Create posts with varied dates and featured images
+        $baseTime = time();
+        $dayOffset = 0;
+        $imageIndex = 0;
+
+        // Include required files for media handling
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/media.php';
+        require_once ABSPATH . 'wp-admin/includes/image.php';
+
+        foreach ($samplePosts as $postData) {
+            $postDate = gmdate('Y-m-d H:i:s', $baseTime - ($dayOffset * DAY_IN_SECONDS));
+            $dayOffset += rand(2, 4);
+
+            $postId = wp_insert_post([
+                'post_title' => $postData['title'],
+                'post_content' => $postData['content'],
+                'post_excerpt' => $postData['excerpt'],
+                'post_status' => 'publish',
+                'post_type' => 'post',
+                'post_date' => $postDate,
+                'post_date_gmt' => $postDate,
+            ]);
+
+            // Add featured image from picsum.photos
+            if ($postId && !is_wp_error($postId)) {
+                $imageIndex++;
+                $imageId = $this->downloadAndAttachImage(
+                    "https://picsum.photos/seed/blog{$imageIndex}/1200/800",
+                    "Blog Beitragsbild {$imageIndex}",
+                    $postId
+                );
+
+                if ($imageId) {
+                    set_post_thumbnail($postId, $imageId);
+                }
+            }
+        }
+
+        // Redirect back to tools page
+        wp_safe_redirect(admin_url('admin.php?page=theme-options-tools&demo-posts=created'));
+        exit;
+    }
+
+    /**
+     * Handle demo posts deletion from Tools page
+     */
+    public function handleDeleteDemoPosts(): void
+    {
+        if (!isset($_GET['wp-starter-delete-demo-posts'])) {
+            return;
+        }
+
+        // Verify nonce and capability
+        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'wp-starter-delete-demo-posts')) {
+            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
+        }
+
+        // Get all posts
+        $posts = get_posts([
+            'post_type' => 'post',
+            'post_status' => 'any',
+            'numberposts' => -1,
+        ]);
+
+        // Delete each post permanently
+        foreach ($posts as $post) {
+            wp_delete_post($post->ID, true);
+        }
+
+        // Redirect back to tools page
+        wp_safe_redirect(admin_url('admin.php?page=theme-options-tools&demo-posts=deleted'));
         exit;
     }
 
@@ -312,6 +455,44 @@ class PluginServiceProvider extends ServiceProvider
         }
 
         return $createdPages;
+    }
+
+    /**
+     * Create sample blog posts
+     *
+     * @param array<int, array{title: string, content: string, excerpt: string}> $posts
+     */
+    private function createDefaultPosts(array $posts): void
+    {
+        // Spread post dates over the last few weeks for realistic appearance
+        $baseTime = time();
+        $dayOffset = 0;
+
+        foreach ($posts as $index => $postData) {
+            // Check if a post with this title already exists
+            $existingPost = get_page_by_title($postData['title'], OBJECT, 'post');
+            if ($existingPost) {
+                continue;
+            }
+
+            // Calculate post date (spread over last 2 weeks)
+            $postDate = gmdate('Y-m-d H:i:s', $baseTime - ($dayOffset * DAY_IN_SECONDS));
+            $dayOffset += rand(3, 5); // Random 3-5 days between posts
+
+            $postId = wp_insert_post([
+                'post_title' => $postData['title'],
+                'post_content' => $postData['content'],
+                'post_excerpt' => $postData['excerpt'],
+                'post_status' => 'publish',
+                'post_type' => 'post',
+                'post_date' => $postDate,
+                'post_date_gmt' => $postDate,
+            ]);
+
+            if (is_wp_error($postId)) {
+                continue;
+            }
+        }
     }
 
     /**
@@ -1140,5 +1321,62 @@ class PluginServiceProvider extends ServiceProvider
             include_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
         return is_plugin_active($plugin);
+    }
+
+    /**
+     * Download an image from URL and attach it to a post
+     *
+     * @param string $url Image URL to download
+     * @param string $title Title for the attachment
+     * @param int $postId Post ID to attach the image to
+     * @return int|false Attachment ID or false on failure
+     */
+    private function downloadAndAttachImage(string $url, string $title, int $postId): int|false
+    {
+        // Download the image
+        $response = wp_remote_get($url, [
+            'timeout' => 30,
+            'redirection' => 5,
+        ]);
+
+        if (is_wp_error($response)) {
+            return false;
+        }
+
+        $imageData = wp_remote_retrieve_body($response);
+        if (empty($imageData)) {
+            return false;
+        }
+
+        // Create a unique filename
+        $filename = sanitize_file_name($title) . '-' . time() . '.jpg';
+
+        // Upload the image
+        $upload = wp_upload_bits($filename, null, $imageData);
+
+        if (!empty($upload['error'])) {
+            return false;
+        }
+
+        // Create attachment
+        $attachment = [
+            'post_mime_type' => 'image/jpeg',
+            'post_title' => $title,
+            'post_content' => '',
+            'post_status' => 'inherit',
+            'post_parent' => $postId,
+        ];
+
+        $attachmentId = wp_insert_attachment($attachment, $upload['file'], $postId);
+
+        if (is_wp_error($attachmentId)) {
+            return false;
+        }
+
+        // Generate attachment metadata
+        $attachmentData = wp_generate_attachment_metadata($attachmentId, $upload['file']);
+        wp_update_attachment_metadata($attachmentId, $attachmentData);
+
+        return $attachmentId;
     }
 }
