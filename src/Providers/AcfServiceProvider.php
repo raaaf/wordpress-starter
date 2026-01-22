@@ -42,6 +42,9 @@ class AcfServiceProvider extends ServiceProvider
 
         // Add ACF admin styles
         $this->addAdminStyles();
+
+        // Add flexible content title scripts
+        $this->addFlexibleTitleScripts();
     }
 
     private function setupAcfJson(): void
@@ -169,6 +172,31 @@ class AcfServiceProvider extends ServiceProvider
                 }
             </style>
             <?php
+        });
+    }
+
+    /**
+     * Add flexible content layout title scripts
+     * Auto-generates layout titles based on content for better UX
+     */
+    private function addFlexibleTitleScripts(): void
+    {
+        add_action('admin_enqueue_scripts', function (string $hook) {
+            // Only load on post edit screens
+            if (!in_array($hook, ['post.php', 'post-new.php'], true)) {
+                return;
+            }
+
+            $scriptPath = get_template_directory() . '/resources/js/admin/flexible-titles.js';
+            if (file_exists($scriptPath)) {
+                wp_enqueue_script(
+                    'acf-flexible-titles',
+                    get_template_directory_uri() . '/resources/js/admin/flexible-titles.js',
+                    ['acf-input'],
+                    filemtime($scriptPath),
+                    true
+                );
+            }
         });
     }
 

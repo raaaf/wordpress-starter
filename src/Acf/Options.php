@@ -668,7 +668,7 @@ class Options
             $statusMessage = sprintf(
                 '<div style="padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
                     <p style="margin: 0; color: #155724;"><strong>✓ Styleguide-Seite existiert</strong></p>
-                    <p style="margin: 10px 0 0 0;">
+                    <p style="margin: 10px 0 0 0; display: flex; gap: 8px; flex-wrap: wrap;">
                         <a href="%s" class="button">Bearbeiten</a>
                         <a href="%s" class="button" target="_blank">Ansehen</a>
                     </p>
@@ -759,6 +759,19 @@ class Options
                     'type' => 'message',
                     'message' => $contentSetupMessage,
                 ],
+                // Demo Content Section
+                [
+                    'key' => 'field_options_tools_demo_heading',
+                    'label' => 'Demo-Inhalte',
+                    'type' => 'message',
+                    'message' => '<p>Erstellt Beispiel-Blogbeiträge zum Testen des Blog-Layouts.</p>',
+                ],
+                [
+                    'key' => 'field_options_tools_demo_status',
+                    'label' => '',
+                    'type' => 'message',
+                    'message' => self::getDemoContentMessage(),
+                ],
                 // Styleguide Section
                 [
                     'key' => 'field_options_tools_styleguide_heading',
@@ -783,6 +796,58 @@ class Options
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Get demo content status message for Tools page
+     */
+    private static function getDemoContentMessage(): string
+    {
+        // Count existing demo posts
+        $existingPosts = get_posts([
+            'post_type' => 'post',
+            'post_status' => 'publish',
+            'numberposts' => -1,
+        ]);
+        $postCount = count($existingPosts);
+
+        $generateUrl = wp_nonce_url(
+            admin_url('?wp-starter-generate-demo-posts=1'),
+            'wp-starter-generate-demo-posts'
+        );
+
+        $deleteUrl = wp_nonce_url(
+            admin_url('?wp-starter-delete-demo-posts=1'),
+            'wp-starter-delete-demo-posts'
+        );
+
+        if ($postCount > 0) {
+            return sprintf(
+                '<div style="padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #155724;"><strong>✓ %d Blogbeiträge vorhanden</strong></p>
+                    <p style="margin: 10px 0 0 0;">
+                        <a href="%s" class="button button-primary">5 weitere generieren</a>
+                        <a href="%s" class="button" style="margin-left: 5px;" onclick="return confirm(\'Alle Beiträge wirklich löschen?\');">Alle löschen</a>
+                        <a href="%s" class="button" style="margin-left: 5px;">Beiträge ansehen</a>
+                    </p>
+                </div>',
+                $postCount,
+                esc_url($generateUrl),
+                esc_url($deleteUrl),
+                esc_url(admin_url('edit.php'))
+            );
+        }
+
+        return sprintf(
+            '<div style="padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; margin-bottom: 20px;">
+                <p style="margin: 0; color: #856404;"><strong>Keine Blogbeiträge vorhanden</strong></p>
+                <p style="margin: 10px 0; color: #856404;">Erstellt 5 Beispiel-Blogbeiträge mit realistischem Inhalt zum Testen.</p>
+                <p style="margin: 10px 0 0 0;">
+                    <a href="%s" class="button button-primary">Demo-Beiträge erstellen</a>
+                </p>
+            </div>',
+            esc_url($generateUrl)
+        );
     }
 
     /**
