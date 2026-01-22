@@ -3,6 +3,14 @@ import Alpine from 'alpinejs';
 import collapse from '@alpinejs/collapse';
 import mediumZoom from 'medium-zoom';
 
+// Declare localized strings from WordPress
+declare const wpStarterStrings: {
+  submenuOpen: string;
+  submenuClose: string;
+  image: string;
+  imageZoomInstruction: string;
+};
+
 // ============================================
 // Navigation Component
 // ============================================
@@ -47,7 +55,7 @@ export function createNavigationComponent(): NavigationComponent {
         const toggle = document.createElement('button');
         toggle.className = 'submenu-toggle';
         toggle.setAttribute('aria-expanded', 'false');
-        toggle.setAttribute('aria-label', 'Untermenü öffnen');
+        toggle.setAttribute('aria-label', wpStarterStrings.submenuOpen);
         toggle.innerHTML =
           '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
 
@@ -56,7 +64,7 @@ export function createNavigationComponent(): NavigationComponent {
           toggle.setAttribute('aria-expanded', String(isExpanded));
           toggle.setAttribute(
             'aria-label',
-            isExpanded ? 'Untermenü schließen' : 'Untermenü öffnen'
+            isExpanded ? wpStarterStrings.submenuClose : wpStarterStrings.submenuOpen
           );
         };
 
@@ -306,7 +314,9 @@ export function initGalleryZoom(): void {
     el.setAttribute('tabindex', '0');
     el.setAttribute(
       'aria-label',
-      (el.getAttribute('alt') || 'Bild') + ' - Klicken oder Enter zum Vergrößern'
+      (el.getAttribute('alt') || wpStarterStrings.image) +
+        ' - ' +
+        wpStarterStrings.imageZoomInstruction
     );
 
     // Allow Enter key to trigger zoom

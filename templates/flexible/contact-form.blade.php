@@ -35,7 +35,7 @@
 
             @if($showContactInfo && ($companyName || $address || $phone || $email))
                 <x-card variant="filled" padding="lg">
-                    <h3 class="text-h5 mb-4 text-content">Kontaktdaten</h3>
+                    <h3 class="text-h5 mb-4 text-content">{{ __('Kontaktdaten', 'wp-starter') }}</h3>
 
                     @if($companyName)
                         <p class="mb-2 font-medium text-content">{{ $companyName }}</p>
@@ -69,9 +69,9 @@
             @else
                 <p class="text-content-secondary">
                     @if(!shortcode_exists('contact-form-7'))
-                        Contact Form 7 Plugin ist nicht installiert.
+                        {{ __('Contact Form 7 Plugin ist nicht installiert.', 'wp-starter') }}
                     @else
-                        Bitte wähle ein Formular aus.
+                        {{ __('Bitte wähle ein Formular aus.', 'wp-starter') }}
                     @endif
                 </p>
             @endif
