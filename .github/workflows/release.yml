@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  # Run tests first before releasing
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, xml, ctype, json
+          tools: composer:v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Run PHP linting
+        run: composer lint
+
+      - name: Run JS linting
+        run: npm run lint
+
+      - name: Run PHP tests
+        run: composer test
+
+      - name: Run JS tests
+        run: npm test
+
+      - name: Build assets
+        run: npm run build
+
+  release:
+    name: Release
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production assets
+        run: npm run build
+
+      - name: Sync version to style.css
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          sed -i "s/^Version: .*/Version: $VERSION/" style.css
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+
+      - name: Sync style.css version after release
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          sed -i "s/^Version: .*/Version: $VERSION/" style.css

@@ -404,7 +404,7 @@ class PluginServiceProvider extends ServiceProvider
                 continue;
             }
 
-            // Determine post status (default: publish, styleguide: private)
+            // Use page-specific status if defined, otherwise default to publish
             $postStatus = $pageData['status'] ?? 'publish';
 
             $pageId = wp_insert_post([

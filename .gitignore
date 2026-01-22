@@ -72,6 +72,7 @@ Thumbs.db
 !.phpcs.xml.dist
 !.prettierrc
 !.env.example
+!.releaserc.json
 
 # track test fixtures
 !tests/fixtures/.env

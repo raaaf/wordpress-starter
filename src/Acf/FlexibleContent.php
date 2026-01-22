@@ -126,10 +126,10 @@ class FlexibleContent
     private static function getLayouts(): array
     {
         return [
-            // Header (1)
+            // Header layouts
             self::heroLayout(),
 
-            // Layout (7)
+            // Column-based layout options
             self::oneColumnLayout(),
             self::twoColumnsLayout(),
             self::twoColumnsImagesLayout(),
@@ -138,18 +138,18 @@ class FlexibleContent
             self::oneThirdTwoThirdsLayout(),
             self::twoThirdsOneThirdLayout(),
 
-            // Content (3)
+            // Content and text layouts
             self::accordionLayout(),
             self::tabsLayout(),
             self::ctaLayout(),
 
-            // Media (4)
+            // Media display layouts
             self::imageLayout(),
             self::videoLayout(),
             self::galleryLayout(),
             self::beforeAfterLayout(),
 
-            // Interactive (6)
+            // Interactive element layouts
             self::testimonialsLayout(),
             self::cardsLayout(),
             self::statsLayout(),
@@ -157,15 +157,15 @@ class FlexibleContent
             self::teamLayout(),
             self::pricingTableLayout(),
 
-            // Forms (2)
+            // Form-related layouts
             self::contactFormLayout(),
             self::mapLayout(),
 
-            // Posts (2)
+            // Post and data display layouts
             self::postsLayout(),
             self::tableLayout(),
 
-            // Misc (2)
+            // Miscellaneous utility layouts
             self::dividerLayout(),
             self::logoSliderLayout(),
         ];
