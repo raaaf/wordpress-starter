@@ -92,10 +92,181 @@ class Vite
             return;
         }
 
-        // Load ACF Icon Radio CSS on post/page edit screens
-        if (in_array($screen->base, ['post', 'page'], true) || $screen->is_block_editor) {
-            wp_add_inline_style('acf-input', self::getAcfIconRadioCss());
+        // Load ACF Icon Radio CSS and JS on post edit screens (including Classic Editor)
+        // The 'post' base covers both Block Editor and Classic Editor
+        if ($screen->base === 'post') {
+            // Add CSS inline in admin head
+            add_action('admin_head', [self::class, 'outputAcfIconRadioCss']);
+
+            // Add JS in admin footer (more reliable than attaching to acf-input)
+            add_action('admin_footer', [self::class, 'outputAcfIconRadioJs']);
         }
+    }
+
+    /**
+     * Output ACF Icon Radio CSS in admin head.
+     */
+    public static function outputAcfIconRadioCss(): void
+    {
+        echo '<style id="acf-icon-radio-css">' . self::getAcfIconRadioCss() . '</style>';
+    }
+
+    /**
+     * Output ACF Icon Radio JS in admin footer.
+     */
+    public static function outputAcfIconRadioJs(): void
+    {
+        echo '<script id="acf-icon-radio-js">' . self::getAcfIconRadioJs() . '</script>';
+    }
+
+    /**
+     * Get all theme icons as SVG strings for admin use.
+     *
+     * @return array<string, string>
+     */
+    private static function getThemeIcons(): array
+    {
+        $iconDir = get_template_directory() . '/resources/icons/';
+        $icons = [];
+
+        $iconNames = [
+            'calendar', 'check', 'chevron', 'chevron-up', 'chevron-down', 'chevron-left', 'chevron-right',
+            'close', 'eye', 'lock', 'mail', 'minus', 'phone', 'plus', 'search', 'user', 'warning',
+            'facebook', 'instagram', 'linkedin', 'x', 'xing', 'youtube',
+        ];
+
+        foreach ($iconNames as $name) {
+            $path = $iconDir . $name . '.svg';
+            if (file_exists($path)) {
+                $svg = file_get_contents($path);
+                if ($svg !== false) {
+                    // Remove width/height attributes so CSS can control size
+                    $svg = preg_replace('/\s*(width|height)="[^"]*"/', '', $svg) ?? $svg;
+                    $icons[$name] = $svg;
+                }
+            }
+        }
+
+        return $icons;
+    }
+
+    /**
+     * Get JavaScript for ACF Icon Radio Field enhancement.
+     * This injects SVG icons into the radio button labels.
+     */
+    private static function getAcfIconRadioJs(): string
+    {
+        $icons = self::getThemeIcons();
+        $iconsJson = wp_json_encode($icons);
+
+        return <<<JS
+(function() {
+    console.log('[ACF Icons] Script loaded, icons available:', Object.keys({$iconsJson}));
+    const icons = {$iconsJson};
+
+    function enhanceLabels(container) {
+        const labels = container.querySelectorAll('.acf-radio-list label');
+        console.log('[ACF Icons] Found', labels.length, 'labels in', container);
+
+        labels.forEach(function(label) {
+            // Skip if already enhanced
+            if (label.dataset.iconEnhanced) return;
+            label.dataset.iconEnhanced = 'true';
+
+            const input = label.querySelector('input[type="radio"]');
+            if (!input) return;
+
+            const iconName = input.value;
+            label.dataset.icon = iconName;
+
+            // Get the text content (the label text)
+            const textContent = label.textContent.trim();
+
+            console.log('[ACF Icons] Processing label:', iconName, '-> has icon:', !!icons[iconName]);
+
+            if (iconName && icons[iconName]) {
+                // Replace content with SVG
+                label.innerHTML = '';
+                label.appendChild(input);
+                label.insertAdjacentHTML('beforeend', icons[iconName]);
+                // Add hidden text for accessibility
+                const srText = document.createElement('span');
+                srText.className = 'screen-reader-text';
+                srText.textContent = textContent;
+                label.appendChild(srText);
+            } else if (iconName === '') {
+                // "No icon" option - keep text but wrap it
+                label.innerHTML = '';
+                label.appendChild(input);
+                const textSpan = document.createElement('span');
+                textSpan.textContent = 'Kein Icon';
+                label.appendChild(textSpan);
+            }
+        });
+    }
+
+    function enhanceAllIconFields() {
+        const fields = document.querySelectorAll('.acf-icon-radio-field');
+        console.log('[ACF Icons] enhanceAllIconFields found', fields.length, 'icon fields');
+        fields.forEach(function(wrapper) {
+            enhanceLabels(wrapper);
+        });
+    }
+
+    // Wait for ACF to be ready, then use proper hooks
+    function initAcfHooks() {
+        if (typeof acf === 'undefined') {
+            console.log('[ACF Icons] ACF not loaded yet, retrying...');
+            setTimeout(initAcfHooks, 100);
+            return;
+        }
+
+        console.log('[ACF Icons] ACF loaded, adding hooks');
+
+        // Use ACF's field-specific hooks for radio fields
+        acf.addAction('ready_field/type=radio', function(field) {
+            console.log('[ACF Icons] ready_field/type=radio triggered', field.\$el ? field.\$el[0].className : 'no \$el');
+            if (field.\$el && field.\$el[0].classList.contains('acf-icon-radio-field')) {
+                enhanceLabels(field.\$el[0]);
+            }
+        });
+
+        acf.addAction('append_field/type=radio', function(field) {
+            console.log('[ACF Icons] append_field/type=radio triggered');
+            if (field.\$el && field.\$el[0].classList.contains('acf-icon-radio-field')) {
+                enhanceLabels(field.\$el[0]);
+            }
+        });
+
+        // Also run on general ready/append for safety
+        acf.addAction('ready', function() {
+            console.log('[ACF Icons] ACF ready triggered');
+            enhanceAllIconFields();
+        });
+        acf.addAction('append', function() {
+            console.log('[ACF Icons] ACF append triggered');
+            enhanceAllIconFields();
+        });
+    }
+
+    // Start initialization
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAcfHooks);
+    } else {
+        initAcfHooks();
+    }
+
+    // Fallback: also run after a delay to catch any edge cases
+    setTimeout(function() {
+        console.log('[ACF Icons] Fallback 500ms');
+        enhanceAllIconFields();
+    }, 500);
+    setTimeout(function() {
+        console.log('[ACF Icons] Fallback 1500ms');
+        enhanceAllIconFields();
+    }, 1500);
+})();
+JS;
     }
 
     /**

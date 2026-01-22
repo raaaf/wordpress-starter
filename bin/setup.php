@@ -168,6 +168,37 @@ class ThemeSetup
         'styleguide' => ['title' => 'Styleguide', 'template' => '', 'status' => 'private'],
     ];
 
+    /** @var array<int, array{title: string, content: string, excerpt: string}> Sample blog posts */
+    private array $samplePosts = [
+        [
+            'title' => 'Willkommen auf unserem Blog',
+            'excerpt' => 'Erfahren Sie mehr über aktuelle Themen, Neuigkeiten und Einblicke aus unserem Unternehmen.',
+            'content' => '<p>Herzlich willkommen auf unserem Blog! Hier teilen wir regelmäßig interessante Einblicke, Neuigkeiten und Fachartikel mit Ihnen.</p>
+<p>Unser Team arbeitet kontinuierlich daran, Ihnen wertvolle Informationen und praktische Tipps zu liefern. Bleiben Sie gespannt auf kommende Beiträge!</p>
+<p>Haben Sie Fragen oder Anregungen? Wir freuen uns über Ihre Nachricht.</p>',
+        ],
+        [
+            'title' => 'Unsere Mission und Werte',
+            'excerpt' => 'Was uns antreibt und welche Werte unser tägliches Handeln bestimmen.',
+            'content' => '<p>Bei allem, was wir tun, stehen unsere Kunden im Mittelpunkt. Qualität, Zuverlässigkeit und Innovation sind die Säulen unserer Arbeit.</p>
+<p>Wir glauben an langfristige Partnerschaften und nachhaltige Lösungen. Jedes Projekt ist für uns eine Chance, gemeinsam zu wachsen und Außergewöhnliches zu schaffen.</p>
+<p>Erfahren Sie mehr über unsere Arbeitsweise und wie wir Ihnen helfen können, Ihre Ziele zu erreichen.</p>',
+        ],
+        [
+            'title' => 'Tipps für den Erfolg',
+            'excerpt' => 'Praktische Ratschläge und bewährte Strategien für Ihren Erfolg.',
+            'content' => '<p>Erfolg kommt selten über Nacht. Er ist das Ergebnis von Planung, harter Arbeit und der Bereitschaft, aus Fehlern zu lernen.</p>
+<p>In diesem Beitrag teilen wir einige bewährte Strategien, die uns und unseren Kunden geholfen haben:</p>
+<ul>
+<li>Klare Ziele setzen und regelmäßig überprüfen</li>
+<li>Kontinuierliche Verbesserung als Prinzip</li>
+<li>Offene Kommunikation pflegen</li>
+<li>Flexibel auf Veränderungen reagieren</li>
+</ul>
+<p>Welche Strategien haben sich bei Ihnen bewährt? Teilen Sie Ihre Erfahrungen mit uns!</p>',
+        ],
+    ];
+
     /** @var array<string, string[]> Menu assignments: menu location => page slugs */
     private array $menuAssignments = [
         'header-menu' => ['about', 'services', 'contact'],
@@ -434,11 +465,12 @@ class ThemeSetup
             $this->config['company_phone'] = '';
             $this->config['company_email'] = $this->config['author_email'] ?? $this->defaults['author_email'];
             $this->config['create_pages'] = true;
+            $this->config['create_posts'] = true;
             $this->config['delete_default_content'] = true;
             $this->config['set_permalink_structure'] = true;
             $this->config['color_scheme'] = 'system';
 
-            echo "\n  " . $this->color("Content options:", 'gray') . " Standardseiten werden erstellt, pretty permalinks aktiviert\n";
+            echo "\n  " . $this->color("Content options:", 'gray') . " Standardseiten + 3 Blog-Beiträge werden erstellt, pretty permalinks aktiviert\n";
             return;
         }
 
@@ -485,6 +517,20 @@ class ThemeSetup
             echo "\n  " . $this->color("Pages to create:", 'gray') . "\n";
             foreach ($this->samplePages as $key => $page) {
                 echo "    - {$page['title']}\n";
+            }
+            echo "\n";
+        }
+
+        $this->config['create_posts'] = strtolower($this->prompt(
+            'Create sample blog posts?',
+            'y',
+            '3 example posts for the blog (y/n)'
+        )) === 'y';
+
+        if ($this->config['create_posts']) {
+            echo "\n  " . $this->color("Posts to create:", 'gray') . "\n";
+            foreach ($this->samplePosts as $post) {
+                echo "    - {$post['title']}\n";
             }
             echo "\n";
         }
@@ -1254,9 +1300,11 @@ CSS;
     {
         $options = [
             'create_pages' => $this->config['create_pages'],
+            'create_posts' => $this->config['create_posts'] ?? false,
             'delete_default_content' => $this->config['delete_default_content'],
             'set_permalink_structure' => $this->config['set_permalink_structure'],
             'pages' => $this->config['create_pages'] ? $this->samplePages : [],
+            'posts' => ($this->config['create_posts'] ?? false) ? $this->samplePosts : [],
             'menu_assignments' => $this->config['create_pages'] ? $this->menuAssignments : [],
             'color_scheme' => $this->config['color_scheme'] ?? 'system',
         ];
