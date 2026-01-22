@@ -123,11 +123,20 @@ class Vite
 
     /**
      * Get all theme icons as SVG strings for admin use.
+     * Uses transient caching to avoid reading SVG files on every request.
      *
      * @return array<string, string>
      */
     private static function getThemeIcons(): array
     {
+        // Try to get cached icons first
+        $cacheKey = 'theme_icons_' . wp_get_theme()->get('Version');
+        $cachedIcons = get_transient($cacheKey);
+
+        if ($cachedIcons !== false && is_array($cachedIcons)) {
+            return $cachedIcons;
+        }
+
         $iconDir = get_template_directory() . '/resources/icons/';
         $icons = [];
 
@@ -148,6 +157,9 @@ class Vite
                 }
             }
         }
+
+        // Cache for 24 hours (invalidated by theme version in cache key)
+        set_transient($cacheKey, $icons, DAY_IN_SECONDS);
 
         return $icons;
     }
@@ -245,14 +257,6 @@ class Vite
     } else {
         initAcfHooks();
     }
-
-    // Fallback: also run after a delay to catch any edge cases
-    setTimeout(function() {
-        enhanceAllIconFields();
-    }, 500);
-    setTimeout(function() {
-        enhanceAllIconFields();
-    }, 1500);
 })();
 JS;
     }

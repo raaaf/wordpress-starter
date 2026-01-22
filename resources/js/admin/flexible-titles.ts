@@ -195,10 +195,6 @@ const debouncedUpdate = debounce(updateAllLayoutTitles, 300);
  * Initialize when ACF is ready
  */
 function init(): void {
-  // Update titles on page load (with delay for ACF to render)
-  setTimeout(updateAllLayoutTitles, 1000);
-  setTimeout(updateAllLayoutTitles, 2000);
-
   // Check if ACF is available
   if (typeof acf !== 'undefined') {
     // Update when layouts are reordered, added, or duplicated

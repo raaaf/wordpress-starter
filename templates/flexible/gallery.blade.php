@@ -33,6 +33,8 @@
                             src="{{ esc_url($thumb[0]) }}"
                             data-zoom-src="{{ esc_url($full[0]) }}"
                             alt="{{ esc_attr($alt ?: '') }}"
+                            width="{{ $thumb[1] }}"
+                            height="{{ $thumb[2] }}"
                             class="object-cover w-full transition-transform duration-300 ease-in-out cursor-zoom-in aspect-square gallery-zoom group-hover:scale-105"
                             loading="lazy"
                         >

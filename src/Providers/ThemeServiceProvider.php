@@ -251,10 +251,19 @@ class ThemeServiceProvider extends ServiceProvider
      *
      * Scans templates directory for .blade.php files with "Template Name:" comment
      * and registers them so they appear in the page template dropdown.
+     * Uses transient caching to avoid filesystem operations on every request.
      */
     private function registerBladePageTemplates(): void
     {
         add_filter('theme_page_templates', function (array $templates): array {
+            // Try to get cached template list first
+            $cacheKey = 'blade_page_templates_' . wp_get_theme()->get('Version');
+            $cachedTemplates = get_transient($cacheKey);
+
+            if ($cachedTemplates !== false && is_array($cachedTemplates)) {
+                return array_merge($templates, $cachedTemplates);
+            }
+
             $templatesDir = get_template_directory() . '/templates';
 
             if (!is_dir($templatesDir)) {
@@ -266,6 +275,7 @@ class ThemeServiceProvider extends ServiceProvider
                 return $templates;
             }
 
+            $foundTemplates = [];
             foreach ($bladeFiles as $file) {
                 $filename = basename($file);
                 // Skip if already registered
@@ -276,11 +286,14 @@ class ThemeServiceProvider extends ServiceProvider
                 // Read file and extract Template Name from comment
                 $content = file_get_contents($file);
                 if ($content && preg_match('/Template Name:\s*(.+)/i', $content, $matches)) {
-                    $templates[$filename] = trim($matches[1]);
+                    $foundTemplates[$filename] = trim($matches[1]);
                 }
             }
 
-            return $templates;
+            // Cache for 7 days (invalidated by theme version in cache key)
+            set_transient($cacheKey, $foundTemplates, WEEK_IN_SECONDS);
+
+            return array_merge($templates, $foundTemplates);
         });
     }
 
@@ -382,6 +395,32 @@ class ThemeServiceProvider extends ServiceProvider
         return $templateName;
     }
 
+    /**
+     * Get all theme options in a single batch for performance.
+     * Uses static caching to avoid multiple database queries per request.
+     *
+     * @return array<string, mixed>
+     */
+    private function getThemeOptions(): array
+    {
+        static $options = null;
+
+        if ($options !== null) {
+            return $options;
+        }
+
+        $options = [];
+        if (function_exists('get_field')) {
+            // Batch load all commonly used theme options
+            $fieldNames = ['company_name', 'address', 'phone', 'email', 'site_logo', 'site_favicon'];
+            foreach ($fieldNames as $fieldName) {
+                $options[$fieldName] = get_field($fieldName, 'option');
+            }
+        }
+
+        return $options;
+    }
+
     private function addStructuredData(): void
     {
         add_action('wp_head', function (): void {
@@ -400,52 +439,52 @@ class ThemeServiceProvider extends ServiceProvider
             $nonce = $GLOBALS['csp_nonce'] ?? '';
             echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($websiteSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
 
-            // Organization Schema (from theme options)
-            if (function_exists('get_field')) {
-                $companyName = get_field('company_name', 'option');
-                $address = get_field('address', 'option');
-                $phone = get_field('phone', 'option');
-                $email = get_field('email', 'option');
+            // Organization Schema (from batched theme options)
+            $themeOptions = $this->getThemeOptions();
+            $companyName = $themeOptions['company_name'] ?? null;
 
-                if ($companyName) {
-                    $orgSchema = [
-                        '@context' => 'https://schema.org',
-                        '@type' => 'Organization',
-                        'name' => $companyName,
-                        'url' => home_url(),
-                    ];
+            if ($companyName) {
+                $orgSchema = [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'Organization',
+                    'name' => $companyName,
+                    'url' => home_url(),
+                ];
 
-                    // Add logo if available (ACF first, then Customizer)
-                    $logoUrl = null;
-                    $acfLogo = get_field('site_logo', 'option');
-                    if ($acfLogo && !empty($acfLogo['url'])) {
-                        $logoUrl = $acfLogo['url'];
-                    } else {
-                        $customLogoId = get_theme_mod('custom_logo');
-                        if ($customLogoId) {
-                            $logoUrl = wp_get_attachment_image_url($customLogoId, 'full');
-                        }
+                // Add logo if available (ACF first, then Customizer)
+                $logoUrl = null;
+                $acfLogo = $themeOptions['site_logo'] ?? null;
+                if ($acfLogo && !empty($acfLogo['url'])) {
+                    $logoUrl = $acfLogo['url'];
+                } else {
+                    $customLogoId = get_theme_mod('custom_logo');
+                    if ($customLogoId) {
+                        $logoUrl = wp_get_attachment_image_url($customLogoId, 'full');
                     }
-                    if ($logoUrl) {
-                        $orgSchema['logo'] = $logoUrl;
-                    }
-
-                    // Add contact info
-                    if ($phone) {
-                        $orgSchema['telephone'] = $phone;
-                    }
-                    if ($email) {
-                        $orgSchema['email'] = $email;
-                    }
-                    if ($address) {
-                        $orgSchema['address'] = [
-                            '@type' => 'PostalAddress',
-                            'streetAddress' => $address,
-                        ];
-                    }
-
-                    echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($orgSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
                 }
+                if ($logoUrl) {
+                    $orgSchema['logo'] = $logoUrl;
+                }
+
+                // Add contact info from batched options
+                $phone = $themeOptions['phone'] ?? null;
+                $email = $themeOptions['email'] ?? null;
+                $address = $themeOptions['address'] ?? null;
+
+                if ($phone) {
+                    $orgSchema['telephone'] = $phone;
+                }
+                if ($email) {
+                    $orgSchema['email'] = $email;
+                }
+                if ($address) {
+                    $orgSchema['address'] = [
+                        '@type' => 'PostalAddress',
+                        'streetAddress' => $address,
+                    ];
+                }
+
+                echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($orgSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
             }
 
             // Article Schema for single posts

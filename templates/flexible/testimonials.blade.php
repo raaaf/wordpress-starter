@@ -41,7 +41,10 @@
                                 <img
                                     src="{{ $image[0] }}"
                                     alt="{{ $testimonial['author'] ?? '' }}"
+                                    width="{{ $image[1] }}"
+                                    height="{{ $image[2] }}"
                                     class="object-cover w-12 h-12 rounded-full"
+                                    loading="lazy"
                                 >
                             @endif
                         @endif
