@@ -13,10 +13,10 @@
     $background = get_sub_field('background_color') ?: 'primary';
 
     // Get contact info from theme options
-    $companyName = \ForeignThemeA\Acf\Fields::option('company_name', '');
-    $address = \ForeignThemeA\Acf\Fields::option('address', '');
-    $phone = \ForeignThemeA\Acf\Fields::option('phone', '');
-    $email = \ForeignThemeA\Acf\Fields::option('email', '');
+    $companyName = \WordpressStarter\Acf\Fields::option('company_name', '');
+    $address = \WordpressStarter\Acf\Fields::option('address', '');
+    $phone = \WordpressStarter\Acf\Fields::option('phone', '');
+    $email = \WordpressStarter\Acf\Fields::option('email', '');
 @endphp
 
 <x-section :background="$background" class="contact-form">

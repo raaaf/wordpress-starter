@@ -121,8 +121,8 @@
                                 loading="lazy"
                                 class="absolute inset-0 w-full h-full"
                                 title="{{ __('YouTube-Video', 'wp-starter') }}"
-                                @load="iframeLoaded = true"
-                                @error="iframeError = true"
+                                x-on:load="iframeLoaded = true"
+                                x-on:error="iframeError = true"
                             ></iframe>
                         @elseif($video_type === 'vimeo')
                             <iframe
@@ -133,8 +133,8 @@
                                 loading="lazy"
                                 class="absolute inset-0 w-full h-full"
                                 title="{{ __('Vimeo-Video', 'wp-starter') }}"
-                                @load="iframeLoaded = true"
-                                @error="iframeError = true"
+                                x-on:load="iframeLoaded = true"
+                                x-on:error="iframeError = true"
                             ></iframe>
                         @endif
                     </template>

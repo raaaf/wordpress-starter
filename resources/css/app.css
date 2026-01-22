@@ -1,3 +1,13 @@
+/**
+ * CSS Layer Order Declaration
+ *
+ * Layers are processed in declaration order (first = lowest priority).
+ * This ensures critical CSS (inlined in <head>) can be overridden by Tailwind.
+ *
+ * Order: critical < theme < base < components < utilities
+ */
+@layer critical, theme, base, components, utilities;
+
 @import './fonts.css';
 @import './tokens.css';
 
