@@ -245,8 +245,11 @@ class WelcomeServiceProvider extends ServiceProvider
         update_option(self::OPTION_ACF_PREFILL_PENDING, true);
         $this->prefillAcfOptions();
 
-        // Redirect to dashboard with success message
-        $redirectUrl = admin_url('index.php?options-imported=1');
+        // Redirect to dashboard with success message (nonce for verification)
+        $redirectUrl = add_query_arg([
+            'options-imported' => '1',
+            '_wpnonce' => wp_create_nonce('options_imported_notice'),
+        ], admin_url('index.php'));
         wp_safe_redirect($redirectUrl);
         exit;
     }
@@ -261,14 +264,19 @@ class WelcomeServiceProvider extends ServiceProvider
             return;
         }
 
-        // Show success message if just imported
-        if (isset($_GET['options-imported']) && $_GET['options-imported'] === '1') {
-            ?>
-            <div class="notice notice-success is-dismissible">
-                <p><strong><?php esc_html_e('Theme-Einstellungen wurden aus der Setup-Konfiguration importiert!', 'wp-starter'); ?></strong></p>
-            </div>
-            <?php
-            return;
+        // Show success message if just imported (with nonce verification)
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified below
+        if (isset($_GET['options-imported'], $_GET['_wpnonce'])) {
+            // Verify nonce before displaying message
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verification
+            if (wp_verify_nonce(wp_unslash($_GET['_wpnonce']), 'options_imported_notice')) {
+                ?>
+                <div class="notice notice-success is-dismissible">
+                    <p><strong><?php esc_html_e('Theme-Einstellungen wurden aus der Setup-Konfiguration importiert!', 'wp-starter'); ?></strong></p>
+                </div>
+                <?php
+                return;
+            }
         }
 
         // Check if config file exists (not yet processed)

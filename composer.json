@@ -1,86 +1,91 @@
 {
-    "name": "raaaf/starter",
-    "description": "A WordPress theme implementing Tailwind CSS and Alpine JS, and removing jQuery once and for all.",
-    "type": "wordpress-theme",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Rafael Alex",
-            "email": "a@rafaelalex.de"
-        }
-    ],
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://wpackagist.org",
-            "only": ["wpackagist-plugin/*"]
-        }
-    ],
-    "require": {
-        "php": "^8.4",
-        "composer/installers": "^2.0",
-        "illuminate/view": "^12.0",
-        "illuminate/events": "^12.0",
-        "illuminate/filesystem": "^12.0",
-        "illuminate/support": "^12.0",
-        "illuminate/container": "^12.0",
-        "ramsey/uuid": "^4.7"
-    },
-    "require-dev": {
-        "squizlabs/php_codesniffer": "^3.13",
-        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
-        "wp-coding-standards/wpcs": "^3.1",
-        "phpcsstandards/phpcsutils": "^1.0",
-        "phpcsstandards/phpcsextra": "^1.2",
-        "phpstan/phpstan": "^2.1",
-        "szepeviktor/phpstan-wordpress": "^2.0",
-        "phpunit/phpunit": "^11.0",
-        "friendsofphp/php-cs-fixer": "^3.92",
-        "phpoption/phpoption": "^1.9",
-        "vlucas/phpdotenv": "^5.6"
-    },
-    "autoload": {
-        "psr-4": {
-            "WordpressStarter\\": "src/"
-        },
-        "files": [
-            "src/helpers.php"
-        ]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "post-install-cmd": [
-            "npm install"
-        ],
-        "test": "phpunit",
-        "phpcs": "phpcs --runtime-set ignore_warnings_on_exit 1",
-        "phpcs:fix": "phpcbf",
-        "phpstan": "phpstan analyze --memory-limit=1G",
-        "cs-fix": "php-cs-fixer fix",
-        "cs-check": "php-cs-fixer fix --dry-run --diff",
-        "lint": [
-            "@phpcs",
-            "@phpstan"
-        ],
-        "verify": [
-            "@phpcs",
-            "@phpstan",
-            "@test"
-        ]
-    },
-    "config": {
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true,
-            "composer/installers": true
-        }
-    },
-    "extra": {
-        "installer-paths": {
-            "../../plugins/{$name}/": ["type:wordpress-plugin"]
-        }
+  "name": "raaaf/starter",
+  "description": "A WordPress theme implementing Tailwind CSS and Alpine JS, and removing jQuery once and for all.",
+  "type": "wordpress-theme",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Rafael Alex",
+      "email": "a@rafaelalex.de"
     }
+  ],
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+      "only": [
+        "wpackagist-plugin/*"
+      ]
+    }
+  ],
+  "require": {
+    "php": "^8.4",
+    "composer/installers": "^2.0",
+    "illuminate/view": "^12.0",
+    "illuminate/events": "^12.0",
+    "illuminate/filesystem": "^12.0",
+    "illuminate/support": "^12.0",
+    "illuminate/container": "^12.0",
+    "ramsey/uuid": "^4.7",
+    "yahnis-elsts/plugin-update-checker": "^5.6"
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^3.13",
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "wp-coding-standards/wpcs": "^3.1",
+    "phpcsstandards/phpcsutils": "^1.0",
+    "phpcsstandards/phpcsextra": "^1.2",
+    "phpstan/phpstan": "^2.1",
+    "szepeviktor/phpstan-wordpress": "^2.0",
+    "phpunit/phpunit": "^11.0",
+    "friendsofphp/php-cs-fixer": "^3.92",
+    "phpoption/phpoption": "^1.9",
+    "vlucas/phpdotenv": "^5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "WordpressStarter\\": "src/"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "npm install"
+    ],
+    "test": "phpunit",
+    "phpcs": "phpcs --runtime-set ignore_warnings_on_exit 1",
+    "phpcs:fix": "phpcbf",
+    "phpstan": "phpstan analyze --memory-limit=1G",
+    "cs-fix": "php-cs-fixer fix",
+    "cs-check": "php-cs-fixer fix --dry-run --diff",
+    "lint": [
+      "@phpcs",
+      "@phpstan"
+    ],
+    "verify": [
+      "@phpcs",
+      "@phpstan",
+      "@test"
+    ]
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "composer/installers": true
+    }
+  },
+  "extra": {
+    "installer-paths": {
+      "../../plugins/{$name}/": [
+        "type:wordpress-plugin"
+      ]
+    }
+  }
 }

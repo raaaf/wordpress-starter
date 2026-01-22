@@ -22,6 +22,7 @@ composer lint     # PHP linting (phpcs + phpstan)
 ## Architecture
 
 ### Directory Structure
+
 ```
 src/                    # PHP source code
 ├── Acf/               # ACF: FlexibleContent, Fields, Options
@@ -37,6 +38,7 @@ resources/
 ```
 
 ### Key Technologies
+
 - **Blade** (Laravel Illuminate v12) - Templates extend `layouts.app`
 - **Alpine.js** (bundled, no CDN) - Interactive components
 - **TailwindCSS v4.1** - Utility-first CSS
@@ -49,11 +51,13 @@ resources/
 Plugins are managed via **Composer** using [wpackagist.org](https://wpackagist.org).
 
 **Install configured plugins:**
+
 ```bash
 composer install
 ```
 
 **Add a new plugin:**
+
 ```bash
 composer require wpackagist-plugin/plugin-slug
 ```
@@ -67,6 +71,7 @@ Plugins are installed to `wp-content/plugins/` via `composer/installers`.
 Auto-generated from Figma in `resources/css/tokens.css`. See [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) for full documentation.
 
 **Update tokens:**
+
 ```bash
 # Export from Figma → config/design-tokens/*.tokens.json
 npm run tokens        # Generate CSS
@@ -76,6 +81,7 @@ npm run tokens:watch  # Watch mode
 **Semantic tokens:** `--bg-*`, `--text-*`, `--border-*`, `--icon-*`
 
 Usage:
+
 ```css
 background: var(--bg-surface);
 color: var(--text-content);
@@ -86,18 +92,20 @@ color: var(--text-content);
 All pages use Flexible Content as the primary content builder. 28 layouts in `templates/flexible/`.
 
 ### Layout Categories (ACF Extended)
-| Category | Layouts |
-|----------|---------|
-| Header | hero |
-| Layout | one-column, two-columns, three-columns, four-columns, one-third-two-thirds, two-thirds-one-third, two-columns-images |
-| Inhalte | accordion, tabs, cta, button |
-| Medien | image, video, gallery, before-after |
-| Interaktiv | testimonials, cards, stats, timeline, team, pricing-table |
-| Formulare | contact-form, map |
-| Beiträge | posts, table |
-| Sonstiges | divider, logo-slider |
+
+| Category   | Layouts                                                                                                              |
+| ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| Header     | hero                                                                                                                 |
+| Layout     | one-column, two-columns, three-columns, four-columns, one-third-two-thirds, two-thirds-one-third, two-columns-images |
+| Inhalte    | accordion, tabs, cta, button                                                                                         |
+| Medien     | image, video, gallery, before-after                                                                                  |
+| Interaktiv | testimonials, cards, stats, timeline, team, pricing-table                                                            |
+| Formulare  | contact-form, map                                                                                                    |
+| Beiträge   | posts, table                                                                                                         |
+| Sonstiges  | divider, logo-slider                                                                                                 |
 
 ### Flexible Template Pattern
+
 ```blade
 {{-- templates/flexible/example.blade.php --}}
 @php
@@ -113,11 +121,13 @@ All pages use Flexible Content as the primary content builder. 28 layouts in `te
 ```
 
 ### Background Colors
+
 All layouts support: `primary`, `secondary`, `tertiary`, `brand`, `brand-subtle`, `inverse`
 
 ## ACF Extended Features
 
 ACF Extended (FREE) enhances the editing experience:
+
 - **Modal Selection** - Choose layouts in visual grid modal
 - **Modal Edit** - Edit layouts in large modal
 - **Copy/Paste** - Copy layouts between pages
@@ -129,16 +139,19 @@ Configuration in `src/Acf/AcfExtended.php`.
 ## Blade Directives
 
 **ACF Fields:**
+
 - `@field('name')` - Escaped field
 - `@fieldRaw('name')` - HTML field (wp_kses_post)
 - `@option('name')` - Theme option (cached)
 - `@optionRaw('name')` - HTML option
 
 **Conditionals:**
+
 - `@hasfield('name')...@endhasfield`
 - `@repeater('name')...@endrepeater`
 
 **Flexible Content:**
+
 - `@flexible('field_name')...@endflexible`
 - `@layout('layout_name')...@endlayout`
 
@@ -160,6 +173,7 @@ FieldDefinitions::repeaterField('key', 'Label', 'name', $subFields);
 ## Theme Options
 
 Available under "Theme-Einstellungen" in admin:
+
 - **Allgemein:** Logo, Favicon, Contact info
 - **Header:** Sticky header, CTA button
 - **Footer:** Footer text, copyright
@@ -170,6 +184,7 @@ Available under "Theme-Einstellungen" in admin:
 ## Alpine.js Components
 
 Defined in `resources/js/app.ts`:
+
 - `navigation` - Mobile menu with focus trap
 - `statsCounter` - Animated number counters
 - `tabs` - Tab navigation
@@ -181,6 +196,7 @@ Defined in `resources/js/app.ts`:
 ## Adding New Layouts
 
 1. Add layout method in `src/Acf/FlexibleContent.php`:
+
 ```php
 private static function myNewLayout(): array
 {
@@ -200,6 +216,79 @@ private static function myNewLayout(): array
 3. Create template `templates/flexible/my-new.blade.php`
 
 4. Register layout in `getLayouts()` array
+
+## Git Commit Conventions
+
+This project uses **Conventional Commits** with **Semantic Release** for automated versioning.
+
+### Commit Message Format
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### Commit Types and Version Bumps
+
+| Type       | Description                           | Version Bump  |
+| ---------- | ------------------------------------- | ------------- |
+| `feat`     | New feature                           | Minor (1.x.0) |
+| `fix`      | Bug fix                               | Patch (1.0.x) |
+| `perf`     | Performance improvement               | Patch         |
+| `refactor` | Code refactoring (no feature change)  | Patch         |
+| `style`    | Code style changes (formatting, etc.) | Patch         |
+| `docs`     | Documentation only                    | No release    |
+| `chore`    | Maintenance tasks                     | No release    |
+| `ci`       | CI/CD changes                         | No release    |
+| `test`     | Adding/updating tests                 | No release    |
+
+### Breaking Changes → Major Version (x.0.0)
+
+Add `!` after type or include `BREAKING CHANGE:` in footer:
+
+```bash
+feat!: redesign theme options API
+# or
+feat: redesign theme options
+
+BREAKING CHANGE: Theme options structure changed
+```
+
+### Examples
+
+```bash
+# New feature → 1.1.0
+git commit -m "feat: add pricing table layout"
+
+# Bug fix → 1.0.1
+git commit -m "fix: hero image not displaying on mobile"
+
+# New feature with scope → 1.1.0
+git commit -m "feat(acf): add video background option to hero"
+
+# Breaking change → 2.0.0
+git commit -m "feat!: change flexible content field structure"
+
+# No release (docs only)
+git commit -m "docs: update installation instructions"
+```
+
+### Automated Releases
+
+On push to `master`:
+
+1. CI runs all tests
+2. Semantic Release analyzes commit messages
+3. Version bumped in `package.json` and `style.css`
+4. `CHANGELOG.md` updated automatically
+5. GitHub Release created with tag
+
+### Theme Updates
+
+Users receive updates via WordPress Dashboard → Updates (powered by `ThemeUpdateProvider`).
 
 ## Important Notes
 
