@@ -239,6 +239,13 @@ class Options
                     false,
                     __('Bestimmt das Standard-Farbschema der Website. „Systemeinstellung" passt sich automatisch an die Browser-/OS-Einstellung des Besuchers an.', 'wp-starter')
                 ),
+                FieldDefinitions::trueFalseField(
+                    'field_options_animations_enabled',
+                    __('Scroll-Animationen', 'wp-starter'),
+                    'animations_enabled',
+                    true,
+                    __('Sanfte Einblend-Animationen beim Scrollen. Automatisch deaktiviert bei „reduzierte Bewegung".', 'wp-starter')
+                ),
             ],
             'location' => [
                 [

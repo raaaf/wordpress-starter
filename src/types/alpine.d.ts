@@ -8,6 +8,13 @@ declare module '@alpinejs/collapse' {
   export default collapse;
 }
 
+// Type declaration for @alpinejs/intersect plugin
+declare module '@alpinejs/intersect' {
+  import { PluginCallback } from 'alpinejs';
+  const intersect: PluginCallback;
+  export default intersect;
+}
+
 export interface AlpineComponentContext {
   $el: HTMLElement;
   $refs: Record<string, HTMLElement>;

@@ -1,6 +1,7 @@
 // Import Alpine.js and plugins
 import Alpine from 'alpinejs';
 import collapse from '@alpinejs/collapse';
+import intersect from '@alpinejs/intersect';
 import mediumZoom from 'medium-zoom';
 
 // Declare localized strings from WordPress
@@ -459,6 +460,7 @@ window.Alpine = Alpine;
 
 // Register Alpine plugins
 Alpine.plugin(collapse);
+Alpine.plugin(intersect);
 
 // Register Alpine components
 Alpine.data('navigation', createNavigationComponent);
