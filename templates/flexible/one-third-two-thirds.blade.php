@@ -2,19 +2,20 @@
     One Third / Two Thirds - Flexible Content Layout
 
     Uses shared components: x-section, x-grid, x-prose, x-card
-    Fields: left_column, right_column
+    ACF Fields: column_1, column_2, background_color
 --}}
 
 @php
-    $left_column = get_sub_field('left_column');
-    $right_column = get_sub_field('right_column');
+    $column_1 = get_sub_field('column_1');
+    $column_2 = get_sub_field('column_2');
+    $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-<x-section>
+<x-section :background="$background" class="one-third-two-thirds">
     <x-grid cols="1/3-2/3" gap="lg" align="items-center">
-        <x-prose>{!! $left_column !!}</x-prose>
+        <x-prose>{!! $column_1 !!}</x-prose>
         <x-card variant="outlined" padding="lg">
-            <x-prose>{!! $right_column !!}</x-prose>
+            <x-prose>{!! $column_2 !!}</x-prose>
         </x-card>
     </x-grid>
 </x-section>

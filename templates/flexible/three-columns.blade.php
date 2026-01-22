@@ -2,19 +2,20 @@
     Three Columns - Flexible Content Layout
 
     Uses shared components: x-section, x-grid, x-prose
-    Fields: left_column, center_column, right_column
+    ACF Fields: column_1, column_2, column_3, background_color
 --}}
 
 @php
-    $left_column = get_sub_field('left_column');
-    $center_column = get_sub_field('center_column');
-    $right_column = get_sub_field('right_column');
+    $column_1 = get_sub_field('column_1');
+    $column_2 = get_sub_field('column_2');
+    $column_3 = get_sub_field('column_3');
+    $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-<x-section>
+<x-section :background="$background" class="three-columns">
     <x-grid cols="3" gap="xl">
-        <x-prose>{!! $left_column !!}</x-prose>
-        <x-prose>{!! $center_column !!}</x-prose>
-        <x-prose>{!! $right_column !!}</x-prose>
+        <x-prose>{!! $column_1 !!}</x-prose>
+        <x-prose>{!! $column_2 !!}</x-prose>
+        <x-prose>{!! $column_3 !!}</x-prose>
     </x-grid>
 </x-section>

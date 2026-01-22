@@ -9,7 +9,7 @@
 @php
     $title = get_sub_field('title') ?: '';
     $stats = get_sub_field('stats') ?: [];
-    $background = get_sub_field('background_color') ?: 'brand';
+    $background = get_sub_field('background_color') ?: 'secondary';
 
     // Use explicit grid classes to ensure Tailwind includes them
     $statsCount = count($stats);
