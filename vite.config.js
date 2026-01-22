@@ -33,8 +33,7 @@ export default defineConfig({
       input: {
         app: resolve(__dirname, 'resources/js/app.ts'),
         styles: resolve(__dirname, 'resources/css/app.css'),
-        // Note: Editor CSS/JS removed - all ACF blocks use edit mode (no preview rendering)
-        // ACF field UI styling is handled via inline CSS in PHP
+        'admin-flexible-titles': resolve(__dirname, 'resources/js/admin/flexible-titles.ts'),
       },
       output: {
         manualChunks: {

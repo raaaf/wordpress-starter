@@ -65,6 +65,14 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['dist/**', 'compiled/**', 'node_modules/**', 'vendor/**'],
+    ignores: [
+      'dist/**',
+      'compiled/**',
+      'node_modules/**',
+      'vendor/**',
+      'vite.config.js',
+      'eslint.config.js',
+      'vitest.config.ts',
+    ],
   }
 );

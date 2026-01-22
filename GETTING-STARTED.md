@@ -6,8 +6,8 @@ Diese Anleitung hilft dir, das WP-Starter Theme in wenigen Minuten einzurichten.
 
 Stelle sicher, dass folgende Software installiert ist:
 
-- **PHP 8.2+** (mit Composer)
-- **Node.js 18+** (mit npm)
+- **PHP 8.4+** (mit Composer)
+- **Node.js 20.19+ oder 22.12+** (mit npm)
 - **WordPress 6.8+**
 - **Local by Flywheel** (empfohlen für Mac-Entwicklung)
 
@@ -17,9 +17,26 @@ Stelle sicher, dass folgende Software installiert ist:
 
 Kopiere den Theme-Ordner nach `wp-content/themes/` deiner WordPress-Installation.
 
-### 2. Abhängigkeiten installieren
+### 2. Setup-Wizard ausführen (empfohlen)
 
-Öffne ein Terminal im Theme-Ordner und führe aus:
+Das Theme enthält einen interaktiven Setup-Wizard, der alles für dich konfiguriert:
+
+```bash
+php bin/setup.php
+```
+
+Der Setup-Wizard:
+
+1. Konfiguriert Theme-Name, Autor und Metadaten
+2. Aktualisiert den PHP-Namespace in allen Dateien
+3. Lässt dich Plugins zur automatischen Installation auswählen
+4. Konfiguriert Startinhalte (Seiten, Permalinks)
+5. Installiert Abhängigkeiten automatisch (composer install, npm install, npm run build)
+6. Erstellt `.env`-Datei aus der Vorlage
+
+### 3. Manuelle Installation (Alternative)
+
+Falls du den Setup-Wizard nicht nutzen möchtest:
 
 ```bash
 # PHP-Abhängigkeiten installieren
@@ -27,11 +44,10 @@ composer install
 
 # JavaScript-Abhängigkeiten installieren
 npm install
-```
 
-### 3. Umgebungsvariablen konfigurieren
+# Assets für Produktion bauen
+npm run build
 
-```bash
 # Erstelle eine .env-Datei aus der Vorlage
 cp .env.example .env
 ```
@@ -47,6 +63,7 @@ cp .env.example .env
 ### 5. ACF Pro aktivieren
 
 Das Theme benötigt **Advanced Custom Fields PRO**:
+
 1. Installiere und aktiviere ACF Pro
 2. Nach der Aktivierung werden alle Blöcke und Theme-Optionen verfügbar
 
@@ -63,9 +80,9 @@ Dies startet den Entwicklungsserver auf `http://localhost:5173` mit Hot Module R
 ### Prüfen ob alles funktioniert
 
 1. Öffne deine WordPress-Seite im Browser
-2. Erstelle einen neuen Beitrag oder eine Seite
-3. Klicke auf den Block-Einfüger (+)
-4. Unter "Theme Blocks" solltest du alle 27 ACF-Blöcke sehen
+2. Erstelle eine neue Seite mit der Vorlage "Flexibler Seiteninhalt"
+3. Im Classic Editor siehst du den "Sektion hinzufügen" Button
+4. Wähle eines der 28 verfügbaren Layouts aus
 
 ## Erste Schritte nach der Installation
 
@@ -87,27 +104,34 @@ Dies startet den Entwicklungsserver auf `http://localhost:5173` mit Hot Module R
 4. Füge weitere Blöcke hinzu (z.B. Zwei Spalten, Handlungsaufforderung)
 5. Veröffentliche die Seite
 
-## Verfügbare Blöcke
+## Verfügbare Layouts
 
-Das Theme enthält 27 vorgefertigte Blöcke:
+Das Theme enthält 28 vorgefertigte Flexible Content Layouts:
 
-| Kategorie | Blöcke |
-|-----------|--------|
-| Layout | Eine Spalte, Zwei Spalten, Drei Spalten, Vier Spalten, 1/3+2/3, 2/3+1/3, Zwei Spalten mit Bildern |
-| Inhalt | Hero-Bereich, Bild, Video, Trenner/Abstand |
-| Interaktiv | Akkordeon, Tabs, Karten, Kundenstimmen, Galerie, Logo-Slider |
-| Weitere | Preistabelle, Team, Statistiken, Zeitstrahl, Beiträge, Kontaktformular, Google Maps, Vorher/Nachher, Tabelle |
+| Kategorie  | Layouts                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------- |
+| Header     | Hero-Bereich                                                                                      |
+| Layout     | Eine Spalte, Zwei Spalten, Drei Spalten, Vier Spalten, 1/3+2/3, 2/3+1/3, Zwei Spalten mit Bildern |
+| Inhalte    | Akkordeon, Tabs, CTA, Button                                                                      |
+| Medien     | Bild, Video, Galerie, Vorher/Nachher                                                              |
+| Interaktiv | Kundenstimmen, Karten, Statistiken, Zeitstrahl, Team, Preistabelle                                |
+| Formulare  | Kontaktformular, Google Maps                                                                      |
+| Beiträge   | Posts, Tabelle                                                                                    |
+| Sonstiges  | Trenner/Abstand, Logo-Slider                                                                      |
 
 ## Wichtige Dateien
 
-| Datei/Ordner | Beschreibung |
-|--------------|--------------|
-| `templates/` | Blade-Templates |
-| `blocks/` | ACF-Block-Definitionen |
-| `resources/css/` | CSS-Quelldateien (TailwindCSS) |
-| `resources/js/` | JavaScript/TypeScript-Quelldateien |
-| `src/` | PHP-Klassen und Service Provider |
-| `config/` | Konfigurationsdateien |
+| Datei/Ordner                   | Beschreibung                                   |
+| ------------------------------ | ---------------------------------------------- |
+| `templates/`                   | Blade-Templates                                |
+| `templates/flexible/`          | Flexible Content Layout-Templates (28 Layouts) |
+| `src/Acf/FlexibleContent.php`  | Layout-Definitionen                            |
+| `src/Acf/FieldDefinitions.php` | Feld-Definitionen                              |
+| `resources/css/`               | CSS-Quelldateien (TailwindCSS)                 |
+| `resources/js/`                | JavaScript/TypeScript-Quelldateien             |
+| `src/`                         | PHP-Klassen und Service Provider               |
+| `config/`                      | Konfigurationsdateien                          |
+| `bin/setup.php`                | Interaktiver Setup-Wizard                      |
 
 ## Nächste Schritte
 

@@ -68,6 +68,7 @@ Thumbs.db
 !.gitignore
 !.github/
 !.editorconfig
+!.husky/
 !.phpcs.xml.dist
 !.prettierrc
 !.env.example
