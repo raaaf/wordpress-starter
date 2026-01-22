@@ -117,7 +117,7 @@
                 @endif
 
                 @if($title)
-                    <h1 class="text-4xl md:text-5xl font-bold mb-6 text-content">
+                    <h1 class="text-h1 mb-6 text-content">
                         {!! $title !!}
                     </h1>
                 @endif
@@ -179,7 +179,7 @@
             @endif
 
             @if($title)
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-content">
+                <h1 class="text-h1 mb-6 text-content">
                     {!! $title !!}
                 </h1>
             @endif

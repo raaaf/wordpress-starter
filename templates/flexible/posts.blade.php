@@ -50,9 +50,6 @@
                 @php $postsQuery->the_post(); @endphp
                 <li>
                     <x-card variant="filled" padding="none" hoverable class="group relative cursor-pointer h-full">
-                        {{-- Stretched link for entire card --}}
-                        <a href="{{ get_permalink() }}" class="absolute inset-0 z-0" aria-hidden="true"></a>
-
                         @if(has_post_thumbnail())
                             <div class="block overflow-hidden aspect-video">
                                 {!! get_the_post_thumbnail(get_the_ID(), 'card-video', [
@@ -88,8 +85,13 @@
                                 </p>
                             @endif
 
-                            <x-link :url="get_permalink()" iconRight="chevron-right" :ariaLabel="__('Weiterlesen:', 'wp-starter') . ' ' . get_the_title()" class="relative z-10 group-hover:text-content-brand">{{ __('Weiterlesen', 'wp-starter') }}</x-link>
+                            <x-link :url="get_permalink()" iconRight="chevron-right" class="relative z-20 group-hover:text-content-brand!">{{ __('Weiterlesen', 'wp-starter') }}</x-link>
                         </div>
+
+                        {{-- Stretched link covering entire card (z-10, below the Weiterlesen link at z-20) --}}
+                        <a href="{{ get_permalink() }}" class="absolute inset-0 z-10" aria-label="{{ __('Weiterlesen:', 'wp-starter') }} {{ get_the_title() }}">
+                            <span class="sr-only">{{ get_the_title() }}</span>
+                        </a>
                     </x-card>
                 </li>
             @endwhile

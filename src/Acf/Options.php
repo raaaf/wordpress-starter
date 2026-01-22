@@ -38,6 +38,7 @@ class Options
 
         // Sub pages with translated labels and icons
         self::addSubPage(__('Allgemein', 'wp-starter'), 'general', 'dashicons-admin-home');
+        self::addSubPage(__('Blog', 'wp-starter'), 'blog', 'dashicons-edit-page');
         self::addSubPage(__('Header', 'wp-starter'), 'header', 'dashicons-arrow-up-alt');
         self::addSubPage(__('Footer', 'wp-starter'), 'footer', 'dashicons-arrow-down-alt');
         self::addSubPage(__('Social Media', 'wp-starter'), 'social', 'dashicons-share');
@@ -95,6 +96,7 @@ class Options
         self::registerSocialFields();
         self::registerAnalyticsFields();
         self::registerToolsFields();
+        self::registerBlogFields();
     }
 
     /**
@@ -865,6 +867,74 @@ class Options
             </div>',
             esc_url($generateUrl)
         );
+    }
+
+    /**
+     * Blog Settings Fields
+     */
+    private static function registerBlogFields(): void
+    {
+        acf_add_local_field_group([
+            'key' => 'group_options_blog',
+            'title' => __('Blog-Einstellungen', 'wp-starter'),
+            'fields' => [
+                FieldDefinitions::textField(
+                    'field_options_blog_title',
+                    __('Blog-Titel', 'wp-starter'),
+                    'blog_title',
+                    false,
+                    __('Überschrift der Blog-Seite. Leer lassen für Standard „Blog".', 'wp-starter'),
+                    __('Blog', 'wp-starter')
+                ),
+                FieldDefinitions::textareaField(
+                    'field_options_blog_description',
+                    __('Blog-Beschreibung', 'wp-starter'),
+                    'blog_description',
+                    3,
+                    __('Einleitungstext unter dem Titel.', 'wp-starter'),
+                    __('Einblicke, Neuigkeiten und Wissenswertes...', 'wp-starter')
+                ),
+                // Section Labels Tab
+                [
+                    'key' => 'field_options_blog_tab_labels',
+                    'label' => __('Abschnitts-Bezeichnungen', 'wp-starter'),
+                    'type' => 'tab',
+                ],
+                FieldDefinitions::textField(
+                    'field_options_blog_label_featured',
+                    __('Aktueller Beitrag', 'wp-starter'),
+                    'blog_label_featured',
+                    false,
+                    '',
+                    __('Aktueller Beitrag', 'wp-starter')
+                ),
+                FieldDefinitions::textField(
+                    'field_options_blog_label_recent',
+                    __('Neueste Artikel', 'wp-starter'),
+                    'blog_label_recent',
+                    false,
+                    '',
+                    __('Neueste Artikel', 'wp-starter')
+                ),
+                FieldDefinitions::textField(
+                    'field_options_blog_label_more',
+                    __('Weitere Artikel', 'wp-starter'),
+                    'blog_label_more',
+                    false,
+                    '',
+                    __('Weitere Artikel', 'wp-starter')
+                ),
+            ],
+            'location' => [
+                [
+                    [
+                        'param' => 'options_page',
+                        'operator' => '==',
+                        'value' => 'theme-options-blog',
+                    ],
+                ],
+            ],
+        ]);
     }
 
     /**

@@ -1,0 +1,213 @@
+@extends('layouts.app')
+
+@php
+    global $wp_query;
+@endphp
+
+@section('content')
+    {{-- Blog Header --}}
+    <x-section background="secondary" padding="lg">
+        <div class="max-w-2xl mx-auto text-center">
+            <h1 class="text-h1 text-content mb-4">
+                {{ get_field('blog_title', 'option') ?: __('Blog', 'wp-starter') }}
+            </h1>
+            @if ($blogDescription = get_field('blog_description', 'option'))
+                <p class="text-lg text-content-secondary">
+                    {{ $blogDescription }}
+                </p>
+            @endif
+        </div>
+    </x-section>
+
+    <x-section padding="lg">
+        @if (have_posts())
+            {{-- FEATURED POST --}}
+            @php the_post(); @endphp
+            <div class="mb-16">
+                <span class="text-sm font-medium text-content-brand uppercase tracking-wider mb-6 block">
+                    {{ get_field('blog_label_featured', 'option') ?: __('Aktueller Beitrag', 'wp-starter') }}
+                </span>
+                <article>
+                    <x-card variant="filled" hoverable padding="none" class="group relative overflow-hidden">
+                        <div class="grid md:grid-cols-2">
+                            {{-- Image --}}
+                            <div class="aspect-[4/3] md:aspect-auto md:min-h-[400px] overflow-hidden">
+                                @if (has_post_thumbnail())
+                                    {!! get_the_post_thumbnail(null, 'large', [
+                                        'class' => 'w-full h-full object-cover transition-transform duration-500 group-hover:scale-105',
+                                        'loading' => 'eager',
+                                    ]) !!}
+                                @else
+                                    <div class="w-full h-full bg-surface-tertiary flex items-center justify-center">
+                                        <x-icon name="eye" class="w-16 h-16 text-content-tertiary" />
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- Content --}}
+                            <div class="p-8 md:p-12 flex flex-col justify-center">
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                    @if (has_category())
+                                        @php $firstCategory = get_the_category()[0]; @endphp
+                                        <x-badge variant="brand">{{ $firstCategory->name }}</x-badge>
+                                    @endif
+                                    <x-badge variant="gray" style="outline">{{ get_reading_time() }}</x-badge>
+                                </div>
+
+                                <h2 class="text-h2 text-content mb-4 transition-colors group-hover:text-content-brand">
+                                    {{ get_the_title() }}
+                                </h2>
+
+                                <p class="text-content-secondary mb-6 line-clamp-3">
+                                    {!! get_the_excerpt() !!}
+                                </p>
+
+                                <div class="flex items-center justify-between mt-auto">
+                                    <x-link :url="get_permalink()" iconRight="chevron-right" class="relative z-20">
+                                        {{ __('Weiterlesen', 'wp-starter') }}
+                                    </x-link>
+                                    <time datetime="{{ get_the_date('c') }}" class="text-sm text-content-tertiary">
+                                        {{ get_the_date() }}
+                                    </time>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Stretched link --}}
+                        <a href="{{ get_permalink() }}" class="absolute inset-0 z-10" aria-label="{{ __('Weiterlesen:', 'wp-starter') }} {{ get_the_title() }}">
+                            <span class="sr-only">{{ get_the_title() }}</span>
+                        </a>
+                    </x-card>
+                </article>
+            </div>
+
+            {{-- RECENT POSTS (with images) --}}
+            @if (have_posts())
+                <div class="mb-16">
+                    <span class="text-sm font-medium text-content-brand uppercase tracking-wider mb-6 block">
+                        {{ get_field('blog_label_recent', 'option') ?: __('Neueste Artikel', 'wp-starter') }}
+                    </span>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        @for ($i = 0; $i < 2 && have_posts(); $i++)
+                            @php the_post(); @endphp
+                            <article>
+                                <x-card variant="filled" hoverable padding="none" class="group relative h-full">
+                                    @if (has_post_thumbnail())
+                                        <div class="aspect-[2/1] overflow-hidden">
+                                            {!! get_the_post_thumbnail(null, 'card-video', [
+                                                'class' => 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105',
+                                                'loading' => 'lazy',
+                                            ]) !!}
+                                        </div>
+                                    @endif
+
+                                    <div class="p-6">
+                                        <div class="flex flex-wrap gap-2 mb-3">
+                                            @if (has_category())
+                                                @php $firstCategory = get_the_category()[0]; @endphp
+                                                <x-badge variant="brand" size="sm">{{ $firstCategory->name }}</x-badge>
+                                            @endif
+                                            <x-badge variant="gray" style="outline" size="sm">{{ get_reading_time() }}</x-badge>
+                                        </div>
+
+                                        <h3 class="text-h4 text-content mb-3 transition-colors group-hover:text-content-brand">
+                                            {{ get_the_title() }}
+                                        </h3>
+
+                                        <p class="text-content-secondary line-clamp-2 mb-4">
+                                            {!! wp_trim_words(get_the_excerpt(), 20) !!}
+                                        </p>
+
+                                        <div class="flex items-center justify-between pt-4 border-t border-line">
+                                            <x-link :url="get_permalink()" iconRight="chevron-right" size="sm" class="relative z-20">
+                                                {{ __('Weiterlesen', 'wp-starter') }}
+                                            </x-link>
+                                            <time datetime="{{ get_the_date('c') }}" class="text-sm text-content-tertiary">
+                                                {{ get_the_date() }}
+                                            </time>
+                                        </div>
+                                    </div>
+
+                                    {{-- Stretched link --}}
+                                    <a href="{{ get_permalink() }}" class="absolute inset-0 z-10" aria-label="{{ __('Weiterlesen:', 'wp-starter') }} {{ get_the_title() }}">
+                                        <span class="sr-only">{{ get_the_title() }}</span>
+                                    </a>
+                                </x-card>
+                            </article>
+                        @endfor
+                    </div>
+                </div>
+            @endif
+
+            {{-- MORE POSTS (text-only list for faster scanning) --}}
+            @if (have_posts())
+                <div>
+                    <span class="text-sm font-medium text-content-brand uppercase tracking-wider mb-6 block">
+                        {{ get_field('blog_label_more', 'option') ?: __('Weitere Artikel', 'wp-starter') }}
+                    </span>
+                    <div class="grid gap-4">
+                        @while (have_posts())
+                            @php the_post(); @endphp
+                            <article>
+                                <x-card variant="filled" hoverable padding="none" class="group relative">
+                                    <a href="{{ get_permalink() }}" class="block p-5 md:p-6">
+                                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                                            @if (has_category())
+                                                @php $firstCategory = get_the_category()[0]; @endphp
+                                                <x-badge variant="brand" size="sm">{{ $firstCategory->name }}</x-badge>
+                                            @endif
+                                            <x-badge variant="gray" style="outline" size="sm">{{ get_reading_time() }}</x-badge>
+                                            <span class="text-sm text-content-tertiary">{{ get_the_date() }}</span>
+                                        </div>
+                                        <h3 class="text-h5 text-content mb-2 transition-colors group-hover:text-content-brand">
+                                            {{ get_the_title() }}
+                                        </h3>
+                                        <p class="text-content-secondary line-clamp-2">
+                                            {!! wp_trim_words(get_the_excerpt(), 30) !!}
+                                        </p>
+                                    </a>
+                                </x-card>
+                            </article>
+                        @endwhile
+                    </div>
+                </div>
+            @endif
+
+            {{-- Pagination --}}
+            @php
+                $pagination = paginate_links([
+                    'type' => 'array',
+                    'prev_text' => __('Zurück', 'wp-starter'),
+                    'next_text' => __('Weiter', 'wp-starter'),
+                ]);
+            @endphp
+            @if ($pagination)
+                <nav class="mt-16 pt-8 border-t border-line" aria-label="{{ __('Blog-Navigation', 'wp-starter') }}">
+                    <ul class="flex flex-wrap justify-center gap-2">
+                        @foreach ($pagination as $link)
+                            <li>{!! str_replace(
+                                ['page-numbers', 'current'],
+                                ['px-4 py-2 rounded-lg border border-line text-content hover:bg-surface-secondary transition-colors', 'bg-surface-brand text-content-inverse border-surface-brand hover:bg-surface-brand'],
+                                $link
+                            ) !!}</li>
+                        @endforeach
+                    </ul>
+                </nav>
+            @endif
+        @else
+            {{-- No Posts --}}
+            <div class="text-center py-12">
+                <svg class="w-16 h-16 mx-auto text-content-tertiary mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                <h2 class="text-h3 text-content mb-4">
+                    {{ __('Keine Beiträge gefunden', 'wp-starter') }}
+                </h2>
+                <p class="text-content-secondary mb-8 max-w-md mx-auto">
+                    {{ __('Der Blog enthält noch keine Beiträge.', 'wp-starter') }}
+                </p>
+                <x-button :url="home_url('/')" :title="__('Zur Startseite', 'wp-starter')" variant="primary" size="lg" />
+            </div>
+        @endif
+    </x-section>
+@endsection

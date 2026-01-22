@@ -57,8 +57,8 @@
         $headerSticky = function_exists('get_field') ? get_field('header_sticky', 'option') : false;
     @endphp
 
-    <header class="px-4 md:px-8 bg-surface {{ $headerSticky ? 'sticky top-0 z-50 shadow-sm' : '' }}" role="banner">
-        <div class="max-w-7xl mx-auto">
+    <header class="bg-surface {{ $headerSticky ? 'sticky top-0 z-50 shadow-sm' : '' }}" role="banner">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav role="navigation" aria-label="Main Navigation">
                 @include('partials.header-menu')
             </nav>

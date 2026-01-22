@@ -5,8 +5,8 @@
         @while (have_posts()) @php(the_post())
             <article class="page">
                 @unless(is_front_page())
-                    <header class="page-header container mx-auto px-4 py-8">
-                        <h1 class="text-4xl font-bold">{{ get_the_title() }}</h1>
+                    <header class="page-header max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <h1 class="text-h1">{{ get_the_title() }}</h1>
                     </header>
                 @endunless
 
@@ -21,7 +21,7 @@
 
                 {{-- Render standard WordPress content if available --}}
                 @if(get_the_content())
-                    <div class="page-content container mx-auto px-4">
+                    <div class="page-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         @php(the_content())
                     </div>
                 @endif
