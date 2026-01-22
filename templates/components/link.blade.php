@@ -50,7 +50,7 @@
     $iconSize = $iconSizes[$size] ?? $iconSizes['md'];
     $variantClass = $disabled
         ? 'text-content-disabled cursor-not-allowed'
-        : ($variants[$variant] ?? $variants['accent']);
+        : 'cursor-pointer ' . ($variants[$variant] ?? $variants['accent']);
 @endphp
 
 <a href="{{ $disabled ? '#' : esc_url($url) }}"
