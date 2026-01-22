@@ -50,7 +50,7 @@
         <div class="max-w-6xl mx-auto">
             <div
                 class="relative overflow-hidden rounded-lg aspect-video bg-surface-secondary"
-                x-data="{ loaded: {{ $source === 'wordpress' ? 'true' : 'false' }} }"
+                x-data="{ loaded: {{ $source === 'wordpress' ? 'true' : 'false' }}, iframeLoaded: false, iframeError: false }"
                 x-ref="videoContainer"
             >
                 @if($source === 'external' && $video_id)
@@ -67,13 +67,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <p class="mb-4 text-content-secondary">
-                            Zum Abspielen des Videos wird ein externer Dienst geladen.<br>
+                            {{ __('Zum Abspielen des Videos wird ein externer Dienst geladen.', 'wp-starter') }}<br>
                             @if($privacyLink)
-                                Es gelten die <x-link url="{{ $privacyLink }}" target="_blank">Datenschutzbestimmungen von {{ $providerName }}</x-link>.
+                                {{ __('Es gelten die', 'wp-starter') }} <x-link url="{{ $privacyLink }}" target="_blank">{{ __('Datenschutzbestimmungen von', 'wp-starter') }} {{ $providerName }}</x-link>.
                             @endif
                         </p>
                         <x-button
-                            title="Video laden"
+                            :title="__('Video laden', 'wp-starter')"
                             variant="primary"
                             size="md"
                             x-on:click="loaded = true; $nextTick(() => $refs.videoContainer.scrollIntoView({ behavior: 'smooth', block: 'center' }))"
@@ -81,8 +81,37 @@
                         />
                     </div>
 
+                    {{-- Loading indicator --}}
+                    <div
+                        x-show="loaded && !iframeLoaded && !iframeError"
+                        class="absolute inset-0 flex flex-col items-center justify-center bg-surface-secondary"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        <div class="animate-spin rounded-full h-12 w-12 border-4 border-line border-t-line-brand mb-4"></div>
+                        <span class="text-content-secondary">{{ __('Video wird geladen...', 'wp-starter') }}</span>
+                    </div>
+
+                    {{-- Error state --}}
+                    <div
+                        x-show="iframeError"
+                        x-cloak
+                        class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-surface-secondary"
+                    >
+                        <svg class="w-16 h-16 mb-4 text-content-error" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <p class="mb-4 text-content-secondary">{{ __('Das Video konnte nicht geladen werden.', 'wp-starter') }}</p>
+                        <x-button
+                            :title="__('Erneut versuchen', 'wp-starter')"
+                            variant="secondary"
+                            size="md"
+                            x-on:click="iframeError = false; iframeLoaded = false"
+                        />
+                    </div>
+
                     {{-- Video iframe (loaded after consent) --}}
-                    <template x-if="loaded">
+                    <template x-if="loaded && !iframeError">
                         @if($video_type === 'youtube')
                             <iframe
                                 src="https://www.youtube-nocookie.com/embed/{{ $video_id }}?dnt=1&autoplay=1"
@@ -91,6 +120,8 @@
                                 allowfullscreen
                                 class="absolute inset-0 w-full h-full"
                                 title="{{ __('YouTube-Video', 'wp-starter') }}"
+                                @load="iframeLoaded = true"
+                                @error="iframeError = true"
                             ></iframe>
                         @elseif($video_type === 'vimeo')
                             <iframe
@@ -100,6 +131,8 @@
                                 allowfullscreen
                                 class="absolute inset-0 w-full h-full"
                                 title="{{ __('Vimeo-Video', 'wp-starter') }}"
+                                @load="iframeLoaded = true"
+                                @error="iframeError = true"
                             ></iframe>
                         @endif
                     </template>

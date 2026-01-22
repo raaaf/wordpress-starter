@@ -45,8 +45,8 @@
                 <img src="{{ $background_image['url'] }}"
                      alt="{{ $background_image['alt'] ?? '' }}"
                      class="w-full h-full object-cover">
-                {{-- Overlay with configurable opacity --}}
-                <div class="absolute inset-0" style="background: rgba(255, 255, 255, {{ $overlay_opacity_css }});"></div>
+                {{-- Overlay with configurable opacity using CSS custom property --}}
+                <div class="absolute inset-0 bg-surface" style="--tw-bg-opacity: {{ $overlay_opacity_css }};"></div>
             </div>
         @else
             <div class="absolute inset-0 bg-surface-brand"></div>
