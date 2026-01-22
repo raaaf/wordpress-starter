@@ -23,8 +23,8 @@
         $afterId = $afterId['ID'] ?? $afterId['id'] ?? null;
     }
 
-    $imageBefore = $beforeId ? wp_get_attachment_image_src($beforeId, 'large') : null;
-    $imageAfter = $afterId ? wp_get_attachment_image_src($afterId, 'large') : null;
+    $imageBefore = $beforeId ? wp_get_attachment_image_src($beforeId, 'content') : null;
+    $imageAfter = $afterId ? wp_get_attachment_image_src($afterId, 'content') : null;
 @endphp
 
 <x-section :background="$background" class="before-after">

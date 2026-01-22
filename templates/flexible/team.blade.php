@@ -21,7 +21,7 @@
         <div class="grid gap-8 md:grid-cols-{{ $columns }}">
             @foreach($members as $member)
                 @php
-                    $image = wp_get_attachment_image_src($member['image'] ?? null, 'medium_large');
+                    $image = wp_get_attachment_image_src($member['image'] ?? null, 'team-portrait');
                     $name = $member['name'] ?? '';
                     $position = $member['position'] ?? '';
                     $bio = $member['bio'] ?? '';

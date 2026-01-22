@@ -54,7 +54,7 @@
                         <div class="flex items-start gap-4">
                             @if (has_post_thumbnail())
                                 <a href="{{ get_permalink() }}" class="shrink-0">
-                                    {!! get_the_post_thumbnail(null, 'thumbnail', ['class' => 'w-24 h-24 object-cover rounded-lg']) !!}
+                                    {!! get_the_post_thumbnail(null, 'avatar', ['class' => 'w-24 h-24 object-cover rounded-lg']) !!}
                                 </a>
                             @endif
                             <div class="flex-1 min-w-0">

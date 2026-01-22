@@ -51,7 +51,7 @@
                     <x-card variant="filled" hoverable :url="get_permalink()" class="flex flex-col">
                         @if (has_post_thumbnail())
                             <div class="aspect-video overflow-hidden">
-                                {!! get_the_post_thumbnail(null, 'medium_large', ['class' => 'w-full h-full object-cover hover:scale-105 transition-transform duration-300']) !!}
+                                {!! get_the_post_thumbnail(null, 'card-video', ['class' => 'w-full h-full object-cover hover:scale-105 transition-transform duration-300']) !!}
                             </div>
                         @endif
                         <div class="p-6 flex flex-col flex-1">

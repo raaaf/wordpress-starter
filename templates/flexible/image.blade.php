@@ -17,7 +17,7 @@
     $imageWidth = '';
     $imageHeight = '';
     if ($imageId) {
-        $imageSrc = wp_get_attachment_image_src($imageId, 'large');
+        $imageSrc = wp_get_attachment_image_src($imageId, 'content');
         $image = [
             'url' => $imageSrc ? $imageSrc[0] : wp_get_attachment_url($imageId),
             'alt' => get_post_meta($imageId, '_wp_attachment_image_alt', true) ?: '',

@@ -27,7 +27,7 @@
                         $year = $event['year'] ?? '';
                         $eventTitle = $event['title'] ?? '';
                         $content = $event['content'] ?? '';
-                        $image = wp_get_attachment_image_src($event['image'] ?? null, 'medium');
+                        $image = wp_get_attachment_image_src($event['image'] ?? null, 'gallery-thumb');
                         $isEven = $index % 2 === 0;
                     @endphp
                     <div class="relative flex flex-col md:flex-row {{ $isEven ? '' : 'md:flex-row-reverse' }} items-center gap-8">
