@@ -39,36 +39,39 @@
         <div class="grid gap-8 md:grid-cols-{{ $columns }}">
             @while($postsQuery->have_posts())
                 @php $postsQuery->the_post(); @endphp
-                <x-card variant="filled" padding="none" hoverable class="group">
+                <x-card variant="filled" padding="none" hoverable class="group relative cursor-pointer">
+                    {{-- Stretched link for entire card --}}
+                    <a href="{{ get_permalink() }}" class="absolute inset-0 z-0" aria-hidden="true"></a>
+
                     @if(has_post_thumbnail())
-                        <a href="{{ get_permalink() }}" class="block overflow-hidden aspect-video">
+                        <div class="block overflow-hidden aspect-video">
                             <img
                                 src="{{ get_the_post_thumbnail_url(get_the_ID(), 'medium_large') }}"
                                 alt="{{ get_the_title() }}"
                                 class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                                 loading="lazy"
                             >
-                        </a>
+                        </div>
                     @endif
 
                     <div class="p-6">
                         @if($showDate || $showAuthor)
-                            <div class="flex items-center gap-4 mb-3 text-body-small text-content-secondary">
+                            <div class="flex items-center gap-4 mb-3">
                                 @if($showDate)
-                                    <time datetime="{{ get_the_date('c') }}">
-                                        {{ get_the_date('j. F Y') }}
-                                    </time>
+                                    <x-badge variant="gray" style="outline" size="sm">
+                                        <time datetime="{{ get_the_date('c') }}">
+                                            {{ get_the_date('j. F Y') }}
+                                        </time>
+                                    </x-badge>
                                 @endif
                                 @if($showAuthor)
-                                    <span>von {{ get_the_author() }}</span>
+                                    <span class="text-body-small text-content-secondary">von {{ get_the_author() }}</span>
                                 @endif
                             </div>
                         @endif
 
-                        <h3 class="text-h4 mb-3 text-content">
-                            <a href="{{ get_permalink() }}" class="hover:text-content-brand">
-                                {{ get_the_title() }}
-                            </a>
+                        <h3 class="text-h4 mb-3 text-content transition-colors duration-200 group-hover:text-content-brand">
+                            {{ get_the_title() }}
                         </h3>
 
                         @if($showExcerpt)
@@ -77,7 +80,7 @@
                             </p>
                         @endif
 
-                        <x-link :url="get_permalink()" iconRight="chevron-right">Weiterlesen</x-link>
+                        <x-link :url="get_permalink()" iconRight="chevron-right" class="relative z-10 group-hover:text-content-brand">Weiterlesen</x-link>
                     </div>
                 </x-card>
             @endwhile
