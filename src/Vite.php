@@ -79,6 +79,24 @@ class Vite
                 wp_script_add_data('app-js', 'defer', true);
             }
         }
+
+        // Localize strings for frontend JavaScript
+        wp_localize_script('app-js', 'wpStarterStrings', self::getFrontendStrings());
+    }
+
+    /**
+     * Get translatable strings for frontend JavaScript.
+     *
+     * @return array<string, string>
+     */
+    private static function getFrontendStrings(): array
+    {
+        return [
+            'submenuOpen' => __('Untermenü öffnen', 'wp-starter'),
+            'submenuClose' => __('Untermenü schließen', 'wp-starter'),
+            'image' => __('Bild', 'wp-starter'),
+            'imageZoomInstruction' => __('Klicken oder Enter zum Vergrößern', 'wp-starter'),
+        ];
     }
 
     /**
@@ -100,7 +118,25 @@ class Vite
 
             // Add JS in admin footer (more reliable than attaching to acf-input)
             add_action('admin_footer', [self::class, 'outputAcfIconRadioJs']);
+
+            // Localize admin strings for JavaScript
+            add_action('admin_footer', [self::class, 'outputAdminStrings'], 5);
         }
+    }
+
+    /**
+     * Output localized admin strings before other scripts.
+     */
+    public static function outputAdminStrings(): void
+    {
+        $strings = [
+            'noIcon' => __('Kein Icon', 'wp-starter'),
+            'entry' => __('Eintrag', 'wp-starter'),
+            'entries' => __('Einträge', 'wp-starter'),
+        ];
+        $json = wp_json_encode($strings);
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted internal JSON for localization
+        echo "<script id=\"wp-starter-admin-strings\">var wpStarterAdminStrings = {$json};</script>";
     }
 
     /**
@@ -209,7 +245,7 @@ class Vite
                 label.innerHTML = '';
                 label.appendChild(input);
                 const textSpan = document.createElement('span');
-                textSpan.textContent = 'Kein Icon';
+                textSpan.textContent = window.wpStarterAdminStrings?.noIcon || 'No Icon';
                 label.appendChild(textSpan);
             }
         });

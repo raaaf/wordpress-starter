@@ -27,8 +27,8 @@ class Options
 
         // Main theme options
         acf_add_options_page([
-            'page_title' => 'Theme-Einstellungen',
-            'menu_title' => 'Theme-Einstellungen',
+            'page_title' => __('Theme-Einstellungen', 'wp-starter'),
+            'menu_title' => __('Theme-Einstellungen', 'wp-starter'),
             'menu_slug' => 'theme-options',
             'capability' => 'edit_posts',
             'redirect' => true,
@@ -36,13 +36,13 @@ class Options
             'position' => 2,
         ]);
 
-        // Sub pages with German labels and icons
-        self::addSubPage('Allgemein', 'general', 'dashicons-admin-home');
-        self::addSubPage('Header', 'header', 'dashicons-arrow-up-alt');
-        self::addSubPage('Footer', 'footer', 'dashicons-arrow-down-alt');
-        self::addSubPage('Social Media', 'social', 'dashicons-share');
-        self::addSubPage('Analytics', 'analytics', 'dashicons-chart-bar');
-        self::addSubPage('Werkzeuge', 'tools', 'dashicons-admin-tools');
+        // Sub pages with translated labels and icons
+        self::addSubPage(__('Allgemein', 'wp-starter'), 'general', 'dashicons-admin-home');
+        self::addSubPage(__('Header', 'wp-starter'), 'header', 'dashicons-arrow-up-alt');
+        self::addSubPage(__('Footer', 'wp-starter'), 'footer', 'dashicons-arrow-down-alt');
+        self::addSubPage(__('Social Media', 'wp-starter'), 'social', 'dashicons-share');
+        self::addSubPage(__('Analytics', 'wp-starter'), 'analytics', 'dashicons-chart-bar');
+        self::addSubPage(__('Werkzeuge', 'wp-starter'), 'tools', 'dashicons-admin-tools');
 
         // Register field groups directly (we're already in acf/init)
         self::registerFieldGroups();
@@ -104,88 +104,88 @@ class Options
     {
         acf_add_local_field_group([
             'key' => 'group_options_general',
-            'title' => 'Allgemeine Einstellungen',
+            'title' => __('Allgemeine Einstellungen', 'wp-starter'),
             'fields' => [
                 // Site Identity Tab
                 [
                     'key' => 'field_options_tab_identity',
-                    'label' => 'Website-Identität',
+                    'label' => __('Website-Identität', 'wp-starter'),
                     'type' => 'tab',
                 ],
                 FieldDefinitions::infoBoxField(
                     'field_options_identity_info',
-                    '<strong>Website-Identität</strong><br>Logo und Favicon erscheinen im Header, Footer und Browser-Tab. Für beste Ergebnisse verwende SVG-Dateien oder PNGs mit transparentem Hintergrund.',
+                    __('<strong>Website-Identität</strong><br>Logo und Favicon erscheinen im Header, Footer und Browser-Tab. Für beste Ergebnisse verwende SVG-Dateien oder PNGs mit transparentem Hintergrund.', 'wp-starter'),
                     'info'
                 ),
                 array_merge(
                     FieldDefinitions::imageField(
                         'field_options_logo',
-                        'Logo',
+                        __('Logo', 'wp-starter'),
                         'site_logo',
                         false,
                         'array',
                         null,
-                        'Das Hauptlogo der Website.'
+                        __('Das Hauptlogo der Website.', 'wp-starter')
                     ),
                     ['wrapper' => ['width' => '50']]
                 ),
                 array_merge(
                     FieldDefinitions::imageField(
                         'field_options_logo_dark',
-                        'Logo (Dunkel)',
+                        __('Logo (Dunkel)', 'wp-starter'),
                         'site_logo_dark',
                         false,
                         'array',
                         null,
-                        'Für dunkle Hintergründe.'
+                        __('Für dunkle Hintergründe.', 'wp-starter')
                     ),
                     ['wrapper' => ['width' => '50']]
                 ),
                 FieldDefinitions::imageField(
                     'field_options_favicon',
-                    'Favicon',
+                    __('Favicon', 'wp-starter'),
                     'site_favicon',
                     false,
                     'id',
                     null,
-                    'Das Favicon für Browser-Tabs. Empfohlen: 512x512px PNG.'
+                    __('Das Favicon für Browser-Tabs. Empfohlen: 512x512px PNG.', 'wp-starter')
                 ),
 
                 // Contact Tab (default selected)
                 [
                     'key' => 'field_options_tab_contact',
-                    'label' => 'Kontaktdaten',
+                    'label' => __('Kontaktdaten', 'wp-starter'),
                     'type' => 'tab',
                     'selected' => 1,
                 ],
                 FieldDefinitions::infoBoxField(
                     'field_options_contact_info',
-                    '<strong>Kontaktdaten</strong><br>Diese Daten werden im Footer und auf der Kontaktseite verwendet. Halte sie aktuell!',
+                    __('<strong>Kontaktdaten</strong><br>Diese Daten werden im Footer und auf der Kontaktseite verwendet. Halte sie aktuell!', 'wp-starter'),
                     'info'
                 ),
                 FieldDefinitions::textField(
                     'field_options_company_name',
-                    'Firmenname',
+                    __('Firmenname', 'wp-starter'),
                     'company_name',
                     false,
-                    'Der vollständige Firmenname für Impressum und Footer.',
-                    'Musterfirma GmbH'
+                    __('Der vollständige Firmenname für Impressum und Footer.', 'wp-starter'),
+                    __('Musterfirma GmbH', 'wp-starter')
                 ),
                 FieldDefinitions::textareaField(
                     'field_options_address',
-                    'Adresse',
+                    __('Adresse', 'wp-starter'),
                     'address',
                     3,
-                    'Die vollständige Geschäftsadresse.',
-                    "Musterstraße 123\n12345 Musterstadt"
+                    __('Die vollständige Geschäftsadresse.', 'wp-starter'),
+                    __("Musterstraße 123\n12345 Musterstadt", 'wp-starter')
                 ),
                 array_merge(
                     FieldDefinitions::textField(
                         'field_options_phone',
-                        'Telefon',
+                        __('Telefon', 'wp-starter'),
                         'phone',
                         false,
-                        'Haupttelefonnummer.',
+                        __('Haupttelefonnummer.', 'wp-starter'),
                         '+49 123 456789'
                     ),
                     ['wrapper' => ['width' => '50']]
@@ -193,18 +193,18 @@ class Options
                 array_merge(
                     FieldDefinitions::emailField(
                         'field_options_email',
-                        'E-Mail',
+                        __('E-Mail', 'wp-starter'),
                         'email',
-                        'Haupt-E-Mail-Adresse.',
+                        __('Haupt-E-Mail-Adresse.', 'wp-starter'),
                         'info@example.com'
                     ),
                     ['wrapper' => ['width' => '50']]
                 ),
                 FieldDefinitions::urlField(
                     'field_options_maps_link',
-                    'Google Maps Link',
+                    __('Google Maps Link', 'wp-starter'),
                     'maps_link',
-                    'Link zur Google Maps Position (für "Anfahrt" Button).',
+                    __('Link zur Google Maps Position (für „Anfahrt" Button).', 'wp-starter'),
                     null,
                     'https://goo.gl/maps/...'
                 ),
@@ -212,21 +212,21 @@ class Options
                 // Tab: Darstellung
                 [
                     'key' => 'field_options_tab_appearance',
-                    'label' => 'Darstellung',
+                    'label' => __('Darstellung', 'wp-starter'),
                     'type' => 'tab',
                 ],
                 FieldDefinitions::selectField(
                     'field_options_color_scheme',
-                    'Farbschema',
+                    __('Farbschema', 'wp-starter'),
                     'color_scheme',
                     [
-                        'system' => 'Systemeinstellung folgen',
-                        'light' => 'Hell (Light Mode)',
-                        'dark' => 'Dunkel (Dark Mode)',
+                        'system' => __('Systemeinstellung folgen', 'wp-starter'),
+                        'light' => __('Hell (Light Mode)', 'wp-starter'),
+                        'dark' => __('Dunkel (Dark Mode)', 'wp-starter'),
                     ],
                     'system',
                     false,
-                    'Bestimmt das Standard-Farbschema der Website. "Systemeinstellung" passt sich automatisch an die Browser-/OS-Einstellung des Besuchers an.'
+                    __('Bestimmt das Standard-Farbschema der Website. „Systemeinstellung" passt sich automatisch an die Browser-/OS-Einstellung des Besuchers an.', 'wp-starter')
                 ),
             ],
             'location' => [
@@ -248,40 +248,40 @@ class Options
     {
         acf_add_local_field_group([
             'key' => 'group_options_header',
-            'title' => 'Header-Einstellungen',
+            'title' => __('Header-Einstellungen', 'wp-starter'),
             'fields' => [
                 FieldDefinitions::infoBoxField(
                     'field_options_header_tip',
-                    '<strong>Tipp:</strong> Ein CTA-Button im Header erhöht die Conversion-Rate. Verwende eine klare Handlungsaufforderung wie "Jetzt anfragen" oder "Termin buchen".',
+                    __('<strong>Tipp:</strong> Ein CTA-Button im Header erhöht die Conversion-Rate. Verwende eine klare Handlungsaufforderung wie „Jetzt anfragen" oder „Termin buchen".', 'wp-starter'),
                     'tip'
                 ),
                 array_merge(
                     FieldDefinitions::trueFalseField(
                         'field_options_header_sticky',
-                        'Sticky Header',
+                        __('Sticky Header', 'wp-starter'),
                         'header_sticky',
                         true,
-                        'Header bleibt beim Scrollen oben fixiert.'
+                        __('Header bleibt beim Scrollen oben fixiert.', 'wp-starter')
                     ),
                     ['wrapper' => ['width' => '50']]
                 ),
                 array_merge(
                     FieldDefinitions::trueFalseField(
                         'field_options_header_cta_show',
-                        'CTA-Button anzeigen',
+                        __('CTA-Button anzeigen', 'wp-starter'),
                         'header_cta_show',
                         true,
-                        'Zeigt einen Call-to-Action Button im Header.'
+                        __('Zeigt einen Call-to-Action Button im Header.', 'wp-starter')
                     ),
                     ['wrapper' => ['width' => '50']]
                 ),
                 array_merge(
                     FieldDefinitions::linkField(
                         'field_options_header_cta',
-                        'CTA-Button',
+                        __('CTA-Button', 'wp-starter'),
                         'header_cta',
                         false,
-                        'Link und Text für den Header-CTA-Button.'
+                        __('Link und Text für den Header-CTA-Button.', 'wp-starter')
                     ),
                     [
                         'conditional_logic' => [
@@ -315,65 +315,65 @@ class Options
     {
         acf_add_local_field_group([
             'key' => 'group_options_footer',
-            'title' => 'Footer-Einstellungen',
+            'title' => __('Footer-Einstellungen', 'wp-starter'),
             'fields' => [
                 // === Spalte 1: Logo & Info ===
                 [
                     'key' => 'field_options_footer_tab_info',
-                    'label' => 'Info-Spalte',
+                    'label' => __('Info-Spalte', 'wp-starter'),
                     'type' => 'tab',
                     'selected' => 1,
                 ],
                 array_merge(
                     FieldDefinitions::trueFalseField(
                         'field_options_footer_logo_show',
-                        'Logo anzeigen',
+                        __('Logo anzeigen', 'wp-starter'),
                         'footer_show_logo',
                         true,
-                        'Zeigt das Site-Logo im Footer.'
+                        __('Zeigt das Site-Logo im Footer.', 'wp-starter')
                     ),
                     ['wrapper' => ['width' => '50']]
                 ),
                 array_merge(
                     FieldDefinitions::trueFalseField(
                         'field_options_footer_company_show',
-                        'Firmenname anzeigen',
+                        __('Firmenname anzeigen', 'wp-starter'),
                         'footer_show_company',
                         true,
-                        'Zeigt den Firmennamen.'
+                        __('Zeigt den Firmennamen.', 'wp-starter')
                     ),
                     ['wrapper' => ['width' => '50']]
                 ),
                 FieldDefinitions::wysiwygField(
                     'field_options_footer_text',
-                    'Footer-Text',
+                    __('Footer-Text', 'wp-starter'),
                     'footer_text',
                     false,
                     null,
-                    'Optionaler Text im Footer (z.B. Firmenbeschreibung).'
+                    __('Optionaler Text im Footer (z.B. Firmenbeschreibung).', 'wp-starter')
                 ),
 
                 // === Spalte 2: Navigation ===
                 [
                     'key' => 'field_options_footer_tab_nav',
-                    'label' => 'Navigation',
+                    'label' => __('Navigation', 'wp-starter'),
                     'type' => 'tab',
                 ],
                 FieldDefinitions::trueFalseField(
                     'field_options_footer_nav_show',
-                    'Navigation anzeigen',
+                    __('Navigation anzeigen', 'wp-starter'),
                     'footer_show_nav',
                     true,
-                    'Zeigt das Footer-Navigationsmenü.'
+                    __('Zeigt das Footer-Navigationsmenü.', 'wp-starter')
                 ),
                 array_merge(
                     FieldDefinitions::textField(
                         'field_options_footer_nav_title',
-                        'Überschrift',
+                        __('Überschrift', 'wp-starter'),
                         'footer_nav_title',
                         false,
-                        'Überschrift über dem Menü.',
-                        'Navigation'
+                        __('Überschrift über dem Menü.', 'wp-starter'),
+                        __('Navigation', 'wp-starter')
                     ),
                     [
                         'wrapper' => ['width' => '50'],
@@ -385,10 +385,10 @@ class Options
                 array_merge(
                     [
                         'key' => 'field_options_footer_nav_menu',
-                        'label' => 'Menü',
+                        'label' => __('Menü', 'wp-starter'),
                         'name' => 'footer_nav_menu',
                         'type' => 'select',
-                        'instructions' => 'Welches Menü anzeigen.',
+                        'instructions' => __('Welches Menü anzeigen.', 'wp-starter'),
                         'required' => 0,
                         'choices' => [],
                         'default_value' => 'footer-menu',
@@ -406,20 +406,24 @@ class Options
                 // === Spalte 3: Kontakt ===
                 [
                     'key' => 'field_options_footer_tab_contact',
-                    'label' => 'Kontakt',
+                    'label' => __('Kontakt', 'wp-starter'),
                     'type' => 'tab',
                 ],
                 FieldDefinitions::trueFalseField(
                     'field_options_footer_contact_show',
-                    'Kontaktdaten anzeigen',
+                    __('Kontaktdaten anzeigen', 'wp-starter'),
                     'footer_show_contact',
                     true,
-                    'Zeigt Adresse, Telefon und E-Mail.'
+                    __('Zeigt Adresse, Telefon und E-Mail.', 'wp-starter')
                 ),
                 array_merge(
                     FieldDefinitions::infoBoxField(
                         'field_options_footer_contact_info',
-                        'Verwendet Daten aus den <a href="' . \admin_url('admin.php?page=theme-options-general') . '">allgemeinen Einstellungen</a> (Kontaktdaten Tab).',
+                        sprintf(
+                            /* translators: %s: URL to general settings page */
+                            __('Verwendet Daten aus den <a href="%s">allgemeinen Einstellungen</a> (Kontaktdaten Tab).', 'wp-starter'),
+                            \admin_url('admin.php?page=theme-options-general')
+                        ),
                         'info'
                     ),
                     [
@@ -431,11 +435,11 @@ class Options
                 array_merge(
                     FieldDefinitions::textField(
                         'field_options_footer_contact_title',
-                        'Kontakt-Überschrift',
+                        __('Kontakt-Überschrift', 'wp-starter'),
                         'footer_contact_title',
                         false,
-                        'Überschrift über den Kontaktdaten.',
-                        'Kontakt'
+                        __('Überschrift über den Kontaktdaten.', 'wp-starter'),
+                        __('Kontakt', 'wp-starter')
                     ),
                     [
                         'conditional_logic' => [
@@ -447,20 +451,24 @@ class Options
                 // === Spalte 4: Social ===
                 [
                     'key' => 'field_options_footer_tab_social',
-                    'label' => 'Social Media',
+                    'label' => __('Social Media', 'wp-starter'),
                     'type' => 'tab',
                 ],
                 FieldDefinitions::trueFalseField(
                     'field_options_footer_social_show',
-                    'Social Links anzeigen',
+                    __('Social Links anzeigen', 'wp-starter'),
                     'footer_show_social',
                     true,
-                    'Zeigt die Social Media Icons im Footer.'
+                    __('Zeigt die Social Media Icons im Footer.', 'wp-starter')
                 ),
                 array_merge(
                     FieldDefinitions::infoBoxField(
                         'field_options_footer_social_info',
-                        'Verwendet Icons aus den <a href="' . \admin_url('admin.php?page=theme-options-social') . '">Social Media Einstellungen</a>.',
+                        sprintf(
+                            /* translators: %s: URL to social media settings page */
+                            __('Verwendet Icons aus den <a href="%s">Social Media Einstellungen</a>.', 'wp-starter'),
+                            \admin_url('admin.php?page=theme-options-social')
+                        ),
                         'info'
                     ),
                     [
@@ -472,11 +480,11 @@ class Options
                 array_merge(
                     FieldDefinitions::textField(
                         'field_options_footer_social_title',
-                        'Social-Überschrift',
+                        __('Social-Überschrift', 'wp-starter'),
                         'footer_social_title',
                         false,
-                        'Überschrift über den Icons.',
-                        'Folge uns'
+                        __('Überschrift über den Icons.', 'wp-starter'),
+                        __('Folge uns', 'wp-starter')
                     ),
                     [
                         'conditional_logic' => [
@@ -488,23 +496,23 @@ class Options
                 // === Untere Leiste ===
                 [
                     'key' => 'field_options_footer_tab_bottom',
-                    'label' => 'Untere Leiste',
+                    'label' => __('Untere Leiste', 'wp-starter'),
                     'type' => 'tab',
                 ],
                 FieldDefinitions::textField(
                     'field_options_copyright',
-                    'Copyright-Text',
+                    __('Copyright-Text', 'wp-starter'),
                     'copyright_text',
                     false,
-                    'Der Copyright-Hinweis. {year} wird automatisch durch das aktuelle Jahr ersetzt.',
-                    '© {year} Firmenname. Alle Rechte vorbehalten.'
+                    __('Der Copyright-Hinweis. {year} wird automatisch durch das aktuelle Jahr ersetzt.', 'wp-starter'),
+                    __('© {year} Firmenname. Alle Rechte vorbehalten.', 'wp-starter')
                 ),
                 FieldDefinitions::trueFalseField(
                     'field_options_footer_legal_show',
-                    'Rechtliches Menü anzeigen',
+                    __('Rechtliches Menü anzeigen', 'wp-starter'),
                     'footer_show_legal',
                     true,
-                    'Zeigt das Legal-Menü (Impressum, Datenschutz) in der unteren Leiste.'
+                    __('Zeigt das Legal-Menü (Impressum, Datenschutz) in der unteren Leiste.', 'wp-starter')
                 ),
             ],
             'location' => [
@@ -526,33 +534,33 @@ class Options
     {
         acf_add_local_field_group([
             'key' => 'group_options_social',
-            'title' => 'Social Media Links',
+            'title' => __('Social Media Links', 'wp-starter'),
             'fields' => [
                 FieldDefinitions::infoBoxField(
                     'field_options_social_info',
-                    '<strong>Social Media</strong><br>Diese Icons werden im Footer angezeigt (wenn aktiviert). Die Reihenfolge hier bestimmt die Anzeige-Reihenfolge.',
+                    __('<strong>Social Media</strong><br>Diese Icons werden im Footer angezeigt (wenn aktiviert). Die Reihenfolge hier bestimmt die Anzeige-Reihenfolge.', 'wp-starter'),
                     'info'
                 ),
                 FieldDefinitions::repeaterField(
                     'field_options_social_links',
-                    'Social Media Kanäle',
+                    __('Social Media Kanäle', 'wp-starter'),
                     'social_links',
                     [
                         array_merge(
                             FieldDefinitions::selectField(
                                 'field_options_social_platform',
-                                'Plattform',
+                                __('Plattform', 'wp-starter'),
                                 'platform',
                                 [
-                                    'facebook' => 'Facebook',
-                                    'instagram' => 'Instagram',
-                                    'linkedin' => 'LinkedIn',
-                                    'xing' => 'XING',
-                                    'twitter' => 'X (Twitter)',
-                                    'youtube' => 'YouTube',
-                                    'tiktok' => 'TikTok',
-                                    'pinterest' => 'Pinterest',
-                                    'threads' => 'Threads',
+                                    'facebook' => __('Facebook', 'wp-starter'),
+                                    'instagram' => __('Instagram', 'wp-starter'),
+                                    'linkedin' => __('LinkedIn', 'wp-starter'),
+                                    'xing' => __('XING', 'wp-starter'),
+                                    'twitter' => __('X (Twitter)', 'wp-starter'),
+                                    'youtube' => __('YouTube', 'wp-starter'),
+                                    'tiktok' => __('TikTok', 'wp-starter'),
+                                    'pinterest' => __('Pinterest', 'wp-starter'),
+                                    'threads' => __('Threads', 'wp-starter'),
                                 ],
                                 'linkedin',
                                 true,
@@ -563,7 +571,7 @@ class Options
                         array_merge(
                             FieldDefinitions::urlField(
                                 'field_options_social_url',
-                                'Profil-URL',
+                                __('Profil-URL', 'wp-starter'),
                                 'url',
                                 '',
                                 null,
@@ -572,7 +580,7 @@ class Options
                             ['wrapper' => ['width' => '60']]
                         ),
                     ],
-                    'Kanal hinzufügen',
+                    __('Kanal hinzufügen', 'wp-starter'),
                     0,
                     'table',
                     ''
@@ -599,20 +607,20 @@ class Options
     {
         acf_add_local_field_group([
             'key' => 'group_options_analytics',
-            'title' => 'Analytics (Cookie-frei)',
+            'title' => __('Analytics (Cookie-frei)', 'wp-starter'),
             'fields' => [
                 FieldDefinitions::infoBoxField(
                     'field_options_analytics_success',
-                    '<strong>Cookie-freie Website</strong><br>Dieses Theme verwendet ausschließlich DSGVO-konforme Analytics ohne Cookies. Kein Cookie-Banner erforderlich!',
+                    __('<strong>Cookie-freie Website</strong><br>Dieses Theme verwendet ausschließlich DSGVO-konforme Analytics ohne Cookies. Kein Cookie-Banner erforderlich!', 'wp-starter'),
                     'success'
                 ),
                 FieldDefinitions::textField(
                     'field_options_pirsch_code',
-                    'Pirsch Site Code',
+                    __('Pirsch Site Code', 'wp-starter'),
                     'pirsch_code',
                     false,
-                    'Den Code findest du unter <a href="https://pirsch.io" target="_blank">pirsch.io</a> → Dashboard → Settings → Integration Code. Leer lassen wenn nicht benötigt.',
-                    'z.B. abc123def456'
+                    __('Den Code findest du unter <a href="https://pirsch.io" target="_blank">pirsch.io</a> → Dashboard → Settings → Integration Code. Leer lassen wenn nicht benötigt.', 'wp-starter'),
+                    __('z.B. abc123def456', 'wp-starter')
                 ),
             ],
             'location' => [
@@ -744,14 +752,14 @@ class Options
 
         acf_add_local_field_group([
             'key' => 'group_options_tools',
-            'title' => 'Werkzeuge',
+            'title' => __('Werkzeuge', 'wp-starter'),
             'fields' => [
                 // Content Setup Section
                 [
                     'key' => 'field_options_tools_content_heading',
-                    'label' => 'Content-Setup',
+                    'label' => __('Content-Setup', 'wp-starter'),
                     'type' => 'message',
-                    'message' => '<p>Erstellt Standardseiten und richtet die Navigation ein.</p>',
+                    'message' => '<p>' . __('Erstellt Standardseiten und richtet die Navigation ein.', 'wp-starter') . '</p>',
                 ],
                 [
                     'key' => 'field_options_tools_content_status',
@@ -762,9 +770,9 @@ class Options
                 // Demo Content Section
                 [
                     'key' => 'field_options_tools_demo_heading',
-                    'label' => 'Demo-Inhalte',
+                    'label' => __('Demo-Inhalte', 'wp-starter'),
                     'type' => 'message',
-                    'message' => '<p>Erstellt Beispiel-Blogbeiträge zum Testen des Blog-Layouts.</p>',
+                    'message' => '<p>' . __('Erstellt Beispiel-Blogbeiträge zum Testen des Blog-Layouts.', 'wp-starter') . '</p>',
                 ],
                 [
                     'key' => 'field_options_tools_demo_status',
@@ -775,9 +783,9 @@ class Options
                 // Styleguide Section
                 [
                     'key' => 'field_options_tools_styleguide_heading',
-                    'label' => 'Styleguide',
+                    'label' => __('Styleguide', 'wp-starter'),
                     'type' => 'message',
-                    'message' => '<p>Der Styleguide zeigt alle verfügbaren Design-Elemente des Themes: Farben, Typografie, Abstände, Komponenten und ACF-Block-Beispiele.</p>',
+                    'message' => '<p>' . __('Der Styleguide zeigt alle verfügbaren Design-Elemente des Themes: Farben, Typografie, Abstände, Komponenten und ACF-Block-Beispiele.', 'wp-starter') . '</p>',
                 ],
                 [
                     'key' => 'field_options_tools_styleguide_status',

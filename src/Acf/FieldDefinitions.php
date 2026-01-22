@@ -10,47 +10,57 @@ namespace WordpressStarter\Acf;
  * This class provides reusable field configurations for all
  * flexible content layouts used in the page builder.
  *
- * All labels are in German for better user experience in German-speaking projects.
+ * All labels use WordPress translation functions for i18n support.
  */
 class FieldDefinitions
 {
     /**
-     * Background color choices that map to design tokens
+     * Get background color choices that map to design tokens
+     *
+     * @return array<string, string>
      */
-    public const BACKGROUND_COLORS = [
-        'primary' => 'Standard (Weiß)',
-        'secondary' => 'Sekundär (Hellgrau)',
-        'tertiary' => 'Tertiär',
-        'brand' => 'Markenfarbe',
-        'brand-subtle' => 'Markenfarbe Dezent',
-        'inverse' => 'Dunkel (Invers)',
-    ];
+    public static function getBackgroundColors(): array
+    {
+        return [
+            'primary' => __('Standard (Weiß)', 'wp-starter'),
+            'secondary' => __('Sekundär (Hellgrau)', 'wp-starter'),
+            'tertiary' => __('Tertiär', 'wp-starter'),
+            'brand' => __('Markenfarbe', 'wp-starter'),
+            'brand-subtle' => __('Markenfarbe Dezent', 'wp-starter'),
+            'inverse' => __('Dunkel (Invers)', 'wp-starter'),
+        ];
+    }
 
     /**
-     * Theme icon choices from resources/icons/
+     * Get theme icon choices from resources/icons/
+     *
+     * @return array<string, string>
      */
-    public const THEME_ICONS = [
-        '' => '— Kein Icon —',
-        'calendar' => 'Kalender',
-        'check' => 'Häkchen',
-        'chevron' => 'Pfeil',
-        'close' => 'Schließen',
-        'eye' => 'Auge',
-        'lock' => 'Schloss',
-        'mail' => 'E-Mail',
-        'minus' => 'Minus',
-        'phone' => 'Telefon',
-        'plus' => 'Plus',
-        'search' => 'Suche',
-        'user' => 'Person',
-        'warning' => 'Warnung',
-        'facebook' => 'Facebook',
-        'instagram' => 'Instagram',
-        'linkedin' => 'LinkedIn',
-        'x' => 'X (Twitter)',
-        'xing' => 'Xing',
-        'youtube' => 'YouTube',
-    ];
+    public static function getThemeIcons(): array
+    {
+        return [
+            '' => __('— Kein Icon —', 'wp-starter'),
+            'calendar' => __('Kalender', 'wp-starter'),
+            'check' => __('Häkchen', 'wp-starter'),
+            'chevron' => __('Pfeil', 'wp-starter'),
+            'close' => __('Schließen', 'wp-starter'),
+            'eye' => __('Auge', 'wp-starter'),
+            'lock' => __('Schloss', 'wp-starter'),
+            'mail' => __('E-Mail', 'wp-starter'),
+            'minus' => __('Minus', 'wp-starter'),
+            'phone' => __('Telefon', 'wp-starter'),
+            'plus' => __('Plus', 'wp-starter'),
+            'search' => __('Suche', 'wp-starter'),
+            'user' => __('Person', 'wp-starter'),
+            'warning' => __('Warnung', 'wp-starter'),
+            'facebook' => __('Facebook', 'wp-starter'),
+            'instagram' => __('Instagram', 'wp-starter'),
+            'linkedin' => __('LinkedIn', 'wp-starter'),
+            'x' => __('X (Twitter)', 'wp-starter'),
+            'xing' => __('Xing', 'wp-starter'),
+            'youtube' => __('YouTube', 'wp-starter'),
+        ];
+    }
 
     /**
      * Get background color field definition
@@ -62,11 +72,11 @@ class FieldDefinitions
     {
         return [
             'key' => "field_{$prefix}_background_color",
-            'label' => 'Hintergrundfarbe',
+            'label' => __('Hintergrundfarbe', 'wp-starter'),
             'name' => 'background_color',
             'type' => 'select',
-            'instructions' => 'Wähle die Hintergrundfarbe für diesen Abschnitt.',
-            'choices' => self::BACKGROUND_COLORS,
+            'instructions' => __('Wähle die Hintergrundfarbe für diesen Abschnitt.', 'wp-starter'),
+            'choices' => self::getBackgroundColors(),
             'default_value' => 'primary',
             'allow_null' => 0,
             'ui' => 1,
@@ -353,7 +363,7 @@ class FieldDefinitions
             'name' => $name,
             'type' => 'radio',
             'instructions' => $instructions,
-            'choices' => self::THEME_ICONS,
+            'choices' => self::getThemeIcons(),
             'default_value' => '',
             'layout' => 'horizontal',
             'return_format' => 'value',
@@ -710,7 +720,7 @@ class FieldDefinitions
         string $label,
         string $name,
         array $subFields,
-        string $buttonLabel = 'Eintrag hinzufügen',
+        ?string $buttonLabel = null,
         int $min = 0,
         string $layout = 'block',
         string $instructions = ''
@@ -724,7 +734,7 @@ class FieldDefinitions
             'required' => $min > 0 ? 1 : 0,
             'min' => $min,
             'layout' => $layout,
-            'button_label' => $buttonLabel,
+            'button_label' => $buttonLabel ?? __('Eintrag hinzufügen', 'wp-starter'),
             'sub_fields' => $subFields,
         ];
     }
@@ -844,60 +854,60 @@ class FieldDefinitions
             // Variante (bestimmt welche Felder sichtbar sind)
             self::buttonGroupField(
                 "field_{$prefix}_variant",
-                'Variante',
+                __('Variante', 'wp-starter'),
                 'variant',
                 [
-                    'centered' => 'Zentriert',
-                    'split' => 'Geteilt',
-                    'background' => 'Hintergrund',
+                    'centered' => __('Zentriert', 'wp-starter'),
+                    'split' => __('Geteilt', 'wp-starter'),
+                    'background' => __('Hintergrund', 'wp-starter'),
                 ],
                 'centered',
-                'Wähle das Layout für den Hero-Bereich.'
+                __('Wähle das Layout für den Hero-Bereich.', 'wp-starter')
             ),
 
             // Inhalt
             self::textField(
                 "field_{$prefix}_badge",
-                'Badge',
+                __('Badge', 'wp-starter'),
                 'badge',
                 false,
-                'Optionaler Badge-Text über der Überschrift.',
-                'z.B. NEU, Coming Soon...'
+                __('Optionaler Badge-Text über der Überschrift.', 'wp-starter'),
+                __('z.B. NEU, Coming Soon...', 'wp-starter')
             ),
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 true,
-                'Die Hauptüberschrift des Hero-Bereichs.',
-                'z.B. Willkommen bei...'
+                __('Die Hauptüberschrift des Hero-Bereichs.', 'wp-starter'),
+                __('z.B. Willkommen bei...', 'wp-starter')
             ),
             self::textareaField(
                 "field_{$prefix}_copy",
-                'Copy',
+                __('Copy', 'wp-starter'),
                 'copy',
                 3,
-                'Kurzer Beschreibungstext unter der Überschrift.',
-                'z.B. Wir helfen Ihnen...'
+                __('Kurzer Beschreibungstext unter der Überschrift.', 'wp-starter'),
+                __('z.B. Wir helfen Ihnen...', 'wp-starter')
             ),
 
             // Buttons (nebeneinander)
             [
                 'key' => "field_{$prefix}_cta_primary",
-                'label' => 'Primärer Button',
+                'label' => __('Primärer Button', 'wp-starter'),
                 'name' => 'cta_primary',
                 'type' => 'link',
-                'instructions' => 'Haupt-Button (orange, auffällig).',
+                'instructions' => __('Haupt-Button (orange, auffällig).', 'wp-starter'),
                 'required' => 0,
                 'return_format' => 'array',
                 'wrapper' => ['width' => '50'],
             ],
             [
                 'key' => "field_{$prefix}_cta_secondary",
-                'label' => 'Sekundärer Button',
+                'label' => __('Sekundärer Button', 'wp-starter'),
                 'name' => 'cta_secondary',
                 'type' => 'link',
-                'instructions' => 'Zweiter Button (dezent, Outline-Stil).',
+                'instructions' => __('Zweiter Button (dezent, Outline-Stil).', 'wp-starter'),
                 'required' => 0,
                 'return_format' => 'array',
                 'wrapper' => ['width' => '50'],
@@ -906,35 +916,35 @@ class FieldDefinitions
             // Bild (nur bei Split-Variante)
             self::imageField(
                 "field_{$prefix}_image",
-                'Bild',
+                __('Bild', 'wp-starter'),
                 'image',
                 false,
                 'array',
                 $showOnSplit,
-                'Empfohlene Größe: mindestens 960×800 Pixel (6:5).'
+                __('Empfohlene Größe: mindestens 960×800 Pixel (6:5).', 'wp-starter')
             ),
 
             // Hintergrundbild (nur bei Background-Variante)
             self::imageField(
                 "field_{$prefix}_background_image",
-                'Hintergrundbild',
+                __('Hintergrundbild', 'wp-starter'),
                 'background_image',
                 false,
                 'array',
                 $showOnBackground,
-                'Empfohlene Größe: mindestens 1920×1080 Pixel (16:9).'
+                __('Empfohlene Größe: mindestens 1920×1080 Pixel (16:9).', 'wp-starter')
             ),
 
             // Overlay-Transparenz (nur bei Background-Variante)
             self::rangeField(
                 "field_{$prefix}_overlay_opacity",
-                'Overlay-Transparenz',
+                __('Overlay-Transparenz', 'wp-starter'),
                 'overlay_opacity',
                 0,
                 100,
                 5,
                 80,
-                '0% = transparent, 100% = vollständig deckend.',
+                __('0% = transparent, 100% = vollständig deckend.', 'wp-starter'),
                 '%',
                 $showOnBackground
             ),
@@ -942,18 +952,11 @@ class FieldDefinitions
             // Hintergrundfarbe (nur bei Centered und Split)
             [
                 'key' => "field_{$prefix}_background_color",
-                'label' => 'Hintergrundfarbe',
+                'label' => __('Hintergrundfarbe', 'wp-starter'),
                 'name' => 'background_color',
                 'type' => 'select',
-                'instructions' => 'Wähle eine Hintergrundfarbe für den Hero-Bereich.',
-                'choices' => [
-                    'primary' => 'Standard (Weiß)',
-                    'secondary' => 'Sekundär (Hellgrau)',
-                    'tertiary' => 'Tertiär',
-                    'brand' => 'Markenfarbe',
-                    'brand-subtle' => 'Markenfarbe Dezent',
-                    'inverse' => 'Dunkel (Invers)',
-                ],
+                'instructions' => __('Wähle eine Hintergrundfarbe für den Hero-Bereich.', 'wp-starter'),
+                'choices' => self::getBackgroundColors(),
                 'default_value' => 'primary',
                 'ui' => 1,
                 'conditional_logic' => $showOnCenteredOrSplit,
@@ -972,19 +975,19 @@ class FieldDefinitions
         return [
             self::wysiwygField(
                 "field_{$prefix}_column_1",
-                'Spalte 1 (links)',
+                __('Spalte 1 (links)', 'wp-starter'),
                 'column_1',
                 true,
                 '50',
-                'Inhalt der linken Spalte (50% Breite).'
+                __('Inhalt der linken Spalte (50% Breite).', 'wp-starter')
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
-                'Spalte 2 (rechts)',
+                __('Spalte 2 (rechts)', 'wp-starter'),
                 'column_2',
                 true,
                 '50',
-                'Inhalt der rechten Spalte (50% Breite).'
+                __('Inhalt der rechten Spalte (50% Breite).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1001,27 +1004,27 @@ class FieldDefinitions
         return [
             self::wysiwygField(
                 "field_{$prefix}_column_1",
-                'Spalte 1',
+                __('Spalte 1', 'wp-starter'),
                 'column_1',
                 true,
                 '33.333',
-                'Inhalt der ersten Spalte (1/3 Breite).'
+                __('Inhalt der ersten Spalte (1/3 Breite).', 'wp-starter')
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
-                'Spalte 2',
+                __('Spalte 2', 'wp-starter'),
                 'column_2',
                 true,
                 '33.333',
-                'Inhalt der mittleren Spalte (1/3 Breite).'
+                __('Inhalt der mittleren Spalte (1/3 Breite).', 'wp-starter')
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_3",
-                'Spalte 3',
+                __('Spalte 3', 'wp-starter'),
                 'column_3',
                 true,
                 '33.333',
-                'Inhalt der dritten Spalte (1/3 Breite).'
+                __('Inhalt der dritten Spalte (1/3 Breite).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1038,35 +1041,35 @@ class FieldDefinitions
         return [
             self::wysiwygField(
                 "field_{$prefix}_column_1",
-                'Spalte 1',
+                __('Spalte 1', 'wp-starter'),
                 'column_1',
                 true,
                 '25',
-                'Inhalt der ersten Spalte (1/4 Breite).'
+                __('Inhalt der ersten Spalte (1/4 Breite).', 'wp-starter')
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
-                'Spalte 2',
+                __('Spalte 2', 'wp-starter'),
                 'column_2',
                 true,
                 '25',
-                'Inhalt der zweiten Spalte (1/4 Breite).'
+                __('Inhalt der zweiten Spalte (1/4 Breite).', 'wp-starter')
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_3",
-                'Spalte 3',
+                __('Spalte 3', 'wp-starter'),
                 'column_3',
                 true,
                 '25',
-                'Inhalt der dritten Spalte (1/4 Breite).'
+                __('Inhalt der dritten Spalte (1/4 Breite).', 'wp-starter')
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_4",
-                'Spalte 4',
+                __('Spalte 4', 'wp-starter'),
                 'column_4',
                 true,
                 '25',
-                'Inhalt der vierten Spalte (1/4 Breite).'
+                __('Inhalt der vierten Spalte (1/4 Breite).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1083,36 +1086,36 @@ class FieldDefinitions
         return [
             self::repeaterField(
                 "field_{$prefix}_accordion",
-                'Accordion-Einträge',
+                __('Accordion-Einträge', 'wp-starter'),
                 'accordion',
                 [
                     self::iconRadioField(
                         "field_{$prefix}_accordion_icon",
-                        'Icon',
+                        __('Icon', 'wp-starter'),
                         'icon',
-                        'Optionales Icon vor dem Titel.'
+                        __('Optionales Icon vor dem Titel.', 'wp-starter')
                     ),
                     self::textField(
                         "field_{$prefix}_accordion_title",
-                        'Titel',
+                        __('Titel', 'wp-starter'),
                         'title',
                         true,
-                        'Der klickbare Titel des Accordion-Elements.',
-                        'z.B. Wie funktioniert...?'
+                        __('Der klickbare Titel des Accordion-Elements.', 'wp-starter'),
+                        __('z.B. Wie funktioniert...?', 'wp-starter')
                     ),
                     self::wysiwygField(
                         "field_{$prefix}_accordion_content",
-                        'Inhalt',
+                        __('Inhalt', 'wp-starter'),
                         'content',
                         true,
                         null,
-                        'Der ausgeklappte Inhalt des Accordion-Elements.'
+                        __('Der ausgeklappte Inhalt des Accordion-Elements.', 'wp-starter')
                     ),
                 ],
-                'Eintrag hinzufügen',
+                __('Eintrag hinzufügen', 'wp-starter'),
                 1,
                 'block',
-                'Füge beliebig viele auf- und zuklappbare Elemente hinzu.'
+                __('Füge beliebig viele auf- und zuklappbare Elemente hinzu.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1129,26 +1132,26 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 true,
-                'Die Hauptüberschrift des Call-to-Action Bereichs.',
-                'z.B. Jetzt starten!'
+                __('Die Hauptüberschrift des Call-to-Action Bereichs.', 'wp-starter'),
+                __('z.B. Jetzt starten!', 'wp-starter')
             ),
             self::textareaField(
                 "field_{$prefix}_content",
-                'Beschreibung',
+                __('Beschreibung', 'wp-starter'),
                 'content',
                 3,
-                'Kurzer Text, der zum Handeln auffordert.',
-                'z.B. Kontaktieren Sie uns für ein unverbindliches Angebot.'
+                __('Kurzer Text, der zum Handeln auffordert.', 'wp-starter'),
+                __('z.B. Kontaktieren Sie uns für ein unverbindliches Angebot.', 'wp-starter')
             ),
             self::linkField(
                 "field_{$prefix}_button",
-                'Button',
+                __('Button', 'wp-starter'),
                 'button',
                 true,
-                'Der Call-to-Action Button mit Link und Text.'
+                __('Der Call-to-Action Button mit Link und Text.', 'wp-starter')
             ),
         ];
     }
@@ -1169,26 +1172,26 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 true,
-                'Die Hauptüberschrift des Call-to-Action Bereichs.',
-                'z.B. Jetzt starten!'
+                __('Die Hauptüberschrift des Call-to-Action Bereichs.', 'wp-starter'),
+                __('z.B. Jetzt starten!', 'wp-starter')
             ),
             self::wysiwygField(
                 "field_{$prefix}_content",
-                'Beschreibung',
+                __('Beschreibung', 'wp-starter'),
                 'content',
                 false,
                 null,
-                'Kurzer Text, der zum Handeln auffordert.'
+                __('Kurzer Text, der zum Handeln auffordert.', 'wp-starter')
             ),
             self::linkField(
                 "field_{$prefix}_cta",
-                'Button',
+                __('Button', 'wp-starter'),
                 'cta',
                 true,
-                'Der Call-to-Action Button mit Link und Text.'
+                __('Der Call-to-Action Button mit Link und Text.', 'wp-starter')
             ),
         ];
     }
@@ -1204,29 +1207,29 @@ class FieldDefinitions
         return [
             self::buttonGroupField(
                 "field_{$prefix}_source",
-                'Video-Quelle',
+                __('Video-Quelle', 'wp-starter'),
                 'source',
                 [
-                    'wordpress' => 'Mediathek',
-                    'external' => 'YouTube / Vimeo',
+                    'wordpress' => __('Mediathek', 'wp-starter'),
+                    'external' => __('YouTube / Vimeo', 'wp-starter'),
                 ],
                 'wordpress',
-                'Wähle, woher das Video kommt.'
+                __('Wähle, woher das Video kommt.', 'wp-starter')
             ),
             self::fileField(
                 "field_{$prefix}_video",
-                'Video-Datei',
+                __('Video-Datei', 'wp-starter'),
                 'video',
                 'mp4,webm,ogg',
                 'url',
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'wordpress']]],
-                'Lade eine MP4, WebM oder OGG Datei hoch.'
+                __('Lade eine MP4, WebM oder OGG Datei hoch.', 'wp-starter')
             ),
             self::urlField(
                 "field_{$prefix}_video_url",
-                'Video-URL',
+                __('Video-URL', 'wp-starter'),
                 'video_url',
-                'Füge die YouTube oder Vimeo URL ein.',
+                __('Füge die YouTube oder Vimeo URL ein.', 'wp-starter'),
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'external']]],
                 'https://www.youtube.com/watch?v=...'
             ),
@@ -1245,29 +1248,29 @@ class FieldDefinitions
         return [
             self::imageField(
                 "field_{$prefix}_image",
-                'Bild',
+                __('Bild', 'wp-starter'),
                 'image',
                 true,
                 'id',
                 null,
-                'Das anzuzeigende Bild.'
+                __('Das anzuzeigende Bild.', 'wp-starter')
             ),
             [
                 'key' => "field_{$prefix}_show_border",
-                'label' => 'Rahmen anzeigen',
+                'label' => __('Rahmen anzeigen', 'wp-starter'),
                 'name' => 'show_border',
                 'type' => 'true_false',
-                'instructions' => 'Zeigt einen dezenten Rahmen um das Bild.',
+                'instructions' => __('Zeigt einen dezenten Rahmen um das Bild.', 'wp-starter'),
                 'default_value' => 1,
                 'ui' => 1,
                 'wrapper' => ['width' => '50'],
             ],
             [
                 'key' => "field_{$prefix}_show_caption",
-                'label' => 'Bildunterschrift anzeigen',
+                'label' => __('Bildunterschrift anzeigen', 'wp-starter'),
                 'name' => 'show_caption',
                 'type' => 'true_false',
-                'instructions' => 'Zeigt die in der Mediathek hinterlegte Bildunterschrift.',
+                'instructions' => __('Zeigt die in der Mediathek hinterlegte Bildunterschrift.', 'wp-starter'),
                 'default_value' => 1,
                 'ui' => 1,
                 'wrapper' => ['width' => '50'],
@@ -1287,23 +1290,23 @@ class FieldDefinitions
         return [
             self::buttonGroupField(
                 "field_{$prefix}_style",
-                'Stil',
+                __('Stil', 'wp-starter'),
                 'style',
                 [
-                    'line' => 'Linie',
-                    'dots' => 'Punkte',
-                    'wave' => 'Welle',
-                    'space' => 'Abstand',
+                    'line' => __('Linie', 'wp-starter'),
+                    'dots' => __('Punkte', 'wp-starter'),
+                    'wave' => __('Welle', 'wp-starter'),
+                    'space' => __('Abstand', 'wp-starter'),
                 ],
                 'line',
-                'Wähle das Aussehen des Trenners.'
+                __('Wähle das Aussehen des Trenners.', 'wp-starter')
             ),
             [
                 'key' => "field_{$prefix}_height",
-                'label' => 'Höhe',
+                'label' => __('Höhe', 'wp-starter'),
                 'name' => 'height',
                 'type' => 'number',
-                'instructions' => 'Höhe in Pixel (Standard: 50)',
+                'instructions' => __('Höhe in Pixel (Standard: 50)', 'wp-starter'),
                 'default_value' => 50,
                 'min' => 10,
                 'max' => 200,
@@ -1324,19 +1327,19 @@ class FieldDefinitions
         return [
             self::wysiwygField(
                 "field_{$prefix}_column_1",
-                'Linke Spalte (schmal)',
+                __('Linke Spalte (schmal)', 'wp-starter'),
                 'column_1',
                 true,
                 '33.333',
-                'Inhalt der schmalen linken Spalte (ca. 1/3 der Breite).'
+                __('Inhalt der schmalen linken Spalte (ca. 1/3 der Breite).', 'wp-starter')
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
-                'Rechte Spalte (breit)',
+                __('Rechte Spalte (breit)', 'wp-starter'),
                 'column_2',
                 true,
                 '66.667',
-                'Inhalt der breiten rechten Spalte (ca. 2/3 der Breite).'
+                __('Inhalt der breiten rechten Spalte (ca. 2/3 der Breite).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1353,19 +1356,19 @@ class FieldDefinitions
         return [
             self::wysiwygField(
                 "field_{$prefix}_column_1",
-                'Linke Spalte (breit)',
+                __('Linke Spalte (breit)', 'wp-starter'),
                 'column_1',
                 true,
                 '66.667',
-                'Inhalt der breiten linken Spalte (ca. 2/3 der Breite).'
+                __('Inhalt der breiten linken Spalte (ca. 2/3 der Breite).', 'wp-starter')
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
-                'Rechte Spalte (schmal)',
+                __('Rechte Spalte (schmal)', 'wp-starter'),
                 'column_2',
                 true,
                 '33.333',
-                'Inhalt der schmalen rechten Spalte (ca. 1/3 der Breite).'
+                __('Inhalt der schmalen rechten Spalte (ca. 1/3 der Breite).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1382,39 +1385,39 @@ class FieldDefinitions
         return [
             self::imageField(
                 "field_{$prefix}_image_1",
-                'Bild 1',
+                __('Bild 1', 'wp-starter'),
                 'image_1',
                 true,
                 'id',
                 null,
-                'Bild für die linke Karte.',
+                __('Bild für die linke Karte.', 'wp-starter'),
                 '50'
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_1",
-                'Inhalt 1',
+                __('Inhalt 1', 'wp-starter'),
                 'column_1',
                 false,
                 '50',
-                'Text unter dem ersten Bild.'
+                __('Text unter dem ersten Bild.', 'wp-starter')
             ),
             self::imageField(
                 "field_{$prefix}_image_2",
-                'Bild 2',
+                __('Bild 2', 'wp-starter'),
                 'image_2',
                 true,
                 'id',
                 null,
-                'Bild für die rechte Karte.',
+                __('Bild für die rechte Karte.', 'wp-starter'),
                 '50'
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
-                'Inhalt 2',
+                __('Inhalt 2', 'wp-starter'),
                 'column_2',
                 false,
                 '50',
-                'Text unter dem zweiten Bild.'
+                __('Text unter dem zweiten Bild.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1435,59 +1438,59 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über den Testimonials.',
-                'z.B. Das sagen unsere Kunden'
+                __('Optionale Überschrift über den Testimonials.', 'wp-starter'),
+                __('z.B. Das sagen unsere Kunden', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_testimonials",
-                'Kundenstimmen',
+                __('Kundenstimmen', 'wp-starter'),
                 'testimonials',
                 [
                     self::textareaField(
                         "field_{$prefix}_testimonial_quote",
-                        'Zitat',
+                        __('Zitat', 'wp-starter'),
                         'quote',
                         3,
-                        'Das Zitat oder die Bewertung des Kunden.',
-                        'z.B. Die Zusammenarbeit war hervorragend...'
+                        __('Das Zitat oder die Bewertung des Kunden.', 'wp-starter'),
+                        __('z.B. Die Zusammenarbeit war hervorragend...', 'wp-starter')
                     ),
                     self::textField(
                         "field_{$prefix}_testimonial_author",
-                        'Name',
+                        __('Name', 'wp-starter'),
                         'author',
                         true,
-                        'Name der Person.',
-                        'z.B. Max Mustermann'
+                        __('Name der Person.', 'wp-starter'),
+                        __('z.B. Max Mustermann', 'wp-starter')
                     ),
                     self::textField(
                         "field_{$prefix}_testimonial_role",
-                        'Position / Firma',
+                        __('Position / Firma', 'wp-starter'),
                         'role',
                         false,
-                        'Position oder Firmenname.',
-                        'z.B. Geschäftsführer, Musterfirma GmbH'
+                        __('Position oder Firmenname.', 'wp-starter'),
+                        __('z.B. Geschäftsführer, Musterfirma GmbH', 'wp-starter')
                     ),
                     self::imageField(
                         "field_{$prefix}_testimonial_image",
-                        'Foto',
+                        __('Foto', 'wp-starter'),
                         'image',
                         false,
                         'id',
                         null,
-                        'Optionales Foto der Person.'
+                        __('Optionales Foto der Person.', 'wp-starter')
                     ),
                 ],
-                'Kundenstimme hinzufügen',
+                __('Kundenstimme hinzufügen', 'wp-starter'),
                 1,
                 'block',
-                'Füge Kundenstimmen und Bewertungen hinzu.'
+                __('Füge Kundenstimmen und Bewertungen hinzu.', 'wp-starter')
             ),
             self::buttonGroupField(
                 "field_{$prefix}_columns",
-                'Spalten',
+                __('Spalten', 'wp-starter'),
                 'columns',
                 [
                     '1' => '1',
@@ -1495,7 +1498,7 @@ class FieldDefinitions
                     '3' => '3',
                 ],
                 '3',
-                'Anzahl der Spalten für die Darstellung.'
+                __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1512,55 +1515,55 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über den Karten.',
-                'z.B. Unsere Leistungen'
+                __('Optionale Überschrift über den Karten.', 'wp-starter'),
+                __('z.B. Unsere Leistungen', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_cards",
-                'Karten',
+                __('Karten', 'wp-starter'),
                 'cards',
                 [
                     self::iconRadioField(
                         "field_{$prefix}_card_icon",
-                        'Icon',
+                        __('Icon', 'wp-starter'),
                         'icon',
-                        'Wähle ein Icon aus dem Theme.'
+                        __('Wähle ein Icon aus dem Theme.', 'wp-starter')
                     ),
                     self::textField(
                         "field_{$prefix}_card_title",
-                        'Titel',
+                        __('Titel', 'wp-starter'),
                         'title',
                         true,
-                        'Titel der Karte.',
-                        'z.B. Beratung'
+                        __('Titel der Karte.', 'wp-starter'),
+                        __('z.B. Beratung', 'wp-starter')
                     ),
                     self::textareaField(
                         "field_{$prefix}_card_content",
-                        'Beschreibung',
+                        __('Beschreibung', 'wp-starter'),
                         'content',
                         3,
-                        'Kurze Beschreibung.',
-                        'z.B. Wir beraten Sie umfassend...'
+                        __('Kurze Beschreibung.', 'wp-starter'),
+                        __('z.B. Wir beraten Sie umfassend...', 'wp-starter')
                     ),
                     self::linkField(
                         "field_{$prefix}_card_link",
-                        'Link',
+                        __('Link', 'wp-starter'),
                         'link',
                         false,
-                        'Optionaler Link zu mehr Informationen.'
+                        __('Optionaler Link zu mehr Informationen.', 'wp-starter')
                     ),
                 ],
-                'Karte hinzufügen',
+                __('Karte hinzufügen', 'wp-starter'),
                 1,
                 'block',
-                'Füge beliebig viele Karten hinzu.'
+                __('Füge beliebig viele Karten hinzu.', 'wp-starter')
             ),
             self::buttonGroupField(
                 "field_{$prefix}_columns",
-                'Spalten',
+                __('Spalten', 'wp-starter'),
                 'columns',
                 [
                     '2' => '2',
@@ -1568,7 +1571,7 @@ class FieldDefinitions
                     '4' => '4',
                 ],
                 '3',
-                'Anzahl der Spalten für die Darstellung.'
+                __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1585,18 +1588,18 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über der Galerie.',
-                'z.B. Unsere Projekte'
+                __('Optionale Überschrift über der Galerie.', 'wp-starter'),
+                __('z.B. Unsere Projekte', 'wp-starter')
             ),
             [
                 'key' => "field_{$prefix}_images",
-                'label' => 'Bilder',
+                'label' => __('Bilder', 'wp-starter'),
                 'name' => 'images',
                 'type' => 'gallery',
-                'instructions' => 'Wähle die Bilder für die Galerie. Klick auf ein Bild öffnet die Lightbox.',
+                'instructions' => __('Wähle die Bilder für die Galerie. Klick auf ein Bild öffnet die Lightbox.', 'wp-starter'),
                 'required' => 1,
                 'return_format' => 'array',
                 'preview_size' => 'medium',
@@ -1605,7 +1608,7 @@ class FieldDefinitions
             ],
             self::buttonGroupField(
                 "field_{$prefix}_columns",
-                'Spalten',
+                __('Spalten', 'wp-starter'),
                 'columns',
                 [
                     '2' => '2',
@@ -1614,7 +1617,7 @@ class FieldDefinitions
                     '5' => '5',
                 ],
                 '3',
-                'Anzahl der Spalten für die Darstellung.'
+                __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1631,54 +1634,54 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über dem Logo-Slider.',
-                'z.B. Unsere Partner'
+                __('Optionale Überschrift über dem Logo-Slider.', 'wp-starter'),
+                __('z.B. Unsere Partner', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_logos",
-                'Logos',
+                __('Logos', 'wp-starter'),
                 'logos',
                 [
                     self::imageField(
                         "field_{$prefix}_logo_image",
-                        'Logo',
+                        __('Logo', 'wp-starter'),
                         'logo',
                         true,
                         'id',
                         null,
-                        'Das Logo (idealerweise mit transparentem Hintergrund).'
+                        __('Das Logo (idealerweise mit transparentem Hintergrund).', 'wp-starter')
                     ),
                     self::textField(
                         "field_{$prefix}_logo_name",
-                        'Name',
+                        __('Name', 'wp-starter'),
                         'name',
                         false,
-                        'Name des Partners (für Barrierefreiheit).',
-                        'z.B. Musterfirma GmbH'
+                        __('Name des Partners (für Barrierefreiheit).', 'wp-starter'),
+                        __('z.B. Musterfirma GmbH', 'wp-starter')
                     ),
                     self::urlField(
                         "field_{$prefix}_logo_link",
-                        'Website',
+                        __('Website', 'wp-starter'),
                         'link',
-                        'Optionaler Link zur Partner-Website.',
+                        __('Optionaler Link zur Partner-Website.', 'wp-starter'),
                         null,
                         'https://...'
                     ),
                 ],
-                'Logo hinzufügen',
+                __('Logo hinzufügen', 'wp-starter'),
                 1,
                 'table',
-                'Füge Partner- oder Kundenlogos hinzu.'
+                __('Füge Partner- oder Kundenlogos hinzu.', 'wp-starter')
             ),
             self::trueFalseField(
                 "field_{$prefix}_autoplay",
-                'Automatisch abspielen',
+                __('Automatisch abspielen', 'wp-starter'),
                 'autoplay',
                 true,
-                'Logos automatisch durchlaufen lassen.'
+                __('Logos automatisch durchlaufen lassen.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1694,48 +1697,48 @@ class FieldDefinitions
     {
         return [
             // Tab: Formular
-            self::tabField("field_{$prefix}_tab_form", 'Formular'),
+            self::tabField("field_{$prefix}_tab_form", __('Formular', 'wp-starter')),
             self::messageField(
                 "field_{$prefix}_form_help",
-                '<strong>So findest du die Formular-ID:</strong><br>1) Gehe zu <em>Formulare</em> im Menü<br>2) Wähle dein Formular aus<br>3) Die ID steht in der URL (z.B. post=<strong>123</strong>) oder im Shortcode'
+                __('<strong>So findest du die Formular-ID:</strong><br>1) Gehe zu <em>Formulare</em> im Menü<br>2) Wähle dein Formular aus<br>3) Die ID steht in der URL (z.B. post=<strong>123</strong>) oder im Shortcode', 'wp-starter')
             ),
             [
                 'key' => "field_{$prefix}_form_id",
-                'label' => 'Formular-ID',
+                'label' => __('Formular-ID', 'wp-starter'),
                 'name' => 'form_id',
                 'type' => 'text',
-                'instructions' => 'Trage nur die Zahl ein.',
-                'placeholder' => 'z.B. 123',
+                'instructions' => __('Trage nur die Zahl ein.', 'wp-starter'),
+                'placeholder' => __('z.B. 123', 'wp-starter'),
                 'required' => 1,
             ],
 
             // Tab: Inhalt
-            self::tabField("field_{$prefix}_tab_content", 'Inhalt'),
+            self::tabField("field_{$prefix}_tab_content", __('Inhalt', 'wp-starter')),
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Überschrift für den Kontaktbereich.',
-                'z.B. Kontaktieren Sie uns'
+                __('Überschrift für den Kontaktbereich.', 'wp-starter'),
+                __('z.B. Kontaktieren Sie uns', 'wp-starter')
             ),
             self::wysiwygField(
                 "field_{$prefix}_content",
-                'Einleitungstext',
+                __('Einleitungstext', 'wp-starter'),
                 'content',
                 false,
                 null,
-                'Optionaler Text über dem Formular.'
+                __('Optionaler Text über dem Formular.', 'wp-starter')
             ),
 
             // Tab: Optionen
-            self::tabField("field_{$prefix}_tab_options", 'Optionen'),
+            self::tabField("field_{$prefix}_tab_options", __('Optionen', 'wp-starter')),
             self::trueFalseField(
                 "field_{$prefix}_show_contact_info",
-                'Kontaktdaten anzeigen',
+                __('Kontaktdaten anzeigen', 'wp-starter'),
                 'show_contact_info',
                 true,
-                'Zeigt die Kontaktdaten aus den Theme-Einstellungen an.'
+                __('Zeigt die Kontaktdaten aus den Theme-Einstellungen an.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1751,59 +1754,59 @@ class FieldDefinitions
     {
         return [
             // Tab: Karte
-            self::tabField("field_{$prefix}_tab_map", 'Karte'),
+            self::tabField("field_{$prefix}_tab_map", __('Karte', 'wp-starter')),
             self::messageField(
                 "field_{$prefix}_map_help",
-                '<strong>So bekommst du die Einbettungs-URL:</strong><br>1) Öffne <a href="https://maps.google.com" target="_blank">Google Maps</a><br>2) Suche deinen Standort<br>3) Klicke auf "Teilen" → "Karte einbetten"<br>4) Kopiere die URL aus dem HTML-Code (beginnt mit https://www.google.com/maps/embed)'
+                __('<strong>So bekommst du die Einbettungs-URL:</strong><br>1) Öffne <a href="https://maps.google.com" target="_blank">Google Maps</a><br>2) Suche deinen Standort<br>3) Klicke auf "Teilen" → "Karte einbetten"<br>4) Kopiere die URL aus dem HTML-Code (beginnt mit https://www.google.com/maps/embed)', 'wp-starter')
             ),
             self::urlField(
                 "field_{$prefix}_embed_url",
-                'Google Maps Einbettungs-URL',
+                __('Google Maps Einbettungs-URL', 'wp-starter'),
                 'embed_url',
-                'Der Block zeigt automatisch einen DSGVO-Hinweis.',
+                __('Der Block zeigt automatisch einen DSGVO-Hinweis.', 'wp-starter'),
                 null,
                 'https://www.google.com/maps/embed?pb=...'
             ),
             self::numberField(
                 "field_{$prefix}_height",
-                'Höhe',
+                __('Höhe', 'wp-starter'),
                 'height',
                 400,
                 200,
                 800,
                 50,
                 'px',
-                'Höhe der Karte in Pixeln.'
+                __('Höhe der Karte in Pixeln.', 'wp-starter')
             ),
 
             // Tab: Inhalt
-            self::tabField("field_{$prefix}_tab_content", 'Inhalt'),
+            self::tabField("field_{$prefix}_tab_content", __('Inhalt', 'wp-starter')),
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über der Karte.',
-                'z.B. So finden Sie uns'
+                __('Optionale Überschrift über der Karte.', 'wp-starter'),
+                __('z.B. So finden Sie uns', 'wp-starter')
             ),
             self::textareaField(
                 "field_{$prefix}_address",
-                'Adresse',
+                __('Adresse', 'wp-starter'),
                 'address',
                 2,
-                'Die vollständige Adresse (für den "Route planen" Link).',
-                'Musterstraße 123, 12345 Musterstadt'
+                __('Die vollständige Adresse (für den "Route planen" Link).', 'wp-starter'),
+                __('Musterstraße 123, 12345 Musterstadt', 'wp-starter')
             ),
             self::trueFalseField(
                 "field_{$prefix}_show_directions_link",
-                '"Route planen" Link anzeigen',
+                __('„Route planen" Link anzeigen', 'wp-starter'),
                 'show_directions_link',
                 true,
-                'Zeigt einen Link zum Planen der Route an.'
+                __('Zeigt einen Link zum Planen der Route an.', 'wp-starter')
             ),
 
             // Tab: Darstellung
-            self::tabField("field_{$prefix}_tab_style", 'Darstellung'),
+            self::tabField("field_{$prefix}_tab_style", __('Darstellung', 'wp-starter')),
             self::backgroundColorField($prefix),
         ];
     }
@@ -1819,44 +1822,44 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über den Tabs.',
-                'z.B. Häufige Fragen'
+                __('Optionale Überschrift über den Tabs.', 'wp-starter'),
+                __('z.B. Häufige Fragen', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_tabs",
-                'Tabs',
+                __('Tabs', 'wp-starter'),
                 'tabs',
                 [
                     self::iconRadioField(
                         "field_{$prefix}_tab_icon",
-                        'Icon',
+                        __('Icon', 'wp-starter'),
                         'icon',
-                        'Optionales Icon neben dem Tab-Titel.'
+                        __('Optionales Icon neben dem Tab-Titel.', 'wp-starter')
                     ),
                     self::textField(
                         "field_{$prefix}_tab_title",
-                        'Tab-Titel',
+                        __('Tab-Titel', 'wp-starter'),
                         'title',
                         true,
-                        'Der Titel des Tabs (im Tab-Button sichtbar).',
-                        'z.B. Übersicht'
+                        __('Der Titel des Tabs (im Tab-Button sichtbar).', 'wp-starter'),
+                        __('z.B. Übersicht', 'wp-starter')
                     ),
                     self::wysiwygField(
                         "field_{$prefix}_tab_content",
-                        'Inhalt',
+                        __('Inhalt', 'wp-starter'),
                         'content',
                         true,
                         null,
-                        'Der Inhalt, der angezeigt wird, wenn dieser Tab aktiv ist.'
+                        __('Der Inhalt, der angezeigt wird, wenn dieser Tab aktiv ist.', 'wp-starter')
                     ),
                 ],
-                'Tab hinzufügen',
+                __('Tab hinzufügen', 'wp-starter'),
                 2,
                 'block',
-                'Füge mindestens 2 Tabs hinzu.'
+                __('Füge mindestens 2 Tabs hinzu.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1877,81 +1880,81 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über der Preistabelle.',
-                'z.B. Unsere Pakete'
+                __('Optionale Überschrift über der Preistabelle.', 'wp-starter'),
+                __('z.B. Unsere Pakete', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_plans",
-                'Preispakete',
+                __('Preispakete', 'wp-starter'),
                 'plans',
                 [
                     // Accordion: Preis (offen)
-                    self::accordionField("field_{$prefix}_acc_price", 'Preis', true),
+                    self::accordionField("field_{$prefix}_acc_price", __('Preis', 'wp-starter'), true),
                     [
                         'key' => "field_{$prefix}_plan_name",
-                        'label' => 'Paketname',
+                        'label' => __('Paketname', 'wp-starter'),
                         'name' => 'name',
                         'type' => 'text',
-                        'instructions' => 'Name des Pakets.',
-                        'placeholder' => 'z.B. Basic, Professional',
+                        'instructions' => __('Name des Pakets.', 'wp-starter'),
+                        'placeholder' => __('z.B. Basic, Professional', 'wp-starter'),
                         'required' => 1,
                         'wrapper' => ['width' => '40'],
                     ],
                     [
                         'key' => "field_{$prefix}_plan_price",
-                        'label' => 'Preis',
+                        'label' => __('Preis', 'wp-starter'),
                         'name' => 'price',
                         'type' => 'text',
-                        'instructions' => 'Der Preis inkl. Währung.',
-                        'placeholder' => 'z.B. 49€',
+                        'instructions' => __('Der Preis inkl. Währung.', 'wp-starter'),
+                        'placeholder' => __('z.B. 49€', 'wp-starter'),
                         'required' => 1,
                         'wrapper' => ['width' => '30'],
                     ],
                     [
                         'key' => "field_{$prefix}_plan_period",
-                        'label' => 'Zeitraum',
+                        'label' => __('Zeitraum', 'wp-starter'),
                         'name' => 'period',
                         'type' => 'text',
-                        'instructions' => 'Abrechnungszeitraum.',
-                        'placeholder' => 'z.B. / Monat',
+                        'instructions' => __('Abrechnungszeitraum.', 'wp-starter'),
+                        'placeholder' => __('z.B. / Monat', 'wp-starter'),
                         'wrapper' => ['width' => '30'],
                     ],
                     self::trueFalseField(
                         "field_{$prefix}_plan_featured",
-                        'Hervorheben',
+                        __('Hervorheben', 'wp-starter'),
                         'is_featured',
                         false,
-                        'Dieses Paket als "Empfohlen" hervorheben.'
+                        __('Dieses Paket als „Empfohlen" hervorheben.', 'wp-starter')
                     ),
                     // Accordion: Leistungen
-                    self::accordionField("field_{$prefix}_acc_features", 'Leistungen'),
+                    self::accordionField("field_{$prefix}_acc_features", __('Leistungen', 'wp-starter')),
                     self::wysiwygField(
                         "field_{$prefix}_plan_features",
-                        'Leistungen',
+                        __('Leistungen', 'wp-starter'),
                         'features',
                         true,
                         null,
-                        'Liste der enthaltenen Leistungen (als Aufzählung).'
+                        __('Liste der enthaltenen Leistungen (als Aufzählung).', 'wp-starter')
                     ),
                     // Accordion: Aktion
-                    self::accordionField("field_{$prefix}_acc_cta", 'Aktion'),
+                    self::accordionField("field_{$prefix}_acc_cta", __('Aktion', 'wp-starter')),
                     self::linkField(
                         "field_{$prefix}_plan_cta",
-                        'Button',
+                        __('Button', 'wp-starter'),
                         'cta',
                         false,
-                        'Call-to-Action Button für dieses Paket.'
+                        __('Call-to-Action Button für dieses Paket.', 'wp-starter')
                     ),
                     // Accordion Ende
                     self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
                 ],
-                'Paket hinzufügen',
+                __('Paket hinzufügen', 'wp-starter'),
                 1,
                 'block',
-                'Füge Preispakete hinzu (empfohlen: 3 Pakete).'
+                __('Füge Preispakete hinzu (empfohlen: 3 Pakete).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -1968,85 +1971,85 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über dem Team.',
-                'z.B. Unser Team'
+                __('Optionale Überschrift über dem Team.', 'wp-starter'),
+                __('z.B. Unser Team', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_members",
-                'Teammitglieder',
+                __('Teammitglieder', 'wp-starter'),
                 'members',
                 [
                     // Accordion: Person (offen)
-                    self::accordionField("field_{$prefix}_acc_person", 'Person', true),
+                    self::accordionField("field_{$prefix}_acc_person", __('Person', 'wp-starter'), true),
                     self::imageField(
                         "field_{$prefix}_member_image",
-                        'Foto',
+                        __('Foto', 'wp-starter'),
                         'image',
                         false,
                         'id',
                         null,
-                        'Portraitfoto (quadratisch empfohlen).'
+                        __('Portraitfoto (quadratisch empfohlen).', 'wp-starter')
                     ),
                     self::textField(
                         "field_{$prefix}_member_name",
-                        'Name',
+                        __('Name', 'wp-starter'),
                         'name',
                         true,
-                        'Vollständiger Name.',
-                        'z.B. Max Mustermann'
+                        __('Vollständiger Name.', 'wp-starter'),
+                        __('z.B. Max Mustermann', 'wp-starter')
                     ),
                     self::textField(
                         "field_{$prefix}_member_position",
-                        'Position',
+                        __('Position', 'wp-starter'),
                         'position',
                         false,
-                        'Jobtitel oder Rolle.',
-                        'z.B. Geschäftsführer'
+                        __('Jobtitel oder Rolle.', 'wp-starter'),
+                        __('z.B. Geschäftsführer', 'wp-starter')
                     ),
                     // Accordion: Details
-                    self::accordionField("field_{$prefix}_acc_details", 'Details'),
+                    self::accordionField("field_{$prefix}_acc_details", __('Details', 'wp-starter')),
                     self::textareaField(
                         "field_{$prefix}_member_bio",
-                        'Kurzbiografie',
+                        __('Kurzbiografie', 'wp-starter'),
                         'bio',
                         2,
-                        'Optionale kurze Beschreibung.',
-                        'z.B. Seit 2020 im Unternehmen...'
+                        __('Optionale kurze Beschreibung.', 'wp-starter'),
+                        __('z.B. Seit 2020 im Unternehmen...', 'wp-starter')
                     ),
                     // Accordion: Kontakt
-                    self::accordionField("field_{$prefix}_acc_contact", 'Kontakt'),
+                    self::accordionField("field_{$prefix}_acc_contact", __('Kontakt', 'wp-starter')),
                     [
                         'key' => "field_{$prefix}_member_email",
-                        'label' => 'E-Mail',
+                        'label' => __('E-Mail', 'wp-starter'),
                         'name' => 'email',
                         'type' => 'email',
-                        'instructions' => 'Direkte E-Mail-Adresse.',
+                        'instructions' => __('Direkte E-Mail-Adresse.', 'wp-starter'),
                         'placeholder' => 'max@beispiel.de',
                         'wrapper' => ['width' => '50'],
                     ],
                     [
                         'key' => "field_{$prefix}_member_linkedin",
-                        'label' => 'LinkedIn',
+                        'label' => __('LinkedIn', 'wp-starter'),
                         'name' => 'linkedin',
                         'type' => 'url',
-                        'instructions' => 'Link zum LinkedIn-Profil.',
+                        'instructions' => __('Link zum LinkedIn-Profil.', 'wp-starter'),
                         'placeholder' => 'https://linkedin.com/in/...',
                         'wrapper' => ['width' => '50'],
                     ],
                     // Accordion Ende
                     self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
                 ],
-                'Mitglied hinzufügen',
+                __('Mitglied hinzufügen', 'wp-starter'),
                 1,
                 'block',
-                'Füge Teammitglieder hinzu.'
+                __('Füge Teammitglieder hinzu.', 'wp-starter')
             ),
             self::buttonGroupField(
                 "field_{$prefix}_columns",
-                'Spalten',
+                __('Spalten', 'wp-starter'),
                 'columns',
                 [
                     '2' => '2',
@@ -2054,7 +2057,7 @@ class FieldDefinitions
                     '4' => '4',
                 ],
                 '3',
-                'Anzahl der Spalten für die Darstellung.'
+                __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -2071,55 +2074,55 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über den Statistiken.',
-                'z.B. Zahlen & Fakten'
+                __('Optionale Überschrift über den Statistiken.', 'wp-starter'),
+                __('z.B. Zahlen & Fakten', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_stats",
-                'Statistiken',
+                __('Statistiken', 'wp-starter'),
                 'stats',
                 [
                     self::numberField(
                         "field_{$prefix}_stat_number",
-                        'Zahl',
+                        __('Zahl', 'wp-starter'),
                         'number',
                         0,
                         0,
                         999999999,
                         1,
                         '',
-                        'Die anzuzeigende Zahl (wird animiert).'
+                        __('Die anzuzeigende Zahl (wird animiert).', 'wp-starter')
                     ),
                     self::textField(
                         "field_{$prefix}_stat_suffix",
-                        'Suffix',
+                        __('Suffix', 'wp-starter'),
                         'suffix',
                         false,
-                        'Optionales Suffix nach der Zahl.',
-                        'z.B. +, %, Jahre'
+                        __('Optionales Suffix nach der Zahl.', 'wp-starter'),
+                        __('z.B. +, %, Jahre', 'wp-starter')
                     ),
                     self::textField(
                         "field_{$prefix}_stat_label",
-                        'Beschriftung',
+                        __('Beschriftung', 'wp-starter'),
                         'label',
                         true,
-                        'Was diese Zahl bedeutet.',
-                        'z.B. Zufriedene Kunden'
+                        __('Was diese Zahl bedeutet.', 'wp-starter'),
+                        __('z.B. Zufriedene Kunden', 'wp-starter')
                     ),
                     self::iconRadioField(
                         "field_{$prefix}_stat_icon",
-                        'Icon',
+                        __('Icon', 'wp-starter'),
                         'icon',
-                        'Optionales Icon für diese Statistik.'
+                        __('Optionales Icon für diese Statistik.', 'wp-starter')
                     ),
                 ],
-                'Statistik hinzufügen',
+                __('Statistik hinzufügen', 'wp-starter'),
                 1,
                 'table',
-                'Füge Kennzahlen hinzu (empfohlen: 3-4).'
+                __('Füge Kennzahlen hinzu (empfohlen: 3-4).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -2136,65 +2139,65 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über dem Zeitstrahl.',
-                'z.B. Unsere Geschichte'
+                __('Optionale Überschrift über dem Zeitstrahl.', 'wp-starter'),
+                __('z.B. Unsere Geschichte', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_events",
-                'Ereignisse',
+                __('Ereignisse', 'wp-starter'),
                 'events',
                 [
                     // Accordion: Event (offen)
-                    self::accordionField("field_{$prefix}_acc_event", 'Event', true),
+                    self::accordionField("field_{$prefix}_acc_event", __('Event', 'wp-starter'), true),
                     [
                         'key' => "field_{$prefix}_event_year",
-                        'label' => 'Jahr / Datum',
+                        'label' => __('Jahr / Datum', 'wp-starter'),
                         'name' => 'year',
                         'type' => 'text',
-                        'instructions' => 'Zeitpunkt des Ereignisses.',
-                        'placeholder' => 'z.B. 2020',
+                        'instructions' => __('Zeitpunkt des Ereignisses.', 'wp-starter'),
+                        'placeholder' => __('z.B. 2020', 'wp-starter'),
                         'required' => 1,
                         'wrapper' => ['width' => '30'],
                     ],
                     [
                         'key' => "field_{$prefix}_event_title",
-                        'label' => 'Titel',
+                        'label' => __('Titel', 'wp-starter'),
                         'name' => 'title',
                         'type' => 'text',
-                        'instructions' => 'Kurzer Titel des Ereignisses.',
-                        'placeholder' => 'z.B. Firmengründung',
+                        'instructions' => __('Kurzer Titel des Ereignisses.', 'wp-starter'),
+                        'placeholder' => __('z.B. Firmengründung', 'wp-starter'),
                         'required' => 1,
                         'wrapper' => ['width' => '70'],
                     ],
                     // Accordion: Details
-                    self::accordionField("field_{$prefix}_acc_details", 'Details'),
+                    self::accordionField("field_{$prefix}_acc_details", __('Details', 'wp-starter')),
                     self::wysiwygField(
                         "field_{$prefix}_event_content",
-                        'Beschreibung',
+                        __('Beschreibung', 'wp-starter'),
                         'content',
                         false,
                         null,
-                        'Detaillierte Beschreibung des Ereignisses.'
+                        __('Detaillierte Beschreibung des Ereignisses.', 'wp-starter')
                     ),
                     self::imageField(
                         "field_{$prefix}_event_image",
-                        'Bild',
+                        __('Bild', 'wp-starter'),
                         'image',
                         false,
                         'id',
                         null,
-                        'Optionales Bild zum Ereignis.'
+                        __('Optionales Bild zum Ereignis.', 'wp-starter')
                     ),
                     // Accordion Ende
                     self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
                 ],
-                'Ereignis hinzufügen',
+                __('Ereignis hinzufügen', 'wp-starter'),
                 2,
                 'block',
-                'Füge Ereignisse in chronologischer Reihenfolge hinzu.'
+                __('Füge Ereignisse in chronologischer Reihenfolge hinzu.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -2221,32 +2224,32 @@ class FieldDefinitions
 
         return [
             // Tab: Inhalt
-            self::tabField("field_{$prefix}_tab_content", 'Inhalt'),
+            self::tabField("field_{$prefix}_tab_content", __('Inhalt', 'wp-starter')),
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über den Beiträgen.',
-                'z.B. Aktuelle Neuigkeiten'
+                __('Optionale Überschrift über den Beiträgen.', 'wp-starter'),
+                __('z.B. Aktuelle Neuigkeiten', 'wp-starter')
             ),
             self::buttonGroupField(
                 "field_{$prefix}_post_type",
-                'Beitragstyp',
+                __('Beitragstyp', 'wp-starter'),
                 'post_type',
                 [
-                    'post' => 'Blog-Beiträge',
-                    'page' => 'Seiten',
+                    'post' => __('Blog-Beiträge', 'wp-starter'),
+                    'page' => __('Seiten', 'wp-starter'),
                 ],
                 'post',
-                'Welcher Beitragstyp angezeigt werden soll.'
+                __('Welcher Beitragstyp angezeigt werden soll.', 'wp-starter')
             ),
             [
                 'key' => "field_{$prefix}_category",
-                'label' => 'Kategorie',
+                'label' => __('Kategorie', 'wp-starter'),
                 'name' => 'category',
                 'type' => 'taxonomy',
-                'instructions' => 'Optional: Nur Beiträge aus dieser Kategorie anzeigen.',
+                'instructions' => __('Optional: Nur Beiträge aus dieser Kategorie anzeigen.', 'wp-starter'),
                 'taxonomy' => 'category',
                 'field_type' => 'select',
                 'allow_null' => 1,
@@ -2255,54 +2258,54 @@ class FieldDefinitions
             ],
             self::numberField(
                 "field_{$prefix}_posts_per_page",
-                'Anzahl',
+                __('Anzahl', 'wp-starter'),
                 'posts_per_page',
                 3,
                 1,
                 12,
                 1,
-                'Beiträge',
-                'Wie viele Beiträge angezeigt werden sollen.'
+                __('Beiträge', 'wp-starter'),
+                __('Wie viele Beiträge angezeigt werden sollen.', 'wp-starter')
             ),
 
             // Tab: Anzeige
-            self::tabField("field_{$prefix}_tab_display", 'Anzeige'),
+            self::tabField("field_{$prefix}_tab_display", __('Anzeige', 'wp-starter')),
             [
                 'key' => "field_{$prefix}_show_excerpt",
-                'label' => 'Auszug',
+                'label' => __('Auszug', 'wp-starter'),
                 'name' => 'show_excerpt',
                 'type' => 'true_false',
-                'instructions' => 'Zeigt einen kurzen Textauszug an.',
+                'instructions' => __('Zeigt einen kurzen Textauszug an.', 'wp-starter'),
                 'default_value' => 1,
                 'ui' => 1,
                 'wrapper' => ['width' => '33'],
             ],
             [
                 'key' => "field_{$prefix}_show_date",
-                'label' => 'Datum',
+                'label' => __('Datum', 'wp-starter'),
                 'name' => 'show_date',
                 'type' => 'true_false',
-                'instructions' => 'Zeigt das Veröffentlichungsdatum an.',
+                'instructions' => __('Zeigt das Veröffentlichungsdatum an.', 'wp-starter'),
                 'default_value' => 1,
                 'ui' => 1,
                 'wrapper' => ['width' => '33'],
             ],
             [
                 'key' => "field_{$prefix}_show_author",
-                'label' => 'Autor',
+                'label' => __('Autor', 'wp-starter'),
                 'name' => 'show_author',
                 'type' => 'true_false',
-                'instructions' => 'Zeigt den Autorennamen an.',
+                'instructions' => __('Zeigt den Autorennamen an.', 'wp-starter'),
                 'default_value' => 0,
                 'ui' => 1,
                 'wrapper' => ['width' => '34'],
             ],
 
             // Tab: Layout
-            self::tabField("field_{$prefix}_tab_layout", 'Layout'),
+            self::tabField("field_{$prefix}_tab_layout", __('Layout', 'wp-starter')),
             self::buttonGroupField(
                 "field_{$prefix}_columns",
-                'Spalten',
+                __('Spalten', 'wp-starter'),
                 'columns',
                 [
                     '2' => '2',
@@ -2310,7 +2313,7 @@ class FieldDefinitions
                     '4' => '4',
                 ],
                 '3',
-                'Anzahl der Spalten für die Darstellung.'
+                __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
         ];
@@ -2327,48 +2330,48 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über dem Vergleich.',
-                'z.B. Vorher vs. Nachher'
+                __('Optionale Überschrift über dem Vergleich.', 'wp-starter'),
+                __('z.B. Vorher vs. Nachher', 'wp-starter')
             ),
             self::imageField(
                 "field_{$prefix}_image_before",
-                'Vorher-Bild',
+                __('Vorher-Bild', 'wp-starter'),
                 'image_before',
                 true,
                 'id',
                 null,
-                'Das "Vorher"-Bild (links).',
+                __('Das „Vorher"-Bild (links).', 'wp-starter'),
                 '50'
             ),
             self::imageField(
                 "field_{$prefix}_image_after",
-                'Nachher-Bild',
+                __('Nachher-Bild', 'wp-starter'),
                 'image_after',
                 true,
                 'id',
                 null,
-                'Das "Nachher"-Bild (rechts). Sollte gleiche Maße haben.',
+                __('Das „Nachher"-Bild (rechts). Sollte gleiche Maße haben.', 'wp-starter'),
                 '50'
             ),
             [
                 'key' => "field_{$prefix}_label_before",
-                'label' => 'Label Vorher',
+                'label' => __('Label Vorher', 'wp-starter'),
                 'name' => 'label_before',
                 'type' => 'text',
-                'instructions' => 'Text für das Vorher-Label.',
-                'placeholder' => 'Vorher',
+                'instructions' => __('Text für das Vorher-Label.', 'wp-starter'),
+                'placeholder' => __('Vorher', 'wp-starter'),
                 'wrapper' => ['width' => '50'],
             ],
             [
                 'key' => "field_{$prefix}_label_after",
-                'label' => 'Label Nachher',
+                'label' => __('Label Nachher', 'wp-starter'),
                 'name' => 'label_after',
                 'type' => 'text',
-                'instructions' => 'Text für das Nachher-Label.',
-                'placeholder' => 'Nachher',
+                'instructions' => __('Text für das Nachher-Label.', 'wp-starter'),
+                'placeholder' => __('Nachher', 'wp-starter'),
                 'wrapper' => ['width' => '50'],
             ],
             self::backgroundColorField($prefix),
@@ -2386,77 +2389,77 @@ class FieldDefinitions
         return [
             self::textField(
                 "field_{$prefix}_title",
-                'Überschrift',
+                __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                'Optionale Überschrift über der Tabelle.',
-                'z.B. Preisübersicht'
+                __('Optionale Überschrift über der Tabelle.', 'wp-starter'),
+                __('z.B. Preisübersicht', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_headers",
-                'Spaltenüberschriften',
+                __('Spaltenüberschriften', 'wp-starter'),
                 'headers',
                 [
                     self::textField(
                         "field_{$prefix}_header_label",
-                        'Spaltenname',
+                        __('Spaltenname', 'wp-starter'),
                         'label',
                         true,
-                        'Name der Spalte.',
-                        'z.B. Produkt, Preis, Menge'
+                        __('Name der Spalte.', 'wp-starter'),
+                        __('z.B. Produkt, Preis, Menge', 'wp-starter')
                     ),
                 ],
-                'Spalte hinzufügen',
+                __('Spalte hinzufügen', 'wp-starter'),
                 1,
                 'table',
-                'Definiere die Spalten der Tabelle.'
+                __('Definiere die Spalten der Tabelle.', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_rows",
-                'Zeilen',
+                __('Zeilen', 'wp-starter'),
                 'rows',
                 [
                     self::repeaterField(
                         "field_{$prefix}_row_cells",
-                        'Zellen',
+                        __('Zellen', 'wp-starter'),
                         'cells',
                         [
                             self::textareaField(
                                 "field_{$prefix}_cell_content",
-                                'Inhalt',
+                                __('Inhalt', 'wp-starter'),
                                 'content',
                                 1,
-                                'Inhalt der Zelle (HTML erlaubt).',
+                                __('Inhalt der Zelle (HTML erlaubt).', 'wp-starter'),
                                 ''
                             ),
                         ],
-                        'Zelle hinzufügen',
+                        __('Zelle hinzufügen', 'wp-starter'),
                         1,
                         'table',
                         ''
                     ),
                 ],
-                'Zeile hinzufügen',
+                __('Zeile hinzufügen', 'wp-starter'),
                 1,
                 'row',
-                'Füge Datenzeilen hinzu.'
+                __('Füge Datenzeilen hinzu.', 'wp-starter')
             ),
             [
                 'key' => "field_{$prefix}_striped",
-                'label' => 'Gestreifte Zeilen',
+                'label' => __('Gestreifte Zeilen', 'wp-starter'),
                 'name' => 'striped',
                 'type' => 'true_false',
-                'instructions' => 'Abwechselnde Hintergrundfarben für bessere Lesbarkeit.',
+                'instructions' => __('Abwechselnde Hintergrundfarben für bessere Lesbarkeit.', 'wp-starter'),
                 'default_value' => 1,
                 'ui' => 1,
                 'wrapper' => ['width' => '50'],
             ],
             [
                 'key' => "field_{$prefix}_bordered",
-                'label' => 'Mit Rahmen',
+                'label' => __('Mit Rahmen', 'wp-starter'),
                 'name' => 'bordered',
                 'type' => 'true_false',
-                'instructions' => 'Zeigt Rahmenlinien um die Zellen.',
+                'instructions' => __('Zeigt Rahmenlinien um die Zellen.', 'wp-starter'),
                 'default_value' => 0,
                 'ui' => 1,
                 'wrapper' => ['width' => '50'],

@@ -19,18 +19,23 @@ namespace WordpressStarter\Acf;
 class FlexibleContent
 {
     /**
-     * Layout categories for ACF Extended modal organization
+     * Get layout categories for ACF Extended modal organization
+     *
+     * @return array<string, string>
      */
-    private const CATEGORIES = [
-        'header' => 'Header',
-        'layout' => 'Layout',
-        'content' => 'Inhalte',
-        'media' => 'Medien',
-        'interactive' => 'Interaktiv',
-        'forms' => 'Formulare',
-        'posts' => 'Beiträge',
-        'misc' => 'Sonstiges',
-    ];
+    private static function getCategories(): array
+    {
+        return [
+            'header' => __('Header', 'wp-starter'),
+            'layout' => __('Layout', 'wp-starter'),
+            'content' => __('Inhalte', 'wp-starter'),
+            'media' => __('Medien', 'wp-starter'),
+            'interactive' => __('Interaktiv', 'wp-starter'),
+            'forms' => __('Formulare', 'wp-starter'),
+            'posts' => __('Beiträge', 'wp-starter'),
+            'misc' => __('Sonstiges', 'wp-starter'),
+        ];
+    }
 
     /**
      * Register flexible content fields
@@ -53,14 +58,14 @@ class FlexibleContent
     {
         acf_add_local_field_group([
             'key' => 'group_page_builder',
-            'title' => 'Seiteninhalt',
+            'title' => __('Seiteninhalt', 'wp-starter'),
             'fields' => [
                 [
                     'key' => 'field_page_sections',
-                    'label' => 'Sektionen',
+                    'label' => __('Sektionen', 'wp-starter'),
                     'name' => 'page_sections',
                     'type' => 'flexible_content',
-                    'instructions' => 'Baue deine Seite, indem du Inhalts-Sektionen hinzufügst.',
+                    'instructions' => __('Baue deine Seite, indem du Inhalts-Sektionen hinzufügst.', 'wp-starter'),
                     'required' => 0,
                     'conditional_logic' => 0,
                     'wrapper' => [
@@ -69,14 +74,14 @@ class FlexibleContent
                         'id' => '',
                     ],
                     'layouts' => self::getLayouts(),
-                    'button_label' => 'Sektion hinzufügen',
+                    'button_label' => __('Sektion hinzufügen', 'wp-starter'),
                     'min' => '',
                     'max' => '',
 
                     // ACF Extended: Modal for selecting layouts
                     'acfe_flexible_modal' => [
                         'acfe_flexible_modal_enabled' => true,
-                        'acfe_flexible_modal_title' => 'Sektion auswählen',
+                        'acfe_flexible_modal_title' => __('Sektion auswählen', 'wp-starter'),
                         'acfe_flexible_modal_col' => '4',
                         'acfe_flexible_modal_categories' => true,
                     ],
@@ -185,10 +190,10 @@ class FlexibleContent
         return [
             'key' => 'layout_hero',
             'name' => 'hero',
-            'label' => 'Hero-Bereich',
+            'label' => __('Hero-Bereich', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::heroFields('flex_hero'),
-            'acfe_flexible_category' => self::CATEGORIES['header'],
+            'acfe_flexible_category' => self::getCategories()['header'],
         ];
     }
 
@@ -206,20 +211,20 @@ class FlexibleContent
         return [
             'key' => 'layout_one_column',
             'name' => 'one_column',
-            'label' => 'Eine Spalte',
+            'label' => __('Eine Spalte', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => [
                 FieldDefinitions::wysiwygField(
                     'field_flex_one_column_content',
-                    'Inhalt',
+                    __('Inhalt', 'wp-starter'),
                     'content',
                     true,
                     null,
-                    'Der Textinhalt dieser Sektion.'
+                    __('Der Textinhalt dieser Sektion.', 'wp-starter')
                 ),
                 FieldDefinitions::backgroundColorField('flex_one_column'),
             ],
-            'acfe_flexible_category' => self::CATEGORIES['layout'],
+            'acfe_flexible_category' => self::getCategories()['layout'],
         ];
     }
 
@@ -233,10 +238,10 @@ class FlexibleContent
         return [
             'key' => 'layout_two_columns',
             'name' => 'two_columns',
-            'label' => 'Zwei Spalten',
+            'label' => __('Zwei Spalten', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::twoColumnsFields('flex_two_columns'),
-            'acfe_flexible_category' => self::CATEGORIES['layout'],
+            'acfe_flexible_category' => self::getCategories()['layout'],
         ];
     }
 
@@ -250,10 +255,10 @@ class FlexibleContent
         return [
             'key' => 'layout_two_columns_images',
             'name' => 'two_columns_images',
-            'label' => 'Zwei Spalten mit Bildern',
+            'label' => __('Zwei Spalten mit Bildern', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::twoColumnsImagesFields('flex_two_columns_images'),
-            'acfe_flexible_category' => self::CATEGORIES['layout'],
+            'acfe_flexible_category' => self::getCategories()['layout'],
         ];
     }
 
@@ -267,10 +272,10 @@ class FlexibleContent
         return [
             'key' => 'layout_three_columns',
             'name' => 'three_columns',
-            'label' => 'Drei Spalten',
+            'label' => __('Drei Spalten', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::threeColumnsFields('flex_three_columns'),
-            'acfe_flexible_category' => self::CATEGORIES['layout'],
+            'acfe_flexible_category' => self::getCategories()['layout'],
         ];
     }
 
@@ -284,10 +289,10 @@ class FlexibleContent
         return [
             'key' => 'layout_four_columns',
             'name' => 'four_columns',
-            'label' => 'Vier Spalten',
+            'label' => __('Vier Spalten', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::fourColumnsFields('flex_four_columns'),
-            'acfe_flexible_category' => self::CATEGORIES['layout'],
+            'acfe_flexible_category' => self::getCategories()['layout'],
         ];
     }
 
@@ -301,10 +306,10 @@ class FlexibleContent
         return [
             'key' => 'layout_one_third_two_thirds',
             'name' => 'one_third_two_thirds',
-            'label' => '1/3 + 2/3 Spalten',
+            'label' => __('1/3 + 2/3 Spalten', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::oneThirdTwoThirdsFields('flex_one_third_two_thirds'),
-            'acfe_flexible_category' => self::CATEGORIES['layout'],
+            'acfe_flexible_category' => self::getCategories()['layout'],
         ];
     }
 
@@ -318,10 +323,10 @@ class FlexibleContent
         return [
             'key' => 'layout_two_thirds_one_third',
             'name' => 'two_thirds_one_third',
-            'label' => '2/3 + 1/3 Spalten',
+            'label' => __('2/3 + 1/3 Spalten', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::twoThirdsOneThirdFields('flex_two_thirds_one_third'),
-            'acfe_flexible_category' => self::CATEGORIES['layout'],
+            'acfe_flexible_category' => self::getCategories()['layout'],
         ];
     }
 
@@ -339,10 +344,10 @@ class FlexibleContent
         return [
             'key' => 'layout_accordion',
             'name' => 'accordion',
-            'label' => 'Akkordeon (FAQ)',
+            'label' => __('Akkordeon (FAQ)', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::accordionFields('flex_accordion'),
-            'acfe_flexible_category' => self::CATEGORIES['content'],
+            'acfe_flexible_category' => self::getCategories()['content'],
         ];
     }
 
@@ -356,10 +361,10 @@ class FlexibleContent
         return [
             'key' => 'layout_tabs',
             'name' => 'tabs',
-            'label' => 'Tabs',
+            'label' => __('Tabs', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::tabsFields('flex_tabs'),
-            'acfe_flexible_category' => self::CATEGORIES['content'],
+            'acfe_flexible_category' => self::getCategories()['content'],
         ];
     }
 
@@ -373,10 +378,10 @@ class FlexibleContent
         return [
             'key' => 'layout_cta',
             'name' => 'cta',
-            'label' => 'Handlungsaufforderung (CTA)',
+            'label' => __('Handlungsaufforderung (CTA)', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::ctaFields('flex_cta'),
-            'acfe_flexible_category' => self::CATEGORIES['content'],
+            'acfe_flexible_category' => self::getCategories()['content'],
         ];
     }
 
@@ -394,10 +399,10 @@ class FlexibleContent
         return [
             'key' => 'layout_image',
             'name' => 'image',
-            'label' => 'Bild',
+            'label' => __('Bild', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::imageFields('flex_image'),
-            'acfe_flexible_category' => self::CATEGORIES['media'],
+            'acfe_flexible_category' => self::getCategories()['media'],
         ];
     }
 
@@ -411,10 +416,10 @@ class FlexibleContent
         return [
             'key' => 'layout_video',
             'name' => 'video',
-            'label' => 'Video',
+            'label' => __('Video', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::videoFields('flex_video'),
-            'acfe_flexible_category' => self::CATEGORIES['media'],
+            'acfe_flexible_category' => self::getCategories()['media'],
         ];
     }
 
@@ -428,10 +433,10 @@ class FlexibleContent
         return [
             'key' => 'layout_gallery',
             'name' => 'gallery',
-            'label' => 'Bildergalerie',
+            'label' => __('Bildergalerie', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::galleryFields('flex_gallery'),
-            'acfe_flexible_category' => self::CATEGORIES['media'],
+            'acfe_flexible_category' => self::getCategories()['media'],
         ];
     }
 
@@ -445,10 +450,10 @@ class FlexibleContent
         return [
             'key' => 'layout_before_after',
             'name' => 'before_after',
-            'label' => 'Vorher/Nachher Vergleich',
+            'label' => __('Vorher/Nachher Vergleich', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::beforeAfterFields('flex_before_after'),
-            'acfe_flexible_category' => self::CATEGORIES['media'],
+            'acfe_flexible_category' => self::getCategories()['media'],
         ];
     }
 
@@ -466,10 +471,10 @@ class FlexibleContent
         return [
             'key' => 'layout_testimonials',
             'name' => 'testimonials',
-            'label' => 'Kundenstimmen',
+            'label' => __('Kundenstimmen', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::testimonialsFields('flex_testimonials'),
-            'acfe_flexible_category' => self::CATEGORIES['interactive'],
+            'acfe_flexible_category' => self::getCategories()['interactive'],
         ];
     }
 
@@ -483,10 +488,10 @@ class FlexibleContent
         return [
             'key' => 'layout_cards',
             'name' => 'cards',
-            'label' => 'Karten / Features',
+            'label' => __('Karten / Features', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::cardsFields('flex_cards'),
-            'acfe_flexible_category' => self::CATEGORIES['interactive'],
+            'acfe_flexible_category' => self::getCategories()['interactive'],
         ];
     }
 
@@ -500,10 +505,10 @@ class FlexibleContent
         return [
             'key' => 'layout_stats',
             'name' => 'stats',
-            'label' => 'Statistiken / Zahlen',
+            'label' => __('Statistiken / Zahlen', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::statsFields('flex_stats'),
-            'acfe_flexible_category' => self::CATEGORIES['interactive'],
+            'acfe_flexible_category' => self::getCategories()['interactive'],
         ];
     }
 
@@ -517,10 +522,10 @@ class FlexibleContent
         return [
             'key' => 'layout_timeline',
             'name' => 'timeline',
-            'label' => 'Zeitstrahl',
+            'label' => __('Zeitstrahl', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::timelineFields('flex_timeline'),
-            'acfe_flexible_category' => self::CATEGORIES['interactive'],
+            'acfe_flexible_category' => self::getCategories()['interactive'],
         ];
     }
 
@@ -534,10 +539,10 @@ class FlexibleContent
         return [
             'key' => 'layout_team',
             'name' => 'team',
-            'label' => 'Team',
+            'label' => __('Team', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::teamFields('flex_team'),
-            'acfe_flexible_category' => self::CATEGORIES['interactive'],
+            'acfe_flexible_category' => self::getCategories()['interactive'],
         ];
     }
 
@@ -551,10 +556,10 @@ class FlexibleContent
         return [
             'key' => 'layout_pricing_table',
             'name' => 'pricing_table',
-            'label' => 'Preistabelle',
+            'label' => __('Preistabelle', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::pricingTableFields('flex_pricing_table'),
-            'acfe_flexible_category' => self::CATEGORIES['interactive'],
+            'acfe_flexible_category' => self::getCategories()['interactive'],
         ];
     }
 
@@ -572,10 +577,10 @@ class FlexibleContent
         return [
             'key' => 'layout_contact_form',
             'name' => 'contact_form',
-            'label' => 'Kontaktformular',
+            'label' => __('Kontaktformular', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::contactFormFields('flex_contact_form'),
-            'acfe_flexible_category' => self::CATEGORIES['forms'],
+            'acfe_flexible_category' => self::getCategories()['forms'],
         ];
     }
 
@@ -589,10 +594,10 @@ class FlexibleContent
         return [
             'key' => 'layout_map',
             'name' => 'map',
-            'label' => 'Karte (Google Maps)',
+            'label' => __('Karte (Google Maps)', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::mapFields('flex_map'),
-            'acfe_flexible_category' => self::CATEGORIES['forms'],
+            'acfe_flexible_category' => self::getCategories()['forms'],
         ];
     }
 
@@ -610,10 +615,10 @@ class FlexibleContent
         return [
             'key' => 'layout_posts',
             'name' => 'posts',
-            'label' => 'Beitrags-Liste',
+            'label' => __('Beitrags-Liste', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::postsFields('flex_posts'),
-            'acfe_flexible_category' => self::CATEGORIES['posts'],
+            'acfe_flexible_category' => self::getCategories()['posts'],
         ];
     }
 
@@ -627,10 +632,10 @@ class FlexibleContent
         return [
             'key' => 'layout_table',
             'name' => 'table',
-            'label' => 'Tabelle',
+            'label' => __('Tabelle', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::tableFields('flex_table'),
-            'acfe_flexible_category' => self::CATEGORIES['posts'],
+            'acfe_flexible_category' => self::getCategories()['posts'],
         ];
     }
 
@@ -648,10 +653,10 @@ class FlexibleContent
         return [
             'key' => 'layout_divider',
             'name' => 'divider',
-            'label' => 'Trenner / Abstand',
+            'label' => __('Trenner / Abstand', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::dividerFields('flex_divider'),
-            'acfe_flexible_category' => self::CATEGORIES['misc'],
+            'acfe_flexible_category' => self::getCategories()['misc'],
         ];
     }
 
@@ -665,10 +670,10 @@ class FlexibleContent
         return [
             'key' => 'layout_logo_slider',
             'name' => 'logo_slider',
-            'label' => 'Logo-Slider',
+            'label' => __('Logo-Slider', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::logoSliderFields('flex_logo_slider'),
-            'acfe_flexible_category' => self::CATEGORIES['misc'],
+            'acfe_flexible_category' => self::getCategories()['misc'],
         ];
     }
 }

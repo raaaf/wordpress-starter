@@ -18,7 +18,8 @@
     $socialTitle = function_exists('get_field') ? (get_field('footer_social_title', 'option') ?: __('Folge uns', 'wp-starter')) : __('Folge uns', 'wp-starter');
 
     // Bottom bar
-    $copyrightText = function_exists('get_field') ? (get_field('copyright_text', 'option') ?: '© {year} Firmenname. Alle Rechte vorbehalten.') : '© {year} Firmenname. Alle Rechte vorbehalten.';
+    $defaultCopyright = __('© {year} Firmenname. Alle Rechte vorbehalten.', 'wp-starter');
+    $copyrightText = function_exists('get_field') ? (get_field('copyright_text', 'option') ?: $defaultCopyright) : $defaultCopyright;
     $showLegal = function_exists('get_field') ? get_field('footer_show_legal', 'option') : true;
 
     // Get contact info from general settings

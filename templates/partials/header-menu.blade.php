@@ -79,7 +79,7 @@
             <div class="hidden md:block">
                 <x-button
                     :url="$headerCta['url']"
-                    :title="$headerCta['title'] ?: 'Kontakt'"
+                    :title="$headerCta['title'] ?: __('Kontakt', 'wp-starter')"
                     :target="$headerCta['target'] ?? '_self'"
                     variant="primary"
                     size="sm"
@@ -117,7 +117,7 @@
             <div class="px-4 py-4 border-t border-line">
                 <x-button
                     :url="$headerCta['url']"
-                    :title="$headerCta['title'] ?: 'Kontakt'"
+                    :title="$headerCta['title'] ?: __('Kontakt', 'wp-starter')"
                     :target="$headerCta['target'] ?? '_self'"
                     variant="primary"
                     size="md"
