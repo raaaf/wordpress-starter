@@ -150,6 +150,15 @@ class Options
                     null,
                     __('Das Favicon für Browser-Tabs. Empfohlen: 512x512px PNG.', 'wp-starter')
                 ),
+                FieldDefinitions::imageField(
+                    'field_options_social_image',
+                    __('Social Sharing Bild', 'wp-starter'),
+                    'social_sharing_image',
+                    false,
+                    'id',
+                    null,
+                    __('Standardbild für Social Media Vorschauen (Facebook, Twitter, LinkedIn). Empfohlene Größe: 1200×630 Pixel (1.91:1). Mindestens 600×315 Pixel. Max. 5 MB. Formate: JPG oder PNG.', 'wp-starter')
+                ),
 
                 // Contact Tab (default selected)
                 [

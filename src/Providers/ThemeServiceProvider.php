@@ -20,15 +20,14 @@ class ThemeServiceProvider extends ServiceProvider
 
         $this->addThemeSupport();
         $this->allowSvgUploads();
+        $this->optimizeScriptLoading();
+        $this->addResourcePreloading();
         $this->disableGlobalStyles();
         $this->disableComments();
         $this->addTemplateFilter();
         $this->registerBladePageTemplates();
         $this->disableCategoriesAndTags();
-        $this->addStructuredData();
-        $this->addBreadcrumbSchema();
-        $this->addCanonicalUrl();
-        $this->addOpenGraphTags();
+        // SEO (structured data, canonical, OG tags) now handled by SeoServiceProvider
         $this->addFaviconSupport();
         $this->addLoginLogoSupport();
         $this->syncAcfWithWordPress();
@@ -57,6 +56,130 @@ class ThemeServiceProvider extends ServiceProvider
             add_theme_support('post-thumbnails');
             add_theme_support('align-wide');
         });
+    }
+
+    /**
+     * Optimize script loading with defer attribute
+     *
+     * Adds defer attribute to non-critical scripts to prevent blocking
+     * the initial page render. This improves First Contentful Paint (FCP)
+     * and Largest Contentful Paint (LCP) metrics.
+     *
+     * Note: Scripts with type="module" are already deferred by browsers.
+     */
+    private function optimizeScriptLoading(): void
+    {
+        add_filter('script_loader_tag', function (string $tag, string $handle, string $src): string {
+            // Skip admin scripts
+            if (is_admin()) {
+                return $tag;
+            }
+
+            // Skip scripts that already have defer, async, or type="module"
+            if (
+                str_contains($tag, ' defer')
+                || str_contains($tag, ' async')
+                || str_contains($tag, 'type="module"')
+            ) {
+                return $tag;
+            }
+
+            // Scripts that should NOT be deferred (critical for page functionality)
+            $noDeferHandles = [
+                'jquery-core',      // jQuery must load synchronously for inline scripts
+                'jquery-migrate',
+                'wp-polyfill',      // Polyfills must load first
+            ];
+
+            if (in_array($handle, $noDeferHandles, true)) {
+                return $tag;
+            }
+
+            // Add defer to all other scripts
+            return str_replace('<script ', '<script defer ', $tag);
+        }, 20, 3);
+    }
+
+    /**
+     * Add resource preloading for critical assets
+     *
+     * Preloads fonts and optionally inlines critical CSS to improve
+     * Largest Contentful Paint (LCP) and reduce render-blocking.
+     */
+    private function addResourcePreloading(): void
+    {
+        // Add preload links early in head
+        add_action('wp_head', function (): void {
+            // Skip in admin
+            if (is_admin()) {
+                return;
+            }
+
+            $fontsDir = get_theme_file_uri('resources/fonts/');
+
+            // Preload critical fonts (headline and body, most used weights)
+            $criticalFonts = [
+                'colabthi-webfont.woff2',      // ColaborateLight (headlines)
+                'inter-v20-latin-regular.woff2', // Inter Regular (body)
+                'inter-v20-latin-700.woff2',    // Inter Bold (body emphasis)
+            ];
+
+            foreach ($criticalFonts as $font) {
+                printf(
+                    '<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin="anonymous">%s',
+                    esc_url($fontsDir . $font),
+                    "\n"
+                );
+            }
+        }, 1); // Priority 1 = very early in head
+
+        // Inline critical CSS if file exists
+        add_action('wp_head', function (): void {
+            if (is_admin()) {
+                return;
+            }
+
+            $criticalCssPath = get_theme_file_path('resources/css/critical.css');
+
+            if (file_exists($criticalCssPath)) {
+                $criticalCss = file_get_contents($criticalCssPath);
+                if ($criticalCss) {
+                    $nonce = $GLOBALS['csp_nonce'] ?? '';
+                    printf(
+                        '<style id="critical-css"%s>%s</style>%s',
+                        $nonce ? ' nonce="' . esc_attr($nonce) . '"' : '',
+                        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted internal CSS
+                        $criticalCss,
+                        "\n"
+                    );
+                }
+            }
+        }, 2); // Priority 2 = right after preloads
+
+        // Preload main stylesheet for faster loading
+        add_action('wp_head', function (): void {
+            if (is_admin()) {
+                return;
+            }
+
+            // Get CSS URL from Vite manifest in production
+            $manifestPath = get_theme_file_path('dist/.vite/manifest.json');
+            if (!file_exists($manifestPath)) {
+                return;
+            }
+
+            $manifest = json_decode(file_get_contents($manifestPath) ?: '', true);
+            if (!isset($manifest['resources/css/app.css']['file'])) {
+                return;
+            }
+
+            $cssUrl = get_theme_file_uri('dist/' . $manifest['resources/css/app.css']['file']);
+            printf(
+                '<link rel="preload" href="%s" as="style">%s',
+                esc_url($cssUrl),
+                "\n"
+            );
+        }, 1);
     }
 
     /**
@@ -115,25 +238,26 @@ class ThemeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Basic SVG sanitization
+     * SVG sanitization using enshrined/svg-sanitize library
      *
-     * Removes scripts, event handlers, and external references.
+     * Properly sanitizes SVG files by parsing the XML and removing
+     * dangerous elements and attributes, rather than using regex.
+     *
+     * @see https://github.com/darylldoyle/svg-sanitizer
      */
     private function sanitizeSvg(string $content): string
     {
-        // Remove script tags
-        $content = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $content) ?? $content;
+        // Use the proper SVG sanitizer library
+        $sanitizer = new \enshrined\svgSanitize\Sanitizer();
 
-        // Remove on* event handlers
-        $content = preg_replace('/\s+on\w+\s*=\s*["\'][^"\']*["\']/i', '', $content) ?? $content;
+        // Configure allowed tags and attributes for strict sanitization
+        $sanitizer->removeRemoteReferences(true);
+        $sanitizer->removeXMLTag(false); // Keep the XML declaration
 
-        // Remove javascript: URLs
-        $content = preg_replace('/href\s*=\s*["\']javascript:[^"\']*["\']/i', '', $content) ?? $content;
+        $sanitized = $sanitizer->sanitize($content);
 
-        // Remove external entity references
-        $content = preg_replace('/<!ENTITY[^>]*>/i', '', $content) ?? $content;
-
-        return $content;
+        // Return original if sanitization failed (shouldn't happen with valid SVG)
+        return $sanitized ?: $content;
     }
 
     /**
@@ -739,26 +863,8 @@ class ThemeServiceProvider extends ServiceProvider
             $url = is_singular() ? get_permalink() : home_url();
             $siteName = get_bloginfo('name');
 
-            // Get image (post thumbnail, ACF logo, or Customizer logo)
-            $imageUrl = '';
-            if (is_singular() && has_post_thumbnail()) {
-                $imageUrl = get_the_post_thumbnail_url(null, 'large');
-            } else {
-                // Try ACF logo first
-                if (function_exists('get_field')) {
-                    $acfLogo = get_field('site_logo', 'option');
-                    if ($acfLogo && !empty($acfLogo['url'])) {
-                        $imageUrl = $acfLogo['url'];
-                    }
-                }
-                // Fallback to Customizer logo
-                if (!$imageUrl) {
-                    $customLogoId = get_theme_mod('custom_logo');
-                    if ($customLogoId) {
-                        $imageUrl = wp_get_attachment_image_url($customLogoId, 'full');
-                    }
-                }
-            }
+            // Get image with metadata (URL, width, height, mime type)
+            $imageData = $this->getSocialShareImage();
 
             // Open Graph Tags
             echo '<meta property="og:type" content="' . ( is_singular('post') ? 'article' : 'website' ) . '">' . "\n";
@@ -770,19 +876,30 @@ class ThemeServiceProvider extends ServiceProvider
             echo '<meta property="og:site_name" content="' . esc_attr($siteName) . '">' . "\n";
             echo '<meta property="og:locale" content="' . esc_attr(get_locale()) . '">' . "\n";
 
-            if ($imageUrl) {
-                echo '<meta property="og:image" content="' . esc_url($imageUrl) . '">' . "\n";
+            if ($imageData) {
+                echo '<meta property="og:image" content="' . esc_url($imageData['url']) . '">' . "\n";
+                echo '<meta property="og:image:secure_url" content="' . esc_url($imageData['url']) . '">' . "\n";
                 echo '<meta property="og:image:alt" content="' . esc_attr($title) . '">' . "\n";
+                if (!empty($imageData['width'])) {
+                    echo '<meta property="og:image:width" content="' . esc_attr( (string) $imageData['width']) . '">' . "\n";
+                }
+                if (!empty($imageData['height'])) {
+                    echo '<meta property="og:image:height" content="' . esc_attr( (string) $imageData['height']) . '">' . "\n";
+                }
+                if (!empty($imageData['mime'])) {
+                    echo '<meta property="og:image:type" content="' . esc_attr($imageData['mime']) . '">' . "\n";
+                }
             }
 
             // Twitter Card Tags
-            echo '<meta name="twitter:card" content="' . ( $imageUrl ? 'summary_large_image' : 'summary' ) . '">' . "\n";
+            echo '<meta name="twitter:card" content="' . ( $imageData ? 'summary_large_image' : 'summary' ) . '">' . "\n";
             echo '<meta name="twitter:title" content="' . esc_attr($title) . '">' . "\n";
             if ($description) {
                 echo '<meta name="twitter:description" content="' . esc_attr($description) . '">' . "\n";
             }
-            if ($imageUrl) {
-                echo '<meta name="twitter:image" content="' . esc_url($imageUrl) . '">' . "\n";
+            if ($imageData) {
+                echo '<meta name="twitter:image" content="' . esc_url($imageData['url']) . '">' . "\n";
+                echo '<meta name="twitter:image:alt" content="' . esc_attr($title) . '">' . "\n";
             }
 
             // Article-specific Open Graph
@@ -792,6 +909,74 @@ class ThemeServiceProvider extends ServiceProvider
                 echo '<meta property="article:author" content="' . esc_attr(get_the_author()) . '">' . "\n";
             }
         }, 5); // Priority 5 to run before wp_head outputs other meta
+    }
+
+    /**
+     * Get social share image with full metadata
+     *
+     * Fallback order:
+     * 1. Post featured image (for singular pages)
+     * 2. Dedicated social sharing image from theme options
+     * 3. Site logo from theme options
+     * 4. Customizer logo
+     *
+     * @return array{url: string, width: int, height: int, mime: string}|null
+     */
+    private function getSocialShareImage(): ?array
+    {
+        // 1. Try post featured image first
+        if (is_singular() && has_post_thumbnail()) {
+            $thumbnailId = get_post_thumbnail_id();
+            if ($thumbnailId) {
+                return $this->getImageMetadata( (int) $thumbnailId, 'large');
+            }
+        }
+
+        if (function_exists('get_field')) {
+            // 2. Try dedicated social sharing image
+            $socialImageId = get_field('social_sharing_image', 'option');
+            if ($socialImageId) {
+                return $this->getImageMetadata( (int) $socialImageId, 'full');
+            }
+
+            // 3. Try site logo
+            $acfLogo = get_field('site_logo', 'option');
+            if ($acfLogo && !empty($acfLogo['id'])) {
+                return $this->getImageMetadata( (int) $acfLogo['id'], 'full');
+            }
+        }
+
+        // 4. Fallback to Customizer logo
+        $customLogoId = get_theme_mod('custom_logo');
+        if ($customLogoId) {
+            return $this->getImageMetadata( (int) $customLogoId, 'full');
+        }
+
+        return null;
+    }
+
+    /**
+     * Get image URL and metadata from attachment ID
+     *
+     * @param int $attachmentId
+     * @param string $size
+     * @return array{url: string, width: int, height: int, mime: string}|null
+     */
+    private function getImageMetadata(int $attachmentId, string $size = 'full'): ?array
+    {
+        $imageSrc = wp_get_attachment_image_src($attachmentId, $size);
+        if (!$imageSrc) {
+            return null;
+        }
+
+        $mime = get_post_mime_type($attachmentId) ?: '';
+
+        return [
+            'url' => $imageSrc[0],
+            'width' => (int) $imageSrc[1],
+            'height' => (int) $imageSrc[2],
+            'mime' => $mime,
+        ];
     }
 
     /**
