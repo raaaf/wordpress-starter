@@ -1,3 +1,9 @@
+# [1.3.0](https://github.com/raaaf/starter/compare/v1.2.0...v1.3.0) (2026-01-22)
+
+### Features
+
+- add optional scroll animations for sections ([4d8e351](https://github.com/raaaf/starter/commit/4d8e3513f6ddbcb3dd5380d081dfb9e2f716fdd2))
+
 # [1.2.0](https://github.com/raaaf/starter/compare/v1.1.2...v1.2.0) (2026-01-22)
 
 ### Features
