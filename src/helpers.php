@@ -68,6 +68,30 @@ if (!function_exists('app')) {
     }
 }
 
+if (!function_exists('get_reading_time')) {
+    /**
+     * Calculate the estimated reading time for a post.
+     *
+     * @param int|WP_Post|null $post Post ID or post object. Default is the current post.
+     * @param int $wordsPerMinute Average reading speed. Default 200 words/minute.
+     * @return string Formatted reading time (e.g., "5 Min. Lesezeit")
+     */
+    function get_reading_time(int|WP_Post|null $post = null, int $wordsPerMinute = 200): string
+    {
+        $post = get_post($post);
+
+        if (!$post) {
+            return '';
+        }
+
+        $content = wp_strip_all_tags($post->post_content);
+        $wordCount = str_word_count($content);
+        $minutes = max(1, (int) ceil($wordCount / $wordsPerMinute));
+
+        return sprintf('%d Min. Lesezeit', $minutes);
+    }
+}
+
 if (!function_exists('blade')) {
     /**
      * Get the Blade service or render a view.

@@ -3,17 +3,12 @@
 @section('content')
     @if (have_posts())
         @while (have_posts()) @php(the_post())
-            <article class="single-post container mx-auto px-4 py-8">
+            <article class="single-post container mx-auto max-w-3xl px-4 py-16 md:py-24">
                 <header class="mb-8">
                     <h1 class="text-4xl font-bold mb-4">{{ get_the_title() }}</h1>
-                    <div class="text-sm text-content-secondary">
-                        <span>{{ get_the_date() }}</span>
-                        <span class="mx-2">|</span>
-                        <span>{{ get_the_author() }}</span>
-                        @if (has_category())
-                            <span class="mx-2">|</span>
-                            <span>{!! get_the_category_list(', ') !!}</span>
-                        @endif
+                    <div class="flex items-center gap-3">
+                        <x-badge variant="gray" style="outline">{{ get_the_date() }}</x-badge>
+                        <x-badge variant="gray" style="outline">{{ get_reading_time() }}</x-badge>
                     </div>
                 </header>
 
@@ -26,19 +21,27 @@
                 <div class="prose max-w-none">
                     @php(the_content())
                 </div>
-
-                @if (get_the_tags())
-                    <footer class="mt-8 pt-8 border-t border-line">
-                        <div class="flex flex-wrap gap-2">
-                            @foreach (get_the_tags() as $tag)
-                                <x-link :url="get_tag_link($tag)" variant="dark" class="no-underline hover:opacity-80 transition-opacity">
-                                    <x-badge variant="gray" style="outline">{{ $tag->name }}</x-badge>
-                                </x-link>
-                            @endforeach
-                        </div>
-                    </footer>
-                @endif
             </article>
+
+            {{-- Post Navigation --}}
+            @if (get_previous_post_link() || get_next_post_link())
+                <nav class="single-post container mx-auto max-w-7xl px-4 pb-16 md:pb-24 pt-8 border-t border-line" aria-label="Beitragsnavigation">
+                    <div class="flex justify-between items-start gap-8">
+                        <div class="flex-1">
+                            @if (get_previous_post())
+                                <span class="text-body-small text-content-secondary mb-2 block">Vorheriger Beitrag</span>
+                                {!! get_previous_post_link('%link', '← %title', false) !!}
+                            @endif
+                        </div>
+                        <div class="flex-1 text-right">
+                            @if (get_next_post())
+                                <span class="text-body-small text-content-secondary mb-2 block">Nächster Beitrag</span>
+                                {!! get_next_post_link('%link', '%title →', false) !!}
+                            @endif
+                        </div>
+                    </div>
+                </nav>
+            @endif
         @endwhile
     @endif
 @endsection
