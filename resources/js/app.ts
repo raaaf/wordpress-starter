@@ -154,11 +154,19 @@ export function createStatsCounterComponent(target: number): StatsCounterCompone
     started: false,
 
     init() {
+      // Check for reduced motion preference - WCAG 2.3.3
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
       const observer = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting && !this.started) {
             this.started = true;
-            this.animate();
+            // Skip animation if user prefers reduced motion
+            if (prefersReducedMotion) {
+              this.current = this.target;
+            } else {
+              this.animate();
+            }
           }
         },
         { threshold: 0.5 }
