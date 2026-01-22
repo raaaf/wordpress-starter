@@ -19,20 +19,40 @@
     @endif
 
     @if(!empty($tabs))
+        @php $tabCount = count($tabs); @endphp
         <div
             id="{{ esc_attr($uniqueId) }}"
-            x-data="{ activeTab: 0 }"
+            x-data="{
+                activeTab: 0,
+                tabCount: {{ $tabCount }},
+                focusTab(index) {
+                    this.activeTab = index;
+                    this.$nextTick(() => {
+                        this.$refs['tab' + index]?.focus();
+                    });
+                }
+            }"
             class="w-full max-w-3xl mx-auto"
         >
-            {{-- Tab Navigation --}}
-            <div class="flex flex-wrap gap-6 mb-6 border-b border-line" role="tablist">
+            {{-- Tab Navigation with ARIA keyboard pattern --}}
+            <div
+                class="flex flex-wrap gap-6 mb-6 border-b border-line"
+                role="tablist"
+                aria-label="{{ $title ?: __('Tabs', 'wp-starter') }}"
+            >
                 @foreach($tabs as $index => $tab)
                     <button
+                        x-ref="tab{{ $index }}"
                         @click="activeTab = {{ $index }}"
+                        @keydown.right.prevent="focusTab((activeTab + 1) % tabCount)"
+                        @keydown.left.prevent="focusTab((activeTab - 1 + tabCount) % tabCount)"
+                        @keydown.home.prevent="focusTab(0)"
+                        @keydown.end.prevent="focusTab(tabCount - 1)"
                         :class="activeTab === {{ $index }}
                             ? 'border-line-accent text-content-accent'
                             : 'border-transparent text-content-secondary hover:text-content hover:border-line'"
                         :aria-selected="activeTab === {{ $index }}"
+                        :tabindex="activeTab === {{ $index }} ? 0 : -1"
                         class="inline-flex items-center gap-2 px-1 py-3 font-medium border-b-2 -mb-px transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus focus-visible:ring-offset-2"
                         role="tab"
                         aria-controls="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"

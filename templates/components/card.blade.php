@@ -93,24 +93,36 @@
         ? 'border-line-brand shadow-[var(--shadow-card-hover)]'
         : '';
 
-    $tag = $url && !$disabled ? 'a' : 'div';
+    // Use stretched-link pattern to avoid nested interactive elements
+    // Card is always a div, with an optional absolute-positioned link overlay
+    $hasNestedInteractive = isset($actions) || $slot->isNotEmpty();
 @endphp
 
-<{{ $tag }}
-    @if($url && !$disabled) href="{{ esc_url($url) }}" @endif
+<div
     @if($disabled) aria-disabled="true" @endif
-    class="card block rounded-[var(--card-radius)] overflow-hidden {{ $variantClass }} {{ $paddingClass }} {{ $interactiveClasses }} {{ $selectedClasses }} {{ $disabledClasses }} {{ $class }}"
+    class="card block rounded-[var(--card-radius)] overflow-hidden {{ $variantClass }} {{ $paddingClass }} {{ $interactiveClasses }} {{ $selectedClasses }} {{ $disabledClasses }} {{ $class }} {{ $url && !$disabled ? 'relative' : '' }}"
 >
+    {{-- Stretched link overlay for entire card clickability (accessibility-safe pattern) --}}
+    @if($url && !$disabled)
+        <a
+            href="{{ esc_url($url) }}"
+            class="absolute inset-0 z-0"
+            aria-label="{{ $title ? esc_attr($title) : __('Karte öffnen', 'wp-starter') }}"
+        >
+            <span class="sr-only">{{ $title ?: __('Mehr erfahren', 'wp-starter') }}</span>
+        </a>
+    @endif
+
     @if($isStructuredCard)
         {{-- Image --}}
         @if($image)
-            <div class="w-full {{ $sizeConfig['imageHeight'] }} overflow-hidden rounded-[var(--card-media-radius,8px)]">
+            <div class="w-full {{ $sizeConfig['imageHeight'] }} overflow-hidden rounded-[var(--card-media-radius,8px)] {{ $url ? 'relative z-0' : '' }}">
                 <img src="{{ esc_url($image) }}" alt="{{ esc_attr($imageAlt) }}" class="w-full h-full object-cover" loading="lazy" />
             </div>
         @endif
 
         {{-- Content --}}
-        <div class="{{ $sizeConfig['padding'] }} {{ $sizeConfig['gap'] }} flex flex-col">
+        <div class="{{ $sizeConfig['padding'] }} {{ $sizeConfig['gap'] }} flex flex-col {{ $url ? 'relative' : '' }}">
             @if($title || $subtitle)
                 <div class="space-y-1">
                     @if($title)
@@ -126,18 +138,24 @@
                 <p class="text-base text-content">{{ $description }}</p>
             @endif
 
-            {{-- Actions slot --}}
+            {{-- Actions slot - z-index ensures interactive elements are clickable above stretched link --}}
             @if(isset($actions))
-                <div class="flex items-center gap-[var(--card-footer-gap,12px)] mt-auto pt-[var(--card-footer-padding-top,16px)]">
+                <div class="flex items-center gap-[var(--card-footer-gap,12px)] mt-auto pt-[var(--card-footer-padding-top,16px)] relative z-10">
                     {{ $actions }}
                 </div>
             @endif
 
-            {{-- Default slot for additional content --}}
-            {{ $slot }}
+            {{-- Default slot for additional content - z-index ensures interactive elements are clickable --}}
+            @if($slot->isNotEmpty())
+                <div class="relative z-10">
+                    {{ $slot }}
+                </div>
+            @endif
         </div>
     @else
         {{-- Simple container mode --}}
-        {{ $slot }}
+        <div class="{{ $url ? 'relative z-10' : '' }}">
+            {{ $slot }}
+        </div>
     @endif
-</{{ $tag }}>
+</div>

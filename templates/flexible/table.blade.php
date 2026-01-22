@@ -26,7 +26,7 @@
                     <thead class="bg-surface-tertiary">
                         <tr>
                             @foreach($headers as $header)
-                                <th class="px-6 py-4 text-left font-semibold text-content {{ $bordered ? 'border border-line' : '' }}">
+                                <th scope="col" class="px-6 py-4 text-left font-semibold text-content {{ $bordered ? 'border border-line' : '' }}">
                                     {{ $header['label'] ?? '' }}
                                 </th>
                             @endforeach

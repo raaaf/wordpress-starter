@@ -63,7 +63,7 @@
         </div>
 
         {{-- Right: Contact Form 7 --}}
-        <div class="p-8 rounded-lg bg-surface-secondary">
+        <div class="p-8 rounded-lg bg-surface-secondary" aria-live="polite" aria-atomic="false">
             @if($formId && shortcode_exists('contact-form-7'))
                 {!! do_shortcode('[contact-form-7 id="' . intval($formId) . '"]') !!}
             @else

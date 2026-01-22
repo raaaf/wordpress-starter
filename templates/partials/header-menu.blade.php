@@ -61,7 +61,9 @@
         <button @click="toggle()"
                 class="md:hidden p-2 rounded-[var(--button-md-radius)] hover:bg-surface-secondary focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)] transition-all duration-200"
                 :aria-label="isOpen ? '{{ __('Menü schließen', 'wp-starter') }}' : '{{ __('Menü öffnen', 'wp-starter') }}'"
-                :aria-expanded="isOpen">
+                :aria-expanded="isOpen"
+                aria-haspopup="menu"
+                aria-controls="mobile-navigation">
             {{-- Hamburger icon --}}
             <svg x-show="!isOpen" class="w-6 h-6 text-content" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -98,7 +100,7 @@
          @keydown="trapFocus($event)"
          class="mobile-nav-container absolute top-full left-0 right-0 bg-surface shadow-lg rounded-md md:hidden z-50"
          x-cloak>
-        <nav class="mobile-nav">
+        <nav id="mobile-navigation" class="mobile-nav">
             @php(
             wp_nav_menu([
                 'container' => false,

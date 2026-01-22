@@ -18,8 +18,8 @@
 
     @if(!empty($events))
         <div class="relative">
-            {{-- Vertical line --}}
-            <div class="absolute hidden w-0.5 h-full transform -translate-x-1/2 md:block bg-line left-1/2"></div>
+            {{-- Vertical line (decorative) --}}
+            <div class="absolute hidden w-0.5 h-full transform -translate-x-1/2 md:block bg-line left-1/2" aria-hidden="true"></div>
 
             <div class="space-y-12">
                 @foreach($events as $index => $event)
@@ -31,8 +31,8 @@
                         $isEven = $index % 2 === 0;
                     @endphp
                     <div class="relative flex flex-col md:flex-row {{ $isEven ? '' : 'md:flex-row-reverse' }} items-center gap-8">
-                        {{-- Timeline dot --}}
-                        <div class="absolute z-10 hidden w-4 h-4 transform -translate-x-1/2 rounded-full md:block bg-surface-brand left-1/2"></div>
+                        {{-- Timeline dot (decorative) --}}
+                        <div class="absolute z-10 hidden w-4 h-4 transform -translate-x-1/2 rounded-full md:block bg-surface-brand left-1/2" aria-hidden="true"></div>
 
                         {{-- Content card --}}
                         <div class="w-full md:w-[calc(50%-2rem)] {{ $isEven ? 'md:text-right' : 'md:text-left' }}">

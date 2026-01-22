@@ -80,7 +80,7 @@
                             </p>
                         @endif
 
-                        <x-link :url="get_permalink()" iconRight="chevron-right" class="relative z-10 group-hover:text-content-brand">Weiterlesen</x-link>
+                        <x-link :url="get_permalink()" iconRight="chevron-right" :ariaLabel="__('Weiterlesen:', 'wp-starter') . ' ' . get_the_title()" class="relative z-10 group-hover:text-content-brand">Weiterlesen</x-link>
                     </div>
                 </x-card>
             @endwhile
