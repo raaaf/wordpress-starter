@@ -42,6 +42,11 @@ Thumbs.db
 *.sql
 *.sqlite
 
+# Playwright test artifacts
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
 # ignore compiled files
 *.com
 *.class
@@ -66,6 +71,8 @@ Thumbs.db
 
 # track these files, if they exist
 !.gitignore
+!.gitattributes
+!.nvmrc
 !.github/
 !.editorconfig
 !.husky/
@@ -83,6 +90,8 @@ Thumbs.db
 !README.md
 !CHANGELOG.md
 !composer.json
+!robots.txt
+!playwright.config.ts
 
 # track favicon files, if they exist
 !android-chrome-*.png

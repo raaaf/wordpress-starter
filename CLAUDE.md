@@ -13,10 +13,13 @@ Guidance for Claude Code when working with this WordPress starter theme.
 ## Essential Commands
 
 ```bash
-npm run dev       # Development with HMR
-npm run build     # Production build
-npm run lint      # JS/TS linting
-composer lint     # PHP linting (phpcs + phpstan)
+npm run dev        # Development with HMR
+npm run build      # Production build
+npm run lint       # JS/TS linting
+npm run test:e2e   # Playwright E2E tests
+npm run test:a11y  # Accessibility tests
+composer lint      # PHP linting (phpcs + phpstan)
+composer test      # PHPUnit tests
 ```
 
 ## Architecture
@@ -26,7 +29,10 @@ composer lint     # PHP linting (phpcs + phpstan)
 ```
 src/                    # PHP source code
 ├── Acf/               # ACF: FlexibleContent, Fields, Options
+├── PostTypes/         # Custom Post Types (AbstractPostType, Testimonial)
+├── Taxonomies/        # Custom Taxonomies (AbstractTaxonomy)
 ├── Providers/         # Service providers
+├── RateLimiter.php    # AJAX rate limiting
 templates/             # Blade templates
 ├── layouts/          # Base layouts
 ├── partials/         # Reusable partials
@@ -35,6 +41,15 @@ templates/             # Blade templates
 resources/
 ├── css/              # TailwindCSS + tokens.css
 ├── js/               # TypeScript + Alpine.js
+tests/
+├── Unit/             # PHPUnit tests
+├── js/               # Vitest tests
+├── e2e/              # Playwright E2E tests
+docs/                 # Documentation
+├── ARCHITECTURE.md   # Service provider pattern
+├── DEPLOYMENT.md     # Production deployment
+├── SECURITY.md       # Security practices
+├── SEO.md            # SEO implementation
 ```
 
 ### Key Technologies
@@ -290,6 +305,63 @@ On push to `master`:
 
 Users receive updates via WordPress Dashboard → Updates (powered by `ThemeUpdateProvider`).
 
+## Custom Post Types
+
+Use the abstract base class for consistent CPT registration:
+
+```php
+<?php
+
+namespace WordpressStarter\PostTypes;
+
+class Service extends AbstractPostType
+{
+    protected static string $postType = 'service';
+    protected static string $singular = 'Leistung';
+    protected static string $plural = 'Leistungen';
+    protected static string $menuIcon = 'dashicons-admin-generic';
+
+    public static function registerFields(): void
+    {
+        // Register ACF fields for this CPT
+    }
+}
+```
+
+Register in `PostTypeServiceProvider::boot()`:
+
+```php
+Service::register();
+```
+
+## Rate Limiting
+
+Protect AJAX handlers with transient-based rate limiting:
+
+```php
+use WordpressStarter\RateLimiter;
+
+// Quick check (returns bool)
+if (!RateLimiter::check('my_action', 10, 60)) {
+    wp_send_json_error('Rate limit exceeded', 429);
+}
+
+// Or auto-send 429 response
+RateLimiter::enforce('my_action', 10, 60);
+```
+
+## Logging
+
+Use `LogServiceProvider` for structured logging (writes to `wp-content/debug.log`):
+
+```php
+use WordpressStarter\Providers\LogServiceProvider;
+
+LogServiceProvider::info('User logged in', ['user_id' => $userId]);
+LogServiceProvider::error('Payment failed', ['order_id' => $orderId]);
+LogServiceProvider::exception($e);
+```
+
 ## Important Notes
 
 - All service providers in `src/Providers/` auto-registered
@@ -298,3 +370,7 @@ Users receive updates via WordPress Dashboard → Updates (powered by `ThemeUpda
 - Gutenberg is disabled - use Classic Editor
 - Never edit `dist/` directly - always through Vite
 - Clear `compiled/` if Blade cache issues
+- Plugins managed via Composer (`wpackagist-plugin/*`)
+- SVG uploads sanitized via `enshrined/svg-sanitize`
+- AJAX handlers protected by rate limiting
+- See `docs/` for detailed documentation

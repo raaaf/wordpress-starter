@@ -177,7 +177,18 @@ npm run test:coverage
 
 # Run PHP tests
 ./vendor/bin/phpunit
+
+# Run E2E tests (requires running WordPress)
+npm run test:e2e
+
+# Run E2E tests with UI
+npm run test:e2e:ui
+
+# Run accessibility tests only
+npm run test:a11y
 ```
+
+See [tests/README.md](tests/README.md) for detailed testing documentation.
 
 ### Service Providers
 
@@ -185,12 +196,17 @@ The theme uses a service provider architecture for clean code organization:
 
 - `BladeServiceProvider` - Blade templating engine setup
 - `MenuServiceProvider` - Navigation menu registration
-- `ThemeServiceProvider` - Core WordPress theme features
+- `ThemeServiceProvider` - Core WordPress theme features, SEO schemas
 - `SecurityServiceProvider` - Security headers and CSP
 - `AcfServiceProvider` - ACF integration, blocks, and directives
 - `AnalyticsServiceProvider` - Pirsch Analytics integration
 - `PluginServiceProvider` - Auto-install required plugins on activation
 - `WelcomeServiceProvider` - Theme activation welcome notice
+- `ImageServiceProvider` - Custom image sizes
+- `PostTypeServiceProvider` - Custom post types and taxonomies
+- `LogServiceProvider` - Error logging to debug.log
+- `CronServiceProvider` - Scheduled maintenance tasks
+- `ThemeUpdateProvider` - GitHub-based theme updates
 
 ### Adding New Features
 
@@ -531,6 +547,44 @@ $items = Fields::repeater('items');
 // Get option with caching
 $footer = Fields::option('footer_text');
 ```
+
+## 📝 Custom Post Types
+
+Create custom post types using the abstract base class:
+
+```php
+<?php
+namespace WordpressStarter\PostTypes;
+
+class Service extends AbstractPostType
+{
+    protected static string $postType = 'service';
+    protected static string $singular = 'Leistung';
+    protected static string $plural = 'Leistungen';
+    protected static string $menuIcon = 'dashicons-admin-generic';
+
+    public static function registerFields(): void
+    {
+        // Register ACF fields
+    }
+}
+```
+
+Register in `PostTypeServiceProvider`:
+
+```php
+Service::register();
+```
+
+## 📚 Documentation
+
+Detailed documentation is available in the `docs/` folder:
+
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Service provider pattern and bootstrap flow
+- [DEPLOYMENT.md](docs/DEPLOYMENT.md) - Production deployment guide
+- [SECURITY.md](docs/SECURITY.md) - Security practices and CSP
+- [SEO.md](docs/SEO.md) - SEO implementation and structured data
+- [DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) - Design token system
 
 ## 🤝 Contributing
 

@@ -16,6 +16,10 @@ use WordpressStarter\Providers\ImageServiceProvider;
 use WordpressStarter\Providers\PluginServiceProvider;
 use WordpressStarter\Providers\WelcomeServiceProvider;
 use WordpressStarter\Providers\ThemeUpdateProvider;
+use WordpressStarter\Providers\PostTypeServiceProvider;
+use WordpressStarter\Providers\LogServiceProvider;
+use WordpressStarter\Providers\CronServiceProvider;
+use WordpressStarter\Providers\SeoServiceProvider;
 
 class Application
 {
@@ -61,9 +65,13 @@ class Application
             AcfServiceProvider::class,
             MenuServiceProvider::class,
             ThemeServiceProvider::class,
+            SeoServiceProvider::class,
             ImageServiceProvider::class,
             AnalyticsServiceProvider::class,
             ThemeUpdateProvider::class,
+            PostTypeServiceProvider::class,
+            LogServiceProvider::class,
+            CronServiceProvider::class,
         ];
     }
 

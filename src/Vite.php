@@ -72,11 +72,16 @@ class Vite
                 wp_enqueue_style('app-css', get_theme_file_uri('dist/' . $cssFile), [], null);
             }
 
-            // Load app JS with proper defer
+            // Load app JS with proper defer strategy (WordPress 6.3+)
             if (isset(self::$manifest['resources/js/app.ts'])) {
                 $jsFile = self::$manifest['resources/js/app.ts']['file'];
-                wp_enqueue_script('app-js', get_theme_file_uri('dist/' . $jsFile), [], null, true);
-                wp_script_add_data('app-js', 'defer', true);
+                wp_enqueue_script(
+                    'app-js',
+                    get_theme_file_uri('dist/' . $jsFile),
+                    [],
+                    null,
+                    ['in_footer' => true, 'strategy' => 'defer']
+                );
             }
         }
 
