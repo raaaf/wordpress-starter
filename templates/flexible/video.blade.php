@@ -114,10 +114,11 @@
                     <template x-if="loaded && !iframeError">
                         @if($video_type === 'youtube')
                             <iframe
-                                src="https://www.youtube-nocookie.com/embed/{{ $video_id }}?dnt=1&autoplay=1"
+                                src="https://www.youtube-nocookie.com/embed/{{ $video_id }}?dnt=1&autoplay=0"
                                 frameborder="0"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowfullscreen
+                                loading="lazy"
                                 class="absolute inset-0 w-full h-full"
                                 title="{{ __('YouTube-Video', 'wp-starter') }}"
                                 @load="iframeLoaded = true"
@@ -125,10 +126,11 @@
                             ></iframe>
                         @elseif($video_type === 'vimeo')
                             <iframe
-                                src="https://player.vimeo.com/video/{{ $video_id }}?dnt=1&autoplay=1"
+                                src="https://player.vimeo.com/video/{{ $video_id }}?dnt=1&autoplay=0"
                                 frameborder="0"
                                 allow="autoplay; fullscreen; picture-in-picture"
                                 allowfullscreen
+                                loading="lazy"
                                 class="absolute inset-0 w-full h-full"
                                 title="{{ __('Vimeo-Video', 'wp-starter') }}"
                                 @load="iframeLoaded = true"
@@ -140,6 +142,7 @@
                     {{-- Self-hosted video - no consent needed --}}
                     <video
                         controls
+                        preload="metadata"
                         class="w-full aspect-video object-cover rounded-lg"
                     >
                         <source src="{{ $video }}" type="video/mp4">

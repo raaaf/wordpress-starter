@@ -34,6 +34,8 @@
                             <img
                                 src="{{ $image[0] }}"
                                 alt="{{ $name }}"
+                                width="{{ $image[1] }}"
+                                height="{{ $image[2] }}"
                                 class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                                 loading="lazy"
                             >

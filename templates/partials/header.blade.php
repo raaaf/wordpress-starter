@@ -17,6 +17,22 @@
     @if(!WP_DEBUG || !\WordpressStarter\Vite::isDevServerRunning())
         <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/css/app.css') }}" as="style">
         <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/js/app.ts') }}" as="script" crossorigin>
+        {{-- Preload critical fonts (regular weights only) to reduce font rendering delay --}}
+        @php
+            $fontDir = get_template_directory() . '/resources/fonts';
+            $fontUri = get_template_directory_uri() . '/resources/fonts';
+            $woff2Files = is_dir($fontDir) ? glob($fontDir . '/*.woff2') : [];
+            // Only preload regular weight fonts (not bold/light variants) for critical rendering
+            $criticalFonts = array_filter($woff2Files, function($font) {
+                $basename = strtolower(basename($font));
+                // Preload regular weights - exclude bold, light, thin, medium, semibold variants
+                return preg_match('/(regular|reg-|reg\.|-400)/i', $basename)
+                    && !preg_match('/(bold|bol|light|thin|medium|semi|700|300|500|600)/i', $basename);
+            });
+        @endphp
+        @foreach($criticalFonts as $font)
+            <link rel="preload" href="{{ $fontUri }}/{{ basename($font) }}" as="font" type="font/woff2" crossorigin>
+        @endforeach
     @endif
 
     {{-- Remove no-js class when JS is enabled --}}

@@ -21,18 +21,24 @@
     // Convert 0-100 to 0-1 for CSS opacity
     $overlay_opacity_css = $overlay_opacity / 100;
 
-    // Handle ID vs array format for images
+    // Handle ID vs array format for images - include dimensions
     if (is_numeric($image)) {
+        $imageSrc = wp_get_attachment_image_src($image, 'large');
         $image = [
-            'url' => wp_get_attachment_url($image),
+            'url' => $imageSrc ? $imageSrc[0] : wp_get_attachment_url($image),
             'alt' => get_post_meta($image, '_wp_attachment_image_alt', true) ?: '',
+            'width' => $imageSrc ? $imageSrc[1] : '',
+            'height' => $imageSrc ? $imageSrc[2] : '',
         ];
     }
 
     if (is_numeric($background_image)) {
+        $bgSrc = wp_get_attachment_image_src($background_image, 'full');
         $background_image = [
-            'url' => wp_get_attachment_url($background_image),
+            'url' => $bgSrc ? $bgSrc[0] : wp_get_attachment_url($background_image),
             'alt' => get_post_meta($background_image, '_wp_attachment_image_alt', true) ?: '',
+            'width' => $bgSrc ? $bgSrc[1] : '',
+            'height' => $bgSrc ? $bgSrc[2] : '',
         ];
     }
 @endphp
@@ -44,6 +50,7 @@
             <div class="absolute inset-0">
                 <img src="{{ $background_image['url'] }}"
                      alt="{{ $background_image['alt'] ?? '' }}"
+                     @if(!empty($background_image['width']) && !empty($background_image['height']))width="{{ $background_image['width'] }}" height="{{ $background_image['height'] }}"@endif
                      class="w-full h-full object-cover">
                 {{-- Overlay with configurable opacity using CSS custom property --}}
                 <div class="absolute inset-0 bg-surface" style="--tw-bg-opacity: {{ $overlay_opacity_css }};"></div>
@@ -141,6 +148,7 @@
                 <div class="relative">
                     <img src="{{ $image['url'] }}"
                          alt="{{ $image['alt'] ?? '' }}"
+                         @if(!empty($image['width']) && !empty($image['height']))width="{{ $image['width'] }}" height="{{ $image['height'] }}"@endif
                          class="w-full h-auto rounded-2xl shadow-xl"
                          loading="lazy">
                 </div>

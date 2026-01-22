@@ -11,14 +11,21 @@
     $showCaption = get_sub_field('show_caption');
     $background = get_sub_field('background_color') ?: 'primary';
 
-    // Get image data from ID
+    // Get image data from ID including dimensions
     $image = null;
     $caption = '';
+    $imageWidth = '';
+    $imageHeight = '';
     if ($imageId) {
+        $imageSrc = wp_get_attachment_image_src($imageId, 'large');
         $image = [
-            'url' => wp_get_attachment_url($imageId),
+            'url' => $imageSrc ? $imageSrc[0] : wp_get_attachment_url($imageId),
             'alt' => get_post_meta($imageId, '_wp_attachment_image_alt', true) ?: '',
         ];
+        if ($imageSrc) {
+            $imageWidth = $imageSrc[1];
+            $imageHeight = $imageSrc[2];
+        }
         // Get caption from attachment
         $attachment = get_post($imageId);
         if ($attachment) {
@@ -34,6 +41,7 @@
         @if($image && !empty($image['url']))
             <img src="{{ $image['url'] }}"
                  alt="{{ $image['alt'] ?? '' }}"
+                 @if($imageWidth && $imageHeight)width="{{ $imageWidth }}" height="{{ $imageHeight }}"@endif
                  class="w-full rounded-lg shadow-xl {{ $borderClass }}"
                  loading="lazy">
         @endif
