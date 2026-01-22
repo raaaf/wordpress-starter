@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/raaaf/starter/compare/v1.1.0...v1.1.1) (2026-01-22)
+
+### Bug Fixes
+
+- **release:** auto-update style.css version on release ([15752c0](https://github.com/raaaf/starter/commit/15752c0e201c1e662cb447c53f1ac9b96933e240))
+
 # [1.1.0](https://github.com/raaaf/starter/compare/v1.0.0...v1.1.0) (2026-01-22)
 
 ### Bug Fixes
