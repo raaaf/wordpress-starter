@@ -39,3 +39,17 @@ shadow-[var(--shadow-inner)]
 shadow-[var(--shadow-focus-ring)]
 shadow-[var(--shadow-focus-ring-ghost)]
 shadow-[var(--shadow-focus-ring-error)]
+md:grid-cols-[1fr_2fr]
+md:grid-cols-[2fr_1fr]
+peer-checked:translate-x-5
+peer-checked:bg-surface-accent
+lg:min-h-[500px]
+hover:bg-white/10
+[&_*]:text-content-inverse
+[&_li]:marker:text-content-inverse
+md:flex
+md:hidden
+md:block
+hidden
+group-hover:text-content-brand
+group-hover:scale-105

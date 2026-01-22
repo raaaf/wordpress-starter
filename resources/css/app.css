@@ -275,6 +275,19 @@
     text-underline-offset: 2px;
   }
 
+  /* Single post navigation links */
+  .single-post nav a {
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .single-post nav a:hover {
+    color: var(--text-brand);
+  }
+
   /* Focus-visible styles - WCAG 2.1 SC 2.4.7: Visible focus indicator */
   :focus-visible {
     outline: 2px solid var(--border-focus);
@@ -298,45 +311,13 @@
 
   /* ============================================
      SECTION SPACING
-     Consistent spacing between content sections
+     Sections have built-in padding via x-section component.
+     No extra margin needed between sections.
      ============================================ */
-
-  /* CSS variable for section spacing - can be overridden */
-  :root {
-    --section-spacing: 6rem; /* 96px default, ~100px */
-  }
-
-  /* Add margin between consecutive sections */
-  #main-content section + section {
-    margin-top: var(--section-spacing);
-  }
-
-  /* No extra margin after hero blocks (they're edge-to-edge) */
-  #main-content .hero + section {
-    margin-top: 0;
-  }
-
-  /* Top spacing when page has no hero (first section is not hero) */
-  #main-content > article > .page-content > section:first-child:not(.hero):not([class*="hero"]),
-  #main-content > section:first-child:not(.hero):not([class*="hero"]) {
-    margin-top: var(--section-spacing);
-  }
-
-  /* Reset margin for hero as first element */
-  #main-content > article > .page-content > .hero:first-child,
-  #main-content > .hero:first-child,
-  #main-content > article > .page-content > section[class*="hero"]:first-child {
-    margin-top: 0;
-  }
-
-  /* Footer spacing - matches section spacing */
-  footer {
-    margin-top: var(--section-spacing);
-  }
 
   /* Styleguide sections - consistent spacing */
   .styleguide-section + .styleguide-section {
-    margin-top: var(--section-spacing);
+    margin-top: 4rem;
   }
 
   /* Styleguide headings - bottom margin */
@@ -347,13 +328,6 @@
   /* Styleguide description paragraph - spacing to content */
   .styleguide-section > p {
     margin-bottom: 1.5rem;
-  }
-
-  /* Responsive section/footer spacing - smaller on mobile */
-  @media (max-width: 768px) {
-    :root {
-      --section-spacing: 4rem; /* 64px on mobile */
-    }
   }
 }
 
@@ -477,8 +451,13 @@
    MEDIUM-ZOOM LIGHTBOX STYLES
    ============================================ */
 
-/* Zoomed image styling */
+/* Overlay z-index must be above sticky header (z-50) */
+.medium-zoom-overlay {
+  z-index: 100 !important;
+}
+
 .medium-zoom-image--opened {
+  z-index: 101 !important;
   border-radius: 0.5rem;
 }
 
@@ -535,4 +514,256 @@
 
 .prose-inherit-colors strong {
   color: inherit;
+}
+
+/* ============================================
+   NAVIGATION SUBMENU STYLES
+   Desktop: Dropdown on hover
+   Mobile: Accordion-style expandable
+   ============================================ */
+
+/* Desktop Navigation - Dropdown Submenus */
+@media (min-width: 768px) {
+  /* Desktop nav link styles */
+  .desktop-nav > ul > li > a {
+    display: block;
+    padding: 0.5rem 0;
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: color 0.15s ease;
+  }
+
+  .desktop-nav > ul > li > a:hover {
+    color: var(--text-primary);
+  }
+
+  .desktop-nav > ul > li.current-menu-item > a,
+  .desktop-nav > ul > li.current-menu-ancestor > a {
+    color: var(--text-brand);
+  }
+
+  /* Parent menu item with submenu */
+  .desktop-nav .menu-item-has-children {
+    position: relative;
+  }
+
+  /* Dropdown arrow indicator */
+  .desktop-nav .menu-item-has-children > a::after {
+    content: '';
+    display: inline-block;
+    width: 0.4em;
+    height: 0.4em;
+    margin-left: 0.4em;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    position: relative;
+    top: -2px;
+  }
+
+  /* Submenu container */
+  .desktop-nav .sub-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    padding: 0.5rem 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md, 0.5rem);
+    box-shadow: var(--shadow-dropdown);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(0.5rem);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    z-index: 50;
+  }
+
+  /* Show submenu on hover */
+  .desktop-nav .menu-item-has-children:hover > .sub-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* Submenu items */
+  .desktop-nav .sub-menu li {
+    position: relative;
+  }
+
+  .desktop-nav .sub-menu a {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .desktop-nav .sub-menu a:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+  }
+
+  .desktop-nav .sub-menu .current-menu-item > a {
+    color: var(--text-brand);
+  }
+
+  /* Nested submenus (level 3+) */
+  .desktop-nav .sub-menu .sub-menu {
+    top: 0;
+    left: 100%;
+    margin-left: 0;
+  }
+
+  .desktop-nav .sub-menu .menu-item-has-children > a::after {
+    transform: rotate(-45deg);
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+  }
+}
+
+/* Mobile Navigation - Accordion Submenus */
+.mobile-nav .menu-item-has-children {
+  position: relative;
+}
+
+/* Mobile nav link styles */
+.mobile-nav > ul > li > a {
+  display: block;
+  padding-right: 3rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.mobile-nav > ul > li > a:hover {
+  color: var(--text-primary);
+}
+
+.mobile-nav > ul > li.current-menu-item > a,
+.mobile-nav > ul > li.current-menu-ancestor > a {
+  color: var(--text-brand);
+}
+
+/* Toggle button for mobile submenu */
+.mobile-nav .submenu-toggle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 3rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  transition: color 0.15s ease;
+}
+
+.mobile-nav .submenu-toggle:hover {
+  color: var(--text-primary);
+}
+
+.mobile-nav .submenu-toggle svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.mobile-nav .submenu-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+/* Mobile submenu */
+.mobile-nav .sub-menu {
+  display: none;
+  padding-left: 1rem;
+  background: var(--bg-secondary);
+}
+
+.mobile-nav .sub-menu.is-open {
+  display: block;
+}
+
+.mobile-nav .sub-menu a {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  transition: color 0.15s ease;
+}
+
+.mobile-nav .sub-menu a:hover {
+  color: var(--text-primary);
+}
+
+.mobile-nav .sub-menu .current-menu-item > a {
+  color: var(--text-brand);
+}
+
+/* ============================================
+   FOOTER NAVIGATION STYLES
+   ============================================ */
+
+/* Footer nav link styles */
+.footer-nav a {
+  color: var(--text-secondary);
+  transition: color 0.15s ease;
+}
+
+.footer-nav a:hover {
+  color: var(--text-primary);
+}
+
+.footer-nav .current-menu-item > a {
+  color: var(--text-brand);
+}
+
+/* ============================================
+   LEGAL NAVIGATION STYLES
+   ============================================ */
+
+/* Legal nav link styles */
+.legal-nav a {
+  color: var(--text-secondary);
+  transition: color 0.15s ease;
+}
+
+.legal-nav a:hover {
+  color: var(--text-primary);
+}
+
+.legal-nav .current-menu-item > a {
+  color: var(--text-brand);
+}
+
+/* ============================================
+   BREADCRUMBS STYLES
+   ============================================ */
+
+.breadcrumbs {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.breadcrumbs a {
+  color: var(--text-secondary);
+  transition: color 0.15s ease;
+}
+
+.breadcrumbs a:hover {
+  color: var(--text-primary);
+}
+
+.breadcrumbs .breadcrumb_last {
+  color: var(--text-tertiary);
+}
+
+/* Yoast SEO breadcrumb separator */
+.breadcrumbs span[aria-hidden="true"] {
+  margin: 0 0.5rem;
+  color: var(--text-tertiary);
 }

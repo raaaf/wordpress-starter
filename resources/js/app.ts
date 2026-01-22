@@ -11,9 +11,11 @@ export interface NavigationComponent {
   isOpen: boolean;
   toggleButton: HTMLElement | null;
   mobileNav: HTMLElement | null;
+  mobileNavContainer: HTMLElement | null;
   toggle(): void;
   close(): void;
   init(): void;
+  initMobileSubmenus(): void;
   handleKeydown(event: KeyboardEvent): void;
   trapFocus(event: KeyboardEvent): void;
   getFocusableElements(): HTMLElement[];
@@ -24,10 +26,40 @@ export function createNavigationComponent(): NavigationComponent {
     isOpen: false,
     toggleButton: null,
     mobileNav: null,
+    mobileNavContainer: null,
 
     init() {
       this.toggleButton = this.$el.querySelector('[aria-label="Toggle navigation menu"]');
       this.mobileNav = this.$el.querySelector('nav[x-show="isOpen"]');
+      this.mobileNavContainer = this.$el.querySelector('.mobile-nav-container');
+      this.initMobileSubmenus();
+    },
+
+    initMobileSubmenus() {
+      if (!this.mobileNavContainer) return;
+
+      const menuItems = this.mobileNavContainer.querySelectorAll('.menu-item-has-children');
+      menuItems.forEach((item) => {
+        const submenu = item.querySelector(':scope > .sub-menu') as HTMLElement;
+        if (!submenu) return;
+
+        // Create toggle button
+        const toggle = document.createElement('button');
+        toggle.className = 'submenu-toggle';
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Untermenü öffnen');
+        toggle.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+
+        toggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const isExpanded = submenu.classList.toggle('is-open');
+          toggle.setAttribute('aria-expanded', String(isExpanded));
+          toggle.setAttribute('aria-label', isExpanded ? 'Untermenü schließen' : 'Untermenü öffnen');
+        });
+
+        item.appendChild(toggle);
+      });
     },
 
     toggle() {
