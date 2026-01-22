@@ -801,4 +801,26 @@
   }
 
   /* Disable stats counter animation (handled in JS) */
+
+  /* Section scroll animations: show immediately */
+  .section[x-data] > div {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ============================================
+   SECTION SCROLL ANIMATIONS
+   Fade-in effect when sections enter viewport
+   ============================================ */
+
+/* Initial hidden state (prevents flash before Alpine initializes) */
+.section[x-data]:not(.is-visible) > div {
+  opacity: 0;
+}
+
+/* No-JS fallback: show content immediately */
+.no-js .section[x-data] > div {
+  opacity: 1 !important;
+  transform: none !important;
 }
