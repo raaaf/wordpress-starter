@@ -1,4 +1,5 @@
 @include('partials.header')
+@include('partials.breadcrumbs')
 <main id="main-content">
     @yield('content')
 </main>
