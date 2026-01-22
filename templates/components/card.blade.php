@@ -126,7 +126,7 @@
             @if($title || $subtitle)
                 <div class="space-y-1">
                     @if($title)
-                        <h3 class="text-lg font-semibold text-content">{{ $title }}</h3>
+                        <h3 class="text-h5 text-content">{{ $title }}</h3>
                     @endif
                     @if($subtitle)
                         <p class="text-sm text-content-secondary">{{ $subtitle }}</p>
@@ -153,9 +153,8 @@
             @endif
         </div>
     @else
-        {{-- Simple container mode --}}
-        <div class="{{ $url ? 'relative z-10' : '' }}">
-            {{ $slot }}
-        </div>
+        {{-- Simple container mode - slot content is NOT z-indexed so stretched link is clickable --}}
+        {{-- Interactive elements inside the slot should have "relative z-10" to be clickable --}}
+        {{ $slot }}
     @endif
 </div>

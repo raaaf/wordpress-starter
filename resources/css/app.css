@@ -288,19 +288,6 @@
     text-underline-offset: 2px;
   }
 
-  /* Single post navigation links */
-  .single-post nav a {
-    color: var(--text-primary);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-    cursor: pointer;
-    transition: color 0.2s ease;
-  }
-
-  .single-post nav a:hover {
-    color: var(--text-brand);
-  }
-
   /* Focus-visible styles - WCAG 2.1 SC 2.4.7: Visible focus indicator */
   :focus-visible {
     outline: 2px solid var(--border-focus);
