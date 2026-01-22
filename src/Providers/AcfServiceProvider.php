@@ -187,15 +187,39 @@ class AcfServiceProvider extends ServiceProvider
                 return;
             }
 
-            $scriptPath = get_template_directory() . '/resources/js/admin/flexible-titles.js';
-            if (file_exists($scriptPath)) {
+            // Check if Vite dev server is running
+            $isDev = defined('WP_DEBUG') && WP_DEBUG && \WordpressStarter\Vite::isDevServerRunning();
+
+            if ($isDev) {
+                // Development mode - load from Vite dev server
+                $host = config('vite.dev_server.host', 'localhost');
+                $port = config('vite.dev_server.port', 5173);
                 wp_enqueue_script(
                     'acf-flexible-titles',
-                    get_template_directory_uri() . '/resources/js/admin/flexible-titles.js',
+                    "http://{$host}:{$port}/resources/js/admin/flexible-titles.ts",
                     ['acf-input'],
-                    filemtime($scriptPath),
+                    null,
                     true
                 );
+            } else {
+                // Production mode - load from manifest
+                $manifestPath = get_theme_file_path('dist/.vite/manifest.json');
+                if (file_exists($manifestPath)) {
+                    $manifestContent = file_get_contents($manifestPath);
+                    if ($manifestContent !== false) {
+                        $manifest = json_decode($manifestContent, true);
+                        $entryKey = 'resources/js/admin/flexible-titles.ts';
+                        if (isset($manifest[$entryKey]['file'])) {
+                            wp_enqueue_script(
+                                'acf-flexible-titles',
+                                get_theme_file_uri('dist/' . $manifest[$entryKey]['file']),
+                                ['acf-input'],
+                                null,
+                                true
+                            );
+                        }
+                    }
+                }
             }
         });
     }

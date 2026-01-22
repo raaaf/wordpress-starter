@@ -41,11 +41,9 @@ jobs:
 
       - name: Run PHP CodeSniffer
         run: composer phpcs
-        continue-on-error: true
 
       - name: Run PHPStan
         run: composer phpstan
-        continue-on-error: true
 
   js-tests:
     name: JavaScript Tests
@@ -65,11 +63,9 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
-        continue-on-error: true
 
       - name: Run Vitest
         run: npm test
-        continue-on-error: true
 
       - name: Build for production
         run: npm run build
@@ -108,4 +104,3 @@ jobs:
 
       - name: Check Prettier formatting
         run: npm run format -- --check
-        continue-on-error: true

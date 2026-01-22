@@ -163,12 +163,10 @@ class Vite
 
         return <<<JS
 (function() {
-    console.log('[ACF Icons] Script loaded, icons available:', Object.keys({$iconsJson}));
     const icons = {$iconsJson};
 
     function enhanceLabels(container) {
         const labels = container.querySelectorAll('.acf-radio-list label');
-        console.log('[ACF Icons] Found', labels.length, 'labels in', container);
 
         labels.forEach(function(label) {
             // Skip if already enhanced
@@ -183,8 +181,6 @@ class Vite
 
             // Get the text content (the label text)
             const textContent = label.textContent.trim();
-
-            console.log('[ACF Icons] Processing label:', iconName, '-> has icon:', !!icons[iconName]);
 
             if (iconName && icons[iconName]) {
                 // Replace content with SVG
@@ -209,7 +205,6 @@ class Vite
 
     function enhanceAllIconFields() {
         const fields = document.querySelectorAll('.acf-icon-radio-field');
-        console.log('[ACF Icons] enhanceAllIconFields found', fields.length, 'icon fields');
         fields.forEach(function(wrapper) {
             enhanceLabels(wrapper);
         });
@@ -218,23 +213,18 @@ class Vite
     // Wait for ACF to be ready, then use proper hooks
     function initAcfHooks() {
         if (typeof acf === 'undefined') {
-            console.log('[ACF Icons] ACF not loaded yet, retrying...');
             setTimeout(initAcfHooks, 100);
             return;
         }
 
-        console.log('[ACF Icons] ACF loaded, adding hooks');
-
         // Use ACF's field-specific hooks for radio fields
         acf.addAction('ready_field/type=radio', function(field) {
-            console.log('[ACF Icons] ready_field/type=radio triggered', field.\$el ? field.\$el[0].className : 'no \$el');
             if (field.\$el && field.\$el[0].classList.contains('acf-icon-radio-field')) {
                 enhanceLabels(field.\$el[0]);
             }
         });
 
         acf.addAction('append_field/type=radio', function(field) {
-            console.log('[ACF Icons] append_field/type=radio triggered');
             if (field.\$el && field.\$el[0].classList.contains('acf-icon-radio-field')) {
                 enhanceLabels(field.\$el[0]);
             }
@@ -242,11 +232,9 @@ class Vite
 
         // Also run on general ready/append for safety
         acf.addAction('ready', function() {
-            console.log('[ACF Icons] ACF ready triggered');
             enhanceAllIconFields();
         });
         acf.addAction('append', function() {
-            console.log('[ACF Icons] ACF append triggered');
             enhanceAllIconFields();
         });
     }
@@ -260,11 +248,9 @@ class Vite
 
     // Fallback: also run after a delay to catch any edge cases
     setTimeout(function() {
-        console.log('[ACF Icons] Fallback 500ms');
         enhanceAllIconFields();
     }, 500);
     setTimeout(function() {
-        console.log('[ACF Icons] Fallback 1500ms');
         enhanceAllIconFields();
     }, 1500);
 })();

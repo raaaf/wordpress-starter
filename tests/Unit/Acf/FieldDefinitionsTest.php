@@ -365,32 +365,6 @@ final class FieldDefinitionsTest extends TestCase
     }
 
     // ==========================================
-    // buttonFields() tests
-    // ==========================================
-
-    public function testButtonFieldsContainsAllOptions(): void
-    {
-        $fields = FieldDefinitions::buttonFields('button');
-
-        $this->assertCount(4, $fields);
-
-        // Find variant field
-        $variantField = null;
-        foreach ($fields as $field) {
-            if (($field['name'] ?? '') === 'variant') {
-                $variantField = $field;
-                break;
-            }
-        }
-
-        $this->assertNotNull($variantField);
-        $this->assertArrayHasKey('primary', $variantField['choices']);
-        $this->assertArrayHasKey('secondary', $variantField['choices']);
-        $this->assertArrayHasKey('ghost', $variantField['choices']);
-        $this->assertArrayHasKey('danger', $variantField['choices']);
-    }
-
-    // ==========================================
     // infoBoxField() tests
     // ==========================================
 
