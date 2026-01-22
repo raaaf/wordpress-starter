@@ -108,6 +108,7 @@ class Vite
      */
     public static function outputAcfIconRadioCss(): void
     {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted internal CSS
         echo '<style id="acf-icon-radio-css">' . self::getAcfIconRadioCss() . '</style>';
     }
 
@@ -116,6 +117,7 @@ class Vite
      */
     public static function outputAcfIconRadioJs(): void
     {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted internal JS
         echo '<script id="acf-icon-radio-js">' . self::getAcfIconRadioJs() . '</script>';
     }
 

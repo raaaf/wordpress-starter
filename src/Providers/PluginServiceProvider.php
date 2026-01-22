@@ -273,7 +273,7 @@ class PluginServiceProvider extends ServiceProvider
         require_once ABSPATH . 'wp-admin/includes/image.php';
 
         foreach ($samplePosts as $postData) {
-            $postDate = gmdate('Y-m-d H:i:s', $baseTime - ($dayOffset * DAY_IN_SECONDS));
+            $postDate = gmdate('Y-m-d H:i:s', $baseTime - ( $dayOffset * DAY_IN_SECONDS ));
             $dayOffset += rand(2, 4);
 
             $postId = wp_insert_post([
@@ -288,7 +288,7 @@ class PluginServiceProvider extends ServiceProvider
 
             // Add featured image from picsum.photos
             if ($postId && !is_wp_error($postId)) {
-                $imageIndex++;
+                ++$imageIndex;
                 $imageId = $this->downloadAndAttachImage(
                     "https://picsum.photos/seed/blog{$imageIndex}/1200/800",
                     "Blog Beitragsbild {$imageIndex}",
@@ -469,14 +469,19 @@ class PluginServiceProvider extends ServiceProvider
         $dayOffset = 0;
 
         foreach ($posts as $index => $postData) {
-            // Check if a post with this title already exists
-            $existingPost = get_page_by_title($postData['title'], OBJECT, 'post');
-            if ($existingPost) {
+            // Check if a post with this title already exists (WP_Query replaces deprecated get_page_by_title)
+            $existingQuery = new \WP_Query([
+                'post_type' => 'post',
+                'title' => $postData['title'],
+                'posts_per_page' => 1,
+                'fields' => 'ids',
+            ]);
+            if ($existingQuery->have_posts()) {
                 continue;
             }
 
             // Calculate post date (spread over last 2 weeks)
-            $postDate = gmdate('Y-m-d H:i:s', $baseTime - ($dayOffset * DAY_IN_SECONDS));
+            $postDate = gmdate('Y-m-d H:i:s', $baseTime - ( $dayOffset * DAY_IN_SECONDS ));
             $dayOffset += rand(3, 5); // Random 3-5 days between posts
 
             $postId = wp_insert_post([

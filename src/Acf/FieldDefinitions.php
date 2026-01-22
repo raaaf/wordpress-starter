@@ -2464,5 +2464,4 @@ class FieldDefinitions
             self::backgroundColorField($prefix),
         ];
     }
-
 }
