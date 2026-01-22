@@ -2,6 +2,7 @@
     Hero - Flexible Content Layout
 
     Variants: centered, split, background
+    Uses wp_get_attachment_image() for automatic srcset/responsive images (split variant)
     ACF Fields: variant, badge, title, copy, cta_primary, cta_secondary, image, background_image, background_color
 --}}
 
@@ -21,15 +22,20 @@
     // Convert 0-100 to 0-1 for CSS opacity
     $overlay_opacity_css = $overlay_opacity / 100;
 
-    // Handle ID vs array format for images - include dimensions
+    // Handle ID vs array format for images - preserve ID for wp_get_attachment_image()
+    $imageId = null;
     if (is_numeric($image)) {
-        $imageSrc = wp_get_attachment_image_src($image, 'hero-split');
+        $imageId = (int) $image;
+        $imageSrc = wp_get_attachment_image_src($imageId, 'hero-split');
         $image = [
-            'url' => $imageSrc ? $imageSrc[0] : wp_get_attachment_url($image),
-            'alt' => get_post_meta($image, '_wp_attachment_image_alt', true) ?: '',
+            'ID' => $imageId,
+            'url' => $imageSrc ? $imageSrc[0] : wp_get_attachment_url($imageId),
+            'alt' => get_post_meta($imageId, '_wp_attachment_image_alt', true) ?: '',
             'width' => $imageSrc ? $imageSrc[1] : '',
             'height' => $imageSrc ? $imageSrc[2] : '',
         ];
+    } elseif (is_array($image) && !empty($image['ID'])) {
+        $imageId = (int) $image['ID'];
     }
 
     if (is_numeric($background_image)) {
@@ -144,7 +150,15 @@
                 @endif
             </div>
 
-            @if($image && !empty($image['url']))
+            @if($imageId)
+                <div class="relative">
+                    {!! wp_get_attachment_image($imageId, 'hero-split', false, [
+                        'class' => 'w-full h-auto rounded-2xl shadow-xl',
+                        'loading' => 'lazy',
+                    ]) !!}
+                </div>
+            @elseif($image && !empty($image['url']))
+                {{-- Fallback for URL-only images --}}
                 <div class="relative">
                     <img src="{{ $image['url'] }}"
                          alt="{{ $image['alt'] ?? '' }}"

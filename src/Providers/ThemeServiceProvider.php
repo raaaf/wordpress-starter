@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use Spatie\SchemaOrg\Schema;
+
 class ThemeServiceProvider extends ServiceProvider
 {
     public function register(): void
@@ -24,6 +26,8 @@ class ThemeServiceProvider extends ServiceProvider
         $this->registerBladePageTemplates();
         $this->disableCategoriesAndTags();
         $this->addStructuredData();
+        $this->addBreadcrumbSchema();
+        $this->addCanonicalUrl();
         $this->addOpenGraphTags();
         $this->addFaviconSupport();
         $this->addLoginLogoSupport();
@@ -522,6 +526,203 @@ class ThemeServiceProvider extends ServiceProvider
                 echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($articleSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
             }
         });
+    }
+
+    /**
+     * Add BreadcrumbList JSON-LD schema for better SEO
+     *
+     * Generates structured data for breadcrumbs when Yoast SEO is not handling it,
+     * or provides an enhanced schema even when Yoast is active.
+     */
+    private function addBreadcrumbSchema(): void
+    {
+        add_action('wp_head', function (): void {
+            // Skip on front page - no breadcrumbs needed
+            if (is_front_page()) {
+                return;
+            }
+
+            $breadcrumbItems = $this->getBreadcrumbItems();
+
+            if (empty($breadcrumbItems)) {
+                return;
+            }
+
+            $listItems = [];
+            foreach ($breadcrumbItems as $position => $item) {
+                $listItem = Schema::listItem()
+                    ->position($position + 1)
+                    ->name($item['name']);
+
+                // Only add item URL if not the current page (last item)
+                if (!empty($item['url'])) {
+                    $listItem->item($item['url']);
+                }
+
+                $listItems[] = $listItem;
+            }
+
+            $breadcrumbSchema = Schema::breadcrumbList()
+                ->itemListElement($listItems);
+
+            $nonce = $GLOBALS['csp_nonce'] ?? '';
+            // Use custom script output to include nonce
+            $json = $breadcrumbSchema->toArray();
+            echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+        }, 15);
+    }
+
+    /**
+     * Build breadcrumb items array for schema generation
+     *
+     * @return array<int, array{name: string, url: string}>
+     */
+    private function getBreadcrumbItems(): array
+    {
+        $items = [];
+
+        // Home is always first
+        $items[] = [
+            'name' => __('Startseite', 'wp-starter'),
+            'url' => home_url('/'),
+        ];
+
+        if (is_singular()) {
+            $post = get_queried_object();
+            if (!$post instanceof \WP_Post) {
+                return $items;
+            }
+
+            // For pages, add ancestors
+            if (is_page() && $post->post_parent) {
+                $ancestors = get_post_ancestors($post->ID);
+                $ancestors = array_reverse($ancestors);
+
+                foreach ($ancestors as $ancestorId) {
+                    $ancestor = get_post($ancestorId);
+                    if ($ancestor) {
+                        $items[] = [
+                            'name' => get_the_title($ancestor),
+                            'url' => get_permalink($ancestor),
+                        ];
+                    }
+                }
+            }
+
+            // For posts, add blog page if set
+            if (is_single() && get_option('page_for_posts')) {
+                $blogPageId = (int) get_option('page_for_posts');
+                $items[] = [
+                    'name' => get_the_title($blogPageId),
+                    'url' => get_permalink($blogPageId),
+                ];
+            }
+
+            // Current page (no URL - it's the current page)
+            $items[] = [
+                'name' => get_the_title($post),
+                'url' => '', // Empty URL for current page
+            ];
+        } elseif (is_archive()) {
+            if (is_post_type_archive()) {
+                $postType = get_queried_object();
+                if ($postType instanceof \WP_Post_Type) {
+                    $items[] = [
+                        'name' => $postType->labels->name ?? $postType->name,
+                        'url' => '',
+                    ];
+                }
+            } elseif (is_date()) {
+                if (is_year()) {
+                    $items[] = [
+                        'name' => get_the_date('Y'),
+                        'url' => '',
+                    ];
+                } elseif (is_month()) {
+                    $items[] = [
+                        'name' => get_the_date('F Y'),
+                        'url' => '',
+                    ];
+                } elseif (is_day()) {
+                    $items[] = [
+                        'name' => get_the_date(),
+                        'url' => '',
+                    ];
+                }
+            }
+        } elseif (is_search()) {
+            $items[] = [
+                'name' => sprintf(__('Suchergebnisse für: %s', 'wp-starter'), get_search_query()),
+                'url' => '',
+            ];
+        } elseif (is_404()) {
+            $items[] = [
+                'name' => __('Seite nicht gefunden', 'wp-starter'),
+                'url' => '',
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * Add canonical URL fallback for sites without Yoast SEO
+     *
+     * Outputs canonical link tag if Yoast SEO is not active.
+     */
+    private function addCanonicalUrl(): void
+    {
+        add_action('wp_head', function (): void {
+            // Skip if Yoast SEO is active - it handles canonical URLs
+            if (defined('WPSEO_VERSION')) {
+                return;
+            }
+
+            // Skip if another SEO plugin has already output canonical
+            if (has_action('wp_head', 'rel_canonical')) {
+                return;
+            }
+
+            $canonicalUrl = $this->getCanonicalUrl();
+
+            if ($canonicalUrl) {
+                echo '<link rel="canonical" href="' . esc_url($canonicalUrl) . '" />' . "\n";
+            }
+        }, 1);
+    }
+
+    /**
+     * Get the canonical URL for the current page
+     */
+    private function getCanonicalUrl(): ?string
+    {
+        if (is_singular()) {
+            return get_permalink();
+        }
+
+        if (is_front_page()) {
+            return home_url('/');
+        }
+
+        if (is_home() && get_option('page_for_posts')) {
+            return get_permalink(get_option('page_for_posts'));
+        }
+
+        if (is_post_type_archive()) {
+            return get_post_type_archive_link(get_queried_object()->name ?? '');
+        }
+
+        if (is_archive()) {
+            // For date/author archives, use the current URL without query params
+            global $wp;
+            return home_url($wp->request);
+        }
+
+        if (is_search()) {
+            return get_search_link();
+        }
+
+        return null;
     }
 
     private function addOpenGraphTags(): void

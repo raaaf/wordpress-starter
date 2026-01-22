@@ -2,6 +2,7 @@
     Blog Posts Flexible Content Layout
 
     Uses shared components: x-section, x-link, x-card
+    Uses get_the_post_thumbnail() for automatic srcset/responsive images
     Fields: title, post_type, posts_per_page, category, show_excerpt, show_date, show_author, columns, background_color
 --}}
 
@@ -53,18 +54,11 @@
                         <a href="{{ get_permalink() }}" class="absolute inset-0 z-0" aria-hidden="true"></a>
 
                         @if(has_post_thumbnail())
-                            @php
-                                $thumbId = get_post_thumbnail_id(get_the_ID());
-                                $thumbSrc = wp_get_attachment_image_src($thumbId, 'card-video');
-                            @endphp
                             <div class="block overflow-hidden aspect-video">
-                                <img
-                                    src="{{ $thumbSrc ? $thumbSrc[0] : get_the_post_thumbnail_url(get_the_ID(), 'card-video') }}"
-                                    alt="{{ get_the_title() }}"
-                                    @if($thumbSrc)width="{{ $thumbSrc[1] }}" height="{{ $thumbSrc[2] }}"@endif
-                                    class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-                                    loading="lazy"
-                                >
+                                {!! get_the_post_thumbnail(get_the_ID(), 'card-video', [
+                                    'class' => 'object-cover w-full h-full transition-transform duration-300 group-hover:scale-105',
+                                    'loading' => 'lazy',
+                                ]) !!}
                             </div>
                         @endif
 
