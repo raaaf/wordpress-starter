@@ -3,11 +3,29 @@
 
     Uses shared components: x-section, x-prose
     Fields: accordion (repeater with icon, title, content), background_color
+
+    Includes FAQPage JSON-LD schema for SEO rich snippets
 --}}
 
 @php
+    use Spatie\SchemaOrg\Schema;
+
     $items = get_sub_field('accordion') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
+
+    // Build FAQPage schema for SEO
+    $faqQuestions = [];
+    if (!empty($items)) {
+        foreach ($items as $item) {
+            if (!empty($item['title']) && !empty($item['content'])) {
+                $faqQuestions[] = Schema::question()
+                    ->name(wp_strip_all_tags($item['title']))
+                    ->acceptedAnswer(
+                        Schema::answer()->text(wp_strip_all_tags($item['content']))
+                    );
+            }
+        }
+    }
 @endphp
 
 <x-section :background="$background" padding="md" class="accordion">
@@ -65,3 +83,14 @@
         </div>
     </div>
 </x-section>
+
+{{-- FAQPage JSON-LD Schema for SEO --}}
+@if(!empty($faqQuestions))
+    @php
+        $faqSchema = Schema::fAQPage()->mainEntity($faqQuestions);
+        $nonce = $GLOBALS['csp_nonce'] ?? '';
+    @endphp
+    <script type="application/ld+json" @if($nonce) nonce="{{ $nonce }}" @endif>
+        {!! wp_json_encode($faqSchema->toArray(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
+@endif
