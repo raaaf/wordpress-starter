@@ -1,3 +1,9 @@
+## [1.1.2](https://github.com/raaaf/starter/compare/v1.1.1...v1.1.2) (2026-01-22)
+
+### Bug Fixes
+
+- CSS layer architecture, namespace consistency, and Alpine.js syntax ([ab4e62d](https://github.com/raaaf/starter/commit/ab4e62db6bb8fd63ca73a25362c659ad0c2602f4))
+
 ## [1.1.1](https://github.com/raaaf/starter/compare/v1.1.0...v1.1.1) (2026-01-22)
 
 ### Bug Fixes
