@@ -1,0 +1,115 @@
+/**
+ * Critical CSS - Inlined in <head> for faster First Contentful Paint
+ *
+ * This file contains minimal CSS needed for above-the-fold content:
+ * - Basic reset and box-sizing
+ * - Typography foundations
+ * - Header/navigation layout
+ * - Hero section basics
+ * - Skip link visibility
+ *
+ * Keep this file SMALL (<14KB) to stay within initial TCP window.
+ * Full styles load via app.css (preloaded, then render-blocking).
+ */
+
+/* Box sizing and basic reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-body, ui-sans-serif, system-ui, sans-serif);
+  background-color: var(--bg-surface, #fff);
+  color: var(--text-content, #1a1a1a);
+}
+
+/* Skip link - accessible but visually hidden until focused */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.skip-link:focus {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  background: var(--bg-surface-inverse, #1a1a1a);
+  color: var(--text-content-inverse, #fff);
+  font-weight: 600;
+}
+
+/* Header layout - prevent layout shift */
+header {
+  position: relative;
+  z-index: 50;
+}
+
+/* Container max-width */
+.container,
+[class*='max-w-7xl'] {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container,
+  [class*='max-w-7xl'] {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+/* Hero section minimum height to prevent CLS */
+.hero {
+  min-height: 50vh;
+}
+
+/* Typography - prevent FOUT flash */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-family-headline, ui-sans-serif, system-ui, sans-serif);
+  font-weight: 300;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* Image aspect ratios - prevent CLS */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Hidden elements (Alpine.js x-cloak) */
+[x-cloak] {
+  display: none !important;
+}
+
+/* Prevent flash of unstyled content for conditional elements */
+[x-show]:not([x-show='true']) {
+  display: none !important;
+}

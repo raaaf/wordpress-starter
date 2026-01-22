@@ -18,7 +18,7 @@ final class FieldDefinitionsTest extends TestCase
 
     public function testBackgroundColorsContainsAllExpectedColors(): void
     {
-        $colors = FieldDefinitions::BACKGROUND_COLORS;
+        $colors = FieldDefinitions::getBackgroundColors();
 
         $this->assertArrayHasKey('primary', $colors);
         $this->assertArrayHasKey('secondary', $colors);
@@ -34,7 +34,7 @@ final class FieldDefinitionsTest extends TestCase
 
     public function testThemeIconsContainsAllExpectedIcons(): void
     {
-        $icons = FieldDefinitions::THEME_ICONS;
+        $icons = FieldDefinitions::getThemeIcons();
 
         $this->assertArrayHasKey('', $icons); // No icon option
         $this->assertArrayHasKey('check', $icons);
@@ -57,7 +57,7 @@ final class FieldDefinitionsTest extends TestCase
         $this->assertSame('background_color', $field['name']);
         $this->assertSame('select', $field['type']);
         $this->assertSame('primary', $field['default_value']);
-        $this->assertSame(FieldDefinitions::BACKGROUND_COLORS, $field['choices']);
+        $this->assertSame(FieldDefinitions::getBackgroundColors(), $field['choices']);
     }
 
     // ==========================================

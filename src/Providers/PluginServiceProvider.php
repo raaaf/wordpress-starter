@@ -1097,6 +1097,9 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function ajaxInstallPlugin(): void
     {
+        // Rate limit: 20 plugin installs per minute
+        \WordpressStarter\RateLimiter::enforce('plugin_install', 20, 60);
+
         check_ajax_referer(self::NONCE_ACTION, 'nonce');
 
         if (!current_user_can('install_plugins')) {
@@ -1123,6 +1126,9 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function ajaxInstallAllPlugins(): void
     {
+        // Rate limit: 5 bulk installs per minute
+        \WordpressStarter\RateLimiter::enforce('plugin_bulk_install', 5, 60);
+
         check_ajax_referer(self::NONCE_ACTION, 'nonce');
 
         if (!current_user_can('install_plugins')) {
