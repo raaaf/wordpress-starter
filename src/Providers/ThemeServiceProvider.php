@@ -17,10 +17,12 @@ class ThemeServiceProvider extends ServiceProvider
         \WordpressStarter\EditorConfig::init();
 
         $this->addThemeSupport();
+        $this->allowSvgUploads();
         $this->disableGlobalStyles();
         $this->disableComments();
         $this->addTemplateFilter();
         $this->registerBladePageTemplates();
+        $this->disableCategoriesAndTags();
         $this->addStructuredData();
         $this->addOpenGraphTags();
         $this->addFaviconSupport();
@@ -51,6 +53,83 @@ class ThemeServiceProvider extends ServiceProvider
             add_theme_support('post-thumbnails');
             add_theme_support('align-wide');
         });
+    }
+
+    /**
+     * Allow SVG uploads for admin users
+     *
+     * SVGs are used for logo placeholders in the styleguide and can be
+     * uploaded by administrators. Basic sanitization is applied.
+     */
+    private function allowSvgUploads(): void
+    {
+        // Add SVG to allowed mime types
+        add_filter('upload_mimes', function (array $mimes): array {
+            $mimes['svg'] = 'image/svg+xml';
+            $mimes['svgz'] = 'image/svg+xml';
+            return $mimes;
+        });
+
+        // Fix SVG file type detection
+        add_filter('wp_check_filetype_and_ext', function (array $data, string $file, string $filename, ?array $mimes): array {
+            $ext = pathinfo($filename, PATHINFO_EXTENSION);
+
+            if ($ext === 'svg') {
+                $data['ext'] = 'svg';
+                $data['type'] = 'image/svg+xml';
+            }
+
+            return $data;
+        }, 10, 4);
+
+        // Basic SVG sanitization on upload
+        add_filter('wp_handle_upload_prefilter', function (array $file): array {
+            if ($file['type'] !== 'image/svg+xml') {
+                return $file;
+            }
+
+            // Only allow admins to upload SVGs
+            if (!current_user_can('manage_options')) {
+                $file['error'] = __('SVG uploads are only allowed for administrators.', 'wp-starter');
+                return $file;
+            }
+
+            // Read and sanitize SVG content
+            $content = file_get_contents($file['tmp_name']);
+            if ($content === false) {
+                return $file;
+            }
+
+            // Remove potentially dangerous elements and attributes
+            $content = $this->sanitizeSvg($content);
+
+            // Write sanitized content back
+            file_put_contents($file['tmp_name'], $content);
+
+            return $file;
+        });
+    }
+
+    /**
+     * Basic SVG sanitization
+     *
+     * Removes scripts, event handlers, and external references.
+     */
+    private function sanitizeSvg(string $content): string
+    {
+        // Remove script tags
+        $content = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $content) ?? $content;
+
+        // Remove on* event handlers
+        $content = preg_replace('/\s+on\w+\s*=\s*["\'][^"\']*["\']/i', '', $content) ?? $content;
+
+        // Remove javascript: URLs
+        $content = preg_replace('/href\s*=\s*["\']javascript:[^"\']*["\']/i', '', $content) ?? $content;
+
+        // Remove external entity references
+        $content = preg_replace('/<!ENTITY[^>]*>/i', '', $content) ?? $content;
+
+        return $content;
     }
 
     /**
@@ -111,17 +190,38 @@ class ThemeServiceProvider extends ServiceProvider
         add_filter('pings_open', '__return_false', 20, 2);
         /** @phpstan-ignore arguments.count */
         add_filter('comments_array', '__return_empty_array', 10, 2);
-        
+
         // Remove from admin menu
         add_action('admin_menu', function (): void {
             remove_menu_page('edit-comments.php');
         });
-        
+
         // Remove from admin bar
         add_action('init', function (): void {
             if (is_admin_bar_showing()) {
                 remove_action('admin_bar_menu', 'wp_admin_bar_comments_menu', 60);
             }
+        });
+    }
+
+    /**
+     * Disable categories and tags for posts
+     *
+     * Removes the category and post_tag taxonomies from posts for a cleaner
+     * content management experience focused on pages with ACF Flexible Content.
+     */
+    private function disableCategoriesAndTags(): void
+    {
+        add_action('init', function (): void {
+            // Unregister category and tag taxonomies from posts
+            unregister_taxonomy_for_object_type('category', 'post');
+            unregister_taxonomy_for_object_type('post_tag', 'post');
+        }, 99);
+
+        // Remove from admin menu
+        add_action('admin_menu', function (): void {
+            remove_submenu_page('edit.php', 'edit-tags.php?taxonomy=category');
+            remove_submenu_page('edit.php', 'edit-tags.php?taxonomy=post_tag');
         });
     }
 
