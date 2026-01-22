@@ -1,3 +1,16 @@
+# [1.1.0](https://github.com/raaaf/starter/compare/v1.0.0...v1.1.0) (2026-01-22)
+
+### Bug Fixes
+
+- **deps:** sync composer.lock with webp-express package ([6e62188](https://github.com/raaaf/starter/commit/6e621880a61de28ca666804b88b8c8e0526ef01b))
+- **deps:** sync package-lock.json with updated dependencies ([07e50d6](https://github.com/raaaf/starter/commit/07e50d631ff8f53cf40f5475127c56dce776b02a))
+- **tests:** update FieldDefinitionsTest to use methods instead of constants ([652db5d](https://github.com/raaaf/starter/commit/652db5dea51078264c710a4292f781534eb72aa2))
+
+### Features
+
+- **i18n:** add full internationalization support for translation readiness ([6d942c1](https://github.com/raaaf/starter/commit/6d942c1a5c898e72d60bc6cfacd7b0b4df76bcef))
+- **seo:** add social sharing image with full Open Graph metadata ([a5e60a5](https://github.com/raaaf/starter/commit/a5e60a52327da07368d13e1a2924bfe714aeeae0))
+
 # 1.0.0 (2026-01-22)
 
 ### Bug Fixes
