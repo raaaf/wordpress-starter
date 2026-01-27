@@ -49,6 +49,38 @@ class FlexibleContent
 
         // Register directly - we're already inside acf/init
         self::registerPageBuilderGroup();
+        self::registerDefaultLayoutFilter();
+    }
+
+    /**
+     * Register filter to prefill new pages with a Hero layout
+     */
+    private static function registerDefaultLayoutFilter(): void
+    {
+        add_filter('acf/load_value/key=field_page_sections', function (mixed $value, int $postId, array $field): mixed {
+            // Only prefill if value is empty
+            if (!empty($value)) {
+                return $value;
+            }
+
+            // Only apply to pages in the admin
+            if (!is_admin() || get_post_type($postId) !== 'page') {
+                return $value;
+            }
+
+            // Only prefill for new pages (auto-draft status)
+            $post = get_post($postId);
+            if (!$post || $post->post_status !== 'auto-draft') {
+                return $value;
+            }
+
+            // Prefill with empty Hero layout
+            return [
+                [
+                    'acf_fc_layout' => 'hero',
+                ],
+            ];
+        }, 10, 3);
     }
 
     /**
