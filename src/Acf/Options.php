@@ -901,36 +901,6 @@ class Options
                     __('Einleitungstext unter dem Titel.', 'wp-starter'),
                     __('Einblicke, Neuigkeiten und Wissenswertes...', 'wp-starter')
                 ),
-                // Section Labels Tab
-                [
-                    'key' => 'field_options_blog_tab_labels',
-                    'label' => __('Abschnitts-Bezeichnungen', 'wp-starter'),
-                    'type' => 'tab',
-                ],
-                FieldDefinitions::textField(
-                    'field_options_blog_label_featured',
-                    __('Aktueller Beitrag', 'wp-starter'),
-                    'blog_label_featured',
-                    false,
-                    '',
-                    __('Aktueller Beitrag', 'wp-starter')
-                ),
-                FieldDefinitions::textField(
-                    'field_options_blog_label_recent',
-                    __('Neueste Artikel', 'wp-starter'),
-                    'blog_label_recent',
-                    false,
-                    '',
-                    __('Neueste Artikel', 'wp-starter')
-                ),
-                FieldDefinitions::textField(
-                    'field_options_blog_label_more',
-                    __('Weitere Artikel', 'wp-starter'),
-                    'blog_label_more',
-                    false,
-                    '',
-                    __('Weitere Artikel', 'wp-starter')
-                ),
             ],
             'location' => [
                 [
