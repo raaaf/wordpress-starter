@@ -51,7 +51,7 @@ class Vite
         // This hook (wp_enqueue_scripts) only fires on frontend, never in admin/editor
         if (self::$isDev) {
             $host = config('vite.dev_server.host', 'localhost');
-            $port = config('vite.dev_server.port', 5173);
+            $port = self::getDevServerPort();
             $devServerUrl = "http://{$host}:{$port}";
 
             // Development mode - inject Vite client
@@ -407,15 +407,33 @@ CSS;
     }
 
     /**
+     * Get the dev server port from .vite-port file or config fallback.
+     * The .vite-port file is written by Vite when the dev server starts.
+     */
+    private static function getDevServerPort(): int
+    {
+        $portFile = get_template_directory() . '/.vite-port';
+
+        if (file_exists($portFile)) {
+            $port = file_get_contents($portFile);
+            if ($port !== false && is_numeric(trim($port))) {
+                return (int) trim($port);
+            }
+        }
+
+        return (int) config('vite.dev_server.port', 5173);
+    }
+
+    /**
      * Check if Vite dev server is running.
      * Uses a short 100ms timeout to avoid blocking page loads.
      */
     public static function isDevServerRunning(): bool
     {
         $host = config('vite.dev_server.host', 'localhost');
-        $port = config('vite.dev_server.port', 5173);
+        $port = self::getDevServerPort();
 
-        $socket = @fsockopen($host, (int) $port, $errno, $errstr, 0.1);
+        $socket = @fsockopen($host, $port, $errno, $errstr, 0.1);
         if ($socket) {
             fclose($socket);
             return true;
@@ -430,7 +448,7 @@ CSS;
     {
         if (self::$isDev) {
             $host = config('vite.dev_server.host', 'localhost');
-            $port = config('vite.dev_server.port', 5173);
+            $port = self::getDevServerPort();
             return "http://{$host}:{$port}/" . ltrim($path, '/');
         }
 
