@@ -14,7 +14,7 @@ return [
     'vite' => [
         'dev_server' => [
             'host' => env('VITE_DEV_SERVER_HOST', 'localhost'),
-            'port' => env('VITE_DEV_SERVER_PORT', 5173),
+            'port' => env('VITE_DEV_SERVER_PORT', 5180),
         ],
     ],
     

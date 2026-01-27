@@ -14,6 +14,9 @@
 .env
 .env.local
 
+# Vite dev server port file (auto-generated)
+.vite-port
+
 # Generated config files (project-specific, created by setup script)
 /config/plugins-to-install.php
 /config/setup-options.php

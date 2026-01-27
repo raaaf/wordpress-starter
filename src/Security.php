@@ -55,9 +55,28 @@ class Security
     }
 
     /**
+     * Get the current Vite dev server port from .vite-port file.
+     * Returns null if the file doesn't exist or is invalid.
+     */
+    private static function getVitePort(): ?int
+    {
+        $portFile = get_template_directory() . '/.vite-port';
+
+        if (file_exists($portFile)) {
+            $port = file_get_contents($portFile);
+            if ($port !== false && is_numeric(trim($port))) {
+                return (int) trim($port);
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Get localhost sources for CSP in development environments.
      *
      * CSP doesn't support port wildcards, so we list common development ports.
+     * Additionally reads the dynamic port from .vite-port if available.
      * Includes both localhost and 127.0.0.1 for maximum compatibility.
      *
      * @return string Space-prefixed localhost sources or empty string in production
@@ -75,13 +94,20 @@ class Security
             3000,  // React, Next.js, generic dev servers
             3001,  // Alternative React port
             4173,  // Vite preview
-            5173,  // Vite dev server (default)
-            5174,  // Vite alternative port
+            5180,  // Vite dev server (theme default)
+            5181,  // Vite alternative port
+            5182,  // Vite alternative port
             8000,  // Python, PHP built-in server
             8080,  // Common alternative port
             8888,  // Jupyter, some PHP setups
             9000,  // PHP-FPM, some dev servers
         ];
+
+        // Add dynamic Vite port if available
+        $vitePort = self::getVitePort();
+        if ($vitePort !== null && !in_array($vitePort, $ports, true)) {
+            $ports[] = $vitePort;
+        }
 
         $hosts = ['localhost', '127.0.0.1'];
         $protocols = ['http', 'ws']; // HTTP and WebSocket

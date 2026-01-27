@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { writeFileSync, existsSync, unlinkSync } from 'fs';
 import { visualizer } from 'rollup-plugin-visualizer';
 import tailwindcss from '@tailwindcss/vite';
 
@@ -19,6 +20,31 @@ export default defineConfig({
       open: false,
       filename: 'dist/bundle-analysis.html',
     }),
+    // Write active port to file so PHP can read it
+    {
+      name: 'write-port-file',
+      configureServer(server) {
+        const portFile = resolve(__dirname, '.vite-port');
+
+        server.httpServer?.once('listening', () => {
+          const address = server.httpServer?.address();
+          const port = typeof address === 'object' ? address?.port : null;
+          if (port) {
+            writeFileSync(portFile, String(port));
+          }
+        });
+
+        const cleanup = () => {
+          if (existsSync(portFile)) {
+            unlinkSync(portFile);
+          }
+        };
+
+        server.httpServer?.on('close', cleanup);
+        process.on('SIGINT', cleanup);
+        process.on('SIGTERM', cleanup);
+      },
+    },
   ],
   root: '.',
   base: './',
@@ -50,10 +76,10 @@ export default defineConfig({
     },
   },
   server: {
-    origin: process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173',
+    origin: process.env.VITE_DEV_SERVER_URL || 'http://localhost:5180',
     host: true, // Listen on all interfaces
-    port: parseInt(process.env.VITE_DEV_SERVER_PORT) || 5173,
-    strictPort: true,
+    port: parseInt(process.env.VITE_DEV_SERVER_PORT) || 5180,
+    strictPort: false,
     cors: true,
     watch: {
       // Watch Blade templates
