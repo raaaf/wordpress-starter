@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/raaaf/starter/compare/v1.3.0...v1.4.0) (2026-01-27)
+
+### Features
+
+- **acf:** prefill new pages with Hero layout ([6d41d3c](https://github.com/raaaf/starter/commit/6d41d3cbd6a65c31b56df5862652c8f0d6477b4a))
+- **vite:** add dynamic port detection for dev server ([d54c4fe](https://github.com/raaaf/starter/commit/d54c4fe2da7dfbe882cfb4083789fde923ea117c))
+
 # [1.3.0](https://github.com/raaaf/starter/compare/v1.2.0...v1.3.0) (2026-01-22)
 
 ### Features
