@@ -13,6 +13,7 @@ use WordpressStarter\Providers\SecurityServiceProvider;
 use WordpressStarter\Providers\AcfServiceProvider;
 use WordpressStarter\Providers\AnalyticsServiceProvider;
 use WordpressStarter\Providers\ImageServiceProvider;
+use WordpressStarter\Providers\PluginConfiguratorServiceProvider;
 use WordpressStarter\Providers\PluginServiceProvider;
 use WordpressStarter\Providers\WelcomeServiceProvider;
 use WordpressStarter\Providers\ThemeUpdateProvider;
@@ -59,6 +60,7 @@ class Application
     {
         $this->providers = [
             PluginServiceProvider::class,
+            PluginConfiguratorServiceProvider::class,
             WelcomeServiceProvider::class,
             SecurityServiceProvider::class,
             BladeServiceProvider::class,
