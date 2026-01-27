@@ -1,3 +1,9 @@
+# [1.5.0](https://github.com/raaaf/starter/compare/v1.4.0...v1.5.0) (2026-01-27)
+
+### Features
+
+- add automatic plugin configuration system ([a7370e2](https://github.com/raaaf/starter/commit/a7370e243cdbdacc9700eaef798fed0d62629cdb))
+
 # [1.4.0](https://github.com/raaaf/starter/compare/v1.3.0...v1.4.0) (2026-01-27)
 
 ### Features
