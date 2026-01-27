@@ -24,9 +24,6 @@
             {{-- FEATURED POST --}}
             @php the_post(); @endphp
             <div class="mb-16">
-                <span class="text-sm font-medium text-content-brand uppercase tracking-wider mb-6 block">
-                    {{ get_field('blog_label_featured', 'option') ?: __('Aktueller Beitrag', 'wp-starter') }}
-                </span>
                 <article>
                     <x-card variant="filled" hoverable padding="none" class="group relative overflow-hidden">
                         <div class="grid md:grid-cols-2">
@@ -84,9 +81,6 @@
             {{-- RECENT POSTS (with images) --}}
             @if (have_posts())
                 <div class="mb-16">
-                    <span class="text-sm font-medium text-content-brand uppercase tracking-wider mb-6 block">
-                        {{ get_field('blog_label_recent', 'option') ?: __('Neueste Artikel', 'wp-starter') }}
-                    </span>
                     <div class="grid md:grid-cols-2 gap-6">
                         @for ($i = 0; $i < 2 && have_posts(); $i++)
                             @php the_post(); @endphp
@@ -142,9 +136,6 @@
             {{-- MORE POSTS (text-only list for faster scanning) --}}
             @if (have_posts())
                 <div>
-                    <span class="text-sm font-medium text-content-brand uppercase tracking-wider mb-6 block">
-                        {{ get_field('blog_label_more', 'option') ?: __('Weitere Artikel', 'wp-starter') }}
-                    </span>
                     <div class="grid gap-4">
                         @while (have_posts())
                             @php the_post(); @endphp
