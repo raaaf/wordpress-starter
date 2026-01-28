@@ -44,6 +44,7 @@ class Options
         self::addSubPage(__('Social Media', 'wp-starter'), 'social', 'dashicons-share');
         self::addSubPage(__('Analytics', 'wp-starter'), 'analytics', 'dashicons-chart-bar');
         self::addSubPage(__('Werkzeuge', 'wp-starter'), 'tools', 'dashicons-admin-tools');
+        self::addSubPage(__('Design Tokens', 'wp-starter'), 'tokens', 'dashicons-art');
 
         // Register field groups directly (we're already in acf/init)
         self::registerFieldGroups();
@@ -97,6 +98,7 @@ class Options
         self::registerAnalyticsFields();
         self::registerToolsFields();
         self::registerBlogFields();
+        self::registerDesignTokensFields();
     }
 
     /**
@@ -936,5 +938,371 @@ class Options
                 self::clearCache();
             }
         });
+    }
+
+    /**
+     * Design Tokens Settings Fields
+     */
+    private static function registerDesignTokensFields(): void
+    {
+        acf_add_local_field_group([
+            'key' => 'group_options_design_tokens',
+            'title' => __('Design Tokens', 'wp-starter'),
+            'fields' => [
+                // Tab: Standard (JSON from Figma)
+                FieldDefinitions::tabField(
+                    'field_tokens_tab_standard',
+                    __('Standard (Figma)', 'wp-starter')
+                ),
+
+                // Info box for standard workflow
+                FieldDefinitions::infoBoxField(
+                    'field_tokens_standard_info',
+                    '<strong>' . esc_html__('Figma-Workflow', 'wp-starter') . '</strong><br>' .
+                    esc_html__('Exportiere Design-Tokens aus Figma, lade sie hier hoch und generiere das CSS. Dies ist der empfohlene Weg für konsistente Design-Systeme.', 'wp-starter'),
+                    'info'
+                ),
+
+                // Download section
+                [
+                    'key' => 'field_tokens_download_section',
+                    'label' => __('Token-Dateien herunterladen', 'wp-starter'),
+                    'name' => '',
+                    'type' => 'message',
+                    'message' => self::getTokenDownloadButtons(),
+                    'new_lines' => 'wpautop',
+                    'esc_html' => 0,
+                ],
+
+                // Upload section
+                [
+                    'key' => 'field_tokens_upload_section',
+                    'label' => __('Token-Dateien hochladen', 'wp-starter'),
+                    'name' => '',
+                    'type' => 'message',
+                    'message' => self::getTokenUploadForm(),
+                    'new_lines' => '',
+                    'esc_html' => 0,
+                ],
+
+                // Backup restore section
+                [
+                    'key' => 'field_tokens_restore_section',
+                    'label' => __('Backup wiederherstellen', 'wp-starter'),
+                    'name' => '',
+                    'type' => 'message',
+                    'message' => self::getBackupRestoreForm(),
+                    'new_lines' => '',
+                    'esc_html' => 0,
+                ],
+
+                // Status section
+                [
+                    'key' => 'field_tokens_status_section',
+                    'label' => __('Status', 'wp-starter'),
+                    'name' => '',
+                    'type' => 'message',
+                    'message' => self::getTokenStatusMessage(),
+                    'new_lines' => 'wpautop',
+                    'esc_html' => 0,
+                ],
+
+                // Tab: Extended (Color Pickers for users without Figma)
+                FieldDefinitions::tabField(
+                    'field_tokens_tab_extended',
+                    __('Erweitert (ohne Figma)', 'wp-starter')
+                ),
+
+                // Info box for extended
+                FieldDefinitions::infoBoxField(
+                    'field_tokens_extended_info',
+                    '<strong>' . esc_html__('Direkte Farbanpassung', 'wp-starter') . '</strong><br>' .
+                    esc_html__('Hier kannst du Farben direkt anpassen, ohne Figma zu verwenden. Nach dem Speichern werden die Token-Dateien automatisch aktualisiert und das CSS neu generiert.', 'wp-starter'),
+                    'info'
+                ),
+
+                // === Brand Colors (Palettes) ===
+                [
+                    'key' => 'field_tokens_brand_heading',
+                    'label' => '',
+                    'name' => '',
+                    'type' => 'message',
+                    'message' => '<h3 style="margin: 0 0 5px 0; padding: 0; font-size: 14px;">' . esc_html__('Markenfarben', 'wp-starter') . '</h3><p style="margin: 0; color: #666; font-size: 13px;">' . esc_html__('Diese Farben werden automatisch in eine vollständige Farbpalette (50-900) umgewandelt.', 'wp-starter') . '</p>',
+                    'new_lines' => '',
+                    'esc_html' => 0,
+                ],
+
+                // Accent Color
+                FieldDefinitions::colorPickerField(
+                    'field_tokens_accent_color',
+                    __('Akzentfarbe', 'wp-starter'),
+                    'token_accent_color',
+                    '#FF6B35',
+                    false,
+                    __('Die Hauptakzentfarbe. Wird für CTAs, Links und interaktive Elemente verwendet.', 'wp-starter')
+                ),
+
+                // Primary Color
+                FieldDefinitions::colorPickerField(
+                    'field_tokens_primary_color',
+                    __('Primärfarbe', 'wp-starter'),
+                    'token_primary_color',
+                    '#1E3A5F',
+                    false,
+                    __('Die Hauptmarkenfarbe. Oft für Headlines, Navigation und wichtige UI-Elemente.', 'wp-starter')
+                ),
+
+                // Secondary Color
+                FieldDefinitions::colorPickerField(
+                    'field_tokens_secondary_color',
+                    __('Sekundärfarbe', 'wp-starter'),
+                    'token_secondary_color',
+                    '#3B82F6',
+                    false,
+                    __('Eine ergänzende Farbe für sekundäre Elemente und Variationen.', 'wp-starter')
+                ),
+
+                // Gray Color
+                FieldDefinitions::colorPickerField(
+                    'field_tokens_gray_color',
+                    __('Grauton', 'wp-starter'),
+                    'token_gray_color',
+                    '#6B7280',
+                    false,
+                    __('Basis-Grauton für Text, Rahmen und neutrale Elemente.', 'wp-starter')
+                ),
+
+                // === Status Colors ===
+                [
+                    'key' => 'field_tokens_status_heading',
+                    'label' => '',
+                    'name' => '',
+                    'type' => 'message',
+                    'message' => '<h3 style="margin: 20px 0 5px 0; padding: 0; font-size: 14px;">' . esc_html__('Statusfarben', 'wp-starter') . '</h3><p style="margin: 0; color: #666; font-size: 13px;">' . esc_html__('Farben für Feedback und Statusmeldungen. Light/Dark-Varianten werden automatisch generiert.', 'wp-starter') . '</p>',
+                    'new_lines' => '',
+                    'esc_html' => 0,
+                ],
+
+                // Success Color
+                FieldDefinitions::colorPickerField(
+                    'field_tokens_success_color',
+                    __('Erfolg (Success)', 'wp-starter'),
+                    'token_success_color',
+                    '#22C55E',
+                    false,
+                    __('Farbe für Erfolgsmeldungen und positive Aktionen.', 'wp-starter')
+                ),
+
+                // Warning Color
+                FieldDefinitions::colorPickerField(
+                    'field_tokens_warning_color',
+                    __('Warnung (Warning)', 'wp-starter'),
+                    'token_warning_color',
+                    '#F59E0B',
+                    false,
+                    __('Farbe für Warnungen und Hinweise.', 'wp-starter')
+                ),
+
+                // Error Color
+                FieldDefinitions::colorPickerField(
+                    'field_tokens_error_color',
+                    __('Fehler (Error)', 'wp-starter'),
+                    'token_error_color',
+                    '#EF4444',
+                    false,
+                    __('Farbe für Fehlermeldungen und kritische Aktionen.', 'wp-starter')
+                ),
+            ],
+            'location' => [
+                [
+                    [
+                        'param' => 'options_page',
+                        'operator' => '==',
+                        'value' => 'theme-options-tokens',
+                    ],
+                ],
+            ],
+            'menu_order' => 0,
+            'position' => 'normal',
+            'style' => 'default',
+            'label_placement' => 'top',
+            'instruction_placement' => 'label',
+        ]);
+    }
+
+    /**
+     * Generate download buttons HTML for token files
+     */
+    private static function getTokenDownloadButtons(): string
+    {
+        // Check if service provider class exists
+        if (!class_exists(\WordpressStarter\Providers\DesignTokenServiceProvider::class)) {
+            return '<p class="notice notice-error">' . esc_html__('DesignTokenServiceProvider nicht geladen.', 'wp-starter') . '</p>';
+        }
+
+        $downloadUrls = [
+            'primitives' => \WordpressStarter\Providers\DesignTokenServiceProvider::getDownloadUrl('primitives'),
+            'light' => \WordpressStarter\Providers\DesignTokenServiceProvider::getDownloadUrl('light'),
+            'dark' => \WordpressStarter\Providers\DesignTokenServiceProvider::getDownloadUrl('dark'),
+        ];
+
+        return sprintf(
+            '<div class="token-download-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">' .
+            '<a href="%s" class="button">%s</a>' .
+            '<a href="%s" class="button">%s</a>' .
+            '<a href="%s" class="button">%s</a>' .
+            '</div>' .
+            '<p class="description" style="margin-top: 10px;">%s</p>',
+            esc_url($downloadUrls['primitives']),
+            esc_html__('primitives.tokens.json', 'wp-starter'),
+            esc_url($downloadUrls['light']),
+            esc_html__('light.tokens.json', 'wp-starter'),
+            esc_url($downloadUrls['dark']),
+            esc_html__('dark.tokens.json', 'wp-starter'),
+            esc_html__('Lade die Dateien herunter, bearbeite sie in einem Texteditor und lade sie unten wieder hoch.', 'wp-starter')
+        );
+    }
+
+    /**
+     * Generate upload form HTML for token files
+     */
+    private static function getTokenUploadForm(): string
+    {
+        // Check if service provider class exists
+        if (!class_exists(\WordpressStarter\Providers\DesignTokenServiceProvider::class)) {
+            return '<p class="notice notice-error">' . esc_html__('DesignTokenServiceProvider nicht geladen.', 'wp-starter') . '</p>';
+        }
+
+        $nonce = \WordpressStarter\Providers\DesignTokenServiceProvider::getUploadNonce();
+
+        return sprintf(
+            '<form method="post" enctype="multipart/form-data" style="background: #f9f9f9; padding: 15px; border-radius: 4px;">' .
+            '%s' .
+            '<input type="hidden" name="wp-starter-upload-tokens" value="1">' .
+            '<div style="display: grid; gap: 15px; max-width: 500px;">' .
+            '<div>' .
+            '<label style="display: block; margin-bottom: 5px; font-weight: 500;">%s</label>' .
+            '<input type="file" name="token_primitives" accept=".json,application/json">' .
+            '</div>' .
+            '<div>' .
+            '<label style="display: block; margin-bottom: 5px; font-weight: 500;">%s</label>' .
+            '<input type="file" name="token_light" accept=".json,application/json">' .
+            '</div>' .
+            '<div>' .
+            '<label style="display: block; margin-bottom: 5px; font-weight: 500;">%s</label>' .
+            '<input type="file" name="token_dark" accept=".json,application/json">' .
+            '</div>' .
+            '</div>' .
+            '<p style="margin-top: 15px;">' .
+            '<button type="submit" class="button button-primary">%s</button>' .
+            '</p>' .
+            '<p class="description">%s</p>' .
+            '</form>',
+            $nonce,
+            esc_html__('Primitives (Basis-Farben, Spacing, etc.)', 'wp-starter'),
+            esc_html__('Light Mode (Semantische Tokens)', 'wp-starter'),
+            esc_html__('Dark Mode (Semantische Tokens)', 'wp-starter'),
+            esc_html__('Tokens hochladen und anwenden', 'wp-starter'),
+            esc_html__('Du kannst einzelne Dateien oder alle drei gleichzeitig hochladen. Ein Backup wird automatisch erstellt.', 'wp-starter')
+        );
+    }
+
+    /**
+     * Generate backup restore form HTML
+     */
+    private static function getBackupRestoreForm(): string
+    {
+        // Check if service provider class exists
+        if (!class_exists(\WordpressStarter\Providers\DesignTokenServiceProvider::class)) {
+            return '<p class="notice notice-error">' . esc_html__('DesignTokenServiceProvider nicht geladen.', 'wp-starter') . '</p>';
+        }
+
+        $backupSets = \WordpressStarter\Providers\DesignTokenServiceProvider::getAvailableBackupSets();
+
+        if (empty($backupSets)) {
+            return sprintf(
+                '<div style="background: #f0f0f1; padding: 15px; border-radius: 4px;">
+                    <p style="margin: 0; color: #666;">%s</p>
+                </div>',
+                esc_html__('Keine Backups vorhanden. Backups werden automatisch erstellt, wenn Tokens geändert werden.', 'wp-starter')
+            );
+        }
+
+        $nonce = \WordpressStarter\Providers\DesignTokenServiceProvider::getRestoreNonce();
+
+        // Build select options
+        $options = '';
+        foreach ($backupSets as $backup) {
+            $typesLabel = implode(', ', $backup['types']);
+            $label = sprintf(
+                '%s (%s)',
+                $backup['date'],
+                $typesLabel
+            );
+            $options .= sprintf(
+                '<option value="%s">%s</option>',
+                esc_attr($backup['timestamp']),
+                esc_html($label)
+            );
+        }
+
+        return sprintf(
+            '<form method="post" style="background: #f9f9f9; padding: 15px; border-radius: 4px;">
+                %s
+                <input type="hidden" name="wp-starter-restore-backup" value="1">
+                <div style="display: flex; gap: 10px; align-items: end; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">%s</label>
+                        <select name="backup_timestamp" style="width: 100%%;">
+                            %s
+                        </select>
+                    </div>
+                    <div>
+                        <button type="submit" class="button" onclick="return confirm(\'%s\');">%s</button>
+                    </div>
+                </div>
+                <p class="description" style="margin-top: 10px;">%s</p>
+            </form>',
+            $nonce,
+            esc_html__('Backup-Zeitpunkt auswählen', 'wp-starter'),
+            $options,
+            esc_js(__('Backup wirklich wiederherstellen? Die aktuellen Token-Dateien werden überschrieben.', 'wp-starter')),
+            esc_html__('Wiederherstellen', 'wp-starter'),
+            esc_html__('Stellt alle Token-Dateien vom gewählten Zeitpunkt wieder her. Die aktuellen Dateien werden überschrieben.', 'wp-starter')
+        );
+    }
+
+    /**
+     * Generate status message HTML
+     */
+    private static function getTokenStatusMessage(): string
+    {
+        // Check if service provider class exists
+        if (!class_exists(\WordpressStarter\Providers\DesignTokenServiceProvider::class)) {
+            return '<p class="notice notice-error">' . esc_html__('DesignTokenServiceProvider nicht geladen.', 'wp-starter') . '</p>';
+        }
+
+        $lastBackup = \WordpressStarter\Providers\DesignTokenServiceProvider::getLastBackupTime();
+        $regenerateUrl = \WordpressStarter\Providers\DesignTokenServiceProvider::getRegenerateUrl();
+
+        $backupStatus = $lastBackup
+            ? sprintf(
+                /* translators: %s: date and time */
+                __('Letztes Backup: %s', 'wp-starter'),
+                $lastBackup
+            )
+            : __('Noch kein Backup vorhanden', 'wp-starter');
+
+        return sprintf(
+            '<div style="background: #f0f0f1; padding: 15px; border-radius: 4px;">' .
+            '<p style="margin: 0 0 10px;"><strong>%s</strong></p>' .
+            '<p style="margin: 0 0 15px;">%s</p>' .
+            '<a href="%s" class="button">%s</a>' .
+            '</div>',
+            esc_html($backupStatus),
+            esc_html__('Klicke auf den Button unten, um die CSS-Tokens manuell neu zu generieren.', 'wp-starter'),
+            esc_url($regenerateUrl),
+            esc_html__('CSS neu generieren', 'wp-starter')
+        );
     }
 }

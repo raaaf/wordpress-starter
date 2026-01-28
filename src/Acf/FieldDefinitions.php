@@ -303,6 +303,37 @@ class FieldDefinitions
     }
 
     /**
+     * Get color picker field definition
+     *
+     * @param string $key Unique field key
+     * @param string $label Field label
+     * @param string $name Field name
+     * @param string $defaultValue Default color value (hex)
+     * @param bool $enableOpacity Enable RGBA opacity support
+     * @param string $instructions Field instructions
+     * @return array<string, mixed>
+     */
+    public static function colorPickerField(
+        string $key,
+        string $label,
+        string $name,
+        string $defaultValue = '#ffffff',
+        bool $enableOpacity = false,
+        string $instructions = ''
+    ): array {
+        return [
+            'key' => $key,
+            'label' => $label,
+            'name' => $name,
+            'type' => 'color_picker',
+            'instructions' => $instructions,
+            'default_value' => $defaultValue,
+            'enable_opacity' => $enableOpacity ? 1 : 0,
+            'return_format' => 'string',
+        ];
+    }
+
+    /**
      * Get button group field definition
      *
      * @param string $key Unique field key
