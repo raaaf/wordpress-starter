@@ -417,12 +417,16 @@ Use it to make something cool, have fun, and share what you've learned with othe
         if (strpos($pattern, '**') !== false) {
             $dir = dirname(str_replace('**', '', $pattern));
             $filePattern = basename($pattern);
-            
+
+            if (!is_dir($dir)) {
+                return;
+            }
+
             $iterator = new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
                 RecursiveIteratorIterator::SELF_FIRST
             );
-            
+
             foreach ($iterator as $file) {
                 if ($file->isFile() && fnmatch($filePattern, $file->getFilename())) {
                     $this->replaceInFile($file->getPathname(), $search, $replace);

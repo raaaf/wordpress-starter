@@ -21,6 +21,7 @@ use WordpressStarter\Providers\PostTypeServiceProvider;
 use WordpressStarter\Providers\LogServiceProvider;
 use WordpressStarter\Providers\CronServiceProvider;
 use WordpressStarter\Providers\SeoServiceProvider;
+use WordpressStarter\Providers\DesignTokenServiceProvider;
 
 class Application
 {
@@ -74,6 +75,7 @@ class Application
             PostTypeServiceProvider::class,
             LogServiceProvider::class,
             CronServiceProvider::class,
+            DesignTokenServiceProvider::class,
         ];
     }
 
