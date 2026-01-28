@@ -138,8 +138,65 @@ class PluginServiceProvider extends ServiceProvider
         // Note: color_scheme is handled by WelcomeServiceProvider via ACF's update_field()
         // to ensure proper field validation and formatting
 
+        // Set default contact data
+        $this->setDefaultContactData();
+
         // Mark as complete
         update_option('wp_starter_content_setup_complete', true);
+    }
+
+    /**
+     * Set default contact data and footer options in theme options
+     */
+    private function setDefaultContactData(): void
+    {
+        if (!function_exists('update_field')) {
+            return;
+        }
+
+        // Contact data - only set if not already filled
+        if (!get_field('company_name', 'option')) {
+            update_field('company_name', 'Musterfirma GmbH', 'option');
+        }
+        if (!get_field('address', 'option')) {
+            update_field('address', "Musterstraße 123\n12345 Musterstadt", 'option');
+        }
+        if (!get_field('phone', 'option')) {
+            update_field('phone', '+49 123 456789', 'option');
+        }
+        if (!get_field('email', 'option')) {
+            update_field('email', 'info@example.com', 'option');
+        }
+        if (!get_field('maps_link', 'option')) {
+            update_field('maps_link', 'https://goo.gl/maps/', 'option');
+        }
+
+        // Footer options - ensure defaults are set so footer displays correctly
+        // These match the ACF field defaults but need to be explicitly set
+        if (get_field('footer_show_logo', 'option') === null) {
+            update_field('footer_show_logo', true, 'option');
+        }
+        if (get_field('footer_show_company', 'option') === null) {
+            update_field('footer_show_company', true, 'option');
+        }
+        if (get_field('footer_show_nav', 'option') === null) {
+            update_field('footer_show_nav', true, 'option');
+        }
+        if (!get_field('footer_nav_title', 'option')) {
+            update_field('footer_nav_title', 'Navigation', 'option');
+        }
+        if (!get_field('footer_nav_menu', 'option')) {
+            update_field('footer_nav_menu', 'footer-menu', 'option');
+        }
+        if (get_field('footer_show_contact', 'option') === null) {
+            update_field('footer_show_contact', true, 'option');
+        }
+        if (get_field('footer_show_social', 'option') === null) {
+            update_field('footer_show_social', true, 'option');
+        }
+        if (get_field('footer_show_legal', 'option') === null) {
+            update_field('footer_show_legal', true, 'option');
+        }
     }
 
     /**
@@ -205,6 +262,9 @@ class PluginServiceProvider extends ServiceProvider
         if (!empty($this->setupOptions['create_posts']) && !empty($this->setupOptions['posts'])) {
             $this->createDefaultPosts($this->setupOptions['posts']);
         }
+
+        // Set default contact data
+        $this->setDefaultContactData();
 
         // Mark as complete
         update_option('wp_starter_content_setup_complete', true);
@@ -427,6 +487,17 @@ class PluginServiceProvider extends ServiceProvider
                 // Track home page
                 if ($slug === 'home') {
                     $homePageId = $pageId;
+                }
+
+                // Add Hero layout with page title (except for styleguide which has its own layouts)
+                if ($slug !== 'styleguide' && function_exists('update_field')) {
+                    $heroLayout = [
+                        [
+                            'acf_fc_layout' => 'hero',
+                            'title' => $pageData['title'],
+                        ],
+                    ];
+                    update_field('page_sections', $heroLayout, $pageId);
                 }
 
                 // Track styleguide page
