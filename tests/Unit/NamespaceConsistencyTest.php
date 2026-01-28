@@ -224,6 +224,10 @@ final class NamespaceConsistencyTest extends TestCase
             'YahnisElsts',  // Plugin Update Checker
             'Spatie',       // Schema.org
             'SchemaOrg',    // Schema.org (alternate)
+            // Internal sub-namespaces (to avoid false positives in Blade templates)
+            'PostTypes',
+            'Taxonomies',
+            'Providers',
         ];
 
         return in_array($namespaceRoot, $externalNamespaces, true);

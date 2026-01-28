@@ -1086,8 +1086,10 @@ class DesignTokenServiceProvider extends ServiceProvider
         }
 
         // Check if color fields were submitted (more reliable than checking screen)
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- ACF handles nonce verification
-        $acfFields = isset($_POST['acf']) && is_array($_POST['acf']) ? $_POST['acf'] : [];
+        // ACF handles nonce verification and we only check array keys, values are handled by ACF
+        // phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+        $acfFields = isset( $_POST['acf'] ) && is_array( wp_unslash( $_POST['acf'] ) ) ? wp_unslash( $_POST['acf'] ) : [];
+        // phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
         // Check if any of our color field keys are in the submitted data
         $hasColorField = false;
@@ -1119,7 +1121,7 @@ class DesignTokenServiceProvider extends ServiceProvider
         if ($result !== null) {
             set_transient('wp_starter_token_notice', [
                 'type' => $result['success'] ? 'success' : 'error',
-                'message' => $result['message'] . (!empty($result['details']) ? "\n" . $result['details'] : ''),
+                'message' => $result['message'] . ( ! empty( $result['details'] ) ? "\n" . $result['details'] : '' ),
             ], 30);
         }
     }
