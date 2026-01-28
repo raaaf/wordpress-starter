@@ -1258,10 +1258,8 @@ class DesignTokenServiceProvider extends ServiceProvider
                 continue;
             }
 
-            $updated = false;
-
             // Update tokens that reference changed primitives
-            $updated = $this->updateSemanticReferences($tokens, $primitives, $paletteColors) || $updated;
+            $updated = $this->updateSemanticReferences($tokens, $primitives, $paletteColors);
             $updated = $this->updateSemanticStatusColors($tokens, $primitives, $statusColors) || $updated;
 
             if ($updated) {
@@ -1785,6 +1783,7 @@ class DesignTokenServiceProvider extends ServiceProvider
      * This is generated in PHP to avoid ACF's HTML escaping in message fields.
      *
      * @return string Form HTML
+     * @phpstan-ignore method.unused (Reserved for future restore UI integration)
      */
     private function generateRestoreFormHtml(): string
     {

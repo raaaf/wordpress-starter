@@ -35,6 +35,7 @@ parameters:
         - '#Function have_rows#'
         - '#Function the_row#'
         - '#Function get_row_layout#'
+        - '#Function update_field#'
         # Config helper
         - '#Function config not found#'
         # WordPress cache functions
