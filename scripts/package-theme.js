@@ -75,6 +75,7 @@ async function packageTheme() {
       'resources/icons',
       'resources/fonts',
       'resources/favicons',
+      'assets/images',
       'acf-json',
       'languages',
     ];
