@@ -58,8 +58,8 @@
                      alt="{{ $background_image['alt'] ?? '' }}"
                      @if(!empty($background_image['width']) && !empty($background_image['height']))width="{{ $background_image['width'] }}" height="{{ $background_image['height'] }}"@endif
                      class="w-full h-full object-cover">
-                {{-- Overlay with configurable opacity using CSS custom property --}}
-                <div class="absolute inset-0 bg-surface" style="--tw-bg-opacity: {{ $overlay_opacity_css }};"></div>
+                {{-- Overlay with configurable opacity --}}
+                <div class="absolute inset-0 bg-surface" style="opacity: {{ $overlay_opacity_css }};"></div>
             </div>
         @else
             <div class="absolute inset-0 bg-surface-brand"></div>
