@@ -28,7 +28,8 @@
     "lint": "eslint resources/js",
     "lint:fix": "eslint resources/js --fix",
     "format": "prettier --write \"resources/**/*.{js,ts,css,json}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "package": "npm run build && node scripts/package-theme.js"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",
@@ -45,6 +46,7 @@
     "@types/wordpress__blocks": "^12.5.18",
     "@vitest/coverage-v8": "^4.0.17",
     "@vitest/ui": "^4.0.17",
+    "archiver": "^7.0.1",
     "conventional-changelog-conventionalcommits": "^9.1.0",
     "cssnano": "^7.0.6",
     "eslint": "^9.18.0",
