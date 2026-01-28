@@ -58,7 +58,8 @@ class Testimonial extends AbstractPostType
         add_action('manage_' . self::$postType . '_posts_custom_column', function (string $column, int $postId): void {
             switch ($column) {
                 case 'thumbnail':
-                    $thumbnail = get_the_post_thumbnail($postId, [50, 50], ['style' => 'border-radius: 50%; object-fit: cover;']);
+                    $thumbnail = get_the_post_thumbnail( $postId, [50, 50], ['style' => 'border-radius: 50%; object-fit: cover;'] );
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_the_post_thumbnail() returns safe HTML
                     echo $thumbnail ?: '<span style="color: #999;">—</span>';
                     break;
                 case 'author_name':
@@ -73,7 +74,7 @@ class Testimonial extends AbstractPostType
                     $rating = get_field('rating', $postId);
                     if ($rating) {
                         $stars = str_repeat('★', (int) $rating) . str_repeat('☆', 5 - (int) $rating);
-                        echo '<span style="color: #f5a623; font-size: 14px;">' . $stars . '</span>';
+                        echo '<span style="color: #f5a623; font-size: 14px;">' . esc_html( $stars ) . '</span>';
                     } else {
                         echo '<span style="color: #999;">—</span>';
                     }
@@ -123,7 +124,7 @@ class Testimonial extends AbstractPostType
     {
         // Set title on save
         add_filter('wp_insert_post_data', function (array $data, array $postarr): array {
-            if (($data['post_type'] ?? '') !== self::$postType) {
+            if ( ( $data['post_type'] ?? '' ) !== self::$postType ) {
                 return $data;
             }
 
