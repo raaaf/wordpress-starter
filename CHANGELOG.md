@@ -1,3 +1,21 @@
+# [1.6.0](https://github.com/raaaf/starter/compare/v1.5.0...v1.6.0) (2026-01-28)
+
+### Bug Fixes
+
+- **hero:** use direct opacity instead of Tailwind CSS variable ([545c505](https://github.com/raaaf/starter/commit/545c505babcf8b62f42b0bad65d0ca3a43d459fd))
+- lower PHP requirement to 8.2 for broader hosting compatibility ([e46f44e](https://github.com/raaaf/starter/commit/e46f44e228e20b218926f54aeb9bab6586d8c6af))
+- resolve PHPCS and PHPUnit CI failures ([e407294](https://github.com/raaaf/starter/commit/e40729472c9a87746c296cc0ac49f109d9fdd6d5))
+- resolve PHPStan CI failures ([be2f54d](https://github.com/raaaf/starter/commit/be2f54d378948e32ed8434962cf02c9ea4d36f3b))
+- **templates:** hide page header when ACF flexible content exists ([e63df2c](https://github.com/raaaf/starter/commit/e63df2c5d4a59f8ddbff73ce7fddb711ccf1769b))
+
+### Features
+
+- **acf:** add source selection to Team and Testimonials layouts ([3a228d0](https://github.com/raaaf/starter/commit/3a228d0e4cb6c23a162e969d96f798aaba9ccdcb))
+- add design token management system ([0e57739](https://github.com/raaaf/starter/commit/0e577393f218144c52533bf7a596cbae1c129535))
+- add theme packaging script ([58656b3](https://github.com/raaaf/starter/commit/58656b38200ad383041d0600c638f262cdf89061))
+- **cpt:** add Team CPT with admin columns and field grouping ([2edb32a](https://github.com/raaaf/starter/commit/2edb32aaed6f82eb04542ec7795f400d6e0e46ee))
+- **setup:** add default contact data and hero layout prefill ([454448b](https://github.com/raaaf/starter/commit/454448bb123a0991e891a7fdedd30bf7284f1f77))
+
 # [1.5.0](https://github.com/raaaf/starter/compare/v1.4.0...v1.5.0) (2026-01-27)
 
 ### Features
