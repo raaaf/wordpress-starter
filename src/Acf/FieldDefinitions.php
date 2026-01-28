@@ -1466,6 +1466,9 @@ class FieldDefinitions
      */
     public static function testimonialsFields(string $prefix): array
     {
+        // Conditional logic: show only when source is 'manual'
+        $showOnManual = [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'manual']]];
+
         return [
             self::textField(
                 "field_{$prefix}_title",
@@ -1475,11 +1478,28 @@ class FieldDefinitions
                 __('Optionale Überschrift über den Testimonials.', 'wp-starter'),
                 __('z.B. Das sagen unsere Kunden', 'wp-starter')
             ),
-            self::repeaterField(
-                "field_{$prefix}_testimonials",
-                __('Kundenstimmen', 'wp-starter'),
-                'testimonials',
+            self::buttonGroupField(
+                "field_{$prefix}_source",
+                __('Datenquelle', 'wp-starter'),
+                'source',
                 [
+                    'manual' => __('Manuell eingeben', 'wp-starter'),
+                    'cpt' => __('Aus Testimonials-Verwaltung', 'wp-starter'),
+                ],
+                'manual',
+                __('Wähle, woher die Testimonials kommen sollen.', 'wp-starter')
+            ),
+            [
+                'key' => "field_{$prefix}_testimonials",
+                'label' => __('Kundenstimmen', 'wp-starter'),
+                'name' => 'testimonials',
+                'type' => 'repeater',
+                'instructions' => __('Füge Kundenstimmen und Bewertungen hinzu.', 'wp-starter'),
+                'min' => 1,
+                'layout' => 'block',
+                'button_label' => __('Kundenstimme hinzufügen', 'wp-starter'),
+                'conditional_logic' => $showOnManual,
+                'sub_fields' => [
                     self::textareaField(
                         "field_{$prefix}_testimonial_quote",
                         __('Zitat', 'wp-starter'),
@@ -1514,11 +1534,7 @@ class FieldDefinitions
                         __('Optionales Foto der Person.', 'wp-starter')
                     ),
                 ],
-                __('Kundenstimme hinzufügen', 'wp-starter'),
-                1,
-                'block',
-                __('Füge Kundenstimmen und Bewertungen hinzu.', 'wp-starter')
-            ),
+            ],
             self::buttonGroupField(
                 "field_{$prefix}_columns",
                 __('Spalten', 'wp-starter'),
@@ -1999,6 +2015,9 @@ class FieldDefinitions
      */
     public static function teamFields(string $prefix): array
     {
+        // Conditional logic: show only when source is 'manual'
+        $showOnManual = [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'manual']]];
+
         return [
             self::textField(
                 "field_{$prefix}_title",
@@ -2008,11 +2027,28 @@ class FieldDefinitions
                 __('Optionale Überschrift über dem Team.', 'wp-starter'),
                 __('z.B. Unser Team', 'wp-starter')
             ),
-            self::repeaterField(
-                "field_{$prefix}_members",
-                __('Teammitglieder', 'wp-starter'),
-                'members',
+            self::buttonGroupField(
+                "field_{$prefix}_source",
+                __('Datenquelle', 'wp-starter'),
+                'source',
                 [
+                    'manual' => __('Manuell eingeben', 'wp-starter'),
+                    'cpt' => __('Aus Team-Verwaltung', 'wp-starter'),
+                ],
+                'manual',
+                __('Wähle, woher die Teammitglieder kommen sollen.', 'wp-starter')
+            ),
+            [
+                'key' => "field_{$prefix}_members",
+                'label' => __('Teammitglieder', 'wp-starter'),
+                'name' => 'members',
+                'type' => 'repeater',
+                'instructions' => __('Füge Teammitglieder hinzu.', 'wp-starter'),
+                'min' => 1,
+                'layout' => 'block',
+                'button_label' => __('Mitglied hinzufügen', 'wp-starter'),
+                'conditional_logic' => $showOnManual,
+                'sub_fields' => [
                     // Accordion: Person (offen)
                     self::accordionField("field_{$prefix}_acc_person", __('Person', 'wp-starter'), true),
                     self::imageField(
@@ -2073,11 +2109,7 @@ class FieldDefinitions
                     // Accordion Ende
                     self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
                 ],
-                __('Mitglied hinzufügen', 'wp-starter'),
-                1,
-                'block',
-                __('Füge Teammitglieder hinzu.', 'wp-starter')
-            ),
+            ],
             self::buttonGroupField(
                 "field_{$prefix}_columns",
                 __('Spalten', 'wp-starter'),

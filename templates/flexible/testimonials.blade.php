@@ -1,15 +1,40 @@
 {{--
     Testimonials - Flexible Content Layout
 
+    Supports two data sources:
+    - 'manual': Uses repeater field for page-specific testimonials
+    - 'cpt': Uses Testimonial CPT for centrally managed testimonials
+
     Uses shared components: x-section, x-grid, x-card
-    Fields: title, testimonials (repeater: quote, author, role, image), columns, background_color
+    Fields: title, source, testimonials (repeater), columns, background_color
 --}}
 
 @php
+    use WordpressStarter\PostTypes\Testimonial;
+
     $title = get_sub_field('title');
-    $testimonials = get_sub_field('testimonials');
+    $source = get_sub_field('source') ?: 'manual';
     $columns = get_sub_field('columns') ?: '3';
     $background = get_sub_field('background_color') ?: 'primary';
+
+    // Normalize testimonials data from either source
+    $testimonials = [];
+
+    if ($source === 'cpt' && class_exists(Testimonial::class)) {
+        // Load from CPT and normalize structure
+        $cptTestimonials = Testimonial::getTestimonials();
+        foreach ($cptTestimonials as $item) {
+            $testimonials[] = [
+                'quote' => $item['content'],
+                'author' => $item['author_name'],
+                'role' => $item['author_position'],
+                'image' => $item['image'], // Featured Image ID
+            ];
+        }
+    } else {
+        // Use manual repeater data
+        $testimonials = get_sub_field('testimonials') ?: [];
+    }
 @endphp
 
 <x-section :background="$background" class="testimonials">
