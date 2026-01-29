@@ -28,7 +28,11 @@
   --color-error-light: #fee2e2;
   --color-error-dark: #b91c1c;
   --color-accent-alpha-50: rgba(255, 107, 53, 0.5);
+  --color-black-alpha-5: rgba(0, 0, 0, 0.05);
   --color-black-alpha-10: rgba(0, 0, 0, 0.1);
+  --color-black-alpha-20: rgba(0, 0, 0, 0.2);
+  --color-black-alpha-25: rgba(0, 0, 0, 0.25);
+  --color-black-alpha-40: rgba(0, 0, 0, 0.4);
   --color-black-alpha-50: rgba(0, 0, 0, 0.5);
   --color-white-alpha-15: rgba(255, 255, 255, 0.15);
   --color-gray-50: #fafafa;
@@ -205,22 +209,35 @@
      Gradients, shadows, and component-specific values
      ============================================ */
 
+  /* Shadow Colors - Semantic (change with theme) */
+  --shadow-color-sm: var(--color-black-alpha-5);
+  --shadow-color-default: var(--color-black-alpha-10);
+  --shadow-color-md: var(--color-black-alpha-10);
+  --shadow-color-lg: var(--color-black-alpha-10);
+  --shadow-color-xl: var(--color-black-alpha-10);
+  --shadow-color-2xl: var(--color-black-alpha-25);
+
   /* Shadows */
-  --shadow-button: 0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
-  --shadow-button-hover: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-inner: inset 0px 2px 4px 0px rgba(0, 0, 0, 0.06);
+  --shadow-button:
+    0px 1px 3px 0px var(--shadow-color-default), 0px 1px 2px 0px var(--shadow-color-sm);
+  --shadow-button-hover:
+    0px 4px 6px -1px var(--shadow-color-default), 0px 2px 4px -2px var(--shadow-color-default);
+  --shadow-inner: inset 0px 2px 4px 0px var(--shadow-color-sm);
   --shadow-focus-ring:
     0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-accent-alpha-50);
   --shadow-focus-ring-ghost: 0px 0px 0px 2px var(--color-accent-alpha-50);
   --shadow-focus-ring-error:
     0px 0px 0px 2px var(--bg-primary),
     0px 0px 0px 4px var(--color-error-alpha-50, rgba(220, 38, 38, 0.5));
-  --shadow-input: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
-  --shadow-input-hover: 0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --shadow-card: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
-  --shadow-card-hover: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-dropdown: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-modal: 0px 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-input: 0px 1px 2px 0px var(--shadow-color-sm);
+  --shadow-input-hover:
+    0px 1px 3px 0px var(--shadow-color-default), 0px 1px 2px -1px var(--shadow-color-default);
+  --shadow-card: 0px 1px 2px 0px var(--shadow-color-sm);
+  --shadow-card-hover:
+    0px 10px 15px -3px var(--shadow-color-lg), 0px 4px 6px -4px var(--shadow-color-lg);
+  --shadow-dropdown:
+    0px 10px 15px -3px var(--shadow-color-lg), 0px 4px 6px -4px var(--shadow-color-lg);
+  --shadow-modal: 0px 25px 50px -12px var(--shadow-color-2xl);
 
   /* Gradients - Primary Button */
   --gradient-primary-start: var(--color-accent-500);
@@ -336,7 +353,7 @@
   --border-strong: #d4d4d4;
   --border-subtle: #f5f5f5;
   --border-brand: #ff6b35;
-  --border-focus: #ff8a62;
+  --border-focus: #e5541d;
   --border-success: #22c55e;
   --border-warning: #f59e0b;
   --border-error: #ef4444;
@@ -410,7 +427,7 @@
   --border-strong: #525252;
   --border-subtle: #262626;
   --border-brand: #ff6b35;
-  --border-focus: #ff8a62;
+  --border-focus: #e5541d;
   --border-success: #22c55e;
   --border-warning: #f59e0b;
   --border-error: #ef4444;
@@ -430,6 +447,14 @@
   --icon-warning: #f59e0b;
   --icon-error: #ef4444;
   --icon-on-color: #ffffff;
+
+  /* Shadow Colors - Dark Mode (higher opacity for visibility) */
+  --shadow-color-sm: var(--color-black-alpha-10);
+  --shadow-color-default: var(--color-black-alpha-20);
+  --shadow-color-md: var(--color-black-alpha-20);
+  --shadow-color-lg: var(--color-black-alpha-25);
+  --shadow-color-xl: var(--color-black-alpha-25);
+  --shadow-color-2xl: var(--color-black-alpha-40);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -480,7 +505,7 @@
     --border-strong: #525252;
     --border-subtle: #262626;
     --border-brand: #ff6b35;
-    --border-focus: #ff8a62;
+    --border-focus: #e5541d;
     --border-success: #22c55e;
     --border-warning: #f59e0b;
     --border-error: #ef4444;
@@ -500,5 +525,13 @@
     --icon-warning: #f59e0b;
     --icon-error: #ef4444;
     --icon-on-color: #ffffff;
+
+    /* Shadow Colors - Dark Mode (higher opacity for visibility) */
+    --shadow-color-sm: var(--color-black-alpha-10);
+    --shadow-color-default: var(--color-black-alpha-20);
+    --shadow-color-md: var(--color-black-alpha-20);
+    --shadow-color-lg: var(--color-black-alpha-25);
+    --shadow-color-xl: var(--color-black-alpha-25);
+    --shadow-color-2xl: var(--color-black-alpha-40);
   }
 }
