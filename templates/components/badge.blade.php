@@ -40,14 +40,15 @@
         'lg' => 'w-2.5 h-2.5',
     ];
 
-    // Filled variants (renamed accent to brand for Figma consistency)
+    // Filled variants - Light: subtle bg + dark text, Dark: strong bg + semantic light text (WCAG AA)
+    // Semantic text tokens (text-content-success etc.) auto-switch to light colors in dark mode
     $filledVariants = [
-        'gray' => 'bg-surface-tertiary text-content',
-        'brand' => 'bg-surface-accent text-content-on-color',
-        'accent' => 'bg-surface-accent text-content-on-color', // Alias for backwards compatibility
-        'success' => 'bg-surface-success-strong text-content-on-color',
-        'warning' => 'bg-surface-warning-strong text-content-on-color',
-        'error' => 'bg-surface-error-strong text-content-on-color',
+        'gray' => 'bg-surface-tertiary text-content dark:bg-surface-tertiary dark:text-content',
+        'brand' => 'bg-surface-accent-subtle text-content-accent dark:bg-surface-accent',
+        'accent' => 'bg-surface-accent-subtle text-content-accent dark:bg-surface-accent',
+        'success' => 'bg-surface-success text-content-success dark:bg-surface-success-strong',
+        'warning' => 'bg-surface-warning text-content-warning dark:bg-surface-warning-strong',
+        'error' => 'bg-surface-error text-content-error dark:bg-surface-error-strong',
     ];
 
     // Outline variants
@@ -60,14 +61,14 @@
         'error' => 'bg-surface-error text-content-error border border-line-error',
     ];
 
-    // Dot colors - use semantic tokens for theme compatibility
+    // Dot colors - semantic tokens auto-switch between light/dark mode
     $dotColors = [
         'gray' => 'bg-content-secondary',
-        'brand' => $style === 'filled' ? 'bg-surface-on-color' : 'bg-content-accent',
-        'accent' => $style === 'filled' ? 'bg-surface-on-color' : 'bg-content-accent',
-        'success' => $style === 'filled' ? 'bg-surface-on-color' : 'bg-content-success',
-        'warning' => $style === 'filled' ? 'bg-surface-on-color' : 'bg-content-warning',
-        'error' => $style === 'filled' ? 'bg-surface-on-color' : 'bg-content-error',
+        'brand' => 'bg-content-accent',
+        'accent' => 'bg-content-accent',
+        'success' => 'bg-content-success',
+        'warning' => 'bg-content-warning',
+        'error' => 'bg-content-error',
     ];
 
     $variants = $style === 'outline' ? $outlineVariants : $filledVariants;
