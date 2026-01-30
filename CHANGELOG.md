@@ -1,3 +1,16 @@
+# [2.0.0](https://github.com/raaaf/starter/compare/v1.6.1...v2.0.0) (2026-01-30)
+
+### Features
+
+- migrate analytics from Pirsch to Rybbit ([1bfb963](https://github.com/raaaf/starter/commit/1bfb963a6958b565c46a808fc1d21d3c70f679cd))
+
+### BREAKING CHANGES
+
+- Pirsch Analytics is no longer supported.
+  Install Rybbit WordPress Plugin from GitHub instead.
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+
 ## [1.6.1](https://github.com/raaaf/starter/compare/v1.6.0...v1.6.1) (2026-01-29)
 
 ### Bug Fixes
