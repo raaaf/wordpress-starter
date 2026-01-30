@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
-  initPirschTracking,
+  initRybbitTracking,
   addContentLinkTracking,
   addImageLinkTracking,
   extractBlockType,
@@ -9,9 +9,9 @@ import {
 } from './app';
 
 /**
- * Tests for Pirsch Analytics tracking functionality.
+ * Tests for Rybbit Analytics tracking functionality.
  */
-describe('Pirsch Analytics Tracking', () => {
+describe('Rybbit Analytics Tracking', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
@@ -20,18 +20,18 @@ describe('Pirsch Analytics Tracking', () => {
     document.body.innerHTML = '';
   });
 
-  describe('initPirschTracking', () => {
-    it('skips links with existing pirsch-event attribute', () => {
+  describe('initRybbitTracking', () => {
+    it('skips links with existing data-rybbit-event attribute', () => {
       document.body.innerHTML = `
         <div class="two-columns">
-          <a href="https://example.com" pirsch-event="Custom_Event">Already tracked</a>
+          <a href="https://example.com" data-rybbit-event="Custom_Event">Already tracked</a>
         </div>
       `;
 
-      initPirschTracking();
+      initRybbitTracking();
 
       const link = document.querySelector('a')!;
-      expect(link.getAttribute('pirsch-event')).toBe('Custom_Event');
+      expect(link.getAttribute('data-rybbit-event')).toBe('Custom_Event');
     });
 
     it('adds External_Link_Click for external links', () => {
@@ -41,10 +41,10 @@ describe('Pirsch Analytics Tracking', () => {
         </div>
       `;
 
-      initPirschTracking();
+      initRybbitTracking();
 
       const link = document.querySelector('a')!;
-      expect(link.getAttribute('pirsch-event')).toBe('External_Link_Click');
+      expect(link.getAttribute('data-rybbit-event')).toBe('External_Link_Click');
     });
 
     it('adds Internal_Link_Click for internal links', () => {
@@ -54,10 +54,10 @@ describe('Pirsch Analytics Tracking', () => {
         </div>
       `;
 
-      initPirschTracking();
+      initRybbitTracking();
 
       const link = document.querySelector('a')!;
-      expect(link.getAttribute('pirsch-event')).toBe('Internal_Link_Click');
+      expect(link.getAttribute('data-rybbit-event')).toBe('Internal_Link_Click');
     });
 
     it('handles links with no parent block', () => {
@@ -67,21 +67,21 @@ describe('Pirsch Analytics Tracking', () => {
         </div>
       `;
 
-      initPirschTracking();
+      initRybbitTracking();
 
       const link = document.querySelector('a')!;
-      expect(link.hasAttribute('pirsch-event')).toBe(false);
+      expect(link.hasAttribute('data-rybbit-event')).toBe(false);
     });
   });
 
   describe('addContentLinkTracking', () => {
-    it('extracts link text for meta attribute', () => {
+    it('extracts link text for prop attribute', () => {
       document.body.innerHTML = `<a href="/page">Click Here for More</a>`;
       const link = document.querySelector('a')!;
 
       addContentLinkTracking(link);
 
-      expect(link.getAttribute('pirsch-meta-link-text')).toBe('Click Here for More');
+      expect(link.getAttribute('data-rybbit-prop-link-text')).toBe('Click Here for More');
     });
 
     it('handles links with no text content using Unknown', () => {
@@ -90,25 +90,27 @@ describe('Pirsch Analytics Tracking', () => {
 
       addContentLinkTracking(link);
 
-      expect(link.getAttribute('pirsch-meta-link-text')).toBe('Unknown');
+      expect(link.getAttribute('data-rybbit-prop-link-text')).toBe('Unknown');
     });
 
-    it('sets pirsch-meta-link-url attribute', () => {
+    it('sets data-rybbit-prop-link-url attribute', () => {
       document.body.innerHTML = `<a href="https://example.com/specific-page">Test</a>`;
       const link = document.querySelector('a')!;
 
       addContentLinkTracking(link);
 
-      expect(link.getAttribute('pirsch-meta-link-url')).toBe('https://example.com/specific-page');
+      expect(link.getAttribute('data-rybbit-prop-link-url')).toBe(
+        'https://example.com/specific-page'
+      );
     });
 
-    it('sets pirsch-meta-key to content_link', () => {
+    it('sets data-rybbit-prop-key to content_link', () => {
       document.body.innerHTML = `<a href="/page">Content Link</a>`;
       const link = document.querySelector('a')!;
 
       addContentLinkTracking(link);
 
-      expect(link.getAttribute('pirsch-meta-key')).toBe('content_link');
+      expect(link.getAttribute('data-rybbit-prop-key')).toBe('content_link');
     });
 
     it('trims whitespace from link text', () => {
@@ -119,17 +121,17 @@ describe('Pirsch Analytics Tracking', () => {
 
       addContentLinkTracking(link);
 
-      expect(link.getAttribute('pirsch-meta-link-text')).toBe('Link with whitespace');
+      expect(link.getAttribute('data-rybbit-prop-link-text')).toBe('Link with whitespace');
     });
 
-    it('skips if already has pirsch-event', () => {
-      document.body.innerHTML = `<a href="/page" pirsch-event="Existing">Link</a>`;
+    it('skips if already has data-rybbit-event', () => {
+      document.body.innerHTML = `<a href="/page" data-rybbit-event="Existing">Link</a>`;
       const link = document.querySelector('a')!;
 
       addContentLinkTracking(link);
 
-      expect(link.getAttribute('pirsch-event')).toBe('Existing');
-      expect(link.hasAttribute('pirsch-meta-key')).toBe(false);
+      expect(link.getAttribute('data-rybbit-event')).toBe('Existing');
+      expect(link.hasAttribute('data-rybbit-prop-key')).toBe(false);
     });
   });
 
@@ -140,34 +142,34 @@ describe('Pirsch Analytics Tracking', () => {
 
       addImageLinkTracking(link);
 
-      expect(link.getAttribute('pirsch-event')).toBe('Image_Link_Click');
+      expect(link.getAttribute('data-rybbit-event')).toBe('Image_Link_Click');
     });
 
-    it('sets pirsch-meta-key to image_block', () => {
+    it('sets data-rybbit-prop-key to image_block', () => {
       document.body.innerHTML = `<a href="/image-page"><img src="/image.jpg" /></a>`;
       const link = document.querySelector('a')!;
 
       addImageLinkTracking(link);
 
-      expect(link.getAttribute('pirsch-meta-key')).toBe('image_block');
+      expect(link.getAttribute('data-rybbit-prop-key')).toBe('image_block');
     });
 
-    it('sets pirsch-meta-link-url', () => {
+    it('sets data-rybbit-prop-link-url', () => {
       document.body.innerHTML = `<a href="https://example.com/image"><img src="/img.jpg" /></a>`;
       const link = document.querySelector('a')!;
 
       addImageLinkTracking(link);
 
-      expect(link.getAttribute('pirsch-meta-link-url')).toBe('https://example.com/image');
+      expect(link.getAttribute('data-rybbit-prop-link-url')).toBe('https://example.com/image');
     });
 
-    it('skips if already has pirsch-event', () => {
-      document.body.innerHTML = `<a href="/page" pirsch-event="Custom"><img /></a>`;
+    it('skips if already has data-rybbit-event', () => {
+      document.body.innerHTML = `<a href="/page" data-rybbit-event="Custom"><img /></a>`;
       const link = document.querySelector('a')!;
 
       addImageLinkTracking(link);
 
-      expect(link.getAttribute('pirsch-event')).toBe('Custom');
+      expect(link.getAttribute('data-rybbit-event')).toBe('Custom');
     });
   });
 

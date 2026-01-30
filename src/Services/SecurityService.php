@@ -43,14 +43,14 @@ class SecurityService
             "font-src 'self' https://fonts.gstatic.com data:",
             "img-src 'self' data: https:",
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.google.com https://maps.google.com",
-            "connect-src 'self' https://api.pirsch.io",
+            "connect-src 'self' https://tracking.maki-it.de",
         ];
 
         // Allow Vite dev server in development
         if ($isDev) {
             $directives[1] = "script-src 'self' 'nonce-{$nonce}' 'unsafe-eval' http://localhost:5173";
             $directives[2] = "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com http://localhost:5173";
-            $directives[6] = "connect-src 'self' https://api.pirsch.io ws://localhost:5173";
+            $directives[6] = "connect-src 'self' https://tracking.maki-it.de ws://localhost:5173";
         }
 
         return implode('; ', $directives);

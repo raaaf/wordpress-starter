@@ -11,7 +11,6 @@ use WordpressStarter\Providers\MenuServiceProvider;
 use WordpressStarter\Providers\ThemeServiceProvider;
 use WordpressStarter\Providers\SecurityServiceProvider;
 use WordpressStarter\Providers\AcfServiceProvider;
-use WordpressStarter\Providers\AnalyticsServiceProvider;
 use WordpressStarter\Providers\ImageServiceProvider;
 use WordpressStarter\Providers\PluginConfiguratorServiceProvider;
 use WordpressStarter\Providers\PluginServiceProvider;
@@ -70,7 +69,6 @@ class Application
             ThemeServiceProvider::class,
             SeoServiceProvider::class,
             ImageServiceProvider::class,
-            AnalyticsServiceProvider::class,
             ThemeUpdateProvider::class,
             PostTypeServiceProvider::class,
             LogServiceProvider::class,

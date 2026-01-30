@@ -18,7 +18,7 @@ $csp = [
     "img-src 'self' data: https: blob:",
     "font-src 'self' https://fonts.gstatic.com",
     "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://www.google.com",
-    "connect-src 'self' http://localhost:* https://api.pirsch.io",
+    "connect-src 'self' http://localhost:* https://tracking.maki-it.de",
 ];
 ```
 

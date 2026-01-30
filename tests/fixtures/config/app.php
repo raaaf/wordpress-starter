@@ -17,10 +17,4 @@ return [
             ],
         ],
     ],
-    'analytics' => [
-        'pirsch' => [
-            'enabled' => false,
-            'code' => 'test-code',
-        ],
-    ],
 ];

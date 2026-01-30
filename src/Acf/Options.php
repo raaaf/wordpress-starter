@@ -634,13 +634,14 @@ class Options
                     __('<strong>Cookie-freie Website</strong><br>Dieses Theme verwendet ausschließlich DSGVO-konforme Analytics ohne Cookies. Kein Cookie-Banner erforderlich!', 'wp-starter'),
                     'success'
                 ),
-                FieldDefinitions::textField(
-                    'field_options_pirsch_code',
-                    __('Pirsch Site Code', 'wp-starter'),
-                    'pirsch_code',
-                    false,
-                    __('Den Code findest du unter <a href="https://pirsch.io" target="_blank">pirsch.io</a> → Dashboard → Settings → Integration Code. Leer lassen wenn nicht benötigt.', 'wp-starter'),
-                    __('z.B. abc123def456', 'wp-starter')
+                FieldDefinitions::infoBoxField(
+                    'field_options_analytics_rybbit',
+                    sprintf(
+                        /* translators: %s: URL to Rybbit Analytics settings */
+                        __('<strong>Rybbit Analytics</strong><br>Analytics wird über das Rybbit-Plugin konfiguriert. Gehe zu <a href="%s">Einstellungen → Rybbit Analytics</a>, um deine Site ID einzutragen.', 'wp-starter'),
+                        esc_url(admin_url('options-general.php?page=rybbit-analytics'))
+                    ),
+                    'info'
                 ),
             ],
             'location' => [

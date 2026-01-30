@@ -11,7 +11,7 @@
     <link rel="pingback" href="{{ esc_url(get_bloginfo('pingback_url')) }}">
 
     {{-- Resource Hints for Performance --}}
-    <link rel="dns-prefetch" href="//api.pirsch.io">
+    <link rel="dns-prefetch" href="//tracking.maki-it.de">
 
     {{-- Preload critical assets --}}
     @if(!WP_DEBUG || !\WordpressStarter\Vite::isDevServerRunning())

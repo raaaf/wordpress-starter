@@ -32,9 +32,6 @@ return [
         'csp_report_uri' => env('CSP_REPORT_URI', ''),
     ],
     
-    'analytics' => [
-        'pirsch_id' => env('PIRSCH_ID', ''),
-    ],
     
     'debug' => [
         'show_grid' => env('WP_DEBUG', false),

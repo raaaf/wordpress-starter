@@ -147,7 +147,7 @@ class ThemeSetup
             'name' => 'Performance & Analytics',
             'plugins' => [
                 'wp-optimize' => ['name' => 'WP-Optimize', 'description' => 'Datenbank & Caching'],
-                'pirsch-analytics' => ['name' => 'Pirsch Analytics', 'description' => 'DSGVO-konforme Analytics'],
+                'rybbit-analytics' => ['name' => 'Rybbit Analytics', 'description' => 'DSGVO-konforme Analytics'],
             ],
         ],
         'admin' => [
@@ -678,25 +678,25 @@ class ThemeSetup
     {
         if ($this->quickSetup) {
             // Skip in quick mode
-            $this->config['pirsch_code'] = '';
+            $this->config['rybbit_site_id'] = '';
             echo "\n  " . $this->color("Analytics:", 'gray') . " Übersprungen (kann später in Theme-Einstellungen konfiguriert werden)\n";
             return;
         }
 
         $this->printSection("Step 6: Analytics");
-        echo "Das Theme unterstützt " . $this->color("Pirsch Analytics", 'cyan') . " - DSGVO-konform & cookie-frei.\n";
-        echo $this->color("https://pirsch.io - Kein Cookie-Banner erforderlich!\n\n", 'gray');
+        echo "Das Theme unterstützt " . $this->color("Rybbit Analytics", 'cyan') . " - DSGVO-konform & cookie-frei.\n";
+        echo $this->color("Analytics wird ueber das Rybbit WordPress Plugin konfiguriert.\n\n", 'gray');
 
-        $this->config['pirsch_code'] = $this->prompt(
-            'Pirsch Site Code',
+        $this->config['rybbit_site_id'] = $this->prompt(
+            'Rybbit Site ID',
             '',
-            'Aus pirsch.io Dashboard (oder leer lassen)'
+            'Aus Rybbit Dashboard (oder leer lassen)'
         );
 
-        if (empty($this->config['pirsch_code'])) {
+        if (empty($this->config['rybbit_site_id'])) {
             echo "  " . $this->color("Kein Analytics konfiguriert. Kann später hinzugefügt werden.", 'gray') . "\n";
         } else {
-            echo "  " . $this->color("✓ Pirsch Analytics wird aktiviert.", 'green') . "\n";
+            echo "  " . $this->color("✓ Rybbit Analytics wird aktiviert.", 'green') . "\n";
         }
     }
 
@@ -775,10 +775,10 @@ class ThemeSetup
         echo "\n";
 
         echo $this->color("Analytics:\n", 'white', true);
-        if (empty($this->config['pirsch_code'])) {
+        if (empty($this->config['rybbit_site_id'])) {
             echo "  " . $this->color("Nicht konfiguriert", 'gray') . "\n";
         } else {
-            echo "  " . $this->color("✓", 'green') . " Pirsch Analytics\n";
+            echo "  " . $this->color("✓", 'green') . " Rybbit Analytics\n";
         }
         echo "\n";
 
@@ -1342,7 +1342,7 @@ CSS;
             'social_links' => $this->socialLinks,
 
             // Analytics
-            'pirsch_code' => $this->config['pirsch_code'] ?? '',
+            'rybbit_site_id' => $this->config['rybbit_site_id'] ?? '',
         ];
 
         $configContent = "<?php\n\n";
@@ -1623,9 +1623,9 @@ CSS;
             'THEME_TEXT_DOMAIN=wp-starter' => "THEME_TEXT_DOMAIN={$this->config['text_domain']}",
         ];
 
-        // Add Pirsch ID if configured
-        if (!empty($this->config['pirsch_code'])) {
-            $replacements['PIRSCH_ID='] = "PIRSCH_ID={$this->config['pirsch_code']}";
+        // Add Rybbit Site ID if configured
+        if (!empty($this->config['rybbit_site_id'])) {
+            $replacements['RYBBIT_SITE_ID='] = "RYBBIT_SITE_ID={$this->config['rybbit_site_id']}";
         }
 
         foreach ($replacements as $search => $replace) {

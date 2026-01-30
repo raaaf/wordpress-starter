@@ -17,7 +17,7 @@ A modern WordPress starter theme built with cutting-edge technologies and best p
 - **Environment Configuration** - `.env` file support
 - **Security First** - CSP headers with nonce support
 - **Zero jQuery** - Lightweight, modern JavaScript
-- **Pirsch Analytics** - Privacy-friendly analytics integration
+- **Rybbit Analytics** - Privacy-friendly analytics integration (via plugin)
 
 ## 📋 Requirements
 
@@ -199,7 +199,7 @@ The theme uses a service provider architecture for clean code organization:
 - `ThemeServiceProvider` - Core WordPress theme features, SEO schemas
 - `SecurityServiceProvider` - Security headers and CSP
 - `AcfServiceProvider` - ACF integration, blocks, and directives
-- `AnalyticsServiceProvider` - Pirsch Analytics integration
+- `SecurityServiceProvider` - Security headers and CSP (Rybbit via plugin)
 - `PluginServiceProvider` - Auto-install required plugins on activation
 - `WelcomeServiceProvider` - Theme activation welcome notice
 - `ImageServiceProvider` - Custom image sizes
@@ -330,57 +330,55 @@ This will:
 - Tree shake unused code
 - Generate bundle analysis report
 
-## 📊 Analytics with Pirsch
+## 📊 Analytics with Rybbit
 
-The theme includes built-in support for [Pirsch Analytics](https://pirsch.io/), a privacy-friendly, cookie-free analytics solution.
+The theme includes built-in support for [Rybbit Analytics](https://rybbit.io/), a privacy-friendly, cookie-free analytics solution.
 
-### Setting up Pirsch
+### Setting up Rybbit
 
-1. Create an account at [pirsch.io](https://pirsch.io/)
-2. Add your site and get your site ID
-3. Add the site ID to your `.env` file:
-   ```env
-   PIRSCH_ID=your-pirsch-site-id
-   ```
+1. Install the [Rybbit WordPress Plugin](https://github.com/maki-it/rybbit-wordpress-plugin/releases)
+2. Configure the plugin under `Settings → Rybbit Analytics`
+3. Enter your Site ID from the Rybbit Dashboard
 
 ### Event Tracking
 
-The theme automatically tracks interactions on various elements:
+The theme automatically tracks interactions on various elements using Rybbit's declarative tracking:
 
 #### Tracked Events:
 - **CTA Clicks** - Call to action button clicks with block context
 - **Hero CTA Clicks** - Hero section button clicks with button text
-- **Accordion Toggles** - Accordion item expansions with item title
-- **Video Consent** - YouTube video consent button clicks with video URL
 - **Link Clicks** - Internal and external link clicks with URL and text
 - **Image Link Clicks** - Clicks on linked images
-- **Privacy Policy Clicks** - Privacy policy link clicks
 
 #### Event Attributes:
 All events include metadata for better insights:
-- `pirsch-event` - The event name (e.g., "CTA", "Hero_CTA_Click")
-- `pirsch-meta-key` - The block type (e.g., "cta_block", "hero_block")
-- Additional metadata specific to each event type
+- `data-rybbit-event` - The event name (e.g., "External_Link_Click", "button_click")
+- `data-rybbit-prop-key` - The block type (e.g., "content_link", "image_block")
+- Additional properties via `data-rybbit-prop-*` attributes
 
 #### Adding Custom Events:
 To track custom events, add data attributes to any element:
 
 ```html
-<button pirsch-event="Custom_Action" 
-        pirsch-meta-key="custom_block"
-        pirsch-meta-custom="value">
+<button data-rybbit-event="Custom_Action"
+        data-rybbit-prop-key="custom_block"
+        data-rybbit-prop-custom="value">
     Click Me
 </button>
 ```
 
+Or use JavaScript:
+```javascript
+rybbit.event('Custom_Action', { key: 'custom_block', custom: 'value' });
+```
+
 ### Privacy Compliance
 
-Pirsch Analytics is:
+Rybbit Analytics is:
 - GDPR compliant
 - Cookie-free
 - No personal data collection
-- Server-side tracking
-- Hosted in EU (Germany)
+- Self-hostable for full data control
 
 ## 🔒 Security
 
@@ -413,9 +411,6 @@ LOAD_CRITICAL_CSS=true
 WP_DEBUG=true
 WP_DEBUG_LOG=true
 WP_DEBUG_DISPLAY=false
-
-# Analytics
-PIRSCH_ID=your-pirsch-site-id
 ```
 
 ### Theme Configuration
