@@ -200,7 +200,7 @@ export function createStatsCounterComponent(target: number): StatsCounterCompone
 }
 
 // ============================================
-// Pirsch Analytics Tracking
+// Rybbit Analytics Tracking
 // ============================================
 
 export const CONTENT_SELECTORS =
@@ -221,31 +221,34 @@ export function extractBlockType(element: Element): string | null {
 }
 
 export function addContentLinkTracking(link: HTMLAnchorElement): void {
-  if (link.hasAttribute('pirsch-event')) return;
+  if (link.hasAttribute('data-rybbit-event')) return;
 
   const isExternal = link.hostname && link.hostname !== window.location.hostname;
   const linkText = link.textContent?.trim() || 'Unknown';
 
-  link.setAttribute('pirsch-event', isExternal ? 'External_Link_Click' : 'Internal_Link_Click');
-  link.setAttribute('pirsch-meta-key', 'content_link');
-  link.setAttribute('pirsch-meta-link-text', linkText);
-  link.setAttribute('pirsch-meta-link-url', link.href);
+  link.setAttribute(
+    'data-rybbit-event',
+    isExternal ? 'External_Link_Click' : 'Internal_Link_Click'
+  );
+  link.setAttribute('data-rybbit-prop-key', 'content_link');
+  link.setAttribute('data-rybbit-prop-link-text', linkText);
+  link.setAttribute('data-rybbit-prop-link-url', link.href);
 
   const blockType = extractBlockType(link);
   if (blockType) {
-    link.setAttribute('pirsch-meta-block-type', blockType);
+    link.setAttribute('data-rybbit-prop-block-type', blockType);
   }
 }
 
 export function addImageLinkTracking(link: HTMLAnchorElement): void {
-  if (link.hasAttribute('pirsch-event')) return;
+  if (link.hasAttribute('data-rybbit-event')) return;
 
-  link.setAttribute('pirsch-event', 'Image_Link_Click');
-  link.setAttribute('pirsch-meta-key', 'image_block');
-  link.setAttribute('pirsch-meta-link-url', link.href);
+  link.setAttribute('data-rybbit-event', 'Image_Link_Click');
+  link.setAttribute('data-rybbit-prop-key', 'image_block');
+  link.setAttribute('data-rybbit-prop-link-url', link.href);
 }
 
-export function initPirschTracking(): void {
+export function initRybbitTracking(): void {
   const contentLinks = document.querySelectorAll<HTMLAnchorElement>(CONTENT_SELECTORS);
   contentLinks.forEach(addContentLinkTracking);
 
@@ -500,7 +503,7 @@ export function initHeaderHeight(): void {
 // Initialize features on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   initHeaderHeight();
-  initPirschTracking();
+  initRybbitTracking();
   initVideoConsent();
   initGalleryZoom();
 });

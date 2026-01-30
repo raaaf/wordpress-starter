@@ -28,6 +28,7 @@ Danke, dass du zum WP-Starter Theme beitragen möchtest! Diese Richtlinien helfe
 - Folge den WordPress Coding Standards (mit Anpassungen, siehe `phpcs.xml`)
 
 Prüfe deinen Code:
+
 ```bash
 composer phpcs      # Fehler anzeigen
 composer phpcs:fix  # Automatisch korrigieren
@@ -41,6 +42,7 @@ composer phpstan    # Statische Analyse
 - **Alpine.js** für Interaktivität (kein jQuery)
 
 Prüfe deinen Code:
+
 ```bash
 npm run lint        # Fehler anzeigen
 npm run lint:fix    # Automatisch korrigieren
@@ -73,15 +75,15 @@ style: Formatierung in FieldDefinitions.php
 
 ### Präfixe
 
-| Präfix | Verwendung |
-|--------|------------|
-| `feat:` | Neue Funktion |
-| `fix:` | Bugfix |
-| `docs:` | Dokumentation |
-| `style:` | Formatierung (kein Code-Change) |
-| `refactor:` | Code-Umbau ohne neue Funktion |
-| `test:` | Tests hinzufügen/ändern |
-| `chore:` | Wartung (Dependencies etc.) |
+| Präfix      | Verwendung                      |
+| ----------- | ------------------------------- |
+| `feat:`     | Neue Funktion                   |
+| `fix:`      | Bugfix                          |
+| `docs:`     | Dokumentation                   |
+| `style:`    | Formatierung (kein Code-Change) |
+| `refactor:` | Code-Umbau ohne neue Funktion   |
+| `test:`     | Tests hinzufügen/ändern         |
+| `chore:`    | Wartung (Dependencies etc.)     |
 
 ## Branch-Strategie
 
@@ -91,6 +93,7 @@ style: Formatierung in FieldDefinitions.php
 - `docs/name` - Dokumentation
 
 Beispiel:
+
 ```bash
 git checkout -b feature/team-block
 # ... Änderungen ...
@@ -117,6 +120,7 @@ git push -u origin feature/team-block
 Siehe [docs/BLOCK-DEVELOPMENT.md](docs/BLOCK-DEVELOPMENT.md) für eine vollständige Anleitung.
 
 Checkliste:
+
 - [ ] `block.json` mit deutschem Titel und Beschreibung
 - [ ] Felder in `FieldDefinitions.php` definiert
 - [ ] Block in `BlockFields.php` registriert
@@ -129,6 +133,7 @@ Checkliste:
 Siehe [docs/COMPONENT-DEVELOPMENT.md](docs/COMPONENT-DEVELOPMENT.md) für eine vollständige Anleitung.
 
 Checkliste:
+
 - [ ] Datei in `templates/components/` erstellt
 - [ ] Props mit `@props` definiert
 - [ ] Dokumentations-Header mit Beispiel
@@ -139,7 +144,7 @@ Checkliste:
 
 - **Keine Cookies** ohne Consent
 - **Keine externen Requests** ohne DSGVO-Consent (z.B. Google Maps, YouTube)
-- **Nur Pirsch Analytics** (Cookie-frei)
+- **Nur Rybbit Analytics** (Cookie-frei, via Plugin)
 - Keine Google Analytics, Tag Manager etc.
 
 ## Barrierefreiheit
@@ -152,6 +157,7 @@ Checkliste:
 ## Fragen?
 
 Bei Fragen oder Problemen:
+
 1. Prüfe zuerst [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 2. Schaue in die bestehende Dokumentation
 3. Öffne ein Issue mit detaillierter Beschreibung

@@ -193,7 +193,7 @@ Available under "Theme-Einstellungen" in admin:
 - **Header:** Sticky header, CTA button
 - **Footer:** Footer text, copyright
 - **Social Media:** Social links repeater
-- **Analytics:** Pirsch Analytics (DSGVO-konform)
+- **Analytics:** Rybbit Analytics (DSGVO-konform, via Plugin)
 - **Rechtliches:** Privacy, Imprint pages
 
 ## Alpine.js Components

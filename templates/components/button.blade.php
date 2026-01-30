@@ -9,7 +9,7 @@
     @param string $class - Additional CSS classes
     @param bool $disabled - Disabled state
     @param string $type - Button type for <button> element (submit, button, reset)
-    @param array $analytics - ['event' => 'name', 'meta' => 'value'] for Pirsch
+    @param array $analytics - ['event' => 'name', 'meta' => 'value'] for Rybbit
 
     States from Figma:
     - Default: Gradient background with shadow
@@ -108,9 +108,9 @@
     // Analytics attributes
     $analyticsAttrs = '';
     if ($analytics && !$disabled) {
-        $analyticsAttrs = 'pirsch-event="' . esc_attr($analytics['event'] ?? 'button_click') . '"';
+        $analyticsAttrs = 'data-rybbit-event="' . esc_attr($analytics['event'] ?? 'button_click') . '"';
         if (isset($analytics['meta'])) {
-            $analyticsAttrs .= ' pirsch-meta-key="' . esc_attr($analytics['meta']) . '"';
+            $analyticsAttrs .= ' data-rybbit-prop-key="' . esc_attr($analytics['meta']) . '"';
         }
     }
 @endphp

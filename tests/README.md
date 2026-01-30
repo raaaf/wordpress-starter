@@ -54,7 +54,7 @@ npm run test:coverage # With coverage report
 ### Test Files
 
 - `navigation.test.ts` - Alpine.js navigation component tests
-- `analytics.test.ts` - Pirsch analytics tracking tests
+- `analytics.test.ts` - Rybbit analytics tracking tests
 
 ## E2E Tests (Playwright)
 

@@ -35,7 +35,7 @@ Ensure these are configured in WordPress Admin → Theme Options:
 - [ ] Contact information filled
 - [ ] Social media links added
 - [ ] Legal pages (Privacy, Imprint) assigned
-- [ ] Analytics ID configured (if using Pirsch)
+- [ ] Rybbit Analytics Plugin installed and configured
 
 ### 4. Plugin Requirements
 
@@ -257,7 +257,7 @@ The theme includes CSP headers. Review `src/Security.php` and adjust as needed f
 
 - **Uptime**: UptimeRobot, Pingdom
 - **Error Tracking**: Sentry, LogRocket
-- **Analytics**: Pirsch (built-in), or Plausible
+- **Analytics**: Rybbit (via plugin), or Plausible
 - **Performance**: Google PageSpeed Insights, WebPageTest
 
 ### Log Files

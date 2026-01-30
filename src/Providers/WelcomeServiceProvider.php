@@ -108,7 +108,6 @@ class WelcomeServiceProvider extends ServiceProvider
             'email' => 'field_options_email',
             'color_scheme' => 'field_options_color_scheme',
             'copyright_text' => 'field_options_copyright',
-            'pirsch_code' => 'field_options_pirsch_code',
         ];
 
         // Update simple fields

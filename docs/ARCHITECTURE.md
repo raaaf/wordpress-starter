@@ -57,19 +57,19 @@ Service providers are the central place for bootstrapping theme functionality.
 
 ### Registered Providers
 
-| Provider                   | Responsibility                       |
-| -------------------------- | ------------------------------------ |
-| `PluginServiceProvider`    | Plugin recommendations, setup wizard |
-| `WelcomeServiceProvider`   | Theme activation, onboarding         |
-| `SecurityServiceProvider`  | CSP headers, nonce generation        |
-| `BladeServiceProvider`     | Blade templating engine              |
-| `AcfServiceProvider`       | ACF configuration, directives        |
-| `MenuServiceProvider`      | Navigation menus                     |
-| `ThemeServiceProvider`     | Core theme features, SEO             |
-| `ImageServiceProvider`     | Custom image sizes                   |
-| `AnalyticsServiceProvider` | Pirsch Analytics                     |
-| `ThemeUpdateProvider`      | GitHub-based updates                 |
-| `PostTypeServiceProvider`  | Custom post types                    |
+| Provider                  | Responsibility                       |
+| ------------------------- | ------------------------------------ |
+| `PluginServiceProvider`   | Plugin recommendations, setup wizard |
+| `WelcomeServiceProvider`  | Theme activation, onboarding         |
+| `SecurityServiceProvider` | CSP headers, nonce generation        |
+| `BladeServiceProvider`    | Blade templating engine              |
+| `AcfServiceProvider`      | ACF configuration, directives        |
+| `MenuServiceProvider`     | Navigation menus                     |
+| `ThemeServiceProvider`    | Core theme features, SEO             |
+| `ImageServiceProvider`    | Custom image sizes                   |
+| `SeoServiceProvider`      | SEO enhancements                     |
+| `ThemeUpdateProvider`     | GitHub-based updates                 |
+| `PostTypeServiceProvider` | Custom post types                    |
 
 ### Creating a New Provider
 
