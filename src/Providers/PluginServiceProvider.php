@@ -719,13 +719,12 @@ class PluginServiceProvider extends ServiceProvider
                 'description' => 'Datenbank-Optimierung und Caching.',
                 'check' => fn() => class_exists('WP_Optimize'),
             ],
-            'rybbit-analytics' => [
+            'integrate-rybbit' => [
                 'name' => 'Rybbit Analytics',
-                'slug' => 'rybbit-analytics',
+                'slug' => 'integrate-rybbit',
                 'required' => false,
                 'description' => 'Datenschutzfreundliche Website-Analyse.',
-                'check' => fn() => self::isPluginActive('rybbit-analytics/rybbit-analytics.php'),
-                'external' => 'https://github.com/maki-it/rybbit-wordpress-plugin/releases',
+                'check' => fn() => self::isPluginActive('integrate-rybbit/integrate-rybbit.php'),
             ],
 
             // === RECOMMENDED: Admin ===
@@ -777,7 +776,7 @@ class PluginServiceProvider extends ServiceProvider
             ],
             'Performance & Analytics' => [
                 'wp-optimize' => $this->plugins['wp-optimize'],
-                'rybbit-analytics' => $this->plugins['rybbit-analytics'],
+                'integrate-rybbit' => $this->plugins['integrate-rybbit'],
             ],
             'Sicherheit & Backup' => [
                 'solid-security' => $this->plugins['solid-security'],

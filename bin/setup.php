@@ -147,7 +147,7 @@ class ThemeSetup
             'name' => 'Performance & Analytics',
             'plugins' => [
                 'wp-optimize' => ['name' => 'WP-Optimize', 'description' => 'Datenbank & Caching'],
-                'rybbit-analytics' => ['name' => 'Rybbit Analytics', 'description' => 'DSGVO-konforme Analytics'],
+                'integrate-rybbit' => ['name' => 'Rybbit Analytics', 'description' => 'DSGVO-konforme Analytics'],
             ],
         ],
         'admin' => [
