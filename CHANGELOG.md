@@ -1,3 +1,9 @@
+## [2.0.3](https://github.com/raaaf/starter/compare/v2.0.2...v2.0.3) (2026-02-11)
+
+### Bug Fixes
+
+- use var() references for semantic tokens and bind prose colors to design tokens ([c41a8b0](https://github.com/raaaf/starter/commit/c41a8b0a66ec6d7144b93bf7831b0e69a93cf198))
+
 ## [2.0.2](https://github.com/raaaf/starter/compare/v2.0.1...v2.0.2) (2026-02-11)
 
 ### Bug Fixes
