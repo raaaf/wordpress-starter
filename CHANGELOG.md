@@ -1,3 +1,9 @@
+## [2.0.1](https://github.com/raaaf/starter/compare/v2.0.0...v2.0.1) (2026-02-11)
+
+### Bug Fixes
+
+- use correct wpackagist slug for Rybbit plugin (integrate-rybbit) ([181ce2e](https://github.com/raaaf/starter/commit/181ce2e18c17748c4ab207a80be8f996aef506b7))
+
 # [2.0.0](https://github.com/raaaf/starter/compare/v1.6.1...v2.0.0) (2026-01-30)
 
 ### Features
