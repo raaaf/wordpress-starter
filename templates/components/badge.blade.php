@@ -40,15 +40,15 @@
         'lg' => 'w-2.5 h-2.5',
     ];
 
-    // Filled variants - Light: subtle bg + dark text, Dark: strong bg + semantic light text (WCAG AA)
-    // Semantic text tokens (text-content-success etc.) auto-switch to light colors in dark mode
+    // Filled variants - Semantic tokens auto-switch between light/dark mode
+    // Brand/accent use dark: override for stronger contrast in dark mode
     $filledVariants = [
-        'gray' => 'bg-surface-tertiary text-content dark:bg-surface-tertiary dark:text-content',
-        'brand' => 'bg-surface-accent-subtle text-content-accent dark:bg-surface-accent',
-        'accent' => 'bg-surface-accent-subtle text-content-accent dark:bg-surface-accent',
-        'success' => 'bg-surface-success text-content-success dark:bg-surface-success-strong',
-        'warning' => 'bg-surface-warning text-content-warning dark:bg-surface-warning-strong',
-        'error' => 'bg-surface-error text-content-error dark:bg-surface-error-strong',
+        'gray' => 'bg-surface-tertiary text-content',
+        'brand' => 'bg-surface-accent-subtle text-content-accent dark:bg-surface-accent dark:text-content-on-color',
+        'accent' => 'bg-surface-accent-subtle text-content-accent dark:bg-surface-accent dark:text-content-on-color',
+        'success' => 'bg-surface-success text-content-success',
+        'warning' => 'bg-surface-warning text-content-warning',
+        'error' => 'bg-surface-error text-content-error',
     ];
 
     // Outline variants
