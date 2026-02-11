@@ -517,6 +517,402 @@
 }
 
 /* ============================================
+   CONTACT FORM 7 - Design System Integration
+   Styles CF7 output to match our Blade components
+   (input, textarea, select, checkbox, radio, button)
+   ============================================ */
+
+@layer components {
+  /* --- Form Layout --- */
+  /* autop is disabled (ContactForm7Configurator), so elements are direct children.
+     Spacing via adjacent sibling selector works for all patterns:
+     direct labels, <p> wrappers, or <div> wrappers. */
+  .wpcf7-form > * + * {
+    margin-top: 1.25rem;
+  }
+
+  /* No spacing between label and its following control wrap (they belong together) */
+  .wpcf7-form > label + .wpcf7-form-control-wrap {
+    margin-top: 0.375rem;
+  }
+
+  /* Also support manual <p> wrappers */
+  .wpcf7-form p {
+    margin-bottom: 0;
+  }
+
+  .wpcf7-form br {
+    display: none;
+  }
+
+  /* --- Labels --- */
+  /* Matches: input.blade.php label styles */
+  .wpcf7-form label {
+    display: block;
+    font-size: var(--typography-body-small-size);
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.375rem;
+  }
+
+  .wpcf7-form .wpcf7-form-control-wrap {
+    display: block;
+  }
+
+  /* --- Text Inputs --- */
+  /* Matches: input.blade.php md size, default state */
+  .wpcf7-form input[type='text'],
+  .wpcf7-form input[type='email'],
+  .wpcf7-form input[type='tel'],
+  .wpcf7-form input[type='url'],
+  .wpcf7-form input[type='number'],
+  .wpcf7-form input[type='date'],
+  .wpcf7-form input[type='time'],
+  .wpcf7-form input[type='password'] {
+    display: block;
+    width: 100%;
+    height: 2.5rem;
+    padding: 0 1rem;
+    font-size: var(--typography-body-size);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--input-md-radius);
+    box-shadow: var(--shadow-input);
+    transition: all 0.2s ease;
+  }
+
+  .wpcf7-form input[type='text']::placeholder,
+  .wpcf7-form input[type='email']::placeholder,
+  .wpcf7-form input[type='tel']::placeholder,
+  .wpcf7-form input[type='url']::placeholder,
+  .wpcf7-form input[type='number']::placeholder,
+  .wpcf7-form input[type='date']::placeholder,
+  .wpcf7-form input[type='time']::placeholder,
+  .wpcf7-form input[type='password']::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  .wpcf7-form input[type='text']:hover,
+  .wpcf7-form input[type='email']:hover,
+  .wpcf7-form input[type='tel']:hover,
+  .wpcf7-form input[type='url']:hover,
+  .wpcf7-form input[type='number']:hover,
+  .wpcf7-form input[type='date']:hover,
+  .wpcf7-form input[type='time']:hover,
+  .wpcf7-form input[type='password']:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-input-hover);
+  }
+
+  .wpcf7-form input[type='text']:focus,
+  .wpcf7-form input[type='email']:focus,
+  .wpcf7-form input[type='tel']:focus,
+  .wpcf7-form input[type='url']:focus,
+  .wpcf7-form input[type='number']:focus,
+  .wpcf7-form input[type='date']:focus,
+  .wpcf7-form input[type='time']:focus,
+  .wpcf7-form input[type='password']:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus-ring);
+  }
+
+  /* --- Textarea --- */
+  /* Matches: textarea.blade.php md size, default state */
+  .wpcf7-form textarea {
+    display: block;
+    width: 100%;
+    padding: var(--input-md-padding-y) var(--input-md-padding-x);
+    font-size: var(--typography-body-size);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--input-md-radius);
+    box-shadow: var(--shadow-input);
+    resize: vertical;
+    transition: all 0.2s ease;
+  }
+
+  .wpcf7-form textarea::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  .wpcf7-form textarea:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-input-hover);
+  }
+
+  .wpcf7-form textarea:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus-ring);
+  }
+
+  /* --- Select --- */
+  /* Matches: select.blade.php md size, default state */
+  .wpcf7-form select {
+    display: block;
+    width: 100%;
+    height: 2.5rem;
+    padding-left: 1rem;
+    padding-right: 2.5rem;
+    font-size: var(--typography-body-size);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--input-md-radius);
+    box-shadow: var(--shadow-input);
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .wpcf7-form select:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-input-hover);
+  }
+
+  .wpcf7-form select:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus-ring);
+  }
+
+  /* --- Checkbox & Radio Groups --- */
+  /* Matches: checkbox.blade.php / radio.blade.php layout */
+  .wpcf7-form .wpcf7-checkbox,
+  .wpcf7-form .wpcf7-radio {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+  }
+
+  .wpcf7-form .wpcf7-list-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .wpcf7-form .wpcf7-list-item label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0;
+    cursor: pointer;
+    font-size: var(--typography-body-size);
+    font-weight: 400;
+  }
+
+  .wpcf7-form .wpcf7-list-item input[type='checkbox'],
+  .wpcf7-form .wpcf7-list-item input[type='radio'] {
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: var(--bg-accent);
+    cursor: pointer;
+  }
+
+  .wpcf7-form .wpcf7-list-item input[type='checkbox']:focus-visible,
+  .wpcf7-form .wpcf7-list-item input[type='radio']:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus-ring);
+  }
+
+  /* --- Acceptance Checkbox --- */
+  .wpcf7-form .wpcf7-acceptance .wpcf7-list-item label {
+    font-size: var(--typography-body-small-size);
+    color: var(--text-secondary);
+  }
+
+  /* --- File Upload --- */
+  .wpcf7-form input[type='file'] {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: var(--typography-body-small-size);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    border: 1px dashed var(--border-default);
+    border-radius: var(--input-md-radius);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .wpcf7-form input[type='file']:hover {
+    border-color: var(--border-strong);
+  }
+
+  .wpcf7-form input[type='file']:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus-ring);
+  }
+
+  .wpcf7-form input[type='file']::file-selector-button {
+    padding: 0.25rem 0.75rem;
+    margin-right: 0.75rem;
+    font-size: var(--typography-body-small-size);
+    font-weight: 500;
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .wpcf7-form input[type='file']::file-selector-button:hover {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-strong);
+  }
+
+  /* --- Submit Button --- */
+  /* Matches: button.blade.php primary variant, md size */
+  .wpcf7-form input[type='submit'] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--button-md-padding-y) var(--button-md-padding-x);
+    min-height: var(--button-md-min-height);
+    font-size: var(--typography-body-small-size);
+    font-weight: 600;
+    color: var(--text-on-color);
+    background: linear-gradient(
+      to bottom,
+      var(--gradient-primary-start),
+      var(--gradient-primary-end)
+    );
+    border: 1px solid var(--border-default);
+    border-radius: var(--button-md-radius);
+    box-shadow: var(--shadow-button);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+  }
+
+  .wpcf7-form input[type='submit']:hover {
+    background: linear-gradient(
+      to bottom,
+      var(--gradient-primary-hover-start),
+      var(--gradient-primary-hover-end)
+    );
+    box-shadow: var(--shadow-button-hover);
+  }
+
+  .wpcf7-form input[type='submit']:active {
+    background: linear-gradient(
+      to bottom,
+      var(--gradient-primary-active-start),
+      var(--gradient-primary-active-end)
+    );
+    box-shadow: var(--shadow-inner);
+  }
+
+  .wpcf7-form input[type='submit']:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus-ring);
+  }
+
+  .wpcf7-form.submitting input[type='submit'] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* --- Validation Error States --- */
+  /* Matches: input.blade.php error state */
+  .wpcf7-form .wpcf7-not-valid {
+    border-color: var(--border-error) !important;
+  }
+
+  .wpcf7-form .wpcf7-not-valid:focus {
+    border-color: var(--border-error) !important;
+    box-shadow: var(--shadow-focus-ring-error) !important;
+  }
+
+  .wpcf7-form .wpcf7-not-valid-tip {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: var(--typography-body-small-size);
+    color: var(--text-error);
+  }
+
+  /* --- Quiz Field --- */
+  .wpcf7-form .wpcf7-quiz-label {
+    display: block;
+    font-size: var(--typography-body-small-size);
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.375rem;
+  }
+
+  /* --- Form Response Output --- */
+  .wpcf7-form .wpcf7-response-output {
+    margin: 1.25rem 0 0;
+    padding: 0.75rem 1rem;
+    font-size: var(--typography-body-small-size);
+    border-radius: var(--radius-md);
+    border-width: 1px;
+    border-style: solid;
+  }
+
+  .wpcf7-form .wpcf7-response-output:empty {
+    display: none;
+  }
+
+  .wpcf7 .wpcf7-response-output,
+  .wpcf7.sent .wpcf7-response-output {
+    color: var(--text-success);
+    background-color: var(--bg-success);
+    border-color: var(--border-success);
+  }
+
+  .wpcf7.invalid .wpcf7-response-output,
+  .wpcf7.unaccepted .wpcf7-response-output {
+    color: var(--text-error);
+    background-color: var(--bg-error);
+    border-color: var(--border-error);
+  }
+
+  .wpcf7.failed .wpcf7-response-output,
+  .wpcf7.aborted .wpcf7-response-output,
+  .wpcf7.spam .wpcf7-response-output {
+    color: var(--text-error);
+    background-color: var(--bg-error);
+    border-color: var(--border-error);
+  }
+
+  /* --- Spinner --- */
+  .wpcf7-form .wpcf7-spinner {
+    display: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-left: 0.75rem;
+    border: 2px solid var(--border-default);
+    border-top-color: var(--border-accent);
+    border-radius: 50%;
+    animation: wpcf7-spin 0.6s linear infinite;
+    vertical-align: middle;
+    background: none;
+  }
+
+  .wpcf7-form.submitting .wpcf7-spinner {
+    display: inline-block;
+  }
+
+  @keyframes wpcf7-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+/* ============================================
    MEDIUM-ZOOM LIGHTBOX STYLES
    ============================================ */
 
