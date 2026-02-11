@@ -99,6 +99,26 @@ function extractStringValue(token) {
 }
 
 /**
+ * Extract color value or resolve alias references to var().
+ * Handles primitive gradient tokens where $value is "{color.accent.500}".
+ */
+function extractColorOrAlias(token) {
+  if (!token || token.$type !== 'color') return null;
+
+  const value = token.$value;
+
+  // Handle alias references like "{color.accent.500}"
+  if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
+    const path = value.slice(1, -1); // Remove braces
+    const varName = path.replace(/\./g, '-'); // dots to dashes
+    return `var(--${varName})`;
+  }
+
+  // Fall back to regular color extraction
+  return extractColorValue(token);
+}
+
+/**
  * Recursively process nested token structure
  * Returns flat object with CSS variable names as keys
  */
@@ -254,7 +274,7 @@ const TYPOGRAPHY_TOKENS = `
 const COMPONENT_TOKENS = `
   /* ============================================
      COMPONENT TOKENS
-     Gradients, shadows, and component-specific values
+     Shadows and component-specific values
      ============================================ */
 
   /* Shadows */
@@ -271,65 +291,57 @@ const COMPONENT_TOKENS = `
   --shadow-dropdown: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -4px rgba(0, 0, 0, 0.1);
   --shadow-modal: 0px 25px 50px -12px rgba(0, 0, 0, 0.25);
 
-  /* Gradients - Primary Button */
-  --gradient-primary-start: var(--color-accent-500);
-  --gradient-primary-end: var(--color-accent-600);
-  --gradient-primary-hover-start: var(--color-accent-600);
-  --gradient-primary-hover-end: var(--color-accent-700);
-  --gradient-primary-active-start: var(--color-accent-700);
-  --gradient-primary-active-end: var(--color-accent-800);
-
   /* Button Sizes */
-  --button-sm-padding-x: 12px;
+  --button-sm-padding-x: var(--spacing-3);
   --button-sm-padding-y: 4px;
-  --button-sm-radius: 4px;
-  --button-sm-min-height: 32px;
-  --button-sm-gap: 6px;
-  --button-md-padding-x: 20px;
-  --button-md-padding-y: 10px;
-  --button-md-radius: 8px;
-  --button-md-min-height: 40px;
+  --button-sm-radius: var(--radius-sm);
+  --button-sm-min-height: var(--spacing-8);
+  --button-sm-gap: var(--spacing-1-5);
+  --button-md-padding-x: var(--spacing-5);
+  --button-md-padding-y: var(--spacing-2-5);
+  --button-md-radius: var(--radius-md);
+  --button-md-min-height: var(--spacing-10);
   --button-md-gap: 8px;
-  --button-lg-padding-x: 24px;
-  --button-lg-padding-y: 12px;
-  --button-lg-radius: 12px;
-  --button-lg-min-height: 48px;
-  --button-lg-gap: 10px;
+  --button-lg-padding-x: var(--spacing-6);
+  --button-lg-padding-y: var(--spacing-3);
+  --button-lg-radius: var(--radius-lg);
+  --button-lg-min-height: var(--spacing-12);
+  --button-lg-gap: var(--spacing-2-5);
 
   /* Input Sizes */
-  --input-sm-padding-x: 10px;
-  --input-sm-padding-y: 6px;
-  --input-sm-radius: 4px;
-  --input-md-padding-x: 12px;
-  --input-md-padding-y: 10px;
-  --input-md-radius: 8px;
-  --input-lg-padding-x: 16px;
-  --input-lg-padding-y: 12px;
-  --input-lg-radius: 12px;
+  --input-sm-padding-x: var(--spacing-2-5);
+  --input-sm-padding-y: var(--spacing-1-5);
+  --input-sm-radius: var(--radius-sm);
+  --input-md-padding-x: var(--spacing-3);
+  --input-md-padding-y: var(--spacing-2-5);
+  --input-md-radius: var(--radius-md);
+  --input-lg-padding-x: var(--spacing-4);
+  --input-lg-padding-y: var(--spacing-3);
+  --input-lg-radius: var(--radius-lg);
 
   /* Badge Sizes */
-  --badge-sm-padding-x: 6px;
-  --badge-sm-padding-y: 2px;
-  --badge-sm-radius: 4px;
+  --badge-sm-padding-x: var(--spacing-1-5);
+  --badge-sm-padding-y: var(--spacing-0-5);
+  --badge-sm-radius: var(--radius-sm);
   --badge-sm-gap: 4px;
-  --badge-md-padding-x: 10px;
+  --badge-md-padding-x: var(--spacing-2-5);
   --badge-md-padding-y: 4px;
-  --badge-md-radius: 6px;
-  --badge-md-gap: 6px;
-  --badge-lg-padding-x: 12px;
-  --badge-lg-padding-y: 6px;
-  --badge-lg-radius: 8px;
+  --badge-md-radius: var(--radius-default);
+  --badge-md-gap: var(--spacing-1-5);
+  --badge-lg-padding-x: var(--spacing-3);
+  --badge-lg-padding-y: var(--spacing-1-5);
+  --badge-lg-radius: var(--radius-md);
   --badge-lg-gap: 8px;
 
   /* Card Tokens */
-  --card-bg: #ffffff;
-  --card-border: #e5e5e5;
-  --card-radius: 12px;
-  --card-padding: 20px;
-  --card-gap: 16px;
-  --card-media-radius: 8px;
-  --card-footer-gap: 12px;
-  --card-footer-padding-top: 16px;
+  --card-bg: var(--bg-primary);
+  --card-border: var(--border-default);
+  --card-radius: var(--radius-lg);
+  --card-padding: var(--spacing-5);
+  --card-gap: var(--spacing-4);
+  --card-media-radius: var(--radius-md);
+  --card-footer-gap: var(--spacing-3);
+  --card-footer-padding-top: var(--spacing-4);
 `;
 
 /**
@@ -354,8 +366,8 @@ function validateAndFix(css) {
     }
   }
 
-  // 2. Check for invalid color values
-  const colorRegex = /--(?:color|bg|text|border|icon)-[\w-]+:\s*([^;]+);/g;
+  // 2. Check for invalid color values (exclude border-width which is not a color)
+  const colorRegex = /--(?:color|bg|text|border-(?!width)[\w-]*|border-default|icon)-[\w-]*:\s*([^;]+);/g;
   while ((match = colorRegex.exec(css)) !== null) {
     const value = match[1].trim();
     // Skip CSS variable references
@@ -479,6 +491,34 @@ function transform() {
     }
   }
 
+  // Process primitives - borderWidth
+  const primitiveBorderWidth = flattenTokens(
+    primitives.borderWidth || {},
+    '',
+    (token) => extractNumericValue(token, 'px')
+  );
+
+  // Process primitives - opacity (values 0-100, stored as-is)
+  const primitiveOpacity = flattenTokens(
+    primitives.opacity || {},
+    '',
+    (token) => extractNumericValue(token, '')
+  );
+
+  // Process primitives - sizing (icon sizes)
+  const primitiveSizing = flattenTokens(
+    primitives.sizing || {},
+    '',
+    (token) => extractNumericValue(token, 'px')
+  );
+
+  // Process primitives - gradient (alias references to color tokens)
+  const primitiveGradient = flattenTokens(
+    primitives.gradient || {},
+    '',
+    extractColorOrAlias
+  );
+
   console.log('Processing semantic tokens (light mode)...');
 
   // Process semantic tokens - light mode (use var() references to primitives)
@@ -531,6 +571,18 @@ ${generateCss(primitiveFontWeight, 'font-weight')}
 
   /* Font Family */
 ${generateCss(primitiveFontFamily, 'font-family')}
+
+  /* Border Width */
+${generateCss(primitiveBorderWidth, 'border-width')}
+
+  /* Opacity */
+${generateCss(primitiveOpacity, 'opacity')}
+
+  /* Sizing */
+${generateCss(primitiveSizing, 'sizing')}
+
+  /* Gradients */
+${generateCss(primitiveGradient, 'gradient')}
 ${TYPOGRAPHY_TOKENS}
 ${COMPONENT_TOKENS}
 }
@@ -656,6 +708,18 @@ ${generateCss(primitiveFontWeight, 'font-weight')}
 
   /* Font Family */
 ${generateCss(primitiveFontFamily, 'font-family')}
+
+  /* Border Width */
+${generateCss(primitiveBorderWidth, 'border-width')}
+
+  /* Opacity */
+${generateCss(primitiveOpacity, 'opacity')}
+
+  /* Sizing */
+${generateCss(primitiveSizing, 'sizing')}
+
+  /* Gradients */
+${generateCss(primitiveGradient, 'gradient')}
 ${TYPOGRAPHY_TOKENS}
 ${COMPONENT_TOKENS}
 }
@@ -728,6 +792,10 @@ ${generateCssImportant(lightIcon, 'icon')}
     fontSize: Object.keys(primitiveFontSize).length,
     fontWeight: Object.keys(primitiveFontWeight).length,
     fontFamily: Object.keys(primitiveFontFamily).length,
+    borderWidth: Object.keys(primitiveBorderWidth).length,
+    opacity: Object.keys(primitiveOpacity).length,
+    sizing: Object.keys(primitiveSizing).length,
+    gradient: Object.keys(primitiveGradient).length,
     lightSemanticColors:
       Object.keys(lightBg).length +
       Object.keys(lightText).length +
@@ -747,6 +815,10 @@ ${generateCssImportant(lightIcon, 'icon')}
   console.log(`  Font sizes:       ${stats.fontSize}`);
   console.log(`  Font weights:     ${stats.fontWeight}`);
   console.log(`  Font families:    ${stats.fontFamily}`);
+  console.log(`  Border widths:    ${stats.borderWidth}`);
+  console.log(`  Opacity:          ${stats.opacity}`);
+  console.log(`  Sizing:           ${stats.sizing}`);
+  console.log(`  Gradients:        ${stats.gradient}`);
   console.log(`  Light semantic:   ${stats.lightSemanticColors}`);
   console.log(`  Dark semantic:    ${stats.darkSemanticColors}`);
   console.log(`\nOutput written to: ${OUTPUT_FILE}`);

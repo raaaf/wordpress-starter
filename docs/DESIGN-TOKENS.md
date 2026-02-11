@@ -10,13 +10,13 @@ Figma Variables → JSON Export → transform-tokens.js → tokens.css → Tailw
 
 ## Dateien
 
-| Datei                                         | Beschreibung                                     |
-| --------------------------------------------- | ------------------------------------------------ |
-| `config/design-tokens/primitives.tokens.json` | Basis-Werte: Farben, Spacing, Radius, Typography |
-| `config/design-tokens/light.tokens.json`      | Semantische Tokens für Light Mode                |
-| `config/design-tokens/dark.tokens.json`       | Semantische Tokens für Dark Mode                 |
-| `scripts/transform-tokens.js`                 | Konvertiert JSON → CSS                           |
-| `resources/css/tokens.css`                    | Generierte CSS Custom Properties                 |
+| Datei                                         | Beschreibung                                                                               |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `config/design-tokens/primitives.tokens.json` | Basis-Werte: Farben, Spacing, Radius, Typography, Border Width, Opacity, Sizing, Gradients |
+| `config/design-tokens/light.tokens.json`      | Semantische Tokens für Light Mode                                                          |
+| `config/design-tokens/dark.tokens.json`       | Semantische Tokens für Dark Mode                                                           |
+| `scripts/transform-tokens.js`                 | Konvertiert JSON → CSS                                                                     |
+| `resources/css/tokens.css`                    | Generierte CSS Custom Properties                                                           |
 
 ## Workflow
 

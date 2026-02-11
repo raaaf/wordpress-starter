@@ -5,7 +5,7 @@
  * Run: node scripts/transform-tokens.js
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-02-11T13:34:35.877Z
+ * Generated: 2026-02-11T14:16:19.932Z
  */
 
 /* ============================================
@@ -122,6 +122,50 @@
   --font-family-body: 'Inter';
   --font-family-mono: 'JetBrains Mono';
 
+  /* Border Width */
+  --border-width-0: 0px;
+  --border-width-1: 1px;
+  --border-width-2: 2px;
+  --border-width-4: 4px;
+
+  /* Opacity */
+  --opacity-0: 0;
+  --opacity-5: 5;
+  --opacity-10: 10;
+  --opacity-25: 25;
+  --opacity-50: 50;
+  --opacity-75: 75;
+  --opacity-100: 100;
+
+  /* Sizing */
+  --sizing-icon-xs: 12px;
+  --sizing-icon-sm: 14px;
+  --sizing-icon-md: 16px;
+  --sizing-icon-lg: 20px;
+  --sizing-icon-xl: 24px;
+
+  /* Gradients */
+  --gradient-primary-start: var(--color-accent-500);
+  --gradient-primary-end: var(--color-accent-600);
+  --gradient-primary-hover-start: var(--color-accent-600);
+  --gradient-primary-hover-end: var(--color-accent-700);
+  --gradient-primary-active-start: var(--color-accent-700);
+  --gradient-primary-active-end: var(--color-accent-800);
+  --gradient-secondary-start: var(--color-white);
+  --gradient-secondary-end: var(--color-gray-100);
+  --gradient-secondary-hover-start: var(--color-gray-100);
+  --gradient-secondary-hover-end: var(--color-gray-200);
+  --gradient-accent-start: var(--color-accent-500);
+  --gradient-accent-end: var(--color-accent-600);
+  --gradient-accent-hover-start: var(--color-accent-600);
+  --gradient-accent-hover-end: var(--color-accent-700);
+  --gradient-subtle-start: var(--color-white);
+  --gradient-subtle-end: var(--color-gray-100);
+  --gradient-dark-start: var(--color-gray-800);
+  --gradient-dark-end: var(--color-gray-900);
+  --gradient-shine-start: var(--color-white-alpha-15);
+  --gradient-shine-end: var(--color-transparent);
+
   /* ============================================
      TYPOGRAPHY COMPOSITE TOKENS
      Standard typography styles using primitives
@@ -202,7 +246,7 @@
 
   /* ============================================
      COMPONENT TOKENS
-     Gradients, shadows, and component-specific values
+     Shadows and component-specific values
      ============================================ */
 
   /* Shadows */
@@ -222,65 +266,57 @@
   --shadow-dropdown: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -4px rgba(0, 0, 0, 0.1);
   --shadow-modal: 0px 25px 50px -12px rgba(0, 0, 0, 0.25);
 
-  /* Gradients - Primary Button */
-  --gradient-primary-start: var(--color-accent-500);
-  --gradient-primary-end: var(--color-accent-600);
-  --gradient-primary-hover-start: var(--color-accent-600);
-  --gradient-primary-hover-end: var(--color-accent-700);
-  --gradient-primary-active-start: var(--color-accent-700);
-  --gradient-primary-active-end: var(--color-accent-800);
-
   /* Button Sizes */
-  --button-sm-padding-x: 12px;
+  --button-sm-padding-x: var(--spacing-3);
   --button-sm-padding-y: 4px;
-  --button-sm-radius: 4px;
-  --button-sm-min-height: 32px;
-  --button-sm-gap: 6px;
-  --button-md-padding-x: 20px;
-  --button-md-padding-y: 10px;
-  --button-md-radius: 8px;
-  --button-md-min-height: 40px;
+  --button-sm-radius: var(--radius-sm);
+  --button-sm-min-height: var(--spacing-8);
+  --button-sm-gap: var(--spacing-1-5);
+  --button-md-padding-x: var(--spacing-5);
+  --button-md-padding-y: var(--spacing-2-5);
+  --button-md-radius: var(--radius-md);
+  --button-md-min-height: var(--spacing-10);
   --button-md-gap: 8px;
-  --button-lg-padding-x: 24px;
-  --button-lg-padding-y: 12px;
-  --button-lg-radius: 12px;
-  --button-lg-min-height: 48px;
-  --button-lg-gap: 10px;
+  --button-lg-padding-x: var(--spacing-6);
+  --button-lg-padding-y: var(--spacing-3);
+  --button-lg-radius: var(--radius-lg);
+  --button-lg-min-height: var(--spacing-12);
+  --button-lg-gap: var(--spacing-2-5);
 
   /* Input Sizes */
-  --input-sm-padding-x: 10px;
-  --input-sm-padding-y: 6px;
-  --input-sm-radius: 4px;
-  --input-md-padding-x: 12px;
-  --input-md-padding-y: 10px;
-  --input-md-radius: 8px;
-  --input-lg-padding-x: 16px;
-  --input-lg-padding-y: 12px;
-  --input-lg-radius: 12px;
+  --input-sm-padding-x: var(--spacing-2-5);
+  --input-sm-padding-y: var(--spacing-1-5);
+  --input-sm-radius: var(--radius-sm);
+  --input-md-padding-x: var(--spacing-3);
+  --input-md-padding-y: var(--spacing-2-5);
+  --input-md-radius: var(--radius-md);
+  --input-lg-padding-x: var(--spacing-4);
+  --input-lg-padding-y: var(--spacing-3);
+  --input-lg-radius: var(--radius-lg);
 
   /* Badge Sizes */
-  --badge-sm-padding-x: 6px;
-  --badge-sm-padding-y: 2px;
-  --badge-sm-radius: 4px;
+  --badge-sm-padding-x: var(--spacing-1-5);
+  --badge-sm-padding-y: var(--spacing-0-5);
+  --badge-sm-radius: var(--radius-sm);
   --badge-sm-gap: 4px;
-  --badge-md-padding-x: 10px;
+  --badge-md-padding-x: var(--spacing-2-5);
   --badge-md-padding-y: 4px;
-  --badge-md-radius: 6px;
-  --badge-md-gap: 6px;
-  --badge-lg-padding-x: 12px;
-  --badge-lg-padding-y: 6px;
-  --badge-lg-radius: 8px;
+  --badge-md-radius: var(--radius-default);
+  --badge-md-gap: var(--spacing-1-5);
+  --badge-lg-padding-x: var(--spacing-3);
+  --badge-lg-padding-y: var(--spacing-1-5);
+  --badge-lg-radius: var(--radius-md);
   --badge-lg-gap: 8px;
 
   /* Card Tokens */
-  --card-bg: #ffffff;
-  --card-border: #e5e5e5;
-  --card-radius: 12px;
-  --card-padding: 20px;
-  --card-gap: 16px;
-  --card-media-radius: 8px;
-  --card-footer-gap: 12px;
-  --card-footer-padding-top: 16px;
+  --card-bg: var(--bg-primary);
+  --card-border: var(--border-default);
+  --card-radius: var(--radius-lg);
+  --card-padding: var(--spacing-5);
+  --card-gap: var(--spacing-4);
+  --card-media-radius: var(--radius-md);
+  --card-footer-gap: var(--spacing-3);
+  --card-footer-padding-top: var(--spacing-4);
 }
 
 /* ============================================
