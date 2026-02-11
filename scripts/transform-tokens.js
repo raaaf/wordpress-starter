@@ -23,6 +23,24 @@ const OUTPUT_FILE = join(ROOT, 'resources/css/tokens.css');
 const OUTPUT_EDITOR_FILE = join(ROOT, 'resources/css/tokens-editor.css');
 
 /**
+ * Extract CSS var() reference from Figma token alias data.
+ * Converts aliasData.targetVariableName (e.g. "color/accent/500")
+ * to var(--color-accent-500). Falls back to resolved hex value.
+ */
+function extractColorAsReference(token) {
+  if (!token || token.$type !== 'color') return null;
+
+  const aliasData = token.$extensions?.['com.figma.aliasData'];
+  if (aliasData?.targetVariableName) {
+    const varName = aliasData.targetVariableName.replace(/\//g, '-');
+    return `var(--${varName})`;
+  }
+
+  // Fallback to resolved hex value if no alias
+  return extractColorValue(token);
+}
+
+/**
  * Extract hex color value from Figma token $value object
  * Handles both simple values and complex color objects with alpha
  */
@@ -463,19 +481,19 @@ function transform() {
 
   console.log('Processing semantic tokens (light mode)...');
 
-  // Process semantic tokens - light mode
-  const lightBg = flattenTokens(lightTokens.bg || {}, '', extractColorValue);
-  const lightText = flattenTokens(lightTokens.text || {}, '', extractColorValue);
-  const lightBorder = flattenTokens(lightTokens.border || {}, '', extractColorValue);
-  const lightIcon = flattenTokens(lightTokens.icon || {}, '', extractColorValue);
+  // Process semantic tokens - light mode (use var() references to primitives)
+  const lightBg = flattenTokens(lightTokens.bg || {}, '', extractColorAsReference);
+  const lightText = flattenTokens(lightTokens.text || {}, '', extractColorAsReference);
+  const lightBorder = flattenTokens(lightTokens.border || {}, '', extractColorAsReference);
+  const lightIcon = flattenTokens(lightTokens.icon || {}, '', extractColorAsReference);
 
   console.log('Processing semantic tokens (dark mode)...');
 
-  // Process semantic tokens - dark mode
-  const darkBg = flattenTokens(darkTokens.bg || {}, '', extractColorValue);
-  const darkText = flattenTokens(darkTokens.text || {}, '', extractColorValue);
-  const darkBorder = flattenTokens(darkTokens.border || {}, '', extractColorValue);
-  const darkIcon = flattenTokens(darkTokens.icon || {}, '', extractColorValue);
+  // Process semantic tokens - dark mode (use var() references to primitives)
+  const darkBg = flattenTokens(darkTokens.bg || {}, '', extractColorAsReference);
+  const darkText = flattenTokens(darkTokens.text || {}, '', extractColorAsReference);
+  const darkBorder = flattenTokens(darkTokens.border || {}, '', extractColorAsReference);
+  const darkIcon = flattenTokens(darkTokens.icon || {}, '', extractColorAsReference);
 
   console.log('Generating CSS...');
 

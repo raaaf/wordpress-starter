@@ -14,6 +14,43 @@
 @import 'tailwindcss';
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
+
+/*
+ * Prose Color Integration
+ *
+ * Override Tailwind Typography defaults with design tokens.
+ * This ensures headings, links, and other prose elements
+ * automatically use the correct colors from the token system.
+ */
+.prose {
+  --tw-prose-body: var(--text-primary);
+  --tw-prose-headings: var(--text-primary);
+  --tw-prose-links: var(--text-link);
+  --tw-prose-bold: var(--text-primary);
+  --tw-prose-counters: var(--text-secondary);
+  --tw-prose-bullets: var(--text-secondary);
+  --tw-prose-hr: var(--border-default);
+  --tw-prose-quotes: var(--text-primary);
+  --tw-prose-quote-borders: var(--border-default);
+  --tw-prose-captions: var(--text-secondary);
+  --tw-prose-th-borders: var(--border-default);
+  --tw-prose-td-borders: var(--border-default);
+}
+
+/* Auto-inherit for prose inside inverse/brand sections */
+.text-content-inverse .prose,
+.text-content-on-color .prose {
+  --tw-prose-body: inherit;
+  --tw-prose-headings: inherit;
+  --tw-prose-lead: inherit;
+  --tw-prose-links: inherit;
+  --tw-prose-bold: inherit;
+  --tw-prose-counters: inherit;
+  --tw-prose-bullets: inherit;
+  --tw-prose-quotes: inherit;
+  color: inherit;
+}
+
 @source "../templates";
 @source "../../blocks";
 @source "../../safelist.txt";
