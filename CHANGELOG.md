@@ -1,3 +1,13 @@
+# [2.1.0](https://github.com/raaaf/starter/compare/v2.0.3...v2.1.0) (2026-02-11)
+
+### Bug Fixes
+
+- dark mode variant, WCAG contrast overrides, and semantic token usage in templates ([0d3dee7](https://github.com/raaaf/starter/commit/0d3dee70500b0e7e9ebc19d2b283191ece4b0241))
+
+### Features
+
+- **tokens:** add borderWidth, opacity, sizing, and gradient token processing ([888b2b6](https://github.com/raaaf/starter/commit/888b2b638980dda07df2ac7d1a4f0a5afb6e1f40))
+
 ## [2.0.3](https://github.com/raaaf/starter/compare/v2.0.2...v2.0.3) (2026-02-11)
 
 ### Bug Fixes
