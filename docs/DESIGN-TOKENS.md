@@ -10,14 +10,13 @@ Figma Variables → JSON Export → transform-tokens.js → tokens.css → Tailw
 
 ## Dateien
 
-| Datei | Beschreibung |
-|-------|--------------|
+| Datei                                         | Beschreibung                                     |
+| --------------------------------------------- | ------------------------------------------------ |
 | `config/design-tokens/primitives.tokens.json` | Basis-Werte: Farben, Spacing, Radius, Typography |
-| `config/design-tokens/light.tokens.json` | Semantische Tokens für Light Mode |
-| `config/design-tokens/dark.tokens.json` | Semantische Tokens für Dark Mode |
-| `config/design-tokens/brand.json` | Vereinfachte Brand-Konfiguration (Fallback) |
-| `scripts/transform-tokens.js` | Konvertiert JSON → CSS |
-| `resources/css/tokens.css` | Generierte CSS Custom Properties |
+| `config/design-tokens/light.tokens.json`      | Semantische Tokens für Light Mode                |
+| `config/design-tokens/dark.tokens.json`       | Semantische Tokens für Dark Mode                 |
+| `scripts/transform-tokens.js`                 | Konvertiert JSON → CSS                           |
+| `resources/css/tokens.css`                    | Generierte CSS Custom Properties                 |
 
 ## Workflow
 
@@ -73,10 +72,11 @@ Die generierten CSS Custom Properties findest du in `resources/css/tokens.css`.
 ```
 
 Wird zu:
+
 ```css
 :root {
-  --color-gray-50: #F9FAFB;
-  --color-gray-100: #F3F4F6;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
   --spacing-1: 4px;
   --spacing-2: 8px;
 }
@@ -84,30 +84,22 @@ Wird zu:
 
 ### Semantische Tokens (Light/Dark)
 
-```json
-{
-  "bg": {
-    "surface": { "$type": "color", "$value": { "hex": "#FFFFFF" } },
-    "surface-secondary": { "$type": "color", "$value": { "hex": "#F9FAFB" } }
-  },
-  "text": {
-    "content": { "$type": "color", "$value": { "hex": "#1F2937" } }
-  }
-}
-```
+Semantische Tokens referenzieren Primitives via Figma-Alias-Daten. Der Transformer generiert `var()`-Referenzen statt aufgelöster Hex-Werte, sodass Änderungen an Primitives automatisch kaskadieren.
 
-Wird zu:
 ```css
-:root, [data-theme="light"] {
-  --bg-surface: #FFFFFF;
-  --bg-surface-secondary: #F9FAFB;
-  --text-content: #1F2937;
+:root,
+[data-theme='light'] {
+  --bg-primary: var(--color-white);
+  --bg-secondary: var(--color-gray-50);
+  --bg-brand: var(--color-accent-500);
+  --text-primary: var(--color-gray-900);
 }
 
-[data-theme="dark"] {
-  --bg-surface: #111827;
-  --bg-surface-secondary: #1F2937;
-  --text-content: #F9FAFB;
+[data-theme='dark'] {
+  --bg-primary: var(--color-gray-900);
+  --bg-secondary: var(--color-gray-800);
+  --bg-brand: var(--color-accent-500);
+  --text-primary: var(--color-white);
 }
 ```
 
@@ -135,6 +127,7 @@ Wird zu:
 ## Verfügbare Tokens
 
 ### Hintergründe (`bg-*`)
+
 - `bg-surface` - Standard-Hintergrund
 - `bg-surface-secondary` - Sekundärer Hintergrund
 - `bg-surface-tertiary` - Tertiärer Hintergrund
@@ -143,6 +136,7 @@ Wird zu:
 - `bg-surface-inverse` - Invertierter Hintergrund
 
 ### Text (`text-*`)
+
 - `text-content` - Standard-Textfarbe
 - `text-content-secondary` - Gedämpfter Text
 - `text-content-tertiary` - Noch dezenter
@@ -151,11 +145,13 @@ Wird zu:
 - `text-content-link` - Link-Farbe
 
 ### Rahmen (`border-*`)
+
 - `border-line` - Standard-Rahmen
 - `border-line-secondary` - Dezenter Rahmen
 - `border-line-brand` - Markenfarbe
 
 ### Icons (`icon-*`)
+
 - `icon-default` - Standard-Icon-Farbe
 - `icon-secondary` - Gedämpft
 - `icon-brand` - Markenfarbe
@@ -171,27 +167,6 @@ Dark Mode wird automatisch unterstützt:
 {{-- In header.blade.php --}}
 <html data-theme="{{ get_field('color_scheme', 'option') ?: 'system' }}">
 ```
-
-## Ohne Figma (brand.json)
-
-Falls du keine Figma-Tokens hast, kannst du `config/design-tokens/brand.json` direkt bearbeiten:
-
-```json
-{
-  "colors": {
-    "primary": { "value": "#0066CC" },
-    "secondary": { "value": "#00A0D2" },
-    "accent": { "value": "#FF6B35" }
-  },
-  "typography": {
-    "fontFamily": {
-      "sans": "Lato, ui-sans-serif, system-ui, sans-serif"
-    }
-  }
-}
-```
-
-> **Hinweis:** Diese Datei wird aktuell nicht automatisch verarbeitet. Für volle Token-Unterstützung verwende die Figma-Export-Methode.
 
 ## Tipps
 
