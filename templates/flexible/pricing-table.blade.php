@@ -56,7 +56,7 @@
                     </div>
 
                     @if($features)
-                        <div class="flex-grow mb-8 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_li]:pl-1 {{ $isFeatured ? 'text-content-inverse [&_li]:marker:text-white' : 'text-content [&_li]:marker:text-content-brand' }}">
+                        <div class="flex-grow mb-8 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_li]:pl-1 {{ $isFeatured ? 'text-content-inverse [&_li]:marker:text-content-inverse' : 'text-content [&_li]:marker:text-content-brand' }}">
                             {!! $features !!}
                         </div>
                     @endif

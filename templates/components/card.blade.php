@@ -52,17 +52,17 @@
     ];
 
     $sizes = [
-        'sm' => ['padding' => 'p-[var(--spacing-4)]', 'imageHeight' => 'h-32', 'gap' => 'gap-[var(--spacing-3)]'],
-        'md' => ['padding' => 'p-[var(--card-padding)]', 'imageHeight' => 'h-40', 'gap' => 'gap-[var(--card-gap)]'],
-        'lg' => ['padding' => 'p-[var(--spacing-8)]', 'imageHeight' => 'h-48', 'gap' => 'gap-[var(--spacing-5)]'],
+        'sm' => ['padding' => 'p-4', 'imageHeight' => 'h-32', 'gap' => 'gap-3'],
+        'md' => ['padding' => 'p-5', 'imageHeight' => 'h-40', 'gap' => 'gap-4'],
+        'lg' => ['padding' => 'p-8', 'imageHeight' => 'h-48', 'gap' => 'gap-5'],
     ];
 
-    // Legacy padding support - use token references
+    // Legacy padding support
     $legacyPaddings = [
         'none' => '',
-        'sm' => 'p-[var(--spacing-4)]',
-        'md' => 'p-[var(--card-padding)]',
-        'lg' => 'p-[var(--spacing-8)]',
+        'sm' => 'p-4',
+        'md' => 'p-5',
+        'lg' => 'p-8',
     ];
 
     $sizeConfig = $sizes[$size] ?? $sizes['md'];

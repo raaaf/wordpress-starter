@@ -15,6 +15,9 @@
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
 
+/* Dark mode via data-theme attribute (matches tokens.css selector) */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
 /*
  * Prose Color Integration
  *
@@ -373,6 +376,26 @@
   /* Styleguide description paragraph - spacing to content */
   .styleguide-section > p {
     margin-bottom: 1.5rem;
+  }
+
+  /* ============================================
+     DARK MODE CONTRAST OVERRIDES
+     Fixes Figma token values that don't meet WCAG AA
+     in dark mode (disabled too dark, ring-offset white)
+     ============================================ */
+
+  [data-theme='dark'] {
+    --text-disabled: var(--color-gray-500);
+    --border-disabled: var(--color-gray-600);
+    --tw-ring-offset-color: var(--bg-primary);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --text-disabled: var(--color-gray-500);
+      --border-disabled: var(--color-gray-600);
+      --tw-ring-offset-color: var(--bg-primary);
+    }
   }
 }
 
