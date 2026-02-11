@@ -9,24 +9,41 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
- * Tests that all namespace references use the default 'WordpressStarter' namespace.
+ * Tests that all namespace references consistently use the project namespace.
  *
- * This ensures the starter theme is correctly configured before the setup script
- * transforms namespaces to a project-specific value.
+ * The expected namespace is read from composer.json PSR-4 autoload config,
+ * so this test works both for the original starter theme and after setup.
  */
 final class NamespaceConsistencyTest extends TestCase
 {
-    private const DEFAULT_NAMESPACE = 'WordpressStarter';
-
     private string $basePath;
+    private string $projectNamespace;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->basePath = dirname(__DIR__, 2);
+        $this->projectNamespace = $this->resolveProjectNamespace();
     }
 
-    public function testPhpFilesUseDefaultNamespace(): void
+    /**
+     * Read the project namespace from composer.json PSR-4 autoload.
+     */
+    private function resolveProjectNamespace(): string
+    {
+        $composerFile = $this->basePath . '/composer.json';
+        $composer = json_decode(file_get_contents($composerFile), true);
+
+        foreach ($composer['autoload']['psr-4'] ?? [] as $namespace => $path) {
+            if ($path === 'src/') {
+                return rtrim($namespace, '\\');
+            }
+        }
+
+        $this->fail('No PSR-4 autoload entry mapping to src/ found in composer.json');
+    }
+
+    public function testPhpFilesUseProjectNamespace(): void
     {
         $srcPath = $this->basePath . '/src';
         $errors = [];
@@ -38,7 +55,7 @@ final class NamespaceConsistencyTest extends TestCase
             // Check for namespace declaration
             if (preg_match('/^namespace\s+([A-Za-z0-9_\\\\]+);/m', $content, $matches)) {
                 $namespace = $matches[1];
-                if (!str_starts_with($namespace, self::DEFAULT_NAMESPACE)) {
+                if (!str_starts_with($namespace, $this->projectNamespace)) {
                     $errors[] = "{$relativePath}: Invalid namespace '{$namespace}' (expected '{$this->getExpectedNamespace($file)}')";
                 }
             }
@@ -46,8 +63,8 @@ final class NamespaceConsistencyTest extends TestCase
             // Check for use statements with non-standard namespaces
             preg_match_all('/^use\s+([A-Za-z0-9_\\\\]+)(?:\s+as\s+[A-Za-z0-9_]+)?;/m', $content, $matches);
             foreach ($matches[1] as $usedNamespace) {
-                if ($this->isProjectNamespace($usedNamespace) && !str_starts_with($usedNamespace, self::DEFAULT_NAMESPACE . '\\')) {
-                    $errors[] = "{$relativePath}: Invalid use statement '{$usedNamespace}' (should start with '" . self::DEFAULT_NAMESPACE . "\\')";
+                if ($this->isProjectNamespace($usedNamespace) && !str_starts_with($usedNamespace, $this->projectNamespace . '\\')) {
+                    $errors[] = "{$relativePath}: Invalid use statement '{$usedNamespace}' (should start with '" . $this->projectNamespace . "\\')";
                 }
             }
         }
@@ -55,7 +72,7 @@ final class NamespaceConsistencyTest extends TestCase
         $this->assertEmpty($errors, "Namespace inconsistencies found:\n" . implode("\n", $errors));
     }
 
-    public function testBladeTemplatesUseDefaultNamespace(): void
+    public function testBladeTemplatesUseProjectNamespace(): void
     {
         $templatesPath = $this->basePath . '/templates';
         $errors = [];
@@ -77,8 +94,8 @@ final class NamespaceConsistencyTest extends TestCase
                 }
 
                 // Check if it looks like a project namespace but isn't WordpressStarter
-                if ($this->looksLikeProjectNamespace($match[1]) && $match[1] !== self::DEFAULT_NAMESPACE) {
-                    $errors[] = "{$relativePath}: Invalid namespace reference '\\{$fullNamespace}' (should use '\\" . self::DEFAULT_NAMESPACE . "\\')";
+                if ($this->looksLikeProjectNamespace($match[1]) && $match[1] !== $this->projectNamespace) {
+                    $errors[] = "{$relativePath}: Invalid namespace reference '\\{$fullNamespace}' (should use '\\" . $this->projectNamespace . "\\')";
                 }
             }
         }
@@ -86,7 +103,7 @@ final class NamespaceConsistencyTest extends TestCase
         $this->assertEmpty($errors, "Namespace inconsistencies in Blade templates:\n" . implode("\n", $errors));
     }
 
-    public function testComposerJsonHasDefaultNamespace(): void
+    public function testComposerJsonHasExactlyOneProjectNamespace(): void
     {
         $composerFile = $this->basePath . '/composer.json';
         $this->assertFileExists($composerFile, 'composer.json not found');
@@ -97,20 +114,20 @@ final class NamespaceConsistencyTest extends TestCase
         $autoload = $composer['autoload']['psr-4'] ?? [];
 
         $this->assertArrayHasKey(
-            self::DEFAULT_NAMESPACE . '\\',
+            $this->projectNamespace . '\\',
             $autoload,
-            "composer.json autoload should have '" . self::DEFAULT_NAMESPACE . "\\' PSR-4 entry"
+            "composer.json autoload should have '" . $this->projectNamespace . "\\' PSR-4 entry"
         );
 
         // Ensure no other project-like namespaces exist
         foreach (array_keys($autoload) as $namespace) {
-            if ($namespace !== self::DEFAULT_NAMESPACE . '\\' && $this->looksLikeProjectNamespace(rtrim($namespace, '\\'))) {
-                $this->fail("composer.json has unexpected namespace '{$namespace}' (should only have '" . self::DEFAULT_NAMESPACE . "\\')");
+            if ($namespace !== $this->projectNamespace . '\\' && $this->looksLikeProjectNamespace(rtrim($namespace, '\\'))) {
+                $this->fail("composer.json has unexpected namespace '{$namespace}' (should only have '" . $this->projectNamespace . "\\')");
             }
         }
     }
 
-    public function testFunctionsPhpUsesDefaultNamespace(): void
+    public function testFunctionsPhpUsesProjectNamespace(): void
     {
         $functionsFile = $this->basePath . '/functions.php';
         $this->assertFileExists($functionsFile, 'functions.php not found');
@@ -120,16 +137,16 @@ final class NamespaceConsistencyTest extends TestCase
         // Check namespace declaration
         if (preg_match('/^namespace\s+([A-Za-z0-9_\\\\]+);/m', $content, $matches)) {
             $this->assertSame(
-                self::DEFAULT_NAMESPACE,
+                $this->projectNamespace,
                 $matches[1],
-                "functions.php should have namespace '" . self::DEFAULT_NAMESPACE . "'"
+                "functions.php should have namespace '" . $this->projectNamespace . "'"
             );
         }
 
         // Check use statements
         preg_match_all('/^use\s+([A-Za-z0-9_\\\\]+)/m', $content, $matches);
         foreach ($matches[1] as $usedNamespace) {
-            if ($this->isProjectNamespace($usedNamespace) && !str_starts_with($usedNamespace, self::DEFAULT_NAMESPACE . '\\')) {
+            if ($this->isProjectNamespace($usedNamespace) && !str_starts_with($usedNamespace, $this->projectNamespace . '\\')) {
                 $this->fail("functions.php has invalid use statement '{$usedNamespace}'");
             }
         }
@@ -258,9 +275,9 @@ final class NamespaceConsistencyTest extends TestCase
         $directory = dirname($relativePath);
 
         if ($directory === '.') {
-            return self::DEFAULT_NAMESPACE;
+            return $this->projectNamespace;
         }
 
-        return self::DEFAULT_NAMESPACE . '\\' . str_replace('/', '\\', $directory);
+        return $this->projectNamespace . '\\' . str_replace('/', '\\', $directory);
     }
 }
