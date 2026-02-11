@@ -1,3 +1,9 @@
+## [2.0.2](https://github.com/raaaf/starter/compare/v2.0.1...v2.0.2) (2026-02-11)
+
+### Bug Fixes
+
+- resolve namespace from composer.json in NamespaceConsistencyTest ([b8895a2](https://github.com/raaaf/starter/commit/b8895a2a624bdf7164348f81e5e0f6a3c0a9b1ab))
+
 ## [2.0.1](https://github.com/raaaf/starter/compare/v2.0.0...v2.0.1) (2026-02-11)
 
 ### Bug Fixes
