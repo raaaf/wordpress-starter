@@ -1,3 +1,9 @@
+## [2.3.1](https://github.com/raaaf/starter/compare/v2.3.0...v2.3.1) (2026-02-12)
+
+### Bug Fixes
+
+- resolve phpcs warning in DesignTokenServiceProvider and add [br] hint ([302a000](https://github.com/raaaf/starter/commit/302a0005f16718cea8e7183f91c3a09dd7e85b88))
+
 # [2.3.0](https://github.com/raaaf/starter/compare/v2.2.1...v2.3.0) (2026-02-12)
 
 ### Bug Fixes
