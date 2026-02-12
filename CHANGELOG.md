@@ -1,3 +1,13 @@
+# [2.3.0](https://github.com/raaaf/starter/compare/v2.2.1...v2.3.0) (2026-02-12)
+
+### Bug Fixes
+
+- use [br] shortcode instead of HTML for manual line breaks in titles ([d884cf2](https://github.com/raaaf/starter/commit/d884cf28acad31ba3ac0bc29dc272932f1ba470a))
+
+### Features
+
+- add [br] usage hint to title field instructions ([01e1d63](https://github.com/raaaf/starter/commit/01e1d63aa59a7c31e53e5c7eb5b2fca52a7f3fac))
+
 ## [2.2.1](https://github.com/raaaf/starter/compare/v2.2.0...v2.2.1) (2026-02-12)
 
 ### Bug Fixes
