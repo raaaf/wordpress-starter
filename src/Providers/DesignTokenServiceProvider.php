@@ -1290,7 +1290,7 @@ class DesignTokenServiceProvider extends ServiceProvider
 
             $targetName = $token['$extensions']['com.figma.aliasData']['targetVariableName'];
 
-            // Parse target like "color/accent/500" -> ["accent", "500"]
+            // Extract color name and shade from the target variable name.
             if (preg_match('/^color\/(\w+)\/(\d+)$/', $targetName, $matches)) {
                 $colorName = $matches[1];
                 $shade = $matches[2];
