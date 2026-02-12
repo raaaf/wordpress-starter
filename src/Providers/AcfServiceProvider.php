@@ -296,8 +296,10 @@ class AcfServiceProvider extends ServiceProvider
         // Sanitize text fields on save (allow <br> in title fields for manual line breaks)
         add_filter('acf/update_value/type=text', function ($value, $postId, $field) {
             if ($field['name'] === 'title') {
+                $placeholder = '{{BR}}';
+                $value = preg_replace('/<br\s*\/?>/i', $placeholder, $value);
                 $value = sanitize_text_field($value);
-                return str_replace('&lt;br&gt;', '<br>', $value);
+                return str_replace($placeholder, '<br>', $value);
             }
             return sanitize_text_field($value);
         }, 10, 3);
