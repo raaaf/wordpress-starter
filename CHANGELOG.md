@@ -1,3 +1,9 @@
+## [2.2.1](https://github.com/raaaf/starter/compare/v2.2.0...v2.2.1) (2026-02-12)
+
+### Bug Fixes
+
+- use placeholder approach for br tag preservation in title fields ([a84fa4b](https://github.com/raaaf/starter/commit/a84fa4bfbfd56e150564efa9065c63ac62aca723))
+
 # [2.2.0](https://github.com/raaaf/starter/compare/v2.1.0...v2.2.0) (2026-02-12)
 
 ### Features
