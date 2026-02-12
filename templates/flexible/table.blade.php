@@ -6,7 +6,7 @@
 --}}
 
 @php
-    $title = get_sub_field('title') ?: '';
+    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
     $headers = get_sub_field('headers') ?: [];
     $rows = get_sub_field('rows') ?: [];
     $striped = get_sub_field('striped') ?? true;

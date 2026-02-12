@@ -7,7 +7,7 @@
 --}}
 
 @php
-    $title = get_sub_field('title');
+    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
     $content = get_sub_field('content');
     $button = get_sub_field('button');
 @endphp

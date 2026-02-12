@@ -303,14 +303,6 @@ class AcfServiceProvider extends ServiceProvider
             return sanitize_textarea_field($value);
         }, 10, 3);
 
-        // Convert [br] shortcode to <br> in title fields on output
-        add_filter('acf/format_value/type=text', function ($value, $postId, $field) {
-            if ($field['name'] === 'title' && is_string($value)) {
-                return str_replace('[br]', '<br>', $value);
-            }
-            return $value;
-        }, 10, 3);
-
         // Add [br] hint to title field instructions
         add_filter('acf/prepare_field/name=title', function ($field) {
             if ($field['type'] === 'text' && !empty($field['instructions'])) {

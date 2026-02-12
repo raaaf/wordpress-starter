@@ -6,7 +6,7 @@
 --}}
 
 @php
-    $title = get_sub_field('title');
+    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
     $cards = get_sub_field('cards');
     $columns = get_sub_field('columns') ?: '3';
     $background = get_sub_field('background_color') ?: 'primary';

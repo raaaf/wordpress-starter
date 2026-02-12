@@ -7,7 +7,7 @@
 --}}
 
 @php
-    $title = get_sub_field('title') ?: '';
+    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
     $labelBefore = get_sub_field('label_before') ?: 'Vorher';
     $labelAfter = get_sub_field('label_after') ?: 'Nachher';
     $background = get_sub_field('background_color') ?: 'primary';
