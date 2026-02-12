@@ -16,7 +16,7 @@
 
 <x-section :background="$background" class="table-block">
     @if($title)
-        <h2 class="text-h2 mb-8 text-center text-content">{{ $title }}</h2>
+        <h2 class="text-h2 mb-8 text-center text-content">{!! $title !!}</h2>
     @endif
 
     @if(!empty($headers) || !empty($rows))

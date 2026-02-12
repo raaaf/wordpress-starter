@@ -15,7 +15,7 @@
 <x-section background="primary" padding="lg" class="cta">
     <div class="max-w-3xl mx-auto bg-surface-brand rounded-2xl p-8 md:p-12 text-center">
         @if($title)
-            <h2 class="text-h2 mb-4 text-content-inverse">{{ $title }}</h2>
+            <h2 class="text-h2 mb-4 text-content-inverse">{!! $title !!}</h2>
         @endif
 
         @if($content)

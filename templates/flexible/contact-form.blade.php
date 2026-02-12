@@ -24,7 +24,7 @@
         {{-- Left: Title, Content, Contact Info --}}
         <div>
             @if($title)
-                <h2 class="text-h2 mb-6 text-content">{{ $title }}</h2>
+                <h2 class="text-h2 mb-6 text-content">{!! $title !!}</h2>
             @endif
 
             @if($content)

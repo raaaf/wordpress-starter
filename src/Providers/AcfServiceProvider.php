@@ -293,8 +293,12 @@ class AcfServiceProvider extends ServiceProvider
             return $valid;
         }, 10, 3);
 
-        // Sanitize text fields on save
+        // Sanitize text fields on save (allow <br> in title fields for manual line breaks)
         add_filter('acf/update_value/type=text', function ($value, $postId, $field) {
+            if ($field['name'] === 'title') {
+                $value = sanitize_text_field($value);
+                return str_replace('&lt;br&gt;', '<br>', $value);
+            }
             return sanitize_text_field($value);
         }, 10, 3);
 
