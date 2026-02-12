@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/raaaf/starter/compare/v2.1.0...v2.2.0) (2026-02-12)
+
+### Features
+
+- allow manual line breaks in headings and fix badge dark mode text color ([f21d4bf](https://github.com/raaaf/starter/commit/f21d4bfa6dc650dcce7c12fe657eee8ca02a3370))
+- **css:** add Contact Form 7 design system integration styles ([13b9a91](https://github.com/raaaf/starter/commit/13b9a91f08ecaa60c4ddf017927e7207c0818d59))
+
 # [2.1.0](https://github.com/raaaf/starter/compare/v2.0.3...v2.1.0) (2026-02-11)
 
 ### Bug Fixes
