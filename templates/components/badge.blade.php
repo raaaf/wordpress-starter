@@ -44,8 +44,8 @@
     // Brand/accent use dark: override for stronger contrast in dark mode
     $filledVariants = [
         'gray' => 'bg-surface-tertiary text-content',
-        'brand' => 'bg-surface-accent-subtle text-content-accent dark:bg-surface-accent dark:text-content-on-color',
-        'accent' => 'bg-surface-accent-subtle text-content-accent dark:bg-surface-accent dark:text-content-on-color',
+        'brand' => 'bg-surface-accent-subtle text-content-accent dark:bg-surface-accent dark:text-content-inverse',
+        'accent' => 'bg-surface-accent-subtle text-content-accent dark:bg-surface-accent dark:text-content-inverse',
         'success' => 'bg-surface-success text-content-success',
         'warning' => 'bg-surface-warning text-content-warning',
         'error' => 'bg-surface-error text-content-error',
