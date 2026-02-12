@@ -293,20 +293,22 @@ class AcfServiceProvider extends ServiceProvider
             return $valid;
         }, 10, 3);
 
-        // Sanitize text fields on save (allow <br> in title fields for manual line breaks)
+        // Sanitize text fields on save
         add_filter('acf/update_value/type=text', function ($value, $postId, $field) {
-            if ($field['name'] === 'title') {
-                $placeholder = '{{BR}}';
-                $value = preg_replace('/<br\s*\/?>/i', $placeholder, $value);
-                $value = sanitize_text_field($value);
-                return str_replace($placeholder, '<br>', $value);
-            }
             return sanitize_text_field($value);
         }, 10, 3);
 
         // Sanitize textarea fields on save
         add_filter('acf/update_value/type=textarea', function ($value, $postId, $field) {
             return sanitize_textarea_field($value);
+        }, 10, 3);
+
+        // Convert [br] shortcode to <br> in title fields on output
+        add_filter('acf/format_value/type=text', function ($value, $postId, $field) {
+            if ($field['name'] === 'title' && is_string($value)) {
+                return str_replace('[br]', '<br>', $value);
+            }
+            return $value;
         }, 10, 3);
     }
 }
