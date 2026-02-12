@@ -310,5 +310,13 @@ class AcfServiceProvider extends ServiceProvider
             }
             return $value;
         }, 10, 3);
+
+        // Add [br] hint to title field instructions
+        add_filter('acf/prepare_field/name=title', function ($field) {
+            if ($field['type'] === 'text' && !empty($field['instructions'])) {
+                $field['instructions'] .= ' ' . __('Nutze [br] für einen manuellen Zeilenumbruch.', 'wp-starter');
+            }
+            return $field;
+        });
     }
 }
