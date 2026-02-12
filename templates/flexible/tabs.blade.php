@@ -7,7 +7,7 @@
 --}}
 
 @php
-    $title = get_sub_field('title') ?: '';
+    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
     $tabs = get_sub_field('tabs') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
     $uniqueId = 'tabs-' . uniqid();

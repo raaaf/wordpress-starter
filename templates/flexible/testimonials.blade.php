@@ -12,7 +12,7 @@
 @php
     use WordpressStarter\PostTypes\Testimonial;
 
-    $title = get_sub_field('title');
+    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
     $source = get_sub_field('source') ?: 'manual';
     $columns = get_sub_field('columns') ?: '3';
     $background = get_sub_field('background_color') ?: 'primary';

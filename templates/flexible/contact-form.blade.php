@@ -6,7 +6,7 @@
 --}}
 
 @php
-    $title = get_sub_field('title');
+    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
     $content = get_sub_field('content');
     $formId = get_sub_field('form_id');
     $showContactInfo = get_sub_field('show_contact_info') ?? true;

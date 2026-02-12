@@ -6,7 +6,7 @@
 --}}
 
 @php
-    $title = get_sub_field('title') ?: '';
+    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
     $plans = get_sub_field('plans') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
 

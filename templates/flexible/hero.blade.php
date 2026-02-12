@@ -9,7 +9,7 @@
 @php
     $variant = get_sub_field('variant') ?: 'centered';
     $badge = get_sub_field('badge');
-    $title = get_sub_field('title');
+    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
     $copy = get_sub_field('copy');
     $cta_primary = get_sub_field('cta_primary');
     $cta_secondary = get_sub_field('cta_secondary');
