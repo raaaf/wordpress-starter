@@ -1,3 +1,9 @@
+## [2.3.2](https://github.com/raaaf/starter/compare/v2.3.1...v2.3.2) (2026-02-12)
+
+### Bug Fixes
+
+- **acf:** apply [br] replacement in templates instead of ACF filter ([4d3e6e4](https://github.com/raaaf/starter/commit/4d3e6e4e291fafad16932cd1756e521349710864))
+
 ## [2.3.1](https://github.com/raaaf/starter/compare/v2.3.0...v2.3.1) (2026-02-12)
 
 ### Bug Fixes
