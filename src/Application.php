@@ -21,6 +21,7 @@ use WordpressStarter\Providers\LogServiceProvider;
 use WordpressStarter\Providers\CronServiceProvider;
 use WordpressStarter\Providers\SeoServiceProvider;
 use WordpressStarter\Providers\DesignTokenServiceProvider;
+use WordpressStarter\Providers\EditorStylesServiceProvider;
 
 class Application
 {
@@ -74,6 +75,7 @@ class Application
             LogServiceProvider::class,
             CronServiceProvider::class,
             DesignTokenServiceProvider::class,
+            EditorStylesServiceProvider::class,
         ];
     }
 
