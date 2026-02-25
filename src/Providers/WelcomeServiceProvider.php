@@ -1756,7 +1756,7 @@ class WelcomeServiceProvider extends ServiceProvider
         $html .= $this->renderButton('Ghost', 'ghost', 'md');
         $html .= $this->renderButton('Danger', 'danger', 'md');
         $html .= '</div>';
-        $html .= '<div class="flex flex-wrap gap-4 p-6 mt-4 bg-surface-secondary rounded-lg">';
+        $html .= '<div class="flex flex-wrap items-start gap-4 p-6 mt-4 bg-surface-secondary rounded-lg">';
         $html .= $this->renderButton('Small', 'primary', 'sm');
         $html .= $this->renderButton('Medium', 'primary', 'md');
         $html .= $this->renderButton('Large', 'primary', 'lg');
@@ -1772,7 +1772,7 @@ class WelcomeServiceProvider extends ServiceProvider
         $html .= $this->renderBadge('Warning', 'warning', 'solid');
         $html .= $this->renderBadge('Error', 'error', 'solid');
         $html .= '</div>';
-        $html .= '<div class="flex flex-wrap gap-4 p-6 mt-4 bg-surface-secondary rounded-lg">';
+        $html .= '<div class="flex flex-wrap items-start gap-4 p-6 mt-4 bg-surface-secondary rounded-lg">';
         $html .= $this->renderBadge('Outline', 'brand', 'outline');
         $html .= $this->renderBadge('Subtle', 'brand', 'subtle');
         $html .= '</div></div>';
