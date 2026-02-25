@@ -46,7 +46,7 @@ class EditorStylesServiceProvider extends ServiceProvider
     /**
      * Add the "styleselect" button to TinyMCE toolbar row 2.
      *
-     * styleselect renders the "Formats" dropdown with all format_tags
+     * Styleselect renders the "Formats" dropdown with all format_tags
      * registered via tiny_mce_before_init.
      */
     private function addStyleselectToToolbar(): void
