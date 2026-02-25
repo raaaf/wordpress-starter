@@ -1496,19 +1496,19 @@ class WelcomeServiceProvider extends ServiceProvider
         $html = '<div class="space-y-6 p-8 bg-surface-secondary rounded-xl">';
 
         $typography = [
-            ['tag' => 'p',  'class' => 'text-display',    'extra' => '',           'label' => 'Display',    'desc' => '60px / Bold'],
-            ['tag' => 'h1', 'class' => 'text-h1',         'extra' => '',           'label' => 'Heading 1',  'desc' => '36px / Bold'],
-            ['tag' => 'h2', 'class' => 'text-h2',         'extra' => '',           'label' => 'Heading 2',  'desc' => '30px / Semibold'],
-            ['tag' => 'h3', 'class' => 'text-h3',         'extra' => '',           'label' => 'Heading 3',  'desc' => '24px / Semibold'],
-            ['tag' => 'h4', 'class' => 'text-h4',         'extra' => '',           'label' => 'Heading 4',  'desc' => '20px / Semibold'],
-            ['tag' => 'h5', 'class' => 'text-h5',         'extra' => '',           'label' => 'Heading 5',  'desc' => '18px / Medium'],
-            ['tag' => 'h6', 'class' => 'text-h5',         'extra' => '',           'label' => 'Heading 6',  'desc' => '18px / Medium'],
-            ['tag' => 'p',  'class' => 'text-body-large', 'extra' => '',           'label' => 'Body Large', 'desc' => '18px / Regular'],
-            ['tag' => 'p',  'class' => 'text-body',       'extra' => '',           'label' => 'Body',       'desc' => '16px / Regular'],
-            ['tag' => 'p',  'class' => 'text-body-small', 'extra' => '',           'label' => 'Body Small', 'desc' => '14px / Regular'],
-            ['tag' => 'p',  'class' => 'text-caption',    'extra' => '',           'label' => 'Caption',    'desc' => '12px / Regular'],
-            ['tag' => 'p',  'class' => 'text-overline',   'extra' => '',           'label' => 'Overline',   'desc' => '12px / Semibold / Uppercase'],
-            ['tag' => 'p',  'class' => 'text-code',       'extra' => '',           'label' => 'Code',       'desc' => '14px / Mono'],
+            ['tag' => 'p', 'class' => 'text-display', 'extra' => '', 'label' => 'Display', 'desc' => '60px / Bold'],
+            ['tag' => 'h1', 'class' => 'text-h1', 'extra' => '', 'label' => 'Heading 1', 'desc' => '36px / Bold'],
+            ['tag' => 'h2', 'class' => 'text-h2', 'extra' => '', 'label' => 'Heading 2', 'desc' => '30px / Semibold'],
+            ['tag' => 'h3', 'class' => 'text-h3', 'extra' => '', 'label' => 'Heading 3', 'desc' => '24px / Semibold'],
+            ['tag' => 'h4', 'class' => 'text-h4', 'extra' => '', 'label' => 'Heading 4', 'desc' => '20px / Semibold'],
+            ['tag' => 'h5', 'class' => 'text-h5', 'extra' => '', 'label' => 'Heading 5', 'desc' => '18px / Medium'],
+            ['tag' => 'h6', 'class' => 'text-h5', 'extra' => '', 'label' => 'Heading 6', 'desc' => '18px / Medium'],
+            ['tag' => 'p', 'class' => 'text-body-large', 'extra' => '', 'label' => 'Body Large', 'desc' => '18px / Regular'],
+            ['tag' => 'p', 'class' => 'text-body', 'extra' => '', 'label' => 'Body', 'desc' => '16px / Regular'],
+            ['tag' => 'p', 'class' => 'text-body-small', 'extra' => '', 'label' => 'Body Small', 'desc' => '14px / Regular'],
+            ['tag' => 'p', 'class' => 'text-caption', 'extra' => '', 'label' => 'Caption', 'desc' => '12px / Regular'],
+            ['tag' => 'p', 'class' => 'text-overline', 'extra' => '', 'label' => 'Overline', 'desc' => '12px / Semibold / Uppercase'],
+            ['tag' => 'p', 'class' => 'text-code', 'extra' => '', 'label' => 'Code', 'desc' => '14px / Mono'],
         ];
 
         foreach ($typography as $item) {
