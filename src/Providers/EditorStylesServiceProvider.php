@@ -19,6 +19,8 @@ class EditorStylesServiceProvider extends ServiceProvider
         $this->addStyleselectToToolbar();
         $this->addCustomFormats();
         $this->ensureStyleselectInAcfToolbar();
+        $this->addIconPickerButton();
+        $this->localizeIconData();
     }
 
     /**
@@ -231,6 +233,121 @@ class EditorStylesServiceProvider extends ServiceProvider
             }
 
             return $toolbars;
+        });
+    }
+
+    /**
+     * Add the icon picker button to the TinyMCE toolbar (row 1).
+     *
+     * Mce_external_plugins requires a URL to a plain .js file. Vite .ts URLs don't
+     * work in dev mode and TinyMCE 4 cannot load ES modules. We serve the plugin
+     * via admin-ajax.php so it works in both dev and production without a build step.
+     */
+    private function addIconPickerButton(): void
+    {
+        add_filter('mce_buttons', function (array $buttons): array {
+            $buttons[] = 'themeicons';
+            return $buttons;
+        });
+
+        add_filter('mce_external_plugins', function (array $plugins): array {
+            $plugins['themeicons'] = admin_url('admin-ajax.php?action=theme_tinymce_icon_picker');
+            return $plugins;
+        });
+
+        add_action('wp_ajax_theme_tinymce_icon_picker', function (): void {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public TinyMCE plugin asset
+            header('Content-Type: application/javascript; charset=utf-8');
+            header('Cache-Control: public, max-age=3600');
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted internal JS
+            echo $this->getIconPickerPluginJs();
+            exit;
+        });
+    }
+
+    /**
+     * Returns the TinyMCE icon picker plugin as a plain JavaScript string.
+     * Served via admin-ajax.php so TinyMCE 4 can load it without Vite.
+     */
+    private function getIconPickerPluginJs(): string
+    {
+        return <<<'JS'
+(function() {
+    if (typeof tinymce === 'undefined') { return; }
+
+    tinymce.PluginManager.add('themeicons', function(editor) {
+        editor.addButton('themeicons', {
+            title: 'Icon einfügen',
+            icon: 'image',
+            onclick: function() {
+                var data = window.themeIconsData;
+                if (!data || !data.icons || data.icons.length === 0) {
+                    editor.windowManager.alert('Keine Icons gefunden.');
+                    return;
+                }
+
+                var html = '<div style="display:flex;flex-wrap:wrap;gap:8px;max-width:580px;padding:8px;">';
+                data.icons.forEach(function(name) {
+                    html += '<button type="button" data-icon="' + name + '" title="' + name + '" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;font-size:11px;min-width:64px;" onmouseover="this.style.background=\'#f0f0f0\'" onmouseout="this.style.background=\'#fff\'">'
+                        + '<img src="' + data.baseUrl + name + '.svg" width="24" height="24" alt="' + name + '" style="opacity:0.7;">'
+                        + name
+                        + '</button>';
+                });
+                html += '</div>';
+
+                editor.windowManager.open({
+                    title: 'Icon auswählen',
+                    body: [{ type: 'container', html: html }],
+                    buttons: [{ text: 'Schließen', onclick: 'close' }],
+                    width: 640,
+                    height: 400,
+                    onopen: function() {
+                        var wins = editor.windowManager.getWindows();
+                        var win = wins[wins.length - 1];
+                        var container = win.find('container')[0];
+                        if (!container) { return; }
+                        var el = container.getEl();
+                        if (!el) { return; }
+                        el.addEventListener('click', function(e) {
+                            var target = e.target.closest('[data-icon]');
+                            if (target) {
+                                editor.insertContent('[icon name="' + target.getAttribute('data-icon') + '"]');
+                                editor.windowManager.close();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    });
+})();
+JS;
+    }
+
+    /**
+     * Pass available theme icons to the TinyMCE icon picker via localized script data.
+     */
+    private function localizeIconData(): void
+    {
+        add_action('admin_enqueue_scripts', function (string $hook): void {
+            if (!str_contains($hook, 'post') && $hook !== 'post.php' && $hook !== 'post-new.php') {
+                return;
+            }
+
+            $icons = array_keys(array_filter(
+                \WordpressStarter\Acf\FieldDefinitions::getThemeIcons(),
+                fn(string $key) => $key !== '',
+                ARRAY_FILTER_USE_KEY
+            ));
+
+            wp_add_inline_script(
+                'editor',
+                'window.themeIconsData = ' . wp_json_encode([
+                    'icons' => $icons,
+                    'baseUrl' => get_template_directory_uri() . '/resources/icons/',
+                ]) . ';',
+                'before'
+            );
         });
     }
 }

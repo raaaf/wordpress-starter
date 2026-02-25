@@ -246,6 +246,7 @@ class FlexibleContent
             'label' => __('Eine Spalte', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => [
+                ...FieldDefinitions::sectionHeaderFields('flex_one_column'),
                 FieldDefinitions::wysiwygField(
                     'field_flex_one_column_content',
                     __('Inhalt', 'wp-starter'),

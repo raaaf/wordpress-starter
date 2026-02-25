@@ -103,6 +103,7 @@ class BladeServiceProvider extends ServiceProvider
             'components.link' => 'link',
             'components.badge' => 'badge',
             'components.icon' => 'icon',
+            'components.section-header' => 'section-header',
         ];
 
         foreach ($components as $view => $alias) {

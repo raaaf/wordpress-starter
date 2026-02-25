@@ -405,7 +405,7 @@
     font-weight: var(--typography-display-weight);
     line-height: var(--typography-display-line-height);
     letter-spacing: var(--typography-display-letter-spacing);
-    color: var(--text-brand);
+    color: var(--text-content);
   }
 
   /* Heading 1 - 36px / Bold */

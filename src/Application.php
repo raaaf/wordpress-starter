@@ -22,6 +22,7 @@ use WordpressStarter\Providers\CronServiceProvider;
 use WordpressStarter\Providers\SeoServiceProvider;
 use WordpressStarter\Providers\DesignTokenServiceProvider;
 use WordpressStarter\Providers\EditorStylesServiceProvider;
+use WordpressStarter\Providers\IconShortcodeServiceProvider;
 
 class Application
 {
@@ -76,6 +77,7 @@ class Application
             CronServiceProvider::class,
             DesignTokenServiceProvider::class,
             EditorStylesServiceProvider::class,
+            IconShortcodeServiceProvider::class,
         ];
     }
 
