@@ -1970,16 +1970,16 @@ class WelcomeServiceProvider extends ServiceProvider
     private function renderButton(string $label, string $variant, string $size): string
     {
         $variants = [
-            'primary' => 'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)] text-content-inverse border border-line shadow-[var(--shadow-button)] hover:from-[var(--gradient-primary-hover-start)] hover:to-[var(--gradient-primary-hover-end)]',
-            'secondary' => 'bg-surface-secondary text-content border border-line shadow-[var(--shadow-button)] hover:border-line-strong',
-            'ghost' => 'bg-transparent text-content border border-transparent hover:bg-surface-tertiary',
-            'danger' => 'bg-surface-error-strong text-content-on-color border border-transparent shadow-[var(--shadow-button)]',
+            'primary' => 'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)] text-content-inverse border border-line shadow-[var(--shadow-button)] hover:from-[var(--gradient-primary-hover-start)] hover:to-[var(--gradient-primary-hover-end)] hover:shadow-[var(--shadow-button-hover)] active:from-[var(--gradient-primary-active-start)] active:to-[var(--gradient-primary-active-end)] active:shadow-[var(--shadow-inner)]',
+            'secondary' => 'bg-surface-secondary text-content border border-line shadow-[var(--shadow-button)] hover:border-line-strong hover:shadow-[var(--shadow-button-hover)] active:bg-surface-tertiary active:shadow-[var(--shadow-inner)]',
+            'ghost' => 'bg-transparent text-content border border-transparent hover:bg-surface-tertiary active:bg-surface-secondary active:border-line',
+            'danger' => 'bg-surface-error-strong text-content-on-color border border-transparent shadow-[var(--shadow-button)] hover:shadow-[var(--shadow-button-hover)] active:shadow-[var(--shadow-inner)]',
         ];
 
         $sizes = [
-            'sm' => 'px-3 py-1.5 text-xs min-h-[28px] gap-1 rounded-md',
-            'md' => 'px-4 py-2 text-sm min-h-[36px] gap-1.5 rounded-lg',
-            'lg' => 'px-6 py-3 text-base min-h-[44px] gap-2 rounded-lg',
+            'sm' => 'px-[var(--button-sm-padding-x)] py-[var(--button-sm-padding-y)] text-xs min-h-[var(--button-sm-min-height)] gap-[var(--button-sm-gap)] rounded-[var(--button-sm-radius)]',
+            'md' => 'px-[var(--button-md-padding-x)] py-[var(--button-md-padding-y)] text-sm min-h-[var(--button-md-min-height)] gap-[var(--button-md-gap)] rounded-[var(--button-md-radius)]',
+            'lg' => 'px-[var(--button-lg-padding-x)] py-[var(--button-lg-padding-y)] text-base min-h-[var(--button-lg-min-height)] gap-[var(--button-lg-gap)] rounded-[var(--button-lg-radius)]',
         ];
 
         $variantClass = $variants[$variant] ?? $variants['primary'];
