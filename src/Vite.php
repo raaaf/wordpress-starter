@@ -430,6 +430,13 @@ CSS;
      */
     public static function isDevServerRunning(): bool
     {
+        // Only consider dev server active if .vite-port file exists.
+        // This prevents false positives when another process occupies the port.
+        $portFile = get_template_directory() . '/.vite-port';
+        if (!file_exists($portFile)) {
+            return false;
+        }
+
         $host = config('vite.dev_server.host', 'localhost');
         $port = self::getDevServerPort();
 
