@@ -1973,7 +1973,7 @@ class WelcomeServiceProvider extends ServiceProvider
         $sizeClass = $size !== 'md' ? 'button-' . $size : '';
 
         return sprintf(
-            '<button class="button %s %s">%s</button>',
+            '<button class="%s %s">%s</button>',
             $variantClass,
             $sizeClass,
             esc_html($label)
