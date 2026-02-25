@@ -1987,8 +1987,8 @@ class WelcomeServiceProvider extends ServiceProvider
 
         return sprintf(
             '<button class="inline-flex items-center justify-center font-semibold transition-all duration-200 no-underline cursor-pointer select-none focus-visible:outline-none %s %s">%s</button>',
-            esc_attr($variantClass),
-            esc_attr($sizeClass),
+            $variantClass,
+            $sizeClass,
             esc_html($label)
         );
     }
