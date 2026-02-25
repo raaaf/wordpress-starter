@@ -1,3 +1,26 @@
+# [2.4.0](https://github.com/raaaf/starter/compare/v2.3.2...v2.4.0) (2026-02-25)
+
+### Bug Fixes
+
+- **acf:** reorder section header fields and align button group choices ([01684b1](https://github.com/raaaf/starter/commit/01684b1ff9ce5ae411ee4a14ccbb962531d6dbb5))
+- **admin:** use flex layout for demo post action buttons ([ac70b65](https://github.com/raaaf/starter/commit/ac70b6522a88514e93673322000841d0b7d6440a))
+- align icons with text, fix logo slider gradient and prose code color ([4e659ab](https://github.com/raaaf/starter/commit/4e659ab0619396f02e247ed3a7770f852b49958c))
+- **button:** increase specificity of sm/lg size modifiers to override variant defaults ([276bfe3](https://github.com/raaaf/starter/commit/276bfe34975eb517c3a8e17f8c5690094538136b))
+- **button:** move md sizing after variants so sm/lg overrides work correctly ([3949133](https://github.com/raaaf/starter/commit/3949133c76389dcded9c2e8873a18b76ea86dcf1))
+- **button:** use correct CSS custom property names in button classes ([78d0d65](https://github.com/raaaf/starter/commit/78d0d65d438e8e5f6e5009433a3ba1caf78a370b))
+- **styleguide:** add items-start to button size container to prevent flex stretch ([946477e](https://github.com/raaaf/starter/commit/946477e81dbf8acd1bcd0620b4191a5b4d3c80df))
+- **styleguide:** remove .button class to avoid WordPress style conflicts ([d606dd1](https://github.com/raaaf/starter/commit/d606dd1c4b2218aed84506f4cfe42a5a350b9d08))
+- **styleguide:** remove esc_attr from button class strings to preserve CSS tokens ([105c3cb](https://github.com/raaaf/starter/commit/105c3cb42aa7b256534ade3a89520bc61c906a08))
+- **styleguide:** sync button variants and sizes with Button component ([b847720](https://github.com/raaaf/starter/commit/b8477202b576dad1ca0dfa98cc8464530a1a9299))
+- **styleguide:** use semantic button CSS classes instead of inline Tailwind utilities ([4fb4f1a](https://github.com/raaaf/starter/commit/4fb4f1a83f657672267804c4de451808572281fb))
+- sync composer.lock after rebase — add missing integrate-rybbit package ([34422fe](https://github.com/raaaf/starter/commit/34422fe085745c55c3a8d4cedae32e918bf712b1))
+- **vite:** require .vite-port file before dev server check, set strictPort and CORS origin ([c2fd830](https://github.com/raaaf/starter/commit/c2fd830824bee4c4beb2b7a57d55eab69862531e))
+
+### Features
+
+- add section header and icon shortcode to column layouts ([6233500](https://github.com/raaaf/starter/commit/623350063840467e805910c8432f79f6711b4632))
+- **editor:** add TinyMCE editor styles and custom formats ([104da5c](https://github.com/raaaf/starter/commit/104da5c9eb511b221aee290ebc0676d0229632c1))
+
 ## [2.3.2](https://github.com/raaaf/starter/compare/v2.3.1...v2.3.2) (2026-02-12)
 
 ### Bug Fixes
