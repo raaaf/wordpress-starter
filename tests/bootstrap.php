@@ -168,6 +168,13 @@ if (!function_exists('add_filter')) {
     }
 }
 
+if (!function_exists('add_shortcode')) {
+    function add_shortcode(string $tag, callable $callback): void
+    {
+        $GLOBALS['wp_mock_shortcodes'][$tag] = $callback;
+    }
+}
+
 // WordPress return functions
 if (!function_exists('__return_true')) {
     function __return_true(): bool { return true; }
