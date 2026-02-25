@@ -1,11 +1,16 @@
 {{--
     Two Columns Images - Flexible Content Layout
 
-    Uses shared components: x-section, x-grid, x-prose, x-card
-    ACF Fields: image_1, column_1, image_2, column_2, background_color
+    Uses shared components: x-section, x-grid, x-prose, x-card, x-section-header
+    ACF Fields: show_section_header, section_chip, section_headline, section_description, image_1, column_1, image_2, column_2, background_color
 --}}
 
 @php
+    $showHeader = get_sub_field('show_section_header');
+    $chip = $showHeader ? get_sub_field('section_chip') : null;
+    $headline = $showHeader ? str_replace('[br]', '<br>', get_sub_field('section_headline') ?: '') : null;
+    $description = $showHeader ? get_sub_field('section_description') : null;
+    $alignment = $showHeader ? (get_sub_field('section_alignment') ?: 'center') : 'center';
     $image_1 = get_sub_field('image_1');
     $column_1 = get_sub_field('column_1');
     $image_2 = get_sub_field('image_2');
@@ -35,6 +40,7 @@
 @endphp
 
 <x-section :background="$background" class="two-columns-images">
+    <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="2" gap="xl">
         <x-card variant="outlined" padding="none" class="overflow-hidden">
             @if($image_1 && !empty($image_1['url']))

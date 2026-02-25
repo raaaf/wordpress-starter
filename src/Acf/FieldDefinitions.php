@@ -996,6 +996,71 @@ class FieldDefinitions
     }
 
     /**
+     * Get Section Header fields (toggle + chip + headline + description)
+     *
+     * @param string $prefix Key prefix
+     * @return array<int, array<string, mixed>>
+     */
+    public static function sectionHeaderFields(string $prefix): array
+    {
+        $showWhenEnabled = [[['field' => "field_{$prefix}_show_section_header", 'operator' => '==', 'value' => '1']]];
+
+        $chipField = self::textField(
+            "field_{$prefix}_section_chip",
+            __('Chip', 'wp-starter'),
+            'section_chip',
+            false,
+            __('Optionaler Chip/Badge über der Überschrift.', 'wp-starter')
+        );
+        $chipField['conditional_logic'] = $showWhenEnabled;
+
+        $headlineField = self::textField(
+            "field_{$prefix}_section_headline",
+            __('Überschrift', 'wp-starter'),
+            'section_headline',
+            false,
+            __('H2-Überschrift. Nutze [br] für Zeilenumbrüche.', 'wp-starter')
+        );
+        $headlineField['conditional_logic'] = $showWhenEnabled;
+
+        $descriptionField = self::textareaField(
+            "field_{$prefix}_section_description",
+            __('Beschreibung', 'wp-starter'),
+            'section_description',
+            3,
+            __('Optionale Beschreibung unter der Überschrift.', 'wp-starter')
+        );
+        $descriptionField['conditional_logic'] = $showWhenEnabled;
+
+        $alignmentField = self::buttonGroupField(
+            "field_{$prefix}_section_alignment",
+            __('Ausrichtung', 'wp-starter'),
+            'section_alignment',
+            [
+                'center' => __('Zentriert', 'wp-starter'),
+                'left'   => __('Linksbündig', 'wp-starter'),
+            ],
+            'center',
+            __('Textausrichtung des Section Headers.', 'wp-starter'),
+            $showWhenEnabled
+        );
+
+        return [
+            self::trueFalseField(
+                "field_{$prefix}_show_section_header",
+                __('Section Header anzeigen', 'wp-starter'),
+                'show_section_header',
+                false,
+                __('Zeigt Chip, Überschrift und Beschreibung über dem Inhalt an.', 'wp-starter')
+            ),
+            $chipField,
+            $headlineField,
+            $descriptionField,
+            $alignmentField,
+        ];
+    }
+
+    /**
      * Get Two Columns layout fields
      *
      * @param string $prefix Key prefix
@@ -1004,6 +1069,7 @@ class FieldDefinitions
     public static function twoColumnsFields(string $prefix): array
     {
         return [
+            ...self::sectionHeaderFields($prefix),
             self::wysiwygField(
                 "field_{$prefix}_column_1",
                 __('Spalte 1 (links)', 'wp-starter'),
@@ -1033,6 +1099,7 @@ class FieldDefinitions
     public static function threeColumnsFields(string $prefix): array
     {
         return [
+            ...self::sectionHeaderFields($prefix),
             self::wysiwygField(
                 "field_{$prefix}_column_1",
                 __('Spalte 1', 'wp-starter'),
@@ -1070,6 +1137,7 @@ class FieldDefinitions
     public static function fourColumnsFields(string $prefix): array
     {
         return [
+            ...self::sectionHeaderFields($prefix),
             self::wysiwygField(
                 "field_{$prefix}_column_1",
                 __('Spalte 1', 'wp-starter'),
@@ -1356,6 +1424,7 @@ class FieldDefinitions
     public static function oneThirdTwoThirdsFields(string $prefix): array
     {
         return [
+            ...self::sectionHeaderFields($prefix),
             self::wysiwygField(
                 "field_{$prefix}_column_1",
                 __('Linke Spalte (schmal)', 'wp-starter'),
@@ -1385,6 +1454,7 @@ class FieldDefinitions
     public static function twoThirdsOneThirdFields(string $prefix): array
     {
         return [
+            ...self::sectionHeaderFields($prefix),
             self::wysiwygField(
                 "field_{$prefix}_column_1",
                 __('Linke Spalte (breit)', 'wp-starter'),
@@ -1414,6 +1484,7 @@ class FieldDefinitions
     public static function twoColumnsImagesFields(string $prefix): array
     {
         return [
+            ...self::sectionHeaderFields($prefix),
             self::imageField(
                 "field_{$prefix}_image_1",
                 __('Bild 1', 'wp-starter'),
