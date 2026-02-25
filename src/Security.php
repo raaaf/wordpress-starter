@@ -94,6 +94,7 @@ class Security
             3000,  // React, Next.js, generic dev servers
             3001,  // Alternative React port
             4173,  // Vite preview
+            5173,  // Vite dev server (default)
             5180,  // Vite dev server (theme default)
             5181,  // Vite alternative port
             5182,  // Vite alternative port

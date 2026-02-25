@@ -79,8 +79,10 @@ export default defineConfig({
     origin: process.env.VITE_DEV_SERVER_URL || 'http://localhost:5180',
     host: true, // Listen on all interfaces
     port: parseInt(process.env.VITE_DEV_SERVER_PORT) || 5180,
-    strictPort: false,
-    cors: true,
+    strictPort: true,
+    cors: {
+      origin: ['https://wordpress.local', 'http://wordpress.local'],
+    },
     watch: {
       // Watch Blade templates
       ignored: ['!**/templates/**', '!**/config/**'],
