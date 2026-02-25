@@ -1813,7 +1813,7 @@ class WelcomeServiceProvider extends ServiceProvider
 
         // Icons - using inline SVGs for reliable rendering
         $html .= '<div><h4 class="text-h4 mb-4 text-content">Icons</h4>';
-        $html .= '<p class="text-body-small text-content-secondary mb-4">Verfügbare Icons aus <code class="text-code bg-surface-tertiary px-1 rounded">resources/icons/</code>. Icons erben die Textfarbe via <code class="text-code bg-surface-tertiary px-1 rounded">currentColor</code>.</p>';
+        $html .= '<p class="text-body-small text-content-secondary mb-4">Verfügbare Icons aus <code class="text-code text-content bg-surface-tertiary px-1 rounded">resources/icons/</code>. Icons erben die Textfarbe via <code class="text-code text-content bg-surface-tertiary px-1 rounded">currentColor</code>.</p>';
         $html .= '<div class="grid grid-cols-4 md:grid-cols-8 gap-4 p-6 bg-surface-secondary rounded-lg">';
 
         $icons = [
@@ -1827,12 +1827,12 @@ class WelcomeServiceProvider extends ServiceProvider
             $iconPath = $iconDir . $name . '.svg';
             $iconSvg = '';
             if (file_exists($iconPath)) {
-                $iconSvg = file_get_contents($iconPath);
+                $iconSvg = trim(file_get_contents($iconPath));
                 // Remove width/height and add classes
                 $iconSvg = preg_replace('/\s*(width|height)="[^"]*"/', '', $iconSvg);
                 $iconSvg = preg_replace(
                     '/<svg/',
-                    '<svg class="w-6 h-6 inline-block shrink-0" aria-hidden="true"',
+                    '<svg class="w-6 h-6 inline-block align-middle shrink-0" aria-hidden="true"',
                     $iconSvg,
                     1
                 );
@@ -1854,9 +1854,9 @@ class WelcomeServiceProvider extends ServiceProvider
             if (!file_exists($path)) {
 				return '';
             }
-            $svg = file_get_contents($path);
+            $svg = trim(file_get_contents($path));
             $svg = preg_replace('/\s*(width|height)="[^"]*"/', '', $svg);
-            return preg_replace('/<svg/', '<svg class="' . $class . ' inline-block shrink-0" aria-hidden="true"', $svg, 1);
+            return preg_replace('/<svg/', '<svg class="' . $class . ' inline-block align-middle shrink-0" aria-hidden="true"', $svg, 1);
         };
 
         $html .= '<span class="flex items-center gap-2 text-icon-primary">' . $getIcon('check', 'w-4 h-4') . ' Icon mit Text</span>';
@@ -1900,7 +1900,7 @@ class WelcomeServiceProvider extends ServiceProvider
 
         // Grid Component
         $html .= '<div><h4 class="text-h4 mb-4 text-content">Grid Komponente</h4>';
-        $html .= '<p class="text-body-small text-content-secondary mb-4">Flexible Spalten-Layouts mit <code class="text-code bg-surface-tertiary px-1 rounded">&lt;x-grid&gt;</code></p>';
+        $html .= '<p class="text-body-small text-content-secondary mb-4">Flexible Spalten-Layouts mit <code class="text-code text-content bg-surface-tertiary px-1 rounded">&lt;x-grid&gt;</code></p>';
         $html .= '<div class="space-y-4">';
 
         // 2 columns demo
@@ -1926,7 +1926,7 @@ class WelcomeServiceProvider extends ServiceProvider
 
         // Section Component
         $html .= '<div><h4 class="text-h4 mb-4 text-content">Section Komponente</h4>';
-        $html .= '<p class="text-body-small text-content-secondary mb-4">Wrapper für Inhaltsabschnitte mit <code class="text-code bg-surface-tertiary px-1 rounded">&lt;x-section&gt;</code></p>';
+        $html .= '<p class="text-body-small text-content-secondary mb-4">Wrapper für Inhaltsabschnitte mit <code class="text-code text-content bg-surface-tertiary px-1 rounded">&lt;x-section&gt;</code></p>';
         $html .= '<div class="border border-line rounded-lg overflow-hidden">';
 
         $sectionBgs = [
@@ -1951,7 +1951,7 @@ class WelcomeServiceProvider extends ServiceProvider
 
         // Prose Component
         $html .= '<div><h4 class="text-h4 mb-4 text-content">Prose Komponente</h4>';
-        $html .= '<p class="text-body-small text-content-secondary mb-4">Typography-Wrapper für WYSIWYG-Inhalte mit <code class="text-code bg-surface-tertiary px-1 rounded">&lt;x-prose&gt;</code></p>';
+        $html .= '<p class="text-body-small text-content-secondary mb-4">Typography-Wrapper für WYSIWYG-Inhalte mit <code class="text-code text-content bg-surface-tertiary px-1 rounded">&lt;x-prose&gt;</code></p>';
         $html .= '<div class="p-6 bg-surface-secondary rounded-lg prose prose-lg max-w-none">';
         $html .= '<h3>Beispiel-Überschrift</h3>';
         $html .= '<p>Dies ist ein Absatz innerhalb der Prose-Komponente. Die Typografie wird automatisch formatiert, inklusive <strong>Fettdruck</strong>, <em>Kursiv</em> und <a href="#">Links</a>.</p>';
