@@ -1013,6 +1013,7 @@ class FieldDefinitions
             __('Optionaler Chip/Badge über der Überschrift.', 'wp-starter')
         );
         $chipField['conditional_logic'] = $showWhenEnabled;
+        $chipField['wrapper'] = ['width' => '40'];
 
         $headlineField = self::textField(
             "field_{$prefix}_section_headline",
@@ -1022,6 +1023,7 @@ class FieldDefinitions
             __('H2-Überschrift. Nutze [br] für Zeilenumbrüche.', 'wp-starter')
         );
         $headlineField['conditional_logic'] = $showWhenEnabled;
+        $headlineField['wrapper'] = ['width' => '40'];
 
         $descriptionField = self::textareaField(
             "field_{$prefix}_section_description",
@@ -1037,13 +1039,14 @@ class FieldDefinitions
             __('Ausrichtung', 'wp-starter'),
             'section_alignment',
             [
-                'center' => __('Zentriert', 'wp-starter'),
                 'left'   => __('Linksbündig', 'wp-starter'),
+                'center' => __('Zentriert', 'wp-starter'),
             ],
             'center',
             __('Textausrichtung des Section Headers.', 'wp-starter'),
             $showWhenEnabled
         );
+        $alignmentField['wrapper'] = ['width' => '20'];
 
         return [
             self::trueFalseField(
@@ -1053,10 +1056,10 @@ class FieldDefinitions
                 false,
                 __('Zeigt Chip, Überschrift und Beschreibung über dem Inhalt an.', 'wp-starter')
             ),
+            $alignmentField,
             $chipField,
             $headlineField,
             $descriptionField,
-            $alignmentField,
         ];
     }
 
