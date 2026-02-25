@@ -1046,7 +1046,11 @@
   }
 
   .prose a.button-sm,
-  .button-sm {
+  .button-sm,
+  .button-primary.button-sm,
+  .button-secondary.button-sm,
+  .button-ghost.button-sm,
+  .button-danger.button-sm {
     padding: var(--button-sm-padding-y) var(--button-sm-padding-x);
     min-height: var(--button-sm-min-height);
     border-radius: var(--button-sm-radius);
@@ -1055,7 +1059,11 @@
   }
 
   .prose a.button-lg,
-  .button-lg {
+  .button-lg,
+  .button-primary.button-lg,
+  .button-secondary.button-lg,
+  .button-ghost.button-lg,
+  .button-danger.button-lg {
     padding: var(--button-lg-padding-y) var(--button-lg-padding-x);
     min-height: var(--button-lg-min-height);
     border-radius: var(--button-lg-radius);
