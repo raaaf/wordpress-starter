@@ -57,3 +57,15 @@ md:block
 hidden
 group-hover:text-content-brand
 group-hover:scale-105
+button-primary
+button-secondary
+button-ghost
+button-sm
+button-md
+button-lg
+text-display
+text-body-large
+text-body-small
+text-caption
+text-overline
+text-code

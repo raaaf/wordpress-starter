@@ -125,6 +125,7 @@ final class ApplicationTest extends TestCase
             \WordpressStarter\Providers\AcfServiceProvider::class,
             \WordpressStarter\Providers\MenuServiceProvider::class,
             \WordpressStarter\Providers\ThemeServiceProvider::class,
+            \WordpressStarter\Providers\EditorStylesServiceProvider::class,
         ];
 
         foreach ($providerClasses as $providerClass) {

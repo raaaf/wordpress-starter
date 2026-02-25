@@ -1,14 +1,407 @@
 /**
- * Editor Styles Entry Point
+ * TinyMCE Editor Styles
  *
- * This is the main entry point for Gutenberg block editor styles.
- * It imports block-editor.css which contains:
- * - tokens-editor.css (light-mode only tokens - no dark mode)
- * - Tailwind CSS with theme configuration
- * - Typography and component styles
+ * Loaded into the TinyMCE iframe via add_editor_style() / mce_css filter.
+ * Provides WYSIWYG parity with the frontend: same fonts, tokens, and
+ * component classes (Typography + Buttons).
  *
- * Note: tokens.css is NOT imported here to avoid dark mode rules in the editor.
- * The block-editor.css imports tokens-editor.css instead.
+ * Imports fonts.css and tokens-editor.css (light-mode only tokens).
+ * tokens-editor.css scopes semantic tokens to .editor-styles-wrapper,
+ * so :root CSS variables are available inside the iframe.
  */
 
-@import './block-editor.css';
+@import './fonts.css';
+@import './tokens-editor.css';
+
+/* ============================================
+   BASE STYLES
+   Scoped to body.mce-content-body (TinyMCE editor body)
+   ============================================ */
+
+body.mce-content-body {
+  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-body-size);
+  font-weight: var(--typography-body-weight);
+  line-height: var(--typography-body-line-height);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  padding: 1.5rem 2rem;
+  max-width: 800px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   HEADINGS
+   Matches @layer base in app.css (lines 220-291)
+   ============================================ */
+
+body.mce-content-body h1 {
+  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-h1-size);
+  font-weight: var(--typography-h1-weight);
+  line-height: var(--typography-h1-line-height);
+  letter-spacing: var(--typography-h1-letter-spacing);
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+}
+
+body.mce-content-body h2 {
+  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-h2-size);
+  font-weight: var(--typography-h2-weight);
+  line-height: var(--typography-h2-line-height);
+  letter-spacing: var(--typography-h2-letter-spacing);
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+body.mce-content-body h3 {
+  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-h3-size);
+  font-weight: var(--typography-h3-weight);
+  line-height: var(--typography-h3-line-height);
+  letter-spacing: var(--typography-h3-letter-spacing);
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+}
+
+body.mce-content-body h4 {
+  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-h4-size);
+  font-weight: var(--typography-h4-weight);
+  line-height: var(--typography-h4-line-height);
+  letter-spacing: var(--typography-h4-letter-spacing);
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+body.mce-content-body h5 {
+  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-h5-size);
+  font-weight: var(--typography-h5-weight);
+  line-height: var(--typography-h5-line-height);
+  letter-spacing: var(--typography-h5-letter-spacing);
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+body.mce-content-body h6 {
+  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-body-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--typography-body-line-height);
+  letter-spacing: 0;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+body.mce-content-body h1:first-child,
+body.mce-content-body h2:first-child,
+body.mce-content-body h3:first-child,
+body.mce-content-body h4:first-child,
+body.mce-content-body h5:first-child,
+body.mce-content-body h6:first-child {
+  margin-top: 0;
+}
+
+/* ============================================
+   PARAGRAPHS, LINKS, LISTS
+   ============================================ */
+
+body.mce-content-body p {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+body.mce-content-body p:last-child {
+  margin-bottom: 0;
+}
+
+body.mce-content-body a {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+body.mce-content-body ul,
+body.mce-content-body ol {
+  margin-top: 0;
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+body.mce-content-body ul {
+  list-style-type: disc;
+}
+
+body.mce-content-body ol {
+  list-style-type: decimal;
+}
+
+body.mce-content-body li {
+  margin-bottom: 0.25em;
+}
+
+body.mce-content-body li:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   BLOCKQUOTE, CODE, HR, TABLES, IMAGES
+   ============================================ */
+
+body.mce-content-body blockquote {
+  border-left: 4px solid var(--border-default);
+  margin: 1.5em 0;
+  padding: 0.5em 1.25em;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+body.mce-content-body code {
+  font-family:
+    var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--typography-code-size);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 3px;
+  padding: 0.1em 0.4em;
+}
+
+body.mce-content-body pre {
+  font-family:
+    var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--typography-code-size);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 1em;
+  overflow-x: auto;
+  margin-bottom: 1em;
+}
+
+body.mce-content-body hr {
+  border: none;
+  border-top: 1px solid var(--border-default);
+  margin: 2em 0;
+}
+
+body.mce-content-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1em;
+}
+
+body.mce-content-body th,
+body.mce-content-body td {
+  border: 1px solid var(--border-default);
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+
+body.mce-content-body th {
+  background-color: var(--bg-secondary);
+  font-weight: var(--font-weight-semibold);
+}
+
+body.mce-content-body img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ============================================
+   TYPOGRAPHY UTILITY CLASSES
+   Matches @layer utilities in app.css (lines 407-516)
+   ============================================ */
+
+body.mce-content-body .text-display {
+  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-display-size);
+  font-weight: var(--typography-display-weight);
+  line-height: var(--typography-display-line-height);
+  letter-spacing: var(--typography-display-letter-spacing);
+}
+
+body.mce-content-body .text-h1 {
+  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-h1-size);
+  font-weight: var(--typography-h1-weight);
+  line-height: var(--typography-h1-line-height);
+  letter-spacing: var(--typography-h1-letter-spacing);
+}
+
+body.mce-content-body .text-h2 {
+  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-h2-size);
+  font-weight: var(--typography-h2-weight);
+  line-height: var(--typography-h2-line-height);
+  letter-spacing: var(--typography-h2-letter-spacing);
+}
+
+body.mce-content-body .text-h3 {
+  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-h3-size);
+  font-weight: var(--typography-h3-weight);
+  line-height: var(--typography-h3-line-height);
+  letter-spacing: var(--typography-h3-letter-spacing);
+}
+
+body.mce-content-body .text-h4 {
+  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-h4-size);
+  font-weight: var(--typography-h4-weight);
+  line-height: var(--typography-h4-line-height);
+  letter-spacing: var(--typography-h4-letter-spacing);
+}
+
+body.mce-content-body .text-h5 {
+  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-h5-size);
+  font-weight: var(--typography-h5-weight);
+  line-height: var(--typography-h5-line-height);
+  letter-spacing: var(--typography-h5-letter-spacing);
+}
+
+body.mce-content-body .text-body-large {
+  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-body-large-size);
+  font-weight: var(--typography-body-large-weight);
+  line-height: var(--typography-body-large-line-height);
+  letter-spacing: var(--typography-body-large-letter-spacing);
+}
+
+body.mce-content-body .text-body {
+  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-body-size);
+  font-weight: var(--typography-body-weight);
+  line-height: var(--typography-body-line-height);
+  letter-spacing: var(--typography-body-letter-spacing);
+}
+
+body.mce-content-body .text-body-small {
+  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-body-small-size);
+  font-weight: var(--typography-body-small-weight);
+  line-height: var(--typography-body-small-line-height);
+  letter-spacing: var(--typography-body-small-letter-spacing);
+}
+
+body.mce-content-body .text-caption {
+  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-caption-size);
+  font-weight: var(--typography-caption-weight);
+  line-height: var(--typography-caption-line-height);
+  letter-spacing: var(--typography-caption-letter-spacing);
+}
+
+body.mce-content-body .text-overline {
+  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-overline-size);
+  font-weight: var(--typography-overline-weight);
+  line-height: var(--typography-overline-line-height);
+  letter-spacing: var(--typography-overline-letter-spacing);
+  text-transform: var(--typography-overline-transform);
+}
+
+body.mce-content-body .text-code {
+  font-family:
+    var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--typography-code-size);
+  font-weight: var(--typography-code-weight);
+  line-height: var(--typography-code-line-height);
+  letter-spacing: var(--typography-code-letter-spacing);
+}
+
+/* ============================================
+   BUTTON CLASSES
+   Applied to <a> elements in WYSIWYG content.
+   Overrides the default link underline from .prose a.
+   ============================================ */
+
+body.mce-content-body a.button-primary,
+body.mce-content-body a.button-secondary,
+body.mce-content-body a.button-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: var(--button-md-padding-y) var(--button-md-padding-x);
+  min-height: var(--button-md-min-height);
+  border-radius: var(--button-md-radius);
+  font-size: var(--typography-body-small-size);
+  gap: var(--button-md-gap);
+}
+
+body.mce-content-body a.button-primary {
+  background-image: linear-gradient(
+    to bottom,
+    var(--gradient-primary-start),
+    var(--gradient-primary-end)
+  );
+  color: var(--text-content-inverse);
+  border: 1px solid var(--border-line);
+  box-shadow: var(--shadow-button);
+}
+
+body.mce-content-body a.button-primary:hover {
+  background-image: linear-gradient(
+    to bottom,
+    var(--gradient-primary-hover-start),
+    var(--gradient-primary-hover-end)
+  );
+  box-shadow: var(--shadow-button-hover);
+}
+
+body.mce-content-body a.button-secondary {
+  background-color: var(--bg-surface-secondary);
+  color: var(--text-content);
+  border: 1px solid var(--border-line);
+  box-shadow: var(--shadow-button);
+}
+
+body.mce-content-body a.button-secondary:hover {
+  border-color: var(--border-line-strong);
+  box-shadow: var(--shadow-button-hover);
+}
+
+body.mce-content-body a.button-ghost {
+  background-color: transparent;
+  color: var(--text-content);
+  border: 1px solid transparent;
+}
+
+body.mce-content-body a.button-ghost:hover {
+  background-color: var(--bg-surface-tertiary);
+}
+
+/* ============================================
+   BUTTON SIZE MODIFIERS
+   ============================================ */
+
+body.mce-content-body a.button-md {
+  padding: var(--button-md-padding-y) var(--button-md-padding-x);
+  min-height: var(--button-md-min-height);
+  border-radius: var(--button-md-radius);
+  font-size: var(--typography-body-small-size);
+  gap: var(--button-md-gap);
+}
+
+body.mce-content-body a.button-sm {
+  padding: var(--button-sm-padding-y) var(--button-sm-padding-x);
+  min-height: var(--button-sm-min-height);
+  border-radius: var(--button-sm-radius);
+  font-size: var(--typography-caption-size);
+  gap: var(--button-sm-gap);
+}
+
+body.mce-content-body a.button-lg {
+  padding: var(--button-lg-padding-y) var(--button-lg-padding-x);
+  min-height: var(--button-lg-min-height);
+  border-radius: var(--button-lg-radius);
+  font-size: var(--typography-body-size);
+  gap: var(--button-lg-gap);
+}

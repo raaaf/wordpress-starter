@@ -59,6 +59,7 @@ export default defineConfig({
       input: {
         app: resolve(__dirname, 'resources/js/app.ts'),
         styles: resolve(__dirname, 'resources/css/app.css'),
+        'editor-style': resolve(__dirname, 'resources/css/editor-style.css'),
         'admin-flexible-titles': resolve(__dirname, 'resources/js/admin/flexible-titles.ts'),
       },
       output: {
