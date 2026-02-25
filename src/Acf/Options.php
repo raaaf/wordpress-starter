@@ -854,11 +854,11 @@ class Options
             return sprintf(
                 '<div style="padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
                     <p style="margin: 0; color: #155724;"><strong>✓ %d Blogbeiträge vorhanden</strong></p>
-                    <p style="margin: 10px 0 0 0;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">
                         <a href="%s" class="button button-primary">5 weitere generieren</a>
-                        <a href="%s" class="button" style="margin-left: 5px;" onclick="return confirm(\'Alle Beiträge wirklich löschen?\');">Alle löschen</a>
-                        <a href="%s" class="button" style="margin-left: 5px;">Beiträge ansehen</a>
-                    </p>
+                        <a href="%s" class="button" onclick="return confirm(\'Alle Beiträge wirklich löschen?\');">Alle löschen</a>
+                        <a href="%s" class="button">Beiträge ansehen</a>
+                    </div>
                 </div>',
                 $postCount,
                 esc_url($generateUrl),
