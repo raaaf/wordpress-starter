@@ -7,7 +7,7 @@ Guidance for Claude Code when working with this WordPress starter theme.
 - **Namespace:** `WordpressStarter\`
 - **Text Domain:** `wp-starter`
 - **PHP:** 8.4+ with strict types
-- **Dev Server:** `npm run dev` (localhost:5173)
+- **Dev Server:** `npm run dev` (localhost:5180)
 - **Editor:** Classic Editor + ACF Flexible Content (Gutenberg disabled)
 
 ## Essential Commands
