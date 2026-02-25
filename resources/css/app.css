@@ -937,11 +937,6 @@
     text-decoration: none;
     cursor: pointer;
     transition: all 0.2s ease;
-    padding: var(--button-md-padding-y) var(--button-md-padding-x);
-    min-height: var(--button-md-min-height);
-    border-radius: var(--button-md-radius);
-    font-size: var(--typography-body-small-size);
-    gap: var(--button-md-gap);
   }
 
   .prose a.button-primary,
@@ -1035,7 +1030,14 @@
     box-shadow: var(--shadow-inner);
   }
 
-  /* Size modifiers — md is the default, sm/lg override it */
+  /* Size modifiers — applied after variants so they always win */
+  .prose a.button-primary,
+  .prose a.button-secondary,
+  .prose a.button-ghost,
+  .button-primary,
+  .button-secondary,
+  .button-ghost,
+  .button-danger,
   .prose a.button-md,
   .button-md {
     padding: var(--button-md-padding-y) var(--button-md-padding-x);
