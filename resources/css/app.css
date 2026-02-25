@@ -925,7 +925,11 @@
 @layer utilities {
   .prose a.button-primary,
   .prose a.button-secondary,
-  .prose a.button-ghost {
+  .prose a.button-ghost,
+  .button-primary,
+  .button-secondary,
+  .button-ghost,
+  .button-danger {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -940,7 +944,8 @@
     gap: var(--button-md-gap);
   }
 
-  .prose a.button-primary {
+  .prose a.button-primary,
+  .button-primary {
     background: linear-gradient(
       to bottom,
       var(--gradient-primary-start),
@@ -951,7 +956,8 @@
     box-shadow: var(--shadow-button);
   }
 
-  .prose a.button-primary:hover {
+  .prose a.button-primary:hover,
+  .button-primary:hover {
     background: linear-gradient(
       to bottom,
       var(--gradient-primary-hover-start),
@@ -962,7 +968,8 @@
     text-decoration: none;
   }
 
-  .prose a.button-primary:active {
+  .prose a.button-primary:active,
+  .button-primary:active {
     background: linear-gradient(
       to bottom,
       var(--gradient-primary-active-start),
@@ -971,40 +978,89 @@
     box-shadow: var(--shadow-inner);
   }
 
-  .prose a.button-secondary {
+  .prose a.button-secondary,
+  .button-secondary {
     background-color: var(--bg-surface-secondary);
     color: var(--text-content);
     border: 1px solid var(--border-line);
     box-shadow: var(--shadow-button);
   }
 
-  .prose a.button-secondary:hover {
+  .prose a.button-secondary:hover,
+  .button-secondary:hover {
     border-color: var(--border-line-strong);
     box-shadow: var(--shadow-button-hover);
     color: var(--text-content);
     text-decoration: none;
   }
 
-  .prose a.button-secondary:active {
+  .prose a.button-secondary:active,
+  .button-secondary:active {
     background-color: var(--bg-surface-tertiary);
     box-shadow: var(--shadow-inner);
   }
 
-  .prose a.button-ghost {
+  .prose a.button-ghost,
+  .button-ghost {
     background-color: transparent;
     color: var(--text-content);
     border: 1px solid transparent;
   }
 
-  .prose a.button-ghost:hover {
+  .prose a.button-ghost:hover,
+  .button-ghost:hover {
     background-color: var(--bg-surface-tertiary);
     color: var(--text-content);
     text-decoration: none;
   }
 
-  .prose a.button-ghost:active {
+  .prose a.button-ghost:active,
+  .button-ghost:active {
     background-color: var(--bg-surface-secondary);
     border-color: var(--border-line);
+  }
+
+  .button-danger {
+    background-color: var(--bg-surface-error-strong);
+    color: var(--text-on-color);
+    border: 1px solid transparent;
+    box-shadow: var(--shadow-button);
+  }
+
+  .button-danger:hover {
+    box-shadow: var(--shadow-button-hover);
+  }
+
+  .button-danger:active {
+    box-shadow: var(--shadow-inner);
+  }
+
+  /* Size modifiers — md is the default, sm/lg override it */
+  .prose a.button-md,
+  .button-md {
+    padding: var(--button-md-padding-y) var(--button-md-padding-x);
+    min-height: var(--button-md-min-height);
+    border-radius: var(--button-md-radius);
+    font-size: var(--typography-body-small-size);
+    gap: var(--button-md-gap);
+  }
+
+  .prose a.button-sm,
+  .button-sm {
+    padding: var(--button-sm-padding-y) var(--button-sm-padding-x);
+    min-height: var(--button-sm-min-height);
+    border-radius: var(--button-sm-radius);
+    font-size: var(--typography-caption-size);
+    gap: var(--button-sm-gap);
+  }
+
+  .prose a.button-lg,
+  .button-lg {
+    padding: var(--button-lg-padding-y) var(--button-lg-padding-x);
+    min-height: var(--button-lg-min-height);
+    border-radius: var(--button-lg-radius);
+    font-size: var(--typography-body-size);
+    gap: var(--button-lg-gap);
   }
 }
 
