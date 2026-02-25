@@ -67,7 +67,7 @@ body.mce-content-body h3 {
 }
 
 body.mce-content-body h4 {
-  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h4-size);
   font-weight: var(--typography-h4-weight);
   line-height: var(--typography-h4-line-height);
@@ -76,22 +76,13 @@ body.mce-content-body h4 {
   margin-bottom: 0.5em;
 }
 
-body.mce-content-body h5 {
-  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+body.mce-content-body h5,
+body.mce-content-body h6 {
+  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h5-size);
   font-weight: var(--typography-h5-weight);
   line-height: var(--typography-h5-line-height);
   letter-spacing: var(--typography-h5-letter-spacing);
-  margin-top: 1em;
-  margin-bottom: 0.5em;
-}
-
-body.mce-content-body h6 {
-  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
-  font-size: var(--typography-body-size);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--typography-body-line-height);
-  letter-spacing: 0;
   margin-top: 1em;
   margin-bottom: 0.5em;
 }
@@ -404,4 +395,18 @@ body.mce-content-body a.button-lg {
   border-radius: var(--button-lg-radius);
   font-size: var(--typography-body-size);
   gap: var(--button-lg-gap);
+}
+
+/* ============================================
+   INLINE ICON (from [icon] shortcode)
+   ============================================ */
+
+body.mce-content-body .inline-icon {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+body.mce-content-body .inline-icon svg {
+  fill: currentColor;
 }

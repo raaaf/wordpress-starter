@@ -1496,30 +1496,32 @@ class WelcomeServiceProvider extends ServiceProvider
         $html = '<div class="space-y-6 p-8 bg-surface-secondary rounded-xl">';
 
         $typography = [
-            ['class' => 'text-display', 'label' => 'Display', 'desc' => '60px / Bold'],
-            ['class' => 'text-h1', 'label' => 'Heading 1', 'desc' => '36px / Bold'],
-            ['class' => 'text-h2', 'label' => 'Heading 2', 'desc' => '30px / Semibold'],
-            ['class' => 'text-h3', 'label' => 'Heading 3', 'desc' => '24px / Semibold'],
-            ['class' => 'text-h4', 'label' => 'Heading 4', 'desc' => '20px / Semibold'],
-            ['class' => 'text-h5', 'label' => 'Heading 5', 'desc' => '18px / Medium'],
-            ['class' => 'text-body-large', 'label' => 'Body Large', 'desc' => '18px / Regular'],
-            ['class' => 'text-body', 'label' => 'Body', 'desc' => '16px / Regular'],
-            ['class' => 'text-body-small', 'label' => 'Body Small', 'desc' => '14px / Regular'],
-            ['class' => 'text-caption', 'label' => 'Caption', 'desc' => '12px / Regular'],
-            ['class' => 'text-overline', 'label' => 'Overline', 'desc' => '12px / Semibold / Uppercase'],
-            ['class' => 'text-code', 'label' => 'Code', 'desc' => '14px / Mono'],
+            ['tag' => 'p',  'class' => 'text-display',    'extra' => '',           'label' => 'Display',    'desc' => '60px / Bold'],
+            ['tag' => 'h1', 'class' => 'text-h1',         'extra' => '',           'label' => 'Heading 1',  'desc' => '36px / Bold'],
+            ['tag' => 'h2', 'class' => 'text-h2',         'extra' => '',           'label' => 'Heading 2',  'desc' => '30px / Semibold'],
+            ['tag' => 'h3', 'class' => 'text-h3',         'extra' => '',           'label' => 'Heading 3',  'desc' => '24px / Semibold'],
+            ['tag' => 'h4', 'class' => 'text-h4',         'extra' => '',           'label' => 'Heading 4',  'desc' => '20px / Semibold'],
+            ['tag' => 'h5', 'class' => 'text-h5',         'extra' => '',           'label' => 'Heading 5',  'desc' => '18px / Medium'],
+            ['tag' => 'h6', 'class' => 'text-h5',         'extra' => '',           'label' => 'Heading 6',  'desc' => '18px / Medium'],
+            ['tag' => 'p',  'class' => 'text-body-large', 'extra' => '',           'label' => 'Body Large', 'desc' => '18px / Regular'],
+            ['tag' => 'p',  'class' => 'text-body',       'extra' => '',           'label' => 'Body',       'desc' => '16px / Regular'],
+            ['tag' => 'p',  'class' => 'text-body-small', 'extra' => '',           'label' => 'Body Small', 'desc' => '14px / Regular'],
+            ['tag' => 'p',  'class' => 'text-caption',    'extra' => '',           'label' => 'Caption',    'desc' => '12px / Regular'],
+            ['tag' => 'p',  'class' => 'text-overline',   'extra' => '',           'label' => 'Overline',   'desc' => '12px / Semibold / Uppercase'],
+            ['tag' => 'p',  'class' => 'text-code',       'extra' => '',           'label' => 'Code',       'desc' => '14px / Mono'],
         ];
 
         foreach ($typography as $item) {
-            $html .= sprintf(
-                '<div class="flex flex-col gap-1 pb-4 border-b border-line last:border-b-0 last:pb-0">
-                    <span class="text-caption text-content-secondary">.%s — %s</span>
-                    <span class="%s text-content">%s</span>
-                </div>',
+            $tag     = esc_attr($item['tag']);
+            $classes = trim(esc_attr($item['class']) . ' my-0! ' . esc_attr($item['extra']));
+            $html   .= sprintf(
+                '<div class="flex flex-col gap-1 pb-4 border-b border-line last:border-b-0 last:pb-0"><span class="text-caption text-content-secondary">.%s — %s</span><%s class="%s">%s</%s></div>',
                 esc_html($item['class']),
                 esc_html($item['desc']),
-                esc_attr($item['class']),
-                esc_html($item['label'])
+                $tag,
+                $classes,
+                esc_html($item['label']),
+                $tag
             );
         }
 
