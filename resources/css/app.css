@@ -36,6 +36,7 @@
   --tw-prose-quotes: var(--text-primary);
   --tw-prose-quote-borders: var(--border-default);
   --tw-prose-captions: var(--text-secondary);
+  --tw-prose-code: var(--text-primary);
   --tw-prose-th-borders: var(--border-default);
   --tw-prose-td-borders: var(--border-default);
 }
@@ -331,7 +332,8 @@
   }
 
   /* Only underline links inside prose content - WCAG 2.1 SC 1.4.1 */
-  .prose a:not(.no-underline) {
+  /* Button classes are excluded — they handle their own text-decoration */
+  .prose a:not(.no-underline, .button-primary, .button-secondary, .button-ghost) {
     text-decoration: underline;
     text-underline-offset: 2px;
   }
@@ -909,6 +911,100 @@
     to {
       transform: rotate(360deg);
     }
+  }
+}
+
+/* ============================================
+   WYSIWYG BUTTON CLASSES
+   Applied to <a> elements inside WYSIWYG / prose content via TinyMCE Formats.
+   Must be in @layer utilities (highest layer) to override Tailwind Typography's
+   .prose :where(a) color and text-decoration rules.
+   Token-based colors automatically adapt to dark mode via tokens.css.
+   ============================================ */
+
+@layer utilities {
+  .prose a.button-primary,
+  .prose a.button-secondary,
+  .prose a.button-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: var(--button-md-padding-y) var(--button-md-padding-x);
+    min-height: var(--button-md-min-height);
+    border-radius: var(--button-md-radius);
+    font-size: var(--typography-body-small-size);
+    gap: var(--button-md-gap);
+  }
+
+  .prose a.button-primary {
+    background: linear-gradient(
+      to bottom,
+      var(--gradient-primary-start),
+      var(--gradient-primary-end)
+    );
+    color: var(--text-content-inverse);
+    border: 1px solid var(--border-line);
+    box-shadow: var(--shadow-button);
+  }
+
+  .prose a.button-primary:hover {
+    background: linear-gradient(
+      to bottom,
+      var(--gradient-primary-hover-start),
+      var(--gradient-primary-hover-end)
+    );
+    box-shadow: var(--shadow-button-hover);
+    color: var(--text-content-inverse);
+    text-decoration: none;
+  }
+
+  .prose a.button-primary:active {
+    background: linear-gradient(
+      to bottom,
+      var(--gradient-primary-active-start),
+      var(--gradient-primary-active-end)
+    );
+    box-shadow: var(--shadow-inner);
+  }
+
+  .prose a.button-secondary {
+    background-color: var(--bg-surface-secondary);
+    color: var(--text-content);
+    border: 1px solid var(--border-line);
+    box-shadow: var(--shadow-button);
+  }
+
+  .prose a.button-secondary:hover {
+    border-color: var(--border-line-strong);
+    box-shadow: var(--shadow-button-hover);
+    color: var(--text-content);
+    text-decoration: none;
+  }
+
+  .prose a.button-secondary:active {
+    background-color: var(--bg-surface-tertiary);
+    box-shadow: var(--shadow-inner);
+  }
+
+  .prose a.button-ghost {
+    background-color: transparent;
+    color: var(--text-content);
+    border: 1px solid transparent;
+  }
+
+  .prose a.button-ghost:hover {
+    background-color: var(--bg-surface-tertiary);
+    color: var(--text-content);
+    text-decoration: none;
+  }
+
+  .prose a.button-ghost:active {
+    background-color: var(--bg-surface-secondary);
+    border-color: var(--border-line);
   }
 }
 

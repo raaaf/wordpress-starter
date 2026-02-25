@@ -41,10 +41,11 @@
     $svgContent = '';
     if (file_exists($iconPath)) {
         $svgContent = file_get_contents($iconPath);
+        $svgContent = trim($svgContent);
         $svgContent = preg_replace('/\s*(width|height)="[^"]*"/', '', $svgContent);
         $svgContent = preg_replace(
             '/<svg/',
-            '<svg class="icon ' . $sizeClass . ' ' . $class . ' inline-block shrink-0" aria-hidden="true"',
+            '<svg class="icon ' . $sizeClass . ' ' . $class . ' inline-block align-middle shrink-0" aria-hidden="true"',
             $svgContent,
             1
         );
