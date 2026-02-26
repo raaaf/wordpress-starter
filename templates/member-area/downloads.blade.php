@@ -1,127 +1,220 @@
 {{-- Member Area Downloads --}}
 @php
-    $rawDownloads = function_exists('get_field') ? (get_field('member_downloads', 'option') ?: []) : [];
-
-    // Attach original index before sorting (needed for nonce + AJAX parameter)
-    foreach ($rawDownloads as $i => $download) {
-        $rawDownloads[$i]['_index'] = $i;
-    }
-
-    // Sort by download_sort field
-    usort($rawDownloads, fn($a, $b) => (int)($a['download_sort'] ?? 0) - (int)($b['download_sort'] ?? 0));
-
-    // Group by category
-    $grouped = [];
-    $categoryLabels = [
-        'general' => __('Allgemein', 'wp-starter'),
-        'reports' => __('Berichte', 'wp-starter'),
-        'forms'   => __('Formulare', 'wp-starter'),
-    ];
-    foreach ($rawDownloads as $download) {
-        $cat = $download['download_category'] ?? 'general';
-        $grouped[$cat][] = $download;
-    }
+    $perPageOptions = ['20' => '20', '50' => '50', '100' => '100'];
 @endphp
 
-<div class="space-y-8">
-    <h2 class="text-h3">{{ __('Dokumente', 'wp-starter') }}</h2>
+<div x-data="downloadTable" x-init="init()">
 
-    @if(empty($rawDownloads))
+    {{-- Toolbar --}}
+    <div class="flex flex-col sm:flex-row gap-3 mb-5">
+
+        {{-- Search --}}
+        <div class="sm:max-w-xs w-full relative">
+            <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-icon-secondary">
+                <x-icon name="search" class="w-4 h-4" />
+            </div>
+            <input
+                type="search"
+                name="search"
+                placeholder="{{ __('Suchen…', 'wp-starter') }}"
+                x-model.debounce.350ms="search"
+                class="input w-full border bg-surface text-content placeholder:text-content-tertiary transition-all duration-200 focus:outline-none rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)] h-10 text-base pl-10 pr-4"
+            />
+        </div>
+
+        {{-- Category filter — dynamic from facets --}}
+        <div class="sm:w-52">
+            <div class="select relative">
+                <select
+                    x-model="category"
+                    class="w-full border bg-surface text-content cursor-pointer transition-all duration-200 focus:outline-none h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]"
+                    style="appearance: none; -webkit-appearance: none; -moz-appearance: none; padding-right: 1rem;"
+                >
+                    <option value="">{{ __('Alle Kategorien', 'wp-starter') }}</option>
+                    <template x-for="cat in categories" :key="cat.slug">
+                        <option :value="cat.slug" x-text="cat.label + ' (' + cat.count + ')'"></option>
+                    </template>
+                </select>
+            </div>
+        </div>
+
+        {{-- Extension filter — dynamic from facets --}}
+        <div class="sm:w-40">
+            <div class="select relative">
+                <select
+                    x-model="ext"
+                    class="w-full border bg-surface text-content cursor-pointer transition-all duration-200 focus:outline-none h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]"
+                    style="appearance: none; -webkit-appearance: none; -moz-appearance: none; padding-right: 1rem;"
+                >
+                    <option value="">{{ __('Alle Typen', 'wp-starter') }}</option>
+                    <template x-for="e in extensions" :key="e.value">
+                        <option :value="e.value" x-text="e.label + ' (' + e.count + ')'"></option>
+                    </template>
+                </select>
+            </div>
+        </div>
+
+        {{-- Per-page --}}
+        <div class="sm:w-24 sm:ml-auto">
+            <x-select
+                name="per_page"
+                :options="$perPageOptions"
+                x-model="perPage"
+            />
+        </div>
+
+    </div>
+
+    {{-- Loading state --}}
+    <div x-show="loading" x-cloak class="space-y-2">
+        @foreach(range(1, 6) as $i)
+            <div class="h-12 bg-surface-secondary rounded-lg animate-pulse"></div>
+        @endforeach
+    </div>
+
+    {{-- Error state --}}
+    <div x-show="!loading && error" x-cloak>
+        <x-alert variant="error">
+            <span x-text="error"></span>
+        </x-alert>
+    </div>
+
+    {{-- Empty state --}}
+    <div x-show="!loading && !error && items.length === 0" x-cloak>
         <x-card variant="default" padding="lg">
             <div class="text-center py-8 text-content-secondary">
                 <x-icon name="download" class="w-12 h-12 mx-auto mb-3 text-icon-tertiary" />
-                <p>{{ __('Noch keine Dokumente verfügbar.', 'wp-starter') }}</p>
+                <p>{{ __('Keine Dokumente gefunden.', 'wp-starter') }}</p>
             </div>
         </x-card>
-    @else
-        @foreach($grouped as $category => $items)
-            <div>
-                <h3 class="text-h5 mb-4 text-content-secondary uppercase tracking-wide text-xs font-semibold">
-                    {{ $categoryLabels[$category] ?? $category }}
-                </h3>
-                <div class="space-y-3">
-                    @foreach($items as $download)
-                        @php
-                            $index       = $download['_index'];
-                            $sourceType  = $download['download_source_type'] ?? 'upload';
-                            $available   = (bool) ($download['download_available'] ?? true);
-                            $lastModified = $download['download_last_modified'] ?? null;
+    </div>
 
-                            // Determine file extension badge
-                            $fileExt = '';
-                            if ($sourceType === 'upload') {
-                                $file    = $download['download_file'] ?? null;
-                                $fileId  = $file ? (is_array($file) ? ($file['ID'] ?? 0) : (int)$file) : 0;
-                                $fileName = is_array($file) ? ($file['filename'] ?? '') : '';
-                                $fileExt = $fileName ? strtoupper(pathinfo($fileName, PATHINFO_EXTENSION)) : '';
-                                $hasFile = $fileId > 0;
-                            } elseif ($sourceType === 'external') {
-                                $externalUrl = $download['download_external_url'] ?? '';
-                                $fileExt     = $externalUrl ? strtoupper(pathinfo($externalUrl, PATHINFO_EXTENSION)) : '';
-                                $hasFile     = !empty($externalUrl);
-                            } else {
-                                // folder — individual imported file
-                                $externalUrl = $download['download_external_url'] ?? '';
-                                $fileExt     = $externalUrl ? strtoupper(pathinfo($externalUrl, PATHINFO_EXTENSION)) : 'Extern';
-                                $hasFile     = !empty($externalUrl);
-                            }
+    {{-- Table --}}
+    <div x-show="!loading && !error && items.length > 0" x-cloak>
+        <div class="overflow-x-auto rounded-lg border border-line">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-surface-secondary border-b border-line">
+                        <th class="px-4 py-3 text-left font-semibold text-content-secondary text-xs uppercase tracking-wide">
+                            {{ __('Dateiname', 'wp-starter') }}
+                        </th>
+                        <th class="px-4 py-3 text-left font-semibold text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
+                            {{ __('Typ', 'wp-starter') }}
+                        </th>
+                        <th class="px-4 py-3 text-left font-semibold text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
+                            {{ __('Kategorie', 'wp-starter') }}
+                        </th>
+                        <th class="px-4 py-3 text-left font-semibold text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
+                            {{ __('Datum', 'wp-starter') }}
+                        </th>
+                        <th class="px-4 py-3 whitespace-nowrap"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="item in items" :key="item.id">
+                        <tr class="border-t border-line hover:bg-surface-secondary transition-colors">
 
-                            // Build download URL using index-based parameter
-                            $downloadNonce = wp_create_nonce('member_download_' . $index);
-                            $downloadUrl   = admin_url('admin-ajax.php')
-                                . '?action=member_download&download_index=' . $index
-                                . '&nonce=' . $downloadNonce;
-
-                            // Format last-modified date
-                            $lastModifiedLabel = '';
-                            if ($lastModified) {
-                                $timestamp = strtotime($lastModified);
-                                if ($timestamp !== false) {
-                                    $lastModifiedLabel = sprintf(
-                                        __('Aktualisiert: %s', 'wp-starter'),
-                                        date_i18n(get_option('date_format'), $timestamp)
-                                    );
-                                }
-                            }
-                        @endphp
-                        <x-card variant="default" padding="md">
-                            <div class="flex items-start justify-between gap-4">
-                                <div class="flex items-start gap-4 min-w-0">
-                                    <div class="w-10 h-10 rounded-lg bg-surface-secondary flex items-center justify-center shrink-0 mt-0.5">
-                                        <x-icon name="download" class="w-5 h-5 text-icon-secondary" />
-                                    </div>
-                                    <div class="min-w-0">
-                                        <div class="font-semibold text-content">{{ $download['download_title'] ?? '' }}</div>
-                                        @if($download['download_description'] ?? '')
-                                            <p class="text-sm text-content-secondary mt-1">{{ $download['download_description'] }}</p>
-                                        @endif
-                                        <div class="flex flex-wrap items-center gap-2 mt-2">
-                                            @if($fileExt)
-                                                <x-badge variant="gray" size="sm">{{ $fileExt }}</x-badge>
-                                            @endif
-                                            @if(!$available)
-                                                <x-badge variant="gray" size="sm">{{ __('Nicht verfügbar', 'wp-starter') }}</x-badge>
-                                            @endif
-                                            @if($lastModifiedLabel)
-                                                <span class="text-xs text-content-secondary">{{ $lastModifiedLabel }}</span>
-                                            @endif
-                                        </div>
-                                    </div>
+                            {{-- Title + "Neu"-Badge --}}
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <a
+                                        :href="item.download_url"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="font-medium text-content hover:text-content-accent transition-colors"
+                                        x-text="item.title"
+                                    ></a>
+                                    <span
+                                        x-show="item.is_updated"
+                                        class="badge inline-flex w-fit items-center font-medium text-xs px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] gap-[var(--badge-sm-gap)] rounded-full bg-transparent text-content border border-line"
+                                    >{{ __('Neu', 'wp-starter') }}</span>
                                 </div>
-                                @if($hasFile && $available)
-                                    <x-button
-                                        url="{{ $downloadUrl }}"
-                                        :title="__('Herunterladen', 'wp-starter')"
-                                        variant="primary"
-                                        size="sm"
-                                        class="shrink-0"
-                                    />
-                                @endif
-                            </div>
-                        </x-card>
-                    @endforeach
-                </div>
+                            </td>
+
+                            {{-- Extension badge: dynamic variant, use badge token classes directly --}}
+                            <td class="px-4 py-3">
+                                <span
+                                    x-show="item.ext"
+                                    class="badge inline-flex w-fit items-center font-medium px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] gap-[var(--badge-sm-gap)] text-xs rounded-md"
+                                    :class="badgeClass(item.ext_variant)"
+                                    x-text="item.ext"
+                                ></span>
+                            </td>
+
+                            <td class="px-4 py-3 text-content-secondary" x-text="item.category_label"></td>
+                            <td class="px-4 py-3 text-content-secondary" x-text="item.last_modified"></td>
+
+                            {{-- Download button (ghost) --}}
+                            <td class="px-4 py-3 text-right">
+                                <a
+                                    x-show="item.available"
+                                    :href="item.download_url"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="button inline-flex items-center justify-center font-semibold transition-all duration-200 no-underline cursor-pointer select-none focus-visible:outline-none bg-transparent text-content border border-transparent hover:bg-surface-tertiary active:bg-surface-secondary px-[var(--button-sm-padding-x)] py-[var(--button-sm-padding-y)] text-xs min-h-[var(--button-sm-min-height)] gap-[var(--button-sm-gap)] rounded-[var(--button-sm-radius)]"
+                                >{{ __('Herunterladen', 'wp-starter') }}</a>
+                                <span
+                                    x-show="!item.available"
+                                    class="text-xs text-content-disabled"
+                                >{{ __('Nicht verfügbar', 'wp-starter') }}</span>
+                            </td>
+
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Footer: total + pagination --}}
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4">
+
+            <p class="text-sm text-content-secondary">
+                <span x-text="total"></span> {{ __('Dokumente', 'wp-starter') }}
+            </p>
+
+            <div x-show="pages > 1" class="flex items-center gap-1">
+
+                <button
+                    type="button"
+                    x-on:click="setPage(currentPage - 1)"
+                    :disabled="currentPage === 1"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-line text-content-secondary hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    aria-label="{{ __('Vorherige Seite', 'wp-starter') }}"
+                >
+                    <x-icon name="chevron-left" class="w-4 h-4" />
+                </button>
+
+                <template x-for="(n, i) in pageNumbers()" :key="i">
+                    <span>
+                        <button
+                            x-show="n !== '...'"
+                            type="button"
+                            x-on:click="setPage(n)"
+                            :class="n === currentPage
+                                ? 'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)] text-content-inverse border-line'
+                                : 'text-content-secondary hover:bg-surface-secondary border-line'"
+                            class="inline-flex items-center justify-center w-8 h-8 rounded-md border text-sm font-medium transition-colors"
+                            x-text="n"
+                        ></button>
+                        <span
+                            x-show="n === '...'"
+                            class="inline-flex items-center justify-center w-8 h-8 text-content-disabled text-sm"
+                        >…</span>
+                    </span>
+                </template>
+
+                <button
+                    type="button"
+                    x-on:click="setPage(currentPage + 1)"
+                    :disabled="currentPage === pages"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-line text-content-secondary hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    aria-label="{{ __('Nächste Seite', 'wp-starter') }}"
+                >
+                    <x-icon name="chevron-right" class="w-4 h-4" />
+                </button>
+
             </div>
-        @endforeach
-    @endif
+        </div>
+    </div>
+
 </div>
