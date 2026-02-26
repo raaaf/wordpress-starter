@@ -241,6 +241,7 @@ final class NamespaceConsistencyTest extends TestCase
             'YahnisElsts',  // Plugin Update Checker
             'Spatie',       // Schema.org
             'SchemaOrg',    // Schema.org (alternate)
+            'phpseclib3',   // SFTP client
             // Internal sub-namespaces (to avoid false positives in Blade templates)
             'PostTypes',
             'Taxonomies',
