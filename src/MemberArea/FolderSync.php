@@ -4,261 +4,293 @@ declare(strict_types=1);
 
 namespace WordpressStarter\MemberArea;
 
+use WordpressStarter\Providers\LogServiceProvider;
+use WordpressStarter\MemberArea\Crypto;
+
 class FolderSync
 {
     private const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'zip'];
 
     public static function run(): void
     {
-        $downloads = get_field('member_downloads', 'option') ?: [];
+        // Scan SFTP folder parent entries (those without a download_sftp_source = created by admin)
+        $folderPosts = new \WP_Query([
+            'post_type'      => 'member_download',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'meta_query'     => [
+                ['key' => 'download_source_type', 'value' => 'sftp'],
+                [
+                    'relation' => 'OR',
+                    ['key' => 'download_sftp_source', 'value' => '', 'compare' => '='],
+                    ['key' => 'download_sftp_source', 'compare' => 'NOT EXISTS'],
+                ],
+            ],
+            'fields' => 'ids',
+        ]);
 
-        // Collect folder entries and check availability for all external/folder entries
-        $updated = false;
+        foreach ($folderPosts->posts as $postId) {
+            $host     = get_field('download_sftp_host',     $postId) ?: '';
+            $port     = (int) ( get_field('download_sftp_port', $postId) ?: 22 ) ?: 22;
+            $username = get_field('download_sftp_username', $postId) ?: '';
+            $password = Crypto::decrypt(get_field('download_sftp_password', $postId) ?: '') ?? '';
+            $path     = get_field('download_sftp_path',     $postId) ?: '/';
 
-        foreach ($downloads as $index => $entry) {
-            $sourceType = $entry['download_source_type'] ?? 'upload';
-
-            if ($sourceType === 'folder') {
-                $folderUrl = $entry['download_folder_url'] ?? '';
-                $username  = $entry['download_folder_username'] ?? '';
-                $password  = $entry['download_folder_password'] ?? '';
-
-                if (empty($folderUrl)) {
-                    continue;
-                }
-
-                // Scan folder for new files
-                $files = self::scanFolder($folderUrl, $username, $password);
-
-                foreach ($files as $file) {
-                    if (!self::entryExists($downloads, $file['url'])) {
-                        $downloads[]   = self::buildFolderFileEntry($file, $folderUrl, $username, $password);
-                        $updated       = true;
-                    }
-                }
-            }
-
-            if (in_array($sourceType, ['external', 'folder'], true)) {
-                $urlToCheck = $sourceType === 'folder'
-                    ? ( $entry['download_folder_url'] ?? '' )
-                    : ( $entry['download_external_url'] ?? '' );
-
-                if (!empty($urlToCheck)) {
-                    $available = self::isAvailable($urlToCheck, $entry['download_folder_username'] ?? '', $entry['download_folder_password'] ?? '');
-                    if ( (bool) ( $entry['download_available'] ?? true ) !== $available) {
-                        $downloads[$index]['download_available'] = $available ? 1 : 0;
-                        $updated = true;
-                    }
-
-                    // Fetch last-modified for non-upload entries
-                    $lastModified = self::fetchLastModified($urlToCheck, $entry['download_folder_username'] ?? '', $entry['download_folder_password'] ?? '');
-                    if ($lastModified && ( $entry['download_last_modified'] ?? '' ) !== $lastModified) {
-                        $downloads[$index]['download_last_modified'] = $lastModified;
-                        $updated = true;
-                    }
-                }
-            }
-        }
-
-        // Also check availability for individually imported folder-file entries
-        foreach ($downloads as $index => $entry) {
-            $sourceType = $entry['download_source_type'] ?? 'upload';
-            if ($sourceType !== 'folder' || empty($entry['download_folder_source'] ?? '')) {
+            if (empty($host) || empty($username) || empty($password)) {
                 continue;
             }
 
-            $fileUrl  = $entry['download_external_url'] ?? '';
-            $username = $entry['download_folder_username'] ?? '';
-            $password = $entry['download_folder_password'] ?? '';
+            $files = self::scanSftpDirectory($host, $port, $username, $password, $path);
 
-            if (!empty($fileUrl)) {
-                $available = self::isAvailable($fileUrl, $username, $password);
-                if ( (bool) ( $entry['download_available'] ?? true ) !== $available) {
-                    $downloads[$index]['download_available'] = $available ? 1 : 0;
-                    $updated = true;
+            foreach ($files as $file) {
+                $identifier = $host . ':' . $port . $file['remotePath'];
+                if (!self::entryExistsByIdentifier($identifier)) {
+                    self::createSftpFileCpt($file, $host, $port, $username, $password, $path, $postId);
                 }
+            }
 
-                $lastModified = self::fetchLastModified($fileUrl, $username, $password);
-                if ($lastModified && ( $entry['download_last_modified'] ?? '' ) !== $lastModified) {
-                    $downloads[$index]['download_last_modified'] = $lastModified;
-                    $updated = true;
-                }
+            self::updateSftpFolderAvailability($postId, $host, $port, $username, $password, $path);
+
+            // Mark as synced so the admin list can reflect the status
+            update_post_meta($postId, '_sftp_synced', '1');
+        }
+
+        // Check availability for imported SFTP file entries
+        $importedPosts = new \WP_Query([
+            'post_type'      => 'member_download',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'meta_query'     => [
+                ['key' => 'download_source_type', 'value' => 'sftp'],
+                ['key' => 'download_sftp_source', 'value' => '', 'compare' => '!='],
+            ],
+            'fields' => 'ids',
+        ]);
+
+        foreach ($importedPosts->posts as $postId) {
+            $host       = get_field('download_sftp_host',        $postId) ?: '';
+            $port       = (int) ( get_field('download_sftp_port', $postId) ?: 22 ) ?: 22;
+            $username   = get_field('download_sftp_username',    $postId) ?: '';
+            $password   = Crypto::decrypt(get_field('download_sftp_password', $postId) ?: '') ?? '';
+            $remotePath = get_field('download_sftp_remote_file', $postId) ?: '';
+
+            if (!empty($host) && !empty($remotePath)) {
+                self::updateSftpFileAvailability($postId, $host, $port, $username, $password, $remotePath);
             }
         }
 
-        if ($updated) {
-            update_field('member_downloads', $downloads, 'option');
+        // Check availability for external-type entries
+        $externalPosts = new \WP_Query([
+            'post_type'      => 'member_download',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'meta_query'     => [
+                ['key' => 'download_source_type', 'value' => 'external'],
+            ],
+            'fields' => 'ids',
+        ]);
+
+        foreach ($externalPosts->posts as $postId) {
+            $url = get_field('download_external_url', $postId) ?: '';
+            if (!empty($url)) {
+                self::updateExternalAvailability($postId, $url);
+            }
         }
     }
 
     /**
-     * Scan an HTTP directory listing and return a list of files.
+     * Scan an SFTP directory and return a list of files with their remote paths.
      *
-     * @return array<int, array{url: string, filename: string, ext: string}>
+     * @return array<int, array{filename: string, ext: string, mtime: int|null, size: int, remotePath: string}>
      */
-    public static function scanFolder(string $url, string $username, string $password): array
-    {
-        $args = ['timeout' => 15];
+    private static function scanSftpDirectory(
+        string $host,
+        int $port,
+        string $username,
+        string $password,
+        string $remotePath
+    ): array {
+        try {
+            $sftp  = SftpClient::connect($host, $port, $username, $password);
+            $files = SftpClient::listFiles($sftp, $remotePath, self::ALLOWED_EXTENSIONS);
 
-        if (!empty($username) && !empty($password)) {
-            $args['headers'] = [
-                'Authorization' => 'Basic ' . base64_encode($username . ':' . $password),
-            ];
-        }
+            $normalizedPath = rtrim($remotePath, '/') . '/';
 
-        $response = wp_remote_get($url, $args);
-
-        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+            return array_map(static function (array $file) use ($normalizedPath): array {
+                $file['remotePath'] = $normalizedPath . $file['filename'];
+                return $file;
+            }, $files);
+        } catch (\Throwable $e) {
+            LogServiceProvider::warning('SFTP scan failed', [
+                'host'    => $host,
+                'path'    => $remotePath,
+                'message' => $e->getMessage(),
+            ]);
             return [];
         }
-
-        $html = wp_remote_retrieve_body($response);
-
-        return self::parseDirectoryListing($html, $url);
     }
 
     /**
-     * Parse Apache/Nginx directory listing HTML and extract downloadable file links.
+     * Check whether a CPT entry already exists for a given SFTP identifier.
+     */
+    private static function entryExistsByIdentifier(string $identifier): bool
+    {
+        $query = new \WP_Query([
+            'post_type'      => 'member_download',
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            'meta_query'     => [
+                ['key' => 'download_sftp_identifier', 'value' => $identifier, 'compare' => '='],
+            ],
+            'fields' => 'ids',
+        ]);
+
+        return $query->found_posts > 0;
+    }
+
+    /**
+     * Create a new CPT post for a file imported from an SFTP folder listing.
      *
-     * @return array<int, array{url: string, filename: string, ext: string}>
+     * @param array{filename: string, ext: string, mtime: int|null, size: int, remotePath: string} $file
      */
-    public static function parseDirectoryListing(string $html, string $baseUrl): array
-    {
-        $files = [];
+    private static function createSftpFileCpt(
+        array $file,
+        string $host,
+        int $port,
+        string $username,
+        string $password,
+        string $folderPath,
+        int $parentPostId
+    ): void {
+        $title      = pathinfo($file['filename'], PATHINFO_FILENAME);
+        $identifier = $host . ':' . $port . $file['remotePath'];
 
-        $dom = new \DOMDocument();
-        @$dom->loadHTML($html); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-        $links = $dom->getElementsByTagName('a');
+        $postId = wp_insert_post([
+            'post_type'   => 'member_download',
+            'post_status' => 'publish',
+            'post_title'  => $title,
+        ]);
 
-        foreach ($links as $link) {
-            /** @var \DOMElement $link */
-            $href = $link->getAttribute('href');
+        if (is_wp_error($postId) || $postId === 0) {
+            LogServiceProvider::warning('Failed to create CPT entry for SFTP file', [
+                'filename' => $file['filename'],
+            ]);
+            return;
+        }
 
-            // Skip parent dir, query-string sort links, absolute paths, and fragments
-            if (
-                $href === '../' ||
-                str_starts_with($href, '?') ||
-                str_starts_with($href, '/') ||
-                str_starts_with($href, '#') ||
-                str_starts_with($href, 'http')
-            ) {
-                continue;
+        $lastModified = $file['mtime'] !== null ? gmdate('c', $file['mtime']) : '';
+
+        update_field('download_source_type',      'sftp',              $postId);
+        update_field('download_sftp_host',         $host,               $postId);
+        update_field('download_sftp_port',         $port,               $postId);
+        update_field('download_sftp_username',     $username,           $postId);
+        update_field('download_sftp_password',     $password,           $postId);
+        update_field('download_sftp_remote_file',  $file['remotePath'], $postId);
+        update_field('download_sftp_identifier',   $identifier,         $postId);
+        update_field('download_sftp_source',       $folderPath,         $postId);
+        update_field('download_available',         true,                $postId);
+        update_field('download_last_modified',     $lastModified,       $postId);
+
+        // Copy taxonomy terms from the parent folder entry
+        $terms = wp_get_post_terms($parentPostId, 'download_category', ['fields' => 'ids']);
+        if (!is_wp_error($terms) && !empty($terms)) {
+            wp_set_post_terms($postId, $terms, 'download_category');
+        }
+    }
+
+    /**
+     * Update availability for a parent SFTP folder entry.
+     */
+    private static function updateSftpFolderAvailability(
+        int $postId,
+        string $host,
+        int $port,
+        string $username,
+        string $password,
+        string $remotePath
+    ): void {
+        try {
+            $sftp      = SftpClient::connect($host, $port, $username, $password);
+            $available = $sftp->is_dir($remotePath);
+        } catch (\Throwable $e) {
+            $available = false;
+            LogServiceProvider::warning('SFTP folder availability check failed', [
+                'post_id' => $postId,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
+        $current = (bool) get_field('download_available', $postId);
+        if ($current !== $available) {
+            update_field('download_available', $available, $postId);
+        }
+    }
+
+    /**
+     * Update availability and last-modified for an individual imported SFTP file entry.
+     */
+    private static function updateSftpFileAvailability(
+        int $postId,
+        string $host,
+        int $port,
+        string $username,
+        string $password,
+        string $remotePath
+    ): void {
+        try {
+            $sftp      = SftpClient::connect($host, $port, $username, $password);
+            $available = SftpClient::fileExists($sftp, $remotePath);
+            $stat      = $sftp->stat($remotePath);
+            $mtime     = isset($stat['mtime']) && is_int($stat['mtime']) ? $stat['mtime'] : null;
+        } catch (\Throwable $e) {
+            $available = false;
+            $mtime     = null;
+            LogServiceProvider::warning('SFTP file availability check failed', [
+                'post_id' => $postId,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
+        $current = (bool) get_field('download_available', $postId);
+        if ($current !== $available) {
+            update_field('download_available', $available, $postId);
+        }
+
+        if (isset($mtime)) {
+            $iso    = gmdate('c', $mtime);
+            $stored = get_field('download_last_modified', $postId) ?: '';
+            if ($stored !== $iso) {
+                update_field('download_last_modified', $iso, $postId);
             }
-
-            $ext = strtolower(pathinfo($href, PATHINFO_EXTENSION));
-
-            if (!in_array($ext, self::ALLOWED_EXTENSIONS, true)) {
-                continue;
-            }
-
-            $files[] = [
-                'url'      => rtrim($baseUrl, '/') . '/' . ltrim($href, '/'),
-                'filename' => rawurldecode($href),
-                'ext'      => $ext,
-            ];
         }
-
-        return $files;
     }
 
     /**
-     * Perform a HEAD request and return the Last-Modified value as ISO 8601 string.
+     * Update availability for an external URL entry via HEAD request.
      */
-    public static function fetchLastModified(string $url, string $username, string $password): ?string
+    private static function updateExternalAvailability(int $postId, string $url): void
     {
-        $args = ['timeout' => 10, 'method' => 'HEAD'];
+        $response  = wp_remote_head($url, ['timeout' => 10]);
+        $available = !is_wp_error($response) && (int) wp_remote_retrieve_response_code($response) >= 200
+            && (int) wp_remote_retrieve_response_code($response) < 300;
 
-        if (!empty($username) && !empty($password)) {
-            $args['headers'] = [
-                'Authorization' => 'Basic ' . base64_encode($username . ':' . $password),
-            ];
+        $current = (bool) get_field('download_available', $postId);
+        if ($current !== $available) {
+            update_field('download_available', $available, $postId);
         }
 
-        $response = wp_remote_head($url, $args);
-
-        if (is_wp_error($response)) {
-            return null;
-        }
-
-        $lastModified = wp_remote_retrieve_header($response, 'last-modified');
-
-        if (empty($lastModified)) {
-            return null;
-        }
-
-        $timestamp = strtotime($lastModified);
-
-        if ($timestamp === false) {
-            return null;
-        }
-
-        return gmdate('c', $timestamp);
-    }
-
-    /**
-     * Check whether a URL is reachable (HTTP 2xx response).
-     */
-    public static function isAvailable(string $url, string $username, string $password): bool
-    {
-        $args = ['timeout' => 10, 'method' => 'HEAD'];
-
-        if (!empty($username) && !empty($password)) {
-            $args['headers'] = [
-                'Authorization' => 'Basic ' . base64_encode($username . ':' . $password),
-            ];
-        }
-
-        $response = wp_remote_head($url, $args);
-
-        if (is_wp_error($response)) {
-            return false;
-        }
-
-        $code = (int) wp_remote_retrieve_response_code($response);
-
-        return $code >= 200 && $code < 300;
-    }
-
-    /**
-     * Check whether a file URL already exists as an entry in the downloads repeater.
-     *
-     * @param array<int, array<string, mixed>> $downloads
-     */
-    private static function entryExists(array $downloads, string $fileUrl): bool
-    {
-        foreach ($downloads as $entry) {
-            if (( $entry['download_external_url'] ?? '' ) === $fileUrl) {
-                return true;
+        if (!is_wp_error($response)) {
+            $lastModified = wp_remote_retrieve_header($response, 'last-modified');
+            if (!empty($lastModified)) {
+                $timestamp = strtotime($lastModified);
+                if ($timestamp !== false) {
+                    $iso    = gmdate('c', $timestamp);
+                    $stored = get_field('download_last_modified', $postId) ?: '';
+                    if ($stored !== $iso) {
+                        update_field('download_last_modified', $iso, $postId);
+                    }
+                }
             }
         }
-
-        return false;
-    }
-
-    /**
-     * Build a new repeater entry for a file imported from a folder listing.
-     *
-     * @param array{url: string, filename: string, ext: string} $file
-     * @return array<string, mixed>
-     */
-    private static function buildFolderFileEntry(array $file, string $folderUrl, string $username, string $password): array
-    {
-        $lastModified = self::fetchLastModified($file['url'], $username, $password);
-
-        return [
-            'download_title'           => pathinfo($file['filename'], PATHINFO_FILENAME),
-            'download_description'     => '',
-            'download_source_type'     => 'folder',
-            'download_file'            => null,
-            'download_external_url'    => $file['url'],
-            'download_folder_url'      => '',
-            'download_folder_username' => $username,
-            'download_folder_password' => $password,
-            'download_last_modified'   => $lastModified ?? '',
-            'download_available'       => 1,
-            'download_folder_source'   => $folderUrl,
-            'download_category'        => 'general',
-            'download_sort'            => 0,
-        ];
     }
 }

@@ -23,9 +23,9 @@
 @php
     // Sizes from Figma tokens - subtle border radius per Figma design
     $sizes = [
-        'sm' => 'px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] text-xs gap-[var(--badge-sm-gap)] rounded-md',
-        'md' => 'px-[var(--badge-md-padding-x)] py-[var(--badge-md-padding-y)] text-sm gap-[var(--badge-md-gap)] rounded-md',
-        'lg' => 'px-[var(--badge-lg-padding-x)] py-[var(--badge-lg-padding-y)] text-base gap-[var(--badge-lg-gap)] rounded-lg',
+        'sm' => 'px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] text-xs gap-[var(--badge-sm-gap)] rounded-full',
+        'md' => 'px-[var(--badge-md-padding-x)] py-[var(--badge-md-padding-y)] text-sm gap-[var(--badge-md-gap)] rounded-full',
+        'lg' => 'px-[var(--badge-lg-padding-x)] py-[var(--badge-lg-padding-y)] text-base gap-[var(--badge-lg-gap)] rounded-full',
     ];
 
     $iconSizes = [

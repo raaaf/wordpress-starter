@@ -46,9 +46,9 @@
 
     // Size classes
     $sizes = [
-        'sm' => 'h-8 text-sm pl-3 pr-8',
-        'md' => 'h-10 text-base pl-4 pr-10',
-        'lg' => 'h-12 text-lg pl-5 pr-12',
+        'sm' => 'h-8 text-sm px-3',
+        'md' => 'h-10 text-base px-4',
+        'lg' => 'h-12 text-lg px-5',
     ];
 
     $iconSizes = [
@@ -69,7 +69,7 @@
     $radiusClass = $radiusClasses[$size] ?? $radiusClasses['md'];
 
     // Base select classes from Figma tokens
-    $baseClasses = 'w-full border bg-surface text-content appearance-none cursor-pointer transition-all duration-200 focus:outline-none';
+    $baseClasses = 'w-full border bg-surface text-content cursor-pointer transition-all duration-200 focus:outline-none [appearance:none] [-webkit-appearance:none] [-moz-appearance:none]';
 
     // State classes from Figma
     $stateClasses = match(true) {
@@ -99,6 +99,7 @@
             @if($disabled) disabled @endif
             @if($hasError) aria-invalid="true" @endif
             @if($displayHint) aria-describedby="{{ $selectId }}-hint" @endif
+            {{ $attributes->whereStartsWith(['x-', '@', ':', 'data-', 'aria-']) }}
             class="{{ $baseClasses }} {{ $radiusClass }} {{ $stateClasses }} {{ $sizeClass }} {{ $class }}"
         >
             @if($placeholder)
@@ -120,10 +121,6 @@
             @endforeach
         </select>
 
-        {{-- Chevron icon --}}
-        <div class="absolute {{ $iconSize }} top-1/2 -translate-y-1/2 pointer-events-none {{ $disabled ? 'text-icon-disabled' : 'text-icon-secondary' }}">
-            <x-icon name="chevron-down" class="w-full h-full" />
-        </div>
     </div>
 
     {{-- Hint / Error message --}}
