@@ -40,3 +40,8 @@ parameters:
         - '#Function config not found#'
         # WordPress cache functions
         - '#Function wp_cache_#'
+        # WordPress constants defined at runtime
+        - '#Constant COOKIEPATH not found#'
+        - '#Constant COOKIE_DOMAIN not found#'
+        # Third-party library method not recognized by PHPStan
+        - '#Call to an undefined method YahnisElsts\\PluginUpdateChecker\\v5p6\\Vcs\\Api::enableReleaseAssets#'
