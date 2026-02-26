@@ -190,6 +190,7 @@ class MemberAreaServiceProvider extends ServiceProvider
                     update_post_meta($postId, 'download_sftp_password', Crypto::encrypt($pw));
                 } catch (\RuntimeException $e) {
                     // AUTH_KEY not configured — skip silently
+                    unset($e);
                 }
             }
 

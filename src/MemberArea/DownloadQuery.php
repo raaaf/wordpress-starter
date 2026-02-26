@@ -253,7 +253,7 @@ class DownloadQuery
             if (!is_wp_error($terms) && !empty($terms)) {
                 foreach ($terms as $term) {
                     $categoryCounts[$term->slug] = $categoryCounts[$term->slug] ?? ['label' => $term->name, 'count' => 0];
-                    $categoryCounts[$term->slug]['count']++;
+                    ++$categoryCounts[$term->slug]['count'];
                 }
             }
 
