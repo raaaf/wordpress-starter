@@ -489,8 +489,13 @@ class PluginServiceProvider extends ServiceProvider
                     $homePageId = $pageId;
                 }
 
-                // Add Hero layout with page title (except for styleguide which has its own layouts)
-                if ($slug !== 'styleguide' && function_exists('update_field')) {
+                // Mark page as protected for member area
+                if (!empty($pageData['protected']) && function_exists('update_field')) {
+                    update_field('field_page_is_protected', true, $pageId);
+                }
+
+                // Add Hero layout with page title (except for styleguide/member-area which have their own templates)
+                if ($slug !== 'styleguide' && $slug !== 'member-area' && function_exists('update_field')) {
                     $heroLayout = [
                         [
                             'acf_fc_layout' => 'hero',
