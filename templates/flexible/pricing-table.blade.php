@@ -21,7 +21,7 @@
 
 <x-section :background="$background" class="pricing-table">
     @if($title)
-        <h2 class="text-h2 mb-12 text-center text-content">{!! $title !!}</h2>
+        <h2 class="mb-12 text-center">{!! $title !!}</h2>
     @endif
 
     @if(!empty($plans))
@@ -43,7 +43,7 @@
                     @endif
 
                     @if($name)
-                        <h3 class="text-h4 mb-4 {{ $isFeatured ? 'text-content-inverse' : 'text-content' }}">{{ $name }}</h3>
+                        <h3 class="text-h4 mb-4 {{ $isFeatured ? 'text-content-inverse' : '' }}">{{ $name }}</h3>
                     @endif
 
                     <div class="mb-6">

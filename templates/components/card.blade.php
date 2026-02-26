@@ -126,7 +126,7 @@
             @if($title || $subtitle)
                 <div class="space-y-1">
                     @if($title)
-                        <h3 class="text-h5 text-content">{{ $title }}</h3>
+                        <h3 class="text-h5">{{ $title }}</h3>
                     @endif
                     @if($subtitle)
                         <p class="text-sm text-content-secondary">{{ $subtitle }}</p>

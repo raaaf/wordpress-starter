@@ -8,7 +8,7 @@
                     <x-link :url="get_post_type_archive_link('post')" variant="dark" iconLeft="chevron-left" size="sm" class="mb-4">
                         {{ __('Zurück zur Übersicht', 'wp-starter') }}
                     </x-link>
-                    <h1 class="text-h1 mb-4">{{ get_the_title() }}</h1>
+                    <h1 class="mb-4">{{ get_the_title() }}</h1>
                     <div class="flex items-center gap-3">
                         <x-badge variant="gray" style="outline">{{ get_the_date() }}</x-badge>
                         <x-badge variant="gray" style="outline">{{ get_reading_time() }}</x-badge>

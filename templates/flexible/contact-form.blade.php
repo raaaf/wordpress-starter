@@ -24,7 +24,7 @@
         {{-- Left: Title, Content, Contact Info --}}
         <div>
             @if($title)
-                <h2 class="text-h2 mb-6 text-content">{!! $title !!}</h2>
+                <h2 class="mb-6">{!! $title !!}</h2>
             @endif
 
             @if($content)
@@ -35,7 +35,7 @@
 
             @if($showContactInfo && ($companyName || $address || $phone || $email))
                 <x-card variant="filled" padding="lg">
-                    <h3 class="text-h5 mb-4 text-content">{{ __('Kontaktdaten', 'wp-starter') }}</h3>
+                    <h3 class="text-h5 mb-4">{{ __('Kontaktdaten', 'wp-starter') }}</h3>
 
                     @if($companyName)
                         <p class="mb-2 font-medium text-content">{{ $companyName }}</p>

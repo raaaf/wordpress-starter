@@ -7,7 +7,7 @@
                 {{-- Only show page header if no ACF sections (title is in Hero block) --}}
                 @unless(is_front_page() || have_rows('page_sections'))
                     <header class="page-header max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        <h1 class="text-h1">{{ get_the_title() }}</h1>
+                        <h1>{{ get_the_title() }}</h1>
                     </header>
                 @endunless
 
