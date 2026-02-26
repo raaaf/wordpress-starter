@@ -231,53 +231,63 @@
      Default typography for all headings
      ============================================ */
 
-  h1 {
+  h1,
+  .text-h1 {
     font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h1-size);
     font-weight: var(--typography-h1-weight);
     line-height: var(--typography-h1-line-height);
     letter-spacing: var(--typography-h1-letter-spacing);
+    color: var(--text-primary);
     margin-top: 0;
     margin-bottom: 0.5em;
   }
 
-  h2 {
+  h2,
+  .text-h2 {
     font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h2-size);
     font-weight: var(--typography-h2-weight);
     line-height: var(--typography-h2-line-height);
     letter-spacing: var(--typography-h2-letter-spacing);
+    color: var(--text-primary);
     margin-top: 1.5em;
     margin-bottom: 0.5em;
   }
 
-  h3 {
+  h3,
+  .text-h3 {
     font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h3-size);
     font-weight: var(--typography-h3-weight);
     line-height: var(--typography-h3-line-height);
     letter-spacing: var(--typography-h3-letter-spacing);
+    color: var(--text-primary);
     margin-top: 1.25em;
     margin-bottom: 0.5em;
   }
 
-  h4 {
+  h4,
+  .text-h4 {
     font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h4-size);
     font-weight: var(--typography-h4-weight);
     line-height: var(--typography-h4-line-height);
     letter-spacing: var(--typography-h4-letter-spacing);
+    color: var(--text-primary);
     margin-top: 1em;
     margin-bottom: 0.5em;
   }
 
   h5,
-  h6 {
+  h6,
+  .text-h5 {
     font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h5-size);
     font-weight: var(--typography-h5-weight);
     line-height: var(--typography-h5-line-height);
     letter-spacing: var(--typography-h5-letter-spacing);
+    color: var(--text-primary);
     margin-top: 1em;
     margin-bottom: 0.5em;
   }
@@ -408,50 +418,7 @@
     color: var(--text-content);
   }
 
-  /* Heading 1 - 36px / Bold */
-  .text-h1 {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
-    font-size: var(--typography-h1-size);
-    font-weight: var(--typography-h1-weight);
-    line-height: var(--typography-h1-line-height);
-    letter-spacing: var(--typography-h1-letter-spacing);
-  }
-
-  /* Heading 2 - 30px / Semibold */
-  .text-h2 {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
-    font-size: var(--typography-h2-size);
-    font-weight: var(--typography-h2-weight);
-    line-height: var(--typography-h2-line-height);
-    letter-spacing: var(--typography-h2-letter-spacing);
-  }
-
-  /* Heading 3 - 24px / Semibold */
-  .text-h3 {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
-    font-size: var(--typography-h3-size);
-    font-weight: var(--typography-h3-weight);
-    line-height: var(--typography-h3-line-height);
-    letter-spacing: var(--typography-h3-letter-spacing);
-  }
-
-  /* Heading 4 - 20px / Semibold */
-  .text-h4 {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
-    font-size: var(--typography-h4-size);
-    font-weight: var(--typography-h4-weight);
-    line-height: var(--typography-h4-line-height);
-    letter-spacing: var(--typography-h4-letter-spacing);
-  }
-
-  /* Heading 5 - 18px / Medium */
-  .text-h5 {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
-    font-size: var(--typography-h5-size);
-    font-weight: var(--typography-h5-weight);
-    line-height: var(--typography-h5-line-height);
-    letter-spacing: var(--typography-h5-letter-spacing);
-  }
+  /* Heading styles (h1–h5, .text-h1–.text-h5) are defined in @layer base */
 
   /* Body Large - 18px / Regular - Intro text */
   .text-body-large {

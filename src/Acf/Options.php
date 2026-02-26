@@ -42,6 +42,9 @@ class Options
         self::addSubPage(__('Header', 'wp-starter'), 'header', 'dashicons-arrow-up-alt');
         self::addSubPage(__('Footer', 'wp-starter'), 'footer', 'dashicons-arrow-down-alt');
         self::addSubPage(__('Social Media', 'wp-starter'), 'social', 'dashicons-share');
+        if (config('member_area.enabled', false)) {
+            self::addSubPage(__('Interner Bereich', 'wp-starter'), 'member-area', 'dashicons-lock');
+        }
         self::addSubPage(__('Analytics', 'wp-starter'), 'analytics', 'dashicons-chart-bar');
         self::addSubPage(__('Werkzeuge', 'wp-starter'), 'tools', 'dashicons-admin-tools');
         self::addSubPage(__('Design Tokens', 'wp-starter'), 'tokens', 'dashicons-art');

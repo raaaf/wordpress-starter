@@ -282,7 +282,7 @@ class Team extends AbstractPostType
 
         // Sort by display_order meta field
         if ($orderby === 'meta_value_num') {
-            $args['meta_key'] = 'display_order';
+            $args['meta_key'] = 'display_order'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
         }
 
         $posts = self::all($args);

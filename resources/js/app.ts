@@ -3,6 +3,7 @@ import Alpine from 'alpinejs';
 import collapse from '@alpinejs/collapse';
 import intersect from '@alpinejs/intersect';
 import mediumZoom from 'medium-zoom';
+import { registerMemberAreaComponents } from './member-area';
 
 // Declare localized strings from WordPress
 declare const wpStarterStrings: {
@@ -472,6 +473,9 @@ Alpine.data('beforeAfterSlider', createBeforeAfterComponent);
 Alpine.data('logoSlider', (logos: LogoSliderLogo[], autoplay: boolean) =>
   createLogoSliderComponent(logos, autoplay)
 );
+
+// Register member area components (only registered when the module is present)
+registerMemberAreaComponents(Alpine);
 
 // Start Alpine
 Alpine.start();
