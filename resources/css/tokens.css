@@ -442,7 +442,7 @@
   --text-on-color: var(--color-white);
 
   /* Border */
-  --border-default: var(--color-gray-700);
+  --border-default: var(--color-gray-800);
   --border-strong: var(--color-gray-600);
   --border-subtle: var(--color-gray-800);
   --border-brand: var(--color-accent-500);
@@ -512,7 +512,7 @@
     --text-on-color: var(--color-white);
 
     /* Border */
-    --border-default: var(--color-gray-700);
+    --border-default: var(--color-gray-800);
     --border-strong: var(--color-gray-600);
     --border-subtle: var(--color-gray-800);
     --border-brand: var(--color-accent-500);
