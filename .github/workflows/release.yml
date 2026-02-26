@@ -81,28 +81,41 @@ jobs:
           sed -i "s/^Version: .*/Version: $VERSION/" style.css
 
       - name: Release
+        id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+        run: |
+          OUTPUT=$(npx semantic-release 2>&1)
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -q "Published release"; then
+            echo "released=true" >> $GITHUB_OUTPUT
+          else
+            echo "released=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Sync style.css version after release
+        if: steps.semantic.outputs.released == 'true'
         run: |
           VERSION=$(node -p "require('./package.json').version")
           sed -i "s/^Version: .*/Version: $VERSION/" style.css
 
       - name: Setup PHP for packaging
+        if: steps.semantic.outputs.released == 'true'
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
           tools: composer:v2
 
       - name: Install PHP dependencies for packaging
+        if: steps.semantic.outputs.released == 'true'
         run: composer install --prefer-dist --no-progress --no-dev
 
       - name: Package theme
+        if: steps.semantic.outputs.released == 'true'
         run: npm run package
 
       - name: Upload release asset
+        if: steps.semantic.outputs.released == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
