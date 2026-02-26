@@ -1,3 +1,19 @@
+# [2.5.0](https://github.com/raaaf/starter/compare/v2.4.0...v2.5.0) (2026-02-26)
+
+### Bug Fixes
+
+- correct composer installer-paths and ignore theme-local plugins dir ([288a566](https://github.com/raaaf/starter/commit/288a566853329bcae019e92c081d4b40b65dd3f2))
+- disable rate limiting in WP_DEBUG mode ([8789500](https://github.com/raaaf/starter/commit/87895008a27d31f2f0833b309d0ded15e0445378))
+- **phpcs:** resolve empty catch and post-increment violations ([77461a3](https://github.com/raaaf/starter/commit/77461a3138db62638bd8edb4713bd66ff8a39c38))
+- **tests:** add phpseclib3 to external namespace whitelist ([0002e3f](https://github.com/raaaf/starter/commit/0002e3faa96e8e80f8df940a3dfd006f4ea5ef19))
+
+### Features
+
+- **member-area:** ACF fields, taxonomy, icons, CSS refinements ([a7d4ebc](https://github.com/raaaf/starter/commit/a7d4ebc4d9bb2656291e19155317f1466a5186ce))
+- **member-area:** implement iteration 2 — admin clarity, multi-source docs, simplified frontend ([dd00f6a](https://github.com/raaaf/starter/commit/dd00f6a753c16741f136e228e8c4da069e46a1a6))
+- **member-area:** SFTP sync, encrypted passwords, download table ([a53c42d](https://github.com/raaaf/starter/commit/a53c42d5f1a21e2cbb59e72cdbf5fb79de5c1736))
+- **member-area:** templates, login page, alert component, layout fixes ([ed78150](https://github.com/raaaf/starter/commit/ed78150b239cac7dfcd3ca2476a1c8369eebf461))
+
 # [2.4.0](https://github.com/raaaf/starter/compare/v2.3.2...v2.4.0) (2026-02-25)
 
 ### Bug Fixes
