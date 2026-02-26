@@ -23,6 +23,7 @@ use WordpressStarter\Providers\SeoServiceProvider;
 use WordpressStarter\Providers\DesignTokenServiceProvider;
 use WordpressStarter\Providers\EditorStylesServiceProvider;
 use WordpressStarter\Providers\IconShortcodeServiceProvider;
+use WordpressStarter\Providers\MemberAreaServiceProvider;
 
 class Application
 {
@@ -78,6 +79,7 @@ class Application
             DesignTokenServiceProvider::class,
             EditorStylesServiceProvider::class,
             IconShortcodeServiceProvider::class,
+            MemberAreaServiceProvider::class,
         ];
     }
 
