@@ -52,7 +52,7 @@
     $copyrightText = str_replace('{year}', date('Y'), $copyrightText);
 @endphp
 
-<footer class="bg-surface-secondary border-t border-line">
+<footer class="bg-surface border-t border-line">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             {{-- Logo / Company Info / Footer Text --}}
@@ -65,7 +65,7 @@
                     </a>
                 @endif
                 @if($showCompany && $company)
-                    <h3 class="text-h5 text-content mb-4">{{ $company }}</h3>
+                    <h3 class="text-h5 mb-4">{{ $company }}</h3>
                 @endif
                 @if($footerText)
                     <div class="text-content-secondary text-sm prose prose-sm">
@@ -77,7 +77,7 @@
             {{-- Footer Navigation --}}
             @if($showNav)
                 <div>
-                    <h3 class="text-h5 text-content mb-4">{{ $navTitle }}</h3>
+                    <h3 class="text-h5 mb-4">{{ $navTitle }}</h3>
                     <nav class="footer-nav">
                         <?php
                         wp_nav_menu([
@@ -95,7 +95,7 @@
             {{-- Contact Info --}}
             @if($showContact && ($address || $phone || $email))
                 <div>
-                    <h3 class="text-h5 text-content mb-4">{{ $contactTitle }}</h3>
+                    <h3 class="text-h5 mb-4">{{ $contactTitle }}</h3>
                     <address class="not-italic text-content-secondary text-sm space-y-2">
                         @if($address)
                             <p>{!! nl2br(esc_html($address)) !!}</p>
@@ -121,7 +121,7 @@
             {{-- Social Links --}}
             @if($showSocial && !empty($socialLinks))
                 <div>
-                    <h3 class="text-h5 text-content mb-4">{{ $socialTitle }}</h3>
+                    <h3 class="text-h5 mb-4">{{ $socialTitle }}</h3>
                     <div class="flex gap-4">
                         @foreach($socialLinks as $social)
                             @if(!empty($social['url']))

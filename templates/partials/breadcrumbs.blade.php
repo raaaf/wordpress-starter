@@ -7,7 +7,7 @@
 @endphp
 
 @if($showBreadcrumbs)
-    <div class="bg-surface-secondary border-b border-line">
+    <div class="bg-surface border-b border-line">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <nav class="breadcrumbs" aria-label="{{ __('Breadcrumb', 'wp-starter') }}">
                 <?php yoast_breadcrumb(); ?>

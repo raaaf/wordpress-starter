@@ -16,7 +16,7 @@
 
 <x-section :background="$background" class="gallery">
     @if($title)
-        <h2 class="text-h2 mb-12 text-center text-content">{!! $title !!}</h2>
+        <h2 class="mb-12 text-center">{!! $title !!}</h2>
     @endif
 
     @if(!empty($images))

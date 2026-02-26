@@ -41,7 +41,7 @@
 
 <x-section :background="$background" class="posts">
     @if($title)
-        <h2 class="text-h2 mb-12 text-center text-content">{!! $title !!}</h2>
+        <h2 class="mb-12 text-center">{!! $title !!}</h2>
     @endif
 
     @if($postsQuery->have_posts())
@@ -75,7 +75,7 @@
                                 </div>
                             @endif
 
-                            <h3 class="text-h4 mb-3 text-content transition-colors duration-200 group-hover:text-content-brand">
+                            <h3 class="text-h4 mb-3 transition-colors duration-200 group-hover:text-content-brand">
                                 {{ get_the_title() }}
                             </h3>
 

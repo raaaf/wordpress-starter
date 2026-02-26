@@ -72,7 +72,7 @@
                 @endif
 
                 @if($title)
-                    <h1 class="text-display mb-6 text-content">
+                    <h1 class="text-display mb-6">
                         {!! $title !!}
                     </h1>
                 @endif
@@ -117,7 +117,7 @@
                 @endif
 
                 @if($title)
-                    <h1 class="text-h1 mb-6 text-content">
+                    <h1 class="mb-6">
                         {!! $title !!}
                     </h1>
                 @endif
@@ -179,7 +179,7 @@
             @endif
 
             @if($title)
-                <h1 class="text-h1 mb-6 text-content">
+                <h1 class="mb-6">
                     {!! $title !!}
                 </h1>
             @endif

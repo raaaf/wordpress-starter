@@ -9,7 +9,7 @@
 @php
     $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
     $stats = get_sub_field('stats') ?: [];
-    $background = get_sub_field('background_color') ?: 'secondary';
+    $background = get_sub_field('background_color') ?: 'primary';
 
     // Use explicit grid classes to ensure Tailwind includes them
     $statsCount = count($stats);
@@ -23,7 +23,7 @@
 
 <x-section :background="$background" class="stats">
     @if($title)
-        <h2 class="text-h2 mb-12 text-center text-content">{!! $title !!}</h2>
+        <h2 class="mb-12 text-center">{!! $title !!}</h2>
     @endif
 
     @if(!empty($stats))

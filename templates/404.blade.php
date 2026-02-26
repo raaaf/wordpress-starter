@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-section background="secondary" padding="xl">
+    <x-section background="primary" padding="xl">
         <div class="text-center max-w-2xl mx-auto">
             {{-- 404 Icon --}}
             <div class="mb-8">
@@ -12,7 +12,7 @@
 
             {{-- Error Message --}}
             <h1 class="text-display text-content-tertiary mb-4">404</h1>
-            <h2 class="text-h2 text-content mb-4">
+            <h2 class="mb-4">
                 {{ __('Seite nicht gefunden', 'wp-starter') }}
             </h2>
             <p class="text-lg text-content-secondary mb-8">

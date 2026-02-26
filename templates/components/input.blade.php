@@ -134,6 +134,7 @@
                 x-ref="input"
                 x-on:input="hasValue = $event.target.value.length > 0"
             @endif
+            {{ $attributes->whereStartsWith(['x-', '@', ':', 'autocomplete', 'aria-', 'data-']) }}
             class="{{ $baseClasses }} {{ $radiusClass }} {{ $stateClasses }} {{ $sizeConfig['input'] }} {{ $sizeConfig['padding'] }} {{ $sizeConfig['paddingRight'] }} {{ $class }}"
         />
 

@@ -5,7 +5,7 @@
 @endphp
 
 @section('content')
-    <x-section background="secondary" padding="lg">
+    <x-section background="primary" padding="lg">
         <div class="max-w-2xl mx-auto text-center">
             {{-- Search Icon --}}
             <div class="mb-6">
@@ -15,7 +15,7 @@
             </div>
 
             {{-- Search Title --}}
-            <h1 class="text-h1 text-content mb-2">
+            <h1 class="mb-2">
                 {{ __('Suchergebnisse', 'wp-starter') }}
             </h1>
             <p class="text-lg text-content-secondary mb-6">
@@ -118,7 +118,7 @@
                 <svg class="w-16 h-16 mx-auto text-content-tertiary mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <h2 class="text-h3 text-content mb-4">
+                <h2 class="text-h3 mb-4">
                     {{ __('Keine Ergebnisse gefunden', 'wp-starter') }}
                 </h2>
                 <p class="text-content-secondary mb-8 max-w-md mx-auto">

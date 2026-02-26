@@ -5,10 +5,10 @@
 @endphp
 
 @section('content')
-    <x-section background="secondary" padding="lg">
+    <x-section background="primary" padding="lg">
         <div class="max-w-2xl mx-auto text-center">
             {{-- Archive Title --}}
-            <h1 class="text-h1 text-content mb-4">
+            <h1 class="mb-4">
                 @if (is_category())
                     {{ sprintf(__('Kategorie: %s', 'wp-starter'), single_cat_title('', false)) }}
                 @elseif (is_tag())
@@ -73,7 +73,7 @@
                                 <x-badge variant="gray" style="outline">{{ get_reading_time() }}</x-badge>
                             </div>
 
-                            <h2 class="text-h2 text-content mb-4 transition-colors group-hover:text-content-brand">
+                            <h2 class="mb-4 transition-colors group-hover:text-content-brand">
                                 {{ get_the_title() }}
                             </h2>
 
@@ -124,7 +124,7 @@
                                         <x-badge variant="gray" style="outline" size="sm">{{ get_reading_time() }}</x-badge>
                                     </div>
 
-                                    <h3 class="text-h4 text-content mb-3 transition-colors group-hover:text-content-brand">
+                                    <h3 class="text-h4 mb-3 transition-colors group-hover:text-content-brand">
                                         {{ get_the_title() }}
                                     </h3>
 
@@ -177,7 +177,7 @@
                                         <x-badge variant="gray" style="outline" size="sm">{{ get_reading_time() }}</x-badge>
                                     </div>
 
-                                    <h3 class="text-h5 text-content mb-2 transition-colors group-hover:text-content-brand line-clamp-2">
+                                    <h3 class="text-h5 mb-2 transition-colors group-hover:text-content-brand line-clamp-2">
                                         {{ get_the_title() }}
                                     </h3>
 
@@ -227,7 +227,7 @@
                 <svg class="w-16 h-16 mx-auto text-content-tertiary mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                 </svg>
-                <h2 class="text-h3 text-content mb-4">
+                <h2 class="text-h3 mb-4">
                     {{ __('Keine Beiträge gefunden', 'wp-starter') }}
                 </h2>
                 <p class="text-content-secondary mb-8 max-w-md mx-auto">
