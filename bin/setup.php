@@ -165,6 +165,7 @@ class ThemeSetup
         'contact' => ['title' => 'Kontakt', 'template' => ''],
         'privacy' => ['title' => 'Datenschutz', 'template' => ''],
         'imprint' => ['title' => 'Impressum', 'template' => ''],
+        'member-area' => ['title' => 'Interner Bereich', 'template' => 'page-member-area', 'status' => 'publish', 'protected' => true],
         'styleguide' => ['title' => 'Styleguide', 'template' => '', 'status' => 'private'],
     ];
 

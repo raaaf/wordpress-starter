@@ -36,4 +36,8 @@ return [
     'debug' => [
         'show_grid' => env('WP_DEBUG', false),
     ],
+
+    'member_area' => [
+        'enabled' => env('MEMBER_AREA_ENABLED', true),
+    ],
 ];

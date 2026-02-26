@@ -402,10 +402,6 @@ class WelcomeServiceProvider extends ServiceProvider
             wp_delete_post( (int) $existingPageId, true);
         }
 
-        // Clear cached images so they get re-uploaded (including SVGs)
-        delete_option(self::OPTION_IMAGES);
-        $this->imageIds = [];
-
         // Create new styleguide page
         $pageId = $this->createStyleguidePage();
 

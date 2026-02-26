@@ -42,7 +42,8 @@
     "wpackagist-plugin/wp-optimize": "^4.0",
     "wpackagist-plugin/admin-site-enhancements": "^8.0",
     "wpackagist-plugin/webp-express": "^0.25",
-    "wpackagist-plugin/integrate-rybbit": "*"
+    "wpackagist-plugin/integrate-rybbit": "*",
+    "phpseclib/phpseclib": "^3.0"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "^3.13",

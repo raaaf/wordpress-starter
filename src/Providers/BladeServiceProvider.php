@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WordpressStarter\Providers;
 
 use Illuminate\Container\Container;
+use WordpressStarter\BladeApplication;
 use Illuminate\View\Factory;
 use Illuminate\Events\Dispatcher;
 use Illuminate\View\FileViewFinder;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Facade;
 
 class BladeServiceProvider extends ServiceProvider
 {
-    private Container $container;
+    private BladeApplication $container;
     private Factory $viewFactory;
 
     public function register(): void
@@ -35,7 +36,7 @@ class BladeServiceProvider extends ServiceProvider
 
     private function setupContainer(): void
     {
-        $this->container = new Container();
+        $this->container = new BladeApplication();
         // Set as global instance so ComponentTagCompiler can find it
         Container::setInstance($this->container);
         /** @phpstan-ignore argument.type */
@@ -68,6 +69,10 @@ class BladeServiceProvider extends ServiceProvider
         $this->container->singleton(\Illuminate\Contracts\View\Factory::class, fn() => $this->viewFactory);
         $this->container->singleton(\Illuminate\View\Factory::class, fn() => $this->viewFactory);
         $this->container->singleton('view.finder', fn() => $viewFinder);
+
+        // Bind Application contract so Blade components can resolve it
+        $this->container->singleton(\Illuminate\Contracts\Foundation\Application::class, fn() => $this->container);
+        $this->container->instance('app', $this->container);
     }
 
     private function setGlobalBladeInstance(): void
@@ -103,6 +108,7 @@ class BladeServiceProvider extends ServiceProvider
             'components.link' => 'link',
             'components.badge' => 'badge',
             'components.icon' => 'icon',
+            'components.alert' => 'alert',
             'components.section-header' => 'section-header',
         ];
 

@@ -61,10 +61,14 @@ final class ThemeUpdateProvider extends ServiceProvider
             self::THEME_SLUG
         );
 
-        // Set the branch to check for updates (uses releases by default)
         $updateChecker->setBranch('master');
 
-        // Optional: Enable release assets (if you attach zip files to releases)
-        // $updateChecker->getVcsApi()->enableReleaseAssets();
+        $api = $updateChecker->getVcsApi();
+
+        if (defined('GITHUB_ACCESS_TOKEN') && GITHUB_ACCESS_TOKEN) {
+            $api->setAuthentication(GITHUB_ACCESS_TOKEN);
+        }
+
+        $api->enableReleaseAssets();
     }
 }
