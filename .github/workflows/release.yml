@@ -89,3 +89,23 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           sed -i "s/^Version: .*/Version: $VERSION/" style.css
+
+      - name: Setup PHP for packaging
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          tools: composer:v2
+
+      - name: Install PHP dependencies for packaging
+        run: composer install --prefer-dist --no-progress --no-dev
+
+      - name: Package theme
+        run: npm run package
+
+      - name: Upload release asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          ZIP=$(ls wp-theme/*.zip | head -1)
+          gh release upload "v${VERSION}" "${ZIP}" --clobber
