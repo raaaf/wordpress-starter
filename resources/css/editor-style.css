@@ -333,8 +333,8 @@ body.mce-content-body a.button-primary {
     var(--gradient-primary-start),
     var(--gradient-primary-end)
   );
-  color: var(--text-content-inverse);
-  border: 1px solid var(--border-line);
+  color: var(--text-inverse);
+  border: 1px solid var(--border-default);
   box-shadow: var(--shadow-button);
 }
 
@@ -348,25 +348,25 @@ body.mce-content-body a.button-primary:hover {
 }
 
 body.mce-content-body a.button-secondary {
-  background-color: var(--bg-surface-secondary);
-  color: var(--text-content);
-  border: 1px solid var(--border-line);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
   box-shadow: var(--shadow-button);
 }
 
 body.mce-content-body a.button-secondary:hover {
-  border-color: var(--border-line-strong);
+  border-color: var(--border-strong);
   box-shadow: var(--shadow-button-hover);
 }
 
 body.mce-content-body a.button-ghost {
   background-color: transparent;
-  color: var(--text-content);
+  color: var(--text-primary);
   border: 1px solid transparent;
 }
 
 body.mce-content-body a.button-ghost:hover {
-  background-color: var(--bg-surface-tertiary);
+  background-color: var(--bg-tertiary);
 }
 
 /* ============================================

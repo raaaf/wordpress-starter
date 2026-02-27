@@ -98,8 +98,8 @@ npm run tokens:watch  # Watch mode
 Usage:
 
 ```css
-background: var(--bg-surface);
-color: var(--text-content);
+background: var(--bg-primary);
+color: var(--text-primary);
 ```
 
 ## ACF Flexible Content
