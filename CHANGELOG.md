@@ -1,3 +1,9 @@
+## [2.7.4](https://github.com/raaaf/starter/compare/v2.7.3...v2.7.4) (2026-02-27)
+
+### Bug Fixes
+
+- **a11y:** remove invalid ARIA roles from navigation menu ([98412c4](https://github.com/raaaf/starter/commit/98412c4ebd4eff561a77e2202a7a63308d14a1e9))
+
 ## [2.7.3](https://github.com/raaaf/starter/compare/v2.7.2...v2.7.3) (2026-02-27)
 
 ### Performance Improvements
