@@ -1,3 +1,9 @@
+## [2.8.4](https://github.com/raaaf/starter/compare/v2.8.3...v2.8.4) (2026-02-27)
+
+### Bug Fixes
+
+- **ci:** restore --no-dev for packaging to reduce ZIP size ([84afb5a](https://github.com/raaaf/starter/commit/84afb5a391829e5e5c7a0b371c2573c96274c638))
+
 ## [2.8.3](https://github.com/raaaf/starter/compare/v2.8.2...v2.8.3) (2026-02-27)
 
 ### Bug Fixes
