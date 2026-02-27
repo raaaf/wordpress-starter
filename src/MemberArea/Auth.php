@@ -20,7 +20,7 @@ class Auth
     {
         $mode = self::getAuthMode();
 
-        if ($mode === 'WordPress') {
+        if ($mode === 'wordpress') {
             if (!is_user_logged_in()) {
                 return false;
             }
@@ -65,7 +65,7 @@ class Auth
     {
         $mode = self::getAuthMode();
 
-        if ($mode === 'WordPress') {
+        if ($mode === 'wordpress') {
             $result = wp_signon([
                 'user_login' => $credential,
                 'user_password' => $password ?? '',
@@ -75,6 +75,10 @@ class Auth
             if (is_wp_error($result)) {
                 return $result;
             }
+
+            // wp_signon() sets the cookie but is_user_logged_in() still returns false
+            // in the same request — set the current user manually so isAuthenticated() works.
+            wp_set_current_user($result->ID);
 
             return self::isAuthenticated();
         }
@@ -97,7 +101,7 @@ class Auth
     {
         $mode = self::getAuthMode();
 
-        if ($mode === 'WordPress') {
+        if ($mode === 'wordpress') {
             wp_logout();
             return;
         }

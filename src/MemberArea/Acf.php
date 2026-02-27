@@ -198,7 +198,7 @@ class Acf
     {
         add_filter('acf/load_field/key=field_member_allowed_roles', static function (array $field): array {
             $field['choices'] = [];
-            foreach (get_editable_roles() as $slug => $role) {
+            foreach (wp_roles()->roles as $slug => $role) {
                 $field['choices'][$slug] = translate_user_role($role['name']);
             }
             return $field;
