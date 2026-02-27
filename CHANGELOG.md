@@ -1,3 +1,17 @@
+# [2.6.0](https://github.com/raaaf/starter/compare/v2.5.0...v2.6.0) (2026-02-27)
+
+### Bug Fixes
+
+- add chevron icon and appearance-none to select filters in member area ([93e4262](https://github.com/raaaf/starter/commit/93e4262f2876cfd5be479a5bb066711013e21565))
+- escape wp_die message with esc_html\_\_ to pass PHPCS ([2b67161](https://github.com/raaaf/starter/commit/2b671614e786639a6d0c00c8625c8075433c0e14))
+- remove duplicate chevron icons from select; noindex member area pages ([03328e7](https://github.com/raaaf/starter/commit/03328e718d41bb501915a71e672a12df37293c73))
+
+### Features
+
+- **acf:** add member-downloads Flexible Content block to member area ([5d5d29d](https://github.com/raaaf/starter/commit/5d5d29deaae92cd2bb5b2c3f3d54d23e96edf922))
+- block WP backend access for member_area_access role ([8094283](https://github.com/raaaf/starter/commit/8094283c28af76befe6cfe501a8322119d26f131))
+- register "Zugang Interner Bereich" WordPress user role ([81a6678](https://github.com/raaaf/starter/commit/81a667873293702efc0ad62b0993bbed6a15b790))
+
 # [2.5.0](https://github.com/raaaf/starter/compare/v2.4.0...v2.5.0) (2026-02-26)
 
 ### Bug Fixes
