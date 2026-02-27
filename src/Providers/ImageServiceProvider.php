@@ -76,24 +76,43 @@ class ImageServiceProvider extends ServiceProvider
         add_filter('jpeg_quality', fn (): int => 80);
         add_filter('wp_editor_set_quality', fn (): int => 80);
 
-        // Fix oversized images inserted via Classic Editor Wysiwyg fields.
-        // WordPress does not add a useful sizes attribute to editor-inserted images.
-        // This filter replaces missing or oversized default sizes with a content-width hint
-        // so the browser picks the right srcset entry instead of downloading the full-size image.
+        // Fix oversized or improperly-sized images inserted via Classic Editor WYSIWYG fields.
+        // Handles two cases:
+        //   1. Image already has srcset but a wrong/missing sizes attribute (e.g. "2560px").
+        //   2. Image has no srcset at all (e.g. inserted as "Full Size" or "Medium") — we rebuild
+        //      it using the content size so the browser gets a proper responsive image.
         add_filter('wp_content_img_tag', function (string $tag, string $context, int $attachmentId): string {
-            if (!str_contains($tag, 'srcset=')) {
+            if ($attachmentId <= 0) {
                 return $tag;
             }
 
-            $hasSizes        = str_contains($tag, 'sizes=');
-            $hasDefaultSizes = str_contains($tag, '2560px');
+            // Case 1: has srcset but wrong/missing sizes — fix sizes attribute only.
+            if (str_contains($tag, 'srcset=')) {
+                $hasSizes        = str_contains($tag, 'sizes=');
+                $hasDefaultSizes = str_contains($tag, '2560px');
 
-            if (!$hasSizes || $hasDefaultSizes) {
-                $tag = preg_replace('/\ssizes="[^"]*"/', '', $tag) ?? $tag;
-                $tag = preg_replace('/(\s*\/?>)$/', ' sizes="(max-width: 896px) 100vw, 896px"$1', $tag) ?? $tag;
+                if (!$hasSizes || $hasDefaultSizes) {
+                    $tag = preg_replace('/\ssizes="[^"]*"/', '', $tag) ?? $tag;
+                    $tag = preg_replace('/(\s*\/?>)$/', ' sizes="(max-width: 896px) 100vw, 896px"$1', $tag) ?? $tag;
+                }
+
+                return $tag;
             }
 
-            return $tag;
+            // Case 2: no srcset — rebuild as content-sized responsive image.
+            // The editor inserted the full-size or an intermediate size without srcset.
+            // Replace the whole img tag with a properly-sized responsive version.
+            $rebuilt = wp_get_attachment_image($attachmentId, 'content', false, [
+                'class'   => implode(' ', array_filter([
+                    self::extractClass($tag),
+                    'size-content',
+                ])),
+                'alt'     => self::extractAttr($tag, 'alt'),
+                'loading' => 'lazy',
+                'sizes'   => '(max-width: 896px) 100vw, 896px',
+            ]);
+
+            return $rebuilt ?: $tag;
         }, 10, 3);
     }
 
@@ -110,6 +129,31 @@ class ImageServiceProvider extends ServiceProvider
             unset($sizes['2048x2048']);
             return $sizes;
         });
+    }
+
+    /**
+     * Extract the value of a named HTML attribute from an img tag string.
+     */
+    private static function extractAttr(string $tag, string $attr): string
+    {
+        preg_match('/' . preg_quote($attr, '/') . '="([^"]*)"/', $tag, $m);
+        return $m[1] ?? '';
+    }
+
+    /**
+     * Extract CSS classes from an img tag, stripping WordPress size/alignment classes
+     * that will be re-added by wp_get_attachment_image().
+     */
+    private static function extractClass(string $tag): string
+    {
+        preg_match('/class="([^"]*)"/', $tag, $m);
+        $classes = preg_split('/\s+/', $m[1] ?? '', -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        // Remove WP-generated size/alignment classes; wp_get_attachment_image adds its own.
+        $strip = ['alignnone', 'alignleft', 'alignright', 'aligncenter', 'size-full', 'size-medium', 'size-large'];
+        $classes = array_filter($classes, fn (string $c): bool => !in_array($c, $strip, true) && !str_starts_with($c, 'wp-image-'));
+
+        return implode(' ', $classes);
     }
 
     /**
