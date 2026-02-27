@@ -9,6 +9,27 @@ class Access
     public static function register(): void
     {
         add_filter('template_include', [self::class, 'checkAccess'], 11);
+        add_filter('wp_robots', [self::class, 'noindexMemberPages']);
+    }
+
+    /**
+     * Add noindex to member area and protected pages so they are excluded from search engines.
+     *
+     * @param array<string, bool|string> $robots
+     * @return array<string, bool|string>
+     */
+    public static function noindexMemberPages(array $robots): array
+    {
+        if (!is_page()) {
+            return $robots;
+        }
+
+        if (get_field('page_is_member_area') || get_field('page_is_protected')) {
+            $robots['noindex'] = true;
+            $robots['nofollow'] = true;
+        }
+
+        return $robots;
     }
 
     public static function checkAccess(string $template): string
