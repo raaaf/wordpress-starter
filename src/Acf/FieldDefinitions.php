@@ -2607,4 +2607,17 @@ class FieldDefinitions
             self::backgroundColorField($prefix),
         ];
     }
+
+    /**
+     * Member Downloads block fields
+     *
+     * No configuration needed — the downloads component is self-contained.
+     *
+     * @param string $prefix Unique prefix for the field key
+     * @return array<int, array<string, mixed>>
+     */
+    public static function memberDownloadsFields(string $prefix): array
+    {
+        return [];
+    }
 }
