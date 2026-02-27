@@ -76,11 +76,12 @@ class ImageServiceProvider extends ServiceProvider
         add_filter('jpeg_quality', fn (): int => 80);
         add_filter('wp_editor_set_quality', fn (): int => 80);
 
-        // Fix oversized or improperly-sized images inserted via Classic Editor WYSIWYG fields.
-        // Handles two cases:
-        //   1. Image already has srcset but a wrong/missing sizes attribute (e.g. "2560px").
-        //   2. Image has no srcset at all (e.g. inserted as "Full Size" or "Medium") — we rebuild
-        //      it using the content size so the browser gets a proper responsive image.
+        /*
+         * Fix oversized or improperly-sized images inserted via Classic Editor WYSIWYG fields.
+         * Case 1: Image already has srcset but a wrong/missing sizes attribute (e.g. "2560px").
+         * Case 2: Image has no srcset at all (e.g. inserted as "Full Size" or "Medium") — we
+         *         rebuild it using the content size so the browser gets a proper responsive image.
+         */
         add_filter('wp_content_img_tag', function (string $tag, string $context, int $attachmentId): string {
             if ($attachmentId <= 0) {
                 return $tag;
