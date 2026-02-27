@@ -39,25 +39,40 @@
     }
 
     if (is_numeric($background_image)) {
-        $bgSrc = wp_get_attachment_image_src($background_image, 'full');
+        $bgId = (int) $background_image;
+        $bgSrc = wp_get_attachment_image_src($bgId, 'hero-background');
         $background_image = [
-            'url' => $bgSrc ? $bgSrc[0] : wp_get_attachment_url($background_image),
-            'alt' => get_post_meta($background_image, '_wp_attachment_image_alt', true) ?: '',
+            'ID' => $bgId,
+            'url' => $bgSrc ? $bgSrc[0] : wp_get_attachment_url($bgId),
+            'alt' => get_post_meta($bgId, '_wp_attachment_image_alt', true) ?: '',
             'width' => $bgSrc ? $bgSrc[1] : '',
             'height' => $bgSrc ? $bgSrc[2] : '',
         ];
+    } elseif (is_array($background_image) && !empty($background_image['ID'])) {
+        $background_image['ID'] = (int) $background_image['ID'];
     }
 @endphp
 
 @if($variant === 'background')
     {{-- BACKGROUND VARIANT: Full-width image with overlay --}}
     <section class="hero hero--background relative overflow-hidden flex items-center" style="min-height: calc(100vh - var(--header-height, 80px)); min-height: calc(100dvh - var(--header-height, 80px));">
-        @if($background_image && !empty($background_image['url']))
+        @if($background_image && (!empty($background_image['ID']) || !empty($background_image['url'])))
             <div class="absolute inset-0">
-                <img src="{{ $background_image['url'] }}"
-                     alt="{{ $background_image['alt'] ?? '' }}"
-                     @if(!empty($background_image['width']) && !empty($background_image['height']))width="{{ $background_image['width'] }}" height="{{ $background_image['height'] }}"@endif
-                     class="w-full h-full object-cover">
+                @if(!empty($background_image['ID']))
+                    {!! wp_get_attachment_image($background_image['ID'], 'hero-background', false, [
+                        'class' => 'w-full h-full object-cover',
+                        'loading' => 'eager',
+                        'fetchpriority' => 'high',
+                        'sizes' => '100vw',
+                    ]) !!}
+                @else
+                    <img src="{{ $background_image['url'] }}"
+                         alt="{{ $background_image['alt'] ?? '' }}"
+                         @if(!empty($background_image['width']) && !empty($background_image['height']))width="{{ $background_image['width'] }}" height="{{ $background_image['height'] }}"@endif
+                         class="w-full h-full object-cover"
+                         loading="eager"
+                         fetchpriority="high">
+                @endif
                 {{-- Overlay with configurable opacity --}}
                 <div class="absolute inset-0 bg-surface" style="opacity: {{ $overlay_opacity_css }};"></div>
             </div>
@@ -155,6 +170,7 @@
                     {!! wp_get_attachment_image($imageId, 'hero-split', false, [
                         'class' => 'w-full h-auto rounded-2xl shadow-xl',
                         'loading' => 'lazy',
+                        'sizes' => '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px',
                     ]) !!}
                 </div>
             @elseif($image && !empty($image['url']))

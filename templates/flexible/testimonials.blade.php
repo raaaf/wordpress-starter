@@ -59,19 +59,11 @@
                     {{-- Author --}}
                     <div class="flex items-center gap-4 mt-auto">
                         @if(!empty($testimonial['image']))
-                            @php
-                                $image = wp_get_attachment_image_src($testimonial['image'], 'avatar');
-                            @endphp
-                            @if($image)
-                                <img
-                                    src="{{ $image[0] }}"
-                                    alt="{{ $testimonial['author'] ?? '' }}"
-                                    width="{{ $image[1] }}"
-                                    height="{{ $image[2] }}"
-                                    class="object-cover w-12 h-12 rounded-full"
-                                    loading="lazy"
-                                >
-                            @endif
+                            {!! wp_get_attachment_image($testimonial['image'], 'avatar', false, [
+                                'class' => 'object-cover w-12 h-12 rounded-full',
+                                'loading' => 'lazy',
+                                'sizes' => '48px',
+                            ]) !!}
                         @endif
                         <div>
                             <div class="font-semibold text-content">{{ $testimonial['author'] ?? '' }}</div>
