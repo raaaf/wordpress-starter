@@ -18,7 +18,7 @@ class FolderSync
             'post_type'      => 'member_download',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
-            'meta_query'     => [
+            'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
                 ['key' => 'download_source_type', 'value' => 'sftp'],
                 [
                     'relation' => 'OR',
@@ -60,7 +60,7 @@ class FolderSync
             'post_type'      => 'member_download',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
-            'meta_query'     => [
+            'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
                 ['key' => 'download_source_type', 'value' => 'sftp'],
                 ['key' => 'download_sftp_source', 'value' => '', 'compare' => '!='],
             ],
@@ -84,7 +84,7 @@ class FolderSync
             'post_type'      => 'member_download',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
-            'meta_query'     => [
+            'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
                 ['key' => 'download_source_type', 'value' => 'external'],
             ],
             'fields' => 'ids',
@@ -139,7 +139,7 @@ class FolderSync
             'post_type'      => 'member_download',
             'post_status'    => 'publish',
             'posts_per_page' => 1,
-            'meta_query'     => [
+            'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
                 ['key' => 'download_sftp_identifier', 'value' => $identifier, 'compare' => '='],
             ],
             'fields' => 'ids',
