@@ -1,3 +1,10 @@
+## [2.8.2](https://github.com/raaaf/starter/compare/v2.8.1...v2.8.2) (2026-02-27)
+
+### Bug Fixes
+
+- **images:** rebuild srcset for full-size and intermediate editor images ([302724d](https://github.com/raaaf/starter/commit/302724de7bbafc196ecb8dd763ae370578fc52c5))
+- **phpcs:** convert indented comments to block comments in ImageServiceProvider ([867bb10](https://github.com/raaaf/starter/commit/867bb10284b34bdd04966b76ef4d0f830dfa5f80))
+
 ## [2.8.1](https://github.com/raaaf/starter/compare/v2.8.0...v2.8.1) (2026-02-27)
 
 ### Bug Fixes
