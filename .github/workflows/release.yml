@@ -108,7 +108,7 @@ jobs:
 
       - name: Install PHP dependencies for packaging
         if: steps.semantic.outputs.released == 'true'
-        run: composer install --prefer-dist --no-progress
+        run: composer install --prefer-dist --no-progress --no-dev
 
       - name: Package theme
         if: steps.semantic.outputs.released == 'true'
