@@ -1,3 +1,9 @@
+## [2.8.3](https://github.com/raaaf/starter/compare/v2.8.2...v2.8.3) (2026-02-27)
+
+### Bug Fixes
+
+- **ci:** include dev dependencies in theme package ZIP ([316d172](https://github.com/raaaf/starter/commit/316d172ea63e3a24d5eacc28508bc65daf742bd9))
+
 ## [2.8.2](https://github.com/raaaf/starter/compare/v2.8.1...v2.8.2) (2026-02-27)
 
 ### Bug Fixes
