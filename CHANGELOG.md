@@ -1,3 +1,9 @@
+## [2.7.3](https://github.com/raaaf/starter/compare/v2.7.2...v2.7.3) (2026-02-27)
+
+### Performance Improvements
+
+- **images:** add responsive srcset and sizes to all ACF image blocks ([f33f935](https://github.com/raaaf/starter/commit/f33f935c415879b702e98290987190a6ce2e6cd7))
+
 ## [2.7.2](https://github.com/raaaf/starter/compare/v2.7.1...v2.7.2) (2026-02-27)
 
 ### Bug Fixes
