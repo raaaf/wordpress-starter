@@ -81,7 +81,7 @@ class DownloadQuery
             'paged'          => $ext ? 1 : $page,
             'orderby'        => 'title',
             'order'          => 'ASC',
-            'meta_query'     => $metaQuery,
+            'meta_query'     => $metaQuery, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
         ];
 
         if (!empty($search)) {
@@ -89,7 +89,7 @@ class DownloadQuery
         }
 
         if (!empty($category)) {
-            $args['tax_query'] = [
+            $args['tax_query'] = [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
                 [
                     'taxonomy' => 'download_category',
                     'field'    => 'slug',

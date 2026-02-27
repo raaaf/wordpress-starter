@@ -104,8 +104,8 @@ class ImageServiceProvider extends ServiceProvider
     {
         add_filter('intermediate_image_sizes_advanced', function (array $sizes): array {
             // Keep: thumbnail (WP admin), medium (300px — used in srcset for small screens),
-            //        medium_large (768px — srcset fallback), large (1024px — srcset fallback)
-            // Remove: 1536x1536, 2048x2048 (not needed)
+            // medium_large (768px — srcset fallback), large (1024px — srcset fallback).
+            // Remove: 1536x1536, 2048x2048 (not needed).
             unset($sizes['1536x1536']);
             unset($sizes['2048x2048']);
             return $sizes;
