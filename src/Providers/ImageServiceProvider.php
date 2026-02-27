@@ -75,6 +75,28 @@ class ImageServiceProvider extends ServiceProvider
         // Reduce JPEG quality slightly for better compression (default: 82)
         add_filter('jpeg_quality', fn (): int => 80);
         add_filter('wp_editor_set_quality', fn (): int => 80);
+
+        // Fix oversized images inserted via Classic Editor Wysiwyg fields.
+        // WordPress does not add a useful sizes attribute to editor-inserted images.
+        // This filter replaces missing or oversized default sizes with a content-width hint
+        // so the browser picks the right srcset entry instead of downloading the full-size image.
+        add_filter('wp_content_img_tag', function (string $tag): string {
+            if (!str_contains($tag, 'srcset=')) {
+                return $tag;
+            }
+
+            $hasSizes     = str_contains($tag, 'sizes=');
+            $hasDefaultSizes = str_contains($tag, '2560px');
+
+            if (!$hasSizes || $hasDefaultSizes) {
+                // Remove existing sizes attribute if present
+                $tag = preg_replace('/\ssizes="[^"]*"/', '', $tag) ?? $tag;
+                // Insert before the closing > or />
+                $tag = preg_replace('/(\s*\/?>)$/', ' sizes="(max-width: 896px) 100vw, 896px"$1', $tag) ?? $tag;
+            }
+
+            return $tag;
+        });
     }
 
     /**
