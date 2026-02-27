@@ -27,14 +27,16 @@
             <div class="select relative">
                 <select
                     x-model="category"
-                    class="w-full border bg-surface text-content cursor-pointer transition-all duration-200 focus:outline-none h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]"
-                    style="appearance: none; -webkit-appearance: none; -moz-appearance: none; padding-right: 1rem;"
+                    class="w-full border bg-surface text-content appearance-none cursor-pointer transition-all duration-200 focus:outline-none h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]"
                 >
                     <option value="">{{ __('Alle Kategorien', 'wp-starter') }}</option>
                     <template x-for="cat in categories" :key="cat.slug">
                         <option :value="cat.slug" x-text="cat.label + ' (' + cat.count + ')'"></option>
                     </template>
                 </select>
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-icon-secondary">
+                    <x-icon name="chevron-down" class="w-4 h-4" />
+                </div>
             </div>
         </div>
 
@@ -43,14 +45,16 @@
             <div class="select relative">
                 <select
                     x-model="ext"
-                    class="w-full border bg-surface text-content cursor-pointer transition-all duration-200 focus:outline-none h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]"
-                    style="appearance: none; -webkit-appearance: none; -moz-appearance: none; padding-right: 1rem;"
+                    class="w-full border bg-surface text-content appearance-none cursor-pointer transition-all duration-200 focus:outline-none h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]"
                 >
                     <option value="">{{ __('Alle Typen', 'wp-starter') }}</option>
                     <template x-for="e in extensions" :key="e.value">
                         <option :value="e.value" x-text="e.label + ' (' + e.count + ')'"></option>
                     </template>
                 </select>
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-icon-secondary">
+                    <x-icon name="chevron-down" class="w-4 h-4" />
+                </div>
             </div>
         </div>
 
