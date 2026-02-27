@@ -26,7 +26,7 @@
  * automatically use the correct colors from the token system.
  */
 .prose {
-  --tw-prose-body: var(--text-primary);
+  --tw-prose-body: var(--text-secondary);
   --tw-prose-headings: var(--text-primary);
   --tw-prose-links: var(--text-link);
   --tw-prose-bold: var(--text-primary);
