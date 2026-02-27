@@ -34,9 +34,6 @@
                         <option :value="cat.slug" x-text="cat.label + ' (' + cat.count + ')'"></option>
                     </template>
                 </select>
-                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-icon-secondary">
-                    <x-icon name="chevron-down" class="w-4 h-4" />
-                </div>
             </div>
         </div>
 
@@ -52,9 +49,6 @@
                         <option :value="e.value" x-text="e.label + ' (' + e.count + ')'"></option>
                     </template>
                 </select>
-                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-icon-secondary">
-                    <x-icon name="chevron-down" class="w-4 h-4" />
-                </div>
             </div>
         </div>
 

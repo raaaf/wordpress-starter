@@ -51,14 +51,7 @@
         'lg' => 'h-12 text-lg pl-5 pr-12',
     ];
 
-    $iconSizes = [
-        'sm' => 'right-2.5 w-3.5 h-3.5',
-        'md' => 'right-3 w-4 h-4',
-        'lg' => 'right-4 w-5 h-5',
-    ];
-
     $sizeClass = $sizes[$size] ?? $sizes['md'];
-    $iconSize = $iconSizes[$size] ?? $iconSizes['md'];
 
     // Radius classes from Figma tokens
     $radiusClasses = [
@@ -120,11 +113,6 @@
                 >{{ $optionLabel }}</option>
             @endforeach
         </select>
-
-        {{-- Chevron icon --}}
-        <div class="absolute {{ $iconSize }} top-1/2 -translate-y-1/2 pointer-events-none {{ $disabled ? 'text-icon-disabled' : 'text-icon-secondary' }}">
-            <x-icon name="chevron-down" class="w-full h-full" />
-        </div>
     </div>
 
     {{-- Hint / Error message --}}
