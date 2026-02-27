@@ -38,8 +38,8 @@
   body {
     margin: 0;
     font-family: var(--font-family-body, ui-sans-serif, system-ui, sans-serif);
-    background-color: var(--bg-surface, #fff);
-    color: var(--text-content, #1a1a1a);
+    background-color: var(--bg-primary, #fff);
+    color: var(--text-primary, #1a1a1a);
   }
 
   /* Skip link - accessible but visually hidden until focused */
@@ -60,8 +60,8 @@
     width: auto;
     height: auto;
     padding: 0.5rem 1rem;
-    background: var(--bg-surface-inverse, #1a1a1a);
-    color: var(--text-content-inverse, #fff);
+    background: var(--bg-inverse, #1a1a1a);
+    color: var(--text-inverse, #fff);
     font-weight: 600;
   }
 
