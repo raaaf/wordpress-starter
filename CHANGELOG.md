@@ -1,3 +1,10 @@
+## [2.8.1](https://github.com/raaaf/starter/compare/v2.8.0...v2.8.1) (2026-02-27)
+
+### Bug Fixes
+
+- **images:** re-enable medium size and fix wp_content_img_tag filter signature ([204374b](https://github.com/raaaf/starter/commit/204374b6731f0a84b6ff8b7d05f1eaf3635ee44d))
+- **phpcs:** suppress slow-query and spelling warnings; fix comment format ([403629a](https://github.com/raaaf/starter/commit/403629acb0db6077919fa3af49e3aad89b8abc77))
+
 # [2.8.0](https://github.com/raaaf/starter/compare/v2.7.5...v2.8.0) (2026-02-27)
 
 ### Bug Fixes
