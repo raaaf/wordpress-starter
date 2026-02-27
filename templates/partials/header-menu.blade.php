@@ -11,35 +11,29 @@
             @php
                 // Try ACF option first, then Customizer, then default
                 $acf_logo = function_exists('get_field') ? get_field('site_logo', 'option') : null;
-                $logo_url = null;
-                $logo_width = 50;
-                $logo_height = 50;
+                $logo_id   = null;
 
-                if ($acf_logo && !empty($acf_logo['url'])) {
-                    $logo_url = $acf_logo['url'];
-                    $logo_width = $acf_logo['width'] ?? 50;
-                    $logo_height = $acf_logo['height'] ?? 50;
+                if (!empty($acf_logo['ID'])) {
+                    $logo_id = $acf_logo['ID'];
                 } else {
-                    $custom_logo_id = get_theme_mod('custom_logo');
-                    if ($custom_logo_id) {
-                        $logo_data = wp_get_attachment_image_src($custom_logo_id, 'logo');
-                        if ($logo_data) {
-                            $logo_url = $logo_data[0];
-                            $logo_width = $logo_data[1];
-                            $logo_height = $logo_data[2];
-                        }
-                    }
+                    $logo_id = get_theme_mod('custom_logo') ?: null;
                 }
-
-                $logo_url = $logo_url ?: get_template_directory_uri() . '/resources/img/default-logo.png';
             @endphp
 
             <a href="{{ esc_url(get_bloginfo('url')) }}" title="{{ esc_attr(get_bloginfo('name')) }}"
                 class="inline-block transition-opacity duration-300 hover:opacity-75">
-                <img src="{{ esc_url($logo_url) }}"
-                    alt="{{ esc_attr(get_bloginfo('name')) }}" loading="lazy"
-                    width="{{ esc_attr($logo_width) }}" height="{{ esc_attr($logo_height) }}"
-                    class="w-auto max-h-12">
+                @if($logo_id)
+                    {!! wp_get_attachment_image($logo_id, 'logo', false, [
+                        'alt'   => esc_attr(get_bloginfo('name')),
+                        'class' => 'w-auto max-h-12',
+                        'sizes' => '(max-width: 768px) 128px, 256px',
+                    ]) !!}
+                @else
+                    <img src="{{ esc_url(get_template_directory_uri() . '/resources/img/default-logo.png') }}"
+                        alt="{{ esc_attr(get_bloginfo('name')) }}"
+                        class="w-auto max-h-12"
+                        width="50" height="50">
+                @endif
             </a>
 
             {{-- Desktop navigation --}}
