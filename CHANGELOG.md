@@ -1,3 +1,17 @@
+# [2.8.0](https://github.com/raaaf/starter/compare/v2.7.5...v2.8.0) (2026-02-27)
+
+### Bug Fixes
+
+- **ci:** ignore ITSEC_Modules in PHPStan — premium plugin not in CI ([dbbb7e2](https://github.com/raaaf/starter/commit/dbbb7e298098dc5060b9cee15b1484ca1264eac4))
+
+### Features
+
+- **plugins:** expand ASE config and add iThemes Security configurator ([791ffe2](https://github.com/raaaf/starter/commit/791ffe24be1e7ec8096a68124ba93b9b16730a7f))
+
+### Performance Improvements
+
+- use wp_get_attachment_image for logo with srcset and sizes ([454e637](https://github.com/raaaf/starter/commit/454e637b5f94f54e52e262a1cd1361dfc3935f35))
+
 ## [2.7.5](https://github.com/raaaf/starter/compare/v2.7.4...v2.7.5) (2026-02-27)
 
 ### Performance Improvements
