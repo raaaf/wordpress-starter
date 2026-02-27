@@ -38,6 +38,9 @@ class ImageServiceProvider extends ServiceProvider
             // Hero split / two-column (50% of max-w-7xl = 640px, 2x retina)
             add_image_size('hero-split', 1280, 0, false);
 
+            // Hero background - full-width background image (2x retina for 1440px screens)
+            add_image_size('hero-background', 2880, 0, false);
+
             // Card thumbnail - 16:9 for posts/video cards (2x retina)
             add_image_size('card-video', 768, 432, true);
 
@@ -56,6 +59,22 @@ class ImageServiceProvider extends ServiceProvider
             // Set default featured image size to card-video (16:9)
             set_post_thumbnail_size(768, 432, true);
         });
+
+        // Limit upload originals to 2400px — prevents storing unnecessarily large source files
+        // while preserving enough quality for all generated sizes (max registered: 2880px)
+        add_filter('big_image_size_threshold', fn (): int => 2400);
+
+        // Convert generated thumbnails to WebP for ~30% smaller files
+        // Requires Imagick or GD with WebP support; original JPEG/PNG is preserved as fallback
+        add_filter('image_editor_output_format', function (array $formats): array {
+            $formats['image/jpeg'] = 'image/webp';
+            $formats['image/png']  = 'image/webp';
+            return $formats;
+        });
+
+        // Reduce JPEG quality slightly for better compression (default: 82)
+        add_filter('jpeg_quality', fn (): int => 80);
+        add_filter('wp_editor_set_quality', fn (): int => 80);
     }
 
     /**
@@ -82,6 +101,7 @@ class ImageServiceProvider extends ServiceProvider
             return array_merge($sizes, [
                 'content' => __('Inhaltsbereich (groß)', 'wp-starter'),
                 'hero-split' => __('Hero / Zweispaltig', 'wp-starter'),
+                'hero-background' => __('Hero Hintergrund (Vollbild)', 'wp-starter'),
                 'card-video' => __('Karte (16:9)', 'wp-starter'),
                 'gallery-thumb' => __('Galerie (Quadrat)', 'wp-starter'),
                 'team-portrait' => __('Team Portrait', 'wp-starter'),

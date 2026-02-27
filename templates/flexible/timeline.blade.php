@@ -27,7 +27,7 @@
                         $year = $event['year'] ?? '';
                         $eventTitle = $event['title'] ?? '';
                         $content = $event['content'] ?? '';
-                        $image = wp_get_attachment_image_src($event['image'] ?? null, 'gallery-thumb');
+                        $imageId = $event['image'] ?? null;
                         $isEven = $index % 2 === 0;
                     @endphp
                     <div class="relative flex flex-col md:flex-row {{ $isEven ? '' : 'md:flex-row-reverse' }} items-center gap-8">
@@ -51,13 +51,13 @@
                                     </div>
                                 @endif
 
-                                @if($image)
-                                    <img
-                                        src="{{ $image[0] }}"
-                                        alt="{{ $eventTitle }}"
-                                        class="mt-4 rounded-lg"
-                                        loading="lazy"
-                                    >
+                                @if($imageId)
+                                    {!! wp_get_attachment_image($imageId, 'gallery-thumb', false, [
+                                        'class' => 'mt-4 rounded-lg',
+                                        'loading' => 'lazy',
+                                        'sizes' => '(max-width: 768px) 100vw, 50vw',
+                                        'alt' => $eventTitle,
+                                    ]) !!}
                                 @endif
                             </x-card>
                         </div>

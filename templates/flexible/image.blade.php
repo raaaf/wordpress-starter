@@ -33,6 +33,7 @@
             {!! wp_get_attachment_image($imageId, 'content', false, [
                 'class' => 'w-full rounded-lg shadow-xl ' . $borderClass,
                 'loading' => 'lazy',
+                'sizes' => '(max-width: 896px) 100vw, 896px',
             ]) !!}
         @endif
 

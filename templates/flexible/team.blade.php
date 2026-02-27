@@ -48,7 +48,7 @@
         <div class="grid gap-8 md:grid-cols-{{ $columns }}">
             @foreach($members as $member)
                 @php
-                    $image = wp_get_attachment_image_src($member['image'] ?? null, 'team-portrait');
+                    $imageId = $member['image'] ?? null;
                     $name = $member['name'] ?? '';
                     $position = $member['position'] ?? '';
                     $bio = $member['bio'] ?? '';
@@ -56,16 +56,13 @@
                     $linkedin = $member['linkedin'] ?? '';
                 @endphp
                 <div class="text-center group">
-                    @if($image)
+                    @if($imageId)
                         <div class="relative mb-6 overflow-hidden rounded-xl aspect-square">
-                            <img
-                                src="{{ $image[0] }}"
-                                alt="{{ $name }}"
-                                width="{{ $image[1] }}"
-                                height="{{ $image[2] }}"
-                                class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-                                loading="lazy"
-                            >
+                            {!! wp_get_attachment_image($imageId, 'team-portrait', false, [
+                                'class' => 'object-cover w-full h-full transition-transform duration-300 group-hover:scale-105',
+                                'loading' => 'lazy',
+                                'sizes' => '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
+                            ]) !!}
                         </div>
                     @else
                         <div class="flex items-center justify-center mb-6 rounded-xl aspect-square bg-surface-secondary">

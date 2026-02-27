@@ -32,6 +32,7 @@
                         {!! wp_get_attachment_image($imageId, 'gallery-thumb', false, [
                             'class' => 'object-cover w-full transition-transform duration-300 ease-in-out cursor-zoom-in aspect-square gallery-zoom group-hover:scale-105',
                             'loading' => 'lazy',
+                            'sizes' => '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw',
                             'data-zoom-src' => esc_url($full[0]),
                         ]) !!}
                         @if($caption)
