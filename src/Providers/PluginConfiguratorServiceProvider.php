@@ -7,6 +7,7 @@ namespace WordpressStarter\Providers;
 use WordpressStarter\PluginConfigurators\AbstractPluginConfigurator;
 use WordpressStarter\PluginConfigurators\AdminSiteEnhancementsConfigurator;
 use WordpressStarter\PluginConfigurators\ContactForm7Configurator;
+use WordpressStarter\PluginConfigurators\IThemesSecurityConfigurator;
 use WordpressStarter\PluginConfigurators\WebpExpressConfigurator;
 use WordpressStarter\PluginConfigurators\WpOptimizeConfigurator;
 use WordpressStarter\PluginConfigurators\YoastSeoConfigurator;
@@ -32,6 +33,7 @@ class PluginConfiguratorServiceProvider extends ServiceProvider
         WpOptimizeConfigurator::class,
         YoastSeoConfigurator::class,
         AdminSiteEnhancementsConfigurator::class,
+        IThemesSecurityConfigurator::class,
         WebpExpressConfigurator::class,
         ContactForm7Configurator::class,
     ];
