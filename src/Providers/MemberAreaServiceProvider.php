@@ -29,6 +29,23 @@ class MemberAreaServiceProvider extends ServiceProvider
         $this->registerLogoutHandler();
         $this->registerCronJobs();
         $this->registerPasswordEncryption();
+        $this->registerUserRole();
+    }
+
+    /**
+     * Register the "Zugang Interner Bereich" WordPress user role.
+     * The role has no capabilities — it exists solely for identification in the WP backend.
+     * add_role() is a no-op if the role already exists.
+     */
+    private function registerUserRole(): void
+    {
+        add_action('after_setup_theme', static function (): void {
+            add_role(
+                'member_area_access',
+                __('Zugang Interner Bereich', 'wp-starter'),
+                []
+            );
+        });
     }
 
     private static function isActiveInBackend(): bool
