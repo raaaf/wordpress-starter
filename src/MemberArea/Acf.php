@@ -17,6 +17,7 @@ class Acf
         self::registerOptionsFields();
         self::registerPageFields();
         self::registerPasswordHashing();
+        self::registerAllowedRolesChoices();
     }
 
     private static function registerOptionsFields(): void
@@ -66,13 +67,7 @@ class Acf
                     'name'              => 'member_allowed_roles',
                     'type'              => 'checkbox',
                     'instructions'      => __('Welche WordPress-Rollen haben Zugang? Leer = alle angemeldeten Benutzer.', 'wp-starter'),
-                    'choices'           => [
-                        'subscriber'    => __('Abonnent', 'wp-starter'),
-                        'contributor'   => __('Mitarbeiter', 'wp-starter'),
-                        'author'        => __('Autor', 'wp-starter'),
-                        'editor'        => __('Redakteur', 'wp-starter'),
-                        'administrator' => __('Administrator', 'wp-starter'),
-                    ],
+                    'choices'           => [],
                     'wrapper'           => ['width' => '75'],
                     'conditional_logic' => [
                         [
@@ -197,6 +192,17 @@ class Acf
             ],
             'position' => 'side',
         ]);
+    }
+
+    private static function registerAllowedRolesChoices(): void
+    {
+        add_filter('acf/load_field/key=field_member_allowed_roles', static function (array $field): array {
+            $field['choices'] = [];
+            foreach (get_editable_roles() as $slug => $role) {
+                $field['choices'][$slug] = translate_user_role($role['name']);
+            }
+            return $field;
+        });
     }
 
     private static function registerPasswordHashing(): void
