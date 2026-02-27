@@ -1,3 +1,13 @@
+# [2.7.0](https://github.com/raaaf/starter/compare/v2.6.0...v2.7.0) (2026-02-27)
+
+### Bug Fixes
+
+- correct WordPress auth mode comparison and login session handling ([e249380](https://github.com/raaaf/starter/commit/e2493807c3d79aabaae028b023a9e8d4bdb92e3d))
+
+### Features
+
+- load allowed roles dynamically from WordPress role registry ([2a001a9](https://github.com/raaaf/starter/commit/2a001a92bf77ff7a06ca8f99b1f3fa53261cb0f7))
+
 # [2.6.0](https://github.com/raaaf/starter/compare/v2.5.0...v2.6.0) (2026-02-27)
 
 ### Bug Fixes
