@@ -43,7 +43,7 @@
             </a>
 
             {{-- Desktop navigation --}}
-            <nav class="desktop-nav hidden md:flex">
+            <nav class="desktop-nav hidden md:flex" aria-label="Hauptnavigation">
                 @php(
                 wp_nav_menu([
                     'container' => false,
@@ -51,7 +51,7 @@
                     'theme_location' => 'header-menu',
                     'li_class' => 'relative',
                     'fallback_cb' => false,
-                    'items_wrap' => '<ul id="%1$s" class="%2$s" role="menubar" aria-label="Main Navigation">%3$s</ul>',
+                    'items_wrap' => '<ul id="%1$s" class="%2$s">%3$s</ul>',
                 ])
             )
             </nav>
@@ -100,7 +100,7 @@
          @keydown="trapFocus($event)"
          class="mobile-nav-container absolute top-full left-0 right-0 bg-surface shadow-lg rounded-md md:hidden z-50"
          x-cloak>
-        <nav id="mobile-navigation" class="mobile-nav">
+        <nav id="mobile-navigation" class="mobile-nav" aria-label="Mobile Navigation">
             @php(
             wp_nav_menu([
                 'container' => false,
@@ -108,7 +108,7 @@
                 'theme_location' => 'header-menu',
                 'li_class' => 'relative px-4 py-2 hover:bg-surface-secondary',
                 'fallback_cb' => false,
-                'items_wrap' => '<ul id="%1$s" class="%2$s" role="menu" aria-label="Mobile Navigation">%3$s</ul>',
+                'items_wrap' => '<ul id="%1$s" class="%2$s">%3$s</ul>',
             ])
         )
         </nav>
