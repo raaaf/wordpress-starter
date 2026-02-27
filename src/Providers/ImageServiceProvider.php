@@ -80,23 +80,21 @@ class ImageServiceProvider extends ServiceProvider
         // WordPress does not add a useful sizes attribute to editor-inserted images.
         // This filter replaces missing or oversized default sizes with a content-width hint
         // so the browser picks the right srcset entry instead of downloading the full-size image.
-        add_filter('wp_content_img_tag', function (string $tag): string {
+        add_filter('wp_content_img_tag', function (string $tag, string $context, int $attachmentId): string {
             if (!str_contains($tag, 'srcset=')) {
                 return $tag;
             }
 
-            $hasSizes     = str_contains($tag, 'sizes=');
+            $hasSizes        = str_contains($tag, 'sizes=');
             $hasDefaultSizes = str_contains($tag, '2560px');
 
             if (!$hasSizes || $hasDefaultSizes) {
-                // Remove existing sizes attribute if present
                 $tag = preg_replace('/\ssizes="[^"]*"/', '', $tag) ?? $tag;
-                // Insert before the closing > or />
                 $tag = preg_replace('/(\s*\/?>)$/', ' sizes="(max-width: 896px) 100vw, 896px"$1', $tag) ?? $tag;
             }
 
             return $tag;
-        });
+        }, 10, 3);
     }
 
     /**
@@ -105,9 +103,9 @@ class ImageServiceProvider extends ServiceProvider
     private function disableUnusedDefaultSizes(): void
     {
         add_filter('intermediate_image_sizes_advanced', function (array $sizes): array {
-            // Keep: thumbnail (WordPress admin), medium_large (fallback), large (fallback)
-            // Remove: medium (replaced by team-portrait), 1536x1536, 2048x2048 (not needed)
-            unset($sizes['medium']);
+            // Keep: thumbnail (WP admin), medium (300px — used in srcset for small screens),
+            //        medium_large (768px — srcset fallback), large (1024px — srcset fallback)
+            // Remove: 1536x1536, 2048x2048 (not needed)
             unset($sizes['1536x1536']);
             unset($sizes['2048x2048']);
             return $sizes;
