@@ -1,3 +1,9 @@
+## [2.7.5](https://github.com/raaaf/starter/compare/v2.7.4...v2.7.5) (2026-02-27)
+
+### Performance Improvements
+
+- **images:** fix oversized wysiwyg images via wp_content_img_tag filter ([ef1b30b](https://github.com/raaaf/starter/commit/ef1b30bc184725d228c5f9efef3640f8bc0ed4ad))
+
 ## [2.7.4](https://github.com/raaaf/starter/compare/v2.7.3...v2.7.4) (2026-02-27)
 
 ### Bug Fixes
