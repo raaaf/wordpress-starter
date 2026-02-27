@@ -88,7 +88,9 @@ class MemberAreaServiceProvider extends ServiceProvider
 
     public function handleLogin(): void
     {
-        \WordpressStarter\RateLimiter::enforce('member_login', 5, 300);
+        if (!defined('WP_DEBUG') || !WP_DEBUG) {
+            \WordpressStarter\RateLimiter::enforce('member_login', 5, 300);
+        }
 
         $nonce = sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) );
         if (!wp_verify_nonce($nonce, 'member_area_login')) {
