@@ -1,3 +1,10 @@
+## [2.7.2](https://github.com/raaaf/starter/compare/v2.7.1...v2.7.2) (2026-02-27)
+
+### Bug Fixes
+
+- **deploy:** track vendor directory for WordPress SFTP deployments ([da760a5](https://github.com/raaaf/starter/commit/da760a55c97f95b1ed27cf8d7b1d1a3bc20cbe51))
+- **tokens:** replace orphaned CSS custom properties with current token names ([24fd92d](https://github.com/raaaf/starter/commit/24fd92d7fb5bdc6b4c1db0dcc9f0d18c792b5591))
+
 ## [2.7.1](https://github.com/raaaf/starter/compare/v2.7.0...v2.7.1) (2026-02-27)
 
 # [2.7.0](https://github.com/raaaf/starter/compare/v2.6.0...v2.7.0) (2026-02-27)
