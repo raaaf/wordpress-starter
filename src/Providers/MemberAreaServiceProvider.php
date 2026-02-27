@@ -46,6 +46,17 @@ class MemberAreaServiceProvider extends ServiceProvider
                 []
             );
         });
+
+        // Block backend access for this role — frontend only
+        add_action('admin_init', static function (): void {
+            $user = wp_get_current_user();
+            if (in_array('member_area_access', (array) $user->roles, true)) {
+                wp_die(
+                    __('Sie haben keinen Zugriff auf den Administrationsbereich.', 'wp-starter'),
+                    403
+                );
+            }
+        });
     }
 
     private static function isActiveInBackend(): bool
