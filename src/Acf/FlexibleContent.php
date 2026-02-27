@@ -50,6 +50,35 @@ class FlexibleContent
         // Register directly - we're already inside acf/init
         self::registerPageBuilderGroup();
         self::registerDefaultLayoutFilter();
+        self::registerMemberDownloadsVisibilityFilter();
+    }
+
+    /**
+     * Register filter to hide the member-downloads layout on non-member-area pages
+     */
+    private static function registerMemberDownloadsVisibilityFilter(): void
+    {
+        add_filter('acf/load_field/key=field_page_sections', function (array $field): array {
+            if (!is_admin()) {
+                return $field;
+            }
+
+            $postId = absint( wp_unslash( $_GET['post'] ?? $_POST['post_id'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended
+            if (!$postId) {
+                return $field;
+            }
+
+            $isMemberArea = get_field('page_is_member_area', $postId);
+
+            if (!$isMemberArea) {
+                $field['layouts'] = array_values(array_filter(
+                    $field['layouts'],
+                    fn(array $layout) => $layout['name'] !== 'member_downloads'
+                ));
+            }
+
+            return $field;
+        }, 10);
     }
 
     /**
@@ -205,6 +234,9 @@ class FlexibleContent
             // Miscellaneous utility layouts
             self::dividerLayout(),
             self::logoSliderLayout(),
+
+            // Member area layouts (filtered per-page via acf/load_field)
+            self::memberDownloadsLayout(),
         ];
     }
 
@@ -707,6 +739,27 @@ class FlexibleContent
             'display' => 'block',
             'sub_fields' => FieldDefinitions::logoSliderFields('flex_logo_slider'),
             'acfe_flexible_category' => self::getCategories()['misc'],
+        ];
+    }
+
+    // =========================================================================
+    // MEMBER AREA LAYOUTS
+    // =========================================================================
+
+    /**
+     * Member Downloads layout (only visible on pages with page_is_member_area = true)
+     *
+     * @return array<string, mixed>
+     */
+    private static function memberDownloadsLayout(): array
+    {
+        return [
+            'key' => 'layout_member_downloads',
+            'name' => 'member_downloads',
+            'label' => __('Downloads (Interner Bereich)', 'wp-starter'),
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::memberDownloadsFields('flex_member_downloads'),
+            'acfe_flexible_category' => self::getCategories()['interactive'],
         ];
     }
 }
