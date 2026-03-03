@@ -667,7 +667,7 @@ class Options
     private static function registerToolsFields(): void
     {
         // Check if styleguide page exists
-        $styleguidePageId = get_option('wp_starter_styleguide_page_id');
+        $styleguidePageId = get_option(ThemeContext::optionKey('styleguide_page_id'));
         $styleguidePost = $styleguidePageId ? get_post($styleguidePageId) : null;
 
         // Check various states: exists, in trash, or missing
@@ -713,7 +713,7 @@ class Options
         } else {
             // Clear the option if it references a non-existent page
             if ($styleguidePageId && !$styleguidePost) {
-                delete_option('wp_starter_styleguide_page_id');
+                delete_option(ThemeContext::optionKey('styleguide_page_id'));
             }
             $createUrl = wp_nonce_url(
                 admin_url('?wp-starter-create-styleguide=1'),
