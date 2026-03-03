@@ -1,3 +1,9 @@
+## [2.9.1](https://github.com/raaaf/starter/compare/v2.9.0...v2.9.1) (2026-03-03)
+
+### Bug Fixes
+
+- sync package-lock.json with package.json (yaml resolution) ([cd6617c](https://github.com/raaaf/starter/commit/cd6617cb777c6630f3acff88d5d457e13f22c324))
+
 # [2.9.0](https://github.com/raaaf/starter/compare/v2.8.4...v2.9.0) (2026-03-03)
 
 ### Bug Fixes
