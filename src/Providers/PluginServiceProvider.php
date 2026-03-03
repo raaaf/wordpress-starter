@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WordpressStarter\Providers;
 
 use WordpressStarter\PluginInstaller;
+use WordpressStarter\ThemeContext;
 
 /**
  * Plugin Service Provider
@@ -99,8 +100,12 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function runContentSetup(): void
     {
+        if (!ThemeContext::isActiveOnCurrentSite()) {
+            return;
+        }
+
         // Only run once
-        if (get_option('wp_starter_content_setup_complete')) {
+        if (get_option(ThemeContext::optionKey('content_setup_complete'))) {
             return;
         }
 
@@ -142,7 +147,7 @@ class PluginServiceProvider extends ServiceProvider
         $this->setDefaultContactData();
 
         // Mark as complete
-        update_option('wp_starter_content_setup_complete', true);
+        update_option(ThemeContext::optionKey('content_setup_complete'), true);
     }
 
     /**
@@ -204,6 +209,10 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function handleRerunContentSetup(): void
     {
+        if (!ThemeContext::isActiveOnCurrentSite()) {
+            return;
+        }
+
         if (!isset($_GET['wp-starter-rerun-content-setup'])) {
             return;
         }
@@ -242,10 +251,10 @@ class PluginServiceProvider extends ServiceProvider
         }
 
         // Reset the completion flag so content setup runs again
-        delete_option('wp_starter_content_setup_complete');
+        delete_option(ThemeContext::optionKey('content_setup_complete'));
 
         // Clear cached styleguide images so they get re-uploaded (including SVGs)
-        delete_option('wp_starter_styleguide_images');
+        delete_option(ThemeContext::optionKey('styleguide_images'));
 
         // Create pages (skips existing ones)
         $createdPageIds = [];
@@ -267,7 +276,7 @@ class PluginServiceProvider extends ServiceProvider
         $this->setDefaultContactData();
 
         // Mark as complete
-        update_option('wp_starter_content_setup_complete', true);
+        update_option(ThemeContext::optionKey('content_setup_complete'), true);
 
         // Redirect back to tools page with success message
         wp_safe_redirect(admin_url('admin.php?page=theme-options-tools&content-setup=success'));
@@ -279,6 +288,10 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function handleGenerateDemoPosts(): void
     {
+        if (!ThemeContext::isActiveOnCurrentSite()) {
+            return;
+        }
+
         if (!isset($_GET['wp-starter-generate-demo-posts'])) {
             return;
         }
@@ -371,6 +384,10 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function handleDeleteDemoPosts(): void
     {
+        if (!ThemeContext::isActiveOnCurrentSite()) {
+            return;
+        }
+
         if (!isset($_GET['wp-starter-delete-demo-posts'])) {
             return;
         }
@@ -459,7 +476,7 @@ class PluginServiceProvider extends ServiceProvider
 
                 // If styleguide exists, store its ID
                 if ($slug === 'styleguide') {
-                    update_option('wp_starter_styleguide_page_id', $existing->ID);
+                    update_option(ThemeContext::optionKey('styleguide_page_id'), $existing->ID);
                 }
                 continue;
             }
@@ -507,9 +524,9 @@ class PluginServiceProvider extends ServiceProvider
 
                 // Track styleguide page
                 if ($slug === 'styleguide') {
-                    update_option('wp_starter_styleguide_page_id', $pageId);
+                    update_option(ThemeContext::optionKey('styleguide_page_id'), $pageId);
                     // Dismiss the welcome notice since styleguide is created
-                    update_option('wp_starter_welcome_dismissed', true);
+                    update_option(ThemeContext::optionKey('welcome_dismissed'), true);
                 }
 
                 // Set legal pages in theme options (if ACF is active)
@@ -813,7 +830,7 @@ class PluginServiceProvider extends ServiceProvider
     public function onThemeActivation(): void
     {
         // Set transient to redirect to setup page
-        set_transient('wp_starter_activation_redirect', true, 60);
+        set_transient(ThemeContext::optionKey('activation_redirect'), true, 60);
     }
 
     /**
@@ -821,11 +838,11 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function maybeRedirectToSetup(): void
     {
-        if (!get_transient('wp_starter_activation_redirect')) {
+        if (!get_transient(ThemeContext::optionKey('activation_redirect'))) {
             return;
         }
 
-        delete_transient('wp_starter_activation_redirect');
+        delete_transient(ThemeContext::optionKey('activation_redirect'));
 
         // Don't redirect on bulk activation or AJAX
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Core WordPress bulk activation parameter
@@ -843,7 +860,7 @@ class PluginServiceProvider extends ServiceProvider
     public function renderSetupPage(): void
     {
         // Dismiss the styleguide welcome notice - user is already doing setup
-        update_option('wp_starter_welcome_dismissed', true);
+        update_option(ThemeContext::optionKey('welcome_dismissed'), true);
 
         $categories = $this->getPluginsByCategory();
         $selectedPlugins = $this->getSelectedPlugins();
@@ -1361,7 +1378,7 @@ class PluginServiceProvider extends ServiceProvider
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
 
         if (wp_verify_nonce($nonce, 'wp-starter-dismiss-plugins')) {
-            update_option('wp_starter_dismissed_plugin_notice', true);
+            update_option(ThemeContext::optionKey('dismissed_plugin_notice'), true);
             wp_safe_redirect(remove_query_arg(['wp-starter-dismiss-plugins', '_wpnonce']));
             exit;
         }
@@ -1372,7 +1389,7 @@ class PluginServiceProvider extends ServiceProvider
      */
     private function isDismissed(string $pluginKey): bool
     {
-        return (bool) get_option('wp_starter_dismissed_plugin_notice', false);
+        return (bool) get_option(ThemeContext::optionKey('dismissed_plugin_notice'), false);
     }
 
     /**
