@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Acf;
 
+use WordpressStarter\ThemeContext;
+
 /**
  * Registers ACF options pages and their field groups
  *
@@ -745,7 +747,7 @@ class Options
         );
 
         // Content Setup section
-        $contentSetupComplete = get_option('wp_starter_content_setup_complete');
+        $contentSetupComplete = get_option(ThemeContext::optionKey('content_setup_complete'));
         $contentSetupUrl = wp_nonce_url(
             admin_url('?wp-starter-rerun-content-setup=1'),
             'wp-starter-rerun-content-setup'
