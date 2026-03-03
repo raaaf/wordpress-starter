@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\ThemeContext;
+
 /**
  * Welcome Service Provider
  *
@@ -12,11 +14,11 @@ namespace WordpressStarter\Providers;
  */
 class WelcomeServiceProvider extends ServiceProvider
 {
-    private const OPTION_ACTIVATED = 'wp_starter_theme_activated';
-    private const OPTION_DISMISSED = 'wp_starter_welcome_dismissed';
-    private const OPTION_PAGE_ID = 'wp_starter_styleguide_page_id';
-    private const OPTION_IMAGES = 'wp_starter_styleguide_images';
-    private const OPTION_ACF_PREFILL_PENDING = 'wp_starter_acf_prefill_pending';
+    private static function optActivated(): string         { return ThemeContext::optionKey('theme_activated'); }
+    private static function optDismissed(): string         { return ThemeContext::optionKey('welcome_dismissed'); }
+    private static function optPageId(): string            { return ThemeContext::optionKey('styleguide_page_id'); }
+    private static function optImages(): string            { return ThemeContext::optionKey('styleguide_images'); }
+    private static function optAcfPrefillPending(): string { return ThemeContext::optionKey('acf_prefill_pending'); }
     private const NONCE_CREATE = 'wp-starter-create-styleguide';
     private const NONCE_DISMISS = 'wp-starter-dismiss-welcome';
     private const NONCE_IMPORT_OPTIONS = 'wp-starter-import-options';
@@ -44,14 +46,18 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     public function onThemeActivation(): void
     {
-        update_option(self::OPTION_ACTIVATED, true);
-        delete_option(self::OPTION_DISMISSED);
+        if (!ThemeContext::isActiveOnCurrentSite()) {
+            return;
+        }
+
+        update_option(self::optActivated(), true);
+        delete_option(self::optDismissed());
 
         // Check if we have ACF options config to import
         $configPath = get_stylesheet_directory() . '/config/acf-options.php';
         if (file_exists($configPath)) {
             // Mark that prefill is pending (ACF may not be active yet)
-            update_option(self::OPTION_ACF_PREFILL_PENDING, true);
+            update_option(self::optAcfPrefillPending(), true);
 
             // Try to prefill now if ACF is already active
             if (function_exists('update_field')) {
@@ -66,8 +72,12 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     public function maybePrefillAcfOptions(): void
     {
+        if (!ThemeContext::isActiveOnCurrentSite()) {
+            return;
+        }
+
         // Only run if prefill is pending
-        if (!get_option(self::OPTION_ACF_PREFILL_PENDING)) {
+        if (!get_option(self::optAcfPrefillPending())) {
             return;
         }
 
@@ -83,7 +93,7 @@ class WelcomeServiceProvider extends ServiceProvider
 
         if (!file_exists($configPath)) {
             // Config already processed or doesn't exist, clear flag
-            delete_option(self::OPTION_ACF_PREFILL_PENDING);
+            delete_option(self::optAcfPrefillPending());
             return;
         }
 
@@ -96,7 +106,7 @@ class WelcomeServiceProvider extends ServiceProvider
         $options = include $configPath;
 
         if (!is_array($options) || empty($options)) {
-            delete_option(self::OPTION_ACF_PREFILL_PENDING);
+            delete_option(self::optAcfPrefillPending());
             return;
         }
 
@@ -135,7 +145,7 @@ class WelcomeServiceProvider extends ServiceProvider
 
         // Mark config as processed and clear pending flag
         rename($configPath, $configPath . '.processed');
-        delete_option(self::OPTION_ACF_PREFILL_PENDING);
+        delete_option(self::optAcfPrefillPending());
     }
 
     /**
@@ -144,19 +154,20 @@ class WelcomeServiceProvider extends ServiceProvider
     public function displayWelcomeNotice(): void
     {
         // Skip if dismissed
-        if (get_option(self::OPTION_DISMISSED)) {
+        if (get_option(self::optDismissed())) {
             return;
         }
 
         // Skip if styleguide page already exists
-        $existingPageId = get_option(self::OPTION_PAGE_ID);
+        $existingPageId = get_option(self::optPageId());
         if ($existingPageId && get_post($existingPageId)) {
             return;
         }
 
         // Check if theme was activated (either via normal activation or via setup script)
-        $themeActivated = get_option(self::OPTION_ACTIVATED);
-        $setupComplete = get_option('wp_starter_setup_complete') || get_option('wp_starter_content_setup_complete');
+        $themeActivated = get_option(self::optActivated());
+        $setupComplete = get_option(ThemeContext::optionKey('setup_complete'))
+                      || get_option(ThemeContext::optionKey('content_setup_complete'));
 
         // Only show if theme was activated or setup was completed
         if (!$themeActivated && !$setupComplete) {
@@ -241,7 +252,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         // Force the prefill by setting the pending flag
-        update_option(self::OPTION_ACF_PREFILL_PENDING, true);
+        update_option(self::optAcfPrefillPending(), true);
         $this->prefillAcfOptions();
 
         // Redirect to dashboard with success message (nonce for verification)
@@ -342,8 +353,8 @@ class WelcomeServiceProvider extends ServiceProvider
         $pageId = $this->createStyleguidePage();
 
         if ($pageId) {
-            update_option(self::OPTION_PAGE_ID, $pageId);
-            update_option(self::OPTION_DISMISSED, true);
+            update_option(self::optPageId(), $pageId);
+            update_option(self::optDismissed(), true);
 
             $editUrl = get_edit_post_link($pageId, 'url');
             if ($editUrl) {
@@ -371,7 +382,7 @@ class WelcomeServiceProvider extends ServiceProvider
             return;
         }
 
-        update_option(self::OPTION_DISMISSED, true);
+        update_option(self::optDismissed(), true);
 
         wp_safe_redirect(remove_query_arg(['wp-starter-dismiss-welcome', '_wpnonce']));
         exit;
@@ -397,7 +408,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         // Delete existing styleguide page if it exists
-        $existingPageId = get_option(self::OPTION_PAGE_ID);
+        $existingPageId = get_option(self::optPageId());
         if ($existingPageId && get_post($existingPageId)) {
             wp_delete_post( (int) $existingPageId, true);
         }
@@ -406,8 +417,8 @@ class WelcomeServiceProvider extends ServiceProvider
         $pageId = $this->createStyleguidePage();
 
         if ($pageId) {
-            update_option(self::OPTION_PAGE_ID, $pageId);
-            update_option(self::OPTION_DISMISSED, true);
+            update_option(self::optPageId(), $pageId);
+            update_option(self::optDismissed(), true);
 
             $editUrl = get_edit_post_link($pageId, 'url');
             if ($editUrl) {
@@ -440,7 +451,7 @@ class WelcomeServiceProvider extends ServiceProvider
             wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu bearbeiten.', 'wp-starter'));
         }
 
-        $existingPageId = get_option(self::OPTION_PAGE_ID);
+        $existingPageId = get_option(self::optPageId());
         if ($existingPageId) {
             wp_untrash_post( (int) $existingPageId);
 
@@ -474,10 +485,10 @@ class WelcomeServiceProvider extends ServiceProvider
             wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu löschen.', 'wp-starter'));
         }
 
-        $existingPageId = get_option(self::OPTION_PAGE_ID);
+        $existingPageId = get_option(self::optPageId());
         if ($existingPageId) {
             wp_delete_post( (int) $existingPageId, true); // true = force delete (bypass trash)
-            delete_option(self::OPTION_PAGE_ID);
+            delete_option(self::optPageId());
         }
 
         wp_safe_redirect(admin_url('admin.php?page=theme-options-tools'));
@@ -526,7 +537,7 @@ class WelcomeServiceProvider extends ServiceProvider
     private function importPlaceholderImages(): void
     {
         // Check if images were already imported
-        $existingImages = get_option(self::OPTION_IMAGES, []);
+        $existingImages = get_option(self::optImages(), []);
         if (!empty($existingImages) && is_array($existingImages)) {
             // Verify images still exist
             $allExist = true;
@@ -572,7 +583,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         // Store image IDs for reuse
-        update_option(self::OPTION_IMAGES, $this->imageIds);
+        update_option(self::optImages(), $this->imageIds);
     }
 
     /**
