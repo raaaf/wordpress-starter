@@ -66,6 +66,20 @@ $GLOBALS['wp_mock_hooks'] = ['actions' => [], 'filters' => []];
 $GLOBALS['wp_mock_enqueued'] = ['scripts' => [], 'styles' => []];
 
 // WordPress path functions
+if (!function_exists('get_template')) {
+    function get_template(): string
+    {
+        return $GLOBALS['wp_mock_template'] ?? 'wordpress-starter-theme';
+    }
+}
+
+if (!function_exists('get_stylesheet')) {
+    function get_stylesheet(): string
+    {
+        return $GLOBALS['wp_mock_stylesheet'] ?? get_template();
+    }
+}
+
 if (!function_exists('get_template_directory')) {
     function get_template_directory(): string
     {
@@ -517,6 +531,14 @@ if (!function_exists('update_option')) {
     function update_option(string $option, mixed $value, mixed $autoload = null): bool
     {
         $GLOBALS['wp_mock_options'][$option] = $value;
+        return true;
+    }
+}
+
+if (!function_exists('delete_option')) {
+    function delete_option(string $option): bool
+    {
+        unset($GLOBALS['wp_mock_options'][$option]);
         return true;
     }
 }
