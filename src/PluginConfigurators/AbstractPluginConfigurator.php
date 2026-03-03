@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\PluginConfigurators;
 
+use WordpressStarter\ThemeContext;
+
 /**
  * Abstract base class for plugin configurators
  *
@@ -71,7 +73,7 @@ abstract class AbstractPluginConfigurator
      */
     protected static function markConfigured(): void
     {
-        update_option('wp_starter_configured_' . static::getPluginSlug(), true);
+        update_option(ThemeContext::optionKey('configured_' . static::getPluginSlug()), true);
     }
 
     /**
@@ -79,7 +81,7 @@ abstract class AbstractPluginConfigurator
      */
     protected static function isMarkedConfigured(): bool
     {
-        return (bool) get_option('wp_starter_configured_' . static::getPluginSlug(), false);
+        return (bool) get_option(ThemeContext::optionKey('configured_' . static::getPluginSlug()), false);
     }
 
     /**
@@ -89,6 +91,6 @@ abstract class AbstractPluginConfigurator
      */
     public static function resetConfiguration(): void
     {
-        delete_option('wp_starter_configured_' . static::getPluginSlug());
+        delete_option(ThemeContext::optionKey('configured_' . static::getPluginSlug()));
     }
 }
