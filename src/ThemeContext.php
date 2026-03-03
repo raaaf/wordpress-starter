@@ -12,6 +12,8 @@ namespace WordpressStarter;
  */
 final class ThemeContext
 {
+    private function __construct() {}
+
     private static ?string $slug = null;
 
     /**
