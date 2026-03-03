@@ -72,6 +72,12 @@ class ThemeSetup
         }
         
         $this->config = $config;
+
+        // Derive repo_url from repo_name if not explicitly set
+        if (empty($this->config['repo_url']) && !empty($this->config['repo_name'])) {
+            $this->config['repo_url'] = "https://github.com/{$this->config['repo_name']}";
+        }
+
         echo "✓ Loaded configuration from $filename\n\n";
     }
     
@@ -120,10 +126,12 @@ class ThemeSetup
         );
         
         // Repository
-        $this->config['repo_url'] = $this->ask(
-            'Git repository URL',
-            "https://github.com/yourusername/{$this->config['theme_slug']}"
+        $defaultRepo = "raaaf/{$this->config['theme_slug']}";
+        $this->config['repo_name'] = $this->ask(
+            'GitHub repository name (e.g. raaaf/my-theme)',
+            $defaultRepo
         );
+        $this->config['repo_url'] = "https://github.com/{$this->config['repo_name']}";
     }
     
     private function confirmConfiguration(): void
@@ -138,7 +146,8 @@ class ThemeSetup
         echo "Dev URL: {$this->config['dev_url']}\n";
         echo "Author: {$this->config['author_name']} <{$this->config['author_email']}>\n";
         echo "Author URI: {$this->config['author_uri']}\n";
-        echo "Repository: {$this->config['repo_url']}\n";
+        echo "GitHub Repo: {$this->config['repo_name']}\n";
+        echo "Repository URL: {$this->config['repo_url']}\n";
         echo "\n";
         
         $confirm = $this->ask('Is this correct? (y/n)', 'y');
@@ -185,10 +194,13 @@ class ThemeSetup
         
         // Update PHP files with new namespace
         $this->updateNamespaceInPhpFiles();
-        
+
+        // Update ThemeUpdateProvider
+        $this->updateThemeUpdateProvider();
+
         // Update config files
         $this->updateConfigFiles();
-        
+
         // Create style.css
         $this->createStyleCss();
     }
@@ -240,6 +252,25 @@ class ThemeSetup
         echo "✓ Updated PHP namespaces\n";
     }
     
+    private function updateThemeUpdateProvider(): void
+    {
+        $file = 'src/Providers/ThemeUpdateProvider.php';
+
+        $this->replaceInFile(
+            $file,
+            "private const GITHUB_REPO = 'https://github.com/raaaf/starter/';",
+            "private const GITHUB_REPO = 'https://github.com/{$this->config['repo_name']}/';"
+        );
+
+        $this->replaceInFile(
+            $file,
+            "private const THEME_SLUG = 'wp-starter';",
+            "private const THEME_SLUG = '{$this->config['theme_slug']}';"
+        );
+
+        echo "✓ Updated ThemeUpdateProvider.php\n";
+    }
+
     private function updateConfigFiles(): void
     {
         // Update .env.example
@@ -334,17 +365,17 @@ Use it to make something cool, have fun, and share what you've learned with othe
         // Update CLAUDE.md
         $this->replaceInFile(
             'CLAUDE.md',
-            'Namespace for PHP classes: `WordpressStarter\`',
-            'Namespace for PHP classes: `' . $this->config['namespace'] . '\`'
+            '- **Namespace:** `WordpressStarter\`',
+            '- **Namespace:** `' . $this->config['namespace'] . '\`'
         );
-        
+
         $this->replaceInFile(
             'CLAUDE.md',
-            'Theme text domain: `wp-starter`',
-            'Theme text domain: `' . $this->config['theme_slug'] . '`'
+            '- **Text Domain:** `wp-starter`',
+            '- **Text Domain:** `' . $this->config['theme_slug'] . '`'
         );
-        
-        echo "✓ Updated documentation\n";
+
+        echo "✓ Updated CLAUDE.md\n";
     }
     
     private function printSuccess(): void

@@ -3,8 +3,8 @@
     "theme_slug": "my-wordpress-theme",
     "namespace": "MyWordPressTheme",
     "dev_url": "http://my-wordpress-theme.local",
-    "author_name": "Your Name",
+    "author_name": "Rafael Alex",
     "author_email": "your@email.com",
-    "author_uri": "https://yourwebsite.com",
-    "repo_url": "https://github.com/yourusername/my-wordpress-theme"
+    "author_uri": "https://rafaelalex.de",
+    "repo_name": "raaaf/my-wordpress-theme"
 }
