@@ -85,6 +85,8 @@ class Application
 
     public function boot(): void
     {
+        ThemeContext::migrate();
+
         // Phase 1: Instantiate and register all providers
         foreach ($this->providers as $providerClass) {
             $provider = $this->resolveProvider($providerClass);

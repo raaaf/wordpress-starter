@@ -133,4 +133,19 @@ final class ApplicationTest extends TestCase
             $this->assertInstanceOf($providerClass, $provider, "Provider {$providerClass} should be registered");
         }
     }
+
+    public function testBootRunsMigration(): void
+    {
+        $GLOBALS['wp_mock_options'] = [];
+        $GLOBALS['wp_mock_options']['wp_starter_content_setup_complete'] = true;
+        $GLOBALS['wp_mock_template'] = 'wordpress-starter-theme';
+        \WordpressStarter\ThemeContext::reset();
+
+        $app = Application::getInstance();
+        $app->boot();
+
+        $this->assertTrue(
+            (bool) get_option('wordpress_starter_theme_migration_done')
+        );
+    }
 }
