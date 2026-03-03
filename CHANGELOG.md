@@ -1,3 +1,18 @@
+# [2.9.0](https://github.com/raaaf/starter/compare/v2.8.4...v2.9.0) (2026-03-03)
+
+### Bug Fixes
+
+- replace remaining wp*starter* keys in Acf/Options ([332f6e9](https://github.com/raaaf/starter/commit/332f6e97090267bc5d7bb4e18a999962bb1583a2))
+
+### Features
+
+- add ThemeContext for multisite option key isolation ([9f83039](https://github.com/raaaf/starter/commit/9f83039272f1df3bdd4af088035ae774daa7a5bf))
+- run ThemeContext migration on boot ([76be7b6](https://github.com/raaaf/starter/commit/76be7b6abbdcb74a2d6f7187b75b7605ad31c0da))
+- use ThemeContext key in Acf/Options ([223257f](https://github.com/raaaf/starter/commit/223257fab71f58393a1730dc6900cb0b82c58de7))
+- use ThemeContext keys and guards in PluginServiceProvider ([378f121](https://github.com/raaaf/starter/commit/378f121c3f0248982616e9b784c7eea503748ba7))
+- use ThemeContext keys and guards in WelcomeServiceProvider ([9940cf9](https://github.com/raaaf/starter/commit/9940cf9ded5545610196cae611043a8b54cbf696))
+- use ThemeContext keys in AbstractPluginConfigurator ([2da9770](https://github.com/raaaf/starter/commit/2da97702754e77368eecb8731ff07bedd045fd02))
+
 ## [2.8.4](https://github.com/raaaf/starter/compare/v2.8.3...v2.8.4) (2026-02-27)
 
 ### Bug Fixes
