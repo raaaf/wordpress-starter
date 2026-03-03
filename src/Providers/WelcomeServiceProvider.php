@@ -14,11 +14,16 @@ use WordpressStarter\ThemeContext;
  */
 class WelcomeServiceProvider extends ServiceProvider
 {
-    private static function optActivated(): string         { return ThemeContext::optionKey('theme_activated'); }
-    private static function optDismissed(): string         { return ThemeContext::optionKey('welcome_dismissed'); }
-    private static function optPageId(): string            { return ThemeContext::optionKey('styleguide_page_id'); }
-    private static function optImages(): string            { return ThemeContext::optionKey('styleguide_images'); }
-    private static function optAcfPrefillPending(): string { return ThemeContext::optionKey('acf_prefill_pending'); }
+    private static function optActivated(): string         {
+		return ThemeContext::optionKey('theme_activated'); }
+    private static function optDismissed(): string         {
+		return ThemeContext::optionKey('welcome_dismissed'); }
+    private static function optPageId(): string            {
+		return ThemeContext::optionKey('styleguide_page_id'); }
+    private static function optImages(): string            {
+		return ThemeContext::optionKey('styleguide_images'); }
+    private static function optAcfPrefillPending(): string {
+		return ThemeContext::optionKey('acf_prefill_pending'); }
     private const NONCE_CREATE = 'wp-starter-create-styleguide';
     private const NONCE_DISMISS = 'wp-starter-dismiss-welcome';
     private const NONCE_IMPORT_OPTIONS = 'wp-starter-import-options';
@@ -167,7 +172,7 @@ class WelcomeServiceProvider extends ServiceProvider
         // Check if theme was activated (either via normal activation or via setup script)
         $themeActivated = get_option(self::optActivated());
         $setupComplete = get_option(ThemeContext::optionKey('setup_complete'))
-                      || get_option(ThemeContext::optionKey('content_setup_complete'));
+                        || get_option(ThemeContext::optionKey('content_setup_complete'));
 
         // Only show if theme was activated or setup was completed
         if (!$themeActivated && !$setupComplete) {

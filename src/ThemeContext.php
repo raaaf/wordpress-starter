@@ -133,6 +133,7 @@ final class ThemeContext
      * Resets the dynamic slug cache — for tests only.
      * Also seeds $ownSlug from the currently active template when it is still unset,
      * so the first reset() in a test setUp() pins the "own" slug for the entire test run.
+     *
      * @internal
      */
     public static function reset(): void
