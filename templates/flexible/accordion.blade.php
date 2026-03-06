@@ -8,8 +8,6 @@
 --}}
 
 @php
-    use Spatie\SchemaOrg\Schema;
-
     $items = get_sub_field('accordion') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
 
@@ -18,11 +16,14 @@
     if (!empty($items)) {
         foreach ($items as $item) {
             if (!empty($item['title']) && !empty($item['content'])) {
-                $faqQuestions[] = Schema::question()
-                    ->name(wp_strip_all_tags($item['title']))
-                    ->acceptedAnswer(
-                        Schema::answer()->text(wp_strip_all_tags($item['content']))
-                    );
+                $faqQuestions[] = [
+                    '@type' => 'Question',
+                    'name' => wp_strip_all_tags($item['title']),
+                    'acceptedAnswer' => [
+                        '@type' => 'Answer',
+                        'text' => wp_strip_all_tags($item['content']),
+                    ],
+                ];
             }
         }
     }
@@ -87,10 +88,10 @@
 {{-- FAQPage JSON-LD Schema for SEO --}}
 @if(!empty($faqQuestions))
     @php
-        $faqSchema = Schema::fAQPage()->mainEntity($faqQuestions);
+        $faqSchema = ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => $faqQuestions];
         $nonce = $GLOBALS['csp_nonce'] ?? '';
     @endphp
     <script type="application/ld+json" @if($nonce) nonce="{{ $nonce }}" @endif>
-        {!! wp_json_encode($faqSchema->toArray(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+        {!! wp_json_encode($faqSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
 @endif
