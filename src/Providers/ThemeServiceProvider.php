@@ -33,9 +33,10 @@ class ThemeServiceProvider extends ServiceProvider
 
     private function setupThemeVersion(): void
     {
-        if (!get_transient('theme_version')) {
+        $transientKey = \WordpressStarter\ThemeContext::prefix() . '_theme_version';
+        if (!get_transient($transientKey)) {
             $theme_version = wp_get_theme()->get('Version');
-            set_transient('theme_version', $theme_version, DAY_IN_SECONDS);
+            set_transient($transientKey, $theme_version, DAY_IN_SECONDS);
         }
     }
 
