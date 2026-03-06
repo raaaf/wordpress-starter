@@ -1,3 +1,10 @@
+## [2.9.3](https://github.com/raaaf/starter/compare/v2.9.2...v2.9.3) (2026-03-06)
+
+### Bug Fixes
+
+- remove extra blank line after namespace declaration ([d2b7669](https://github.com/raaaf/starter/commit/d2b7669a928efac9ee85f8520de996457b2aea78))
+- replace spatie/schema-org with direct PHP arrays in breadcrumb schema ([7761c3c](https://github.com/raaaf/starter/commit/7761c3ccd7ad98e8edffd08a6e8c6c67e8e7b7f5))
+
 ## [2.9.2](https://github.com/raaaf/starter/compare/v2.9.1...v2.9.2) (2026-03-06)
 
 ### Bug Fixes
