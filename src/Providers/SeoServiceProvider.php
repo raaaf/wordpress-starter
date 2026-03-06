@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
-use Spatie\SchemaOrg\Schema;
 
 /**
  * SEO Service Provider
@@ -183,29 +182,30 @@ class SeoServiceProvider extends ServiceProvider
 
             $listItems = [];
             foreach ($breadcrumbItems as $position => $item) {
-                $listItem = Schema::listItem()
-                    ->position($position + 1)
-                    ->name($item['name']);
+                $listItem = [
+                    '@type' => 'ListItem',
+                    'position' => $position + 1,
+                    'name' => $item['name'],
+                ];
 
-                // Only add item URL if not the current page (last item)
-                // item() expects a Thing object with @id, not a plain string
                 if (!empty($item['url'])) {
-                    $listItem->item(
-                        Schema::thing()
-                            ->setProperty('@id', $item['url'])
-                            ->name($item['name'])
-                    );
+                    $listItem['item'] = [
+                        '@type' => 'Thing',
+                        '@id' => $item['url'],
+                        'name' => $item['name'],
+                    ];
                 }
 
                 $listItems[] = $listItem;
             }
 
-            $breadcrumbSchema = Schema::breadcrumbList()
-                ->itemListElement($listItems);
+            $json = [
+                '@context' => 'https://schema.org',
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => $listItems,
+            ];
 
             $nonce = $GLOBALS['csp_nonce'] ?? '';
-            // Use custom script output to include nonce
-            $json = $breadcrumbSchema->toArray();
             echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
         }, 15);
     }
