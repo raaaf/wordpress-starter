@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
-
 /**
  * SEO Service Provider
  *
