@@ -1,3 +1,9 @@
+## [2.9.5](https://github.com/raaaf/starter/compare/v2.9.4...v2.9.5) (2026-03-06)
+
+### Bug Fixes
+
+- multisite autoloader guard and remove spatie/schema-org dependency ([fba109b](https://github.com/raaaf/starter/commit/fba109bf385f7593364b028dcd3d92f2413ec043))
+
 ## [2.9.4](https://github.com/raaaf/starter/compare/v2.9.3...v2.9.4) (2026-03-06)
 
 ### Bug Fixes
