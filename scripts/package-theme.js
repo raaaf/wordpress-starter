@@ -48,12 +48,6 @@ async function packageTheme() {
       'theme.json',
       'robots.txt',
       'screenshot.png',
-      'LICENSE',
-      'README.MD',
-      'CHANGELOG.md',
-      'composer.json',
-      'composer.lock',
-      '.env.example',
     ];
 
     for (const file of rootFiles) {
@@ -70,7 +64,6 @@ async function packageTheme() {
       'dist',
       'vendor',
       'resources/css',
-      'resources/js',
       'resources/img',
       'resources/icons',
       'resources/fonts',
