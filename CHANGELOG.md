@@ -1,3 +1,10 @@
+## [2.9.2](https://github.com/raaaf/starter/compare/v2.9.1...v2.9.2) (2026-03-06)
+
+### Bug Fixes
+
+- isolate option keys for multisite compatibility ([3eb613f](https://github.com/raaaf/starter/commit/3eb613fe43da41b29c20985a6129c07f7258da98))
+- **setup:** add ThemeUpdateProvider config and fix CLAUDE.md patterns ([a443f77](https://github.com/raaaf/starter/commit/a443f77d77734cc115f590203994e22471e0466f))
+
 ## [2.9.1](https://github.com/raaaf/starter/compare/v2.9.0...v2.9.1) (2026-03-03)
 
 ### Bug Fixes
