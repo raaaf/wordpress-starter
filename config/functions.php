@@ -13,9 +13,19 @@ if (
 }
 
 // Load Composer dependencies
+// Guard against duplicate autoloader class names when multiple themes share the same
+// composer dependency set (identical hash). Only require_once if not yet declared.
 $autoload_path = __DIR__ . '/../vendor/autoload.php';
 if (file_exists($autoload_path)) {
-    require_once $autoload_path;
+    $autoload_real = __DIR__ . '/../vendor/composer/autoload_real.php';
+    if (file_exists($autoload_real)) {
+        preg_match('/^class\s+(ComposerAutoloaderInit\w+)/m', file_get_contents($autoload_real), $matches);
+        if (empty($matches[1]) || !class_exists($matches[1], false)) {
+            require_once $autoload_path;
+        }
+    } else {
+        require_once $autoload_path;
+    }
 }
 
 // Load helper functions

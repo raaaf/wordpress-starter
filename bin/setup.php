@@ -806,6 +806,7 @@ class ThemeSetup
         $this->task('Updating Blade templates', fn() => $this->updateBladeTemplates());
         $this->task('Updating block.json files', fn() => $this->updateBlockJsonFiles());
         $this->task('Updating CLAUDE.md', fn() => $this->updateClaudeMd());
+        $this->task('Updating theme-updater.php mu-plugin', fn() => $this->updateThemeUpdaterPlugin());
         $this->task('Updating documentation files', fn() => $this->updateDocumentation());
         $this->task('Cleaning up old plugin config', fn() => $this->savePluginPreferences());
         $this->task('Saving content options', fn() => $this->saveContentOptions());
@@ -1233,58 +1234,131 @@ CSS;
 
         $content = file_get_contents($claudePath);
 
+        // Update description line
         $content = str_replace(
-            'Namespace for PHP classes: `WordpressStarter\\`',
-            "Namespace for PHP classes: `{$this->config['namespace']}\\`",
+            'Guidance for Claude Code when working with this WordPress starter theme.',
+            'Guidance for Claude Code when working with this WordPress theme.',
             $content
         );
 
+        // Update namespace in Quick Reference
         $content = str_replace(
-            'Theme text domain: `wp-starter`',
-            "Theme text domain: `{$this->config['text_domain']}`",
+            '- **Namespace:** `WordpressStarter\`',
+            "- **Namespace:** `{$this->config['namespace']}\\`",
+            $content
+        );
+
+        // Update text domain in Quick Reference
+        $content = str_replace(
+            '- **Text Domain:** `wp-starter`',
+            "- **Text Domain:** `{$this->config['text_domain']}`",
+            $content
+        );
+
+        // Update namespace in code examples
+        $content = str_replace(
+            'use WordpressStarter\\',
+            "use {$this->config['namespace']}\\",
+            $content
+        );
+        $content = str_replace(
+            'namespace WordpressStarter\\',
+            "namespace {$this->config['namespace']}\\",
             $content
         );
 
         file_put_contents($claudePath, $content);
     }
 
-    private function updateDocumentation(): void
+    private function updateThemeUpdaterPlugin(): void
     {
-        $oldNamespace = 'WordpressStarter';
-        $newNamespace = $this->config['namespace'];
-        $oldTextDomain = 'wp-starter';
-        $newTextDomain = $this->config['text_domain'];
-
-        if ($oldNamespace === $newNamespace && $oldTextDomain === $newTextDomain) {
+        $pluginPath = dirname($this->themeDir, 3) . '/mu-plugins/theme-updater.php';
+        if (!file_exists($pluginPath)) {
             return;
         }
 
-        $docFiles = [
-            $this->themeDir . '/README.md',
-            $this->themeDir . '/README.MD',
-            $this->themeDir . '/CONTRIBUTING.md',
-            $this->themeDir . '/TROUBLESHOOTING.md',
-        ];
+        $slug      = basename($this->themeDir);
+        $repo      = $this->config['repo_name'] ?? '';
+        $repoUrl   = $this->config['repo_url'] ?? "https://github.com/{$repo}";
 
-        foreach ($docFiles as $docPath) {
-            if (!file_exists($docPath)) {
-                continue;
-            }
+        $content = file_get_contents($pluginPath);
 
-            $content = file_get_contents($docPath);
-            $original = $content;
-
-            // Update namespace references in documentation
-            $content = str_replace("{$oldNamespace}\\", "{$newNamespace}\\", $content);
-            $content = str_replace("`{$oldNamespace}`", "`{$newNamespace}`", $content);
-            // Update text domain references
-            $content = str_replace("'{$oldTextDomain}'", "'{$newTextDomain}'", $content);
-            $content = str_replace("`{$oldTextDomain}`", "`{$newTextDomain}`", $content);
-
-            if ($content !== $original) {
-                file_put_contents($docPath, $content);
-            }
+        // Add slug to $ourThemes array if not already present
+        if (!str_contains($content, "'{$slug}'")) {
+            $content = preg_replace(
+                "/(\\\$ourThemes\s*=\s*\[)([^\]]+?)(\];)/s",
+                "$1$2    '{$slug}',\n$3",
+                $content
+            );
         }
+
+        // Add entry to $themes array if not already present
+        if (!str_contains($content, "'{$slug}'")) {
+            $themeEntry = <<<PHP
+
+        '{$slug}' => [
+            'repo' => '{$repoUrl}/',
+            'path' => WP_CONTENT_DIR . '/themes/{$slug}/style.css',
+        ],
+PHP;
+            $content = preg_replace(
+                '/(\s*\];)(\s*\n\s*foreach)/s',
+                "{$themeEntry}\n$1$2",
+                $content,
+                1
+            );
+        }
+
+        file_put_contents($pluginPath, $content);
+    }
+
+    private function updateDocumentation(): void
+    {
+        $this->writeClientReadme();
+    }
+
+    private function writeClientReadme(): void
+    {
+        $readmePath = $this->themeDir . '/README.md';
+        $name       = $this->config['theme_name'] ?? basename($this->themeDir);
+        $namespace  = $this->config['namespace'] ?? 'MyTheme';
+        $domain     = $this->config['text_domain'] ?? basename($this->themeDir);
+        $repo       = $this->config['repo_name'] ?? '';
+        $slug       = basename($this->themeDir);
+
+        $content = <<<MD
+# {$name} Theme
+
+Client-Theme für {$name}. Basiert auf dem wordpress-starter-theme.
+
+## Kenndaten
+
+- **Namespace:** `{$namespace}\\`
+- **Text Domain:** `{$domain}`
+- **Version:** siehe `style.css`
+- **Repo:** `{$repo}`
+
+## Stack
+
+Blade, TailwindCSS v4.1, Alpine.js, ACF Pro + ACF Extended, Vite 7.3, PHP 8.2+. Kein Gutenberg.
+
+## Entwicklung
+
+```bash
+cd app/public/wp-content/themes/{$slug}
+npm run dev        # Vite Dev Server (localhost:5180)
+npm run build      # Production Build
+composer lint      # PHPCS + PHPStan
+composer test      # PHPUnit
+npm run test:e2e   # Playwright E2E
+```
+
+## Plugins
+
+Composer-verwaltet via wpackagist. ACF Pro manuell installieren.
+MD;
+
+        file_put_contents($readmePath, $content);
     }
 
     private function savePluginPreferences(): void

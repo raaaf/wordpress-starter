@@ -361,8 +361,14 @@ Use it to make something cool, have fun, and share what you've learned with othe
     private function runPostSetup(): void
     {
         echo "\nRunning post-setup tasks...\n";
-        
+
         // Update CLAUDE.md
+        $this->replaceInFile(
+            'CLAUDE.md',
+            'Guidance for Claude Code when working with this WordPress starter theme.',
+            'Guidance for Claude Code when working with this WordPress theme.'
+        );
+
         $this->replaceInFile(
             'CLAUDE.md',
             '- **Namespace:** `WordpressStarter\`',
@@ -375,7 +381,54 @@ Use it to make something cool, have fun, and share what you've learned with othe
             '- **Text Domain:** `' . $this->config['theme_slug'] . '`'
         );
 
+        // Update namespace in code examples
+        $claudeContent = file_exists('CLAUDE.md') ? file_get_contents('CLAUDE.md') : '';
+        if ($claudeContent) {
+            $claudeContent = str_replace('use WordpressStarter\\', 'use ' . $this->config['namespace'] . '\\', $claudeContent);
+            $claudeContent = str_replace('namespace WordpressStarter\\', 'namespace ' . $this->config['namespace'] . '\\', $claudeContent);
+            file_put_contents('CLAUDE.md', $claudeContent);
+        }
+
         echo "✓ Updated CLAUDE.md\n";
+
+        // Update theme-updater.php mu-plugin
+        $this->updateThemeUpdaterPlugin();
+    }
+
+    private function updateThemeUpdaterPlugin(): void
+    {
+        $pluginPath = dirname(getcwd(), 3) . '/mu-plugins/theme-updater.php';
+        if (!file_exists($pluginPath)) {
+            return;
+        }
+
+        $slug    = basename(getcwd());
+        $repoUrl = $this->config['repo_url'] ?? '';
+
+        $content = file_get_contents($pluginPath);
+
+        // Add slug to $ourThemes array if not already present
+        if (!str_contains($content, "'{$slug}'")) {
+            $content = preg_replace(
+                "/(\\\$ourThemes\s*=\s*\[)([^\]]+?)(\];)/s",
+                "$1$2    '{$slug}',\n$3",
+                $content
+            );
+        }
+
+        // Add entry to $themes array if not already present
+        if (!str_contains($content, "'{$slug}' =>")) {
+            $themeEntry = "\n        '{$slug}' => [\n            'repo' => '{$repoUrl}/',\n            'path' => WP_CONTENT_DIR . '/themes/{$slug}/style.css',\n        ],";
+            $content = preg_replace(
+                '/(\s*\];)(\s*\n\s*foreach)/s',
+                "{$themeEntry}\n$1$2",
+                $content,
+                1
+            );
+        }
+
+        file_put_contents($pluginPath, $content);
+        echo "✓ Updated theme-updater.php\n";
     }
     
     private function printSuccess(): void
