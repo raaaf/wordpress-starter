@@ -1,3 +1,9 @@
+## [2.9.4](https://github.com/raaaf/starter/compare/v2.9.3...v2.9.4) (2026-03-06)
+
+### Bug Fixes
+
+- update composer.lock to remove spatie/schema-org ([9973574](https://github.com/raaaf/starter/commit/997357451efb1c03d2386c6b40869491dac79573))
+
 ## [2.9.3](https://github.com/raaaf/starter/compare/v2.9.2...v2.9.3) (2026-03-06)
 
 ### Bug Fixes
