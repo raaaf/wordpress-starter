@@ -11,6 +11,7 @@ use WordpressStarter\MemberArea\Crypto;
 use WordpressStarter\MemberArea\DownloadQuery;
 use WordpressStarter\MemberArea\FileHandler;
 use WordpressStarter\MemberArea\FolderSync;
+use WordpressStarter\ThemeContext;
 use WordpressStarter\Vite;
 
 class MemberAreaServiceProvider extends ServiceProvider
@@ -196,7 +197,7 @@ class MemberAreaServiceProvider extends ServiceProvider
     {
         // One-time migration: encrypt any existing plaintext passwords on first admin load
         add_action('admin_init', static function (): void {
-            if (get_option('_member_sftp_passwords_encrypted') === '1') {
+            if (get_option(ThemeContext::optionKey('sftp_passwords_encrypted')) === '1') {
                 return;
             }
 
@@ -224,7 +225,7 @@ class MemberAreaServiceProvider extends ServiceProvider
                 }
             }
 
-            update_option('_member_sftp_passwords_encrypted', '1', autoload: false);
+            update_option(ThemeContext::optionKey('sftp_passwords_encrypted'), '1', autoload: false);
         });
 
         // Encrypt the SFTP password when ACF saves the field
