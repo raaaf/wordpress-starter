@@ -1,3 +1,9 @@
+## [2.9.6](https://github.com/raaaf/starter/compare/v2.9.5...v2.9.6) (2026-03-10)
+
+### Bug Fixes
+
+- full codebase audit — security, a11y, perf, and code quality fixes ([580529b](https://github.com/raaaf/starter/commit/580529b0e1a1ed7dc5c4e674871ebad0c2455870))
+
 ## [2.9.5](https://github.com/raaaf/starter/compare/v2.9.4...v2.9.5) (2026-03-06)
 
 ### Bug Fixes
