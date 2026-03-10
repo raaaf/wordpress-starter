@@ -168,7 +168,7 @@ class PluginConfiguratorServiceProvider extends ServiceProvider
             </div>',
             esc_html__('WP-Starter: Plugins wurden automatisch konfiguriert', 'wp-starter'),
             '<li>' . implode('</li><li>', array_map('esc_html', $messages)) . '</li>',
-            esc_html__('Sie koennen die Einstellungen jederzeit in den jeweiligen Plugin-Optionen aendern.', 'wp-starter')
+            esc_html__('Sie können die Einstellungen jederzeit in den jeweiligen Plugin-Optionen ändern.', 'wp-starter')
         );
     }
 

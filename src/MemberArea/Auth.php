@@ -45,7 +45,7 @@ class Auth
     {
         $mode = self::getAuthMode();
 
-        if ($mode === 'WordPress') { // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
+        if (strtolower($mode) === 'wordpress') { // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
             if (!is_user_logged_in()) {
                 return false;
             }
@@ -89,7 +89,7 @@ class Auth
     {
         $mode = self::getAuthMode();
 
-        if ($mode === 'WordPress') { // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
+        if (strtolower($mode) === 'wordpress') { // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
             $result = wp_signon([
                 'user_login' => $credential,
                 'user_password' => $password ?? '',
@@ -125,7 +125,7 @@ class Auth
     {
         $mode = self::getAuthMode();
 
-        if ($mode === 'WordPress') { // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
+        if (strtolower($mode) === 'wordpress') { // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
             wp_logout();
             return;
         }
