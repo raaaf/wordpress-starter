@@ -48,6 +48,38 @@ final class ThemeContext
     }
 
     /**
+     * Kebab-case prefix — same as slug(), kept as named alias for clarity.
+     * 'wordpress-starter-theme' → 'wordpress-starter-theme'
+     */
+    public static function kebabPrefix(): string
+    {
+        return self::slug();
+    }
+
+    /**
+     * CamelCase JS variable name derived from the theme slug.
+     * 'wordpress-starter-theme' → 'wordpressStarterTheme'
+     */
+    public static function jsPrefix(): string
+    {
+        $parts = explode('-', self::slug());
+        $camel = array_shift($parts);
+        foreach ($parts as $part) {
+            $camel .= ucfirst($part);
+        }
+        return $camel;
+    }
+
+    /**
+     * Human-readable title-case prefix for error_log messages.
+     * 'wordpress-starter-theme' → 'WordPress Starter Theme'
+     */
+    public static function logPrefix(): string
+    {
+        return implode(' ', array_map('ucfirst', explode('-', self::slug())));
+    }
+
+    /**
      * Theme-specific option key.
      * ThemeContext::optionKey('content_setup_complete')
      * → 'wordpress_starter_theme_content_setup_complete'

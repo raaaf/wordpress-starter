@@ -678,12 +678,12 @@ class Options
         if ($styleguideInTrash) {
             // Page is in trash - offer to restore or delete permanently
             $restoreUrl = wp_nonce_url(
-                admin_url('?wp-starter-restore-styleguide=1'),
-                'wp-starter-restore-styleguide'
+                admin_url('?' . ThemeContext::kebabPrefix() . '-restore-styleguide=1'),
+                ThemeContext::kebabPrefix() . '-restore-styleguide'
             );
             $deleteUrl = wp_nonce_url(
-                admin_url('?wp-starter-delete-styleguide=1'),
-                'wp-starter-delete-styleguide'
+                admin_url('?' . ThemeContext::kebabPrefix() . '-delete-styleguide=1'),
+                ThemeContext::kebabPrefix() . '-delete-styleguide'
             );
             $statusMessage = sprintf(
                 '<div style="padding: 15px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">
@@ -716,8 +716,8 @@ class Options
                 delete_option(ThemeContext::optionKey('styleguide_page_id'));
             }
             $createUrl = wp_nonce_url(
-                admin_url('?wp-starter-create-styleguide=1'),
-                'wp-starter-create-styleguide'
+                admin_url('?' . ThemeContext::kebabPrefix() . '-create-styleguide=1'),
+                ThemeContext::kebabPrefix() . '-create-styleguide'
             );
             $statusMessage = sprintf(
                 '<div style="padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; margin-bottom: 20px;">
@@ -732,8 +732,8 @@ class Options
 
         // Regenerate option (always show)
         $regenerateUrl = wp_nonce_url(
-            admin_url('?wp-starter-regenerate-styleguide=1'),
-            'wp-starter-regenerate-styleguide'
+            admin_url('?' . ThemeContext::kebabPrefix() . '-regenerate-styleguide=1'),
+            ThemeContext::kebabPrefix() . '-regenerate-styleguide'
         );
         $regenerateMessage = sprintf(
             '<div style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
@@ -749,8 +749,8 @@ class Options
         // Content Setup section
         $contentSetupComplete = get_option(ThemeContext::optionKey('content_setup_complete'));
         $contentSetupUrl = wp_nonce_url(
-            admin_url('?wp-starter-rerun-content-setup=1'),
-            'wp-starter-rerun-content-setup'
+            admin_url('?' . ThemeContext::kebabPrefix() . '-rerun-content-setup=1'),
+            ThemeContext::kebabPrefix() . '-rerun-content-setup'
         );
 
         if ($contentSetupComplete) {
@@ -846,13 +846,13 @@ class Options
         $postCount = count($existingPosts);
 
         $generateUrl = wp_nonce_url(
-            admin_url('?wp-starter-generate-demo-posts=1'),
-            'wp-starter-generate-demo-posts'
+            admin_url('?' . ThemeContext::kebabPrefix() . '-generate-demo-posts=1'),
+            ThemeContext::kebabPrefix() . '-generate-demo-posts'
         );
 
         $deleteUrl = wp_nonce_url(
-            admin_url('?wp-starter-delete-demo-posts=1'),
-            'wp-starter-delete-demo-posts'
+            admin_url('?' . ThemeContext::kebabPrefix() . '-delete-demo-posts=1'),
+            ThemeContext::kebabPrefix() . '-delete-demo-posts'
         );
 
         if ($postCount > 0) {
@@ -1184,7 +1184,7 @@ class Options
         return sprintf(
             '<form method="post" enctype="multipart/form-data" style="background: #f9f9f9; padding: 15px; border-radius: 4px;">' .
             '%s' .
-            '<input type="hidden" name="wp-starter-upload-tokens" value="1">' .
+            '<input type="hidden" name="' . esc_attr(ThemeContext::kebabPrefix() . '-upload-tokens') . '" value="1">' .
             '<div style="display: grid; gap: 15px; max-width: 500px;">' .
             '<div>' .
             '<label style="display: block; margin-bottom: 5px; font-weight: 500;">%s</label>' .
@@ -1255,7 +1255,7 @@ class Options
         return sprintf(
             '<form method="post" style="background: #f9f9f9; padding: 15px; border-radius: 4px;">
                 %s
-                <input type="hidden" name="wp-starter-restore-backup" value="1">
+                <input type="hidden" name="%s" value="1">
                 <div style="display: flex; gap: 10px; align-items: end; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 250px;">
                         <label style="display: block; margin-bottom: 5px; font-weight: 500;">%s</label>
@@ -1270,6 +1270,7 @@ class Options
                 <p class="description" style="margin-top: 10px;">%s</p>
             </form>',
             $nonce,
+            esc_attr(ThemeContext::kebabPrefix() . '-restore-backup'),
             esc_html__('Backup-Zeitpunkt auswählen', 'wp-starter'),
             $options,
             esc_js(__('Backup wirklich wiederherstellen? Die aktuellen Token-Dateien werden überschrieben.', 'wp-starter')),

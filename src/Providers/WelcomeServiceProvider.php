@@ -24,9 +24,65 @@ class WelcomeServiceProvider extends ServiceProvider
 		return ThemeContext::optionKey('styleguide_images'); }
     private static function optAcfPrefillPending(): string {
 		return ThemeContext::optionKey('acf_prefill_pending'); }
-    private const NONCE_CREATE = 'wp-starter-create-styleguide';
-    private const NONCE_DISMISS = 'wp-starter-dismiss-welcome';
-    private const NONCE_IMPORT_OPTIONS = 'wp-starter-import-options';
+    private static function nonceCreate(): string
+    {
+        return ThemeContext::kebabPrefix() . '-create-styleguide';
+    }
+
+    private static function nonceDismiss(): string
+    {
+        return ThemeContext::kebabPrefix() . '-dismiss-welcome';
+    }
+
+    private static function nonceImportOptions(): string
+    {
+        return ThemeContext::kebabPrefix() . '-import-options';
+    }
+
+    private static function nonceRegenerateStyleguide(): string
+    {
+        return ThemeContext::kebabPrefix() . '-regenerate-styleguide';
+    }
+
+    private static function nonceRestoreStyleguide(): string
+    {
+        return ThemeContext::kebabPrefix() . '-restore-styleguide';
+    }
+
+    private static function nonceDeleteStyleguide(): string
+    {
+        return ThemeContext::kebabPrefix() . '-delete-styleguide';
+    }
+
+    private static function paramCreateStyleguide(): string
+    {
+        return ThemeContext::kebabPrefix() . '-create-styleguide';
+    }
+
+    private static function paramDismissWelcome(): string
+    {
+        return ThemeContext::kebabPrefix() . '-dismiss-welcome';
+    }
+
+    private static function paramImportOptions(): string
+    {
+        return ThemeContext::kebabPrefix() . '-import-options';
+    }
+
+    private static function paramRegenerateStyleguide(): string
+    {
+        return ThemeContext::kebabPrefix() . '-regenerate-styleguide';
+    }
+
+    private static function paramRestoreStyleguide(): string
+    {
+        return ThemeContext::kebabPrefix() . '-restore-styleguide';
+    }
+
+    private static function paramDeleteStyleguide(): string
+    {
+        return ThemeContext::kebabPrefix() . '-delete-styleguide';
+    }
 
     /** @var array<string, int> Imported placeholder image IDs */
     private array $imageIds = [];
@@ -197,13 +253,13 @@ class WelcomeServiceProvider extends ServiceProvider
     private function renderNotice(): void
     {
         $createUrl = wp_nonce_url(
-            add_query_arg('wp-starter-create-styleguide', '1'),
-            self::NONCE_CREATE
+            add_query_arg(self::paramCreateStyleguide(), '1'),
+            self::nonceCreate()
         );
 
         $dismissUrl = wp_nonce_url(
-            add_query_arg('wp-starter-dismiss-welcome', '1'),
-            self::NONCE_DISMISS
+            add_query_arg(self::paramDismissWelcome(), '1'),
+            self::nonceDismiss()
         );
 
         printf(
@@ -242,13 +298,13 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleImportOptions(): void
     {
-        if (!isset($_GET['wp-starter-import-options'])) {
+        if (!isset($_GET[self::paramImportOptions()])) {
             return;
         }
 
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
 
-        if (!wp_verify_nonce($nonce, self::NONCE_IMPORT_OPTIONS)) {
+        if (!wp_verify_nonce($nonce, self::nonceImportOptions())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
         }
 
@@ -318,8 +374,8 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         $importUrl = wp_nonce_url(
-            admin_url('admin.php?wp-starter-import-options=1'),
-            self::NONCE_IMPORT_OPTIONS
+            admin_url('admin.php?' . self::paramImportOptions() . '=1'),
+            self::nonceImportOptions()
         );
         ?>
         <div class="notice notice-info">
@@ -341,13 +397,13 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleCreateStyleguide(): void
     {
-        if (!isset($_GET['wp-starter-create-styleguide'])) {
+        if (!isset($_GET[self::paramCreateStyleguide()])) {
             return;
         }
 
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
 
-        if (!wp_verify_nonce($nonce, self::NONCE_CREATE)) {
+        if (!wp_verify_nonce($nonce, self::nonceCreate())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
         }
 
@@ -377,19 +433,19 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleDismiss(): void
     {
-        if (!isset($_GET['wp-starter-dismiss-welcome'])) {
+        if (!isset($_GET[self::paramDismissWelcome()])) {
             return;
         }
 
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
 
-        if (!wp_verify_nonce($nonce, self::NONCE_DISMISS)) {
+        if (!wp_verify_nonce($nonce, self::nonceDismiss())) {
             return;
         }
 
         update_option(self::optDismissed(), true);
 
-        wp_safe_redirect(remove_query_arg(['wp-starter-dismiss-welcome', '_wpnonce']));
+        wp_safe_redirect(remove_query_arg([self::paramDismissWelcome(), '_wpnonce']));
         exit;
     }
 
@@ -398,13 +454,13 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleRegenerateStyleguide(): void
     {
-        if (!isset($_GET['wp-starter-regenerate-styleguide'])) {
+        if (!isset($_GET[self::paramRegenerateStyleguide()])) {
             return;
         }
 
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
 
-        if (!wp_verify_nonce($nonce, 'wp-starter-regenerate-styleguide')) {
+        if (!wp_verify_nonce($nonce, self::nonceRegenerateStyleguide())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
         }
 
@@ -442,13 +498,13 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleRestoreStyleguide(): void
     {
-        if (!isset($_GET['wp-starter-restore-styleguide'])) {
+        if (!isset($_GET[self::paramRestoreStyleguide()])) {
             return;
         }
 
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
 
-        if (!wp_verify_nonce($nonce, 'wp-starter-restore-styleguide')) {
+        if (!wp_verify_nonce($nonce, self::nonceRestoreStyleguide())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
         }
 
@@ -476,13 +532,13 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleDeleteStyleguide(): void
     {
-        if (!isset($_GET['wp-starter-delete-styleguide'])) {
+        if (!isset($_GET[self::paramDeleteStyleguide()])) {
             return;
         }
 
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
 
-        if (!wp_verify_nonce($nonce, 'wp-starter-delete-styleguide')) {
+        if (!wp_verify_nonce($nonce, self::nonceDeleteStyleguide())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
         }
 

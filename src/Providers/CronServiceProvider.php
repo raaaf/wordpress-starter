@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\ThemeContext;
+
 /**
  * Handles scheduled tasks (WP-Cron) for the theme
  *
@@ -11,16 +13,21 @@ namespace WordpressStarter\Providers;
  */
 class CronServiceProvider extends ServiceProvider
 {
-    /**
-     * Custom cron schedule names
-     */
-    public const SCHEDULE_TWICE_DAILY = 'wp_starter_twice_daily';
+    public static function scheduleName(): string
+    {
+        return ThemeContext::prefix() . '_twice_daily';
+    }
 
-    /**
-     * Hook names for cron events
-     */
-    public const HOOK_CLEANUP_TRANSIENTS = 'wp_starter_cleanup_transients';
-    public const HOOK_CLEANUP_REVISIONS = 'wp_starter_cleanup_revisions';
+    public static function hookCleanupTransients(): string
+    {
+        return ThemeContext::prefix() . '_cleanup_transients';
+    }
+
+    public static function hookCleanupRevisions(): string
+    {
+        return ThemeContext::prefix() . '_cleanup_revisions';
+    }
+
 
     public function register(): void
     {
@@ -31,8 +38,8 @@ class CronServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Register cron hooks
-        add_action(self::HOOK_CLEANUP_TRANSIENTS, [$this, 'cleanupExpiredTransients']);
-        add_action(self::HOOK_CLEANUP_REVISIONS, [$this, 'cleanupOldRevisions']);
+        add_action(self::hookCleanupTransients(), [$this, 'cleanupExpiredTransients']);
+        add_action(self::hookCleanupRevisions(), [$this, 'cleanupOldRevisions']);
 
         // Schedule events if not already scheduled
         add_action('init', [$this, 'scheduleEvents']);
@@ -49,7 +56,7 @@ class CronServiceProvider extends ServiceProvider
      */
     public function addCronSchedules(array $schedules): array
     {
-        $schedules[self::SCHEDULE_TWICE_DAILY] = [
+        $schedules[self::scheduleName()] = [
             'interval' => 12 * HOUR_IN_SECONDS,
             'display' => __('Zweimal täglich', 'wp-starter'),
         ];
@@ -63,13 +70,13 @@ class CronServiceProvider extends ServiceProvider
     public function scheduleEvents(): void
     {
         // Schedule transient cleanup (daily)
-        if (!wp_next_scheduled(self::HOOK_CLEANUP_TRANSIENTS)) {
-            wp_schedule_event(time(), 'daily', self::HOOK_CLEANUP_TRANSIENTS);
+        if (!wp_next_scheduled(self::hookCleanupTransients())) {
+            wp_schedule_event(time(), 'daily', self::hookCleanupTransients());
         }
 
         // Schedule revision cleanup (weekly)
-        if (!wp_next_scheduled(self::HOOK_CLEANUP_REVISIONS)) {
-            wp_schedule_event(time(), 'weekly', self::HOOK_CLEANUP_REVISIONS);
+        if (!wp_next_scheduled(self::hookCleanupRevisions())) {
+            wp_schedule_event(time(), 'weekly', self::hookCleanupRevisions());
         }
     }
 
@@ -78,8 +85,8 @@ class CronServiceProvider extends ServiceProvider
      */
     public static function deactivate(): void
     {
-        wp_clear_scheduled_hook(self::HOOK_CLEANUP_TRANSIENTS);
-        wp_clear_scheduled_hook(self::HOOK_CLEANUP_REVISIONS);
+        wp_clear_scheduled_hook(self::hookCleanupTransients());
+        wp_clear_scheduled_hook(self::hookCleanupRevisions());
     }
 
     /**

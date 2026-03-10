@@ -85,11 +85,9 @@ class ThemeServiceProvider extends ServiceProvider
 
             // Scripts that should NOT be deferred (critical for page functionality)
             $noDeferHandles = [
-                'jquery-core',      // jQuery must load synchronously for inline scripts
-                'jquery-migrate',
-                'wp-polyfill',      // Polyfills must load first
-                'wp-hooks',         // Required by wp-i18n (defines wp.hooks)
-                'wp-i18n',          // Required by inline translation scripts (Contact Form 7, etc.)
+                'wp-polyfill',  // Polyfills must load first
+                'wp-hooks',     // Required by wp-i18n (defines wp.hooks)
+                'wp-i18n',      // Required by inline translation scripts (Contact Form 7, etc.)
             ];
 
             if (in_array($handle, $noDeferHandles, true)) {

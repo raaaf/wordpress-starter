@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter;
 
+use WordpressStarter\ThemeContext;
+
 /**
  * Vite Asset Management
  *
@@ -86,7 +88,7 @@ class Vite
         }
 
         // Localize strings for frontend JavaScript
-        wp_localize_script('app-js', 'wpStarterStrings', self::getFrontendStrings());
+        wp_localize_script('app-js', 'themeStrings', self::getFrontendStrings());
     }
 
     /**
@@ -140,8 +142,9 @@ class Vite
             'entries' => __('Einträge', 'wp-starter'),
         ];
         $json = wp_json_encode($strings);
+        $scriptId = ThemeContext::kebabPrefix() . '-admin-strings';
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted internal JSON for localization
-        echo "<script id=\"wp-starter-admin-strings\">var wpStarterAdminStrings = {$json};</script>";
+        echo "<script id=\"{$scriptId}\">var themeAdminStrings = {$json};</script>";
     }
 
     /**
@@ -250,7 +253,7 @@ class Vite
                 label.innerHTML = '';
                 label.appendChild(input);
                 const textSpan = document.createElement('span');
-                textSpan.textContent = window.wpStarterAdminStrings?.noIcon || 'No Icon';
+                textSpan.textContent = window.themeAdminStrings?.noIcon || 'No Icon';
                 label.appendChild(textSpan);
             }
         });
@@ -379,7 +382,7 @@ CSS;
                 // Log warning in development mode
                 if (defined('WP_DEBUG') && WP_DEBUG) {
                     // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-                    error_log('WP-Starter: Vite manifest not found at ' . $manifestPath . '. Run "npm run build".');
+                    error_log(ThemeContext::logPrefix() . ': Vite manifest not found at ' . $manifestPath . '. Run "npm run build".');
                 }
                 return;
             }
@@ -389,7 +392,7 @@ CSS;
             if ($content === false) {
                 self::$manifest = [];
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-                error_log('WP-Starter: Could not read Vite manifest at ' . $manifestPath);
+                error_log(ThemeContext::logPrefix() . ': Could not read Vite manifest at ' . $manifestPath);
                 return;
             }
 
@@ -398,7 +401,7 @@ CSS;
             if (json_last_error() !== JSON_ERROR_NONE) {
                 self::$manifest = [];
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-                error_log('WP-Starter: Invalid JSON in Vite manifest: ' . json_last_error_msg());
+                error_log(ThemeContext::logPrefix() . ': Invalid JSON in Vite manifest: ' . json_last_error_msg());
                 return;
             }
 
