@@ -12,7 +12,7 @@ declare const tinymce: {
 };
 
 // Declare localized strings from WordPress admin
-declare const wpStarterAdminStrings:
+declare const themeAdminStrings:
   | {
       noIcon: string;
       entry: string;
@@ -21,11 +21,7 @@ declare const wpStarterAdminStrings:
   | undefined;
 
 interface AcfField {
-  $el?: JQuery<HTMLElement>;
-}
-
-interface JQuery<T> {
-  [index: number]: T;
+  $el?: HTMLElement;
 }
 
 interface TinyMCEEditor {
@@ -117,8 +113,8 @@ function getLayoutPreview(layout: HTMLElement): string | null {
   if (repeater) {
     const rows = repeater.querySelectorAll(':scope > table > tbody > tr.acf-row:not(.acf-clone)');
     if (rows.length > 0) {
-      const singularLabel = wpStarterAdminStrings?.entry || 'Entry';
-      const pluralLabel = wpStarterAdminStrings?.entries || 'Entries';
+      const singularLabel = themeAdminStrings?.entry || 'Entry';
+      const pluralLabel = themeAdminStrings?.entries || 'Entries';
       const label = rows.length === 1 ? singularLabel : pluralLabel;
       return `${rows.length} ${label}`;
     }

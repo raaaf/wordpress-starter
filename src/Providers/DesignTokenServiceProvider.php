@@ -7,6 +7,7 @@ namespace WordpressStarter\Providers;
 use WordpressStarter\ColorPaletteGenerator;
 use WordpressStarter\DesignTokenValidator;
 use WordpressStarter\RateLimiter;
+use WordpressStarter\ThemeContext;
 
 /**
  * Design Token Service Provider
@@ -22,11 +23,76 @@ class DesignTokenServiceProvider extends ServiceProvider
 {
     private const TOKENS_DIR = 'config/design-tokens';
     private const BACKUP_DIR = 'config/design-tokens/backups';
-    private const NONCE_DOWNLOAD = 'wp-starter-download-tokens';
-    private const NONCE_UPLOAD = 'wp-starter-upload-tokens';
-    private const NONCE_REGENERATE = 'wp-starter-regenerate-tokens';
-    private const NONCE_APPLY_COLORS = 'wp-starter-apply-colors';
-    private const NONCE_RESTORE = 'wp-starter-restore-tokens';
+
+    private static function nonceDownload(): string
+    {
+        return ThemeContext::kebabPrefix() . '-download-tokens';
+    }
+
+    private static function nonceUpload(): string
+    {
+        return ThemeContext::kebabPrefix() . '-upload-tokens';
+    }
+
+    private static function nonceRegenerate(): string
+    {
+        return ThemeContext::kebabPrefix() . '-regenerate-tokens';
+    }
+
+    private static function nonceApplyColors(): string
+    {
+        return ThemeContext::kebabPrefix() . '-apply-colors';
+    }
+
+    private static function nonceRestore(): string
+    {
+        return ThemeContext::kebabPrefix() . '-restore-tokens';
+    }
+
+    private static function ajaxActionUploadTokens(): string
+    {
+        return ThemeContext::prefix() . '_upload_tokens';
+    }
+
+    private static function ajaxActionRestoreBackup(): string
+    {
+        return ThemeContext::prefix() . '_restore_backup';
+    }
+
+    private static function transientTokenNotice(): string
+    {
+        return ThemeContext::prefix() . '_token_notice';
+    }
+
+    private static function transientTokensJustUploaded(): string
+    {
+        return ThemeContext::prefix() . '_tokens_just_uploaded';
+    }
+
+    private static function paramDownloadToken(): string
+    {
+        return ThemeContext::kebabPrefix() . '-download-token';
+    }
+
+    private static function paramUploadTokens(): string
+    {
+        return ThemeContext::kebabPrefix() . '-upload-tokens';
+    }
+
+    private static function paramRegenerateTokens(): string
+    {
+        return ThemeContext::kebabPrefix() . '-regenerate-tokens';
+    }
+
+    private static function paramApplyColors(): string
+    {
+        return ThemeContext::kebabPrefix() . '-apply-colors';
+    }
+
+    private static function paramRestoreBackup(): string
+    {
+        return ThemeContext::kebabPrefix() . '-restore-backup';
+    }
 
     private const TOKEN_TYPES = ['primitives', 'light', 'dark'];
 
@@ -55,8 +121,8 @@ class DesignTokenServiceProvider extends ServiceProvider
         add_action('admin_init', [$this, 'handleTokenActions'], 1);
 
         // AJAX handlers for token upload and restore
-        add_action('wp_ajax_wp_starter_upload_tokens', [$this, 'ajaxUploadTokens']);
-        add_action('wp_ajax_wp_starter_restore_backup', [$this, 'ajaxRestoreBackup']);
+        add_action('wp_ajax_' . self::ajaxActionUploadTokens(), [$this, 'ajaxUploadTokens']);
+        add_action('wp_ajax_' . self::ajaxActionRestoreBackup(), [$this, 'ajaxRestoreBackup']);
     }
 
     public function boot(): void
@@ -90,14 +156,14 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     public function displayStoredNotices(): void
     {
-        $notice = get_transient('wp_starter_token_notice');
+        $notice = get_transient(self::transientTokenNotice());
 
         if (!$notice || !is_array($notice)) {
             return;
         }
 
         // Delete transient immediately to prevent duplicate display
-        delete_transient('wp_starter_token_notice');
+        delete_transient(self::transientTokenNotice());
 
         $type = isset($notice['type']) ? sanitize_key($notice['type']) : 'info';
         $message = isset($notice['message']) ? $notice['message'] : '';
@@ -193,8 +259,8 @@ class DesignTokenServiceProvider extends ServiceProvider
                 const overlay = document.getElementById('wpStarterLoading');
                 const acfForm = document.getElementById('post');
                 const ajaxUrl = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>';
-                const uploadNonce = '<?php echo esc_js(wp_create_nonce(self::NONCE_UPLOAD)); ?>';
-                const restoreNonce = '<?php echo esc_js(wp_create_nonce(self::NONCE_RESTORE)); ?>';
+                const uploadNonce = '<?php echo esc_js(wp_create_nonce(self::nonceUpload())); ?>';
+                const restoreNonce = '<?php echo esc_js(wp_create_nonce(self::nonceRestore())); ?>';
 
                 // Show loading overlay for ACF form submissions
                 if (acfForm && overlay) {
@@ -267,7 +333,7 @@ class DesignTokenServiceProvider extends ServiceProvider
                             }
 
                             const formData = new FormData();
-                            formData.append('action', 'wp_starter_upload_tokens');
+                            formData.append('action', '<?php echo esc_js(self::ajaxActionUploadTokens()); ?>');
                             formData.append('nonce', uploadNonce);
                             if (primitives) formData.append('token_primitives', primitives);
                             if (light) formData.append('token_light', light);
@@ -377,7 +443,7 @@ class DesignTokenServiceProvider extends ServiceProvider
                                 }
 
                                 const formData = new FormData();
-                                formData.append('action', 'wp_starter_restore_backup');
+                                formData.append('action', '<?php echo esc_js(self::ajaxActionRestoreBackup()); ?>');
                                 formData.append('nonce', restoreNonce);
                                 formData.append('timestamp', timestamp);
 
@@ -496,13 +562,13 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     private function handleDownloadTokens(): void
     {
-        if (!isset($_GET['wp-starter-download-token'])) {
+        if (!isset($_GET[self::paramDownloadToken()])) {
             return;
         }
 
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
 
-        if (!wp_verify_nonce($nonce, self::NONCE_DOWNLOAD)) {
+        if (!wp_verify_nonce($nonce, self::nonceDownload())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
         }
 
@@ -536,16 +602,16 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     private function handleUploadTokens(): void
     {
-        if (!isset($_POST['wp-starter-upload-tokens'])) {
+        if (!isset($_POST[self::paramUploadTokens()])) {
             return;
         }
 
         // Set flag to prevent ACF color sync from overwriting uploaded files
-        set_transient('wp_starter_tokens_just_uploaded', true, 60);
+        set_transient(self::transientTokensJustUploaded(), true, 60);
 
-        $nonce = isset($_POST['wp-starter-upload-tokens-nonce']) ? sanitize_text_field(wp_unslash($_POST['wp-starter-upload-tokens-nonce'])) : '';
+        $nonce = isset($_POST[self::paramUploadTokens() . '-nonce']) ? sanitize_text_field(wp_unslash($_POST[self::paramUploadTokens() . '-nonce'])) : '';
 
-        if (!wp_verify_nonce($nonce, self::NONCE_UPLOAD)) {
+        if (!wp_verify_nonce($nonce, self::nonceUpload())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
         }
 
@@ -685,7 +751,7 @@ class DesignTokenServiceProvider extends ServiceProvider
             $message .= "\n" . $result['details'];
         }
 
-        set_transient('wp_starter_token_notice', [
+        set_transient(self::transientTokenNotice(), [
             'type' => $result['success'] ? 'success' : 'error',
             'message' => $message,
         ], 30);
@@ -700,13 +766,13 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     private function handleRegenerateTokens(): void
     {
-        if (!isset($_GET['wp-starter-regenerate-tokens'])) {
+        if (!isset($_GET[self::paramRegenerateTokens()])) {
             return;
         }
 
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
 
-        if (!wp_verify_nonce($nonce, self::NONCE_REGENERATE)) {
+        if (!wp_verify_nonce($nonce, self::nonceRegenerate())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
         }
 
@@ -716,7 +782,7 @@ class DesignTokenServiceProvider extends ServiceProvider
 
         $result = $this->runTokenTransform();
 
-        set_transient('wp_starter_token_notice', [
+        set_transient(self::transientTokenNotice(), [
             'type' => $result['success'] ? 'success' : 'error',
             'message' => $result['message'],
         ], 30);
@@ -730,13 +796,13 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     private function handleApplyColors(): void
     {
-        if (!isset($_POST['wp-starter-apply-colors'])) {
+        if (!isset($_POST[self::paramApplyColors()])) {
             return;
         }
 
         $nonce = isset($_POST['_wpnonce']) ? sanitize_text_field(wp_unslash($_POST['_wpnonce'])) : '';
 
-        if (!wp_verify_nonce($nonce, self::NONCE_APPLY_COLORS)) {
+        if (!wp_verify_nonce($nonce, self::nonceApplyColors())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
         }
 
@@ -747,7 +813,7 @@ class DesignTokenServiceProvider extends ServiceProvider
         $result = $this->syncColorsToTokens();
 
         if ($result !== null) {
-            set_transient('wp_starter_token_notice', [
+            set_transient(self::transientTokenNotice(), [
                 'type' => $result['success'] ? 'success' : 'error',
                 'message' => $result['message'],
             ], 30);
@@ -762,16 +828,16 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     private function handleRestoreBackup(): void
     {
-        if (!isset($_POST['wp-starter-restore-backup'])) {
+        if (!isset($_POST[self::paramRestoreBackup()])) {
             return;
         }
 
         // Set flag to prevent ACF color sync from overwriting restored files
-        set_transient('wp_starter_tokens_just_uploaded', true, 60);
+        set_transient(self::transientTokensJustUploaded(), true, 60);
 
         $nonce = isset($_POST['_wpnonce']) ? sanitize_text_field(wp_unslash($_POST['_wpnonce'])) : '';
 
-        if (!wp_verify_nonce($nonce, self::NONCE_RESTORE)) {
+        if (!wp_verify_nonce($nonce, self::nonceRestore())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
         }
 
@@ -850,7 +916,7 @@ class DesignTokenServiceProvider extends ServiceProvider
             $noticeType = 'error';
         }
 
-        set_transient('wp_starter_token_notice', [
+        set_transient(self::transientTokenNotice(), [
             'type' => $noticeType,
             'message' => $noticeMessage,
         ], 30);
@@ -868,7 +934,7 @@ class DesignTokenServiceProvider extends ServiceProvider
     {
         // Verify nonce
         $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-        if (!wp_verify_nonce($nonce, self::NONCE_UPLOAD)) {
+        if (!wp_verify_nonce($nonce, self::nonceUpload())) {
             wp_send_json_error(['message' => __('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter')]);
         }
 
@@ -1015,7 +1081,7 @@ class DesignTokenServiceProvider extends ServiceProvider
     {
         // Verify nonce
         $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-        if (!wp_verify_nonce($nonce, self::NONCE_RESTORE)) {
+        if (!wp_verify_nonce($nonce, self::nonceRestore())) {
             wp_send_json_error(['message' => __('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter')]);
         }
 
@@ -1103,20 +1169,20 @@ class DesignTokenServiceProvider extends ServiceProvider
 
         // Skip if this is a token upload request (direct check)
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Just checking for presence
-        if (isset($_POST['wp-starter-upload-tokens'])) {
+        if (isset($_POST[self::paramUploadTokens()])) {
             return;
         }
 
         // Skip if this is a backup restore request (direct check)
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Just checking for presence
-        if (isset($_POST['wp-starter-restore-backup'])) {
+        if (isset($_POST[self::paramRestoreBackup()])) {
             return;
         }
 
         // Skip if tokens were just uploaded - the upload form is nested inside the ACF form,
         // so ACF's save_post fires with old color values that would overwrite the uploaded files
-        if (get_transient('wp_starter_tokens_just_uploaded')) {
-            delete_transient('wp_starter_tokens_just_uploaded');
+        if (get_transient(self::transientTokensJustUploaded())) {
+            delete_transient(self::transientTokensJustUploaded());
             return;
         }
 
@@ -1154,7 +1220,7 @@ class DesignTokenServiceProvider extends ServiceProvider
 
         // Store result as transient for display after redirect
         if ($result !== null) {
-            set_transient('wp_starter_token_notice', [
+            set_transient(self::transientTokenNotice(), [
                 'type' => $result['success'] ? 'success' : 'error',
                 'message' => $result['message'] . ( ! empty( $result['details'] ) ? "\n" . $result['details'] : '' ),
             ], 30);
@@ -1787,7 +1853,7 @@ class DesignTokenServiceProvider extends ServiceProvider
         }
 
         // Fire action for cache plugins
-        do_action('wp_starter_tokens_updated');
+        do_action(ThemeContext::prefix() . '_tokens_updated');
     }
 
     /**
@@ -1849,7 +1915,7 @@ class DesignTokenServiceProvider extends ServiceProvider
         return sprintf(
             '<form method="post" style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
                 %s
-                <input type="hidden" name="wp-starter-restore-backup" value="1">
+                <input type="hidden" name="%s" value="1">
                 <h3 style="margin: 0 0 15px 0; font-size: 14px;">%s</h3>
                 <div style="display: flex; gap: 10px; align-items: end; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 250px;">
@@ -1864,7 +1930,8 @@ class DesignTokenServiceProvider extends ServiceProvider
                 </div>
                 <p class="description" style="margin-top: 10px;">%s</p>
             </form>',
-            wp_nonce_field(self::NONCE_RESTORE, '_wpnonce', true, false),
+            wp_nonce_field(self::nonceRestore(), '_wpnonce', true, false),
+            esc_attr(self::paramRestoreBackup()),
             esc_html__('Backup wiederherstellen', 'wp-starter'),
             esc_html__('Backup-Zeitpunkt auswählen', 'wp-starter'),
             $options,
@@ -1884,10 +1951,10 @@ class DesignTokenServiceProvider extends ServiceProvider
     {
         return wp_nonce_url(
             add_query_arg([
-                'wp-starter-download-token' => '1',
+                self::paramDownloadToken() => '1',
                 'type' => $type,
             ], admin_url()),
-            self::NONCE_DOWNLOAD
+            self::nonceDownload()
         );
     }
 
@@ -1899,8 +1966,8 @@ class DesignTokenServiceProvider extends ServiceProvider
     public static function getRegenerateUrl(): string
     {
         return wp_nonce_url(
-            add_query_arg('wp-starter-regenerate-tokens', '1', admin_url()),
-            self::NONCE_REGENERATE
+            add_query_arg(self::paramRegenerateTokens(), '1', admin_url()),
+            self::nonceRegenerate()
         );
     }
 
@@ -1911,7 +1978,7 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     public static function getUploadNonce(): string
     {
-        return wp_nonce_field(self::NONCE_UPLOAD, '_wpnonce', true, false);
+        return wp_nonce_field(self::nonceUpload(), '_wpnonce', true, false);
     }
 
     /**
@@ -1921,7 +1988,7 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     public static function getApplyColorsNonce(): string
     {
-        return wp_nonce_field(self::NONCE_APPLY_COLORS, '_wpnonce', true, false);
+        return wp_nonce_field(self::nonceApplyColors(), '_wpnonce', true, false);
     }
 
     /**
@@ -1931,7 +1998,7 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     public static function getRestoreNonce(): string
     {
-        return wp_nonce_field(self::NONCE_RESTORE, '_wpnonce', true, false);
+        return wp_nonce_field(self::nonceRestore(), '_wpnonce', true, false);
     }
 
     /**

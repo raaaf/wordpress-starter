@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WordpressStarter\Providers;
 
 use WordpressStarter\PluginConfigurators\AbstractPluginConfigurator;
+use WordpressStarter\ThemeContext;
 use WordpressStarter\PluginConfigurators\AdminSiteEnhancementsConfigurator;
 use WordpressStarter\PluginConfigurators\ContactForm7Configurator;
 use WordpressStarter\PluginConfigurators\IThemesSecurityConfigurator;
@@ -41,13 +42,13 @@ class PluginConfiguratorServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Allow themes/plugins to add custom configurators
-        $this->configurators = apply_filters('wp_starter_plugin_configurators', $this->configurators);
+        $this->configurators = apply_filters(ThemeContext::prefix() . '_plugin_configurators', $this->configurators);
     }
 
     public function boot(): void
     {
         // Check if auto-configuration is enabled
-        if (!apply_filters('wp_starter_auto_configure_plugins', true)) {
+        if (!apply_filters(ThemeContext::prefix() . '_auto_configure_plugins', true)) {
             return;
         }
 
@@ -113,7 +114,7 @@ class PluginConfiguratorServiceProvider extends ServiceProvider
     {
         // Allow disabling individual plugin configuration
         $slug = $configuratorClass::getPluginSlug();
-        if (!apply_filters("wp_starter_configure_{$slug}", true)) {
+        if (!apply_filters(ThemeContext::prefix() . "_configure_{$slug}", true)) {
             return;
         }
 
@@ -121,7 +122,7 @@ class PluginConfiguratorServiceProvider extends ServiceProvider
 
         // Store summary for admin notice
         set_transient(
-            'wp_starter_plugin_configured_' . $slug,
+            ThemeContext::prefix() . '_plugin_configured_' . $slug,
             $configuratorClass::getConfigurationSummary(),
             300 // 5 minutes
         );
@@ -147,11 +148,11 @@ class PluginConfiguratorServiceProvider extends ServiceProvider
 
         foreach ($this->configurators as $configuratorClass) {
             $slug = $configuratorClass::getPluginSlug();
-            $message = get_transient('wp_starter_plugin_configured_' . $slug);
+            $message = get_transient(ThemeContext::prefix() . '_plugin_configured_' . $slug);
 
             if ($message) {
                 $messages[] = $message;
-                delete_transient('wp_starter_plugin_configured_' . $slug);
+                delete_transient(ThemeContext::prefix() . '_plugin_configured_' . $slug);
             }
         }
 
