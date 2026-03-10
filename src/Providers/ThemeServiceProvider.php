@@ -143,7 +143,12 @@ class ThemeServiceProvider extends ServiceProvider
             $criticalCssPath = get_theme_file_path('resources/css/critical.css');
 
             if (file_exists($criticalCssPath)) {
-                $criticalCss = file_get_contents($criticalCssPath);
+                $cacheKey = 'critical_css_' . get_template_directory();
+                $criticalCss = wp_cache_get($cacheKey, 'theme');
+                if ($criticalCss === false) {
+                    $criticalCss = file_get_contents($criticalCssPath);
+                    wp_cache_set($cacheKey, $criticalCss, 'theme', DAY_IN_SECONDS);
+                }
                 if ($criticalCss) {
                     $nonce = $GLOBALS['csp_nonce'] ?? '';
                     printf(
@@ -164,17 +169,11 @@ class ThemeServiceProvider extends ServiceProvider
             }
 
             // Get CSS URL from Vite manifest in production
-            $manifestPath = get_theme_file_path('dist/.vite/manifest.json');
-            if (!file_exists($manifestPath)) {
+            $cssUrl = \WordpressStarter\Vite::getAssetUrl('resources/css/app.css');
+            if (!$cssUrl) {
                 return;
             }
 
-            $manifest = json_decode(file_get_contents($manifestPath) ?: '', true);
-            if (!isset($manifest['resources/css/app.css']['file'])) {
-                return;
-            }
-
-            $cssUrl = get_theme_file_uri('dist/' . $manifest['resources/css/app.css']['file']);
             printf(
                 '<link rel="preload" href="%s" as="style">%s',
                 esc_url($cssUrl),
@@ -535,7 +534,7 @@ class ThemeServiceProvider extends ServiceProvider
                 return $url;
             }
 
-            $faviconId = get_field('site_favicon', 'option');
+            $faviconId = \WordpressStarter\Acf\Fields::option('site_favicon');
             if (!$faviconId) {
                 return $url;
             }
@@ -550,7 +549,7 @@ class ThemeServiceProvider extends ServiceProvider
                 return;
             }
 
-            $faviconId = get_field('site_favicon', 'option');
+            $faviconId = \WordpressStarter\Acf\Fields::option('site_favicon');
             if (!$faviconId) {
                 return;
             }
@@ -627,7 +626,7 @@ class ThemeServiceProvider extends ServiceProvider
     {
         // Try ACF option first
         if (function_exists('get_field')) {
-            $acfLogo = get_field('site_logo', 'option');
+            $acfLogo = \WordpressStarter\Acf\Fields::option('site_logo');
             if ($acfLogo && !empty($acfLogo['url'])) {
                 return $acfLogo['url'];
             }
@@ -698,7 +697,7 @@ class ThemeServiceProvider extends ServiceProvider
             return;
         }
 
-        $faviconId = get_field('site_favicon', 'option');
+        $faviconId = \WordpressStarter\Acf\Fields::option('site_favicon');
 
         if ($faviconId) {
             // Set the WordPress site_icon to the ACF favicon
@@ -711,6 +710,12 @@ class ThemeServiceProvider extends ServiceProvider
      */
     private function maybeInitialSync(): void
     {
+        // Only run once — bail if already synced in a previous request
+        $transientKey = \WordpressStarter\ThemeContext::prefix() . '_initial_sync_done';
+        if (get_transient($transientKey)) {
+            return;
+        }
+
         // Sync logo if ACF has one but WordPress doesn't
         $acfLogo = get_field('site_logo', 'option');
         $wpLogo = get_theme_mod('custom_logo');
@@ -720,11 +725,13 @@ class ThemeServiceProvider extends ServiceProvider
         }
 
         // Sync favicon if ACF has one but WordPress doesn't
-        $acfFavicon = get_field('site_favicon', 'option');
+        $acfFavicon = \WordpressStarter\Acf\Fields::option('site_favicon');
         $wpSiteIcon = get_option('site_icon');
 
         if ($acfFavicon && !$wpSiteIcon) {
             update_option('site_icon', $acfFavicon);
         }
+
+        set_transient($transientKey, true, DAY_IN_SECONDS);
     }
 }

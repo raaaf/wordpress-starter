@@ -12,7 +12,6 @@ use WordpressStarter\MemberArea\DownloadQuery;
 use WordpressStarter\MemberArea\FileHandler;
 use WordpressStarter\MemberArea\FolderSync;
 use WordpressStarter\ThemeContext;
-use WordpressStarter\Vite;
 
 class MemberAreaServiceProvider extends ServiceProvider
 {
@@ -89,9 +88,7 @@ class MemberAreaServiceProvider extends ServiceProvider
 
     public function handleLogin(): void
     {
-        if (!defined('WP_DEBUG') || !WP_DEBUG) {
-            \WordpressStarter\RateLimiter::enforce('member_login', 5, 300);
-        }
+        \WordpressStarter\RateLimiter::enforce('member_login', 5, 300);
 
         $nonce = sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) );
         if (!wp_verify_nonce($nonce, 'member_area_login')) {
@@ -115,10 +112,7 @@ class MemberAreaServiceProvider extends ServiceProvider
             wp_send_json_error(['message' => __('Anmeldung fehlgeschlagen.', 'wp-starter')], 401);
         }
 
-        $redirectUrl = sanitize_url( wp_unslash( $_POST['redirect'] ?? '' ) );
-        if (empty($redirectUrl)) {
-            $redirectUrl = home_url('/');
-        }
+        $redirectUrl = wp_validate_redirect( sanitize_url( wp_unslash( $_POST['redirect'] ?? '' ) ), home_url('/') );
 
         wp_send_json_success(['redirect' => $redirectUrl]);
     }
@@ -219,9 +213,8 @@ class MemberAreaServiceProvider extends ServiceProvider
                 }
                 try {
                     update_post_meta($postId, 'download_sftp_password', Crypto::encrypt($pw));
-                } catch (\RuntimeException $e) {
+                } catch (\RuntimeException) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
                     // AUTH_KEY not configured — skip silently
-                    unset($e);
                 }
             }
 
@@ -241,7 +234,7 @@ class MemberAreaServiceProvider extends ServiceProvider
 
             try {
                 return Crypto::encrypt($value);
-            } catch (\RuntimeException $e) {
+            } catch (\RuntimeException) {
                 // AUTH_KEY not configured — store plaintext rather than silently break sync
                 return $value;
             }

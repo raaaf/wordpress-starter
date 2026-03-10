@@ -64,6 +64,7 @@
                         'loading' => 'eager',
                         'fetchpriority' => 'high',
                         'sizes' => '100vw',
+                        'alt' => '',
                     ]) !!}
                 @else
                     <img src="{{ $background_image['url'] }}"
@@ -169,7 +170,8 @@
                 <div class="relative">
                     {!! wp_get_attachment_image($imageId, 'hero-split', false, [
                         'class' => 'w-full h-auto rounded-2xl shadow-xl',
-                        'loading' => 'lazy',
+                        'loading' => 'eager',
+                        'fetchpriority' => 'high',
                         'sizes' => '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px',
                     ]) !!}
                 </div>
@@ -180,7 +182,8 @@
                          alt="{{ $image['alt'] ?? '' }}"
                          @if(!empty($image['width']) && !empty($image['height']))width="{{ $image['width'] }}" height="{{ $image['height'] }}"@endif
                          class="w-full h-auto rounded-2xl shadow-xl"
-                         loading="lazy">
+                         loading="eager"
+                         fetchpriority="high">
                 </div>
             @endif
         </div>

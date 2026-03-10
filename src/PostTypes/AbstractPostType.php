@@ -235,9 +235,11 @@ abstract class AbstractPostType
     public static function all(array $args = []): array
     {
         $defaults = [
-            'post_type' => static::$postType,
-            'posts_per_page' => -1,
-            'post_status' => 'publish',
+            'post_type'              => static::$postType,
+            'posts_per_page'         => -1,
+            'post_status'            => 'publish',
+            'no_found_rows'          => true,
+            'update_post_term_cache' => false,
         ];
 
         $query = new \WP_Query(array_merge($defaults, $args));

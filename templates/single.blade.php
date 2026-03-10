@@ -34,12 +34,12 @@
                 $hasNext = !empty($nextPost);
             @endphp
             @if ($hasPrev || $hasNext)
-                <nav class="container mx-auto max-w-7xl px-4 pb-16 md:pb-24 pt-8 border-t border-line" aria-label="Beitragsnavigation">
+                <nav class="container mx-auto max-w-7xl px-4 pb-16 md:pb-24 pt-8 border-t border-line" aria-label="{{ __('Beitragsnavigation', 'wp-starter') }}">
                     <div class="flex justify-between items-start gap-8">
                         <div class="flex-1">
                             @if ($hasPrev)
                                 <span class="text-body-small text-content-secondary mb-2 block">{{ __('Vorheriger Beitrag', 'wp-starter') }}</span>
-                                <a href="{{ get_permalink($prevPost) }}" class="inline-flex items-center gap-1.5 text-content hover:text-content-brand transition-colors">
+                                <a href="{{ get_permalink($prevPost) }}" aria-label="{{ __('Vorheriger Beitrag', 'wp-starter') }}: {{ get_the_title($prevPost) }}" class="inline-flex items-center gap-1.5 text-content hover:text-content-brand transition-colors">
                                     <x-icon name="chevron-left" class="w-4 h-4" />
                                     {{ get_the_title($prevPost) }}
                                 </a>
@@ -48,7 +48,7 @@
                         <div class="flex-1 text-right">
                             @if ($hasNext)
                                 <span class="text-body-small text-content-secondary mb-2 block">{{ __('Nächster Beitrag', 'wp-starter') }}</span>
-                                <a href="{{ get_permalink($nextPost) }}" class="inline-flex items-center justify-end gap-1.5 text-content hover:text-content-brand transition-colors">
+                                <a href="{{ get_permalink($nextPost) }}" aria-label="{{ __('Nächster Beitrag', 'wp-starter') }}: {{ get_the_title($nextPost) }}" class="inline-flex items-center justify-end gap-1.5 text-content hover:text-content-brand transition-colors">
                                     {{ get_the_title($nextPost) }}
                                     <x-icon name="chevron-right" class="w-4 h-4" />
                                 </a>

@@ -6,6 +6,8 @@ namespace WordpressStarter\MemberArea;
 
 class FileHandler
 {
+    private const POST_TYPE = 'member_download';
+    private const NONCE_PREFIX = 'member_download_';
     private const ALLOWED_PROTOCOLS = ['https', 'http'];
     private const SSRF_BLOCKED_RANGES = [
         '/^127\./',
@@ -14,6 +16,9 @@ class FileHandler
         '/^172\.(1[6-9]|2[0-9]|3[01])\./',
         '/^::1$/',
         '/^localhost$/i',
+        '/^0\./',
+        '/^169\.254\./',
+        '/^fc[0-9a-f]{2}:/i',
     ];
 
     public static function handleDownload(): void
@@ -29,27 +34,28 @@ class FileHandler
             wp_send_json_error(['message' => __('Ungültige Download-ID.', 'wp-starter')], 400);
         }
 
-        if (!wp_verify_nonce($nonce, 'member_download_' . $postId)) {
+        if (!wp_verify_nonce($nonce, self::NONCE_PREFIX . $postId)) {
             wp_send_json_error(['message' => __('Ungültige Anfrage.', 'wp-starter')], 403);
         }
 
         $post = get_post($postId);
-        if (!$post || $post->post_type !== 'member_download' || $post->post_status !== 'publish') {
+        if (!$post || $post->post_type !== self::POST_TYPE || $post->post_status !== 'publish') {
             wp_send_json_error(['message' => __('Dokument nicht gefunden.', 'wp-starter')], 404);
         }
 
+        $fields = get_fields($postId) ?: [];
         $entry = [
-            'download_source_type'       => get_field('download_source_type',       $postId),
-            'download_file'              => get_field('download_file',               $postId),
-            'download_external_url'      => get_field('download_external_url',       $postId),
-            'download_sftp_host'         => get_field('download_sftp_host',          $postId),
-            'download_sftp_port'         => get_field('download_sftp_port',          $postId),
-            'download_sftp_username'     => get_field('download_sftp_username',      $postId),
-            'download_sftp_password'     => get_field('download_sftp_password',      $postId),
-            'download_sftp_remote_file'  => get_field('download_sftp_remote_file',   $postId),
+            'download_source_type'      => $fields['download_source_type'] ?? null,
+            'download_file'             => $fields['download_file'] ?? null,
+            'download_external_url'     => $fields['download_external_url'] ?? null,
+            'download_sftp_host'        => $fields['download_sftp_host'] ?? null,
+            'download_sftp_port'        => $fields['download_sftp_port'] ?? null,
+            'download_sftp_username'    => $fields['download_sftp_username'] ?? null,
+            'download_sftp_password'    => $fields['download_sftp_password'] ?? null,
+            'download_sftp_remote_file' => $fields['download_sftp_remote_file'] ?? null,
         ];
 
-        $available = (bool) get_field('download_available', $postId);
+        $available = (bool) ( $fields['download_available'] ?? false );
         if (!$available) {
             wp_send_json_error(['message' => __('Datei nicht verfügbar.', 'wp-starter')], 503);
         }
@@ -92,9 +98,16 @@ class FileHandler
             $mimeType = get_post_mime_type($fileId) ?: 'application/octet-stream';
         }
 
+        $mimeType = sanitize_mime_type($mimeType);
+        if (empty($mimeType)) {
+            $mimeType = 'application/octet-stream';
+        }
+
+        $fileName = preg_replace('/["\r\n]/', '', $fileName);
+
         nocache_headers();
         header('Content-Type: ' . $mimeType);
-        header('Content-Disposition: attachment; filename="' . esc_attr($fileName) . '"');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
         header('Content-Length: ' . filesize($filePath));
         header('X-Content-Type-Options: nosniff');
 
@@ -137,14 +150,14 @@ class FileHandler
 
         try {
             SftpClient::assertSafeHost($host);
-        } catch (\RuntimeException $e) {
+        } catch (\RuntimeException) {
             wp_send_json_error(['message' => __('Diese URL ist nicht erlaubt.', 'wp-starter')], 403);
         }
 
         try {
             $sftp     = SftpClient::connect($host, $port, $username, $password);
             $contents = SftpClient::readFile($sftp, $remotePath);
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             wp_send_json_error(['message' => __('Datei konnte nicht abgerufen werden.', 'wp-starter')], 502);
         }
 
@@ -155,9 +168,16 @@ class FileHandler
         $fileName = basename($remotePath);
         $mimeType = self::guessMimeType($fileName);
 
+        $mimeType = sanitize_mime_type($mimeType);
+        if (empty($mimeType)) {
+            $mimeType = 'application/octet-stream';
+        }
+
+        $fileName = preg_replace('/["\r\n]/', '', $fileName);
+
         nocache_headers();
         header('Content-Type: ' . $mimeType);
-        header('Content-Disposition: attachment; filename="' . esc_attr($fileName) . '"');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
         header('Content-Length: ' . strlen($contents));
         header('X-Content-Type-Options: nosniff');
 

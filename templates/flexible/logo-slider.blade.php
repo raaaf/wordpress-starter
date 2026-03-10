@@ -104,7 +104,7 @@
                 {{-- Duplicate set for infinite scroll effect --}}
                 @if($autoplay)
                     @foreach($logoData as $logo)
-                        <div class="flex-shrink-0 w-32 flex items-center justify-center">
+                        <div class="flex-shrink-0 w-32 flex items-center justify-center" aria-hidden="true">
                             @if($logo['link'])
                                 <a
                                     href="{{ $logo['link'] }}"

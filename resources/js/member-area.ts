@@ -1,4 +1,5 @@
 // Member Area Alpine.js Components
+import type { AlpineMagics } from '../../src/types/alpine';
 
 // Declare localized config from WordPress
 declare const memberAreaConfig: {
@@ -96,7 +97,7 @@ interface FacetOption {
   count: number;
 }
 
-interface DownloadTableState {
+interface DownloadTableState extends AlpineMagics {
   items: DownloadItem[];
   total: number;
   pages: number;
@@ -119,6 +120,8 @@ interface DownloadTableState {
 
 function createDownloadTableComponent(): DownloadTableState {
   return {
+    // Alpine magic properties ($el, $watch, etc.) are injected at runtime
+    ...({} as AlpineMagics),
     items: [],
     total: 0,
     pages: 1,
@@ -263,7 +266,7 @@ function createDownloadTableComponent(): DownloadTableState {
 // ============================================
 
 export function registerMemberAreaComponents(Alpine: {
-  data: (name: string, component: () => unknown) => void;
+  data: (name: string, component: () => object) => void;
 }): void {
   Alpine.data('memberLogin', createMemberLoginComponent);
   Alpine.data('downloadTable', createDownloadTableComponent);

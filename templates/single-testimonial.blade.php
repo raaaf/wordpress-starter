@@ -12,6 +12,7 @@
 
     <x-section background="primary">
         <article class="max-w-3xl mx-auto">
+            <h1 class="sr-only">{{ get_the_title() }}</h1>
             {{-- Testimonial Card --}}
             <div class="bg-surface-secondary rounded-xl p-8 md:p-12">
                 {{-- Quote Icon --}}
@@ -68,29 +69,24 @@
                 {{-- Source Link --}}
                 @if($sourceUrl)
                     <div class="mt-8 pt-6 border-t border-line">
-                        <a
-                            href="{{ $sourceUrl }}"
+                        <x-link
+                            :url="$sourceUrl"
                             target="_blank"
-                            rel="noopener noreferrer"
-                            class="inline-flex items-center gap-2 text-sm text-content-secondary hover:text-content-brand transition-colors"
-                        >
-                            <span>{{ __('Original-Bewertung ansehen', 'wp-starter') }}</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                            </svg>
-                        </a>
+                            variant="dark"
+                            size="sm"
+                            iconRight="external-link"
+                        >{{ __('Original-Bewertung ansehen', 'wp-starter') }}</x-link>
                     </div>
                 @endif
             </div>
 
             {{-- Back Link --}}
             <div class="mt-8 text-center">
-                <a href="{{ home_url() }}" class="inline-flex items-center gap-2 text-content-secondary hover:text-content-brand transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                    <span>{{ __('Zurück zur Startseite', 'wp-starter') }}</span>
-                </a>
+                <x-link
+                    :url="home_url()"
+                    variant="dark"
+                    iconLeft="arrow-left"
+                >{{ __('Zurück zur Startseite', 'wp-starter') }}</x-link>
             </div>
         </article>
     </x-section>

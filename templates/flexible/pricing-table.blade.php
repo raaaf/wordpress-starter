@@ -38,7 +38,7 @@
                 <div class="relative flex flex-col p-8 rounded-xl {{ $isFeatured ? 'bg-surface-brand text-content-inverse ring-4 ring-surface-brand ring-offset-2' : 'bg-surface-secondary' }}">
                     @if($isFeatured)
                         <x-badge variant="accent" size="md" class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            Empfohlen
+                            {{ __('Empfohlen', 'wp-starter') }}
                         </x-badge>
                     @endif
 
@@ -57,7 +57,7 @@
 
                     @if($features)
                         <div class="flex-grow mb-8 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_li]:pl-1 {{ $isFeatured ? 'text-content-inverse [&_li]:marker:text-content-inverse' : 'text-content [&_li]:marker:text-content-brand' }}">
-                            {!! $features !!}
+                            {!! wp_kses_post($features ?? '') !!}
                         </div>
                     @endif
 
@@ -76,7 +76,7 @@
         </div>
     @else
         <div class="p-8 text-center rounded-lg bg-surface-secondary">
-            <p class="text-content-secondary">Bitte füge mindestens ein Preispaket hinzu.</p>
+            <p class="text-content-secondary">{{ __('Bitte füge mindestens ein Preispaket hinzu.', 'wp-starter') }}</p>
         </div>
     @endif
 </x-section>

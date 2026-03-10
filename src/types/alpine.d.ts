@@ -1,5 +1,6 @@
 // Alpine.js Component Context Types
-// These types extend the component interface with Alpine's magic properties
+// These types provide missing module declarations for Alpine plugins
+// and a helper type for Alpine magic properties.
 
 // Type declaration for @alpinejs/collapse plugin
 declare module '@alpinejs/collapse' {
@@ -15,19 +16,20 @@ declare module '@alpinejs/intersect' {
   export default intersect;
 }
 
-export interface AlpineComponentContext {
-  $el: HTMLElement;
-  $refs: Record<string, HTMLElement>;
-  $store: Record<string, any>;
-  $dispatch: (event: string, detail?: any) => void;
-  $nextTick: (callback: () => void) => Promise<void>;
-  $watch: <T>(property: string, callback: (value: T, oldValue: T) => void) => void;
-  $root: HTMLElement;
+/**
+ * Alpine magic properties injected at runtime by Alpine.js.
+ * Add this to component interfaces so TypeScript knows about $el, $nextTick, etc.
+ *
+ * Usage: interface MyComponent extends AlpineMagics { ... }
+ */
+export interface AlpineMagics {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   $data: Record<string, any>;
-  $id: (name: string, key?: string | number) => string;
-}
-
-// Augment the navigation component to include Alpine context
-declare module '../js/app' {
-  interface NavigationComponent extends AlpineComponentContext {}
+  $dispatch: (event: string, detail?: unknown) => void;
+  $el: HTMLElement;
+  $id: (name: string, key?: number | string | null) => string;
+  $nextTick: (callback?: () => void) => Promise<void>;
+  $refs: Record<string, HTMLElement>;
+  $root: HTMLElement;
+  $watch: <T>(property: string, callback: (value: T, oldValue: T) => void) => void;
 }

@@ -6,6 +6,7 @@ namespace WordpressStarter\MemberArea;
 
 use WordpressStarter\Providers\LogServiceProvider;
 use WordpressStarter\MemberArea\Crypto;
+use phpseclib3\Net\SFTP;
 
 class FolderSync
 {
@@ -13,11 +14,15 @@ class FolderSync
 
     public static function run(): void
     {
+        // Pre-load all existing SFTP identifiers in a single DB query to avoid N+1
+        $existingIdentifiers = self::loadExistingIdentifiers();
+
         // Scan SFTP folder parent entries (those without a download_sftp_source = created by admin)
         $folderPosts = new \WP_Query([
             'post_type'      => 'member_download',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
+            'no_found_rows'  => true,
             'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
                 ['key' => 'download_source_type', 'value' => 'sftp'],
                 [
@@ -29,30 +34,65 @@ class FolderSync
             'fields' => 'ids',
         ]);
 
+        // Prime the postmeta cache for all folder post IDs to avoid N+1 DB queries
+        update_meta_cache('post', $folderPosts->posts);
+
+        // Group folder posts by connection key to reuse SFTP connections
+        /** @var array<string, list<array{postId: int, path: string}>> $folderGroups */
+        $folderGroups = [];
+        /** @var array<string, array{host: string, port: int, username: string, password: string}> $folderCredentials */
+        $folderCredentials = [];
+
         foreach ($folderPosts->posts as $postId) {
-            $host     = get_field('download_sftp_host',     $postId) ?: '';
-            $port     = (int) ( get_field('download_sftp_port', $postId) ?: 22 ) ?: 22;
-            $username = get_field('download_sftp_username', $postId) ?: '';
-            $password = Crypto::decrypt(get_field('download_sftp_password', $postId) ?: '') ?? '';
-            $path     = get_field('download_sftp_path',     $postId) ?: '/';
+            $host     = get_post_meta($postId, 'download_sftp_host', true) ?: '';
+            $port     = (int) ( get_post_meta($postId, 'download_sftp_port', true) ?: 22 ) ?: 22;
+            $username = get_post_meta($postId, 'download_sftp_username', true) ?: '';
+            $password = Crypto::decrypt(get_post_meta($postId, 'download_sftp_password', true) ?: '') ?? '';
+            $path     = get_post_meta($postId, 'download_sftp_path', true) ?: '/';
 
             if (empty($host) || empty($username) || empty($password)) {
                 continue;
             }
 
-            $files = self::scanSftpDirectory($host, $port, $username, $password, $path);
+            $connKey = md5($host . ':' . $port . ':' . $username . ':' . $password);
 
-            foreach ($files as $file) {
-                $identifier = $host . ':' . $port . $file['remotePath'];
-                if (!self::entryExistsByIdentifier($identifier)) {
-                    self::createSftpFileCpt($file, $host, $port, $username, $password, $path, $postId);
-                }
+            if (!isset($folderCredentials[$connKey])) {
+                $folderCredentials[$connKey] = compact('host', 'port', 'username', 'password');
             }
 
-            self::updateSftpFolderAvailability($postId, $host, $port, $username, $password, $path);
+            $folderGroups[$connKey][] = ['postId' => $postId, 'path' => $path];
+        }
 
-            // Mark as synced so the admin list can reflect the status
-            update_post_meta($postId, '_sftp_synced', '1');
+        foreach ($folderGroups as $connKey => $entries) {
+            $creds = $folderCredentials[$connKey];
+
+            try {
+                $sftp = SftpClient::connect($creds['host'], $creds['port'], $creds['username'], $creds['password']);
+            } catch (\Throwable $e) {
+                LogServiceProvider::warning('SFTP connection failed for folder group', [
+                    'host'    => $creds['host'],
+                    'message' => $e->getMessage(),
+                ]);
+                continue;
+            }
+
+            foreach ($entries as ['postId' => $postId, 'path' => $path]) {
+                $files = self::scanSftpDirectory($sftp, $creds['host'], $creds['port'], $path);
+
+                foreach ($files as $file) {
+                    $identifier = $creds['host'] . ':' . $creds['port'] . $file['remotePath'];
+                    if (!isset($existingIdentifiers[$identifier])) {
+                        self::createSftpFileCpt($file, $creds['host'], $creds['port'], $creds['username'], $creds['password'], $path, $postId);
+                        // Track newly created identifiers so duplicate files in the same run are not re-created
+                        $existingIdentifiers[$identifier] = true;
+                    }
+                }
+
+                self::updateSftpFolderAvailability($sftp, $postId, $path);
+
+                // Mark as synced so the admin list can reflect the status
+                update_post_meta($postId, '_sftp_synced', '1');
+            }
         }
 
         // Check availability for imported SFTP file entries
@@ -60,6 +100,7 @@ class FolderSync
             'post_type'      => 'member_download',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
+            'no_found_rows'  => true,
             'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
                 ['key' => 'download_source_type', 'value' => 'sftp'],
                 ['key' => 'download_sftp_source', 'value' => '', 'compare' => '!='],
@@ -67,15 +108,50 @@ class FolderSync
             'fields' => 'ids',
         ]);
 
-        foreach ($importedPosts->posts as $postId) {
-            $host       = get_field('download_sftp_host',        $postId) ?: '';
-            $port       = (int) ( get_field('download_sftp_port', $postId) ?: 22 ) ?: 22;
-            $username   = get_field('download_sftp_username',    $postId) ?: '';
-            $password   = Crypto::decrypt(get_field('download_sftp_password', $postId) ?: '') ?? '';
-            $remotePath = get_field('download_sftp_remote_file', $postId) ?: '';
+        // Prime the postmeta cache for all imported post IDs to avoid N+1 DB queries
+        update_meta_cache('post', $importedPosts->posts);
 
-            if (!empty($host) && !empty($remotePath)) {
-                self::updateSftpFileAvailability($postId, $host, $port, $username, $password, $remotePath);
+        // Group imported posts by connection key to reuse SFTP connections
+        /** @var array<string, list<array{postId: int, remotePath: string}>> $importedGroups */
+        $importedGroups = [];
+        /** @var array<string, array{host: string, port: int, username: string, password: string}> $importedCredentials */
+        $importedCredentials = [];
+
+        foreach ($importedPosts->posts as $postId) {
+            $host       = get_post_meta($postId, 'download_sftp_host', true) ?: '';
+            $port       = (int) ( get_post_meta($postId, 'download_sftp_port', true) ?: 22 ) ?: 22;
+            $username   = get_post_meta($postId, 'download_sftp_username', true) ?: '';
+            $password   = Crypto::decrypt(get_post_meta($postId, 'download_sftp_password', true) ?: '') ?? '';
+            $remotePath = get_post_meta($postId, 'download_sftp_remote_file', true) ?: '';
+
+            if (empty($host) || empty($remotePath)) {
+                continue;
+            }
+
+            $connKey = md5($host . ':' . $port . ':' . $username . ':' . $password);
+
+            if (!isset($importedCredentials[$connKey])) {
+                $importedCredentials[$connKey] = compact('host', 'port', 'username', 'password');
+            }
+
+            $importedGroups[$connKey][] = ['postId' => $postId, 'remotePath' => $remotePath];
+        }
+
+        foreach ($importedGroups as $connKey => $entries) {
+            $creds = $importedCredentials[$connKey];
+
+            try {
+                $sftp = SftpClient::connect($creds['host'], $creds['port'], $creds['username'], $creds['password']);
+            } catch (\Throwable $e) {
+                LogServiceProvider::warning('SFTP connection failed for imported file group', [
+                    'host'    => $creds['host'],
+                    'message' => $e->getMessage(),
+                ]);
+                continue;
+            }
+
+            foreach ($entries as ['postId' => $postId, 'remotePath' => $remotePath]) {
+                self::updateSftpFileAvailability($sftp, $postId, $remotePath);
             }
         }
 
@@ -84,6 +160,7 @@ class FolderSync
             'post_type'      => 'member_download',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
+            'no_found_rows'  => true,
             'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
                 ['key' => 'download_source_type', 'value' => 'external'],
             ],
@@ -99,19 +176,36 @@ class FolderSync
     }
 
     /**
+     * Load all existing download_sftp_identifier meta values in one DB query.
+     *
+     * @return array<string, true>
+     */
+    private static function loadExistingIdentifiers(): array
+    {
+        global $wpdb;
+
+        $identifiers = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            $wpdb->prepare(
+                "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                'download_sftp_identifier'
+            )
+        );
+
+        return array_fill_keys($identifiers, true);
+    }
+
+    /**
      * Scan an SFTP directory and return a list of files with their remote paths.
      *
      * @return array<int, array{filename: string, ext: string, mtime: int|null, size: int, remotePath: string}>
      */
     private static function scanSftpDirectory(
+        SFTP $sftp,
         string $host,
         int $port,
-        string $username,
-        string $password,
         string $remotePath
     ): array {
         try {
-            $sftp  = SftpClient::connect($host, $port, $username, $password);
             $files = SftpClient::listFiles($sftp, $remotePath, self::ALLOWED_EXTENSIONS);
 
             $normalizedPath = rtrim($remotePath, '/') . '/';
@@ -123,29 +217,12 @@ class FolderSync
         } catch (\Throwable $e) {
             LogServiceProvider::warning('SFTP scan failed', [
                 'host'    => $host,
+                'port'    => $port,
                 'path'    => $remotePath,
                 'message' => $e->getMessage(),
             ]);
             return [];
         }
-    }
-
-    /**
-     * Check whether a CPT entry already exists for a given SFTP identifier.
-     */
-    private static function entryExistsByIdentifier(string $identifier): bool
-    {
-        $query = new \WP_Query([
-            'post_type'      => 'member_download',
-            'post_status'    => 'publish',
-            'posts_per_page' => 1,
-            'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-                ['key' => 'download_sftp_identifier', 'value' => $identifier, 'compare' => '='],
-            ],
-            'fields' => 'ids',
-        ]);
-
-        return $query->found_posts > 0;
     }
 
     /**
@@ -184,6 +261,7 @@ class FolderSync
         update_field('download_sftp_host',         $host,               $postId);
         update_field('download_sftp_port',         $port,               $postId);
         update_field('download_sftp_username',     $username,           $postId);
+        // $password is the decrypted value here — re-encrypted by the acf/update_value filter in MemberAreaServiceProvider
         update_field('download_sftp_password',     $password,           $postId);
         update_field('download_sftp_remote_file',  $file['remotePath'], $postId);
         update_field('download_sftp_identifier',   $identifier,         $postId);
@@ -202,15 +280,11 @@ class FolderSync
      * Update availability for a parent SFTP folder entry.
      */
     private static function updateSftpFolderAvailability(
+        SFTP $sftp,
         int $postId,
-        string $host,
-        int $port,
-        string $username,
-        string $password,
         string $remotePath
     ): void {
         try {
-            $sftp      = SftpClient::connect($host, $port, $username, $password);
             $available = $sftp->is_dir($remotePath);
         } catch (\Throwable $e) {
             $available = false;
@@ -230,15 +304,11 @@ class FolderSync
      * Update availability and last-modified for an individual imported SFTP file entry.
      */
     private static function updateSftpFileAvailability(
+        SFTP $sftp,
         int $postId,
-        string $host,
-        int $port,
-        string $username,
-        string $password,
         string $remotePath
     ): void {
         try {
-            $sftp      = SftpClient::connect($host, $port, $username, $password);
             $available = SftpClient::fileExists($sftp, $remotePath);
             $stat      = $sftp->stat($remotePath);
             $mtime     = isset($stat['mtime']) && is_int($stat['mtime']) ? $stat['mtime'] : null;

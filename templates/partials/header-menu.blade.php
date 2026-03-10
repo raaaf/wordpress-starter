@@ -1,7 +1,7 @@
 @php
     // Get header CTA options
-    $showCta = function_exists('get_field') ? get_field('header_cta_show', 'option') : false;
-    $headerCta = function_exists('get_field') ? get_field('header_cta', 'option') : null;
+    $showCta = \WordpressStarter\Acf\Fields::option('header_cta_show');
+    $headerCta = \WordpressStarter\Acf\Fields::option('header_cta');
 @endphp
 
 <div x-data="navigation" x-init="init()" @keydown.window="handleKeydown($event)" class="relative">
@@ -10,7 +10,7 @@
         <div class="flex items-center gap-8">
             @php
                 // Try ACF option first, then Customizer, then default
-                $acf_logo = function_exists('get_field') ? get_field('site_logo', 'option') : null;
+                $acf_logo = \WordpressStarter\Acf\Fields::option('site_logo');
                 $logo_id   = null;
 
                 if (!empty($acf_logo['ID'])) {
@@ -20,7 +20,7 @@
                 }
             @endphp
 
-            <a href="{{ esc_url(get_bloginfo('url')) }}" title="{{ esc_attr(get_bloginfo('name')) }}"
+            <a href="{{ esc_url(get_bloginfo('url')) }}"
                 class="inline-block transition-opacity duration-300 hover:opacity-75">
                 @if($logo_id)
                     {!! wp_get_attachment_image($logo_id, 'logo', false, [
@@ -53,6 +53,7 @@
 
         {{-- Mobile menu button - visible below md --}}
         <button @click="toggle()"
+                data-nav-toggle
                 class="md:hidden p-2 rounded-[var(--button-md-radius)] hover:bg-surface-secondary focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)] transition-all duration-200"
                 :aria-label="isOpen ? '{{ __('Menü schließen', 'wp-starter') }}' : '{{ __('Menü öffnen', 'wp-starter') }}'"
                 :aria-expanded="isOpen"

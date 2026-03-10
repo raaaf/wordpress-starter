@@ -101,7 +101,7 @@
         </div>
     @else
         <div class="p-8 text-center rounded-lg bg-surface-secondary">
-            <p class="text-content-secondary">Bitte füge ein Vorher- und Nachher-Bild hinzu.</p>
+            <p class="text-content-secondary">{{ __('Bitte füge ein Vorher- und Nachher-Bild hinzu.', 'wp-starter') }}</p>
         </div>
     @endif
 </x-section>

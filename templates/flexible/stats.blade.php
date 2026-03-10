@@ -39,7 +39,11 @@
                     x-data="statsCounter({{ $number }})"
                     class="p-6"
                     role="group"
-                    aria-label="{{ $label ?: __('Statistik', 'wp-starter') }}"
+                    @if($label)
+                        aria-labelledby="stat-label-{{ $loop->index }}"
+                    @else
+                        aria-label="{{ __('Statistik', 'wp-starter') }}"
+                    @endif
                 >
                     @if($icon)
                         <div class="flex justify-center mb-4 text-content-brand">

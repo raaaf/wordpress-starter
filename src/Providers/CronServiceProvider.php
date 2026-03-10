@@ -36,6 +36,9 @@ class CronServiceProvider extends ServiceProvider
 
         // Schedule events if not already scheduled
         add_action('init', [$this, 'scheduleEvents']);
+
+        // Clear scheduled events when the theme is switched
+        add_action('switch_theme', [static::class, 'deactivate']);
     }
 
     /**
@@ -128,13 +131,15 @@ class CronServiceProvider extends ServiceProvider
         global $wpdb;
 
         // Get posts with more than 5 revisions
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-        $posts_with_revisions = $wpdb->get_results(
-            "SELECT post_parent, COUNT(*) as revision_count
-            FROM {$wpdb->posts}
-            WHERE post_type = 'revision'
-            GROUP BY post_parent
-            HAVING revision_count > 5"
+        $posts_with_revisions = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            $wpdb->prepare(
+                "SELECT post_parent, COUNT(*) as revision_count
+                FROM {$wpdb->posts}
+                WHERE post_type = %s
+                GROUP BY post_parent
+                HAVING revision_count > 5", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                'revision'
+            )
         );
 
         $deleted = 0;

@@ -1,11 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createNavigationComponent, type NavigationComponent } from './app';
 
-// Extend NavigationComponent with Alpine.js magic properties for testing
-interface TestableNavigationComponent extends NavigationComponent {
-  $nextTick: (callback: () => void) => void;
-  $el: HTMLElement;
-}
+// TestableNavigationComponent is NavigationComponent — magic properties already included via AlpineMagics
+type TestableNavigationComponent = NavigationComponent;
 
 /**
  * Tests for the navigation Alpine.js component.
@@ -16,7 +13,10 @@ describe('Navigation Component', () => {
   beforeEach(() => {
     navigation = createNavigationComponent() as TestableNavigationComponent;
     // Mock Alpine.js magic properties
-    navigation.$nextTick = (callback: () => void) => callback();
+    navigation.$nextTick = (callback?: () => void) => {
+      callback?.();
+      return Promise.resolve();
+    };
     navigation.$el = document.createElement('div');
   });
 

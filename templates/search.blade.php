@@ -29,6 +29,7 @@
                         type="search"
                         name="s"
                         id="search-results"
+                        :label="__('Suchbegriff', 'wp-starter')"
                         :value="get_search_query()"
                         :placeholder="__('Suchen...', 'wp-starter')"
                         size="lg"

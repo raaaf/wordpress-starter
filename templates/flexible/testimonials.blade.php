@@ -63,6 +63,7 @@
                                 'class' => 'object-cover w-12 h-12 rounded-full',
                                 'loading' => 'lazy',
                                 'sizes' => '48px',
+                                'alt' => '',
                             ]) !!}
                         @endif
                         <div>

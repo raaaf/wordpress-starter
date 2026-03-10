@@ -7,6 +7,7 @@ namespace WordpressStarter\Providers;
 use WordpressStarter\Acf\AcfExtended;
 use WordpressStarter\Acf\Options;
 use WordpressStarter\Acf\FlexibleContent;
+use WordpressStarter\Vite;
 use Illuminate\Support\Facades\Blade;
 
 class AcfServiceProvider extends ServiceProvider
@@ -203,22 +204,15 @@ class AcfServiceProvider extends ServiceProvider
                 );
             } else {
                 // Production mode - load from manifest
-                $manifestPath = get_theme_file_path('dist/.vite/manifest.json');
-                if (file_exists($manifestPath)) {
-                    $manifestContent = file_get_contents($manifestPath);
-                    if ($manifestContent !== false) {
-                        $manifest = json_decode($manifestContent, true);
-                        $entryKey = 'resources/js/admin/flexible-titles.ts';
-                        if (isset($manifest[$entryKey]['file'])) {
-                            wp_enqueue_script(
-                                'acf-flexible-titles',
-                                get_theme_file_uri('dist/' . $manifest[$entryKey]['file']),
-                                ['acf-input'],
-                                null,
-                                true
-                            );
-                        }
-                    }
+                $scriptUrl = Vite::getAssetUrl('resources/js/admin/flexible-titles.ts');
+                if ($scriptUrl) {
+                    wp_enqueue_script(
+                        'acf-flexible-titles',
+                        $scriptUrl,
+                        ['acf-input'],
+                        null,
+                        true
+                    );
                 }
             }
         });

@@ -17,6 +17,7 @@
                 type="search"
                 name="search"
                 placeholder="{{ __('Suchen…', 'wp-starter') }}"
+                aria-label="{{ __('Downloads durchsuchen', 'wp-starter') }}"
                 x-model.debounce.350ms="search"
                 class="input w-full border bg-surface text-content placeholder:text-content-tertiary transition-all duration-200 focus:outline-none rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)] h-10 text-base pl-10 pr-4"
             />
@@ -27,6 +28,7 @@
             <div class="select relative">
                 <select
                     x-model="category"
+                    aria-label="{{ __('Kategorie filtern', 'wp-starter') }}"
                     class="w-full border bg-surface text-content appearance-none cursor-pointer transition-all duration-200 focus:outline-none h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]"
                 >
                     <option value="">{{ __('Alle Kategorien', 'wp-starter') }}</option>
@@ -42,6 +44,7 @@
             <div class="select relative">
                 <select
                     x-model="ext"
+                    aria-label="{{ __('Dateityp filtern', 'wp-starter') }}"
                     class="w-full border bg-surface text-content appearance-none cursor-pointer transition-all duration-200 focus:outline-none h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]"
                 >
                     <option value="">{{ __('Alle Typen', 'wp-starter') }}</option>
@@ -64,7 +67,7 @@
     </div>
 
     {{-- Loading state --}}
-    <div x-show="loading" x-cloak class="space-y-2">
+    <div x-show="loading" x-cloak class="space-y-2" role="status" aria-label="{{ __('Dokumente werden geladen...', 'wp-starter') }}">
         @foreach(range(1, 6) as $i)
             <div class="h-12 bg-surface-secondary rounded-lg animate-pulse"></div>
         @endforeach
@@ -122,6 +125,7 @@
                                         class="font-medium text-content hover:text-content-accent transition-colors"
                                         x-text="item.title"
                                     ></a>
+                                    <span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
                                     <span
                                         x-show="item.is_updated"
                                         class="badge inline-flex w-fit items-center font-medium text-xs px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] gap-[var(--badge-sm-gap)] rounded-full bg-transparent text-content border border-line"
@@ -150,7 +154,7 @@
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     class="button inline-flex items-center justify-center font-semibold transition-all duration-200 no-underline cursor-pointer select-none focus-visible:outline-none bg-transparent text-content border border-transparent hover:bg-surface-tertiary active:bg-surface-secondary px-[var(--button-sm-padding-x)] py-[var(--button-sm-padding-y)] text-xs min-h-[var(--button-sm-min-height)] gap-[var(--button-sm-gap)] rounded-[var(--button-sm-radius)]"
-                                >{{ __('Herunterladen', 'wp-starter') }}</a>
+                                >{{ __('Herunterladen', 'wp-starter') }}<span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
                                 <span
                                     x-show="!item.available"
                                     class="text-xs text-content-disabled"
@@ -192,6 +196,8 @@
                                 ? 'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)] text-content-inverse border-line'
                                 : 'text-content-secondary hover:bg-surface-secondary border-line'"
                             class="inline-flex items-center justify-center w-8 h-8 rounded-md border text-sm font-medium transition-colors"
+                            :aria-label="`{{ __('Seite', 'wp-starter') }} ${n}`"
+                            :aria-current="n === currentPage ? 'page' : false"
                             x-text="n"
                         ></button>
                         <span

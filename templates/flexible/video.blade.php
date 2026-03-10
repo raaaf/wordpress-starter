@@ -143,6 +143,7 @@
                     <video
                         controls
                         preload="metadata"
+                        aria-label="{{ __('Video', 'wp-starter') }}"
                         class="w-full aspect-video object-cover rounded-lg"
                     >
                         <source src="{{ $video }}" type="video/mp4">
@@ -153,7 +154,7 @@
         </div>
     @else
         <div class="p-8 text-center rounded-lg bg-surface-secondary">
-            <p class="text-content-secondary">Bitte füge eine Video-URL ein oder lade eine Videodatei hoch.</p>
+            <p class="text-content-secondary">{{ __('Bitte füge eine Video-URL ein oder lade eine Videodatei hoch.', 'wp-starter') }}</p>
         </div>
     @endif
 </x-section>

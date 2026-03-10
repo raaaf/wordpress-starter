@@ -49,7 +49,7 @@
                     />
                 </div>
 
-                <div x-show="error" class="mb-4 flex items-start gap-3 p-4 rounded-lg bg-surface-error border border-line-error text-content-error text-sm" x-cloak>
+                <div x-show="error" role="alert" class="mb-4 flex items-start gap-3 p-4 rounded-lg bg-surface-error border border-line-error text-content-error text-sm" x-cloak>
                     <x-icon name="warning" class="w-5 h-5 text-icon-error shrink-0 mt-0.5" />
                     <span x-text="error"></span>
                 </div>

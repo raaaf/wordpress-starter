@@ -1,40 +1,40 @@
 @php
     // Get footer options - Info column
-    $showLogo = function_exists('get_field') ? get_field('footer_show_logo', 'option') : true;
-    $showCompany = function_exists('get_field') ? get_field('footer_show_company', 'option') : true;
-    $footerText = function_exists('get_field') ? get_field('footer_text', 'option') : '';
+    $showLogo = \WordpressStarter\Acf\Fields::option('footer_show_logo', true);
+    $showCompany = \WordpressStarter\Acf\Fields::option('footer_show_company', true);
+    $footerText = \WordpressStarter\Acf\Fields::option('footer_text', '');
 
     // Navigation column
-    $showNav = function_exists('get_field') ? get_field('footer_show_nav', 'option') : true;
-    $navTitle = function_exists('get_field') ? (get_field('footer_nav_title', 'option') ?: __('Navigation', 'wp-starter')) : __('Navigation', 'wp-starter');
-    $navMenu = function_exists('get_field') ? (get_field('footer_nav_menu', 'option') ?: 'footer-menu') : 'footer-menu';
+    $showNav = \WordpressStarter\Acf\Fields::option('footer_show_nav', true);
+    $navTitle = \WordpressStarter\Acf\Fields::option('footer_nav_title') ?: __('Navigation', 'wp-starter');
+    $navMenu = \WordpressStarter\Acf\Fields::option('footer_nav_menu', 'footer-menu');
 
     // Contact column
-    $showContact = function_exists('get_field') ? get_field('footer_show_contact', 'option') : true;
-    $contactTitle = function_exists('get_field') ? (get_field('footer_contact_title', 'option') ?: __('Kontakt', 'wp-starter')) : __('Kontakt', 'wp-starter');
+    $showContact = \WordpressStarter\Acf\Fields::option('footer_show_contact', true);
+    $contactTitle = \WordpressStarter\Acf\Fields::option('footer_contact_title') ?: __('Kontakt', 'wp-starter');
 
     // Social column
-    $showSocial = function_exists('get_field') ? get_field('footer_show_social', 'option') : true;
-    $socialTitle = function_exists('get_field') ? (get_field('footer_social_title', 'option') ?: __('Folge uns', 'wp-starter')) : __('Folge uns', 'wp-starter');
+    $showSocial = \WordpressStarter\Acf\Fields::option('footer_show_social', true);
+    $socialTitle = \WordpressStarter\Acf\Fields::option('footer_social_title') ?: __('Folge uns', 'wp-starter');
 
     // Bottom bar
     $defaultCopyright = __('© {year} Firmenname. Alle Rechte vorbehalten.', 'wp-starter');
-    $copyrightText = function_exists('get_field') ? (get_field('copyright_text', 'option') ?: $defaultCopyright) : $defaultCopyright;
-    $showLegal = function_exists('get_field') ? get_field('footer_show_legal', 'option') : true;
+    $copyrightText = \WordpressStarter\Acf\Fields::option('copyright_text') ?: $defaultCopyright;
+    $showLegal = \WordpressStarter\Acf\Fields::option('footer_show_legal', true);
 
     // Get contact info from general settings
-    $company = function_exists('get_field') ? get_field('company_name', 'option') : '';
-    $address = function_exists('get_field') ? get_field('address', 'option') : '';
-    $phone = function_exists('get_field') ? get_field('phone', 'option') : '';
-    $email = function_exists('get_field') ? get_field('email', 'option') : '';
+    $company = \WordpressStarter\Acf\Fields::option('company_name', '');
+    $address = \WordpressStarter\Acf\Fields::option('address', '');
+    $phone = \WordpressStarter\Acf\Fields::option('phone', '');
+    $email = \WordpressStarter\Acf\Fields::option('email', '');
 
     // Get social links
-    $socialLinks = function_exists('get_field') ? get_field('social_links', 'option') : [];
+    $socialLinks = \WordpressStarter\Acf\Fields::option('social_links', []);
 
     // Get logo (same logic as header)
     $logo_url = null;
     if ($showLogo) {
-        $acf_logo = function_exists('get_field') ? get_field('site_logo', 'option') : null;
+        $acf_logo = \WordpressStarter\Acf\Fields::option('site_logo');
         if ($acf_logo && !empty($acf_logo['url'])) {
             $logo_url = $acf_logo['url'];
         } else {
@@ -49,7 +49,7 @@
     }
 
     // Replace {year} placeholder
-    $copyrightText = str_replace('{year}', date('Y'), $copyrightText);
+    $copyrightText = str_replace('{year}', wp_date('Y'), $copyrightText);
 @endphp
 
 <footer class="bg-surface border-t border-line">
@@ -78,7 +78,7 @@
             @if($showNav)
                 <div>
                     <h3 class="text-h5 mb-4">{{ $navTitle }}</h3>
-                    <nav class="footer-nav">
+                    <nav class="footer-nav" aria-label="Fußnavigation">
                         <?php
                         wp_nav_menu([
                             'container' => false,
@@ -182,7 +182,7 @@
 
                 {{-- Legal Menu --}}
                 @if($showLegal)
-                    <nav class="legal-nav">
+                    <nav class="legal-nav" aria-label="Rechtliche Links">
                         <?php
                         wp_nav_menu([
                             'container' => false,
