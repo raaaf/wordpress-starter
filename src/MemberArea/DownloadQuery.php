@@ -126,6 +126,10 @@ class DownloadQuery
 
         $posts = $wpQuery->posts;
 
+        // Pre-warm the object cache so subsequent get_field() calls inside the loop
+        // hit cache instead of issuing individual DB queries (avoids N+1).
+        update_meta_cache('post', wp_list_pluck($posts, 'ID'));
+
         // PHP-level extension filter (avoids complex SQL JOIN on attachments table)
         if (!empty($ext)) {
             $posts = array_filter($posts, static function (\WP_Post $post) use ($ext): bool {
@@ -244,6 +248,10 @@ class DownloadQuery
             ],
             'fields' => 'ids',
         ]);
+
+        // Pre-warm the object cache for all post IDs so getPostExt() calls inside
+        // the loop hit cache instead of issuing individual DB queries (avoids N+1).
+        update_meta_cache('post', $posts);
 
         // Count by category
         $categoryCounts = [];
