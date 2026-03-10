@@ -1,3 +1,9 @@
+## [2.9.7](https://github.com/raaaf/starter/compare/v2.9.6...v2.9.7) (2026-03-10)
+
+### Bug Fixes
+
+- resolve security and performance findings from audit ([844101d](https://github.com/raaaf/starter/commit/844101d4495b3f03dc5c74b8ca3cc235cab96cdd))
+
 ## [2.9.6](https://github.com/raaaf/starter/compare/v2.9.5...v2.9.6) (2026-03-10)
 
 ### Bug Fixes
