@@ -22,6 +22,9 @@
     @if(!empty($headers) || !empty($rows))
         <div class="overflow-x-auto rounded-lg">
             <table class="w-full {{ $bordered ? 'border border-line' : '' }}">
+                @if($title)
+                    <caption class="sr-only">{{ strip_tags($title) }}</caption>
+                @endif
                 @if(!empty($headers))
                     <thead class="bg-surface-tertiary">
                         <tr>
@@ -43,7 +46,7 @@
                                 @endphp
                                 @foreach($cells as $cell)
                                     <td class="px-6 py-4 text-content {{ $bordered ? 'border border-line' : '' }}">
-                                        {!! $cell['content'] ?? '' !!}
+                                        {!! wp_kses_post($cell['content'] ?? '') !!}
                                     </td>
                                 @endforeach
                             </tr>
@@ -54,7 +57,7 @@
         </div>
     @else
         <div class="p-8 text-center rounded-lg bg-surface-secondary">
-            <p class="text-content-secondary">Bitte füge Tabellenzeilen hinzu.</p>
+            <p class="text-content-secondary">{{ __('Bitte füge Tabellenzeilen hinzu.', 'wp-starter') }}</p>
         </div>
     @endif
 </x-section>

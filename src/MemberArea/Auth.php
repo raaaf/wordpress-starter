@@ -8,12 +8,37 @@ class Auth
 {
     private const COOKIE_NAME = 'wp_member_area_auth';
 
+    private static ?string $cachedAuthMode = null;
+    private static bool $authModeCached = false;
+    private static int|false $cachedCookieTtl = false;
+    private static string|false $cachedSharedPassword = false;
+
     public static function getAuthMode(): string
     {
         if (!function_exists('get_field')) {
             return 'password';
         }
-        return get_field('member_auth_mode', 'option') ?: 'password';
+        if (!self::$authModeCached) {
+            self::$cachedAuthMode = get_field('member_auth_mode', 'option') ?: 'password';
+            self::$authModeCached = true;
+        }
+        return self::$cachedAuthMode;
+    }
+
+    private static function getCookieTtl(): int
+    {
+        if (self::$cachedCookieTtl === false) {
+            self::$cachedCookieTtl = (int) ( get_field('member_cookie_ttl', 'option') ?: 14 );
+        }
+        return self::$cachedCookieTtl;
+    }
+
+    private static function getSharedPassword(): string
+    {
+        if (self::$cachedSharedPassword === false) {
+            self::$cachedSharedPassword = get_field('member_shared_password', 'option') ?: '';
+        }
+        return self::$cachedSharedPassword;
     }
 
     public static function isAuthenticated(): bool
@@ -44,15 +69,14 @@ class Auth
         }
 
         [$timestamp, $hmac] = $parts;
-        $ttlHours = (int) ( get_field('member_cookie_ttl', 'option') ?: 14 );
-        $ttlSeconds = $ttlHours * 3600;
+        $ttlSeconds = self::getCookieTtl() * 3600;
 
         if ( (int) $timestamp + $ttlSeconds < time()) {
             self::clearCookie();
             return false;
         }
 
-        $passwordHash = get_field('member_shared_password', 'option') ?: '';
+        $passwordHash = self::getSharedPassword();
         $expectedHmac = hash_hmac('sha256', $timestamp . '|' . $passwordHash, wp_salt('auth'));
 
         return hash_equals($expectedHmac, $hmac);
@@ -84,7 +108,7 @@ class Auth
         }
 
         // Password mode
-        $passwordHash = get_field('member_shared_password', 'option') ?: '';
+        $passwordHash = self::getSharedPassword();
         if (empty($passwordHash)) {
             return new \WP_Error('no_password', __('Kein Passwort konfiguriert.', 'wp-starter'));
         }
@@ -115,8 +139,7 @@ class Auth
         $hmac = hash_hmac('sha256', $timestamp . '|' . $passwordHash, wp_salt('auth'));
         $value = $timestamp . '|' . $hmac;
 
-        $ttlHours = (int) ( get_field('member_cookie_ttl', 'option') ?: 14 );
-        $expire = time() + ( $ttlHours * 3600 );
+        $expire = time() + ( self::getCookieTtl() * 3600 );
 
         $secure = is_ssl();
 

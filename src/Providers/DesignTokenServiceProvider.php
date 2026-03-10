@@ -208,42 +208,54 @@ class DesignTokenServiceProvider extends ServiceProvider
                 if (uploadSection) {
                     const messageDiv = uploadSection.querySelector('.acf-input');
                     if (messageDiv) {
-                        messageDiv.innerHTML = `
-                            <div id="wp-starter-upload-ui" style="background: #f9f9f9; padding: 15px; border-radius: 4px;">
-                                <div id="wp-starter-upload-notice"></div>
-                                <div style="display: grid; gap: 15px; max-width: 500px;">
-                                    <div>
-                                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">
-                                            <?php echo esc_js(__('Primitives (Basis-Farben, Spacing, etc.)', 'wp-starter')); ?>
-                                        </label>
-                                        <input type="file" id="wp-starter-file-primitives" accept=".json,application/json">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">
-                                            <?php echo esc_js(__('Light Mode (Semantische Tokens)', 'wp-starter')); ?>
-                                        </label>
-                                        <input type="file" id="wp-starter-file-light" accept=".json,application/json">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">
-                                            <?php echo esc_js(__('Dark Mode (Semantische Tokens)', 'wp-starter')); ?>
-                                        </label>
-                                        <input type="file" id="wp-starter-file-dark" accept=".json,application/json">
-                                    </div>
-                                </div>
-                                <p style="margin-top: 15px;">
-                                    <button type="button" id="wp-starter-upload-btn" class="button button-primary">
-                                        <?php echo esc_js(__('Tokens hochladen und anwenden', 'wp-starter')); ?>
-                                    </button>
-                                </p>
-                                <p class="description">
-                                    <?php echo esc_js(__('Du kannst einzelne Dateien oder alle drei gleichzeitig hochladen. Ein Backup wird automatisch erstellt.', 'wp-starter')); ?>
-                                </p>
-                            </div>
-                        `;
+                        const uploadUi = document.createElement('div');
+                        uploadUi.id = 'wp-starter-upload-ui';
+                        uploadUi.setAttribute('style', 'background: #f9f9f9; padding: 15px; border-radius: 4px;');
+
+                        const uploadNotice = document.createElement('div');
+                        uploadNotice.id = 'wp-starter-upload-notice';
+                        uploadUi.appendChild(uploadNotice);
+
+                        const grid = document.createElement('div');
+                        grid.setAttribute('style', 'display: grid; gap: 15px; max-width: 500px;');
+
+                        [
+                            { labelText: '<?php echo esc_js(__('Primitives (Basis-Farben, Spacing, etc.)', 'wp-starter')); ?>', inputId: 'wp-starter-file-primitives' },
+                            { labelText: '<?php echo esc_js(__('Light Mode (Semantische Tokens)', 'wp-starter')); ?>', inputId: 'wp-starter-file-light' },
+                            { labelText: '<?php echo esc_js(__('Dark Mode (Semantische Tokens)', 'wp-starter')); ?>', inputId: 'wp-starter-file-dark' },
+                        ].forEach(function(item) {
+                            const row = document.createElement('div');
+                            const lbl = document.createElement('label');
+                            lbl.setAttribute('style', 'display: block; margin-bottom: 5px; font-weight: 500;');
+                            lbl.textContent = item.labelText;
+                            const inp = document.createElement('input');
+                            inp.type = 'file';
+                            inp.id = item.inputId;
+                            inp.accept = '.json,application/json';
+                            row.appendChild(lbl);
+                            row.appendChild(inp);
+                            grid.appendChild(row);
+                        });
+                        uploadUi.appendChild(grid);
+
+                        const uploadBtnP = document.createElement('p');
+                        uploadBtnP.setAttribute('style', 'margin-top: 15px;');
+                        const uploadBtn = document.createElement('button');
+                        uploadBtn.type = 'button';
+                        uploadBtn.id = 'wp-starter-upload-btn';
+                        uploadBtn.className = 'button button-primary';
+                        uploadBtn.textContent = '<?php echo esc_js(__('Tokens hochladen und anwenden', 'wp-starter')); ?>';
+                        uploadBtnP.appendChild(uploadBtn);
+                        uploadUi.appendChild(uploadBtnP);
+
+                        const descP = document.createElement('p');
+                        descP.className = 'description';
+                        descP.textContent = '<?php echo esc_js(__('Du kannst einzelne Dateien oder alle drei gleichzeitig hochladen. Ein Backup wird automatisch erstellt.', 'wp-starter')); ?>';
+                        uploadUi.appendChild(descP);
+
+                        messageDiv.appendChild(uploadUi);
 
                         // Handle upload button click
-                        const uploadBtn = document.getElementById('wp-starter-upload-btn');
                         uploadBtn.addEventListener('click', async function() {
                             const primitives = document.getElementById('wp-starter-file-primitives').files[0];
                             const light = document.getElementById('wp-starter-file-light').files[0];
@@ -300,44 +312,63 @@ class DesignTokenServiceProvider extends ServiceProvider
                         const backupSets = <?php echo wp_json_encode($backupSets); ?>;
 
                         if (backupSets.length === 0) {
-                            messageDiv.innerHTML = `
-                                <div style="background: #f0f0f1; padding: 15px; border-radius: 4px;">
-                                    <p style="margin: 0; color: #666;">
-                                        <?php echo esc_js(__('Keine Backups vorhanden. Backups werden automatisch erstellt, wenn Tokens geändert werden.', 'wp-starter')); ?>
-                                    </p>
-                                </div>
-                            `;
+                            const emptyWrapper = document.createElement('div');
+                            emptyWrapper.setAttribute('style', 'background: #f0f0f1; padding: 15px; border-radius: 4px;');
+                            const emptyP = document.createElement('p');
+                            emptyP.setAttribute('style', 'margin: 0; color: #666;');
+                            emptyP.textContent = '<?php echo esc_js(__('Keine Backups vorhanden. Backups werden automatisch erstellt, wenn Tokens geändert werden.', 'wp-starter')); ?>';
+                            emptyWrapper.appendChild(emptyP);
+                            messageDiv.appendChild(emptyWrapper);
                         } else {
-                            let options = backupSets.map(b =>
-                                `<option value="${b.timestamp}">${b.date} (${b.types.join(', ')})</option>`
-                            ).join('');
+                            const restoreUi = document.createElement('div');
+                            restoreUi.id = 'wp-starter-restore-ui';
+                            restoreUi.setAttribute('style', 'background: #f9f9f9; padding: 15px; border-radius: 4px;');
 
-                            messageDiv.innerHTML = `
-                                <div id="wp-starter-restore-ui" style="background: #f9f9f9; padding: 15px; border-radius: 4px;">
-                                    <div id="wp-starter-restore-notice"></div>
-                                    <div style="display: flex; gap: 10px; align-items: end; flex-wrap: wrap;">
-                                        <div style="flex: 1; min-width: 250px;">
-                                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">
-                                                <?php echo esc_js(__('Backup-Zeitpunkt auswählen', 'wp-starter')); ?>
-                                            </label>
-                                            <select id="wp-starter-backup-select" style="width: 100%;">
-                                                ${options}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <button type="button" id="wp-starter-restore-btn" class="button">
-                                                <?php echo esc_js(__('Wiederherstellen', 'wp-starter')); ?>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <p class="description" style="margin-top: 10px;">
-                                        <?php echo esc_js(__('Stellt alle Token-Dateien vom gewählten Zeitpunkt wieder her.', 'wp-starter')); ?>
-                                    </p>
-                                </div>
-                            `;
+                            const noticeContainer = document.createElement('div');
+                            noticeContainer.id = 'wp-starter-restore-notice';
+                            restoreUi.appendChild(noticeContainer);
+
+                            const flexRow = document.createElement('div');
+                            flexRow.setAttribute('style', 'display: flex; gap: 10px; align-items: end; flex-wrap: wrap;');
+
+                            const selectWrapper = document.createElement('div');
+                            selectWrapper.setAttribute('style', 'flex: 1; min-width: 250px;');
+                            const selectLabel = document.createElement('label');
+                            selectLabel.setAttribute('style', 'display: block; margin-bottom: 5px; font-weight: 500;');
+                            selectLabel.textContent = '<?php echo esc_js(__('Backup-Zeitpunkt auswählen', 'wp-starter')); ?>';
+                            const selectEl = document.createElement('select');
+                            selectEl.id = 'wp-starter-backup-select';
+                            selectEl.setAttribute('style', 'width: 100%;');
+                            backupSets.forEach(function(b) {
+                                const opt = document.createElement('option');
+                                opt.value = b.timestamp;
+                                opt.textContent = b.date + ' (' + b.types.join(', ') + ')';
+                                selectEl.appendChild(opt);
+                            });
+                            selectWrapper.appendChild(selectLabel);
+                            selectWrapper.appendChild(selectEl);
+
+                            const btnWrapper = document.createElement('div');
+                            const restoreBtn = document.createElement('button');
+                            restoreBtn.type = 'button';
+                            restoreBtn.id = 'wp-starter-restore-btn';
+                            restoreBtn.className = 'button';
+                            restoreBtn.textContent = '<?php echo esc_js(__('Wiederherstellen', 'wp-starter')); ?>';
+                            btnWrapper.appendChild(restoreBtn);
+
+                            flexRow.appendChild(selectWrapper);
+                            flexRow.appendChild(btnWrapper);
+                            restoreUi.appendChild(flexRow);
+
+                            const descP = document.createElement('p');
+                            descP.className = 'description';
+                            descP.setAttribute('style', 'margin-top: 10px;');
+                            descP.textContent = '<?php echo esc_js(__('Stellt alle Token-Dateien vom gewählten Zeitpunkt wieder her.', 'wp-starter')); ?>';
+                            restoreUi.appendChild(descP);
+
+                            messageDiv.appendChild(restoreUi);
 
                             // Handle restore button click
-                            const restoreBtn = document.getElementById('wp-starter-restore-btn');
                             restoreBtn.addEventListener('click', async function() {
                                 const timestamp = document.getElementById('wp-starter-backup-select').value;
 
@@ -385,7 +416,11 @@ class DesignTokenServiceProvider extends ServiceProvider
                 function showNotice(section, type, message) {
                     const noticeDiv = document.getElementById(`wp-starter-${section}-notice`);
                     if (noticeDiv) {
-                        noticeDiv.innerHTML = `<div class="wp-starter-ajax-notice ${type}">${message}</div>`;
+                        noticeDiv.textContent = '';
+                        const msgEl = document.createElement('div');
+                        msgEl.className = 'wp-starter-ajax-notice ' + type;
+                        msgEl.textContent = message;
+                        noticeDiv.appendChild(msgEl);
                     }
                 }
 
@@ -656,7 +691,7 @@ class DesignTokenServiceProvider extends ServiceProvider
         ], 30);
 
         // Redirect to prevent form resubmission
-        wp_safe_redirect(add_query_arg('tokens-updated', '1', wp_get_referer() ?: admin_url()));
+        wp_safe_redirect(add_query_arg('tokens-updated', '1', sanitize_url(wp_get_referer()) ?: admin_url()));
         exit;
     }
 
@@ -686,7 +721,7 @@ class DesignTokenServiceProvider extends ServiceProvider
             'message' => $result['message'],
         ], 30);
 
-        wp_safe_redirect(wp_get_referer() ?: admin_url('admin.php?page=theme-options-tokens'));
+        wp_safe_redirect(sanitize_url(wp_get_referer()) ?: admin_url('admin.php?page=theme-options-tokens'));
         exit;
     }
 
@@ -718,7 +753,7 @@ class DesignTokenServiceProvider extends ServiceProvider
             ], 30);
         }
 
-        wp_safe_redirect(add_query_arg('colors-applied', '1', wp_get_referer() ?: admin_url()));
+        wp_safe_redirect(add_query_arg('colors-applied', '1', sanitize_url(wp_get_referer()) ?: admin_url()));
         exit;
     }
 
@@ -820,7 +855,7 @@ class DesignTokenServiceProvider extends ServiceProvider
             'message' => $noticeMessage,
         ], 30);
 
-        wp_safe_redirect(add_query_arg('backup-restored', '1', wp_get_referer() ?: admin_url()));
+        wp_safe_redirect(add_query_arg('backup-restored', '1', sanitize_url(wp_get_referer()) ?: admin_url()));
         exit;
     }
 
@@ -1540,22 +1575,41 @@ class DesignTokenServiceProvider extends ServiceProvider
             ];
         }
 
-        // Build PATH for subprocesses (Local by Flywheel may have limited PATH)
-        $pathEnv = $this->buildPathEnv($nodePath, $npmPath);
+        // Build PATH env array for subprocesses (Local by Flywheel may have limited PATH)
+        $env = array_merge(getenv() ?: [], [
+            'PATH' => implode(':', array_unique(array_filter([
+                dirname($nodePath),
+                $npmPath ? dirname($npmPath) : null,
+                '/usr/local/bin',
+                '/opt/homebrew/bin',
+                '/usr/bin',
+                '/bin',
+            ]))),
+        ]);
 
         // Step 1: Run token transform
-        $command = sprintf(
-            'cd %s && %s %s %s 2>&1',
-            escapeshellarg($themeDir),
-            $pathEnv,
-            escapeshellarg($nodePath),
-            escapeshellarg($nodeScript)
+        $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+        // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_proc_open
+        $process = proc_open(
+            [$nodePath, $nodeScript],
+            $descriptors,
+            $pipes,
+            $themeDir,
+            $env
         );
 
         $output = [];
-        $returnVar = 0;
-        // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec
-        exec($command, $output, $returnVar);
+        $returnVar = 1;
+        if (is_resource($process)) {
+            fclose($pipes[0]);
+            $stdout = stream_get_contents($pipes[1]);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            $returnVar = proc_close($process);
+            if ($stdout) {
+                $output = explode("\n", trim($stdout));
+            }
+        }
 
         if ($returnVar !== 0) {
             return [
@@ -1567,17 +1621,27 @@ class DesignTokenServiceProvider extends ServiceProvider
 
         // Step 2: Run Vite build
         if ($npmPath) {
-            $buildCommand = sprintf(
-                'cd %s && %s %s run build 2>&1',
-                escapeshellarg($themeDir),
-                $pathEnv,
-                escapeshellarg($npmPath)
+            // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_proc_open
+            $buildProcess = proc_open(
+                [$npmPath, 'run', 'build'],
+                $descriptors,
+                $buildPipes,
+                $themeDir,
+                $env
             );
 
             $buildOutput = [];
-            $buildReturnVar = 0;
-            // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec
-            exec($buildCommand, $buildOutput, $buildReturnVar);
+            $buildReturnVar = 1;
+            if (is_resource($buildProcess)) {
+                fclose($buildPipes[0]);
+                $buildStdout = stream_get_contents($buildPipes[1]);
+                fclose($buildPipes[1]);
+                fclose($buildPipes[2]);
+                $buildReturnVar = proc_close($buildProcess);
+                if ($buildStdout) {
+                    $buildOutput = explode("\n", trim($buildStdout));
+                }
+            }
 
             if ($buildReturnVar !== 0) {
                 return [
@@ -1629,40 +1693,6 @@ class DesignTokenServiceProvider extends ServiceProvider
                 update_field($fieldName, $currentColor, 'option');
             }
         }
-    }
-
-    /**
-     * Build PATH environment variable for exec commands
-     *
-     * @param string|null $nodePath Path to node executable
-     * @param string|null $npmPath Path to npm executable
-     * @return string PATH= command prefix
-     */
-    private function buildPathEnv(?string $nodePath, ?string $npmPath): string
-    {
-        $paths = [
-            '/usr/local/bin',
-            '/usr/bin',
-            '/opt/homebrew/bin',
-            '/bin',
-        ];
-
-        // Add directories containing node and npm
-        if ($nodePath) {
-            $nodeDir = dirname($nodePath);
-            if (!in_array($nodeDir, $paths, true)) {
-                array_unshift($paths, $nodeDir);
-            }
-        }
-
-        if ($npmPath) {
-            $npmDir = dirname($npmPath);
-            if (!in_array($npmDir, $paths, true)) {
-                array_unshift($paths, $npmDir);
-            }
-        }
-
-        return 'PATH=' . escapeshellarg(implode(':', $paths));
     }
 
     /**

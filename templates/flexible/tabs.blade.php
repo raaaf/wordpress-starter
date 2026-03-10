@@ -42,6 +42,7 @@
             >
                 @foreach($tabs as $index => $tab)
                     <button
+                        id="{{ esc_attr($uniqueId) }}-tab-{{ $index }}"
                         x-ref="tab{{ $index }}"
                         @click="activeTab = {{ $index }}"
                         @keydown.right.prevent="focusTab((activeTab + 1) % tabCount)"
@@ -78,6 +79,7 @@
                         :tabindex="activeTab === {{ $index }} ? 0 : -1"
                         id="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"
                         role="tabpanel"
+                        aria-labelledby="{{ esc_attr($uniqueId) }}-tab-{{ $index }}"
                         class="prose max-w-2xl text-content"
                     >
                         @kses($tab['content'] ?? '')

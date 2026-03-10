@@ -180,10 +180,6 @@ class RateLimiter
      */
     public static function check(string $action, int $maxAttempts = 10, int $decaySeconds = 60): bool
     {
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            return true;
-        }
-
         $limiter = new self($action, $maxAttempts, $decaySeconds);
         return $limiter->attempt();
     }
@@ -197,10 +193,6 @@ class RateLimiter
      */
     public static function enforce(string $action, int $maxAttempts = 10, int $decaySeconds = 60): void
     {
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            return;
-        }
-
         $limiter = new self($action, $maxAttempts, $decaySeconds);
 
         if (!$limiter->attempt()) {

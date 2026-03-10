@@ -25,7 +25,7 @@
     <div class="button-block {{ $alignmentClasses }}">
         <x-button
             :url="$button['url']"
-            :title="$button['title'] ?: 'Mehr erfahren'"
+            :title="$button['title'] ?: __('Mehr erfahren', 'wp-starter')"
             :target="$button['target'] ?? '_self'"
             :variant="$variant"
             :size="$size"

@@ -11,6 +11,7 @@ namespace WordpressStarter\Providers;
  * - JSON-LD structured data (WebSite, Organization, Article, BreadcrumbList)
  * - Open Graph and Twitter Card meta tags
  * - Canonical URLs
+ * - Robots meta tag overrides (noindex for 404 pages)
  */
 class SeoServiceProvider extends ServiceProvider
 {
@@ -21,10 +22,28 @@ class SeoServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->addRobotsOverrides();
         $this->addStructuredData();
         $this->addBreadcrumbSchema();
         $this->addCanonicalUrl();
         $this->addOpenGraphTags();
+    }
+
+    /**
+     * Add robots meta tag overrides for pages that must not be indexed.
+     *
+     * 404 pages: noindex, follow (broken URLs should not be indexed)
+     */
+    private function addRobotsOverrides(): void
+    {
+        add_filter('wp_robots', function (array $robots): array {
+            if (is_404()) {
+                $robots['noindex'] = true;
+                unset($robots['nofollow']);
+            }
+
+            return $robots;
+        });
     }
 
     /**
@@ -44,7 +63,7 @@ class SeoServiceProvider extends ServiceProvider
         $options = [];
         if (function_exists('get_field')) {
             // Batch load all commonly used theme options
-            $fieldNames = ['company_name', 'address', 'phone', 'email', 'site_logo', 'site_favicon'];
+            $fieldNames = ['company_name', 'address', 'phone', 'email', 'site_logo', 'site_favicon', 'social_sharing_image'];
             foreach ($fieldNames as $fieldName) {
                 $options[$fieldName] = get_field($fieldName, 'option');
             }
@@ -59,20 +78,23 @@ class SeoServiceProvider extends ServiceProvider
     private function addStructuredData(): void
     {
         add_action('wp_head', function (): void {
-            // WebSite Schema
-            $websiteSchema = [
-                '@context' => 'https://schema.org',
-                '@type' => 'WebSite',
-                'name' => get_bloginfo('name'),
-                'url' => home_url(),
-                'potentialAction' => [
-                    '@type' => 'SearchAction',
-                    'target' => home_url() . '/?s={search_term_string}',
-                    'query-input' => 'required name=search_term_string',
-                ],
-            ];
             $nonce = $GLOBALS['csp_nonce'] ?? '';
-            echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($websiteSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+
+            // WebSite Schema (front page only)
+            if (is_front_page()) {
+                $websiteSchema = [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'WebSite',
+                    'name' => get_bloginfo('name'),
+                    'url' => home_url(),
+                    'potentialAction' => [
+                        '@type' => 'SearchAction',
+                        'target' => home_url() . '/?s={search_term_string}',
+                        'query-input' => 'required name=search_term_string',
+                    ],
+                ];
+                echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($websiteSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+            }
 
             // Organization Schema (from batched theme options)
             $themeOptions = $this->getThemeOptions();
@@ -136,11 +158,7 @@ class SeoServiceProvider extends ServiceProvider
                         '@type' => 'Person',
                         'name' => get_the_author(),
                     ],
-                    'publisher' => [
-                        '@type' => 'Organization',
-                        'name' => get_bloginfo('name'),
-                        'url' => home_url(),
-                    ],
+                    'publisher' => $this->buildPublisherSchema(),
                 ];
 
                 // Add featured image
@@ -369,9 +387,23 @@ class SeoServiceProvider extends ServiceProvider
     private function addOpenGraphTags(): void
     {
         add_action('wp_head', function (): void {
+            // Skip if Yoast SEO is active - it handles Open Graph tags
+            if (defined('WPSEO_VERSION')) {
+                return;
+            }
+
             $title = is_singular() ? get_the_title() : get_bloginfo('name');
-            $description = is_singular() ? wp_strip_all_tags(get_the_excerpt()) : get_bloginfo('description');
-            $url = is_singular() ? get_permalink() : home_url();
+            $description = is_singular()
+                ? wp_strip_all_tags(get_the_excerpt())
+                : ( get_bloginfo('description') ?: get_the_archive_title() ?: get_bloginfo('name') );
+            if (is_singular()) {
+                $url = get_permalink() ?: home_url('/');
+            } elseif (is_search()) {
+                $url = home_url('/?s=' . urlencode(get_search_query()));
+            } else {
+                global $wp;
+                $url = home_url($wp->request);
+            }
             $siteName = get_bloginfo('name');
 
             // Get image with metadata (URL, width, height, mime type)
@@ -439,22 +471,22 @@ class SeoServiceProvider extends ServiceProvider
         if (is_singular() && has_post_thumbnail()) {
             $thumbnailId = get_post_thumbnail_id();
             if ($thumbnailId) {
-                return $this->getImageMetadata( (int) $thumbnailId, 'large');
+                return $this->getImageMetadata( (int) $thumbnailId, 'full');
             }
         }
 
-        if (function_exists('get_field')) {
-            // 2. Try dedicated social sharing image
-            $socialImageId = get_field('social_sharing_image', 'option');
-            if ($socialImageId) {
-                return $this->getImageMetadata( (int) $socialImageId, 'full');
-            }
+        $themeOptions = $this->getThemeOptions();
 
-            // 3. Try site logo
-            $acfLogo = get_field('site_logo', 'option');
-            if ($acfLogo && !empty($acfLogo['id'])) {
-                return $this->getImageMetadata( (int) $acfLogo['id'], 'full');
-            }
+        // 2. Try dedicated social sharing image
+        $socialImageId = $themeOptions['social_sharing_image'] ?? null;
+        if ($socialImageId) {
+            return $this->getImageMetadata( (int) $socialImageId, 'full');
+        }
+
+        // 3. Try site logo
+        $acfLogo = $themeOptions['site_logo'] ?? null;
+        if ($acfLogo && !empty($acfLogo['id'])) {
+            return $this->getImageMetadata( (int) $acfLogo['id'], 'full');
         }
 
         // 4. Fallback to Customizer logo
@@ -464,6 +496,56 @@ class SeoServiceProvider extends ServiceProvider
         }
 
         return null;
+    }
+
+    /**
+     * Build the publisher schema for Article structured data.
+     *
+     * Includes the logo ImageObject only when a logo URL is available.
+     *
+     * @return array<string, mixed>
+     */
+    private function buildPublisherSchema(): array
+    {
+        $publisher = [
+            '@type' => 'Organization',
+            'name' => get_bloginfo('name'),
+            'url' => home_url(),
+        ];
+
+        $logoUrl = $this->getOrganizationLogoUrl();
+        if ($logoUrl) {
+            $publisher['logo'] = [
+                '@type' => 'ImageObject',
+                'url' => $logoUrl,
+            ];
+        }
+
+        return $publisher;
+    }
+
+    /**
+     * Get the organization logo URL for use in structured data.
+     *
+     * Fallback order: ACF site_logo → Customizer custom_logo → empty string.
+     */
+    private function getOrganizationLogoUrl(): string
+    {
+        $themeOptions = $this->getThemeOptions();
+        $acfLogo = $themeOptions['site_logo'] ?? null;
+        if ($acfLogo && !empty($acfLogo['url'])) {
+            return $acfLogo['url'];
+        }
+
+        $customLogoId = get_theme_mod('custom_logo');
+        if ($customLogoId) {
+            $url = wp_get_attachment_image_url( (int) $customLogoId, 'full');
+            if ($url) {
+                return $url;
+            }
+        }
+
+        return '';
     }
 
     /**

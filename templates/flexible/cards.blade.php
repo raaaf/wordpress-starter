@@ -46,9 +46,10 @@
                         <x-link
                             :url="$link['url'] ?? '#'"
                             :target="$link['target'] ?? '_self'"
+                            :ariaLabel="($link['title'] ?? __('Mehr erfahren', 'wp-starter')) . (!empty($card['title']) ? ': ' . $card['title'] : '')"
                             class="mt-auto"
                         >
-                            {{ $link['title'] ?? 'Mehr erfahren' }}
+                            {{ $link['title'] ?? __('Mehr erfahren', 'wp-starter') }}
                         </x-link>
                     @endif
                 </x-card>

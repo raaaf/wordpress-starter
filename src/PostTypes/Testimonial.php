@@ -306,14 +306,15 @@ class Testimonial extends AbstractPostType
 
         $testimonials = [];
         foreach ($posts as $post) {
+            $fields = get_fields($post->ID) ?: [];
             $testimonials[] = [
-                'id' => $post->ID,
-                'author_name' => get_field('author_name', $post->ID) ?: '',
-                'author_position' => get_field('author_position', $post->ID) ?: '',
-                'content' => get_field('content', $post->ID) ?: '',
-                'rating' => get_field('rating', $post->ID) ?: null,
-                'image' => get_post_thumbnail_id($post->ID) ?: null,
-                'source_url' => get_field('source_url', $post->ID) ?: null,
+                'id'              => $post->ID,
+                'author_name'     => $fields['author_name'] ?? '',
+                'author_position' => $fields['author_position'] ?? '',
+                'content'         => $fields['content'] ?? '',
+                'rating'          => $fields['rating'] ?: null,
+                'image'           => get_post_thumbnail_id($post->ID) ?: null,
+                'source_url'      => $fields['source_url'] ?: null,
             ];
         }
 

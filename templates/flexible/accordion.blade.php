@@ -48,6 +48,7 @@
                 @foreach($items as $index => $item)
                     <div class="w-full overflow-hidden border-b border-line last:border-b-0">
                         <button x-ref="accordion{{ $index }}"
+                                id="accordion-header-{{ $index }}"
                                 @click="active = active === {{ $index }} ? null : {{ $index }}"
                                 @keydown.down.prevent="focusItem(({{ $index }} + 1) % itemCount)"
                                 @keydown.up.prevent="focusItem(({{ $index }} - 1 + itemCount) % itemCount)"

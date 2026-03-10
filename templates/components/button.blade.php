@@ -117,7 +117,7 @@
 
 @if($url)
     {{-- Link button --}}
-    <a href="{!! $disabled ? '#' : esc_url($url) !!}"
+    <a href="{{ $disabled ? '#' : esc_url($url) }}"
        target="{{ esc_attr($target) }}"
        @if($target === '_blank' && !$disabled) rel="noopener noreferrer" @endif
        @if($disabled) aria-disabled="true" tabindex="-1" @endif

@@ -289,16 +289,17 @@ class Team extends AbstractPostType
 
         $members = [];
         foreach ($posts as $post) {
+            $fields = get_fields($post->ID) ?: [];
             $members[] = [
-                'id' => $post->ID,
-                'name' => $post->post_title,
-                'position' => get_field('position', $post->ID) ?: '',
-                'bio' => get_field('bio', $post->ID) ?: '',
-                'email' => get_field('email', $post->ID) ?: null,
-                'phone' => get_field('phone', $post->ID) ?: null,
-                'linkedin' => get_field('linkedin', $post->ID) ?: null,
-                'xing' => get_field('xing', $post->ID) ?: null,
-                'image' => get_post_thumbnail_id($post->ID) ?: null,
+                'id'       => $post->ID,
+                'name'     => $post->post_title,
+                'position' => $fields['position'] ?? '',
+                'bio'      => $fields['bio'] ?? '',
+                'email'    => $fields['email'] ?: null,
+                'phone'    => $fields['phone'] ?: null,
+                'linkedin' => $fields['linkedin'] ?: null,
+                'xing'     => $fields['xing'] ?: null,
+                'image'    => get_post_thumbnail_id($post->ID) ?: null,
             ];
         }
 

@@ -27,6 +27,7 @@
                             type="search"
                             name="s"
                             id="search-404"
+                            :label="__('Suchbegriff', 'wp-starter')"
                             :placeholder="__('Suchen...', 'wp-starter')"
                             size="lg"
                         />

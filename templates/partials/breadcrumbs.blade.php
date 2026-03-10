@@ -1,9 +1,9 @@
 @php
     // Only show breadcrumbs if:
-    // 1. Yoast SEO is active and breadcrumbs are enabled
-    // 2. We're not on the front page
-    // 3. We're not on a single post (clean reading experience)
-    $showBreadcrumbs = function_exists('yoast_breadcrumb') && !is_front_page() && !is_singular('post');
+    // 1. We're not on the front page
+    // 2. We're not on a single post (clean reading experience)
+    $showBreadcrumbs = !is_front_page() && !is_singular('post');
+    $hasYoast = function_exists('yoast_breadcrumb');
 
     $isMemberArea = is_page() && function_exists('get_field') && get_field('page_is_member_area');
     $isAuthenticated = $isMemberArea && \WordpressStarter\MemberArea\Auth::isAuthenticated();
@@ -13,7 +13,21 @@
     <div class="bg-surface border-b border-line">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
             <nav class="breadcrumbs" aria-label="{{ __('Breadcrumb', 'wp-starter') }}">
-                <?php yoast_breadcrumb(); ?>
+                @if($hasYoast)
+                    <?php yoast_breadcrumb(); ?>
+                @else
+                    <ol class="flex items-center gap-1 text-sm text-content-secondary">
+                        <li>
+                            <a href="{{ home_url('/') }}" class="hover:text-content transition-colors">{{ __('Startseite', 'wp-starter') }}</a>
+                        </li>
+                        @if(!is_front_page())
+                            <li aria-hidden="true" class="text-content-tertiary">›</li>
+                            <li>
+                                <span class="text-content" aria-current="page">{{ get_the_title() }}</span>
+                            </li>
+                        @endif
+                    </ol>
+                @endif
             </nav>
             @if($isAuthenticated)
                 <x-button

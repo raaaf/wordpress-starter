@@ -6,8 +6,8 @@
 --}}
 
 @php
-    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
-    $content = get_sub_field('content');
+    $title = wp_kses(str_replace('[br]', '<br>', get_sub_field('title') ?: ''), ['br' => []]);
+    $content = wp_kses_post(get_sub_field('content'));
     $formId = get_sub_field('form_id');
     $showContactInfo = get_sub_field('show_contact_info') ?? true;
     $background = get_sub_field('background_color') ?: 'primary';
@@ -63,7 +63,7 @@
         </div>
 
         {{-- Right: Contact Form 7 --}}
-        <div class="p-8 rounded-lg bg-surface-secondary" aria-live="polite" aria-atomic="false">
+        <div class="p-8 rounded-lg bg-surface-secondary" aria-live="polite" aria-atomic="true">
             @if($formId && shortcode_exists('contact-form-7'))
                 {!! do_shortcode('[contact-form-7 id="' . intval($formId) . '"]') !!}
             @else

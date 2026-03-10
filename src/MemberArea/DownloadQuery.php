@@ -81,6 +81,7 @@ class DownloadQuery
             'paged'          => $ext ? 1 : $page,
             'orderby'        => 'title',
             'order'          => 'ASC',
+            'no_found_rows'  => (bool) $ext,
             'meta_query'     => $metaQuery, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
         ];
 
@@ -150,6 +151,7 @@ class DownloadQuery
             }
         }
 
+        $dateFormat = get_option('date_format');
         $items = [];
         foreach ($posts as $post) {
             $postId       = $post->ID;
@@ -166,7 +168,7 @@ class DownloadQuery
             if ($lastModified) {
                 $timestamp = strtotime($lastModified);
                 if ($timestamp !== false) {
-                    $lastModifiedLabel = date_i18n(get_option('date_format'), $timestamp);
+                    $lastModifiedLabel = date_i18n($dateFormat, $timestamp);
                     $isUpdated         = $timestamp > ( time() - 7 * DAY_IN_SECONDS );
                 }
             }
@@ -230,6 +232,7 @@ class DownloadQuery
             'post_type'      => 'member_download',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
+            'no_found_rows'  => true,
             'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
                 'relation' => 'OR',
                 ['key' => 'download_source_type', 'value' => 'sftp', 'compare' => '!='],

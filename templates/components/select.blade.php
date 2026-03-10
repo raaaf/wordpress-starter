@@ -78,7 +78,7 @@
         <label for="{{ $selectId }}" class="block text-sm font-medium text-content mb-1.5">
             {{ $label }}
             @if($required)
-                <span class="text-content-error ml-0.5">*</span>
+                <span class="text-content-error ml-0.5" aria-hidden="true">*</span><span class="sr-only">(Pflichtfeld)</span>
             @endif
         </label>
     @endif

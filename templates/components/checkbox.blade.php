@@ -73,6 +73,6 @@
 
 @if($indeterminate)
 <script nonce="{{ $GLOBALS['csp_nonce'] ?? '' }}">
-    document.querySelector('[data-indeterminate="true"]').indeterminate = true;
+    document.getElementById('{{ $checkboxId }}').indeterminate = true;
 </script>
 @endif

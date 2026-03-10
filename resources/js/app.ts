@@ -2,6 +2,7 @@
 import Alpine from 'alpinejs';
 import collapse from '@alpinejs/collapse';
 import intersect from '@alpinejs/intersect';
+import type { AlpineMagics } from '../../src/types/alpine';
 import mediumZoom from 'medium-zoom';
 import { registerMemberAreaComponents } from './member-area';
 
@@ -17,7 +18,7 @@ declare const wpStarterStrings: {
 // Navigation Component
 // ============================================
 
-export interface NavigationComponent {
+export interface NavigationComponent extends AlpineMagics {
   isOpen: boolean;
   toggleButton: HTMLElement | null;
   mobileNav: HTMLElement | null;
@@ -33,13 +34,15 @@ export interface NavigationComponent {
 
 export function createNavigationComponent(): NavigationComponent {
   return {
+    // Alpine magic properties ($el, $nextTick, etc.) are injected at runtime
+    ...({} as AlpineMagics),
     isOpen: false,
     toggleButton: null,
     mobileNav: null,
     mobileNavContainer: null,
 
     init() {
-      this.toggleButton = this.$el.querySelector('[aria-label="Toggle navigation menu"]');
+      this.toggleButton = this.$el.querySelector('[data-nav-toggle]');
       this.mobileNav = this.$el.querySelector('nav[x-show="isOpen"]');
       this.mobileNavContainer = this.$el.querySelector('.mobile-nav-container');
       this.initMobileSubmenus();
@@ -147,30 +150,35 @@ export function createNavigationComponent(): NavigationComponent {
 // Stats Counter Component
 // ============================================
 
-export interface StatsCounterComponent {
+export interface StatsCounterComponent extends AlpineMagics {
   target: number;
   current: number;
   duration: number;
   started: boolean;
+  observer: IntersectionObserver | null;
   init(): void;
   animate(): void;
 }
 
 export function createStatsCounterComponent(target: number): StatsCounterComponent {
   return {
+    // Alpine magic properties ($el, $nextTick, etc.) are injected at runtime
+    ...({} as AlpineMagics),
     target,
     current: 0,
     duration: 2000,
     started: false,
+    observer: null,
 
     init() {
       // Check for reduced motion preference - WCAG 2.3.3
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      const observer = new IntersectionObserver(
+      this.observer = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting && !this.started) {
             this.started = true;
+            this.observer?.disconnect();
             // Skip animation if user prefers reduced motion
             if (prefersReducedMotion) {
               this.current = this.target;
@@ -181,7 +189,7 @@ export function createStatsCounterComponent(target: number): StatsCounterCompone
         },
         { threshold: 0.5 }
       );
-      observer.observe(this.$el);
+      this.observer.observe(this.$el as Element);
     },
 
     animate() {
@@ -422,6 +430,7 @@ export interface LogoSliderComponent {
   init(): void;
   pause(): void;
   resume(): void;
+  destroy(): void;
 }
 
 export function createLogoSliderComponent(
@@ -451,6 +460,12 @@ export function createLogoSliderComponent(
 
     resume() {
       this.paused = false;
+    },
+
+    destroy() {
+      if (this.intervalId) {
+        clearInterval(this.intervalId);
+      }
     },
   };
 }

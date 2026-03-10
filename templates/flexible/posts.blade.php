@@ -30,6 +30,7 @@
         'post_type' => $postType,
         'posts_per_page' => $postsPerPage,
         'post_status' => 'publish',
+        'no_found_rows' => true,
     ];
 
     if ($category) {
@@ -85,7 +86,7 @@
                                 </p>
                             @endif
 
-                            <x-link :url="get_permalink()" iconRight="chevron-right" class="relative z-20 group-hover:text-content-brand!">{{ __('Weiterlesen', 'wp-starter') }}</x-link>
+                            <x-link :url="get_permalink()" iconRight="chevron-right" aria-hidden="true" tabindex="-1" class="relative z-20 group-hover:text-content-brand!">{{ __('Weiterlesen', 'wp-starter') }}</x-link>
                         </div>
 
                         {{-- Stretched link covering entire card (z-10, below the Weiterlesen link at z-20) --}}

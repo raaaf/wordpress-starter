@@ -13,6 +13,25 @@ class Access
     }
 
     /**
+     * Read page_is_member_area and page_is_protected once per post ID and cache the result.
+     *
+     * @return array{is_member_area: mixed, is_protected: mixed}
+     */
+    private static function getPageFlags(int $postId): array
+    {
+        static $cache = [];
+
+        if (!isset($cache[$postId])) {
+            $cache[$postId] = [
+                'is_member_area' => get_field('page_is_member_area', $postId),
+                'is_protected'   => get_field('page_is_protected', $postId),
+            ];
+        }
+
+        return $cache[$postId];
+    }
+
+    /**
      * Add noindex to member area and protected pages so they are excluded from search engines.
      *
      * @param array<string, bool|string> $robots
@@ -24,7 +43,8 @@ class Access
             return $robots;
         }
 
-        if (get_field('page_is_member_area') || get_field('page_is_protected')) {
+        $flags = self::getPageFlags(get_queried_object_id());
+        if ($flags['is_member_area'] || $flags['is_protected']) {
             $robots['noindex'] = true;
             $robots['nofollow'] = true;
         }
@@ -46,8 +66,10 @@ class Access
             return $template;
         }
 
+        $flags = self::getPageFlags(get_queried_object_id());
+
         // Member area dashboard page
-        $isMemberArea = get_field('page_is_member_area');
+        $isMemberArea = $flags['is_member_area'];
         if ($isMemberArea) {
             $blade = $GLOBALS['blade'] ?? null;
             if (!$blade) {
@@ -64,7 +86,7 @@ class Access
         }
 
         // Protected page — redirect to login if not authenticated
-        $isProtected = get_field('page_is_protected');
+        $isProtected = $flags['is_protected'];
         if (!$isProtected) {
             return $template;
         }

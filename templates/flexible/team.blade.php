@@ -90,6 +90,7 @@
                                 <x-button
                                     url="mailto:{{ $email }}"
                                     title=""
+                                    :aria-label="__('E-Mail senden', 'wp-starter') . ': ' . $name"
                                     variant="secondary"
                                     size="sm"
                                     class="p-2! min-h-0! hover:bg-surface-brand! hover:text-content-inverse!"
@@ -102,6 +103,7 @@
                                 <x-button
                                     url="{{ $linkedin }}"
                                     title=""
+                                    :aria-label="__('LinkedIn', 'wp-starter') . ': ' . $name"
                                     target="_blank"
                                     variant="secondary"
                                     size="sm"

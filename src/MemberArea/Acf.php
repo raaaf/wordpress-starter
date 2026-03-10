@@ -219,7 +219,7 @@ class Acf
         add_filter('acf/update_value/key=field_member_shared_password', function ($value) {
             if (empty($value)) {
                 // Use get_option directly to bypass the load_value filter above
-                return get_option('options_member_shared_password') ?: '';
+                return get_option('options_member_shared_password') ?: $value;
             }
             return wp_hash_password($value);
         }, 10, 1);

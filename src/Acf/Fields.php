@@ -214,10 +214,17 @@ class Fields
      */
     private static function getWebPSrcset(int $imageId, string $size): string
     {
+        static $cache = [];
+
+        if (isset($cache[$imageId])) {
+            return $cache[$imageId];
+        }
+
         $metadata = wp_get_attachment_metadata($imageId);
 
         if (!$metadata || empty($metadata['sizes'])) {
-            return '';
+            $cache[$imageId] = '';
+            return $cache[$imageId];
         }
 
         // Check if WordPress has generated WebP versions (5.8+)
@@ -235,7 +242,8 @@ class Fields
             }
         }
 
-        return implode(', ', $webpSrcset);
+        $cache[$imageId] = implode(', ', $webpSrcset);
+        return $cache[$imageId];
     }
 
     /**
