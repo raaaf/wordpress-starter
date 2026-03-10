@@ -260,9 +260,8 @@ class FolderSync
         update_field('download_source_type',      'sftp',              $postId);
         update_field('download_sftp_host',         $host,               $postId);
         update_field('download_sftp_port',         $port,               $postId);
-        update_field('download_sftp_username',     $username,           $postId);
-        // $password is the decrypted value here — re-encrypted by the acf/update_value filter in MemberAreaServiceProvider
-        update_field('download_sftp_password',     $password,           $postId);
+        update_field('download_sftp_username',     $username,                    $postId);
+        update_field('download_sftp_password',     Crypto::encrypt($password),   $postId);
         update_field('download_sftp_remote_file',  $file['remotePath'], $postId);
         update_field('download_sftp_identifier',   $identifier,         $postId);
         update_field('download_sftp_source',       $folderPath,         $postId);
