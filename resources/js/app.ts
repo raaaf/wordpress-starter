@@ -153,6 +153,7 @@ export function createNavigationComponent(): NavigationComponent {
 export interface StatsCounterComponent extends AlpineMagics {
   target: number;
   current: number;
+  decimals: number;
   duration: number;
   started: boolean;
   observer: IntersectionObserver | null;
@@ -161,11 +162,13 @@ export interface StatsCounterComponent extends AlpineMagics {
 }
 
 export function createStatsCounterComponent(target: number): StatsCounterComponent {
+  const decimals = (target.toString().split('.')[1] || '').length;
   return {
     // Alpine magic properties ($el, $nextTick, etc.) are injected at runtime
     ...({} as AlpineMagics),
     target,
     current: 0,
+    decimals,
     duration: 2000,
     started: false,
     observer: null,
@@ -196,7 +199,8 @@ export function createStatsCounterComponent(target: number): StatsCounterCompone
       const start = performance.now();
       const step = (timestamp: number) => {
         const progress = Math.min((timestamp - start) / this.duration, 1);
-        this.current = Math.floor(progress * this.target);
+        const multiplier = Math.pow(10, this.decimals);
+        this.current = Math.round(progress * this.target * multiplier) / multiplier;
         if (progress < 1) {
           requestAnimationFrame(step);
         } else {

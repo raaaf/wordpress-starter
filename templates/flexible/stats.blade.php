@@ -30,7 +30,7 @@
         <div class="grid gap-8 text-center {{ $gridClass }}">
             @foreach($stats as $stat)
                 @php
-                    $number = intval($stat['number'] ?? 0);
+                    $number = floatval($stat['number'] ?? 0);
                     $suffix = $stat['suffix'] ?? '';
                     $label = $stat['label'] ?? '';
                     $icon = $stat['icon'] ?? '';
@@ -52,8 +52,8 @@
                     @endif
 
                     <div class="text-display mb-2 text-content" role="status" aria-live="polite" aria-atomic="true">
-                        <span x-text="current.toLocaleString('de-DE')" aria-hidden="true">0</span><span aria-hidden="true">{{ $suffix }}</span>
-                        <span class="sr-only" x-text="`${current.toLocaleString('de-DE')}{{ $suffix }}`">{{ $number }}{{ $suffix }}</span>
+                        <span x-text="current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })" aria-hidden="true">0</span><span aria-hidden="true">{{ $suffix }}</span>
+                        <span class="sr-only" x-text="`${current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{{ $suffix }}`">{{ $number }}{{ $suffix }}</span>
                     </div>
 
                     @if($label)
