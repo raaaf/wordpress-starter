@@ -1,3 +1,9 @@
+# [2.10.0](https://github.com/raaaf/starter/compare/v2.9.7...v2.10.0) (2026-03-12)
+
+### Features
+
+- **stats:** allow decimal numbers in stats block ([748d94e](https://github.com/raaaf/starter/commit/748d94ecc511f593c2d3450ba704d5ffa9a4d7f3))
+
 ## [2.9.7](https://github.com/raaaf/starter/compare/v2.9.6...v2.9.7) (2026-03-10)
 
 ### Bug Fixes
