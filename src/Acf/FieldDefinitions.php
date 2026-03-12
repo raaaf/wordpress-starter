@@ -625,10 +625,10 @@ class FieldDefinitions
         string $key,
         string $label,
         string $name,
-        int $defaultValue = 0,
-        int $min = 0,
-        int $max = 100,
-        int $step = 1,
+        int|float $defaultValue = 0,
+        int|float $min = 0,
+        int|float $max = 100,
+        int|float $step = 1,
         string $append = '',
         string $instructions = ''
     ): array {
@@ -2232,7 +2232,7 @@ class FieldDefinitions
                         0,
                         0,
                         999999999,
-                        1,
+                        0.01,
                         '',
                         __('Die anzuzeigende Zahl (wird animiert).', 'wp-starter')
                     ),
