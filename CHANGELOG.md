@@ -1,3 +1,9 @@
+# [2.11.0](https://github.com/raaaf/starter/compare/v2.10.0...v2.11.0) (2026-03-16)
+
+### Features
+
+- **acf:** add external video URL source and automatic section anchors ([#1](https://github.com/raaaf/starter/issues/1)) ([b8cd667](https://github.com/raaaf/starter/commit/b8cd667d1fd626f8b1f8d1eda3e73b42a6bd9acb))
+
 # [2.10.0](https://github.com/raaaf/starter/compare/v2.9.7...v2.10.0) (2026-03-12)
 
 ### Features
