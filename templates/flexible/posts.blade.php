@@ -40,7 +40,7 @@
     $postsQuery = new WP_Query($args);
 @endphp
 
-<x-section :background="$background" class="posts">
+<x-section :anchor="$sectionAnchor" :background="$background" class="posts">
     @if($title)
         <h2 class="mb-12 text-center">{!! $title !!}</h2>
     @endif

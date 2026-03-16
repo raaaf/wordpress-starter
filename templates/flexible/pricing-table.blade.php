@@ -19,7 +19,7 @@
     };
 @endphp
 
-<x-section :background="$background" class="pricing-table">
+<x-section :anchor="$sectionAnchor" :background="$background" class="pricing-table">
     @if($title)
         <h2 class="mb-12 text-center">{!! $title !!}</h2>
     @endif

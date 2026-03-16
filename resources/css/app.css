@@ -18,6 +18,14 @@
 /* Dark mode via data-theme attribute (matches tokens.css selector) */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+html {
+  scroll-behavior: smooth;
+}
+
+.section[id] {
+  scroll-margin-top: var(--header-height, 80px);
+}
+
 /*
  * Prose Color Integration
  *

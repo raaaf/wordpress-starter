@@ -39,7 +39,7 @@
     }
 @endphp
 
-<x-section :background="$background" class="two-columns-images">
+<x-section :anchor="$sectionAnchor" :background="$background" class="two-columns-images">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="2" gap="xl">
         <x-card variant="outlined" padding="none" class="overflow-hidden">

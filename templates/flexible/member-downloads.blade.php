@@ -6,6 +6,6 @@
     Background is fixed — no color picker exposed to editors.
 --}}
 
-<x-section background="primary">
+<x-section :anchor="$sectionAnchor" background="primary">
     @include('member-area.downloads')
 </x-section>

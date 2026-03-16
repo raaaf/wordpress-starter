@@ -14,7 +14,7 @@
     $content = get_sub_field('content');
 @endphp
 
-<x-section class="one-column">
+<x-section :anchor="$sectionAnchor" class="one-column">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" class="max-w-2xl mx-auto" />
     <div class="max-w-2xl mx-auto">
         <x-prose>{!! $content !!}</x-prose>

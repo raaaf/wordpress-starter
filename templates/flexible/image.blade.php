@@ -27,7 +27,7 @@
     $borderClass = $showBorder ? 'border border-line' : '';
 @endphp
 
-<x-section :background="$background" padding="md" class="image">
+<x-section :anchor="$sectionAnchor" :background="$background" padding="md" class="image">
     <figure class="mx-auto max-w-4xl">
         @if($imageId)
             {!! wp_get_attachment_image($imageId, 'content', false, [
