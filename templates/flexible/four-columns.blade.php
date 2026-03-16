@@ -18,7 +18,7 @@
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-<x-section :background="$background" class="four-columns">
+<x-section :anchor="$sectionAnchor" :background="$background" class="four-columns">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="4" gap="lg">
         <x-prose>{!! $column_1 !!}</x-prose>

@@ -995,6 +995,7 @@ class FieldDefinitions
                 'ui' => 1,
                 'conditional_logic' => $showOnCenteredOrSplit,
             ],
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1093,6 +1094,7 @@ class FieldDefinitions
                 __('Inhalt der rechten Spalte (50% Breite).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1131,6 +1133,7 @@ class FieldDefinitions
                 __('Inhalt der dritten Spalte (1/3 Breite).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1177,6 +1180,7 @@ class FieldDefinitions
                 __('Inhalt der vierten Spalte (1/4 Breite).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1223,6 +1227,7 @@ class FieldDefinitions
                 __('Füge beliebig viele auf- und zuklappbare Elemente hinzu.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1317,6 +1322,7 @@ class FieldDefinitions
                 [
                     'wordpress' => __('Mediathek', 'wp-starter'),
                     'external' => __('YouTube / Vimeo', 'wp-starter'),
+                    'url' => __('Externer Link', 'wp-starter'),
                 ],
                 'wordpress',
                 __('Wähle, woher das Video kommt.', 'wp-starter')
@@ -1338,7 +1344,16 @@ class FieldDefinitions
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'external']]],
                 'https://www.youtube.com/watch?v=...'
             ),
+            self::urlField(
+                "field_{$prefix}_video_file_url",
+                __('Video-Datei-URL', 'wp-starter'),
+                'video_file_url',
+                __('Direkter Link zu einer Videodatei (MP4, WebM, OGG).', 'wp-starter'),
+                [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'url']]],
+                'https://cdn.example.com/video.mp4'
+            ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1381,6 +1396,7 @@ class FieldDefinitions
                 'wrapper' => ['width' => '50'],
             ],
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1418,6 +1434,7 @@ class FieldDefinitions
                 'step' => 10,
                 'append' => 'px',
             ],
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1448,6 +1465,7 @@ class FieldDefinitions
                 __('Inhalt der breiten rechten Spalte (ca. 2/3 der Breite).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1478,6 +1496,7 @@ class FieldDefinitions
                 __('Inhalt der schmalen rechten Spalte (ca. 1/3 der Breite).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1528,6 +1547,7 @@ class FieldDefinitions
                 __('Text unter dem zweiten Bild.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1625,6 +1645,7 @@ class FieldDefinitions
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1698,6 +1719,7 @@ class FieldDefinitions
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1744,6 +1766,7 @@ class FieldDefinitions
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1808,6 +1831,7 @@ class FieldDefinitions
                 __('Logos automatisch durchlaufen lassen.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1865,6 +1889,7 @@ class FieldDefinitions
                 __('Zeigt die Kontaktdaten aus den Theme-Einstellungen an.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1932,6 +1957,7 @@ class FieldDefinitions
             // Tab: Darstellung
             self::tabField("field_{$prefix}_tab_style", __('Darstellung', 'wp-starter')),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1986,6 +2012,7 @@ class FieldDefinitions
                 __('Füge mindestens 2 Tabs hinzu.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -2081,6 +2108,7 @@ class FieldDefinitions
                 __('Füge Preispakete hinzu (empfohlen: 3 Pakete).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -2200,6 +2228,7 @@ class FieldDefinitions
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -2265,6 +2294,7 @@ class FieldDefinitions
                 __('Füge Kennzahlen hinzu (empfohlen: 3-4).', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -2340,6 +2370,7 @@ class FieldDefinitions
                 __('Füge Ereignisse in chronologischer Reihenfolge hinzu.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -2456,6 +2487,7 @@ class FieldDefinitions
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -2515,6 +2547,7 @@ class FieldDefinitions
                 'wrapper' => ['width' => '50'],
             ],
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -2605,6 +2638,7 @@ class FieldDefinitions
                 'wrapper' => ['width' => '50'],
             ],
             self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -2618,6 +2652,26 @@ class FieldDefinitions
      */
     public static function memberDownloadsFields(string $prefix): array
     {
-        return [];
+        return [
+            self::sectionAnchorField($prefix),
+        ];
+    }
+
+    /**
+     * Get section anchor field for manual anchor-ID override
+     *
+     * @param string $prefix Key prefix
+     * @return array<string, mixed>
+     */
+    public static function sectionAnchorField(string $prefix): array
+    {
+        return self::textField(
+            "field_{$prefix}_section_anchor",
+            __('Anker-ID', 'wp-starter'),
+            'section_anchor',
+            false,
+            __('Optionale ID für Anker-Links (z.B. "kontakt"). Wird automatisch generiert wenn leer.', 'wp-starter'),
+            'z.B. kontakt'
+        );
     }
 }

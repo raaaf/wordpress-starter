@@ -17,7 +17,7 @@
     $directionsUrl = $address ? 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode($address) : '';
 @endphp
 
-<x-section :background="$background" class="map">
+<x-section :anchor="$sectionAnchor" :background="$background" class="map">
     @if($title)
         <h2 class="mb-8 text-center">{!! $title !!}</h2>
     @endif

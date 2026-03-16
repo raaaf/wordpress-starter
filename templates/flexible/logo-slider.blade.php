@@ -43,7 +43,7 @@
     }
 @endphp
 
-<x-section :background="$background" padding="md" class="logo-slider">
+<x-section :anchor="$sectionAnchor" :background="$background" padding="md" class="logo-slider">
     @if($title)
         <h2 class="text-h3 mb-8 text-center">{!! $title !!}</h2>
     @endif

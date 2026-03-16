@@ -2,13 +2,14 @@
     Video - Flexible Content Layout
 
     Uses shared components: x-section, x-button, x-link
-    ACF Fields: source, video, video_url, background_color
+    ACF Fields: source, video, video_url, video_file_url, background_color
 --}}
 
 @php
     $source = get_sub_field('source') ?: 'wordpress';
     $video = get_sub_field('video'); // URL string for self-hosted
     $video_url = get_sub_field('video_url'); // YouTube/Vimeo URL
+    $video_file_url = get_sub_field('video_file_url'); // Direct file URL (CDN etc.)
     $background = get_sub_field('background_color') ?: 'primary';
 
     // Detect video type from URL for external videos
@@ -42,15 +43,16 @@
 
     // Check if we have a valid video
     $hasVideo = ($source === 'external' && $video_id) ||
-                ($source === 'wordpress' && $video);
+                ($source === 'wordpress' && $video) ||
+                ($source === 'url' && $video_file_url);
 @endphp
 
-<x-section :background="$background" class="video">
+<x-section :background="$background" :anchor="$sectionAnchor" class="video">
     @if($hasVideo)
         <div class="max-w-6xl mx-auto">
             <div
                 class="relative overflow-hidden rounded-lg aspect-video bg-surface-secondary"
-                x-data="{ loaded: {{ $source === 'wordpress' ? 'true' : 'false' }}, iframeLoaded: false, iframeError: false }"
+                x-data="{ loaded: {{ in_array($source, ['wordpress', 'url']) ? 'true' : 'false' }}, iframeLoaded: false, iframeError: false }"
                 x-ref="videoContainer"
             >
                 @if($source === 'external' && $video_id)
@@ -146,7 +148,18 @@
                         aria-label="{{ __('Video', 'wp-starter') }}"
                         class="w-full aspect-video object-cover rounded-lg"
                     >
-                        <source src="{{ $video }}" type="video/mp4">
+                        <source src="{{ esc_url($video) }}" type="video/mp4">
+                        Ihr Browser unterstützt das Video-Tag nicht.
+                    </video>
+                @elseif($source === 'url' && $video_file_url)
+                    {{-- External file URL - no consent needed --}}
+                    <video
+                        controls
+                        preload="metadata"
+                        aria-label="{{ __('Video', 'wp-starter') }}"
+                        class="w-full aspect-video object-cover rounded-lg"
+                    >
+                        <source src="{{ esc_url($video_file_url) }}">
                         Ihr Browser unterstützt das Video-Tag nicht.
                     </video>
                 @endif

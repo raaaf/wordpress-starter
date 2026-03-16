@@ -14,7 +14,7 @@
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-<x-section :background="$background" class="gallery">
+<x-section :anchor="$sectionAnchor" :background="$background" class="gallery">
     @if($title)
         <h2 class="mb-12 text-center">{!! $title !!}</h2>
     @endif

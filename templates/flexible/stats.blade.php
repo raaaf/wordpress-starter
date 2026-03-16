@@ -21,7 +21,7 @@
     };
 @endphp
 
-<x-section :background="$background" class="stats">
+<x-section :anchor="$sectionAnchor" :background="$background" class="stats">
     @if($title)
         <h2 class="mb-12 text-center">{!! $title !!}</h2>
     @endif

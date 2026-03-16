@@ -27,7 +27,7 @@
     $imageAfter = $afterId ? wp_get_attachment_image_src($afterId, 'content') : null;
 @endphp
 
-<x-section :background="$background" class="before-after">
+<x-section :anchor="$sectionAnchor" :background="$background" class="before-after">
     @if($title)
         <h2 class="mb-8 text-center">{!! $title !!}</h2>
     @endif

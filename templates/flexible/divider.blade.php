@@ -10,7 +10,7 @@
     $height = get_sub_field('height') ?: 50;
 @endphp
 
-<x-section padding="none" class="divider">
+<x-section :anchor="$sectionAnchor" padding="none" class="divider">
     <div class="py-4 flex items-center justify-center" style="height: {{ $height }}px">
         @switch($style)
             @case('line')
