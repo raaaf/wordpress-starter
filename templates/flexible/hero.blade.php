@@ -125,7 +125,7 @@
 
 @elseif($variant === 'split')
     {{-- SPLIT VARIANT: Content left, image right --}}
-    <x-section :background="$background_color" padding="lg" class="hero hero--split">
+    <x-section :anchor="$sectionAnchor" :background="$background_color" padding="lg" class="hero hero--split">
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
                 @if($badge)
@@ -191,7 +191,7 @@
 
 @else
     {{-- CENTERED VARIANT (default): Centered content --}}
-    <x-section :background="$background_color" padding="xl" class="hero hero--centered">
+    <x-section :anchor="$sectionAnchor" :background="$background_color" padding="xl" class="hero hero--centered">
         <div class="max-w-3xl mx-auto text-center">
             @if($badge)
                 <x-badge variant="accent" size="md" class="mb-4">{{ $badge }}</x-badge>

@@ -34,6 +34,9 @@ class AcfServiceProvider extends ServiceProvider
 
         // Register field validation hooks
         $this->registerValidationHooks();
+
+        // Auto-generate section anchors on save
+        $this->registerSectionAnchorGeneration();
     }
 
     public function boot(): void
@@ -298,11 +301,56 @@ class AcfServiceProvider extends ServiceProvider
         }, 10, 3);
 
         // Add [br] hint to title field instructions
-        add_filter('acf/prepare_field/name=title', function ($field) {
+        add_filter('acf/prepare_field/name=title', function ($field): mixed {
             if ($field['type'] === 'text' && !empty($field['instructions'])) {
                 $field['instructions'] .= ' ' . __('Nutze [br] für einen manuellen Zeilenumbruch.', 'wp-starter');
             }
             return $field;
         });
+    }
+
+    /**
+     * Auto-generate section_anchor values on save
+     *
+     * Fills empty section_anchor fields with a unique ID based on layout name
+     * and position. Preserves manually set anchors.
+     */
+    private function registerSectionAnchorGeneration(): void
+    {
+        $callback = function ($postId) use (&$callback): void {
+            if (!function_exists('have_rows') || wp_is_post_revision($postId)) {
+                return;
+            }
+
+            $sections = get_field('page_sections', $postId);
+            if (!is_array($sections)) {
+                return;
+            }
+
+            $layoutCounters = [];
+            $changed = false;
+
+            foreach ($sections as &$section) {
+                $layout = $section['acf_fc_layout'] ?? '';
+                if (!$layout) {
+                    continue;
+                }
+
+                $layoutCounters[$layout] = ( $layoutCounters[$layout] ?? 0 ) + 1;
+
+                if (empty($section['section_anchor'])) {
+                    $section['section_anchor'] = str_replace('_', '-', $layout) . '-' . $layoutCounters[$layout];
+                    $changed = true;
+                }
+            }
+            unset($section);
+
+            if ($changed) {
+                remove_action('acf/save_post', $callback, 20);
+                update_field('page_sections', $sections, $postId);
+                add_action('acf/save_post', $callback, 20);
+            }
+        };
+        add_action('acf/save_post', $callback, 20);
     }
 }

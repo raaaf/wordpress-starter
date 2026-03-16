@@ -11,7 +11,7 @@
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-<x-section :background="$background" class="timeline">
+<x-section :anchor="$sectionAnchor" :background="$background" class="timeline">
     @if($title)
         <h2 class="mb-12 text-center">{!! $title !!}</h2>
     @endif
