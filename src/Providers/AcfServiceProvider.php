@@ -228,7 +228,7 @@ class AcfServiceProvider extends ServiceProvider
     private function registerRestApi(): void
     {
         // Enable ACF fields in REST API for posts
-        add_filter('acf/rest_api/item_permissions/get', function ($permission) {
+        add_filter('acf/rest_api/item_permissions/get', function () {
             return current_user_can('read');
         });
 
@@ -265,7 +265,7 @@ class AcfServiceProvider extends ServiceProvider
     private function registerValidationHooks(): void
     {
         // Example: Validate URL fields contain valid URLs
-        add_filter('acf/validate_value/type=url', function ($valid, $value, $field) {
+        add_filter('acf/validate_value/type=url', function ($valid, $value) {
             if (!$valid || empty($value)) {
                 return $valid;
             }
@@ -275,10 +275,10 @@ class AcfServiceProvider extends ServiceProvider
             }
 
             return $valid;
-        }, 10, 3);
+        }, 10, 2);
 
         // Example: Validate email fields
-        add_filter('acf/validate_value/type=email', function ($valid, $value, $field) {
+        add_filter('acf/validate_value/type=email', function ($valid, $value) {
             if (!$valid || empty($value)) {
                 return $valid;
             }
@@ -288,17 +288,17 @@ class AcfServiceProvider extends ServiceProvider
             }
 
             return $valid;
-        }, 10, 3);
+        }, 10, 2);
 
         // Sanitize text fields on save
-        add_filter('acf/update_value/type=text', function ($value, $postId, $field) {
+        add_filter('acf/update_value/type=text', function ($value) {
             return sanitize_text_field($value);
-        }, 10, 3);
+        }, 10, 1);
 
         // Sanitize textarea fields on save
-        add_filter('acf/update_value/type=textarea', function ($value, $postId, $field) {
+        add_filter('acf/update_value/type=textarea', function ($value) {
             return sanitize_textarea_field($value);
-        }, 10, 3);
+        }, 10, 1);
 
         // Add [br] hint to title field instructions
         add_filter('acf/prepare_field/name=title', function ($field): mixed {
