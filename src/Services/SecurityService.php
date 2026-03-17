@@ -43,6 +43,7 @@ class SecurityService
             "font-src 'self' https://fonts.gstatic.com data:",
             "img-src 'self' data: https:",
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.google.com https://maps.google.com",
+            "media-src 'self' https:",
             "connect-src 'self' https://tracking.maki-it.de",
         ];
 

@@ -139,6 +139,7 @@ class Security
             "font-src 'self' data: https://fonts.gstatic.com" . $localSources,
             "img-src 'self' data: https:" . $localSources,
             "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com",
+            "media-src 'self' https:" . $localSources,
         ];
 
         // Script sources
