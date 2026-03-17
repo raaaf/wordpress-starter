@@ -1,3 +1,9 @@
+# [2.12.0](https://github.com/raaaf/starter/compare/v2.11.2...v2.12.0) (2026-03-17)
+
+### Features
+
+- **acf:** make multi-column layout fields optional ([bc72104](https://github.com/raaaf/starter/commit/bc72104c18d4f78d2890eafbdd971ce4a6ed2835))
+
 ## [2.11.2](https://github.com/raaaf/starter/compare/v2.11.1...v2.11.2) (2026-03-17)
 
 ### Bug Fixes
