@@ -1081,7 +1081,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_1",
                 __('Spalte 1 (links)', 'wp-starter'),
                 'column_1',
-                true,
+                false,
                 '50',
                 __('Inhalt der linken Spalte (50% Breite).', 'wp-starter')
             ),
@@ -1089,7 +1089,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_2",
                 __('Spalte 2 (rechts)', 'wp-starter'),
                 'column_2',
-                true,
+                false,
                 '50',
                 __('Inhalt der rechten Spalte (50% Breite).', 'wp-starter')
             ),
@@ -1112,7 +1112,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_1",
                 __('Spalte 1', 'wp-starter'),
                 'column_1',
-                true,
+                false,
                 '33.333',
                 __('Inhalt der ersten Spalte (1/3 Breite).', 'wp-starter')
             ),
@@ -1120,7 +1120,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_2",
                 __('Spalte 2', 'wp-starter'),
                 'column_2',
-                true,
+                false,
                 '33.333',
                 __('Inhalt der mittleren Spalte (1/3 Breite).', 'wp-starter')
             ),
@@ -1128,7 +1128,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_3",
                 __('Spalte 3', 'wp-starter'),
                 'column_3',
-                true,
+                false,
                 '33.333',
                 __('Inhalt der dritten Spalte (1/3 Breite).', 'wp-starter')
             ),
@@ -1151,7 +1151,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_1",
                 __('Spalte 1', 'wp-starter'),
                 'column_1',
-                true,
+                false,
                 '25',
                 __('Inhalt der ersten Spalte (1/4 Breite).', 'wp-starter')
             ),
@@ -1159,7 +1159,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_2",
                 __('Spalte 2', 'wp-starter'),
                 'column_2',
-                true,
+                false,
                 '25',
                 __('Inhalt der zweiten Spalte (1/4 Breite).', 'wp-starter')
             ),
@@ -1167,7 +1167,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_3",
                 __('Spalte 3', 'wp-starter'),
                 'column_3',
-                true,
+                false,
                 '25',
                 __('Inhalt der dritten Spalte (1/4 Breite).', 'wp-starter')
             ),
@@ -1175,7 +1175,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_4",
                 __('Spalte 4', 'wp-starter'),
                 'column_4',
-                true,
+                false,
                 '25',
                 __('Inhalt der vierten Spalte (1/4 Breite).', 'wp-starter')
             ),
@@ -1452,7 +1452,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_1",
                 __('Linke Spalte (schmal)', 'wp-starter'),
                 'column_1',
-                true,
+                false,
                 '33.333',
                 __('Inhalt der schmalen linken Spalte (ca. 1/3 der Breite).', 'wp-starter')
             ),
@@ -1460,7 +1460,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_2",
                 __('Rechte Spalte (breit)', 'wp-starter'),
                 'column_2',
-                true,
+                false,
                 '66.667',
                 __('Inhalt der breiten rechten Spalte (ca. 2/3 der Breite).', 'wp-starter')
             ),
@@ -1483,7 +1483,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_1",
                 __('Linke Spalte (breit)', 'wp-starter'),
                 'column_1',
-                true,
+                false,
                 '66.667',
                 __('Inhalt der breiten linken Spalte (ca. 2/3 der Breite).', 'wp-starter')
             ),
@@ -1491,7 +1491,7 @@ class FieldDefinitions
                 "field_{$prefix}_column_2",
                 __('Rechte Spalte (schmal)', 'wp-starter'),
                 'column_2',
-                true,
+                false,
                 '33.333',
                 __('Inhalt der schmalen rechten Spalte (ca. 1/3 der Breite).', 'wp-starter')
             ),
