@@ -1,3 +1,9 @@
+## [2.11.1](https://github.com/raaaf/starter/compare/v2.11.0...v2.11.1) (2026-03-17)
+
+### Bug Fixes
+
+- **security:** add media-src CSP directive for external video URLs ([a31064b](https://github.com/raaaf/starter/commit/a31064b773302d8ce00bc3353844201a0b8b191c))
+
 # [2.11.0](https://github.com/raaaf/starter/compare/v2.10.0...v2.11.0) (2026-03-16)
 
 ### Features
