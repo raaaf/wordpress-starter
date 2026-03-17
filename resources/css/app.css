@@ -26,6 +26,21 @@ html {
   scroll-margin-top: var(--header-height, 80px);
 }
 
+/* Make WordPress video embeds responsive and styled inside content areas */
+.wp-video {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden;
+  border-radius: var(--radius-lg, 0.5rem);
+}
+
+.wp-video-shortcode {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: var(--radius-lg, 0.5rem);
+}
+
 /*
  * Prose Color Integration
  *
