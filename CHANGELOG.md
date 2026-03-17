@@ -1,3 +1,9 @@
+## [2.11.2](https://github.com/raaaf/starter/compare/v2.11.1...v2.11.2) (2026-03-17)
+
+### Bug Fixes
+
+- make WordPress video embeds responsive with rounded corners ([536586c](https://github.com/raaaf/starter/commit/536586c98895ae298304386ee7e57a8a3404f670))
+
 ## [2.11.1](https://github.com/raaaf/starter/compare/v2.11.0...v2.11.1) (2026-03-17)
 
 ### Bug Fixes
