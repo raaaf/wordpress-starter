@@ -31,14 +31,14 @@
                     <figure class="relative overflow-hidden rounded-lg group">
                         <button type="button" class="block w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-line-focus" aria-label="{{ sprintf(__('Bild vergrößern: %s', 'wp-starter'), get_post_meta($imageId, '_wp_attachment_image_alt', true) ?: wp_get_attachment_caption($imageId) ?: __('Galeriebild', 'wp-starter')) }}">
                         {!! wp_get_attachment_image($imageId, 'gallery-thumb', false, [
-                            'class' => 'object-cover w-full transition-transform duration-300 ease-in-out cursor-zoom-in aspect-square gallery-zoom group-hover:scale-105',
+                            'class' => 'object-cover w-full transition-transform duration-200 ease-out cursor-zoom-in aspect-square gallery-zoom group-hover:scale-[1.03]',
                             'loading' => 'lazy',
                             'sizes' => '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw',
                             'data-zoom-src' => esc_url($full[0]),
                         ]) !!}
                         </button>
                         @if($caption)
-                            <figcaption class="absolute inset-x-0 bottom-0 p-3 text-body-small text-content-inverse transition-opacity duration-300 opacity-0 bg-gradient-to-t from-surface-inverse/70 to-transparent group-hover:opacity-100">
+                            <figcaption class="absolute inset-x-0 bottom-0 p-3 text-body-small text-content-inverse transition-opacity duration-200 ease-out opacity-0 bg-gradient-to-t from-surface-inverse/70 to-transparent group-hover:opacity-100">
                                 {{ $caption }}
                             </figcaption>
                         @endif
