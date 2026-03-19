@@ -52,8 +52,8 @@
                     @endif
 
                     <div class="text-display mb-2 text-content" role="status" aria-live="polite" aria-atomic="true">
-                        <span x-text="current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })" aria-hidden="true">0</span><span aria-hidden="true">{{ $suffix }}</span>
-                        <span class="sr-only" x-text="`${current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{{ $suffix }}`">{{ $number }}{{ $suffix }}</span>
+                        <span x-text="current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })" aria-hidden="true">0</span>@if($suffix)<span aria-hidden="true"> {{ $suffix }}</span>@endif
+                        <span class="sr-only" x-text="`${current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{{ $suffix ? ' ' . $suffix : '' }}`">{{ $number }}{{ $suffix ? ' ' . $suffix : '' }}</span>
                     </div>
 
                     @if($label)
