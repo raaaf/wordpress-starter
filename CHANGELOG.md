@@ -1,3 +1,9 @@
+## [2.12.2](https://github.com/raaaf/starter/compare/v2.12.1...v2.12.2) (2026-03-19)
+
+### Bug Fixes
+
+- use esc_attr instead of intval for CF7 form ID ([9f60ae7](https://github.com/raaaf/starter/commit/9f60ae7f7df2eef89f5a8615c9c4e2a06cf33a51))
+
 ## [2.12.1](https://github.com/raaaf/starter/compare/v2.12.0...v2.12.1) (2026-03-19)
 
 ### Bug Fixes
