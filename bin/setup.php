@@ -805,6 +805,7 @@ class ThemeSetup
         $this->task('Updating PHP namespaces', fn() => $this->updatePhpFiles());
         $this->task('Updating Blade templates', fn() => $this->updateBladeTemplates());
         $this->task('Updating block.json files', fn() => $this->updateBlockJsonFiles());
+        $this->task('Updating hardcoded references', fn() => $this->updateHardcodedReferences());
         $this->task('Updating CLAUDE.md', fn() => $this->updateClaudeMd());
         $this->task('Updating theme-updater.php mu-plugin', fn() => $this->updateThemeUpdaterPlugin());
         $this->task('Updating documentation files', fn() => $this->updateDocumentation());
@@ -1193,6 +1194,8 @@ CSS;
 
             // Update fully qualified namespace calls (e.g., \WordpressStarter\Vite::)
             $content = str_replace("\\{$oldNamespace}\\", "\\{$newNamespace}\\", $content);
+            // Update use statements in @php blocks (e.g., use WordpressStarter\PostTypes\Team)
+            $content = str_replace("use {$oldNamespace}\\", "use {$newNamespace}\\", $content);
             // Update text domain
             $content = str_replace("'{$oldTextDomain}'", "'{$newTextDomain}'", $content);
 
@@ -1221,6 +1224,70 @@ CSS;
 
             if ($content !== $original) {
                 file_put_contents($file, $content);
+            }
+        }
+    }
+
+    /**
+     * Update hardcoded references that namespace/text-domain replacement doesn't cover:
+     * - config/app.php theme name
+     * - LogServiceProvider log prefix
+     * - Test mocks (bootstrap.php, WordPressMocks.php, ThemeContextTest.php)
+     */
+    private function updateHardcodedReferences(): void
+    {
+        $themeSlug = $this->config['theme_slug'];
+        $themeName = $this->config['theme_name'];
+        $themeDir = basename($this->themeDir);
+
+        $replacements = [
+            // config/app.php — theme display name
+            $this->themeDir . '/config/app.php' => [
+                "'name' => 'WP Starter'" => "'name' => '{$themeName}'",
+            ],
+            // LogServiceProvider — log channel prefix
+            $this->themeDir . '/src/Providers/LogServiceProvider.php' => [
+                'wp-starter.{' => "{$themeSlug}.{",
+            ],
+            // Test bootstrap — mock template name and URI
+            $this->themeDir . '/tests/bootstrap.php' => [
+                "'wordpress-starter-theme'" => "'{$themeDir}'",
+                "themes/wp-starter'" => "themes/{$themeDir}'",
+            ],
+            // WordPressMocks trait — mock URI
+            $this->themeDir . '/tests/Support/WordPressMocks.php' => [
+                "themes/wp-starter'" => "themes/{$themeDir}'",
+            ],
+        ];
+
+        foreach ($replacements as $filePath => $fileReplacements) {
+            if (!file_exists($filePath)) {
+                continue;
+            }
+
+            $content = file_get_contents($filePath);
+            $original = $content;
+
+            foreach ($fileReplacements as $search => $replace) {
+                $content = str_replace($search, $replace, $content);
+            }
+
+            if ($content !== $original) {
+                file_put_contents($filePath, $content);
+            }
+        }
+
+        // ThemeContextTest — update mock template and expected prefixes
+        $testFile = $this->themeDir . '/tests/Unit/ThemeContextTest.php';
+        if (file_exists($testFile)) {
+            $content = file_get_contents($testFile);
+            $original = $content;
+
+            $content = str_replace("'wordpress-starter-theme'", "'{$themeDir}'", $content);
+            $content = str_replace("'wordpress_starter_theme'", "'" . str_replace('-', '_', $themeDir) . "'", $content);
+
+            if ($content !== $original) {
+                file_put_contents($testFile, $content);
             }
         }
     }
