@@ -1,3 +1,9 @@
+## [2.12.1](https://github.com/raaaf/starter/compare/v2.12.0...v2.12.1) (2026-03-19)
+
+### Bug Fixes
+
+- **setup:** replace use statements in Blade and hardcoded references ([db56ecf](https://github.com/raaaf/starter/commit/db56ecf49acf4c93284391e7e7a7fe1dc27bca56))
+
 # [2.12.0](https://github.com/raaaf/starter/compare/v2.11.2...v2.12.0) (2026-03-17)
 
 ### Features
