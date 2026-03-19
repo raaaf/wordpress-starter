@@ -78,7 +78,7 @@
                                 href="{{ $logo['link'] }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="block transition-all duration-300 opacity-50 hover:opacity-100 grayscale hover:grayscale-0"
+                                class="block transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0"
                                 @if($logo['name']) title="{{ $logo['name'] }}" @endif
                             >
                                 <img
@@ -89,7 +89,7 @@
                                 >
                             </a>
                         @else
-                            <div class="transition-all duration-300 opacity-50 hover:opacity-100 grayscale hover:grayscale-0">
+                            <div class="transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0">
                                 <img
                                     src="{{ $logo['url'] }}"
                                     alt="{{ $logo['name'] }}"
@@ -104,13 +104,13 @@
                 {{-- Duplicate set for infinite scroll effect --}}
                 @if($autoplay)
                     @foreach($logoData as $logo)
-                        <div class="flex-shrink-0 w-32 flex items-center justify-center" aria-hidden="true">
+                        <div class="flex-shrink-0 w-32 flex items-center justify-center" aria-hidden="true" inert
                             @if($logo['link'])
                                 <a
                                     href="{{ $logo['link'] }}"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    class="block transition-all duration-300 opacity-50 hover:opacity-100 grayscale hover:grayscale-0"
+                                    class="block transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0"
                                     @if($logo['name']) title="{{ $logo['name'] }}" @endif
                                 >
                                     <img
@@ -121,7 +121,7 @@
                                     >
                                 </a>
                             @else
-                                <div class="transition-all duration-300 opacity-50 hover:opacity-100 grayscale hover:grayscale-0">
+                                <div class="transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0">
                                     <img
                                         src="{{ $logo['url'] }}"
                                         alt="{{ $logo['name'] }}"

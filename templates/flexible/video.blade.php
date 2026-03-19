@@ -59,7 +59,7 @@
                     {{-- Consent notice for GDPR compliance --}}
                     <div
                         x-show="!loaded"
-                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave="transition ease-out duration-150"
                         x-transition:leave-start="opacity-100"
                         x-transition:leave-end="opacity-0"
                         class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center video-consent-notice"

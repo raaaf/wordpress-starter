@@ -247,6 +247,8 @@ html {
   body {
     color: var(--text-primary);
     background-color: var(--bg-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* ============================================
@@ -262,6 +264,7 @@ html {
     line-height: var(--typography-h1-line-height);
     letter-spacing: var(--typography-h1-letter-spacing);
     color: var(--text-primary);
+    text-wrap: balance;
     margin-top: 0;
     margin-bottom: 0.5em;
   }
@@ -274,6 +277,7 @@ html {
     line-height: var(--typography-h2-line-height);
     letter-spacing: var(--typography-h2-letter-spacing);
     color: var(--text-primary);
+    text-wrap: balance;
     margin-top: 1.5em;
     margin-bottom: 0.5em;
   }
@@ -286,6 +290,7 @@ html {
     line-height: var(--typography-h3-line-height);
     letter-spacing: var(--typography-h3-letter-spacing);
     color: var(--text-primary);
+    text-wrap: balance;
     margin-top: 1.25em;
     margin-bottom: 0.5em;
   }
@@ -298,6 +303,7 @@ html {
     line-height: var(--typography-h4-line-height);
     letter-spacing: var(--typography-h4-letter-spacing);
     color: var(--text-primary);
+    text-wrap: balance;
     margin-top: 1em;
     margin-bottom: 0.5em;
   }
@@ -311,6 +317,7 @@ html {
     line-height: var(--typography-h5-line-height);
     letter-spacing: var(--typography-h5-letter-spacing);
     color: var(--text-primary);
+    text-wrap: balance;
     margin-top: 1em;
     margin-bottom: 0.5em;
   }
@@ -359,7 +366,7 @@ html {
   /* Button classes are excluded — they handle their own text-decoration */
   .prose a:not(.no-underline, .button-primary, .button-secondary, .button-ghost) {
     text-decoration: underline;
-    text-underline-offset: 2px;
+    text-underline-offset: 4px;
   }
 
   /* Focus-visible styles - WCAG 2.1 SC 2.4.7: Visible focus indicator */
@@ -439,6 +446,7 @@ html {
     line-height: var(--typography-display-line-height);
     letter-spacing: var(--typography-display-letter-spacing);
     color: var(--text-primary);
+    text-wrap: balance;
   }
 
   /* Heading styles (h1–h5, .text-h1–.text-h5) are defined in @layer base */
@@ -563,7 +571,10 @@ html {
     border: 1px solid var(--border-default);
     border-radius: var(--input-md-radius);
     box-shadow: var(--shadow-input);
-    transition: all 0.2s ease;
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
   }
 
   .wpcf7-form input[type='text']::placeholder,
@@ -615,7 +626,10 @@ html {
     border-radius: var(--input-md-radius);
     box-shadow: var(--shadow-input);
     resize: vertical;
-    transition: all 0.2s ease;
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
   }
 
   .wpcf7-form textarea::placeholder {
@@ -653,7 +667,10 @@ html {
     box-shadow: var(--shadow-input);
     appearance: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
   }
 
   .wpcf7-form select:hover {
@@ -724,7 +741,9 @@ html {
     border: 1px dashed var(--border-default);
     border-radius: var(--input-md-radius);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
   }
 
   .wpcf7-form input[type='file']:hover {
@@ -747,7 +766,9 @@ html {
     border: 1px solid var(--border-default);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease;
   }
 
   .wpcf7-form input[type='file']::file-selector-button:hover {
@@ -775,7 +796,12 @@ html {
     border-radius: var(--button-md-radius);
     box-shadow: var(--shadow-button);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition:
+      color 0.2s ease,
+      background 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
     appearance: none;
   }
 
@@ -795,6 +821,7 @@ html {
       var(--gradient-primary-active-end)
     );
     box-shadow: var(--shadow-inner);
+    transform: scale(0.98);
   }
 
   .wpcf7-form input[type='submit']:focus-visible {
@@ -918,7 +945,12 @@ html {
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition:
+      color 0.2s ease,
+      background 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
   }
 
   .prose a.button-primary,
@@ -953,6 +985,7 @@ html {
       var(--gradient-primary-active-end)
     );
     box-shadow: var(--shadow-inner);
+    transform: scale(0.98);
   }
 
   .prose a.button-secondary,
@@ -975,6 +1008,7 @@ html {
   .button-secondary:active {
     background-color: var(--color-surface-tertiary);
     box-shadow: var(--shadow-inner);
+    transform: scale(0.98);
   }
 
   .prose a.button-ghost,
@@ -995,6 +1029,7 @@ html {
   .button-ghost:active {
     background-color: var(--color-surface-secondary);
     border-color: var(--color-line);
+    transform: scale(0.98);
   }
 
   .button-danger {
@@ -1010,6 +1045,7 @@ html {
 
   .button-danger:active {
     box-shadow: var(--shadow-inner);
+    transform: scale(0.98);
   }
 
   /* Size modifiers — applied after variants so they always win */
@@ -1072,11 +1108,13 @@ html {
 
 /* Gallery hover effect - ensure transition works */
 .gallery figure img {
-  transition: transform 300ms ease-in-out;
+  transition: transform 200ms ease-out;
 }
 
-.gallery figure:hover img {
-  transform: scale(1.05);
+@media (hover: hover) and (pointer: fine) {
+  .gallery figure:hover img {
+    transform: scale(1.03);
+  }
 }
 
 /* ============================================
@@ -1183,10 +1221,10 @@ html {
     box-shadow: var(--shadow-dropdown);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(0.5rem);
+    transform: translateY(0.25rem);
     transition:
-      opacity 0.2s ease,
-      transform 0.2s ease,
+      opacity 0.2s ease-out,
+      transform 0.2s ease-out,
       visibility 0.2s;
     z-index: 50;
   }
