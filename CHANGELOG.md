@@ -1,3 +1,9 @@
+## [2.12.3](https://github.com/raaaf/starter/compare/v2.12.2...v2.12.3) (2026-03-19)
+
+### Bug Fixes
+
+- add space between number and suffix in stats block ([276ab82](https://github.com/raaaf/starter/commit/276ab820c46be1ca0478e232a6668c0b0df45e93))
+
 ## [2.12.2](https://github.com/raaaf/starter/compare/v2.12.1...v2.12.2) (2026-03-19)
 
 ### Bug Fixes
