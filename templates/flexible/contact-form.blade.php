@@ -65,7 +65,7 @@
         {{-- Right: Contact Form 7 --}}
         <div class="p-8 rounded-lg bg-surface-secondary" aria-live="polite" aria-atomic="true">
             @if($formId && shortcode_exists('contact-form-7'))
-                {!! do_shortcode('[contact-form-7 id="' . intval($formId) . '"]') !!}
+                {!! do_shortcode('[contact-form-7 id="' . esc_attr($formId) . '"]') !!}
             @else
                 <p class="text-content-secondary">
                     @if(!shortcode_exists('contact-form-7'))
