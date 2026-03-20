@@ -1,3 +1,9 @@
+## [2.12.5](https://github.com/raaaf/starter/compare/v2.12.4...v2.12.5) (2026-03-20)
+
+### Bug Fixes
+
+- make WordPress video player responsive inside card containers ([65cc329](https://github.com/raaaf/starter/commit/65cc3299055324057763117e27ba8e16ac82c08e))
+
 ## [2.12.4](https://github.com/raaaf/starter/compare/v2.12.3...v2.12.4) (2026-03-19)
 
 ## [2.12.3](https://github.com/raaaf/starter/compare/v2.12.2...v2.12.3) (2026-03-19)
