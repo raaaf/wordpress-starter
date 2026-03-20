@@ -41,6 +41,18 @@ html {
   border-radius: var(--radius-lg, 0.5rem);
 }
 
+/* MediaElement.js player gets inline pixel widths from WordPress — override to stay responsive */
+.wp-video .mejs-container {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.wp-video .mejs-overlay,
+.wp-video .mejs-mediaelement video {
+  width: 100% !important;
+  height: auto !important;
+}
+
 /*
  * Prose Color Integration
  *
