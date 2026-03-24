@@ -539,6 +539,76 @@ class Options
                     true,
                     __('Zeigt das Legal-Menü (Impressum, Datenschutz) in der unteren Leiste.', 'wp-starter')
                 ),
+
+                // === Hinweisleiste ===
+                [
+                    'key' => 'field_options_footer_tab_alerts',
+                    'label' => __('Hinweisleiste', 'wp-starter'),
+                    'type' => 'tab',
+                ],
+                FieldDefinitions::infoBoxField(
+                    'field_options_footer_alerts_info',
+                    __('Hinweise werden zwischen Seiteninhalt und Footer angezeigt. Ideal für rechtliche Hinweise, Risikobelehrungen oder temporäre Mitteilungen. Bei Textänderung erscheint ein zuvor geschlossener Hinweis erneut.', 'wp-starter'),
+                    'info'
+                ),
+                array_merge(
+                    FieldDefinitions::repeaterField(
+                        'field_options_footer_alerts',
+                        __('Hinweise', 'wp-starter'),
+                        'footer_alerts',
+                        [
+                            FieldDefinitions::trueFalseField(
+                                'field_options_footer_alert_active',
+                                __('Aktiv', 'wp-starter'),
+                                'active',
+                                true
+                            ),
+                            FieldDefinitions::trueFalseField(
+                                'field_options_footer_alert_dismissible',
+                                __('Schliessbar', 'wp-starter'),
+                                'dismissible',
+                                false,
+                                __('Besucher kann den Hinweis ausblenden (localStorage, 7 Tage).', 'wp-starter')
+                            ),
+                            FieldDefinitions::textareaField(
+                                'field_options_footer_alert_text',
+                                __('Hinweistext', 'wp-starter'),
+                                'text',
+                                3,
+                                __('Einfacher Text oder HTML (Links, Fett). Max. 500 Zeichen empfohlen.', 'wp-starter')
+                            ),
+                            FieldDefinitions::selectField(
+                                'field_options_footer_alert_visibility',
+                                __('Sichtbarkeit', 'wp-starter'),
+                                'visibility',
+                                [
+                                    'all' => __('Alle Seiten', 'wp-starter'),
+                                    'only' => __('Nur ausgewählte Seiten', 'wp-starter'),
+                                    'except' => __('Alle ausser ausgewählte Seiten', 'wp-starter'),
+                                ],
+                                'all'
+                            ),
+                            [
+                                'key' => 'field_options_footer_alert_pages',
+                                'label' => __('Seiten', 'wp-starter'),
+                                'name' => 'pages',
+                                'type' => 'relationship',
+                                'post_type' => ['page'],
+                                'filters' => ['search'],
+                                'return_format' => 'id',
+                                'min' => 0,
+                                'max' => '',
+                                'conditional_logic' => [
+                                    [['field' => 'field_options_footer_alert_visibility', 'operator' => '!=', 'value' => 'all']],
+                                ],
+                            ],
+                        ],
+                        __('Hinweis hinzufügen', 'wp-starter'),
+                        0,
+                        'block'
+                    ),
+                    ['max' => 5]
+                ),
             ],
             'location' => [
                 [
