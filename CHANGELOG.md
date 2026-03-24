@@ -1,3 +1,14 @@
+# [2.13.0](https://github.com/raaaf/starter/compare/v2.12.5...v2.13.0) (2026-03-24)
+
+### Bug Fixes
+
+- alert bar design tweaks and WYSIWYG field ([2ffe275](https://github.com/raaaf/starter/commit/2ffe275f19ae923cdd9e642ef540146858a27279))
+- use basic WYSIWYG toolbar, fix invisible hover on close button ([5beb1a1](https://github.com/raaaf/starter/commit/5beb1a134cc03028a95ac3fe7be535f1c9f68c7b))
+
+### Features
+
+- add footer alert bar for legal disclaimers and notices ([a1ccd9d](https://github.com/raaaf/starter/commit/a1ccd9df87a2c6ea740cd7df19894d967c20cc8f))
+
 ## [2.12.5](https://github.com/raaaf/starter/compare/v2.12.4...v2.12.5) (2026-03-20)
 
 ### Bug Fixes
