@@ -32,7 +32,7 @@
         @endif
 
         @if($headline)
-            <h2 class="m-0! mt-4!">{!! $headline !!}</h2>
+            <h2 class="m-0 mt-4">{!! $headline !!}</h2>
         @endif
 
         @if($description)

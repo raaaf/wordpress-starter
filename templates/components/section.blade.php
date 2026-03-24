@@ -60,7 +60,7 @@
             class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 @if($shouldAnimate) motion-reduce:opacity-100! motion-reduce:transform-none! @endif"
             @if($shouldAnimate)
                 x-show="shown"
-                x-transition:enter="transition ease-out duration-500"
+                x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 translate-y-4"
                 x-transition:enter-end="opacity-100 translate-y-0"
             @endif
@@ -72,7 +72,7 @@
             <div
                 class="motion-reduce:opacity-100! motion-reduce:transform-none!"
                 x-show="shown"
-                x-transition:enter="transition ease-out duration-500"
+                x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 translate-y-4"
                 x-transition:enter-end="opacity-100 translate-y-0"
             >

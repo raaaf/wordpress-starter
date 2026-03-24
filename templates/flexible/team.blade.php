@@ -45,7 +45,15 @@
     @endif
 
     @if(!empty($members))
-        <div class="grid gap-8 md:grid-cols-{{ $columns }}">
+        @php
+            $gridClass = match((int) $columns) {
+                2 => 'md:grid-cols-2',
+                3 => 'md:grid-cols-3',
+                4 => 'md:grid-cols-4',
+                default => 'md:grid-cols-3',
+            };
+        @endphp
+        <div class="grid gap-8 {{ $gridClass }}">
             @foreach($members as $member)
                 @php
                     $imageId = $member['image'] ?? null;
@@ -96,7 +104,7 @@
                                     class="p-2! min-h-0! hover:bg-surface-brand! hover:text-content-inverse!"
                                 >
                                     <x-icon name="mail" size="lg" />
-                                    <span class="sr-only">E-Mail</span>
+                                    <span class="sr-only">{{ __('E-Mail', 'wp-starter') }}</span>
                                 </x-button>
                             @endif
                             @if($linkedin)
@@ -110,7 +118,7 @@
                                     class="p-2! min-h-0! hover:bg-surface-brand! hover:text-content-inverse!"
                                 >
                                     <x-icon name="linkedin" size="lg" />
-                                    <span class="sr-only">LinkedIn</span>
+                                    <span class="sr-only">{{ __('LinkedIn', 'wp-starter') }}</span>
                                 </x-button>
                             @endif
                         </div>

@@ -48,7 +48,7 @@
 
                     <div class="mb-6">
                         @if($price)
-                            <span class="text-h1 {{ $isFeatured ? 'text-content-inverse' : 'text-content' }}">{{ $price }}</span>
+                            <span class="text-h1 tabular-nums {{ $isFeatured ? 'text-content-inverse' : 'text-content' }}">{{ $price }}</span>
                         @endif
                         @if($period)
                             <span class="{{ $isFeatured ? 'text-content-inverse opacity-80' : 'text-content-secondary' }}">/ {{ $period }}</span>

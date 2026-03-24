@@ -18,7 +18,7 @@
     $variants = [
         'info' => [
             'wrapper' => 'bg-surface-accent-subtle border border-line-accent text-content-accent',
-            'icon' => 'plus',
+            'icon' => 'info',
             'iconClass' => 'text-icon-accent',
         ],
         'success' => [

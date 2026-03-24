@@ -191,7 +191,7 @@ Available under "Theme-Einstellungen" in admin:
 
 - **Allgemein:** Logo, Favicon, Contact info
 - **Header:** Sticky header, CTA button
-- **Footer:** Footer text, copyright
+- **Footer:** Footer text, copyright, alert bar (Hinweisleiste)
 - **Social Media:** Social links repeater
 - **Analytics:** Rybbit Analytics (DSGVO-konform, via Plugin)
 - **Rechtliches:** Privacy, Imprint pages
