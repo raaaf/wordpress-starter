@@ -570,12 +570,13 @@ class Options
                                 false,
                                 __('Besucher kann den Hinweis ausblenden (localStorage, 7 Tage).', 'wp-starter')
                             ),
-                            FieldDefinitions::textareaField(
+                            FieldDefinitions::wysiwygField(
                                 'field_options_footer_alert_text',
                                 __('Hinweistext', 'wp-starter'),
                                 'text',
-                                3,
-                                __('Einfacher Text oder HTML (Links, Fett). Max. 500 Zeichen empfohlen.', 'wp-starter')
+                                false,
+                                null,
+                                __('Wird als Kleingedrucktes über dem Footer angezeigt.', 'wp-starter')
                             ),
                             FieldDefinitions::selectField(
                                 'field_options_footer_alert_visibility',
