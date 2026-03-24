@@ -34,7 +34,7 @@
 @php
     // Base classes - common to all buttons
     // 'button' class is used for editor CSS overrides (prevents WordPress link styling)
-    $baseClasses = 'button inline-flex items-center justify-center font-semibold transition-all duration-200 no-underline cursor-pointer select-none focus-visible:outline-none';
+    $baseClasses = 'button inline-flex items-center justify-center font-semibold transition-[color,background,border-color,box-shadow,transform] duration-200 no-underline cursor-pointer select-none focus-visible:outline-none active:scale-[0.98]';
 
     // Variants matching Figma design with gradients and shadows
     $variants = [

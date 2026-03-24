@@ -48,10 +48,6 @@
             peer-checked:bg-surface-accent peer-checked:border-surface-accent
             {{ $disabled ? 'peer-checked:bg-surface-disabled peer-checked:border-line-disabled' : '' }}
         ">
-            {{-- Check icon --}}
-            <svg class="w-full h-full text-content-on-color hidden peer-checked:block" viewBox="0 0 16 16" fill="none">
-                <path d="M13.5 4.5L6.5 11.5L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
         </span>
 
         {{-- Check/Minus icon (shown via CSS) --}}

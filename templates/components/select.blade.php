@@ -62,7 +62,7 @@
     $radiusClass = $radiusClasses[$size] ?? $radiusClasses['md'];
 
     // Base select classes from Figma tokens
-    $baseClasses = 'w-full border bg-surface text-content appearance-none cursor-pointer transition-all duration-200 focus:outline-none';
+    $baseClasses = 'w-full border bg-surface text-content appearance-none cursor-pointer transition-[color,background,border-color,box-shadow] duration-200 focus:outline-none';
 
     // State classes from Figma
     $stateClasses = match(true) {

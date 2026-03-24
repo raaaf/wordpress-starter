@@ -64,7 +64,7 @@
     $actualRows = $rows ?? $sizeConfig['rows'];
 
     // Base textarea classes from Figma
-    $baseClasses = 'textarea w-full border bg-surface text-content placeholder:text-content-tertiary resize-y transition-all duration-200 focus:outline-none';
+    $baseClasses = 'textarea w-full border bg-surface text-content placeholder:text-content-tertiary resize-y transition-[color,background,border-color,box-shadow] duration-200 focus:outline-none';
 
     // State classes from Figma
     $stateClasses = match(true) {

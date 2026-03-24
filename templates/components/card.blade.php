@@ -76,7 +76,7 @@
     $isInteractive = $hoverable || $url;
     $interactiveClasses = $isInteractive && !$disabled
         ? implode(' ', [
-            'transition-all duration-200 cursor-pointer',
+            'transition-[color,background,border-color,box-shadow,transform] duration-200 cursor-pointer',
             'hover:border-line-brand hover:shadow-[var(--shadow-card-hover)]',
             'active:shadow-[var(--shadow-inner)] active:scale-[0.99]',
             'focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]',
