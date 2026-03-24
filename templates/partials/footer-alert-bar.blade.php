@@ -22,7 +22,7 @@
                             <button
                                 type="button"
                                 @click="localStorage.setItem('{{ $alert['storage_key'] }}', JSON.stringify({t: Date.now()})); dismissed = true"
-                                class="shrink-0 cursor-pointer rounded p-2 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-secondary"
+                                class="shrink-0 cursor-pointer rounded p-2 text-content-tertiary transition-colors hover:bg-black/5 hover:text-content-secondary"
                                 aria-label="{{ __('Hinweis schließen', 'wp-starter') }}"
                             >
                                 <x-icon name="close" class="h-4 w-4" />

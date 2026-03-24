@@ -570,14 +570,17 @@ class Options
                                 false,
                                 __('Besucher kann den Hinweis ausblenden (localStorage, 7 Tage).', 'wp-starter')
                             ),
-                            FieldDefinitions::wysiwygField(
-                                'field_options_footer_alert_text',
-                                __('Hinweistext', 'wp-starter'),
-                                'text',
-                                false,
-                                null,
-                                __('Wird als Kleingedrucktes über dem Footer angezeigt.', 'wp-starter')
-                            ),
+                            [
+                                'key' => 'field_options_footer_alert_text',
+                                'label' => __('Hinweistext', 'wp-starter'),
+                                'name' => 'text',
+                                'type' => 'wysiwyg',
+                                'required' => 0,
+                                'instructions' => __('Wird als Kleingedrucktes über dem Footer angezeigt.', 'wp-starter'),
+                                'tabs' => 'visual',
+                                'toolbar' => 'basic',
+                                'media_upload' => 0,
+                            ],
                             FieldDefinitions::selectField(
                                 'field_options_footer_alert_visibility',
                                 __('Sichtbarkeit', 'wp-starter'),
