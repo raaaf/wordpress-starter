@@ -15,14 +15,14 @@
             >
                 <div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
                     <div class="flex items-center gap-3">
-                        <p class="flex-1 text-sm leading-relaxed text-content-secondary">
+                        <div class="flex-1 text-xs leading-relaxed text-content-secondary [&_p]:mb-0">
                             {!! wp_kses_post($alert['text']) !!}
-                        </p>
+                        </div>
                         @if($alert['dismissible'])
                             <button
                                 type="button"
                                 @click="localStorage.setItem('{{ $alert['storage_key'] }}', JSON.stringify({t: Date.now()})); dismissed = true"
-                                class="shrink-0 p-1 text-content-tertiary transition-colors hover:text-content-secondary"
+                                class="shrink-0 cursor-pointer rounded p-2 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-secondary"
                                 aria-label="{{ __('Hinweis schließen', 'wp-starter') }}"
                             >
                                 <x-icon name="close" class="h-4 w-4" />
