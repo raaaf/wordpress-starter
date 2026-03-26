@@ -1,3 +1,10 @@
+## [2.13.1](https://github.com/raaaf/starter/compare/v2.13.0...v2.13.1) (2026-03-26)
+
+### Bug Fixes
+
+- **seo:** add is_multisite mock to test bootstrap ([70e3c53](https://github.com/raaaf/starter/commit/70e3c53a8f382523f2d60b2c81f9bc1ce8172960))
+- **seo:** correct robots.txt sitemap URL for multisite with domain mapping ([0a4f757](https://github.com/raaaf/starter/commit/0a4f757eba16feb2f00a3276066f913a600b939a))
+
 # [2.13.0](https://github.com/raaaf/starter/compare/v2.12.5...v2.13.0) (2026-03-24)
 
 ### Bug Fixes
