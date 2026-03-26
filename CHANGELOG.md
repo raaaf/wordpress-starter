@@ -1,3 +1,5 @@
+## [2.13.2](https://github.com/raaaf/starter/compare/v2.13.1...v2.13.2) (2026-03-26)
+
 ## [2.13.1](https://github.com/raaaf/starter/compare/v2.13.0...v2.13.1) (2026-03-26)
 
 ### Bug Fixes
