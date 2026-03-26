@@ -7,7 +7,7 @@
 --}}
 
 @php
-    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
+    $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $logos = get_sub_field('logos');
     $autoplay = get_sub_field('autoplay') ?? true;
     $background = get_sub_field('background_color') ?: 'primary';

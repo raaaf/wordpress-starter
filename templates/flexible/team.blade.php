@@ -12,7 +12,7 @@
 @php
     use WordpressStarter\PostTypes\Team;
 
-    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
+    $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $source = get_sub_field('source') ?: 'manual';
     $columns = get_sub_field('columns') ?: 3;
     $background = get_sub_field('background_color') ?: 'primary';
@@ -89,7 +89,7 @@
                     @endif
 
                     @if($bio)
-                        <p class="mb-4 text-content-secondary">{{ $bio }}</p>
+                        <p class="mb-4 text-content-secondary">{!! \WordpressStarter\Helpers\Text::lineBreaks($bio) !!}</p>
                     @endif
 
                     @if($email || $linkedin)

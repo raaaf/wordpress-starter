@@ -7,7 +7,7 @@
 --}}
 
 @php
-    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
+    $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $postType = get_sub_field('post_type') ?: 'post';
     $postsPerPage = get_sub_field('posts_per_page') ?: 3;
     $category = get_sub_field('category') ?: '';

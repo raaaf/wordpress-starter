@@ -7,7 +7,7 @@
 --}}
 
 @php
-    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
+    $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $stats = get_sub_field('stats') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
 

@@ -6,7 +6,7 @@
 --}}
 
 @php
-    $title = wp_kses(str_replace('[br]', '<br>', get_sub_field('title') ?: ''), ['br' => []]);
+    $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $content = wp_kses_post(get_sub_field('content'));
     $formId = get_sub_field('form_id');
     $showContactInfo = get_sub_field('show_contact_info') ?? true;

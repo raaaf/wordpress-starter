@@ -9,8 +9,8 @@
 @php
     $variant = get_sub_field('variant') ?: 'centered';
     $badge = get_sub_field('badge');
-    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
-    $copy = get_sub_field('copy');
+    $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+    $copy = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('copy'));
     $cta_primary = get_sub_field('cta_primary');
     $cta_secondary = get_sub_field('cta_secondary');
     $image = get_sub_field('image');
@@ -94,7 +94,7 @@
                 @endif
 
                 @if($copy)
-                    <p class="text-body-large mb-8 text-content-secondary">{{ $copy }}</p>
+                    <p class="text-body-large mb-8 text-content-secondary">{!! $copy !!}</p>
                 @endif
 
                 @if($cta_primary || $cta_secondary)
@@ -139,7 +139,7 @@
                 @endif
 
                 @if($copy)
-                    <p class="text-lg mb-8 text-content-secondary">{{ $copy }}</p>
+                    <p class="text-lg mb-8 text-content-secondary">{!! $copy !!}</p>
                 @endif
 
                 @if($cta_primary || $cta_secondary)
@@ -204,7 +204,7 @@
             @endif
 
             @if($copy)
-                <p class="text-lg md:text-xl mb-8 text-content-secondary">{{ $copy }}</p>
+                <p class="text-lg md:text-xl mb-8 text-content-secondary">{!! $copy !!}</p>
             @endif
 
             @if($cta_primary || $cta_secondary)

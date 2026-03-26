@@ -6,7 +6,7 @@
 --}}
 
 @php
-    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
+    $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $address = get_sub_field('address') ?: '';
     $embedUrl = get_sub_field('embed_url') ?: '';
     $height = get_sub_field('height') ?: 400;

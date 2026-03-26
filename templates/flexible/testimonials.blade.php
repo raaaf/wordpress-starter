@@ -12,7 +12,7 @@
 @php
     use WordpressStarter\PostTypes\Testimonial;
 
-    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
+    $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $source = get_sub_field('source') ?: 'manual';
     $columns = get_sub_field('columns') ?: '3';
     $background = get_sub_field('background_color') ?: 'primary';
@@ -53,7 +53,7 @@
 
                     {{-- Quote --}}
                     <blockquote class="text-body-large italic flex-grow mb-6 text-content-secondary">
-                        "{{ $testimonial['quote'] ?? '' }}"
+                        "{!! \WordpressStarter\Helpers\Text::lineBreaks($testimonial['quote'] ?? '') !!}"
                     </blockquote>
 
                     {{-- Author --}}

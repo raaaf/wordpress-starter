@@ -300,13 +300,29 @@ class AcfServiceProvider extends ServiceProvider
             return sanitize_textarea_field($value);
         }, 10, 1);
 
-        // Add [br] hint to title field instructions
-        add_filter('acf/prepare_field/name=title', function ($field): mixed {
-            if ($field['type'] === 'text' && !empty($field['instructions'])) {
-                $field['instructions'] .= ' ' . __('Nutze [br] für einen manuellen Zeilenumbruch.', 'wp-starter');
+        // Add [br] hint to all text and textarea field instructions
+        $brHint = function ($field): mixed {
+            if (!is_array($field) || empty($field['type'])) {
+                return $field;
             }
+
+            // Skip fields that don't benefit from line breaks
+            $excludeNames = ['email', 'phone', 'url', 'website', 'section_anchor'];
+            if (in_array($field['name'] ?? '', $excludeNames, true)) {
+                return $field;
+            }
+
+            $hint = __('Nutze [br] für einen manuellen Zeilenumbruch.', 'wp-starter');
+            if (!empty($field['instructions']) && !str_contains($field['instructions'], '[br]')) {
+                $field['instructions'] .= ' ' . $hint;
+            } elseif (empty($field['instructions'])) {
+                $field['instructions'] = $hint;
+            }
+
             return $field;
-        });
+        };
+        add_filter('acf/prepare_field/type=text', $brHint);
+        add_filter('acf/prepare_field/type=textarea', $brHint);
     }
 
     /**
