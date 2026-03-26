@@ -378,6 +378,13 @@ if (!function_exists('is_admin')) {
     }
 }
 
+if (!function_exists('is_multisite')) {
+    function is_multisite(): bool
+    {
+        return $GLOBALS['wp_mock_is_multisite'] ?? false;
+    }
+}
+
 // Block editor functions
 if (!function_exists('acf_register_block_type')) {
     function acf_register_block_type(array $settings): void
