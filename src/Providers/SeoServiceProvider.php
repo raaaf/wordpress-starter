@@ -23,10 +23,38 @@ class SeoServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->addRobotsOverrides();
+        $this->fixMultisiteRobotsTxt();
         $this->addStructuredData();
         $this->addBreadcrumbSchema();
         $this->addCanonicalUrl();
         $this->addOpenGraphTags();
+    }
+
+    /**
+     * Fix robots.txt sitemap URL in WordPress Multisite with domain mapping.
+     *
+     * WordPress Multisite generates a single robots.txt from the main site,
+     * which means subsites with custom domains get the wrong sitemap URL.
+     * This filter replaces the sitemap reference with the current site's home URL.
+     */
+    private function fixMultisiteRobotsTxt(): void
+    {
+        if (!is_multisite()) {
+            return;
+        }
+
+        add_filter('robots_txt', function (string $output): string {
+            $homeUrl = home_url('/');
+
+            // Remove any existing Sitemap lines
+            $output = preg_replace('/^Sitemap:.*$/mi', '', $output);
+            $output = rtrim($output) . "\n";
+
+            // Add correct sitemap URL for this site
+            $output .= "\nSitemap: " . $homeUrl . 'sitemap_index.xml' . "\n";
+
+            return $output;
+        }, 999);
     }
 
     /**
