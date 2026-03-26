@@ -6,7 +6,7 @@
 
     @param string|null $chip        - Optional badge text above the headline
     @param string|null $headline    - H2 headline (HTML allowed for [br] replacements)
-    @param string|null $description - Optional description paragraph
+    @param string|null $description - Optional description paragraph (HTML allowed for [br] replacements)
     @param string $alignment        - 'center' (default) or 'left'
     @param string $class            - Additional CSS classes
 --}}
@@ -36,7 +36,7 @@
         @endif
 
         @if($description)
-            <p class="mt-4 text-body-large text-content-secondary {{ $descClass }}">{{ $description }}</p>
+            <p class="mt-4 text-body-large text-content-secondary {{ $descClass }}">{!! $description !!}</p>
         @endif
     </div>
 @endif

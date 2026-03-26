@@ -6,7 +6,7 @@
 --}}
 
 @php
-    $title = str_replace('[br]', '<br>', get_sub_field('title') ?: '');
+    $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $cards = get_sub_field('cards');
     $columns = get_sub_field('columns') ?: '3';
     $background = get_sub_field('background_color') ?: 'primary';
@@ -35,7 +35,7 @@
 
                     {{-- Content --}}
                     @if(!empty($card['content']))
-                        <p class="mb-4 text-content-secondary">{{ $card['content'] }}</p>
+                        <p class="mb-4 text-content-secondary">{!! \WordpressStarter\Helpers\Text::lineBreaks($card['content']) !!}</p>
                     @endif
 
                     {{-- Link --}}

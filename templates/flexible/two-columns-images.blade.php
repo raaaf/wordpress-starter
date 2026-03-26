@@ -8,8 +8,8 @@
 @php
     $showHeader = get_sub_field('show_section_header');
     $chip = $showHeader ? get_sub_field('section_chip') : null;
-    $headline = $showHeader ? str_replace('[br]', '<br>', get_sub_field('section_headline') ?: '') : null;
-    $description = $showHeader ? get_sub_field('section_description') : null;
+    $headline = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_headline')) : null;
+    $description = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_description')) : null;
     $alignment = $showHeader ? (get_sub_field('section_alignment') ?: 'center') : 'center';
     $image_1 = get_sub_field('image_1');
     $column_1 = get_sub_field('column_1');
