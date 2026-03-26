@@ -1,3 +1,9 @@
+# [2.14.0](https://github.com/raaaf/starter/compare/v2.13.2...v2.14.0) (2026-03-26)
+
+### Features
+
+- **acf:** add [br] line break support to all prose text fields ([a8ba8c6](https://github.com/raaaf/starter/commit/a8ba8c65cc4003c8e4d850705a31ab10df9a013d))
+
 ## [2.13.2](https://github.com/raaaf/starter/compare/v2.13.1...v2.13.2) (2026-03-26)
 
 ## [2.13.1](https://github.com/raaaf/starter/compare/v2.13.0...v2.13.1) (2026-03-26)
