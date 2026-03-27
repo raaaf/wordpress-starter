@@ -37,12 +37,14 @@ html {
 .wp-video-shortcode {
   width: 100% !important;
   max-width: 100% !important;
+  height: auto !important;
   border-radius: var(--radius-lg, 0.5rem);
 }
 
 /* MediaElement.js player gets inline pixel widths from WordPress — override to stay responsive */
 .wp-video .mejs-container {
   width: 100% !important;
+  height: auto !important;
   min-width: 0 !important;
 }
 
