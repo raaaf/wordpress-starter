@@ -1,3 +1,9 @@
+## [2.14.2](https://github.com/raaaf/starter/compare/v2.14.1...v2.14.2) (2026-03-27)
+
+### Bug Fixes
+
+- **auth:** always grant member area access to administrators ([3e2527b](https://github.com/raaaf/starter/commit/3e2527bfebf405879acd706da21fd5f9797462d1))
+
 ## [2.14.1](https://github.com/raaaf/starter/compare/v2.14.0...v2.14.1) (2026-03-27)
 
 ### Bug Fixes
