@@ -198,8 +198,11 @@ class FlexibleContent
             // Column-based layout options
             self::oneColumnLayout(),
             self::twoColumnsLayout(),
+            self::oneColumnImageLayout(),
             self::twoColumnsImagesLayout(),
+            self::threeColumnsImagesLayout(),
             self::threeColumnsLayout(),
+            self::fourColumnsImagesLayout(),
             self::fourColumnsLayout(),
             self::oneThirdTwoThirdsLayout(),
             self::twoThirdsOneThirdLayout(),
@@ -316,6 +319,18 @@ class FlexibleContent
      *
      * @return array<string, mixed>
      */
+    private static function oneColumnImageLayout(): array
+    {
+        return [
+            'key' => 'layout_one_column_image',
+            'name' => 'one_column_image',
+            'label' => __('Eine Spalte mit Bild', 'wp-starter'),
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::oneColumnImageFields('flex_one_column_image'),
+            'acfe_flexible_category' => self::getCategories()['layout'],
+        ];
+    }
+
     private static function twoColumnsImagesLayout(): array
     {
         return [
@@ -324,6 +339,30 @@ class FlexibleContent
             'label' => __('Zwei Spalten mit Bildern', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::twoColumnsImagesFields('flex_two_columns_images'),
+            'acfe_flexible_category' => self::getCategories()['layout'],
+        ];
+    }
+
+    private static function threeColumnsImagesLayout(): array
+    {
+        return [
+            'key' => 'layout_three_columns_images',
+            'name' => 'three_columns_images',
+            'label' => __('Drei Spalten mit Bildern', 'wp-starter'),
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::threeColumnsImagesFields('flex_three_columns_images'),
+            'acfe_flexible_category' => self::getCategories()['layout'],
+        ];
+    }
+
+    private static function fourColumnsImagesLayout(): array
+    {
+        return [
+            'key' => 'layout_four_columns_images',
+            'name' => 'four_columns_images',
+            'label' => __('Vier Spalten mit Bildern', 'wp-starter'),
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::fourColumnsImagesFields('flex_four_columns_images'),
             'acfe_flexible_category' => self::getCategories()['layout'],
         ];
     }
