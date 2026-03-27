@@ -99,7 +99,7 @@ class Auth
                 'user_login' => $credential,
                 'user_password' => $password ?? '',
                 'remember' => false,
-            ]);
+            ], is_ssl());
 
             if (is_wp_error($result)) {
                 return $result;
