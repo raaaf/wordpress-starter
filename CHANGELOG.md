@@ -1,3 +1,9 @@
+## [2.14.1](https://github.com/raaaf/starter/compare/v2.14.0...v2.14.1) (2026-03-27)
+
+### Bug Fixes
+
+- **auth:** stop sanitizing passwords and improve login error messages ([b453bb0](https://github.com/raaaf/starter/commit/b453bb0b6bbce96abcae9fb9527af632332f3962))
+
 # [2.14.0](https://github.com/raaaf/starter/compare/v2.13.2...v2.14.0) (2026-03-26)
 
 ### Features
