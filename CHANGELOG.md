@@ -1,3 +1,9 @@
+## [2.15.2](https://github.com/raaaf/starter/compare/v2.15.1...v2.15.2) (2026-03-27)
+
+### Bug Fixes
+
+- **css:** use aspect-ratio on mejs-container for responsive video sizing ([b76210e](https://github.com/raaaf/starter/commit/b76210e8a6cbaec57ccd9ef5ebe1849003b60e88))
+
 ## [2.15.1](https://github.com/raaaf/starter/compare/v2.15.0...v2.15.1) (2026-03-27)
 
 ### Bug Fixes
