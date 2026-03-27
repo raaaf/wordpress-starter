@@ -1,3 +1,9 @@
+## [2.15.1](https://github.com/raaaf/starter/compare/v2.15.0...v2.15.1) (2026-03-27)
+
+### Bug Fixes
+
+- **css:** add height auto to mejs-container for responsive video sizing ([c419b78](https://github.com/raaaf/starter/commit/c419b785ed844129a99352978e3cc08b56383426))
+
 # [2.15.0](https://github.com/raaaf/starter/compare/v2.14.2...v2.15.0) (2026-03-27)
 
 ### Bug Fixes
