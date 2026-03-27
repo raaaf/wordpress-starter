@@ -1506,6 +1506,32 @@ class FieldDefinitions
      * @param string $prefix Key prefix
      * @return array<int, array<string, mixed>>
      */
+    public static function oneColumnImageFields(string $prefix): array
+    {
+        return [
+            ...self::sectionHeaderFields($prefix),
+            self::imageField(
+                "field_{$prefix}_image",
+                __('Bild', 'wp-starter'),
+                'image',
+                false,
+                'id',
+                null,
+                __('Bild für die Karte.', 'wp-starter')
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_content",
+                __('Inhalt', 'wp-starter'),
+                'content',
+                false,
+                null,
+                __('Text unter dem Bild.', 'wp-starter')
+            ),
+            self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
+        ];
+    }
+
     public static function twoColumnsImagesFields(string $prefix): array
     {
         return [
@@ -1514,7 +1540,7 @@ class FieldDefinitions
                 "field_{$prefix}_image_1",
                 __('Bild 1', 'wp-starter'),
                 'image_1',
-                true,
+                false,
                 'id',
                 null,
                 __('Bild für die linke Karte.', 'wp-starter'),
@@ -1532,7 +1558,7 @@ class FieldDefinitions
                 "field_{$prefix}_image_2",
                 __('Bild 2', 'wp-starter'),
                 'image_2',
-                true,
+                false,
                 'id',
                 null,
                 __('Bild für die rechte Karte.', 'wp-starter'),
@@ -1545,6 +1571,150 @@ class FieldDefinitions
                 false,
                 '50',
                 __('Text unter dem zweiten Bild.', 'wp-starter')
+            ),
+            self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
+        ];
+    }
+
+    public static function threeColumnsImagesFields(string $prefix): array
+    {
+        return [
+            ...self::sectionHeaderFields($prefix),
+            self::imageField(
+                "field_{$prefix}_image_1",
+                __('Bild 1', 'wp-starter'),
+                'image_1',
+                false,
+                'id',
+                null,
+                __('Bild für die linke Karte.', 'wp-starter'),
+                '33'
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_column_1",
+                __('Inhalt 1', 'wp-starter'),
+                'column_1',
+                false,
+                '33',
+                __('Text unter dem ersten Bild.', 'wp-starter')
+            ),
+            self::imageField(
+                "field_{$prefix}_image_2",
+                __('Bild 2', 'wp-starter'),
+                'image_2',
+                false,
+                'id',
+                null,
+                __('Bild für die mittlere Karte.', 'wp-starter'),
+                '33'
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_column_2",
+                __('Inhalt 2', 'wp-starter'),
+                'column_2',
+                false,
+                '33',
+                __('Text unter dem zweiten Bild.', 'wp-starter')
+            ),
+            self::imageField(
+                "field_{$prefix}_image_3",
+                __('Bild 3', 'wp-starter'),
+                'image_3',
+                false,
+                'id',
+                null,
+                __('Bild für die rechte Karte.', 'wp-starter'),
+                '33'
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_column_3",
+                __('Inhalt 3', 'wp-starter'),
+                'column_3',
+                false,
+                '33',
+                __('Text unter dem dritten Bild.', 'wp-starter')
+            ),
+            self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
+        ];
+    }
+
+    public static function fourColumnsImagesFields(string $prefix): array
+    {
+        return [
+            ...self::sectionHeaderFields($prefix),
+            self::imageField(
+                "field_{$prefix}_image_1",
+                __('Bild 1', 'wp-starter'),
+                'image_1',
+                false,
+                'id',
+                null,
+                __('Bild für die erste Karte.', 'wp-starter'),
+                '25'
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_column_1",
+                __('Inhalt 1', 'wp-starter'),
+                'column_1',
+                false,
+                '25',
+                __('Text unter dem ersten Bild.', 'wp-starter')
+            ),
+            self::imageField(
+                "field_{$prefix}_image_2",
+                __('Bild 2', 'wp-starter'),
+                'image_2',
+                false,
+                'id',
+                null,
+                __('Bild für die zweite Karte.', 'wp-starter'),
+                '25'
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_column_2",
+                __('Inhalt 2', 'wp-starter'),
+                'column_2',
+                false,
+                '25',
+                __('Text unter dem zweiten Bild.', 'wp-starter')
+            ),
+            self::imageField(
+                "field_{$prefix}_image_3",
+                __('Bild 3', 'wp-starter'),
+                'image_3',
+                false,
+                'id',
+                null,
+                __('Bild für die dritte Karte.', 'wp-starter'),
+                '25'
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_column_3",
+                __('Inhalt 3', 'wp-starter'),
+                'column_3',
+                false,
+                '25',
+                __('Text unter dem dritten Bild.', 'wp-starter')
+            ),
+            self::imageField(
+                "field_{$prefix}_image_4",
+                __('Bild 4', 'wp-starter'),
+                'image_4',
+                false,
+                'id',
+                null,
+                __('Bild für die vierte Karte.', 'wp-starter'),
+                '25'
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_column_4",
+                __('Inhalt 4', 'wp-starter'),
+                'column_4',
+                false,
+                '25',
+                __('Text unter dem vierten Bild.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
