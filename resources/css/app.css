@@ -34,29 +34,22 @@ html {
   border-radius: var(--radius-lg, 0.5rem);
 }
 
-.wp-video-shortcode {
+.wp-video-shortcode,
+.wp-video .mejs-container {
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
+  aspect-ratio: 16 / 9;
   border-radius: var(--radius-lg, 0.5rem);
 }
 
-/* MediaElement.js player gets inline pixel widths from WordPress — override to stay responsive */
-.wp-video .mejs-container {
-  width: 100% !important;
-  height: auto !important;
-  min-width: 0 !important;
-}
-
-.wp-video .mejs-overlay {
+/* Inner video and overlay fill the aspect-ratio container */
+.wp-video .mejs-mediaelement,
+.wp-video .mejs-mediaelement video,
+.wp-video .mejs-overlay,
+.wp-video .mejs-poster {
   width: 100% !important;
   height: 100% !important;
-  margin: 0 !important;
-}
-
-.wp-video .mejs-mediaelement video {
-  width: 100% !important;
-  height: auto !important;
   margin: 0 !important;
 }
 
