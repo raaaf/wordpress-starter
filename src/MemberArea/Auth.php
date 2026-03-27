@@ -43,6 +43,11 @@ class Auth
 
     public static function isAuthenticated(): bool
     {
+        // Administrators always have access regardless of auth mode
+        if (is_user_logged_in() && current_user_can('manage_options')) {
+            return true;
+        }
+
         $mode = self::getAuthMode();
 
         if (strtolower($mode) === 'wordpress') { // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
