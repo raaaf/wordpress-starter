@@ -1,3 +1,17 @@
+# [2.15.0](https://github.com/raaaf/starter/compare/v2.14.2...v2.15.0) (2026-03-27)
+
+### Bug Fixes
+
+- **acf:** add content guards and fix DocBlocks for image layouts ([7323abf](https://github.com/raaaf/starter/commit/7323abf9248d320459314cd974bd65a31d84dbac))
+- add missing PHPStan return type annotations for image layout fields ([8755bd7](https://github.com/raaaf/starter/commit/8755bd7d05fea51ceee4c0c2f992400fb7862627))
+- **auth:** pass is_ssl() to wp_signon for correct cookie handling ([08a9935](https://github.com/raaaf/starter/commit/08a9935a51b58b81f4787b458262303917a213db))
+- **css:** prevent inline video collapse and fix play button centering ([a1e838d](https://github.com/raaaf/starter/commit/a1e838d46366f73222726a746e352449b0cace50))
+- skip scroll animations on anchor hash navigation ([dd108d0](https://github.com/raaaf/starter/commit/dd108d0c4ca4aa67a79f8f7e8588dcd2e38ed521))
+
+### Features
+
+- **acf:** add one-column, three-columns, and four-columns image layouts ([360f372](https://github.com/raaaf/starter/commit/360f372724f7f536ee3346c3d4b2f52e9b75836f))
+
 ## [2.14.3](https://github.com/raaaf/starter/compare/v2.14.2...v2.14.3) (2026-03-27)
 
 ### Bug Fixes
