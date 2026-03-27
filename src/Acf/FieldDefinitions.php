@@ -1532,6 +1532,10 @@ class FieldDefinitions
         ];
     }
 
+    /**
+     * @param string $prefix Key prefix
+     * @return array<int, array<string, mixed>>
+     */
     public static function twoColumnsImagesFields(string $prefix): array
     {
         return [
@@ -1577,6 +1581,10 @@ class FieldDefinitions
         ];
     }
 
+    /**
+     * @param string $prefix Key prefix
+     * @return array<int, array<string, mixed>>
+     */
     public static function threeColumnsImagesFields(string $prefix): array
     {
         return [
@@ -1640,6 +1648,10 @@ class FieldDefinitions
         ];
     }
 
+    /**
+     * @param string $prefix Key prefix
+     * @return array<int, array<string, mixed>>
+     */
     public static function fourColumnsImagesFields(string $prefix): array
     {
         return [
