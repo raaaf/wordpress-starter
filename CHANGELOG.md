@@ -1,3 +1,9 @@
+## [2.14.3](https://github.com/raaaf/starter/compare/v2.14.2...v2.14.3) (2026-03-27)
+
+### Bug Fixes
+
+- **auth:** pass is_ssl() to wp_signon for correct cookie handling ([08a9935](https://github.com/raaaf/starter/commit/08a9935a51b58b81f4787b458262303917a213db))
+
 ## [2.14.2](https://github.com/raaaf/starter/compare/v2.14.1...v2.14.2) (2026-03-27)
 
 ### Bug Fixes
