@@ -46,9 +46,11 @@
                      class="w-full object-cover"
                      loading="lazy">
             @endif
-            <div class="p-6 lg:p-8">
-                <x-prose>{!! $column_1 !!}</x-prose>
-            </div>
+            @if($column_1)
+                <div class="p-6 lg:p-8">
+                    <x-prose>{!! $column_1 !!}</x-prose>
+                </div>
+            @endif
         </x-card>
         <x-card variant="outlined" padding="none" class="overflow-hidden">
             @if($image_2 && !empty($image_2['url']))
@@ -58,9 +60,11 @@
                      class="w-full object-cover"
                      loading="lazy">
             @endif
-            <div class="p-6 lg:p-8">
-                <x-prose>{!! $column_2 !!}</x-prose>
-            </div>
+            @if($column_2)
+                <div class="p-6 lg:p-8">
+                    <x-prose>{!! $column_2 !!}</x-prose>
+                </div>
+            @endif
         </x-card>
         <x-card variant="outlined" padding="none" class="overflow-hidden">
             @if($image_3 && !empty($image_3['url']))
@@ -70,9 +74,11 @@
                      class="w-full object-cover"
                      loading="lazy">
             @endif
-            <div class="p-6 lg:p-8">
-                <x-prose>{!! $column_3 !!}</x-prose>
-            </div>
+            @if($column_3)
+                <div class="p-6 lg:p-8">
+                    <x-prose>{!! $column_3 !!}</x-prose>
+                </div>
+            @endif
         </x-card>
         <x-card variant="outlined" padding="none" class="overflow-hidden">
             @if($image_4 && !empty($image_4['url']))
@@ -82,9 +88,11 @@
                      class="w-full object-cover"
                      loading="lazy">
             @endif
-            <div class="p-6 lg:p-8">
-                <x-prose>{!! $column_4 !!}</x-prose>
-            </div>
+            @if($column_4)
+                <div class="p-6 lg:p-8">
+                    <x-prose>{!! $column_4 !!}</x-prose>
+                </div>
+            @endif
         </x-card>
     </x-grid>
 </x-section>

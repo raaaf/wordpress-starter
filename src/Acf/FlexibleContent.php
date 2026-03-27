@@ -185,7 +185,7 @@ class FlexibleContent
     }
 
     /**
-     * Get all flexible content layouts (28 total)
+     * Get all flexible content layouts (31 total)
      *
      * @return array<int, array<string, mixed>>
      */
@@ -315,7 +315,7 @@ class FlexibleContent
     }
 
     /**
-     * Two Columns with Images layout
+     * One Column with Image layout
      *
      * @return array<string, mixed>
      */
@@ -331,6 +331,11 @@ class FlexibleContent
         ];
     }
 
+    /**
+     * Two Columns with Images layout
+     *
+     * @return array<string, mixed>
+     */
     private static function twoColumnsImagesLayout(): array
     {
         return [
@@ -343,6 +348,11 @@ class FlexibleContent
         ];
     }
 
+    /**
+     * Three Columns with Images layout
+     *
+     * @return array<string, mixed>
+     */
     private static function threeColumnsImagesLayout(): array
     {
         return [
@@ -355,6 +365,11 @@ class FlexibleContent
         ];
     }
 
+    /**
+     * Four Columns with Images layout
+     *
+     * @return array<string, mixed>
+     */
     private static function fourColumnsImagesLayout(): array
     {
         return [
