@@ -96,7 +96,9 @@ class MemberAreaServiceProvider extends ServiceProvider
         }
 
         $credential = sanitize_text_field( wp_unslash( $_POST['credential'] ?? '' ) );
-        $password    = isset( $_POST['password'] ) ? sanitize_text_field( wp_unslash( $_POST['password'] ) ) : null;
+        // Passwords must not be sanitized — sanitize_text_field strips characters that
+        // may be part of a valid password (e.g. <, >, &, multiple spaces).
+        $password    = isset( $_POST['password'] ) ? wp_unslash( $_POST['password'] ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
         if (empty($credential)) {
             wp_send_json_error(['message' => __('Bitte alle Felder ausfüllen.', 'wp-starter')], 400);
@@ -105,11 +107,18 @@ class MemberAreaServiceProvider extends ServiceProvider
         $result = Auth::login($credential, $password);
 
         if (is_wp_error($result)) {
-            wp_send_json_error(['message' => __('Falsches Passwort.', 'wp-starter')], 401);
+            $errorCode = $result->get_error_code();
+            $message = match ($errorCode) {
+                'invalid_username', 'invalid_email' => __('Unbekannter Benutzername.', 'wp-starter'),
+                'incorrect_password' => __('Falsches Passwort.', 'wp-starter'),
+                'no_password' => $result->get_error_message(),
+                default => __('Anmeldung fehlgeschlagen.', 'wp-starter'),
+            };
+            wp_send_json_error(['message' => $message], 401);
         }
 
         if (!$result) {
-            wp_send_json_error(['message' => __('Anmeldung fehlgeschlagen.', 'wp-starter')], 401);
+            wp_send_json_error(['message' => __('Kein Zugang — fehlende Berechtigung.', 'wp-starter')], 401);
         }
 
         $redirectUrl = wp_validate_redirect( sanitize_url( wp_unslash( $_POST['redirect'] ?? '' ) ), home_url('/') );
