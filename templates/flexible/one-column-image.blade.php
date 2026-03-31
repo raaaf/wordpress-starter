@@ -12,6 +12,7 @@
     $description = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_description')) : null;
     $alignment = $showHeader ? (get_sub_field('section_alignment') ?: 'center') : 'center';
     $image = get_sub_field('image');
+    $content = get_sub_field('content');
     $accordion = get_sub_field('accordion') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
 
@@ -37,6 +38,11 @@
                      @if(!empty($image['width']) && !empty($image['height']))width="{{ $image['width'] }}" height="{{ $image['height'] }}"@endif
                      class="w-full object-cover"
                      loading="lazy">
+            @endif
+            @if($content)
+                <div class="p-6 lg:p-8">
+                    <x-prose>{!! $content !!}</x-prose>
+                </div>
             @endif
             @if(!empty($accordion))
                 <div class="p-6 lg:p-8" x-data="{ active: null }">
