@@ -1559,8 +1559,7 @@ class FieldDefinitions
                 __('Eintrag hinzufügen', 'wp-starter'),
                 0,
                 'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
-                '75'
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1617,8 +1616,7 @@ class FieldDefinitions
                 __('Eintrag hinzufügen', 'wp-starter'),
                 0,
                 'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
-                '75'
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
             ),
             self::imageField(
                 "field_{$prefix}_image_2",
@@ -1662,8 +1660,7 @@ class FieldDefinitions
                 __('Eintrag hinzufügen', 'wp-starter'),
                 0,
                 'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
-                '75'
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1720,8 +1717,7 @@ class FieldDefinitions
                 __('Eintrag hinzufügen', 'wp-starter'),
                 0,
                 'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
-                '75'
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
             ),
             self::imageField(
                 "field_{$prefix}_image_2",
@@ -1765,8 +1761,7 @@ class FieldDefinitions
                 __('Eintrag hinzufügen', 'wp-starter'),
                 0,
                 'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
-                '75'
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
             ),
             self::imageField(
                 "field_{$prefix}_image_3",
@@ -1810,8 +1805,7 @@ class FieldDefinitions
                 __('Eintrag hinzufügen', 'wp-starter'),
                 0,
                 'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
-                '75'
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1868,8 +1862,7 @@ class FieldDefinitions
                 __('Eintrag hinzufügen', 'wp-starter'),
                 0,
                 'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
-                '75'
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
             ),
             self::imageField(
                 "field_{$prefix}_image_2",
@@ -1913,8 +1906,7 @@ class FieldDefinitions
                 __('Eintrag hinzufügen', 'wp-starter'),
                 0,
                 'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
-                '75'
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
             ),
             self::imageField(
                 "field_{$prefix}_image_3",
@@ -1958,8 +1950,7 @@ class FieldDefinitions
                 __('Eintrag hinzufügen', 'wp-starter'),
                 0,
                 'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
-                '75'
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
             ),
             self::imageField(
                 "field_{$prefix}_image_4",
@@ -2003,8 +1994,7 @@ class FieldDefinitions
                 __('Eintrag hinzufügen', 'wp-starter'),
                 0,
                 'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
-                '75'
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
