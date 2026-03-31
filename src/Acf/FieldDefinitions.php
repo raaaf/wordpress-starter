@@ -1527,6 +1527,14 @@ class FieldDefinitions
                 __('Bild für die Karte.', 'wp-starter'),
                 '25'
             ),
+            self::wysiwygField(
+                "field_{$prefix}_content",
+                __('Inhalt', 'wp-starter'),
+                'content',
+                false,
+                '75',
+                __('Text unter dem Bild.', 'wp-starter')
+            ),
             self::repeaterField(
                 "field_{$prefix}_accordion",
                 __('Akkordeon', 'wp-starter'),
@@ -1577,6 +1585,14 @@ class FieldDefinitions
                 __('Bild für die linke Karte.', 'wp-starter'),
                 '25'
             ),
+            self::wysiwygField(
+                "field_{$prefix}_column_1",
+                __('Inhalt 1', 'wp-starter'),
+                'column_1',
+                false,
+                '75',
+                __('Text unter dem ersten Bild.', 'wp-starter')
+            ),
             self::repeaterField(
                 "field_{$prefix}_accordion_1",
                 __('Akkordeon 1', 'wp-starter'),
@@ -1613,6 +1629,14 @@ class FieldDefinitions
                 null,
                 __('Bild für die rechte Karte.', 'wp-starter'),
                 '25'
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_column_2",
+                __('Inhalt 2', 'wp-starter'),
+                'column_2',
+                false,
+                '75',
+                __('Text unter dem zweiten Bild.', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_accordion_2",
@@ -1664,6 +1688,14 @@ class FieldDefinitions
                 __('Bild für die linke Karte.', 'wp-starter'),
                 '25'
             ),
+            self::wysiwygField(
+                "field_{$prefix}_column_1",
+                __('Inhalt 1', 'wp-starter'),
+                'column_1',
+                false,
+                '75',
+                __('Text unter dem ersten Bild.', 'wp-starter')
+            ),
             self::repeaterField(
                 "field_{$prefix}_accordion_1",
                 __('Akkordeon 1', 'wp-starter'),
@@ -1701,6 +1733,14 @@ class FieldDefinitions
                 __('Bild für die mittlere Karte.', 'wp-starter'),
                 '25'
             ),
+            self::wysiwygField(
+                "field_{$prefix}_column_2",
+                __('Inhalt 2', 'wp-starter'),
+                'column_2',
+                false,
+                '75',
+                __('Text unter dem zweiten Bild.', 'wp-starter')
+            ),
             self::repeaterField(
                 "field_{$prefix}_accordion_2",
                 __('Akkordeon 2', 'wp-starter'),
@@ -1737,6 +1777,14 @@ class FieldDefinitions
                 null,
                 __('Bild für die rechte Karte.', 'wp-starter'),
                 '25'
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_column_3",
+                __('Inhalt 3', 'wp-starter'),
+                'column_3',
+                false,
+                '75',
+                __('Text unter dem dritten Bild.', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_accordion_3",
@@ -1788,6 +1836,14 @@ class FieldDefinitions
                 __('Bild für die erste Karte.', 'wp-starter'),
                 '25'
             ),
+            self::wysiwygField(
+                "field_{$prefix}_column_1",
+                __('Inhalt 1', 'wp-starter'),
+                'column_1',
+                false,
+                '75',
+                __('Text unter dem ersten Bild.', 'wp-starter')
+            ),
             self::repeaterField(
                 "field_{$prefix}_accordion_1",
                 __('Akkordeon 1', 'wp-starter'),
@@ -1824,6 +1880,14 @@ class FieldDefinitions
                 null,
                 __('Bild für die zweite Karte.', 'wp-starter'),
                 '25'
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_column_2",
+                __('Inhalt 2', 'wp-starter'),
+                'column_2',
+                false,
+                '75',
+                __('Text unter dem zweiten Bild.', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_accordion_2",
@@ -1862,6 +1926,14 @@ class FieldDefinitions
                 __('Bild für die dritte Karte.', 'wp-starter'),
                 '25'
             ),
+            self::wysiwygField(
+                "field_{$prefix}_column_3",
+                __('Inhalt 3', 'wp-starter'),
+                'column_3',
+                false,
+                '75',
+                __('Text unter dem dritten Bild.', 'wp-starter')
+            ),
             self::repeaterField(
                 "field_{$prefix}_accordion_3",
                 __('Akkordeon 3', 'wp-starter'),
@@ -1898,6 +1970,14 @@ class FieldDefinitions
                 null,
                 __('Bild für die vierte Karte.', 'wp-starter'),
                 '25'
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_column_4",
+                __('Inhalt 4', 'wp-starter'),
+                'column_4',
+                false,
+                '75',
+                __('Text unter dem vierten Bild.', 'wp-starter')
             ),
             self::repeaterField(
                 "field_{$prefix}_accordion_4",

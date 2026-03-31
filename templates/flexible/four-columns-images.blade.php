@@ -12,12 +12,16 @@
     $description = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_description')) : null;
     $alignment = $showHeader ? (get_sub_field('section_alignment') ?: 'center') : 'center';
     $image_1 = get_sub_field('image_1');
+    $column_1 = get_sub_field('column_1');
     $accordion_1 = get_sub_field('accordion_1') ?: [];
     $image_2 = get_sub_field('image_2');
+    $column_2 = get_sub_field('column_2');
     $accordion_2 = get_sub_field('accordion_2') ?: [];
     $image_3 = get_sub_field('image_3');
+    $column_3 = get_sub_field('column_3');
     $accordion_3 = get_sub_field('accordion_3') ?: [];
     $image_4 = get_sub_field('image_4');
+    $column_4 = get_sub_field('column_4');
     $accordion_4 = get_sub_field('accordion_4') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
 
@@ -41,9 +45,10 @@
         @foreach([1, 2, 3, 4] as $col)
             @php
                 $img = ${'image_' . $col};
+                $text = ${'column_' . $col};
                 $acc = ${'accordion_' . $col};
             @endphp
-            @if(($img && !empty($img['url'])) || !empty($acc))
+            @if(($img && !empty($img['url'])) || $text || !empty($acc))
             <x-card variant="outlined" padding="none" class="overflow-hidden">
                 @if($img && !empty($img['url']))
                     <img src="{{ $img['url'] }}"
@@ -51,6 +56,11 @@
                          @if(!empty($img['width']) && !empty($img['height']))width="{{ $img['width'] }}" height="{{ $img['height'] }}"@endif
                          class="w-full object-cover"
                          loading="lazy">
+                @endif
+                @if($text)
+                    <div class="p-6 lg:p-8">
+                        <x-prose>{!! $text !!}</x-prose>
+                    </div>
                 @endif
                 @if(!empty($acc))
                     <div class="p-6 lg:p-8" x-data="{ active: null }">
