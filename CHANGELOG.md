@@ -1,3 +1,9 @@
+## [2.16.1](https://github.com/raaaf/starter/compare/v2.16.0...v2.16.1) (2026-03-31)
+
+### Bug Fixes
+
+- restore WYSIWYG content fields in image column layouts ([4ef3ca5](https://github.com/raaaf/starter/commit/4ef3ca516b5ca1e8eee4d83028cb912328137083))
+
 # [2.16.0](https://github.com/raaaf/starter/compare/v2.15.2...v2.16.0) (2026-03-31)
 
 ### Bug Fixes
