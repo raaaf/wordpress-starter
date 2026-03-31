@@ -1,3 +1,13 @@
+# [2.16.0](https://github.com/raaaf/starter/compare/v2.15.2...v2.16.0) (2026-03-31)
+
+### Bug Fixes
+
+- **a11y:** add aria-labelledby to accordion panels in image layouts ([817302a](https://github.com/raaaf/starter/commit/817302a05a27a2f37f80993cb1e8bb5355b12293))
+
+### Features
+
+- **acf:** add accordion to image column layouts and enable modal search ([53e8865](https://github.com/raaaf/starter/commit/53e8865e706c812c4ea0dbf58eb35c7c8455e0ac))
+
 ## [2.15.2](https://github.com/raaaf/starter/compare/v2.15.1...v2.15.2) (2026-03-27)
 
 ### Bug Fixes
