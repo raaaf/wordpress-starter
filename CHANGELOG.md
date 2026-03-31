@@ -1,3 +1,9 @@
+## [2.16.2](https://github.com/raaaf/starter/compare/v2.16.1...v2.16.2) (2026-03-31)
+
+### Bug Fixes
+
+- **acf:** fix field width grouping in image column layouts ([eaa7b1e](https://github.com/raaaf/starter/commit/eaa7b1ee85124914a6546dadaed2b9b60604f27c))
+
 ## [2.16.1](https://github.com/raaaf/starter/compare/v2.16.0...v2.16.1) (2026-03-31)
 
 ### Bug Fixes
