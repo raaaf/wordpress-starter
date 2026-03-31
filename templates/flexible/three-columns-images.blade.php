@@ -54,7 +54,8 @@
                     <div class="p-6 lg:p-8" x-data="{ active: null }">
                         @foreach($acc as $aIdx => $aItem)
                             <div class="border-b border-line last:border-b-0">
-                                <button @click="active = active === {{ $aIdx }} ? null : {{ $aIdx }}"
+                                <button id="acc-btn-{{ $col }}-{{ $aIdx }}"
+                                        @click="active = active === {{ $aIdx }} ? null : {{ $aIdx }}"
                                         :aria-expanded="active === {{ $aIdx }}"
                                         aria-controls="acc-{{ $col }}-{{ $aIdx }}"
                                         class="group flex items-center justify-between w-full py-3 font-bold text-left cursor-pointer transition-colors hover:text-content-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus focus-visible:ring-offset-2"
@@ -70,6 +71,7 @@
                                      x-collapse
                                      id="acc-{{ $col }}-{{ $aIdx }}"
                                      role="region"
+                                     aria-labelledby="acc-btn-{{ $col }}-{{ $aIdx }}"
                                      class="pb-4">
                                     <x-prose class="text-sm">{!! $aItem['content'] !!}</x-prose>
                                 </div>
