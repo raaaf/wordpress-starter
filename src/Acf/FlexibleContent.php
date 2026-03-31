@@ -145,6 +145,7 @@ class FlexibleContent
                         'acfe_flexible_modal_title' => __('Sektion auswählen', 'wp-starter'),
                         'acfe_flexible_modal_col' => '4',
                         'acfe_flexible_modal_categories' => true,
+                        'acfe_flexible_modal_search' => true,
                     ],
 
                     // ACF Extended: Modal for editing layouts

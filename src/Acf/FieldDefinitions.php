@@ -757,9 +757,10 @@ class FieldDefinitions
         ?string $buttonLabel = null,
         int $min = 0,
         string $layout = 'block',
-        string $instructions = ''
+        string $instructions = '',
+        ?string $width = null
     ): array {
-        return [
+        $field = [
             'key' => $key,
             'label' => $label,
             'name' => $name,
@@ -771,6 +772,12 @@ class FieldDefinitions
             'button_label' => $buttonLabel ?? __('Eintrag hinzufügen', 'wp-starter'),
             'sub_fields' => $subFields,
         ];
+
+        if ($width !== null) {
+            $field['wrapper'] = ['width' => $width];
+        }
+
+        return $field;
     }
 
     /**
@@ -1517,15 +1524,35 @@ class FieldDefinitions
                 false,
                 'id',
                 null,
-                __('Bild für die Karte.', 'wp-starter')
+                __('Bild für die Karte.', 'wp-starter'),
+                '25'
             ),
-            self::wysiwygField(
-                "field_{$prefix}_content",
-                __('Inhalt', 'wp-starter'),
-                'content',
-                false,
-                null,
-                __('Text unter dem Bild.', 'wp-starter')
+            self::repeaterField(
+                "field_{$prefix}_accordion",
+                __('Akkordeon', 'wp-starter'),
+                'accordion',
+                [
+                    self::textField(
+                        "field_{$prefix}_accordion_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
+                    ),
+                    self::wysiwygField(
+                        "field_{$prefix}_accordion_content",
+                        __('Inhalt', 'wp-starter'),
+                        'content',
+                        true,
+                        null,
+                        __('Der ausgeklappte Inhalt.', 'wp-starter')
+                    ),
+                ],
+                __('Eintrag hinzufügen', 'wp-starter'),
+                0,
+                'block',
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
+                '75'
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1548,15 +1575,34 @@ class FieldDefinitions
                 'id',
                 null,
                 __('Bild für die linke Karte.', 'wp-starter'),
-                '50'
+                '25'
             ),
-            self::wysiwygField(
-                "field_{$prefix}_column_1",
-                __('Inhalt 1', 'wp-starter'),
-                'column_1',
-                false,
-                '50',
-                __('Text unter dem ersten Bild.', 'wp-starter')
+            self::repeaterField(
+                "field_{$prefix}_accordion_1",
+                __('Akkordeon 1', 'wp-starter'),
+                'accordion_1',
+                [
+                    self::textField(
+                        "field_{$prefix}_accordion_1_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
+                    ),
+                    self::wysiwygField(
+                        "field_{$prefix}_accordion_1_content",
+                        __('Inhalt', 'wp-starter'),
+                        'content',
+                        true,
+                        null,
+                        __('Der ausgeklappte Inhalt.', 'wp-starter')
+                    ),
+                ],
+                __('Eintrag hinzufügen', 'wp-starter'),
+                0,
+                'block',
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
+                '75'
             ),
             self::imageField(
                 "field_{$prefix}_image_2",
@@ -1566,15 +1612,34 @@ class FieldDefinitions
                 'id',
                 null,
                 __('Bild für die rechte Karte.', 'wp-starter'),
-                '50'
+                '25'
             ),
-            self::wysiwygField(
-                "field_{$prefix}_column_2",
-                __('Inhalt 2', 'wp-starter'),
-                'column_2',
-                false,
-                '50',
-                __('Text unter dem zweiten Bild.', 'wp-starter')
+            self::repeaterField(
+                "field_{$prefix}_accordion_2",
+                __('Akkordeon 2', 'wp-starter'),
+                'accordion_2',
+                [
+                    self::textField(
+                        "field_{$prefix}_accordion_2_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
+                    ),
+                    self::wysiwygField(
+                        "field_{$prefix}_accordion_2_content",
+                        __('Inhalt', 'wp-starter'),
+                        'content',
+                        true,
+                        null,
+                        __('Der ausgeklappte Inhalt.', 'wp-starter')
+                    ),
+                ],
+                __('Eintrag hinzufügen', 'wp-starter'),
+                0,
+                'block',
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
+                '75'
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1597,15 +1662,34 @@ class FieldDefinitions
                 'id',
                 null,
                 __('Bild für die linke Karte.', 'wp-starter'),
-                '33'
+                '25'
             ),
-            self::wysiwygField(
-                "field_{$prefix}_column_1",
-                __('Inhalt 1', 'wp-starter'),
-                'column_1',
-                false,
-                '33',
-                __('Text unter dem ersten Bild.', 'wp-starter')
+            self::repeaterField(
+                "field_{$prefix}_accordion_1",
+                __('Akkordeon 1', 'wp-starter'),
+                'accordion_1',
+                [
+                    self::textField(
+                        "field_{$prefix}_accordion_1_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
+                    ),
+                    self::wysiwygField(
+                        "field_{$prefix}_accordion_1_content",
+                        __('Inhalt', 'wp-starter'),
+                        'content',
+                        true,
+                        null,
+                        __('Der ausgeklappte Inhalt.', 'wp-starter')
+                    ),
+                ],
+                __('Eintrag hinzufügen', 'wp-starter'),
+                0,
+                'block',
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
+                '75'
             ),
             self::imageField(
                 "field_{$prefix}_image_2",
@@ -1615,15 +1699,34 @@ class FieldDefinitions
                 'id',
                 null,
                 __('Bild für die mittlere Karte.', 'wp-starter'),
-                '33'
+                '25'
             ),
-            self::wysiwygField(
-                "field_{$prefix}_column_2",
-                __('Inhalt 2', 'wp-starter'),
-                'column_2',
-                false,
-                '33',
-                __('Text unter dem zweiten Bild.', 'wp-starter')
+            self::repeaterField(
+                "field_{$prefix}_accordion_2",
+                __('Akkordeon 2', 'wp-starter'),
+                'accordion_2',
+                [
+                    self::textField(
+                        "field_{$prefix}_accordion_2_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
+                    ),
+                    self::wysiwygField(
+                        "field_{$prefix}_accordion_2_content",
+                        __('Inhalt', 'wp-starter'),
+                        'content',
+                        true,
+                        null,
+                        __('Der ausgeklappte Inhalt.', 'wp-starter')
+                    ),
+                ],
+                __('Eintrag hinzufügen', 'wp-starter'),
+                0,
+                'block',
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
+                '75'
             ),
             self::imageField(
                 "field_{$prefix}_image_3",
@@ -1633,15 +1736,34 @@ class FieldDefinitions
                 'id',
                 null,
                 __('Bild für die rechte Karte.', 'wp-starter'),
-                '33'
+                '25'
             ),
-            self::wysiwygField(
-                "field_{$prefix}_column_3",
-                __('Inhalt 3', 'wp-starter'),
-                'column_3',
-                false,
-                '33',
-                __('Text unter dem dritten Bild.', 'wp-starter')
+            self::repeaterField(
+                "field_{$prefix}_accordion_3",
+                __('Akkordeon 3', 'wp-starter'),
+                'accordion_3',
+                [
+                    self::textField(
+                        "field_{$prefix}_accordion_3_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
+                    ),
+                    self::wysiwygField(
+                        "field_{$prefix}_accordion_3_content",
+                        __('Inhalt', 'wp-starter'),
+                        'content',
+                        true,
+                        null,
+                        __('Der ausgeklappte Inhalt.', 'wp-starter')
+                    ),
+                ],
+                __('Eintrag hinzufügen', 'wp-starter'),
+                0,
+                'block',
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
+                '75'
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1666,13 +1788,32 @@ class FieldDefinitions
                 __('Bild für die erste Karte.', 'wp-starter'),
                 '25'
             ),
-            self::wysiwygField(
-                "field_{$prefix}_column_1",
-                __('Inhalt 1', 'wp-starter'),
-                'column_1',
-                false,
-                '25',
-                __('Text unter dem ersten Bild.', 'wp-starter')
+            self::repeaterField(
+                "field_{$prefix}_accordion_1",
+                __('Akkordeon 1', 'wp-starter'),
+                'accordion_1',
+                [
+                    self::textField(
+                        "field_{$prefix}_accordion_1_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
+                    ),
+                    self::wysiwygField(
+                        "field_{$prefix}_accordion_1_content",
+                        __('Inhalt', 'wp-starter'),
+                        'content',
+                        true,
+                        null,
+                        __('Der ausgeklappte Inhalt.', 'wp-starter')
+                    ),
+                ],
+                __('Eintrag hinzufügen', 'wp-starter'),
+                0,
+                'block',
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
+                '75'
             ),
             self::imageField(
                 "field_{$prefix}_image_2",
@@ -1684,13 +1825,32 @@ class FieldDefinitions
                 __('Bild für die zweite Karte.', 'wp-starter'),
                 '25'
             ),
-            self::wysiwygField(
-                "field_{$prefix}_column_2",
-                __('Inhalt 2', 'wp-starter'),
-                'column_2',
-                false,
-                '25',
-                __('Text unter dem zweiten Bild.', 'wp-starter')
+            self::repeaterField(
+                "field_{$prefix}_accordion_2",
+                __('Akkordeon 2', 'wp-starter'),
+                'accordion_2',
+                [
+                    self::textField(
+                        "field_{$prefix}_accordion_2_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
+                    ),
+                    self::wysiwygField(
+                        "field_{$prefix}_accordion_2_content",
+                        __('Inhalt', 'wp-starter'),
+                        'content',
+                        true,
+                        null,
+                        __('Der ausgeklappte Inhalt.', 'wp-starter')
+                    ),
+                ],
+                __('Eintrag hinzufügen', 'wp-starter'),
+                0,
+                'block',
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
+                '75'
             ),
             self::imageField(
                 "field_{$prefix}_image_3",
@@ -1702,13 +1862,32 @@ class FieldDefinitions
                 __('Bild für die dritte Karte.', 'wp-starter'),
                 '25'
             ),
-            self::wysiwygField(
-                "field_{$prefix}_column_3",
-                __('Inhalt 3', 'wp-starter'),
-                'column_3',
-                false,
-                '25',
-                __('Text unter dem dritten Bild.', 'wp-starter')
+            self::repeaterField(
+                "field_{$prefix}_accordion_3",
+                __('Akkordeon 3', 'wp-starter'),
+                'accordion_3',
+                [
+                    self::textField(
+                        "field_{$prefix}_accordion_3_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
+                    ),
+                    self::wysiwygField(
+                        "field_{$prefix}_accordion_3_content",
+                        __('Inhalt', 'wp-starter'),
+                        'content',
+                        true,
+                        null,
+                        __('Der ausgeklappte Inhalt.', 'wp-starter')
+                    ),
+                ],
+                __('Eintrag hinzufügen', 'wp-starter'),
+                0,
+                'block',
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
+                '75'
             ),
             self::imageField(
                 "field_{$prefix}_image_4",
@@ -1720,13 +1899,32 @@ class FieldDefinitions
                 __('Bild für die vierte Karte.', 'wp-starter'),
                 '25'
             ),
-            self::wysiwygField(
-                "field_{$prefix}_column_4",
-                __('Inhalt 4', 'wp-starter'),
-                'column_4',
-                false,
-                '25',
-                __('Text unter dem vierten Bild.', 'wp-starter')
+            self::repeaterField(
+                "field_{$prefix}_accordion_4",
+                __('Akkordeon 4', 'wp-starter'),
+                'accordion_4',
+                [
+                    self::textField(
+                        "field_{$prefix}_accordion_4_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
+                    ),
+                    self::wysiwygField(
+                        "field_{$prefix}_accordion_4_content",
+                        __('Inhalt', 'wp-starter'),
+                        'content',
+                        true,
+                        null,
+                        __('Der ausgeklappte Inhalt.', 'wp-starter')
+                    ),
+                ],
+                __('Eintrag hinzufügen', 'wp-starter'),
+                0,
+                'block',
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
+                '75'
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),

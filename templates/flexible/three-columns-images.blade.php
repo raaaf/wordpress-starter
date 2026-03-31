@@ -2,7 +2,7 @@
     Three Columns Images - Flexible Content Layout
 
     Uses shared components: x-section, x-grid, x-prose, x-card, x-section-header
-    ACF Fields: show_section_header, section_chip, section_headline, section_description, image_1, column_1, image_2, column_2, image_3, column_3, background_color
+    ACF Fields: show_section_header, section_chip, section_headline, section_description, image_1, accordion_1, image_2, accordion_2, image_3, accordion_3, background_color
 --}}
 
 @php
@@ -12,11 +12,11 @@
     $description = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_description')) : null;
     $alignment = $showHeader ? (get_sub_field('section_alignment') ?: 'center') : 'center';
     $image_1 = get_sub_field('image_1');
-    $column_1 = get_sub_field('column_1');
+    $accordion_1 = get_sub_field('accordion_1') ?: [];
     $image_2 = get_sub_field('image_2');
-    $column_2 = get_sub_field('column_2');
+    $accordion_2 = get_sub_field('accordion_2') ?: [];
     $image_3 = get_sub_field('image_3');
-    $column_3 = get_sub_field('column_3');
+    $accordion_3 = get_sub_field('accordion_3') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
 
     // Handle ID vs array format for images with proper sizing
@@ -36,47 +36,49 @@
 <x-section :anchor="$sectionAnchor" :background="$background" class="three-columns-images">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="3" gap="xl">
-        <x-card variant="outlined" padding="none" class="overflow-hidden">
-            @if($image_1 && !empty($image_1['url']))
-                <img src="{{ $image_1['url'] }}"
-                     alt="{{ $image_1['alt'] ?? '' }}"
-                     @if(!empty($image_1['width']) && !empty($image_1['height']))width="{{ $image_1['width'] }}" height="{{ $image_1['height'] }}"@endif
-                     class="w-full object-cover"
-                     loading="lazy">
+        @foreach([1, 2, 3] as $col)
+            @php
+                $img = ${'image_' . $col};
+                $acc = ${'accordion_' . $col};
+            @endphp
+            @if(($img && !empty($img['url'])) || !empty($acc))
+            <x-card variant="outlined" padding="none" class="overflow-hidden">
+                @if($img && !empty($img['url']))
+                    <img src="{{ $img['url'] }}"
+                         alt="{{ $img['alt'] ?? '' }}"
+                         @if(!empty($img['width']) && !empty($img['height']))width="{{ $img['width'] }}" height="{{ $img['height'] }}"@endif
+                         class="w-full object-cover"
+                         loading="lazy">
+                @endif
+                @if(!empty($acc))
+                    <div class="p-6 lg:p-8" x-data="{ active: null }">
+                        @foreach($acc as $aIdx => $aItem)
+                            <div class="border-b border-line last:border-b-0">
+                                <button @click="active = active === {{ $aIdx }} ? null : {{ $aIdx }}"
+                                        :aria-expanded="active === {{ $aIdx }}"
+                                        aria-controls="acc-{{ $col }}-{{ $aIdx }}"
+                                        class="group flex items-center justify-between w-full py-3 font-bold text-left cursor-pointer transition-colors hover:text-content-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus focus-visible:ring-offset-2"
+                                        :class="{ 'text-content-brand': active === {{ $aIdx }} }">
+                                    {{ $aItem['title'] }}
+                                    <svg class="w-4 h-4 shrink-0 transition-transform duration-200"
+                                         :class="{ 'rotate-180': active === {{ $aIdx }} }"
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                                <div x-show="active === {{ $aIdx }}"
+                                     x-collapse
+                                     id="acc-{{ $col }}-{{ $aIdx }}"
+                                     role="region"
+                                     class="pb-4">
+                                    <x-prose class="text-sm">{!! $aItem['content'] !!}</x-prose>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </x-card>
             @endif
-            @if($column_1)
-                <div class="p-6 lg:p-8">
-                    <x-prose>{!! $column_1 !!}</x-prose>
-                </div>
-            @endif
-        </x-card>
-        <x-card variant="outlined" padding="none" class="overflow-hidden">
-            @if($image_2 && !empty($image_2['url']))
-                <img src="{{ $image_2['url'] }}"
-                     alt="{{ $image_2['alt'] ?? '' }}"
-                     @if(!empty($image_2['width']) && !empty($image_2['height']))width="{{ $image_2['width'] }}" height="{{ $image_2['height'] }}"@endif
-                     class="w-full object-cover"
-                     loading="lazy">
-            @endif
-            @if($column_2)
-                <div class="p-6 lg:p-8">
-                    <x-prose>{!! $column_2 !!}</x-prose>
-                </div>
-            @endif
-        </x-card>
-        <x-card variant="outlined" padding="none" class="overflow-hidden">
-            @if($image_3 && !empty($image_3['url']))
-                <img src="{{ $image_3['url'] }}"
-                     alt="{{ $image_3['alt'] ?? '' }}"
-                     @if(!empty($image_3['width']) && !empty($image_3['height']))width="{{ $image_3['width'] }}" height="{{ $image_3['height'] }}"@endif
-                     class="w-full object-cover"
-                     loading="lazy">
-            @endif
-            @if($column_3)
-                <div class="p-6 lg:p-8">
-                    <x-prose>{!! $column_3 !!}</x-prose>
-                </div>
-            @endif
-        </x-card>
+        @endforeach
     </x-grid>
 </x-section>
