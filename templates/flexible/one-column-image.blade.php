@@ -35,7 +35,7 @@
         <x-card variant="outlined" padding="none" class="overflow-hidden">
             @if($label)
                 <div class="p-6 lg:p-8 pb-0 lg:pb-0">
-                    <p class="text-sm font-bold uppercase tracking-wider text-content-secondary">{{ $label }}</p>
+                    <p class="text-sm font-bold uppercase tracking-wider text-content-secondary mb-4">{{ $label }}</p>
                 </div>
             @endif
             @if($image && !empty($image['url']))
