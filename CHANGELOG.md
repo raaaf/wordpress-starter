@@ -1,3 +1,9 @@
+# [2.17.0](https://github.com/raaaf/starter/compare/v2.16.2...v2.17.0) (2026-04-02)
+
+### Features
+
+- **acf:** add optional label field above images in column layouts ([31ee3bb](https://github.com/raaaf/starter/commit/31ee3bbdec238b52e6e8e4669aee0ab2b9c4c296))
+
 ## [2.16.2](https://github.com/raaaf/starter/compare/v2.16.1...v2.16.2) (2026-03-31)
 
 ### Bug Fixes
