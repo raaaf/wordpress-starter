@@ -1,3 +1,9 @@
+## [2.17.1](https://github.com/raaaf/starter/compare/v2.17.0...v2.17.1) (2026-04-02)
+
+### Bug Fixes
+
+- add margin between label and image in column layouts ([2ed4f23](https://github.com/raaaf/starter/commit/2ed4f2335ca297819a488b007c464a98d73f43f5))
+
 # [2.17.0](https://github.com/raaaf/starter/compare/v2.16.2...v2.17.0) (2026-04-02)
 
 ### Features
