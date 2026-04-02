@@ -1517,6 +1517,13 @@ class FieldDefinitions
     {
         return [
             ...self::sectionHeaderFields($prefix),
+            self::textField(
+                "field_{$prefix}_label",
+                __('Label', 'wp-starter'),
+                'label',
+                false,
+                __('Optionale Überschrift über dem Bild.', 'wp-starter')
+            ),
             self::imageField(
                 "field_{$prefix}_image",
                 __('Bild', 'wp-starter'),
@@ -1574,6 +1581,13 @@ class FieldDefinitions
     {
         return [
             ...self::sectionHeaderFields($prefix),
+            self::textField(
+                "field_{$prefix}_label_1",
+                __('Label 1', 'wp-starter'),
+                'label_1',
+                false,
+                __('Optionale Überschrift über dem ersten Bild.', 'wp-starter')
+            ),
             self::imageField(
                 "field_{$prefix}_image_1",
                 __('Bild 1', 'wp-starter'),
@@ -1617,6 +1631,13 @@ class FieldDefinitions
                 0,
                 'block',
                 __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
+            ),
+            self::textField(
+                "field_{$prefix}_label_2",
+                __('Label 2', 'wp-starter'),
+                'label_2',
+                false,
+                __('Optionale Überschrift über dem zweiten Bild.', 'wp-starter')
             ),
             self::imageField(
                 "field_{$prefix}_image_2",
@@ -1675,6 +1696,13 @@ class FieldDefinitions
     {
         return [
             ...self::sectionHeaderFields($prefix),
+            self::textField(
+                "field_{$prefix}_label_1",
+                __('Label 1', 'wp-starter'),
+                'label_1',
+                false,
+                __('Optionale Überschrift über dem ersten Bild.', 'wp-starter')
+            ),
             self::imageField(
                 "field_{$prefix}_image_1",
                 __('Bild 1', 'wp-starter'),
@@ -1719,6 +1747,13 @@ class FieldDefinitions
                 'block',
                 __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
             ),
+            self::textField(
+                "field_{$prefix}_label_2",
+                __('Label 2', 'wp-starter'),
+                'label_2',
+                false,
+                __('Optionale Überschrift über dem zweiten Bild.', 'wp-starter')
+            ),
             self::imageField(
                 "field_{$prefix}_image_2",
                 __('Bild 2', 'wp-starter'),
@@ -1762,6 +1797,13 @@ class FieldDefinitions
                 0,
                 'block',
                 __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
+            ),
+            self::textField(
+                "field_{$prefix}_label_3",
+                __('Label 3', 'wp-starter'),
+                'label_3',
+                false,
+                __('Optionale Überschrift über dem dritten Bild.', 'wp-starter')
             ),
             self::imageField(
                 "field_{$prefix}_image_3",
@@ -1820,6 +1862,13 @@ class FieldDefinitions
     {
         return [
             ...self::sectionHeaderFields($prefix),
+            self::textField(
+                "field_{$prefix}_label_1",
+                __('Label 1', 'wp-starter'),
+                'label_1',
+                false,
+                __('Optionale Überschrift über dem ersten Bild.', 'wp-starter')
+            ),
             self::imageField(
                 "field_{$prefix}_image_1",
                 __('Bild 1', 'wp-starter'),
@@ -1863,6 +1912,13 @@ class FieldDefinitions
                 0,
                 'block',
                 __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
+            ),
+            self::textField(
+                "field_{$prefix}_label_2",
+                __('Label 2', 'wp-starter'),
+                'label_2',
+                false,
+                __('Optionale Überschrift über dem zweiten Bild.', 'wp-starter')
             ),
             self::imageField(
                 "field_{$prefix}_image_2",
@@ -1908,6 +1964,13 @@ class FieldDefinitions
                 'block',
                 __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
             ),
+            self::textField(
+                "field_{$prefix}_label_3",
+                __('Label 3', 'wp-starter'),
+                'label_3',
+                false,
+                __('Optionale Überschrift über dem dritten Bild.', 'wp-starter')
+            ),
             self::imageField(
                 "field_{$prefix}_image_3",
                 __('Bild 3', 'wp-starter'),
@@ -1951,6 +2014,13 @@ class FieldDefinitions
                 0,
                 'block',
                 __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
+            ),
+            self::textField(
+                "field_{$prefix}_label_4",
+                __('Label 4', 'wp-starter'),
+                'label_4',
+                false,
+                __('Optionale Überschrift über dem vierten Bild.', 'wp-starter')
             ),
             self::imageField(
                 "field_{$prefix}_image_4",

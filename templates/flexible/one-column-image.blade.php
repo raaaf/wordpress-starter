@@ -11,6 +11,7 @@
     $headline = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_headline')) : null;
     $description = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_description')) : null;
     $alignment = $showHeader ? (get_sub_field('section_alignment') ?: 'center') : 'center';
+    $label = get_sub_field('label');
     $image = get_sub_field('image');
     $content = get_sub_field('content');
     $accordion = get_sub_field('accordion') ?: [];
@@ -32,6 +33,11 @@
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <div class="mx-auto max-w-3xl">
         <x-card variant="outlined" padding="none" class="overflow-hidden">
+            @if($label)
+                <div class="p-6 lg:p-8 pb-0 lg:pb-0">
+                    <p class="text-sm font-bold uppercase tracking-wider text-content-secondary">{{ $label }}</p>
+                </div>
+            @endif
             @if($image && !empty($image['url']))
                 <img src="{{ $image['url'] }}"
                      alt="{{ $image['alt'] ?? '' }}"
