@@ -1,3 +1,9 @@
+## [2.19.2](https://github.com/raaaf/starter/compare/v2.19.1...v2.19.2) (2026-04-16)
+
+### Bug Fixes
+
+- **svg:** detect real SVG dimensions so logos render at full size ([016660b](https://github.com/raaaf/starter/commit/016660b2ea78ba8958f00ca60105e52bc55e9adb))
+
 ## [2.19.1](https://github.com/raaaf/starter/compare/v2.19.0...v2.19.1) (2026-04-16)
 
 ### Bug Fixes
