@@ -1,3 +1,9 @@
+# [2.19.0](https://github.com/raaaf/starter/compare/v2.18.0...v2.19.0) (2026-04-16)
+
+### Features
+
+- **tokens:** add fluid typography scale with clamp() ([94011ec](https://github.com/raaaf/starter/commit/94011ec62295f983af17d87c4aa7b2bd1ec3edcc))
+
 # [2.18.0](https://github.com/raaaf/starter/compare/v2.17.1...v2.18.0) (2026-04-16)
 
 ### Features
