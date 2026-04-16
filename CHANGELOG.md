@@ -1,3 +1,9 @@
+## [2.19.3](https://github.com/raaaf/starter/compare/v2.19.2...v2.19.3) (2026-04-16)
+
+### Bug Fixes
+
+- **header:** use h-12 w-auto for logo instead of w-auto max-h-12 ([82992ea](https://github.com/raaaf/starter/commit/82992ea77494a4a4a9b821ea2299e427de6b8eee))
+
 ## [2.19.2](https://github.com/raaaf/starter/compare/v2.19.1...v2.19.2) (2026-04-16)
 
 ### Bug Fixes
