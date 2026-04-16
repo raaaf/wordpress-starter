@@ -256,6 +256,17 @@ html {
     --header-height: 80px;
   }
 
+  /*
+   * SVG aspect-ratio safety net.
+   * When a WP attachment has no persisted dimensions, the <img> tag is output
+   * with width="1" height="1" which forces a 1:1 aspect ratio via Tailwind's
+   * Preflight rules. Resetting aspect-ratio lets the browser fall back to the
+   * SVG's own viewBox when width/height (auto) are applied via utility classes.
+   */
+  img[src*='.svg'] {
+    aspect-ratio: auto;
+  }
+
   body {
     color: var(--text-primary);
     background-color: var(--bg-primary);

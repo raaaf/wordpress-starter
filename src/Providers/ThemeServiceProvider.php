@@ -18,6 +18,7 @@ class ThemeServiceProvider extends ServiceProvider
 
         $this->addThemeSupport();
         $this->allowSvgUploads();
+        $this->resolveSvgDimensions();
         $this->optimizeScriptLoading();
         $this->addResourcePreloading();
         $this->disableGlobalStyles();
@@ -127,7 +128,7 @@ class ThemeServiceProvider extends ServiceProvider
                 printf(
                     '<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin="anonymous">%s',
                     esc_url($fontsDir . $font),
-                    "\n"
+                    "\n",
                 );
             }
         }, 1); // Priority 1 = very early in head
@@ -154,7 +155,7 @@ class ThemeServiceProvider extends ServiceProvider
                         $nonce ? ' nonce="' . esc_attr($nonce) . '"' : '',
                         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted internal CSS
                         $criticalCss,
-                        "\n"
+                        "\n",
                     );
                 }
             }
@@ -175,7 +176,7 @@ class ThemeServiceProvider extends ServiceProvider
             printf(
                 '<link rel="preload" href="%s" as="style">%s',
                 esc_url($cssUrl),
-                "\n"
+                "\n",
             );
         }, 1);
     }
@@ -192,6 +193,7 @@ class ThemeServiceProvider extends ServiceProvider
         add_filter('upload_mimes', function (array $mimes): array {
             $mimes['svg'] = 'image/svg+xml';
             $mimes['svgz'] = 'image/svg+xml';
+
             return $mimes;
         });
 
@@ -216,6 +218,7 @@ class ThemeServiceProvider extends ServiceProvider
             // Only allow admins to upload SVGs
             if (!current_user_can('manage_options')) {
                 $file['error'] = __('SVG uploads are only allowed for administrators.', 'wp-starter');
+
                 return $file;
             }
 
@@ -256,6 +259,133 @@ class ThemeServiceProvider extends ServiceProvider
 
         // Return original if sanitization failed (shouldn't happen with valid SVG)
         return $sanitized ?: $content;
+    }
+
+    /**
+     * Resolve SVG dimensions from viewBox / width / height attributes.
+     *
+     * WordPress relies on getimagesize() for attachment dimensions, which
+     * returns false for SVG files. Without dimensions, wp_get_attachment_image()
+     * outputs width="1" height="1" on the <img> tag, forcing a 1:1 aspect ratio
+     * that squashes logos down to tiny squares.
+     *
+     * Two hook points cover both new uploads and existing attachments:
+     * - wp_generate_attachment_metadata: populate dimensions when SVG is uploaded
+     * - wp_get_attachment_metadata: fill in missing dimensions on demand for
+     *   SVGs that were uploaded before this fix landed.
+     *
+     * Dimensions are parsed from (in order): viewBox, width+height attributes.
+     */
+    private function resolveSvgDimensions(): void
+    {
+        add_filter('wp_generate_attachment_metadata', function (array $metadata, int $attachmentId): array {
+            if (get_post_mime_type($attachmentId) !== 'image/svg+xml') {
+                return $metadata;
+            }
+
+            $dimensions = $this->extractSvgDimensions(get_attached_file($attachmentId) ?: '');
+            if ($dimensions) {
+                $metadata['width'] = $dimensions['width'];
+                $metadata['height'] = $dimensions['height'];
+                if (empty($metadata['file'])) {
+                    $attachedFile = get_post_meta($attachmentId, '_wp_attached_file', true);
+                    if (is_string($attachedFile)) {
+                        $metadata['file'] = $attachedFile;
+                    }
+                }
+            }
+
+            return $metadata;
+        }, 10, 2);
+
+        add_filter('wp_get_attachment_metadata', function ($metadata, int $attachmentId) {
+            if (!empty($metadata['width']) && !empty($metadata['height'])) {
+                return $metadata;
+            }
+            if (get_post_mime_type($attachmentId) !== 'image/svg+xml') {
+                return $metadata;
+            }
+
+            $dimensions = $this->extractSvgDimensions(get_attached_file($attachmentId) ?: '');
+            if (!$dimensions) {
+                return $metadata;
+            }
+
+            $metadata = is_array($metadata) ? $metadata : [];
+            $metadata['width'] = $dimensions['width'];
+            $metadata['height'] = $dimensions['height'];
+
+            return $metadata;
+        }, 10, 2);
+
+        // Also cover direct wp_get_attachment_image_src() calls for SVGs without
+        // persisted metadata (e.g. attachments uploaded before this fix).
+        add_filter('wp_get_attachment_image_src', function ($image, $attachmentId) {
+            if (!is_array($image) || ( !empty($image[1]) && !empty($image[2]) )) {
+                return $image;
+            }
+            if (get_post_mime_type( (int) $attachmentId) !== 'image/svg+xml') {
+                return $image;
+            }
+
+            $dimensions = $this->extractSvgDimensions(get_attached_file( (int) $attachmentId) ?: '');
+            if (!$dimensions) {
+                return $image;
+            }
+
+            $image[1] = $dimensions['width'];
+            $image[2] = $dimensions['height'];
+
+            return $image;
+        }, 10, 2);
+    }
+
+    /**
+     * Extract pixel dimensions from an SVG file.
+     *
+     * Preference order:
+     * 1. `viewBox="minX minY width height"` attribute (most reliable)
+     * 2. `width` + `height` attributes on the root <svg>
+     *
+     * Returns null if the file is unreadable or both approaches fail.
+     *
+     * @return array{width: int, height: int}|null
+     */
+    private function extractSvgDimensions(string $filePath): ?array
+    {
+        if ($filePath === '' || !is_readable($filePath)) {
+            return null;
+        }
+
+        // Read only the first 2KB — the <svg> root tag with its attributes
+        // always lives at the start of the file.
+        $fh = @fopen($filePath, 'rb');
+        if ($fh === false) {
+            return null;
+        }
+        $head = (string) fread($fh, 2048);
+        fclose($fh);
+
+        if (!preg_match('/<svg\b[^>]*>/is', $head, $svgTag)) {
+            return null;
+        }
+        $tag = $svgTag[0];
+
+        if (preg_match('/\bviewBox\s*=\s*["\']([^"\']+)["\']/i', $tag, $vb)) {
+            $parts = preg_split('/[\s,]+/', trim($vb[1])) ?: [];
+            if (count($parts) === 4) {
+                $width = (int) round( (float) $parts[2]);
+                $height = (int) round( (float) $parts[3]);
+                if ($width > 0 && $height > 0) {
+                    return ['width' => $width, 'height' => $height];
+                }
+            }
+        }
+
+        $width = preg_match('/\bwidth\s*=\s*["\']([\d.]+)/i', $tag, $w) ? (int) round( (float) $w[1]) : 0;
+        $height = preg_match('/\bheight\s*=\s*["\']([\d.]+)/i', $tag, $h) ? (int) round( (float) $h[1]) : 0;
+
+        return ( $width > 0 && $height > 0 ) ? ['width' => $width, 'height' => $height] : null;
     }
 
     /**
@@ -365,6 +495,7 @@ class ThemeServiceProvider extends ServiceProvider
 
             if ($blade->exists($templateName)) {
                 $GLOBALS['template_name'] = $templateName;
+
                 return get_template_directory() . '/config/index.php';
             }
 
@@ -538,6 +669,7 @@ class ThemeServiceProvider extends ServiceProvider
             }
 
             $faviconUrl = wp_get_attachment_image_url($faviconId, [$size, $size]);
+
             return $faviconUrl ?: $url;
         }, 10, 3);
 
