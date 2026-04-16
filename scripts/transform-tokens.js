@@ -12,7 +12,7 @@
 
 import { readFileSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -47,15 +47,23 @@ const ROOT_PX = 16;
  * VIEWPORT_MIN and VIEWPORT_MAX viewport widths.
  * Returns a static rem string when minPx === maxPx (no scaling needed).
  */
+/**
+ * Format a number with up to 4 decimal places, trimming trailing zeros.
+ * Keeps generated CSS readable: `2.375rem` instead of `2.3750rem`.
+ */
+function fmt(n) {
+  return n.toFixed(4).replace(/\.?0+$/, '');
+}
+
 function fluidClamp(minPx, maxPx, minVw = VIEWPORT_MIN, maxVw = VIEWPORT_MAX, rootPx = ROOT_PX) {
   if (minPx === maxPx) {
-    return `${(minPx / rootPx).toFixed(4).replace(/\.?0+$/, '')}rem`;
+    return `${fmt(minPx / rootPx)}rem`;
   }
   const minRem = minPx / rootPx;
   const maxRem = maxPx / rootPx;
   const vwCoef = (100 * (maxPx - minPx)) / (maxVw - minVw);
   const remIntercept = (minPx - (vwCoef / 100) * minVw) / rootPx;
-  return `clamp(${minRem.toFixed(4)}rem, calc(${remIntercept.toFixed(4)}rem + ${vwCoef.toFixed(4)}vw), ${maxRem.toFixed(4)}rem)`;
+  return `clamp(${fmt(minRem)}rem, calc(${fmt(remIntercept)}rem + ${fmt(vwCoef)}vw), ${fmt(maxRem)}rem)`;
 }
 
 /**
@@ -70,8 +78,7 @@ function fluidLineHeight(mobileLh, desktopLh, minVw = VIEWPORT_MIN, maxVw = VIEW
   const clampMin = Math.min(mobileLh, desktopLh);
   const clampMax = Math.max(mobileLh, desktopLh);
   const op = vwCoef < 0 ? '-' : '+';
-  const absCoef = Math.abs(vwCoef).toFixed(4);
-  return `clamp(${clampMin}, calc(${intercept.toFixed(4)} ${op} ${absCoef}vw), ${clampMax})`;
+  return `clamp(${clampMin}, calc(${fmt(intercept)} ${op} ${fmt(Math.abs(vwCoef))}vw), ${clampMax})`;
 }
 
 /**
@@ -876,7 +883,8 @@ ${generateCssImportant(lightIcon, 'icon')}
 }
 
 // Run transformation only when invoked directly, not when imported by tests.
-if (import.meta.url === `file://${process.argv[1]}`) {
+// pathToFileURL handles path segments with spaces, special chars, symlinks correctly.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   transform();
 }
 
