@@ -22,6 +22,58 @@ const TOKENS_DIR = join(ROOT, 'config/design-tokens');
 const OUTPUT_FILE = join(ROOT, 'resources/css/tokens.css');
 const OUTPUT_EDITOR_FILE = join(ROOT, 'resources/css/tokens-editor.css');
 
+// Fluid typography configuration
+// Mobile min values (at VIEWPORT_MIN). Max values come from Figma primitives.fontSize.
+// Body and smaller tokens stay constant for readability; only headlines scale.
+const FLUID_SIZES = {
+  xs: { min: 12, max: 12 },
+  sm: { min: 14, max: 14 },
+  base: { min: 16, max: 16 },
+  lg: { min: 17, max: 18 },
+  xl: { min: 18, max: 20 },
+  '2xl': { min: 20, max: 24 },
+  '3xl': { min: 24, max: 30 },
+  '4xl': { min: 28, max: 36 },
+  '5xl': { min: 32, max: 48 },
+  '6xl': { min: 38, max: 60 },
+};
+
+const VIEWPORT_MIN = 320;
+const VIEWPORT_MAX = 1920;
+const ROOT_PX = 16;
+
+/**
+ * Generate a fluid clamp() value in rem that scales linearly between
+ * VIEWPORT_MIN and VIEWPORT_MAX viewport widths.
+ * Returns a static rem string when minPx === maxPx (no scaling needed).
+ */
+function fluidClamp(minPx, maxPx, minVw = VIEWPORT_MIN, maxVw = VIEWPORT_MAX, rootPx = ROOT_PX) {
+  if (minPx === maxPx) {
+    return `${(minPx / rootPx).toFixed(4).replace(/\.?0+$/, '')}rem`;
+  }
+  const minRem = minPx / rootPx;
+  const maxRem = maxPx / rootPx;
+  const vwCoef = (100 * (maxPx - minPx)) / (maxVw - minVw);
+  const remIntercept = (minPx - (vwCoef / 100) * minVw) / rootPx;
+  return `clamp(${minRem.toFixed(4)}rem, calc(${remIntercept.toFixed(4)}rem + ${vwCoef.toFixed(4)}vw), ${maxRem.toFixed(4)}rem)`;
+}
+
+/**
+ * Generate a fluid unitless line-height that shrinks as viewport grows.
+ * mobileLh is used at minVw (typically larger for breathing room on small screens),
+ * desktopLh is used at maxVw (typically tighter for visual density).
+ */
+function fluidLineHeight(mobileLh, desktopLh, minVw = VIEWPORT_MIN, maxVw = VIEWPORT_MAX) {
+  if (mobileLh === desktopLh) return String(mobileLh);
+  const vwCoef = (100 * (desktopLh - mobileLh)) / (maxVw - minVw);
+  const intercept = mobileLh - (vwCoef / 100) * minVw;
+  const clampMin = Math.min(mobileLh, desktopLh);
+  const clampMax = Math.max(mobileLh, desktopLh);
+  const op = vwCoef < 0 ? '-' : '+';
+  const absCoef = Math.abs(vwCoef).toFixed(4);
+  return `clamp(${clampMin}, calc(${intercept.toFixed(4)} ${op} ${absCoef}vw), ${clampMax})`;
+}
+
 /**
  * Extract CSS var() reference from Figma token alias data.
  * Converts aliasData.targetVariableName (e.g. "color/accent/500")
@@ -95,7 +147,7 @@ function extractNumericValue(token, unit = 'px') {
 function extractStringValue(token) {
   if (!token || token.$type !== 'string') return null;
   // Wrap font family names in quotes for CSS
-  return `"${token.$value}"`
+  return `"${token.$value}"`;
 }
 
 /**
@@ -184,10 +236,17 @@ function generateCssImportant(tokens, prefix = '') {
 }
 
 /**
- * Standard typography tokens (not from Figma, but needed for consistency)
- * These use primitive font-size/font-weight values and add line-height, letter-spacing
+ * Standard typography tokens (not from Figma, but needed for consistency).
+ * Large headlines get fluid line-heights to preserve breathing room on mobile
+ * where long German compound words need more vertical space.
  */
-const TYPOGRAPHY_TOKENS = `
+function buildTypographyTokens() {
+  const displayLh = fluidLineHeight(1.5, 1.1);
+  const h1Lh = fluidLineHeight(1.4, 1.2);
+  const h2Lh = fluidLineHeight(1.35, 1.25);
+  const h3Lh = fluidLineHeight(1.4, 1.3);
+
+  return `
   /* ============================================
      TYPOGRAPHY COMPOSITE TOKENS
      Standard typography styles using primitives
@@ -196,25 +255,25 @@ const TYPOGRAPHY_TOKENS = `
   /* Display - 6xl / Bold (for hero headlines) */
   --typography-display-size: var(--font-size-6xl);
   --typography-display-weight: var(--font-weight-bold);
-  --typography-display-line-height: 1.1;
+  --typography-display-line-height: ${displayLh};
   --typography-display-letter-spacing: -0.02em;
 
   /* Heading 1 - 4xl / Bold */
   --typography-h1-size: var(--font-size-4xl);
   --typography-h1-weight: var(--font-weight-bold);
-  --typography-h1-line-height: 1.2;
+  --typography-h1-line-height: ${h1Lh};
   --typography-h1-letter-spacing: -0.01em;
 
   /* Heading 2 - 3xl / Semibold */
   --typography-h2-size: var(--font-size-3xl);
   --typography-h2-weight: var(--font-weight-semibold);
-  --typography-h2-line-height: 1.25;
+  --typography-h2-line-height: ${h2Lh};
   --typography-h2-letter-spacing: -0.01em;
 
   /* Heading 3 - 2xl / Semibold */
   --typography-h3-size: var(--font-size-2xl);
   --typography-h3-weight: var(--font-weight-semibold);
-  --typography-h3-line-height: 1.3;
+  --typography-h3-line-height: ${h3Lh};
   --typography-h3-letter-spacing: 0;
 
   /* Heading 4 - xl / Semibold */
@@ -266,6 +325,7 @@ const TYPOGRAPHY_TOKENS = `
   --typography-code-line-height: 1.5;
   --typography-code-letter-spacing: 0;
 `;
+}
 
 /**
  * Standard component tokens (shadows, button sizes, etc.)
@@ -367,7 +427,8 @@ function validateAndFix(css) {
   }
 
   // 2. Check for invalid color values (exclude border-width which is not a color)
-  const colorRegex = /--(?:color|bg|text|border-(?!width)[\w-]*|border-default|icon)-[\w-]*:\s*([^;]+);/g;
+  const colorRegex =
+    /--(?:color|bg|text|border-(?!width)[\w-]*|border-default|icon)-[\w-]*:\s*([^;]+);/g;
   while ((match = colorRegex.exec(css)) !== null) {
     const value = match[1].trim();
     // Skip CSS variable references
@@ -385,15 +446,21 @@ function validateAndFix(css) {
     }
   }
 
-  // 3. Check for px values that should be rem (font-size)
-  const fontSizeRegex = /--font-size-\w+:\s*(\d+)px;/g;
+  // 3. Check for px values that should be rem (font-size).
+  // Negative lookahead prevents matching inside clamp()/calc() expressions from
+  // the fluid typography pipeline. Offset-based replace avoids substring collisions
+  // when the same --font-size-* line would appear twice anywhere in the CSS.
+  const fontSizeRegex = /--font-size-(\w+):\s*(?!clamp)(\d+)px;/g;
+  let fontSizeDelta = 0;
   while ((match = fontSizeRegex.exec(css)) !== null) {
-    const pxValue = parseInt(match[1]);
+    const pxValue = parseInt(match[2]);
     const remValue = (pxValue / 16).toFixed(4).replace(/\.?0+$/, '');
-    warnings.push(`Font size in px: ${match[1]}px (should be ${remValue}rem for accessibility)`);
-    // Auto-fix to rem
-    fixedCss = fixedCss.replace(match[0], `--font-size-${match[0].match(/--font-size-(\w+)/)[1]}: ${remValue}rem;`);
-    fixes.push(`Auto-fixed: Converted ${match[1]}px to ${remValue}rem`);
+    const replacement = `--font-size-${match[1]}: ${remValue}rem;`;
+    warnings.push(`Font size in px: ${match[2]}px (should be ${remValue}rem for accessibility)`);
+    const start = match.index + fontSizeDelta;
+    fixedCss = fixedCss.slice(0, start) + replacement + fixedCss.slice(start + match[0].length);
+    fontSizeDelta += replacement.length - match[0].length;
+    fixes.push(`Auto-fixed: Converted ${match[2]}px to ${remValue}rem`);
   }
 
   // 4. Check for missing required tokens
@@ -430,15 +497,9 @@ function transform() {
   console.log('Reading Figma token files...');
 
   // Read token files
-  const primitives = JSON.parse(
-    readFileSync(join(TOKENS_DIR, 'primitives.tokens.json'), 'utf8')
-  );
-  const lightTokens = JSON.parse(
-    readFileSync(join(TOKENS_DIR, 'light.tokens.json'), 'utf8')
-  );
-  const darkTokens = JSON.parse(
-    readFileSync(join(TOKENS_DIR, 'dark.tokens.json'), 'utf8')
-  );
+  const primitives = JSON.parse(readFileSync(join(TOKENS_DIR, 'primitives.tokens.json'), 'utf8'));
+  const lightTokens = JSON.parse(readFileSync(join(TOKENS_DIR, 'light.tokens.json'), 'utf8'));
+  const darkTokens = JSON.parse(readFileSync(join(TOKENS_DIR, 'dark.tokens.json'), 'utf8'));
 
   console.log('Processing primitives...');
 
@@ -446,37 +507,32 @@ function transform() {
   const primitiveColors = flattenTokens(primitives.color || {}, '', extractColorValue);
 
   // Process primitives - spacing (convert to rem)
-  const primitiveSpacing = flattenTokens(
-    primitives.spacing || {},
-    '',
-    (token) => extractNumericValue(token, 'px')
+  const primitiveSpacing = flattenTokens(primitives.spacing || {}, '', (token) =>
+    extractNumericValue(token, 'px')
   );
 
   // Process primitives - radius
-  const primitiveRadius = flattenTokens(
-    primitives.radius || {},
-    '',
-    (token) => extractNumericValue(token, 'px')
+  const primitiveRadius = flattenTokens(primitives.radius || {}, '', (token) =>
+    extractNumericValue(token, 'px')
   );
 
-  // Process primitives - fontSize (convert to rem for better accessibility)
-  const primitiveFontSize = flattenTokens(
-    primitives.fontSize || {},
-    '',
-    (token) => {
-      const px = token?.$value;
-      if (typeof px === 'number') {
-        return `${(px / 16).toFixed(4).replace(/\.?0+$/, '')}rem`;
-      }
-      return null;
-    }
-  );
+  // Process primitives - fontSize as fluid clamp() values between VIEWPORT_MIN and VIEWPORT_MAX.
+  // Figma provides the desktop max; FLUID_SIZES provides the mobile min per level.
+  // Unknown keys (not in FLUID_SIZES) fall back to a static rem value.
+  const primitiveFontSize = {};
+  for (const [key, token] of Object.entries(primitives.fontSize || {})) {
+    if (key.startsWith('$')) continue;
+    const px = token?.$value;
+    if (typeof px !== 'number') continue;
+    const config = FLUID_SIZES[key];
+    primitiveFontSize[key] = config
+      ? fluidClamp(config.min, px)
+      : `${(px / ROOT_PX).toFixed(4).replace(/\.?0+$/, '')}rem`;
+  }
 
   // Process primitives - fontWeight
-  const primitiveFontWeight = flattenTokens(
-    primitives.fontWeight || {},
-    '',
-    (token) => extractNumericValue(token, '')
+  const primitiveFontWeight = flattenTokens(primitives.fontWeight || {}, '', (token) =>
+    extractNumericValue(token, '')
   );
 
   // Process primitives - fontFamily
@@ -492,32 +548,22 @@ function transform() {
   }
 
   // Process primitives - borderWidth
-  const primitiveBorderWidth = flattenTokens(
-    primitives.borderWidth || {},
-    '',
-    (token) => extractNumericValue(token, 'px')
+  const primitiveBorderWidth = flattenTokens(primitives.borderWidth || {}, '', (token) =>
+    extractNumericValue(token, 'px')
   );
 
   // Process primitives - opacity (values 0-100, stored as-is)
-  const primitiveOpacity = flattenTokens(
-    primitives.opacity || {},
-    '',
-    (token) => extractNumericValue(token, '')
+  const primitiveOpacity = flattenTokens(primitives.opacity || {}, '', (token) =>
+    extractNumericValue(token, '')
   );
 
   // Process primitives - sizing (icon sizes)
-  const primitiveSizing = flattenTokens(
-    primitives.sizing || {},
-    '',
-    (token) => extractNumericValue(token, 'px')
+  const primitiveSizing = flattenTokens(primitives.sizing || {}, '', (token) =>
+    extractNumericValue(token, 'px')
   );
 
   // Process primitives - gradient (alias references to color tokens)
-  const primitiveGradient = flattenTokens(
-    primitives.gradient || {},
-    '',
-    extractColorOrAlias
-  );
+  const primitiveGradient = flattenTokens(primitives.gradient || {}, '', extractColorOrAlias);
 
   console.log('Processing semantic tokens (light mode)...');
 
@@ -583,7 +629,7 @@ ${generateCss(primitiveSizing, 'sizing')}
 
   /* Gradients */
 ${generateCss(primitiveGradient, 'gradient')}
-${TYPOGRAPHY_TOKENS}
+${buildTypographyTokens()}
 ${COMPONENT_TOKENS}
 }
 
@@ -649,13 +695,13 @@ ${generateCss(darkIcon, 'icon')}
 
   if (fixes.length > 0) {
     console.log('\n✅ Auto-fixes applied:');
-    fixes.forEach(fix => console.log(`   ${fix}`));
+    fixes.forEach((fix) => console.log(`   ${fix}`));
     css = validatedCss;
   }
 
   if (warnings.length > 0) {
     console.log('\n⚠️  Warnings:');
-    warnings.forEach(warning => console.log(`   ${warning}`));
+    warnings.forEach((warning) => console.log(`   ${warning}`));
   }
 
   if (warnings.length === 0 && fixes.length === 0) {
@@ -720,7 +766,7 @@ ${generateCss(primitiveSizing, 'sizing')}
 
   /* Gradients */
 ${generateCss(primitiveGradient, 'gradient')}
-${TYPOGRAPHY_TOKENS}
+${buildTypographyTokens()}
 ${COMPONENT_TOKENS}
 }
 
@@ -829,5 +875,9 @@ ${generateCssImportant(lightIcon, 'icon')}
   }
 }
 
-// Run transformation
-transform();
+// Run transformation only when invoked directly, not when imported by tests.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  transform();
+}
+
+export { fluidClamp, fluidLineHeight, FLUID_SIZES, VIEWPORT_MIN, VIEWPORT_MAX, ROOT_PX };
