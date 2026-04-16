@@ -4,26 +4,28 @@ declare(strict_types=1);
 
 namespace WordpressStarter;
 
+use Closure;
 use Illuminate\Container\Container;
-use WordpressStarter\Providers\ServiceProvider;
-use WordpressStarter\Providers\BladeServiceProvider;
-use WordpressStarter\Providers\MenuServiceProvider;
-use WordpressStarter\Providers\ThemeServiceProvider;
-use WordpressStarter\Providers\SecurityServiceProvider;
 use WordpressStarter\Providers\AcfServiceProvider;
-use WordpressStarter\Providers\ImageServiceProvider;
-use WordpressStarter\Providers\PluginConfiguratorServiceProvider;
-use WordpressStarter\Providers\PluginServiceProvider;
-use WordpressStarter\Providers\WelcomeServiceProvider;
-use WordpressStarter\Providers\ThemeUpdateProvider;
-use WordpressStarter\Providers\PostTypeServiceProvider;
-use WordpressStarter\Providers\LogServiceProvider;
+use WordpressStarter\Providers\BladeServiceProvider;
 use WordpressStarter\Providers\CronServiceProvider;
-use WordpressStarter\Providers\SeoServiceProvider;
 use WordpressStarter\Providers\DesignTokenServiceProvider;
 use WordpressStarter\Providers\EditorStylesServiceProvider;
 use WordpressStarter\Providers\IconShortcodeServiceProvider;
+use WordpressStarter\Providers\ImageServiceProvider;
+use WordpressStarter\Providers\LlmsTxtProvider;
+use WordpressStarter\Providers\LogServiceProvider;
 use WordpressStarter\Providers\MemberAreaServiceProvider;
+use WordpressStarter\Providers\MenuServiceProvider;
+use WordpressStarter\Providers\PluginConfiguratorServiceProvider;
+use WordpressStarter\Providers\PluginServiceProvider;
+use WordpressStarter\Providers\PostTypeServiceProvider;
+use WordpressStarter\Providers\SecurityServiceProvider;
+use WordpressStarter\Providers\SeoServiceProvider;
+use WordpressStarter\Providers\ServiceProvider;
+use WordpressStarter\Providers\ThemeServiceProvider;
+use WordpressStarter\Providers\ThemeUpdateProvider;
+use WordpressStarter\Providers\WelcomeServiceProvider;
 
 class Application
 {
@@ -56,6 +58,7 @@ class Application
         if (self::$instance === null) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
@@ -71,6 +74,7 @@ class Application
             MenuServiceProvider::class,
             ThemeServiceProvider::class,
             SeoServiceProvider::class,
+            LlmsTxtProvider::class,
             ImageServiceProvider::class,
             ThemeUpdateProvider::class,
             PostTypeServiceProvider::class,
@@ -110,6 +114,7 @@ class Application
         if (!isset($this->providerInstances[$providerClass])) {
             $this->providerInstances[$providerClass] = new $providerClass();
         }
+
         return $this->providerInstances[$providerClass];
     }
 
@@ -123,6 +128,7 @@ class Application
         if (in_array($providerClass, $this->providers, true)) {
             return $this->resolveProvider($providerClass);
         }
+
         return null;
     }
 
@@ -138,7 +144,9 @@ class Application
      * Resolve a class from the container.
      *
      * @template T
+     *
      * @param class-string<T> $abstract
+     *
      * @return T
      */
     public function make(string $abstract): mixed
@@ -150,9 +158,9 @@ class Application
      * Register a binding in the container.
      *
      * @param string $abstract
-     * @param \Closure|string|null $concrete
+     * @param Closure|string|null $concrete
      */
-    public function bind(string $abstract, \Closure|string|null $concrete = null, bool $shared = false): void
+    public function bind(string $abstract, Closure|string|null $concrete = null, bool $shared = false): void
     {
         $this->container->bind($abstract, $concrete, $shared);
     }
@@ -161,9 +169,9 @@ class Application
      * Register a shared binding (singleton) in the container.
      *
      * @param string $abstract
-     * @param \Closure|string|null $concrete
+     * @param Closure|string|null $concrete
      */
-    public function singleton(string $abstract, \Closure|string|null $concrete = null): void
+    public function singleton(string $abstract, Closure|string|null $concrete = null): void
     {
         $this->container->singleton($abstract, $concrete);
     }
@@ -172,8 +180,10 @@ class Application
      * Register an existing instance in the container.
      *
      * @template T
+     *
      * @param string $abstract
      * @param T $instance
+     *
      * @return T
      */
     public function instance(string $abstract, mixed $instance): mixed
