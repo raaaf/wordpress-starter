@@ -1,3 +1,9 @@
+# [2.18.0](https://github.com/raaaf/starter/compare/v2.17.1...v2.18.0) (2026-04-16)
+
+### Features
+
+- **seo:** add GEO foundations for AI search visibility ([b4a16e1](https://github.com/raaaf/starter/commit/b4a16e19415d17be8a719ac7f2e3565656448899))
+
 ## [2.17.1](https://github.com/raaaf/starter/compare/v2.17.0...v2.17.1) (2026-04-02)
 
 ### Bug Fixes
