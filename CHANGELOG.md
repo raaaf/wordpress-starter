@@ -1,3 +1,9 @@
+## [2.19.1](https://github.com/raaaf/starter/compare/v2.19.0...v2.19.1) (2026-04-16)
+
+### Bug Fixes
+
+- **tokens:** ESM guard + trim trailing zeros in clamp output ([821e0c7](https://github.com/raaaf/starter/commit/821e0c78741daa45b12141d76915eb258c89d883))
+
 # [2.19.0](https://github.com/raaaf/starter/compare/v2.18.0...v2.19.0) (2026-04-16)
 
 ### Features
