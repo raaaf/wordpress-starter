@@ -17,6 +17,7 @@ use RecursiveIteratorIterator;
 final class NamespaceConsistencyTest extends TestCase
 {
     private string $basePath;
+
     private string $projectNamespace;
 
     protected function setUp(): void
@@ -116,7 +117,7 @@ final class NamespaceConsistencyTest extends TestCase
         $this->assertArrayHasKey(
             $this->projectNamespace . '\\',
             $autoload,
-            "composer.json autoload should have '" . $this->projectNamespace . "\\' PSR-4 entry"
+            "composer.json autoload should have '" . $this->projectNamespace . "\\' PSR-4 entry",
         );
 
         // Ensure no other project-like namespaces exist
@@ -139,7 +140,7 @@ final class NamespaceConsistencyTest extends TestCase
             $this->assertSame(
                 $this->projectNamespace,
                 $matches[1],
-                "functions.php should have namespace '" . $this->projectNamespace . "'"
+                "functions.php should have namespace '" . $this->projectNamespace . "'",
             );
         }
 
@@ -164,7 +165,7 @@ final class NamespaceConsistencyTest extends TestCase
         }
 
         $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS)
+            new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS),
         );
 
         foreach ($iterator as $file) {
@@ -186,7 +187,7 @@ final class NamespaceConsistencyTest extends TestCase
         }
 
         $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS)
+            new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS),
         );
 
         foreach ($iterator as $file) {
@@ -202,6 +203,7 @@ final class NamespaceConsistencyTest extends TestCase
     private function isProjectNamespace(string $namespace): bool
     {
         $firstPart = explode('\\', $namespace)[0];
+
         return !$this->isExternalNamespace($firstPart);
     }
 
@@ -242,6 +244,13 @@ final class NamespaceConsistencyTest extends TestCase
             'Spatie',       // Schema.org
             'SchemaOrg',    // Schema.org (alternate)
             'phpseclib3',   // SFTP client
+            // WordPress core globals (auto-imported by php-cs-fixer)
+            'WP_Post',
+            'WP_Post_Type',
+            'WP_Query',
+            'WP_Error',
+            'WP_Term',
+            'WP_User',
             // Internal sub-namespaces (to avoid false positives in Blade templates)
             'PostTypes',
             'Taxonomies',

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WP_Post;
+use WP_Post_Type;
+
 /**
  * SEO Service Provider
  *
@@ -23,10 +26,74 @@ class SeoServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->addRobotsOverrides();
+        $this->addAiCrawlerPolicy();
         $this->addStructuredData();
         $this->addBreadcrumbSchema();
         $this->addCanonicalUrl();
         $this->addOpenGraphTags();
+    }
+
+    /**
+     * Explicitly allow known AI crawlers in the WordPress virtual robots.txt.
+     *
+     * WordPress serves a virtual robots.txt unless a static file exists in the
+     * web root. Yoast SEO appends its own rules via the same filter. We append
+     * a clearly labelled block so crawlers that respect robots.txt see an
+     * explicit allow, even if a parent directive (`User-agent: *`) would have
+     * covered them. Clients can disable the whole block by returning an empty
+     * string from the `wp_starter_ai_crawler_policy` filter, or rewrite it
+     * entirely via `wp_starter_ai_crawlers`.
+     */
+    private function addAiCrawlerPolicy(): void
+    {
+        add_filter('robots_txt', function (string $output, bool $public): string {
+            if (!$public) {
+                return $output;
+            }
+
+            $crawlers = apply_filters('wp_starter_ai_crawlers', [
+                'GPTBot',           // ChatGPT (training + browsing)
+                'OAI-SearchBot',    // ChatGPT Search surfaces
+                'ChatGPT-User',     // ChatGPT browsing on behalf of a user
+                'ClaudeBot',        // Anthropic crawler
+                'Claude-Web',       // Legacy Anthropic crawler
+                'anthropic-ai',     // Legacy Anthropic user agent
+                'PerplexityBot',    // Perplexity AI
+                'Perplexity-User',  // Perplexity browsing on behalf of a user
+                'Google-Extended',  // Gemini + AI Overviews opt-in signal
+                'CCBot',            // Common Crawl (feeds many LLMs)
+                'Applebot-Extended',
+                'Bytespider',
+                'DuckAssistBot',
+                'Meta-ExternalAgent',
+                'cohere-ai',
+                'Diffbot',
+            ]);
+
+            if (!is_array($crawlers) || $crawlers === []) {
+                return $output;
+            }
+
+            $lines = ['', '# AI crawlers (managed by theme)'];
+            foreach ($crawlers as $agent) {
+                $agent = (string) $agent;
+                if ($agent === '') {
+                    continue;
+                }
+                $lines[] = 'User-agent: ' . $agent;
+                $lines[] = 'Allow: /';
+                $lines[] = '';
+            }
+
+            $block = implode("\n", $lines);
+
+            /**
+             * Filter the final AI crawler block. Return an empty string to omit it entirely.
+             */
+            $block = (string) apply_filters('wp_starter_ai_crawler_policy', $block, $crawlers);
+
+            return rtrim($output) . "\n" . $block;
+        }, 20, 2);
     }
 
     /**
@@ -244,7 +311,7 @@ class SeoServiceProvider extends ServiceProvider
 
         if (is_singular()) {
             $post = get_queried_object();
-            if (!$post instanceof \WP_Post) {
+            if (!$post instanceof WP_Post) {
                 return $items;
             }
 
@@ -281,7 +348,7 @@ class SeoServiceProvider extends ServiceProvider
         } elseif (is_archive()) {
             if (is_post_type_archive()) {
                 $postType = get_queried_object();
-                if ($postType instanceof \WP_Post_Type) {
+                if ($postType instanceof WP_Post_Type) {
                     $items[] = [
                         'name' => $postType->labels->name ?? $postType->name,
                         'url' => '',
@@ -371,6 +438,7 @@ class SeoServiceProvider extends ServiceProvider
         if (is_archive()) {
             // For date/author archives, use the current URL without query params
             global $wp;
+
             return home_url($wp->request);
         }
 
@@ -553,6 +621,7 @@ class SeoServiceProvider extends ServiceProvider
      *
      * @param int $attachmentId
      * @param string $size
+     *
      * @return array{url: string, width: int, height: int, mime: string}|null
      */
     private function getImageMetadata(int $attachmentId, string $size = 'full'): ?array
@@ -570,5 +639,106 @@ class SeoServiceProvider extends ServiceProvider
             'height' => (int) $imageSrc[2],
             'mime' => $mime,
         ];
+    }
+
+    /**
+     * Render a FAQPage JSON-LD block for a list of question/answer pairs.
+     *
+     * Intended for opt-in use inside flexible layouts (e.g. accordion.blade.php).
+     * Skips rendering when the list is empty or all entries are invalid.
+     *
+     * @param array<int, array{question: string, answer: string}> $items
+     */
+    public static function emitFaqSchema(array $items): void
+    {
+        $mainEntity = [];
+
+        foreach ($items as $item) {
+            $question = isset($item['question']) ? trim(wp_strip_all_tags( (string) $item['question'])) : '';
+            $answer = isset($item['answer']) ? trim(wp_kses_post( (string) $item['answer'])) : '';
+
+            if ($question === '' || $answer === '') {
+                continue;
+            }
+
+            $mainEntity[] = [
+                '@type' => 'Question',
+                'name' => $question,
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => $answer,
+                ],
+            ];
+        }
+
+        if ($mainEntity === []) {
+            return;
+        }
+
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => $mainEntity,
+        ];
+
+        $nonce = $GLOBALS['csp_nonce'] ?? '';
+        echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
+            . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            . '</script>' . "\n";
+    }
+
+    /**
+     * Render a Person JSON-LD block. Useful for team pages, author bios and
+     * E-E-A-T signals on regulated pages (finance, health, legal).
+     *
+     * @param array{
+     *     name: string,
+     *     jobTitle?: string,
+     *     description?: string,
+     *     image?: string,
+     *     url?: string,
+     *     email?: string,
+     *     telephone?: string,
+     *     sameAs?: array<int, string>,
+     *     worksFor?: string
+     * } $person
+     */
+    public static function emitPersonSchema(array $person): void
+    {
+        $name = isset($person['name']) ? trim( (string) $person['name']) : '';
+        if ($name === '') {
+            return;
+        }
+
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Person',
+            'name' => $name,
+        ];
+
+        foreach (['jobTitle', 'description', 'image', 'url', 'email', 'telephone'] as $key) {
+            if (!empty($person[$key])) {
+                $schema[$key] = $person[$key];
+            }
+        }
+
+        if (!empty($person['sameAs']) && is_array($person['sameAs'])) {
+            $schema['sameAs'] = array_values(array_filter(array_map('strval', $person['sameAs'])));
+            if ($schema['sameAs'] === []) {
+                unset($schema['sameAs']);
+            }
+        }
+
+        if (!empty($person['worksFor'])) {
+            $schema['worksFor'] = [
+                '@type' => 'Organization',
+                'name' => (string) $person['worksFor'],
+            ];
+        }
+
+        $nonce = $GLOBALS['csp_nonce'] ?? '';
+        echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
+            . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            . '</script>' . "\n";
     }
 }
