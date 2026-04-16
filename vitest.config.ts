@@ -9,7 +9,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
-    include: ['resources/js/**/*.{test,spec}.{js,ts}'],
+    include: ['resources/js/**/*.{test,spec}.{js,ts}', 'scripts/**/*.{test,spec}.{js,ts}'],
     exclude: ['node_modules', 'dist'],
     coverage: {
       provider: 'v8',
