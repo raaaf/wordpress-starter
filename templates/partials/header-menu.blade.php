@@ -25,13 +25,13 @@
                 @if($logo_id)
                     {!! wp_get_attachment_image($logo_id, 'logo', false, [
                         'alt'   => esc_attr(get_bloginfo('name')),
-                        'class' => 'w-auto max-h-12',
+                        'class' => 'h-12 w-auto',
                         'sizes' => '(max-width: 768px) 128px, 256px',
                     ]) !!}
                 @else
                     <img src="{{ esc_url(get_template_directory_uri() . '/resources/img/default-logo.png') }}"
                         alt="{{ esc_attr(get_bloginfo('name')) }}"
-                        class="w-auto max-h-12"
+                        class="h-12 w-auto"
                         width="50" height="50">
                 @endif
             </a>
