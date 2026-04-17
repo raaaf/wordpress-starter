@@ -1,3 +1,9 @@
+## [2.19.4](https://github.com/raaaf/starter/compare/v2.19.3...v2.19.4) (2026-04-17)
+
+### Bug Fixes
+
+- **a11y:** resolve WCAG issues across components and templates ([076b3e4](https://github.com/raaaf/starter/commit/076b3e4ce640eb6a79facc3b3b3548fc1610f5d1))
+
 ## [2.19.3](https://github.com/raaaf/starter/compare/v2.19.2...v2.19.3) (2026-04-16)
 
 ### Bug Fixes
