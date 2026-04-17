@@ -43,8 +43,8 @@
     ];
 
     $variants = [
-        'accent' => 'text-content-link hover:text-content-link-hover visited:text-content-tertiary',
-        'dark' => 'text-content hover:text-content-secondary visited:text-content-tertiary',
+        'accent' => 'text-content-link hover:text-content-link-hover',
+        'dark' => 'text-content hover:text-content-secondary',
     ];
 
     $sizeClass = $sizes[$size] ?? $sizes['md'];

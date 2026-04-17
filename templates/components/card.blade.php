@@ -40,6 +40,7 @@
     'url' => null,
     'disabled' => false,
     'selected' => false,
+    'eager' => false,
 ])
 
 @php
@@ -117,7 +118,7 @@
         {{-- Image --}}
         @if($image)
             <div class="w-full {{ $sizeConfig['imageHeight'] }} overflow-hidden rounded-[var(--card-media-radius,8px)] {{ $url ? 'relative z-0' : '' }}">
-                <img src="{{ esc_url($image) }}" alt="{{ esc_attr($imageAlt) }}" class="w-full h-full object-cover" loading="lazy" />
+                <img src="{{ esc_url($image) }}" alt="{{ esc_attr($imageAlt) }}" class="w-full h-full object-cover" loading="{{ $eager ? 'eager' : 'lazy' }}" @if($eager) fetchpriority="high" @endif />
             </div>
         @endif
 

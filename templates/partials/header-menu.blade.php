@@ -57,7 +57,7 @@
                 class="md:hidden p-2 rounded-[var(--button-md-radius)] hover:bg-surface-secondary focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)] transition-all duration-200"
                 :aria-label="isOpen ? '{{ __('Menü schließen', 'wp-starter') }}' : '{{ __('Menü öffnen', 'wp-starter') }}'"
                 :aria-expanded="isOpen"
-                aria-haspopup="menu"
+                aria-haspopup="true"
                 aria-controls="mobile-navigation">
             {{-- Hamburger icon --}}
             <svg x-show="!isOpen" class="w-6 h-6 text-content" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

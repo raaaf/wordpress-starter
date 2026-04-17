@@ -13,6 +13,7 @@
     'name',
     'id' => null,
     'label' => null,
+    'ariaLabel' => null,
     'checked' => false,
     'disabled' => false,
     'class' => '',
@@ -20,16 +21,22 @@
 
 @php
     $toggleId = $id ?? $name;
+    $accessibleName = $ariaLabel ?: $label;
+    if (defined('WP_DEBUG') && WP_DEBUG && !$accessibleName) {
+        trigger_error('x-toggle requires a "label" or "ariaLabel" prop for accessibility.', E_USER_WARNING);
+    }
 @endphp
 
 <label class="toggle inline-flex items-center gap-3 cursor-pointer {{ $disabled ? 'cursor-not-allowed' : '' }} {{ $class }}">
     <span class="relative">
         <input
             type="checkbox"
+            role="switch"
             name="{{ $name }}"
             id="{{ $toggleId }}"
             @if($checked) checked @endif
             @if($disabled) disabled @endif
+            @if($ariaLabel && !$label) aria-label="{{ esc_attr($ariaLabel) }}" @endif
             class="peer sr-only"
         />
 

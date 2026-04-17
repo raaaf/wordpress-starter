@@ -21,7 +21,7 @@
 
             {{-- Search Form --}}
             <div class="mb-8">
-                <form role="search" method="get" action="{{ esc_url(home_url('/')) }}" class="flex gap-2 max-w-md mx-auto">
+                <form role="search" method="get" action="{{ esc_url(home_url('/')) }}" class="flex items-end gap-2 max-w-md mx-auto">
                     <div class="flex-1">
                         <x-input
                             type="search"
@@ -40,7 +40,15 @@
             <div class="flex flex-wrap justify-center gap-4">
                 <x-button :url="home_url('/')" variant="primary" size="lg" iconLeft="home" :title="__('Zur Startseite', 'wp-starter')" />
 
-                <x-button variant="secondary" size="lg" iconLeft="arrow-left" :title="__('Zurück', 'wp-starter')" onclick="history.back()" />
+                <x-button
+                    x-data
+                    x-show="window.history.length > 1"
+                    @click.prevent="window.history.back()"
+                    variant="secondary"
+                    size="lg"
+                    iconLeft="arrow-left"
+                    :title="__('Zurück', 'wp-starter')"
+                />
             </div>
         </div>
     </x-section>

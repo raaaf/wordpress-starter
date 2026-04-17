@@ -15,24 +15,26 @@
 ])
 
 @php
+    // Body text uses text-content on subtle surfaces to guarantee 4.5:1 contrast.
+    // Status-tinted text (text-content-{status}) is reserved for the icon only.
     $variants = [
         'info' => [
-            'wrapper' => 'bg-surface-accent-subtle border border-line-accent text-content-accent',
+            'wrapper' => 'bg-surface-accent-subtle border border-line-accent text-content',
             'icon' => 'info',
             'iconClass' => 'text-icon-accent',
         ],
         'success' => [
-            'wrapper' => 'bg-surface-success border border-line-success text-content-success',
+            'wrapper' => 'bg-surface-success border border-line-success text-content',
             'icon' => 'check',
             'iconClass' => 'text-icon-success',
         ],
         'warning' => [
-            'wrapper' => 'bg-surface-warning border border-line-warning text-content-warning',
+            'wrapper' => 'bg-surface-warning border border-line-warning text-content',
             'icon' => 'warning',
             'iconClass' => 'text-icon-warning',
         ],
         'error' => [
-            'wrapper' => 'bg-surface-error border border-line-error text-content-error',
+            'wrapper' => 'bg-surface-error border border-line-error text-content',
             'icon' => 'warning',
             'iconClass' => 'text-icon-error',
         ],

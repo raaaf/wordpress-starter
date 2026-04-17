@@ -23,7 +23,7 @@
             </p>
 
             {{-- Search Form --}}
-            <form role="search" method="get" action="{{ esc_url(home_url('/')) }}" class="flex gap-2 max-w-md mx-auto">
+            <form role="search" method="get" action="{{ esc_url(home_url('/')) }}" class="flex items-end gap-2 max-w-md mx-auto">
                 <div class="flex-1">
                     <x-input
                         type="search"
