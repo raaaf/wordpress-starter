@@ -51,6 +51,14 @@
         'lg' => 'h-12 text-lg pl-5 pr-12',
     ];
 
+    // Chevron icon positioning per size
+    $chevronSizes = [
+        'sm' => ['wrap' => 'right-2.5', 'icon' => 'w-3.5 h-3.5'],
+        'md' => ['wrap' => 'right-3', 'icon' => 'w-4 h-4'],
+        'lg' => ['wrap' => 'right-4', 'icon' => 'w-5 h-5'],
+    ];
+    $chevronConfig = $chevronSizes[$size] ?? $chevronSizes['md'];
+
     $sizeClass = $sizes[$size] ?? $sizes['md'];
 
     // Radius classes from Figma tokens
@@ -78,7 +86,7 @@
         <label for="{{ $selectId }}" class="block text-sm font-medium text-content mb-1.5">
             {{ $label }}
             @if($required)
-                <span class="text-content-error ml-0.5" aria-hidden="true">*</span><span class="sr-only">(Pflichtfeld)</span>
+                <span class="text-content-error ml-0.5" aria-hidden="true">*</span><span class="sr-only"> ({{ __('Pflichtfeld', 'wp-starter') }})</span>
             @endif
         </label>
     @endif
@@ -113,6 +121,11 @@
                 >{{ $optionLabel }}</option>
             @endforeach
         </select>
+
+        {{-- Chevron icon --}}
+        <div class="absolute {{ $chevronConfig['wrap'] }} top-1/2 -translate-y-1/2 pointer-events-none {{ $disabled ? 'text-icon-disabled' : 'text-icon-secondary' }}">
+            <x-icon name="chevron-down" class="{{ $chevronConfig['icon'] }}" />
+        </div>
     </div>
 
     {{-- Hint / Error message --}}

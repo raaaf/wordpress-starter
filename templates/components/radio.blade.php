@@ -15,6 +15,7 @@
     'id' => null,
     'value',
     'label' => null,
+    'ariaLabel' => null,
     'checked' => false,
     'disabled' => false,
     'class' => '',
@@ -22,6 +23,10 @@
 
 @php
     $radioId = $id ?? $name . '_' . $value;
+    $accessibleName = $ariaLabel ?: $label;
+    if (defined('WP_DEBUG') && WP_DEBUG && !$accessibleName) {
+        trigger_error('x-radio requires a "label" or "ariaLabel" prop for accessibility.', E_USER_WARNING);
+    }
 @endphp
 
 <label class="radio inline-flex items-center gap-2 cursor-pointer {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }} {{ $class }}">
@@ -33,6 +38,7 @@
             value="{{ $value }}"
             @if($checked) checked @endif
             @if($disabled) disabled @endif
+            @if($ariaLabel && !$label) aria-label="{{ esc_attr($ariaLabel) }}" @endif
             class="peer sr-only"
         />
 

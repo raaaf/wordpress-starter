@@ -28,8 +28,16 @@
                     $caption = wp_get_attachment_caption($imageId);
                 @endphp
                 @if($imageId && $full)
+                    @php
+                        $imgAlt = get_post_meta($imageId, '_wp_attachment_image_alt', true);
+                        $imgCaption = wp_get_attachment_caption($imageId);
+                        $accessibleLabel = $imgAlt ?: $imgCaption;
+                        if (defined('WP_DEBUG') && WP_DEBUG && !$accessibleLabel) {
+                            trigger_error(sprintf('Gallery image #%d is missing alt text and caption.', $imageId), E_USER_WARNING);
+                        }
+                    @endphp
                     <figure class="relative overflow-hidden rounded-lg group">
-                        <button type="button" class="block w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-line-focus" aria-label="{{ sprintf(__('Bild vergrößern: %s', 'wp-starter'), get_post_meta($imageId, '_wp_attachment_image_alt', true) ?: wp_get_attachment_caption($imageId) ?: __('Galeriebild', 'wp-starter')) }}">
+                        <button type="button" class="block w-full rounded-lg focus:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]" aria-label="{{ sprintf(__('Bild vergrößern: %s', 'wp-starter'), $accessibleLabel ?: __('Galeriebild', 'wp-starter')) }}">
                         {!! wp_get_attachment_image($imageId, 'gallery-thumb', false, [
                             'class' => 'object-cover w-full transition-transform duration-200 ease-out cursor-zoom-in aspect-square gallery-zoom group-hover:scale-[1.03]',
                             'loading' => 'lazy',

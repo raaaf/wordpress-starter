@@ -59,7 +59,7 @@
                 >
             </div>
 
-            {{-- Slider handle --}}
+            {{-- Slider handle (48px hit area with 1px visual bar) --}}
             <div
                 role="slider"
                 tabindex="0"
@@ -67,7 +67,7 @@
                 aria-valuemin="0"
                 aria-valuemax="100"
                 aria-label="{{ __('Bildvergleich: Verwenden Sie die Pfeiltasten, um zwischen Vorher und Nachher zu wechseln', 'wp-starter') }}"
-                class="absolute inset-y-0 w-1 -translate-x-1/2 cursor-ew-resize bg-surface opacity-80 before-after-handle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus focus-visible:ring-offset-2"
+                class="absolute inset-y-0 w-12 -translate-x-1/2 cursor-ew-resize before-after-handle focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)] rounded-full"
                 :style="'left: ' + position + '%'"
                 @mousedown="handleMouseDown($event)"
                 @touchstart="handleTouchStart($event)"
@@ -80,8 +80,11 @@
                 @keydown.page-up.prevent="position = Math.min(100, position + 10)"
                 @keydown.page-down.prevent="position = Math.max(0, position - 10)"
             >
+                {{-- Visual divider bar (1px, centered) --}}
+                <span class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1 bg-surface opacity-80 pointer-events-none" aria-hidden="true"></span>
+
                 {{-- Handle circle --}}
-                <div class="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 bg-surface rounded-full shadow-lg top-1/2 left-1/2 flex items-center justify-center border-2 border-line">
+                <div class="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 bg-surface rounded-full shadow-lg top-1/2 left-1/2 flex items-center justify-center border-2 border-line pointer-events-none">
                     <svg class="w-6 h-6 text-content-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                     </svg>

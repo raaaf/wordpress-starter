@@ -54,7 +54,7 @@
                             : 'border-transparent text-content-secondary hover:text-content hover:border-line'"
                         :aria-selected="activeTab === {{ $index }}"
                         :tabindex="activeTab === {{ $index }} ? 0 : -1"
-                        class="inline-flex items-center gap-2 px-1 py-3 font-medium border-b-2 -mb-px transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus focus-visible:ring-offset-2"
+                        class="inline-flex items-center gap-2 px-1 py-3 font-medium border-b-2 -mb-px transition-colors cursor-pointer rounded-[var(--radius-sm)] focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
                         role="tab"
                         aria-controls="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"
                     >
@@ -66,8 +66,8 @@
                 @endforeach
             </div>
 
-            {{-- Tab Panels with aria-live for screen readers --}}
-            <div aria-live="polite" aria-atomic="true">
+            {{-- Tab Panels - no aria-live; focus moves to panel via tabindex --}}
+            <div>
                 @foreach($tabs as $index => $tab)
                     <div
                         x-show="activeTab === {{ $index }}"

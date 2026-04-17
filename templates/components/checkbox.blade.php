@@ -16,6 +16,7 @@
     'id' => null,
     'value' => '1',
     'label' => null,
+    'ariaLabel' => null,
     'checked' => false,
     'indeterminate' => false,
     'disabled' => false,
@@ -23,7 +24,12 @@
 ])
 
 @php
-    $checkboxId = $id ?? $name;
+    static $checkboxCounter = 0;
+    $checkboxId = $id ?? $name . '-' . (++$checkboxCounter);
+    $accessibleName = $ariaLabel ?: $label;
+    if (defined('WP_DEBUG') && WP_DEBUG && !$accessibleName) {
+        trigger_error('x-checkbox requires a "label" or "ariaLabel" prop for accessibility.', E_USER_WARNING);
+    }
 @endphp
 
 <label class="checkbox inline-flex items-center gap-2 cursor-pointer {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }} {{ $class }}">
@@ -36,6 +42,7 @@
             @if($checked) checked @endif
             @if($disabled) disabled @endif
             @if($indeterminate) data-indeterminate="true" @endif
+            @if($ariaLabel && !$label) aria-label="{{ esc_attr($ariaLabel) }}" @endif
             class="peer sr-only"
         />
 
