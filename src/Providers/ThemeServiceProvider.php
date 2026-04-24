@@ -103,14 +103,15 @@ class ThemeServiceProvider extends ServiceProvider
     /**
      * Add resource preloading for critical assets
      *
-     * Preloads fonts and optionally inlines critical CSS to improve
-     * Largest Contentful Paint (LCP) and reduce render-blocking.
+     * Preloads critical fonts (curated per-theme list) and inlines critical CSS
+     * to improve Largest Contentful Paint (LCP) and reduce render-blocking.
+     * This is the single source of truth for font preloads — the header blade
+     * partial does not emit additional font preloads.
      */
     private function addResourcePreloading(): void
     {
         // Add preload links early in head
         add_action('wp_head', function (): void {
-            // Skip in admin
             if (is_admin()) {
                 return;
             }
@@ -119,19 +120,19 @@ class ThemeServiceProvider extends ServiceProvider
 
             // Preload critical fonts (headline and body, most used weights)
             $criticalFonts = [
-                'colabthi-webfont.woff2',      // ColaborateLight (headlines)
+                'colabthi-webfont.woff2',        // ColaborateLight (headlines)
                 'inter-v20-latin-regular.woff2', // Inter Regular (body)
-                'inter-v20-latin-700.woff2',    // Inter Bold (body emphasis)
+                'inter-v20-latin-700.woff2',     // Inter Bold (body emphasis)
             ];
 
             foreach ($criticalFonts as $font) {
                 printf(
                     '<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin="anonymous">%s',
                     esc_url($fontsDir . $font),
-                    "\n",
+                    "\n"
                 );
             }
-        }, 1); // Priority 1 = very early in head
+        }, 1);
 
         // Inline critical CSS if file exists
         add_action('wp_head', function (): void {

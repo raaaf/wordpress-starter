@@ -21,6 +21,20 @@ class SecurityServiceProvider extends ServiceProvider
             $GLOBALS['csp_nonce'] = Security::getNonce();
         });
 
+        // HSTS: tell browsers to always use HTTPS for two years, including subdomains.
+        // Only emitted on HTTPS frontend requests. Skip admin/ajax to avoid interfering
+        // with non-HTTPS staging logins. `preload` is included so the domain is eligible
+        // for the browser HSTS preload list (https://hstspreload.org) once confirmed.
+        add_action('send_headers', function (): void {
+            if (is_admin() || wp_doing_ajax() || !is_ssl()) {
+                return;
+            }
+            if (headers_sent()) {
+                return;
+            }
+            header('Strict-Transport-Security: max-age=63072000; includeSubDomains; preload');
+        });
+
         // Suppress the "password changed" confirmation email when an admin
         // edits another user. Users still get the email when changing their
         // own password, which preserves the security signal.

@@ -9,31 +9,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="pingback" href="{{ esc_url(get_bloginfo('pingback_url')) }}">
 
-    {{-- Preload critical assets --}}
+    {{-- Preload critical assets. Font preloads are emitted by ThemeServiceProvider::addResourcePreloading. --}}
     @if(!WP_DEBUG || !\WordpressStarter\Vite::isDevServerRunning())
         <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/css/app.css') }}" as="style">
         <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/js/app.ts') }}" as="script" crossorigin>
-        {{-- Preload critical fonts (regular weights only) to reduce font rendering delay --}}
-        @php
-            $fontDir = get_template_directory() . '/resources/fonts';
-            $fontUri = get_template_directory_uri() . '/resources/fonts';
-            $cacheKey = 'theme_woff2_files_' . get_template();
-            $woff2Files = wp_cache_get($cacheKey, 'theme');
-            if ($woff2Files === false) {
-                $woff2Files = is_dir($fontDir) ? (glob($fontDir . '/*.woff2') ?: []) : [];
-                wp_cache_set($cacheKey, $woff2Files, 'theme', DAY_IN_SECONDS);
-            }
-            // Only preload regular weight fonts (not bold/light variants) for critical rendering
-            $criticalFonts = array_filter($woff2Files, function($font) {
-                $basename = strtolower(basename($font));
-                // Preload regular weights - exclude bold, light, thin, medium, semibold variants
-                return preg_match('/(regular|reg-|reg\.|-400)/i', $basename)
-                    && !preg_match('/(bold|bol|light|thin|medium|semi|700|300|500|600)/i', $basename);
-            });
-        @endphp
-        @foreach($criticalFonts as $font)
-            <link rel="preload" href="{{ $fontUri }}/{{ basename($font) }}" as="font" type="font/woff2" crossorigin>
-        @endforeach
     @endif
 
     {{-- Remove no-js class when JS is enabled --}}

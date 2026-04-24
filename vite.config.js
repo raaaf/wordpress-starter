@@ -64,7 +64,7 @@ export default defineConfig({
       },
       output: {
         manualChunks: {
-          vendor: ['alpinejs', '@alpinejs/collapse', 'medium-zoom'],
+          vendor: ['alpinejs', '@alpinejs/collapse'],
         },
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
