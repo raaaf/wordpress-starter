@@ -3,7 +3,6 @@ import Alpine from 'alpinejs';
 import collapse from '@alpinejs/collapse';
 import intersect from '@alpinejs/intersect';
 import type { AlpineMagics } from '../../src/types/alpine';
-import mediumZoom from 'medium-zoom';
 import { registerMemberAreaComponents } from './member-area';
 
 // Declare localized strings from WordPress (object name is fixed as 'themeStrings' for all themes)
@@ -293,9 +292,12 @@ export function initVideoConsent(): void {
 // Gallery Lightbox
 // ============================================
 
-export function initGalleryZoom(): void {
+export async function initGalleryZoom(): Promise<void> {
   const zoomElements = document.querySelectorAll('.gallery-zoom');
   if (zoomElements.length === 0) return;
+
+  // Lazy-load medium-zoom only on pages that actually use it.
+  const { default: mediumZoom } = await import('medium-zoom');
 
   let lastFocusedElement: HTMLElement | null = null;
 
