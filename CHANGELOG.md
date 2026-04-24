@@ -1,3 +1,9 @@
+## [2.19.5](https://github.com/raaaf/starter/compare/v2.19.4...v2.19.5) (2026-04-24)
+
+### Bug Fixes
+
+- suppress password change email when admin edits another user ([319526d](https://github.com/raaaf/starter/commit/319526d549a2fc5275dd9e0ba78bb2e94c5c44b5))
+
 ## [2.19.4](https://github.com/raaaf/starter/compare/v2.19.3...v2.19.4) (2026-04-17)
 
 ### Bug Fixes
