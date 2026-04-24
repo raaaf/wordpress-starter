@@ -1,3 +1,13 @@
+## [2.19.6](https://github.com/raaaf/starter/compare/v2.19.5...v2.19.6) (2026-04-24)
+
+### Bug Fixes
+
+- address audit findings for perf refactor ([13328b4](https://github.com/raaaf/starter/commit/13328b4bfaf413761e4ad3478ff9649ef5c08dbb))
+
+### Performance Improvements
+
+- lazy-load medium-zoom, dedupe font preloads, add HSTS ([adbeff0](https://github.com/raaaf/starter/commit/adbeff0d475e8c9146acdd8f7cabafee980d145a))
+
 ## [2.19.5](https://github.com/raaaf/starter/compare/v2.19.4...v2.19.5) (2026-04-24)
 
 ### Bug Fixes
