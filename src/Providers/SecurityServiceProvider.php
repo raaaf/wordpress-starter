@@ -26,10 +26,14 @@ class SecurityServiceProvider extends ServiceProvider
         // with non-HTTPS staging logins. `preload` is included so the domain is eligible
         // for the browser HSTS preload list (https://hstspreload.org) once confirmed.
         add_action('send_headers', function (): void {
-            if (is_admin() || wp_doing_ajax() || !is_ssl()) {
+            if (is_admin() || wp_doing_ajax()) {
                 return;
             }
-            if (headers_sent()) {
+            $forwardedProto = isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+                ? strtolower(sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_PROTO'])))
+                : '';
+            $isHttps = is_ssl() || $forwardedProto === 'https';
+            if (!$isHttps || headers_sent()) {
                 return;
             }
             header('Strict-Transport-Security: max-age=63072000; includeSubDomains; preload');

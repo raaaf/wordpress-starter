@@ -524,9 +524,9 @@ export function initHeaderHeight(): void {
 }
 
 // Initialize features on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initHeaderHeight();
   initRybbitTracking();
   initVideoConsent();
-  initGalleryZoom();
+  await initGalleryZoom();
 });

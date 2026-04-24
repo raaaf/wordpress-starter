@@ -105,7 +105,7 @@ class ThemeServiceProvider extends ServiceProvider
      *
      * Preloads critical fonts (curated per-theme list) and inlines critical CSS
      * to improve Largest Contentful Paint (LCP) and reduce render-blocking.
-     * This is the single source of truth for font preloads — the header blade
+     * This is the single source of truth for font preloads; the header blade
      * partial does not emit additional font preloads.
      */
     private function addResourcePreloading(): void
