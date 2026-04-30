@@ -83,22 +83,43 @@ class MemberAreaServiceProvider extends ServiceProvider
         add_action('wp_ajax_member_logout', [$this, 'handleLogout']);
         add_action('wp_ajax_nopriv_member_logout', [$this, 'handleLogout']);
 
+        add_action('wp_ajax_member_get_nonces', [$this, 'handleGetNonces']);
+        add_action('wp_ajax_nopriv_member_get_nonces', [$this, 'handleGetNonces']);
+
         add_action('wp_ajax_member_sync_now', [$this, 'handleManualSync']);
+    }
+
+    /**
+     * Returns fresh nonces for member-area AJAX actions.
+     * Required when the member-area page is served from a page cache: nonces embedded
+     * in cached HTML expire and break login. The frontend fetches a fresh set right
+     * before submitting. Response is explicitly non-cacheable.
+     */
+    public function handleGetNonces(): void
+    {
+        nocache_headers();
+        \WordpressStarter\RateLimiter::enforce('member_get_nonces', 30, 60);
+
+        wp_send_json_success([
+            'login'     => wp_create_nonce('member_area_login'),
+            'logout'    => wp_create_nonce('member_area_logout'),
+            'downloads' => wp_create_nonce('member_downloads_query'),
+        ]);
     }
 
     public function handleLogin(): void
     {
         \WordpressStarter\RateLimiter::enforce('member_login', 5, 300);
 
-        $nonce = sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) );
+        $nonce = sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''));
         if (!wp_verify_nonce($nonce, 'member_area_login')) {
             wp_send_json_error(['message' => __('Ungültige Anfrage.', 'wp-starter')], 403);
         }
 
-        $credential = sanitize_text_field( wp_unslash( $_POST['credential'] ?? '' ) );
+        $credential = sanitize_text_field(wp_unslash($_POST['credential'] ?? ''));
         // Passwords must not be sanitized — sanitize_text_field strips characters that
         // may be part of a valid password (e.g. <, >, &, multiple spaces).
-        $password    = isset( $_POST['password'] ) ? wp_unslash( $_POST['password'] ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+        $password    = isset($_POST['password']) ? wp_unslash($_POST['password']) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
         if (empty($credential)) {
             wp_send_json_error(['message' => __('Bitte alle Felder ausfüllen.', 'wp-starter')], 400);
@@ -121,14 +142,14 @@ class MemberAreaServiceProvider extends ServiceProvider
             wp_send_json_error(['message' => __('Kein Zugang — fehlende Berechtigung.', 'wp-starter')], 401);
         }
 
-        $redirectUrl = wp_validate_redirect( sanitize_url( wp_unslash( $_POST['redirect'] ?? '' ) ), home_url('/') );
+        $redirectUrl = wp_validate_redirect(sanitize_url(wp_unslash($_POST['redirect'] ?? '')), home_url('/'));
 
         wp_send_json_success(['redirect' => $redirectUrl]);
     }
 
     public function handleLogout(): void
     {
-        $nonce = sanitize_text_field( wp_unslash( $_POST['nonce'] ?? $_GET['nonce'] ?? '' ) );
+        $nonce = sanitize_text_field(wp_unslash($_POST['nonce'] ?? $_GET['nonce'] ?? ''));
         if (!wp_verify_nonce($nonce, 'member_area_logout')) {
             wp_send_json_error(['message' => __('Ungültige Anfrage.', 'wp-starter')], 403);
         }
@@ -142,7 +163,7 @@ class MemberAreaServiceProvider extends ServiceProvider
     {
         add_action('template_redirect', function (): void {
             if (isset($_GET['member_logout'])) {
-                $nonce = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) );
+                $nonce = sanitize_text_field(wp_unslash($_GET['_wpnonce'] ?? ''));
                 if (wp_verify_nonce($nonce, 'member_area_logout')) {
                     Auth::logout();
                     wp_safe_redirect(home_url('/'));
@@ -257,14 +278,18 @@ class MemberAreaServiceProvider extends ServiceProvider
                 return;
             }
 
-            // member-area.ts is imported by app.ts and bundled together.
-            // We only need to pass the config to the already-enqueued app-js handle.
+            // Member-area pages must not be served from a page cache:
+            // cached HTML would carry stale nonces and break login after the next tick.
+            if (!defined('DONOTCACHEPAGE')) {
+                define('DONOTCACHEPAGE', true);
+            }
+            nocache_headers();
+
+            // Nonces are intentionally omitted here — they are fetched on-demand
+            // via the member_get_nonces AJAX endpoint to avoid stale-cache issues.
             wp_localize_script('app-js', 'memberAreaConfig', [
-                'ajaxUrl'        => admin_url('admin-ajax.php'),
-                'nonce'          => wp_create_nonce('member_area_login'),
-                'authMode'       => Auth::getAuthMode(),
-                'logoutNonce'    => wp_create_nonce('member_area_logout'),
-                'downloadsNonce' => wp_create_nonce('member_downloads_query'),
+                'ajaxUrl'  => admin_url('admin-ajax.php'),
+                'authMode' => Auth::getAuthMode(),
             ]);
         });
     }

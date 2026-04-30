@@ -110,7 +110,7 @@ class AdminSiteEnhancementsConfigurator extends AbstractPluginConfigurator
 
         // === Media ===
         $options['enable_svg_upload'] = true;
-        $options['enable_svg_upload_for'] = ['administrator', 'editor'];
+        $options['enable_svg_upload_for'] = ['administrator'];
         $options['enable_avif_upload'] = true;
 
         // === Utilities ===
