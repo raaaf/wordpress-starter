@@ -1,14 +1,42 @@
 // Member Area Alpine.js Components
 import type { AlpineMagics } from '../../src/types/alpine';
 
-// Declare localized config from WordPress
+// Declare localized config from WordPress.
+// Nonces are intentionally not part of this payload — the page may be served
+// from a cache and would carry stale nonces. We fetch fresh ones on demand.
 declare const memberAreaConfig: {
   ajaxUrl: string;
-  nonce: string;
   authMode: string;
-  logoutNonce: string;
-  downloadsNonce: string;
 };
+
+interface NonceSet {
+  login: string;
+  logout: string;
+  downloads: string;
+}
+
+let cachedNonces: NonceSet | null = null;
+let cachedAt = 0;
+const NONCE_CACHE_MS = 60_000;
+
+async function fetchNonces(): Promise<NonceSet> {
+  const now = Date.now();
+  if (cachedNonces && now - cachedAt < NONCE_CACHE_MS) {
+    return cachedNonces;
+  }
+  const url = `${memberAreaConfig.ajaxUrl}?action=member_get_nonces&_=${now}`;
+  const response = await fetch(url, {
+    credentials: 'same-origin',
+    cache: 'no-store',
+  });
+  const data = await response.json();
+  if (!data?.success || !data.data) {
+    throw new Error('member_get_nonces failed');
+  }
+  cachedNonces = data.data as NonceSet;
+  cachedAt = now;
+  return cachedNonces;
+}
 
 // ============================================
 // Member Login Component
@@ -40,21 +68,24 @@ function createMemberLoginComponent(): MemberLoginState {
         return;
       }
 
-      const body = new FormData();
-      body.append('action', 'member_login');
-      body.append('nonce', config.nonce);
-      body.append('redirect', window.location.href);
-
-      if (config.authMode === 'wordpress') {
-        body.append('credential', this.username);
-        body.append('password', this.password);
-      } else {
-        body.append('credential', this.password);
-      }
-
       try {
+        const nonces = await fetchNonces();
+
+        const body = new FormData();
+        body.append('action', 'member_login');
+        body.append('nonce', nonces.login);
+        body.append('redirect', window.location.href);
+
+        if (config.authMode === 'wordpress') {
+          body.append('credential', this.username);
+          body.append('password', this.password);
+        } else {
+          body.append('credential', this.password);
+        }
+
         const response = await fetch(config.ajaxUrl, {
           method: 'POST',
+          credentials: 'same-origin',
           body,
         });
 
@@ -162,14 +193,16 @@ function createDownloadTableComponent(): DownloadTableState {
       const config = typeof memberAreaConfig !== 'undefined' ? memberAreaConfig : null;
       if (!config) return;
 
-      const params = new URLSearchParams({
-        action: 'member_downloads_query',
-        nonce: config.downloadsNonce,
-        facets: '1',
-      });
-
       try {
-        const response = await fetch(`${config.ajaxUrl}?${params}`);
+        const nonces = await fetchNonces();
+        const params = new URLSearchParams({
+          action: 'member_downloads_query',
+          nonce: nonces.downloads,
+          facets: '1',
+        });
+        const response = await fetch(`${config.ajaxUrl}?${params}`, {
+          credentials: 'same-origin',
+        });
         const data = await response.json();
         if (data.success) {
           this.categories = data.data.categories;
@@ -191,18 +224,20 @@ function createDownloadTableComponent(): DownloadTableState {
         return;
       }
 
-      const params = new URLSearchParams({
-        action: 'member_downloads_query',
-        nonce: config.downloadsNonce,
-        page: String(this.currentPage),
-        per_page: String(this.perPage),
-        search: this.search,
-        category: this.category,
-        ext: this.ext,
-      });
-
       try {
-        const response = await fetch(`${config.ajaxUrl}?${params}`);
+        const nonces = await fetchNonces();
+        const params = new URLSearchParams({
+          action: 'member_downloads_query',
+          nonce: nonces.downloads,
+          page: String(this.currentPage),
+          per_page: String(this.perPage),
+          search: this.search,
+          category: this.category,
+          ext: this.ext,
+        });
+        const response = await fetch(`${config.ajaxUrl}?${params}`, {
+          credentials: 'same-origin',
+        });
         const data = await response.json();
 
         if (data.success) {
