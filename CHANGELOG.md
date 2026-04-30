@@ -1,3 +1,9 @@
+## [2.19.7](https://github.com/raaaf/starter/compare/v2.19.6...v2.19.7) (2026-04-30)
+
+### Bug Fixes
+
+- **member-area:** fetch nonces on-demand to bypass page caches ([54ca6f3](https://github.com/raaaf/starter/commit/54ca6f33e98b3df4b60ed3db09be97114ffc85a5))
+
 ## [2.19.6](https://github.com/raaaf/starter/compare/v2.19.5...v2.19.6) (2026-04-24)
 
 ### Bug Fixes
