@@ -1,3 +1,9 @@
+## [2.19.8](https://github.com/raaaf/starter/compare/v2.19.7...v2.19.8) (2026-05-07)
+
+### Bug Fixes
+
+- stretch column cards to full row height in image layouts ([f6a5757](https://github.com/raaaf/starter/commit/f6a575794f4bcbc2275d1842a06ec8123ba31a50))
+
 ## [2.19.7](https://github.com/raaaf/starter/compare/v2.19.6...v2.19.7) (2026-04-30)
 
 ### Bug Fixes
