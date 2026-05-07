@@ -37,7 +37,7 @@
 
 <x-section :anchor="$sectionAnchor" :background="$background" class="two-columns-images">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
-    <x-grid cols="2" gap="xl">
+    <x-grid cols="2" gap="xl" align="items-stretch">
         @foreach([1, 2] as $col)
             @php
                 $lbl = ${'label_' . $col};
