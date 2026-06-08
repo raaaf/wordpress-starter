@@ -233,7 +233,7 @@ class ColorPaletteGenerator
      *
      * @param array<int, string> $palette Shade => hex color array
      * @param string $colorName Base name for the color (e.g., 'accent', 'primary')
-     * @return array<string, array<string, mixed>> Figma-compatible token structure
+     * @return array<int, array<string, mixed>> Figma-compatible token structure
      */
     public function toFigmaTokenFormat(array $palette, string $colorName): array
     {
