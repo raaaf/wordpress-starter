@@ -54,7 +54,7 @@ docs/                 # Documentation
 
 ### Key Technologies
 
-- **Blade** (Laravel Illuminate v12) - Templates extend `layouts.app`
+- **Blade** (Laravel Illuminate v13) - Templates extend `layouts.app`
 - **Alpine.js** (bundled, no CDN) - Interactive components
 - **TailwindCSS v4.1** - Utility-first CSS
 - **ACF Pro** - Flexible Content page builder

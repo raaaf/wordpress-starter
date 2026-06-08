@@ -4,15 +4,15 @@ Eigenes WordPress-Theme-Framework als Basis für alle Client-Projekte. Kein Page
 
 ## Stack
 
-| Technologie | Version | Zweck |
-|-------------|---------|-------|
-| PHP | 8.4+ | Strict types, moderne Features |
-| Laravel Blade | Illuminate v12 | Templating |
-| TailwindCSS | v4.1 | Utility CSS, Design Tokens |
-| Alpine.js | v3.15 | Interaktive Komponenten, gebündelt |
-| Vite | 7.3 | Build-Tool mit HMR |
-| ACF Pro + ACF Extended (FREE) | — | Flexible Content Page Builder |
-| TypeScript | — | Type-safe JS |
+| Technologie                   | Version        | Zweck                              |
+| ----------------------------- | -------------- | ---------------------------------- |
+| PHP                           | 8.4+           | Strict types, moderne Features     |
+| Laravel Blade                 | Illuminate v13 | Templating                         |
+| TailwindCSS                   | v4.1           | Utility CSS, Design Tokens         |
+| Alpine.js                     | v3.15          | Interaktive Komponenten, gebündelt |
+| Vite                          | 7.3            | Build-Tool mit HMR                 |
+| ACF Pro + ACF Extended (FREE) | —              | Flexible Content Page Builder      |
+| TypeScript                    | —              | Type-safe JS                       |
 
 Gutenberg ist deaktiviert. Content-Modell: Classic Editor + ACF Flexible Content.
 
@@ -34,6 +34,7 @@ php bin/setup.php
 ```
 
 Der Setup-Wizard:
+
 1. Setzt Theme-Name, Autor, Text Domain
 2. Ersetzt den Namespace `WordpressStarter\` in allen Dateien
 3. Lässt Plugins auswählen (werden per Composer verwaltet)
@@ -108,24 +109,24 @@ npm run test:a11y    # Accessibility Tests
 
 Alle Provider in `src/Providers/` werden automatisch registriert via `Application::boot()`.
 
-| Provider | Aufgabe |
-|----------|---------|
-| `ThemeServiceProvider` | Theme Support, Favicon, Login-Logo, Script-Loading |
-| `BladeServiceProvider` | Blade Engine, Cache-Verzeichnis |
-| `AcfServiceProvider` | ACF Felder, Blade-Direktiven, REST API |
-| `MenuServiceProvider` | Nav-Menus registrieren |
-| `SecurityServiceProvider` | CSP-Header, Nonces |
-| `ImageServiceProvider` | Custom Image Sizes |
-| `PostTypeServiceProvider` | CPTs und Taxonomien |
-| `MemberAreaServiceProvider` | Member-Bereich (Login, Downloads, SFTP-Sync) |
-| `PluginServiceProvider` | Plugin-Setup bei Theme-Aktivierung |
-| `PluginConfiguratorServiceProvider` | Auto-Konfiguration von Plugins |
-| `WelcomeServiceProvider` | Welcome-Notice, ACF Options Prefill |
-| `SeoServiceProvider` | Schema.org, OG-Tags, Canonical |
-| `DesignTokenServiceProvider` | Token-Upload aus Figma |
-| `CronServiceProvider` | Transient- und Revision-Cleanup |
-| `LogServiceProvider` | Strukturiertes Logging in debug.log |
-| `ThemeUpdateProvider` | GitHub-basierte Theme-Updates |
+| Provider                            | Aufgabe                                            |
+| ----------------------------------- | -------------------------------------------------- |
+| `ThemeServiceProvider`              | Theme Support, Favicon, Login-Logo, Script-Loading |
+| `BladeServiceProvider`              | Blade Engine, Cache-Verzeichnis                    |
+| `AcfServiceProvider`                | ACF Felder, Blade-Direktiven, REST API             |
+| `MenuServiceProvider`               | Nav-Menus registrieren                             |
+| `SecurityServiceProvider`           | CSP-Header, Nonces                                 |
+| `ImageServiceProvider`              | Custom Image Sizes                                 |
+| `PostTypeServiceProvider`           | CPTs und Taxonomien                                |
+| `MemberAreaServiceProvider`         | Member-Bereich (Login, Downloads, SFTP-Sync)       |
+| `PluginServiceProvider`             | Plugin-Setup bei Theme-Aktivierung                 |
+| `PluginConfiguratorServiceProvider` | Auto-Konfiguration von Plugins                     |
+| `WelcomeServiceProvider`            | Welcome-Notice, ACF Options Prefill                |
+| `SeoServiceProvider`                | Schema.org, OG-Tags, Canonical                     |
+| `DesignTokenServiceProvider`        | Token-Upload aus Figma                             |
+| `CronServiceProvider`               | Transient- und Revision-Cleanup                    |
+| `LogServiceProvider`                | Strukturiertes Logging in debug.log                |
+| `ThemeUpdateProvider`               | GitHub-basierte Theme-Updates                      |
 
 ## Blade-Direktiven
 
