@@ -1,3 +1,9 @@
+## [2.20.4](https://github.com/raaaf/starter/compare/v2.20.3...v2.20.4) (2026-06-08)
+
+### Bug Fixes
+
+- **build:** pin archiver to ^7 (v8 is ESM-only, breaks package script) ([56536a4](https://github.com/raaaf/starter/commit/56536a4b047d242b6c5fe41471679034a7b67477))
+
 ## [2.20.3](https://github.com/raaaf/starter/compare/v2.20.2...v2.20.3) (2026-06-08)
 
 ### Bug Fixes
