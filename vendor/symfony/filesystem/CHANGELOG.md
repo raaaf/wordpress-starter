@@ -1,92 +1,78 @@
-CHANGELOG
-=========
+# CHANGELOG
 
-7.1
----
+## 8.1
 
- * Add the `Filesystem::readFile()` method
+- Deprecate calling `Filesystem::mirror()` with option `copy_on_windows`, use option `follow_symlinks` instead.
 
-7.0
----
+## 7.1
 
- * Add argument `$lock` to `Filesystem::appendToFile()`
+- Add the `Filesystem::readFile()` method
 
-5.4
----
+## 7.0
 
- * Add `Path` class
- * Add `$lock` argument to `Filesystem::appendToFile()`
+- Add argument `$lock` to `Filesystem::appendToFile()`
 
-5.0.0
------
+## 5.4
 
- * `Filesystem::dumpFile()` and `appendToFile()` don't accept arrays anymore
+- Add `Path` class
+- Add `$lock` argument to `Filesystem::appendToFile()`
 
-4.4.0
------
+## 5.0.0
 
- * support for passing a `null` value to `Filesystem::isAbsolutePath()` is deprecated and will be removed in 5.0
- * `tempnam()` now accepts a third argument `$suffix`.
+- `Filesystem::dumpFile()` and `appendToFile()` don't accept arrays anymore
 
-4.3.0
------
+## 4.4.0
 
- * support for passing arrays to `Filesystem::dumpFile()` is deprecated and will be removed in 5.0
- * support for passing arrays to `Filesystem::appendToFile()` is deprecated and will be removed in 5.0
+- support for passing a `null` value to `Filesystem::isAbsolutePath()` is deprecated and will be removed in 5.0
+- `tempnam()` now accepts a third argument `$suffix`.
 
-4.0.0
------
+## 4.3.0
 
- * removed `LockHandler`
- * Support for passing relative paths to `Filesystem::makePathRelative()` has been removed.
+- support for passing arrays to `Filesystem::dumpFile()` is deprecated and will be removed in 5.0
+- support for passing arrays to `Filesystem::appendToFile()` is deprecated and will be removed in 5.0
 
-3.4.0
------
+## 4.0.0
 
- * support for passing relative paths to `Filesystem::makePathRelative()` is deprecated and will be removed in 4.0
+- removed `LockHandler`
+- Support for passing relative paths to `Filesystem::makePathRelative()` has been removed.
 
-3.3.0
------
+## 3.4.0
 
- * added `appendToFile()` to append contents to existing files
+- support for passing relative paths to `Filesystem::makePathRelative()` is deprecated and will be removed in 4.0
 
-3.2.0
------
+## 3.3.0
 
- * added `readlink()` as a platform independent method to read links
+- added `appendToFile()` to append contents to existing files
 
-3.0.0
------
+## 3.2.0
 
- * removed `$mode` argument from `Filesystem::dumpFile()`
+- added `readlink()` as a platform independent method to read links
 
-2.8.0
------
+## 3.0.0
 
- * added tempnam() a stream aware version of PHP's native tempnam()
+- removed `$mode` argument from `Filesystem::dumpFile()`
 
-2.6.0
------
+## 2.8.0
 
- * added LockHandler
+- added tempnam() a stream aware version of PHP's native tempnam()
 
-2.3.12
-------
+## 2.6.0
 
- * deprecated dumpFile() file mode argument.
+- added LockHandler
 
-2.3.0
------
+## 2.3.12
 
- * added the dumpFile() method to atomically write files
+- deprecated dumpFile() file mode argument.
 
-2.2.0
------
+## 2.3.0
 
- * added a delete option for the mirror() method
+- added the dumpFile() method to atomically write files
 
-2.1.0
------
+## 2.2.0
 
- * 24eb396 : BC Break : mkdir() function now throws exception in case of failure instead of returning Boolean value
- * created the component
+- added a delete option for the mirror() method
+
+## 2.1.0
+
+- 24eb396 : BC Break : mkdir() function now throws exception in case of failure instead of returning Boolean value
+- created the component
