@@ -1,3 +1,9 @@
+## [2.20.3](https://github.com/raaaf/starter/compare/v2.20.2...v2.20.3) (2026-06-08)
+
+### Bug Fixes
+
+- **deps:** upgrade illuminate 12->13 and symfony 7->8 (requires PHP 8.3) ([4a23cb8](https://github.com/raaaf/starter/commit/4a23cb88968bc5c187fd7c6a9484f7daaa45d55a))
+
 ## [2.20.2](https://github.com/raaaf/starter/compare/v2.20.1...v2.20.2) (2026-06-08)
 
 ### Bug Fixes
