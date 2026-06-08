@@ -1,3 +1,9 @@
+## [2.20.2](https://github.com/raaaf/starter/compare/v2.20.1...v2.20.2) (2026-06-08)
+
+### Bug Fixes
+
+- **deps:** bump phpseclib to 3.0.52 (CVE fix) and update bundled deps ([55f0abf](https://github.com/raaaf/starter/commit/55f0abfda3af6323f3dea0435b2e244365350bfc))
+
 ## [2.20.1](https://github.com/raaaf/starter/compare/v2.20.0...v2.20.1) (2026-06-08)
 
 ### Bug Fixes
