@@ -1,3 +1,9 @@
+## [2.20.1](https://github.com/raaaf/starter/compare/v2.20.0...v2.20.1) (2026-06-08)
+
+### Bug Fixes
+
+- **cf7:** harden wpcf7_spam callback against older CF7 and non-bool input ([a3ec3bc](https://github.com/raaaf/starter/commit/a3ec3bc7b5da442f22c3b67869242300e5903f8c))
+
 # [2.20.0](https://github.com/raaaf/starter/compare/v2.19.8...v2.20.0) (2026-06-08)
 
 ### Features
