@@ -13,6 +13,7 @@ use function array_merge;
 use function assert;
 use PHPUnit\Metadata\Api\DataProvider;
 use PHPUnit\Metadata\Api\Groups;
+use PHPUnit\Metadata\Api\ProvidedData;
 use PHPUnit\Metadata\Api\Requirements;
 use PHPUnit\Metadata\BackupGlobals;
 use PHPUnit\Metadata\BackupStaticProperties;
@@ -20,6 +21,7 @@ use PHPUnit\Metadata\ExcludeGlobalVariableFromBackup;
 use PHPUnit\Metadata\ExcludeStaticPropertyFromBackup;
 use PHPUnit\Metadata\Parser\Registry as MetadataRegistry;
 use PHPUnit\Metadata\PreserveGlobalState;
+use PHPUnit\Runner\ErrorHandler;
 use PHPUnit\TextUI\Configuration\Registry as ConfigurationRegistry;
 use ReflectionClass;
 
@@ -44,7 +46,13 @@ final readonly class TestBuilder
         $data = null;
 
         if ($this->requirementsSatisfied($className, $methodName)) {
-            $data = (new DataProvider)->providedData($className, $methodName);
+            try {
+                ErrorHandler::instance()->enterTestCaseContext($className, $methodName);
+
+                $data = (new DataProvider)->providedData($className, $methodName);
+            } finally {
+                ErrorHandler::instance()->leaveTestCaseContext();
+            }
         }
 
         if ($data !== null) {
@@ -54,7 +62,6 @@ final readonly class TestBuilder
                 $data,
                 $this->shouldTestMethodBeRunInSeparateProcess($className, $methodName),
                 $this->shouldGlobalStateBePreserved($className, $methodName),
-                $this->shouldAllTestMethodsOfTestClassBeRunInSingleSeparateProcess($className),
                 $this->backupSettings($className, $methodName),
                 $groups,
             );
@@ -66,7 +73,6 @@ final readonly class TestBuilder
             $test,
             $this->shouldTestMethodBeRunInSeparateProcess($className, $methodName),
             $this->shouldGlobalStateBePreserved($className, $methodName),
-            $this->shouldAllTestMethodsOfTestClassBeRunInSingleSeparateProcess($className),
             $this->backupSettings($className, $methodName),
         );
 
@@ -76,11 +82,11 @@ final readonly class TestBuilder
     /**
      * @param non-empty-string                                                                                                                                                  $methodName
      * @param class-string<TestCase>                                                                                                                                            $className
-     * @param array<list<mixed>>                                                                                                                                                $data
+     * @param array<ProvidedData>                                                                                                                                               $data
      * @param array{backupGlobals: ?true, backupGlobalsExcludeList: list<string>, backupStaticProperties: ?true, backupStaticPropertiesExcludeList: array<string,list<string>>} $backupSettings
      * @param list<non-empty-string>                                                                                                                                            $groups
      */
-    private function buildDataProviderTestSuite(string $methodName, string $className, array $data, bool $runTestInSeparateProcess, ?bool $preserveGlobalState, bool $runClassInSeparateProcess, array $backupSettings, array $groups): DataProviderTestSuite
+    private function buildDataProviderTestSuite(string $methodName, string $className, array $data, bool $runTestInSeparateProcess, ?bool $preserveGlobalState, array $backupSettings, array $groups): DataProviderTestSuite
     {
         $dataProviderTestSuite = DataProviderTestSuite::empty(
             $className . '::' . $methodName,
@@ -94,13 +100,12 @@ final readonly class TestBuilder
         foreach ($data as $_dataName => $_data) {
             $_test = new $className($methodName);
 
-            $_test->setData($_dataName, $_data);
+            $_test->setData($_dataName, $_data->value());
 
             $this->configureTestCase(
                 $_test,
                 $runTestInSeparateProcess,
                 $preserveGlobalState,
-                $runClassInSeparateProcess,
                 $backupSettings,
             );
 
@@ -113,14 +118,10 @@ final readonly class TestBuilder
     /**
      * @param array{backupGlobals: ?true, backupGlobalsExcludeList: list<string>, backupStaticProperties: ?true, backupStaticPropertiesExcludeList: array<string,list<string>>} $backupSettings
      */
-    private function configureTestCase(TestCase $test, bool $runTestInSeparateProcess, ?bool $preserveGlobalState, bool $runClassInSeparateProcess, array $backupSettings): void
+    private function configureTestCase(TestCase $test, bool $runTestInSeparateProcess, ?bool $preserveGlobalState, array $backupSettings): void
     {
         if ($runTestInSeparateProcess) {
             $test->setRunTestInSeparateProcess(true);
-        }
-
-        if ($runClassInSeparateProcess) {
-            $test->setRunClassInSeparateProcess(true);
         }
 
         if ($preserveGlobalState !== null) {
@@ -266,14 +267,6 @@ final readonly class TestBuilder
         }
 
         return false;
-    }
-
-    /**
-     * @param class-string<TestCase> $className
-     */
-    private function shouldAllTestMethodsOfTestClassBeRunInSingleSeparateProcess(string $className): bool
-    {
-        return MetadataRegistry::parser()->forClass($className)->isRunClassInSeparateProcess()->isNotEmpty();
     }
 
     /**

@@ -32,7 +32,7 @@ final readonly class ComplexityCollection implements Countable, IteratorAggregat
 
     public static function fromList(Complexity ...$items): self
     {
-        return new self($items);
+        return new self(array_values($items));
     }
 
     /**
@@ -66,7 +66,7 @@ final readonly class ComplexityCollection implements Countable, IteratorAggregat
 
     public function isEmpty(): bool
     {
-        return empty($this->items);
+        return $this->items === [];
     }
 
     /**

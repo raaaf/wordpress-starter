@@ -29,7 +29,7 @@ use SebastianBergmann\Environment\Console;
  */
 final class Help
 {
-    private const LEFT_MARGIN              = '  ';
+    private const string LEFT_MARGIN       = '  ';
     private int $lengthOfLongestOptionName = 0;
     private readonly int $columnsAvailableForDescription;
     private bool $hasColor;
@@ -123,7 +123,7 @@ final class Help
                     $arg = Color::colorize('fg-green', str_pad($option['arg'], $this->lengthOfLongestOptionName));
                     $arg = preg_replace_callback(
                         '/(<[^>]+>)/',
-                        static fn ($matches) => Color::colorize('fg-cyan', $matches[0]),
+                        static fn (array $matches) => Color::colorize('fg-cyan', $matches[0]),
                         $arg,
                     );
 
@@ -148,7 +148,7 @@ final class Help
      */
     private function elements(): array
     {
-        $elements = [
+        return [
             'Usage' => [
                 ['text' => 'phpunit [options] <directory|file> ...'],
             ],
@@ -170,6 +170,7 @@ final class Help
             ],
 
             'Selection' => [
+                ['arg' => '--all', 'desc' => 'Ignore test selection from XML configuration file'],
                 ['arg' => '--list-suites', 'desc' => 'List available test suites'],
                 ['arg' => '--testsuite <name>', 'desc' => 'Only run tests from the specified test suite(s)'],
                 ['arg' => '--exclude-testsuite <name>', 'desc' => 'Exclude tests from the specified test suite(s)'],
@@ -185,6 +186,7 @@ final class Help
                 ['arg' => '--filter <pattern>', 'desc' => 'Filter which tests to run'],
                 ['arg' => '--exclude-filter <pattern>', 'desc' => 'Exclude tests for the specified filter pattern'],
                 ['arg' => '--test-suffix <suffixes>', 'desc' => 'Only search for test in files with specified suffix(es). Default: Test.php,.phpt'],
+                ['arg' => '--test-files-file <file>', 'desc' => 'Only run test files listed in file (one file by line)'],
             ],
 
             'Execution' => [
@@ -217,6 +219,7 @@ final class Help
                 ['arg'    => '--fail-on-risky', 'desc' => 'Signal failure using shell exit code when a test was considered risky'],
                 ['arg'    => '--fail-on-deprecation', 'desc' => 'Signal failure using shell exit code when a deprecation was triggered'],
                 ['arg'    => '--fail-on-phpunit-deprecation', 'desc' => 'Signal failure using shell exit code when a PHPUnit deprecation was triggered'],
+                ['arg'    => '--fail-on-phpunit-notice', 'desc' => 'Signal failure using shell exit code when a PHPUnit notice was triggered'],
                 ['arg'    => '--fail-on-phpunit-warning', 'desc' => 'Signal failure using shell exit code when a PHPUnit warning was triggered'],
                 ['arg'    => '--fail-on-notice', 'desc' => 'Signal failure using shell exit code when a notice was triggered'],
                 ['arg'    => '--fail-on-skipped', 'desc' => 'Signal failure using shell exit code when a test was skipped'],
@@ -229,6 +232,7 @@ final class Help
                 ['arg'    => '--do-not-fail-on-risky', 'desc' => 'Do not signal failure using shell exit code when a test was considered risky'],
                 ['arg'    => '--do-not-fail-on-deprecation', 'desc' => 'Do not signal failure using shell exit code when a deprecation was triggered'],
                 ['arg'    => '--do-not-fail-on-phpunit-deprecation', 'desc' => 'Do not signal failure using shell exit code when a PHPUnit deprecation was triggered'],
+                ['arg'    => '--do-not-fail-on-phpunit-notice', 'desc' => 'Do not signal failure using shell exit code when a PHPUnit notice was triggered'],
                 ['arg'    => '--do-not-fail-on-phpunit-warning', 'desc' => 'Do not signal failure using shell exit code when a PHPUnit warning was triggered'],
                 ['arg'    => '--do-not-fail-on-notice', 'desc' => 'Do not signal failure using shell exit code when a notice was triggered'],
                 ['arg'    => '--do-not-fail-on-skipped', 'desc' => 'Do not signal failure using shell exit code when a test was skipped'],
@@ -240,11 +244,15 @@ final class Help
                 ['spacer' => ''],
 
                 ['arg' => '--order-by <order>', 'desc' => 'Run tests in order: default|defects|depends|duration|no-depends|random|reverse|size'],
+                ['arg' => '--resolve-dependencies', 'desc' => 'Alias for "--order-by depends"'],
+                ['arg' => '--ignore-dependencies', 'desc' => 'Alias for "--order-by no-depends"'],
+                ['arg' => '--random-order', 'desc' => 'Alias for "--order-by random"'],
                 ['arg' => '--random-order-seed <N>', 'desc' => 'Use the specified random seed when running tests in random order'],
+                ['arg' => '--reverse-order', 'desc' => 'Alias for "--order-by reverse"'],
             ],
 
             'Reporting' => [
-                ['arg' => '--colors <flag>', 'desc' => 'Use colors in output ("never", "auto" or "always")'],
+                ['arg' => '--colors=<flag>', 'desc' => 'Use colors in output ("never", "auto" or "always")'],
                 ['arg'    => '--columns <n>', 'desc' => 'Number of columns to use for progress output'],
                 ['arg'    => '--columns max', 'desc' => 'Use maximum number of columns for progress output'],
                 ['arg'    => '--stderr', 'desc' => 'Write to STDERR instead of STDOUT'],
@@ -259,6 +267,7 @@ final class Help
                 ['arg'    => '--display-skipped', 'desc' => 'Display details for skipped tests'],
                 ['arg'    => '--display-deprecations', 'desc' => 'Display details for deprecations triggered by tests'],
                 ['arg'    => '--display-phpunit-deprecations', 'desc' => 'Display details for PHPUnit deprecations'],
+                ['arg'    => '--display-phpunit-notices', 'desc' => 'Display details for PHPUnit notices'],
                 ['arg'    => '--display-errors', 'desc' => 'Display details for errors triggered by tests'],
                 ['arg'    => '--display-notices', 'desc' => 'Display details for notices triggered by tests'],
                 ['arg'    => '--display-warnings', 'desc' => 'Display details for warnings triggered by tests'],
@@ -272,20 +281,24 @@ final class Help
                 ['spacer' => ''],
 
                 ['arg' => '--debug', 'desc' => 'Replace default progress and result output with debugging information'],
+                ['arg' => '--with-telemetry', 'desc' => 'Include telemetry information in debugging information output'],
             ],
 
             'Logging' => [
                 ['arg' => '--log-junit <file>', 'desc' => 'Write test results in JUnit XML format to file'],
+                ['arg' => '--log-otr <file>', 'desc' => 'Write test results in Open Test Reporting XML format to file'],
                 ['arg' => '--log-teamcity <file>', 'desc' => 'Write test results in TeamCity format to file'],
                 ['arg' => '--testdox-html <file>', 'desc' => 'Write test results in TestDox format (HTML) to file'],
                 ['arg' => '--testdox-text <file>', 'desc' => 'Write test results in TestDox format (plain text) to file'],
                 ['arg' => '--log-events-text <file>', 'desc' => 'Stream events as plain text to file'],
                 ['arg' => '--log-events-verbose-text <file>', 'desc' => 'Stream events as plain text with extended information to file'],
+                ['arg' => '--include-git-information', 'desc' => 'Include Git information in supported formats'],
                 ['arg' => '--no-logging', 'desc' => 'Ignore logging configured in the XML configuration file'],
             ],
 
             'Code Coverage' => [
                 ['arg' => '--coverage-clover <file>', 'desc' => 'Write code coverage report in Clover XML format to file'],
+                ['arg' => '--coverage-openclover <file>', 'desc' => 'Write code coverage report in OpenClover XML format to file'],
                 ['arg' => '--coverage-cobertura <file>', 'desc' => 'Write code coverage report in Cobertura XML format to file'],
                 ['arg' => '--coverage-crap4j <file>', 'desc' => 'Write code coverage report in Crap4J XML format to file'],
                 ['arg' => '--coverage-html <dir>', 'desc' => 'Write code coverage report in HTML format to directory'],
@@ -294,30 +307,26 @@ final class Help
                 ['arg' => '--only-summary-for-coverage-text', 'desc' => 'Option for code coverage report in text format: only show summary'],
                 ['arg' => '--show-uncovered-for-coverage-text', 'desc' => 'Option for code coverage report in text format: show uncovered files'],
                 ['arg' => '--coverage-xml <dir>', 'desc' => 'Write code coverage report in XML format to directory'],
+                ['arg' => '--exclude-source-from-xml-coverage', 'desc' => 'Exclude <source> element from code coverage report in XML format'],
                 ['arg' => '--warm-coverage-cache', 'desc' => 'Warm static analysis cache'],
                 ['arg' => '--coverage-filter <dir>', 'desc' => 'Include <dir> in code coverage reporting'],
                 ['arg' => '--path-coverage', 'desc' => 'Report path coverage in addition to line coverage'],
                 ['arg' => '--disable-coverage-ignore', 'desc' => 'Disable metadata for ignoring code coverage'],
                 ['arg' => '--no-coverage', 'desc' => 'Ignore code coverage reporting configured in the XML configuration file'],
             ],
-        ];
-
-        if (defined('__PHPUNIT_PHAR__')) {
-            $elements['PHAR'] = [
+            ...(defined('__PHPUNIT_PHAR__') ? ['PHAR' => [
                 ['arg' => '--manifest', 'desc' => 'Print Software Bill of Materials (SBOM) in plain-text format'],
                 ['arg' => '--sbom', 'desc' => 'Print Software Bill of Materials (SBOM) in CycloneDX XML format'],
                 ['arg' => '--composer-lock', 'desc' => 'Print composer.lock file used to build the PHAR'],
-            ];
-        }
+            ]] : []),
 
-        $elements['Miscellaneous'] = [
-            ['arg' => '-h|--help', 'desc' => 'Prints this usage information'],
-            ['arg' => '--version', 'desc' => 'Prints the version and exits'],
-            ['arg' => '--atleast-version <min>', 'desc' => 'Checks that version is greater than <min> and exits'],
-            ['arg' => '--check-version', 'desc' => 'Checks whether PHPUnit is the latest version and exits'],
-            ['arg' => '--check-php-configuration', 'desc' => 'Checks whether PHP configuration follows best practices'],
+            'Miscellaneous' => [
+                ['arg' => '-h|--help', 'desc' => 'Prints this usage information'],
+                ['arg' => '--version', 'desc' => 'Prints the version and exits'],
+                ['arg' => '--atleast-version <min>', 'desc' => 'Checks that version is greater than <min> and exits'],
+                ['arg' => '--check-version', 'desc' => 'Checks whether PHPUnit is the latest version and exits'],
+                ['arg' => '--check-php-configuration', 'desc' => 'Checks whether PHP configuration follows best practices'],
+            ],
         ];
-
-        return $elements;
     }
 }

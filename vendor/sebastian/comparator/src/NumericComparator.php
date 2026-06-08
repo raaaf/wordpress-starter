@@ -19,6 +19,11 @@ use function is_string;
 use function sprintf;
 use SebastianBergmann\Exporter\Exporter;
 
+/**
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for sebastian/comparator
+ *
+ * @internal This class is not covered by the backward compatibility promise for sebastian/comparator
+ */
 final class NumericComparator extends ScalarComparator
 {
     public function accepts(mixed $expected, mixed $actual): bool
@@ -61,6 +66,7 @@ final class NumericComparator extends ScalarComparator
                     $exporter->export($actual),
                     $exporter->export($expected),
                 ),
+                $this->contextLines(),
             );
         }
     }

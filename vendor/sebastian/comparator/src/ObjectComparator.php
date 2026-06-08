@@ -16,6 +16,11 @@ use function sprintf;
 use function substr_replace;
 use SebastianBergmann\Exporter\Exporter;
 
+/**
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for sebastian/comparator
+ *
+ * @internal This class is not covered by the backward compatibility promise for sebastian/comparator
+ */
 class ObjectComparator extends ArrayComparator
 {
     public function accepts(mixed $expected, mixed $actual): bool
@@ -46,6 +51,7 @@ class ObjectComparator extends ArrayComparator
                     $exporter->export($actual),
                     $expected::class,
                 ),
+                $this->contextLines(),
             );
         }
 
@@ -78,6 +84,7 @@ class ObjectComparator extends ArrayComparator
                     substr_replace($e->getExpectedAsString(), $expected::class . ' Object', 0, 5),
                     substr_replace($e->getActualAsString(), $actual::class . ' Object', 0, 5),
                     'Failed asserting that two objects are equal.',
+                    $this->contextLines(),
                 );
             }
         }

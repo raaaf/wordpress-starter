@@ -23,11 +23,7 @@ use PHPUnit\Event\Telemetry;
 final readonly class PreConditionFinished implements Event
 {
     private Telemetry\Info $telemetryInfo;
-
-    /**
-     * @var class-string
-     */
-    private string $testClassName;
+    private Code\TestMethod $test;
 
     /**
      * @var list<Code\ClassMethod>
@@ -35,12 +31,12 @@ final readonly class PreConditionFinished implements Event
     private array $calledMethods;
 
     /**
-     * @param class-string $testClassName
+     * @internal This method is not covered by the backward compatibility promise for PHPUnit
      */
-    public function __construct(Telemetry\Info $telemetryInfo, string $testClassName, Code\ClassMethod ...$calledMethods)
+    public function __construct(Telemetry\Info $telemetryInfo, Code\TestMethod $test, Code\ClassMethod ...$calledMethods)
     {
         $this->telemetryInfo = $telemetryInfo;
-        $this->testClassName = $testClassName;
+        $this->test          = $test;
         $this->calledMethods = $calledMethods;
     }
 
@@ -49,12 +45,9 @@ final readonly class PreConditionFinished implements Event
         return $this->telemetryInfo;
     }
 
-    /**
-     * @return class-string
-     */
-    public function testClassName(): string
+    public function test(): Code\TestMethod
     {
-        return $this->testClassName;
+        return $this->test;
     }
 
     /**
@@ -65,6 +58,9 @@ final readonly class PreConditionFinished implements Event
         return $this->calledMethods;
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function asString(): string
     {
         $buffer = 'Pre Condition Method Finished:';
