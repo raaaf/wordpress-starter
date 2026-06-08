@@ -257,6 +257,40 @@ These files should not be web-accessible:
 </FilesMatch>
 ```
 
+## Contact Form Spam Protection
+
+Contact Form 7 submissions pass through server-side heuristics registered in
+`src/PluginConfigurators/ContactForm7Configurator.php`. No third-party service,
+no admin configuration, GDPR-clean.
+
+### Layers
+
+1. **Honeypot** -- a hidden field (`your-website`) is injected into every form.
+   Real users never see it; bots that fill every field are flagged.
+2. **Time-trap** -- a signed render timestamp (HMAC, `wp_salt`) is injected.
+   Submissions arriving in under `MIN_SUBMIT_SECONDS` (3s) are flagged. Fails
+   open when the timestamp is missing or its signature mismatches (page cache),
+   so legitimate users are never blocked.
+3. **Link limit** -- submissions with more than `MAX_URLS` (2) URLs across all
+   fields are flagged.
+4. **Keyword filter** -- a conservative, high-confidence list (pharma, gambling,
+   adult, replica). Extend per site:
+
+```php
+add_filter("theme_cf7_spam_keywords", function (array $keywords): array {
+    $keywords[] = "another-spam-term";
+    return $keywords;
+});
+```
+
+Flagged submissions are recorded via `WPCF7_Submission::add_spam_log()` and are
+visible in Contact Form 7 / Flamingo. CF7 treats them as spam (no mail sent).
+
+### Not enabled (optional second layer)
+
+Cloudflare Turnstile and Akismet require external keys and are configured in the
+Contact Form 7 admin (Integration tab), not in theme code.
+
 ## Security Audit Checklist
 
 ### Regular Checks
