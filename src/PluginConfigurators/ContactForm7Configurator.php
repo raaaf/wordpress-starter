@@ -121,10 +121,10 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
     /**
      * Server-side spam heuristics applied to every CF7 submission.
      *
-     * @param bool $spam Whether a prior filter already flagged this submission.
+     * @param mixed $spam Whether a prior filter already flagged this submission.
      * @param mixed $submission The WPCF7_Submission instance.
      */
-    public static function detectSpam(bool $spam, mixed $submission): bool
+    public static function detectSpam(mixed $spam, mixed $submission = null): bool
     {
         if ($spam) {
             return true;
