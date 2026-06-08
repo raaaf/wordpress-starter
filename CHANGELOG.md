@@ -1,3 +1,9 @@
+# [2.20.0](https://github.com/raaaf/starter/compare/v2.19.8...v2.20.0) (2026-06-08)
+
+### Features
+
+- **cf7:** add server-side spam protection for Contact Form 7 ([752ed39](https://github.com/raaaf/starter/commit/752ed3904cd77122176085a99c3c91932e393472))
+
 ## [2.19.8](https://github.com/raaaf/starter/compare/v2.19.7...v2.19.8) (2026-05-07)
 
 ### Bug Fixes
