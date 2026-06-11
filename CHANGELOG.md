@@ -1,3 +1,15 @@
+# [2.21.0](https://github.com/raaaf/starter/compare/v2.20.4...v2.21.0) (2026-06-11)
+
+### Bug Fixes
+
+- full codebase audit — security, a11y, performance, DRY and docs ([598ebbb](https://github.com/raaaf/starter/commit/598ebbb80120fd817589663050509ad62960e038))
+- **security:** hardening set from audit follow-up ([062809d](https://github.com/raaaf/starter/commit/062809de3452d0688bc681db1ac662e12c0b775a)), closes [#8](https://github.com/raaaf/starter/issues/8)
+
+### Features
+
+- **acf:** extend FieldDefinitions builders and migrate raw field arrays ([2aa2a76](https://github.com/raaaf/starter/commit/2aa2a76303554c18dfde31a8a5a7ac5bf3540983)), closes [#3](https://github.com/raaaf/starter/issues/3) [#7](https://github.com/raaaf/starter/issues/7)
+- **components:** hint and error props for checkbox, radio, toggle ([376b92b](https://github.com/raaaf/starter/commit/376b92bf944a766d678c76d7027ec01e7289607f)), closes [#6](https://github.com/raaaf/starter/issues/6)
+
 ## [2.20.4](https://github.com/raaaf/starter/compare/v2.20.3...v2.20.4) (2026-06-08)
 
 ### Bug Fixes
