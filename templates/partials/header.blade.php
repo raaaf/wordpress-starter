@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="pingback" href="{{ esc_url(get_bloginfo('pingback_url')) }}">
 
-    {{-- Preload critical assets. Font preloads are emitted by ThemeServiceProvider::addResourcePreloading. --}}
+    {{-- Preload critical assets. Font preloads are emitted by AssetOptimizationServiceProvider::addResourcePreloading. --}}
     @if(!WP_DEBUG || !\WordpressStarter\Vite::isDevServerRunning())
         <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/css/app.css') }}" as="style">
         <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/js/app.ts') }}" as="script" crossorigin>

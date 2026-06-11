@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace WordpressStarter\Providers;
 
 use WordpressStarter\PluginInstaller;
+use WordpressStarter\Services\ContentSetupService;
 use WordpressStarter\ThemeContext;
 
 /**
  * Plugin Service Provider
  *
  * Manages plugin recommendations and requirements for the theme.
- * Provides a setup page for bulk plugin installation.
+ * Provides a setup page for bulk plugin installation and handles
+ * content scaffolding via ContentSetupService.
  */
 class PluginServiceProvider extends ServiceProvider
 {
@@ -69,11 +71,6 @@ class PluginServiceProvider extends ServiceProvider
      */
     private array $plugins = [];
 
-    public function register(): void
-    {
-        $this->definePlugins();
-    }
-
     /**
      * Selected plugins from setup script
      *
@@ -87,6 +84,14 @@ class PluginServiceProvider extends ServiceProvider
      * @var array<string, mixed>
      */
     private array $setupOptions = [];
+
+    private ContentSetupService $contentSetupService;
+
+    public function register(): void
+    {
+        $this->definePlugins();
+        $this->contentSetupService = new ContentSetupService();
+    }
 
     public function boot(): void
     {
@@ -112,9 +117,6 @@ class PluginServiceProvider extends ServiceProvider
      */
     private function loadSetupConfig(): void
     {
-        $setupOptionsPath = get_template_directory() . '/config/setup-options.php';
-
-        // Plugins are now managed via composer.json - read them from there
         $composerPath = get_template_directory() . '/composer.json';
         if (file_exists($composerPath)) {
             $composer = json_decode(file_get_contents($composerPath), true);
@@ -127,13 +129,14 @@ class PluginServiceProvider extends ServiceProvider
             }
         }
 
+        $setupOptionsPath = get_template_directory() . '/config/setup-options.php';
         if (file_exists($setupOptionsPath)) {
             $this->setupOptions = include $setupOptionsPath;
         }
     }
 
     /**
-     * Run content setup on first theme activation
+     * Run content setup on first theme activation — delegates to ContentSetupService.
      */
     public function runContentSetup(): void
     {
@@ -141,108 +144,11 @@ class PluginServiceProvider extends ServiceProvider
             return;
         }
 
-        // Only run once
-        if (get_option(ThemeContext::optionKey('content_setup_complete'))) {
-            return;
-        }
-
-        // Only run if we have setup options
-        if (empty($this->setupOptions)) {
-            return;
-        }
-
-        // Delete default WordPress content
-        if (!empty($this->setupOptions['delete_default_content'])) {
-            $this->deleteDefaultContent();
-        }
-
-        // Set permalink structure
-        if (!empty($this->setupOptions['set_permalink_structure'])) {
-            $this->setPermalinkStructure();
-        }
-
-        // Create default pages
-        $createdPageIds = [];
-        if (!empty($this->setupOptions['create_pages']) && !empty($this->setupOptions['pages'])) {
-            $createdPageIds = $this->createDefaultPages($this->setupOptions['pages']);
-        }
-
-        // Create default menus and assign pages
-        if (!empty($createdPageIds) && !empty($this->setupOptions['menu_assignments'])) {
-            $this->createDefaultMenus($createdPageIds, $this->setupOptions['menu_assignments']);
-        }
-
-        // Create sample blog posts
-        if (!empty($this->setupOptions['create_posts']) && !empty($this->setupOptions['posts'])) {
-            $this->createDefaultPosts($this->setupOptions['posts']);
-        }
-
-        // Note: color_scheme is handled by WelcomeServiceProvider via ACF's update_field()
-        // to ensure proper field validation and formatting
-
-        // Set default contact data
-        $this->setDefaultContactData();
-
-        // Mark as complete
-        update_option(ThemeContext::optionKey('content_setup_complete'), true);
+        $this->contentSetupService->runOnce($this->setupOptions);
     }
 
     /**
-     * Set default contact data and footer options in theme options
-     */
-    private function setDefaultContactData(): void
-    {
-        if (!function_exists('update_field')) {
-            return;
-        }
-
-        // Contact data - only set if not already filled
-        if (!get_field('company_name', 'option')) {
-            update_field('company_name', 'Musterfirma GmbH', 'option');
-        }
-        if (!get_field('address', 'option')) {
-            update_field('address', "Musterstraße 123\n12345 Musterstadt", 'option');
-        }
-        if (!get_field('phone', 'option')) {
-            update_field('phone', '+49 123 456789', 'option');
-        }
-        if (!get_field('email', 'option')) {
-            update_field('email', 'info@example.com', 'option');
-        }
-        if (!get_field('maps_link', 'option')) {
-            update_field('maps_link', 'https://goo.gl/maps/', 'option');
-        }
-
-        // Footer options - ensure defaults are set so footer displays correctly
-        // These match the ACF field defaults but need to be explicitly set
-        if (get_field('footer_show_logo', 'option') === null) {
-            update_field('footer_show_logo', true, 'option');
-        }
-        if (get_field('footer_show_company', 'option') === null) {
-            update_field('footer_show_company', true, 'option');
-        }
-        if (get_field('footer_show_nav', 'option') === null) {
-            update_field('footer_show_nav', true, 'option');
-        }
-        if (!get_field('footer_nav_title', 'option')) {
-            update_field('footer_nav_title', 'Navigation', 'option');
-        }
-        if (!get_field('footer_nav_menu', 'option')) {
-            update_field('footer_nav_menu', 'footer-menu', 'option');
-        }
-        if (get_field('footer_show_contact', 'option') === null) {
-            update_field('footer_show_contact', true, 'option');
-        }
-        if (get_field('footer_show_social', 'option') === null) {
-            update_field('footer_show_social', true, 'option');
-        }
-        if (get_field('footer_show_legal', 'option') === null) {
-            update_field('footer_show_legal', true, 'option');
-        }
-    }
-
-    /**
-     * Handle manual re-run of content setup from Tools page
+     * Handle manual re-run of content setup from Tools page — delegates to ContentSetupService.
      */
     public function handleRerunContentSetup(): void
     {
@@ -254,7 +160,6 @@ class PluginServiceProvider extends ServiceProvider
             return;
         }
 
-        // Verify nonce and capability
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
         if (!wp_verify_nonce($nonce, self::paramRerunContentSetup())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
@@ -264,58 +169,10 @@ class PluginServiceProvider extends ServiceProvider
             wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
         }
 
-        // Reload setup options
         $this->loadSetupConfig();
 
-        if (empty($this->setupOptions)) {
-            // Create default options if config file doesn't exist
-            $this->setupOptions = [
-                'create_pages' => true,
-                'pages' => [
-                    'home' => ['title' => 'Startseite', 'template' => 'page-home'],
-                    'about' => ['title' => 'Über uns', 'template' => ''],
-                    'services' => ['title' => 'Leistungen', 'template' => ''],
-                    'contact' => ['title' => 'Kontakt', 'template' => ''],
-                    'privacy' => ['title' => 'Datenschutz', 'template' => ''],
-                    'imprint' => ['title' => 'Impressum', 'template' => ''],
-                ],
-                'menu_assignments' => [
-                    'header-menu' => ['about', 'services', 'contact'],
-                    'legal-menu' => ['privacy', 'imprint'],
-                    'footer-menu' => ['about', 'services', 'contact'],
-                ],
-            ];
-        }
+        $this->contentSetupService->rerun($this->setupOptions);
 
-        // Reset the completion flag so content setup runs again
-        delete_option(ThemeContext::optionKey('content_setup_complete'));
-
-        // Clear cached styleguide images so they get re-uploaded (including SVGs)
-        delete_option(ThemeContext::optionKey('styleguide_images'));
-
-        // Create pages (skips existing ones)
-        $createdPageIds = [];
-        if (!empty($this->setupOptions['pages'])) {
-            $createdPageIds = $this->createDefaultPages($this->setupOptions['pages']);
-        }
-
-        // Create menus and assign pages
-        if (!empty($createdPageIds) && !empty($this->setupOptions['menu_assignments'])) {
-            $this->createDefaultMenus($createdPageIds, $this->setupOptions['menu_assignments']);
-        }
-
-        // Create sample blog posts (skips existing ones)
-        if (!empty($this->setupOptions['create_posts']) && !empty($this->setupOptions['posts'])) {
-            $this->createDefaultPosts($this->setupOptions['posts']);
-        }
-
-        // Set default contact data
-        $this->setDefaultContactData();
-
-        // Mark as complete
-        update_option(ThemeContext::optionKey('content_setup_complete'), true);
-
-        // Redirect back to tools page with success message
         wp_safe_redirect(admin_url('admin.php?page=theme-options-tools&content-setup=success'));
         exit;
     }
@@ -333,7 +190,6 @@ class PluginServiceProvider extends ServiceProvider
             return;
         }
 
-        // Verify nonce and capability
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
         if (!wp_verify_nonce($nonce, self::paramGenerateDemoPosts())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
@@ -372,12 +228,10 @@ class PluginServiceProvider extends ServiceProvider
             ],
         ];
 
-        // Create posts with varied dates and featured images
         $baseTime = time();
         $dayOffset = 0;
         $imageIndex = 0;
 
-        // Include required files for media handling
         require_once ABSPATH . 'wp-admin/includes/file.php';
         require_once ABSPATH . 'wp-admin/includes/media.php';
         require_once ABSPATH . 'wp-admin/includes/image.php';
@@ -396,13 +250,12 @@ class PluginServiceProvider extends ServiceProvider
                 'post_date_gmt' => $postDate,
             ]);
 
-            // Add featured image from picsum.photos
             if ($postId && !is_wp_error($postId)) {
                 ++$imageIndex;
                 $imageId = $this->downloadAndAttachImage(
                     "https://picsum.photos/seed/blog{$imageIndex}/1200/800",
                     "Blog Beitragsbild {$imageIndex}",
-                    $postId
+                    $postId,
                 );
 
                 if ($imageId) {
@@ -411,7 +264,6 @@ class PluginServiceProvider extends ServiceProvider
             }
         }
 
-        // Redirect back to tools page
         wp_safe_redirect(admin_url('admin.php?page=theme-options-tools&demo-posts=created'));
         exit;
     }
@@ -429,7 +281,6 @@ class PluginServiceProvider extends ServiceProvider
             return;
         }
 
-        // Verify nonce and capability
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
         if (!wp_verify_nonce($nonce, self::paramDeleteDemoPosts())) {
             wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
@@ -439,281 +290,18 @@ class PluginServiceProvider extends ServiceProvider
             wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
         }
 
-        // Get all posts
         $posts = get_posts([
             'post_type' => 'post',
             'post_status' => 'any',
             'numberposts' => -1,
         ]);
 
-        // Delete each post permanently
         foreach ($posts as $post) {
             wp_delete_post($post->ID, true);
         }
 
-        // Redirect back to tools page
         wp_safe_redirect(admin_url('admin.php?page=theme-options-tools&demo-posts=deleted'));
         exit;
-    }
-
-    /**
-     * Delete default WordPress content
-     */
-    private function deleteDefaultContent(): void
-    {
-        // Delete "Hello World" post (ID 1 is always the default post)
-        // Works for all languages (en: hello-world, de: hallo-welt)
-        $default_post = get_post(1);
-        if ($default_post && $default_post->post_type === 'post') {
-            wp_delete_post(1, true);
-        }
-
-        // Delete sample page (ID 2 is always the default page)
-        // Works for all languages (en: sample-page, de: beispiel-seite)
-        $sample_page = get_post(2);
-        if ($sample_page && $sample_page->post_type === 'page') {
-            wp_delete_post(2, true);
-        }
-
-        // Delete default comment
-        $comment = get_comment(1);
-        if ($comment) {
-            wp_delete_comment(1, true);
-        }
-    }
-
-    /**
-     * Set permalink structure to /%postname%/
-     */
-    private function setPermalinkStructure(): void
-    {
-        global $wp_rewrite;
-
-        $wp_rewrite->set_permalink_structure('/%postname%/');
-        $wp_rewrite->flush_rules();
-    }
-
-    /**
-     * Create default pages
-     *
-     * @param array<string, array{title: string, template: string, status?: string}> $pages
-     * @return array<string, int> Map of page slug to page ID
-     */
-    private function createDefaultPages(array $pages): array
-    {
-        $homePageId = null;
-        $createdPages = [];
-
-        foreach ($pages as $slug => $pageData) {
-            // Check if page already exists
-            $existing = get_page_by_path($slug);
-            if ($existing) {
-                // Store existing page ID for menu creation
-                $createdPages[$slug] = $existing->ID;
-
-                // If styleguide exists, store its ID
-                if ($slug === 'styleguide') {
-                    update_option(ThemeContext::optionKey('styleguide_page_id'), $existing->ID);
-                }
-                continue;
-            }
-
-            // Use page-specific status if defined, otherwise default to publish
-            $postStatus = $pageData['status'] ?? 'publish';
-
-            $pageId = wp_insert_post([
-                'post_title' => $pageData['title'],
-                'post_name' => $slug,
-                'post_status' => $postStatus,
-                'post_type' => 'page',
-                'post_content' => '',
-            ]);
-
-            if ($pageId && !is_wp_error($pageId)) {
-                // Store created page ID for menu creation
-                $createdPages[$slug] = $pageId;
-
-                // Set page template if specified
-                if (!empty($pageData['template'])) {
-                    update_post_meta($pageId, '_wp_page_template', $pageData['template'] . '.blade.php');
-                }
-
-                // Track home page
-                if ($slug === 'home') {
-                    $homePageId = $pageId;
-                }
-
-                // Mark page as protected for member area
-                if (!empty($pageData['protected']) && function_exists('update_field')) {
-                    update_field('field_page_is_protected', true, $pageId);
-                }
-
-                // Add Hero layout with page title (except for styleguide/member-area which have their own templates)
-                if ($slug !== 'styleguide' && $slug !== 'member-area' && function_exists('update_field')) {
-                    $heroLayout = [
-                        [
-                            'acf_fc_layout' => 'hero',
-                            'title' => $pageData['title'],
-                        ],
-                    ];
-                    update_field('page_sections', $heroLayout, $pageId);
-                }
-
-                // Track styleguide page
-                if ($slug === 'styleguide') {
-                    update_option(ThemeContext::optionKey('styleguide_page_id'), $pageId);
-                    // Dismiss the welcome notice since styleguide is created
-                    update_option(ThemeContext::optionKey('welcome_dismissed'), true);
-                }
-
-                // Set legal pages in theme options (if ACF is active)
-                if (function_exists('update_field')) {
-                    if ($slug === 'privacy') {
-                        update_field('datenschutz_seite', $pageId, 'option');
-                        update_option('wp_page_for_privacy_policy', $pageId);
-                    } elseif ($slug === 'imprint') {
-                        update_field('impressum_seite', $pageId, 'option');
-                    }
-                }
-            }
-        }
-
-        // Set homepage as front page
-        if ($homePageId) {
-            update_option('show_on_front', 'page');
-            update_option('page_on_front', $homePageId);
-        }
-
-        return $createdPages;
-    }
-
-    /**
-     * Create sample blog posts
-     *
-     * @param array<int, array{title: string, content: string, excerpt: string}> $posts
-     */
-    private function createDefaultPosts(array $posts): void
-    {
-        // Spread post dates over the last few weeks for realistic appearance
-        $baseTime = time();
-        $dayOffset = 0;
-
-        foreach ($posts as $index => $postData) {
-            // Check if a post with this title already exists (WP_Query replaces deprecated get_page_by_title)
-            $existingQuery = new \WP_Query([
-                'post_type' => 'post',
-                'title' => $postData['title'],
-                'posts_per_page' => 1,
-                'fields' => 'ids',
-            ]);
-            if ($existingQuery->have_posts()) {
-                continue;
-            }
-
-            // Calculate post date (spread over last 2 weeks)
-            $postDate = gmdate('Y-m-d H:i:s', $baseTime - ( $dayOffset * DAY_IN_SECONDS ));
-            $dayOffset += rand(3, 5); // Random 3-5 days between posts
-
-            $postId = wp_insert_post([
-                'post_title' => $postData['title'],
-                'post_content' => $postData['content'],
-                'post_excerpt' => $postData['excerpt'],
-                'post_status' => 'publish',
-                'post_type' => 'post',
-                'post_date' => $postDate,
-                'post_date_gmt' => $postDate,
-            ]);
-
-            if (is_wp_error($postId)) {
-                continue;
-            }
-        }
-    }
-
-    /**
-     * Create default menus and populate them with pages
-     *
-     * @param array<string, int> $pageIds Map of page slug to page ID
-     * @param array<string, string[]> $menuAssignments Map of menu location to page slugs
-     */
-    private function createDefaultMenus(array $pageIds, array $menuAssignments): void
-    {
-        // Get registered menu locations
-        $locations = get_registered_nav_menus();
-        $menuLocations = get_nav_menu_locations();
-
-        foreach ($menuAssignments as $location => $pageSlugs) {
-            // Skip if this location isn't registered
-            if (!isset($locations[$location])) {
-                continue;
-            }
-
-            // Create menu name based on location
-            $menuName = $locations[$location];
-
-            // Check if menu already exists
-            $existingMenu = wp_get_nav_menu_object($menuName);
-
-            if ($existingMenu) {
-                $menuId = $existingMenu->term_id;
-            } else {
-                // Create new menu
-                $menuId = wp_create_nav_menu($menuName);
-
-                if (is_wp_error($menuId)) {
-                    continue;
-                }
-            }
-
-            // Assign menu to location
-            $menuLocations[$location] = $menuId;
-
-            // Add pages to menu in order
-            $position = 0;
-            foreach ($pageSlugs as $pageSlug) {
-                if (!isset($pageIds[$pageSlug])) {
-                    continue;
-                }
-
-                $pageId = $pageIds[$pageSlug];
-                $page = get_post($pageId);
-
-                if (!$page) {
-                    continue;
-                }
-
-                // Check if this page is already in the menu
-                $existingItems = wp_get_nav_menu_items($menuId);
-                $alreadyInMenu = false;
-
-                if ($existingItems) {
-                    foreach ($existingItems as $item) {
-                        if ( (int) $item->object_id === $pageId && $item->object === 'page') {
-                            $alreadyInMenu = true;
-                            break;
-                        }
-                    }
-                }
-
-                if ($alreadyInMenu) {
-                    continue;
-                }
-
-                $position += 10;
-
-                wp_update_nav_menu_item($menuId, 0, [
-                    'menu-item-object-id' => $pageId,
-                    'menu-item-object' => 'page',
-                    'menu-item-type' => 'post_type',
-                    'menu-item-status' => 'publish',
-                    'menu-item-title' => $page->post_title,
-                    'menu-item-position' => $position,
-                ]);
-            }
-        }
-
-        // Save menu locations
-        set_theme_mod('nav_menu_locations', $menuLocations);
     }
 
     /**
@@ -728,7 +316,7 @@ class PluginServiceProvider extends ServiceProvider
                 'slug' => 'advanced-custom-fields-pro',
                 'required' => true,
                 'description' => 'Erforderlich für alle ACF-Blöcke und Theme Options.',
-                'check' => fn() => class_exists('ACF') && function_exists('acf_add_local_field_group'),
+                'check' => fn () => class_exists('ACF') && function_exists('acf_add_local_field_group'),
                 'external' => 'https://www.advancedcustomfields.com/pro/',
             ],
             // === RECOMMENDED: SEO & Content ===
@@ -737,21 +325,21 @@ class PluginServiceProvider extends ServiceProvider
                 'slug' => 'wordpress-seo',
                 'required' => false,
                 'description' => 'SEO-Optimierung für alle Inhalte.',
-                'check' => fn() => defined('WPSEO_VERSION'),
+                'check' => fn () => defined('WPSEO_VERSION'),
             ],
             'acf-content-analysis-for-yoast-seo' => [
                 'name' => 'ACF Content Analysis for Yoast SEO',
                 'slug' => 'acf-content-analysis-for-yoast-seo',
                 'required' => false,
                 'description' => 'Integriert ACF-Felder in die Yoast SEO-Analyse.',
-                'check' => fn() => defined('AC_YOAST_ACF_ANALYSIS_FILE'),
+                'check' => fn () => defined('AC_YOAST_ACF_ANALYSIS_FILE'),
             ],
             'acf-extended' => [
                 'name' => 'ACF Extended',
                 'slug' => 'acf-extended',
                 'required' => false,
                 'description' => 'Erweitert ACF um zusätzliche Feldtypen und Funktionen.',
-                'check' => fn() => class_exists('ACFE'),
+                'check' => fn () => class_exists('ACFE'),
             ],
 
             // === RECOMMENDED: Forms & Communication ===
@@ -760,14 +348,14 @@ class PluginServiceProvider extends ServiceProvider
                 'slug' => 'contact-form-7',
                 'required' => false,
                 'description' => 'Empfohlen für den Kontaktformular-Block.',
-                'check' => fn() => class_exists('WPCF7'),
+                'check' => fn () => class_exists('WPCF7'),
             ],
             'wp-mail-smtp' => [
                 'name' => 'WP Mail SMTP',
                 'slug' => 'wp-mail-smtp',
                 'required' => false,
                 'description' => 'Zuverlässiger E-Mail-Versand über SMTP.',
-                'check' => fn() => defined('WPMS_PLUGIN_VER'),
+                'check' => fn () => defined('WPMS_PLUGIN_VER'),
             ],
 
             // === RECOMMENDED: Performance & Analytics ===
@@ -776,14 +364,14 @@ class PluginServiceProvider extends ServiceProvider
                 'slug' => 'wp-optimize',
                 'required' => false,
                 'description' => 'Datenbank-Optimierung und Caching.',
-                'check' => fn() => class_exists('WP_Optimize'),
+                'check' => fn () => class_exists('WP_Optimize'),
             ],
             'integrate-rybbit' => [
                 'name' => 'Rybbit Analytics',
                 'slug' => 'integrate-rybbit',
                 'required' => false,
                 'description' => 'Datenschutzfreundliche Website-Analyse.',
-                'check' => fn() => self::isPluginActive('integrate-rybbit/integrate-rybbit.php'),
+                'check' => fn () => self::isPluginActive('integrate-rybbit/integrate-rybbit.php'),
             ],
 
             // === RECOMMENDED: Admin ===
@@ -792,7 +380,7 @@ class PluginServiceProvider extends ServiceProvider
                 'slug' => 'admin-site-enhancements',
                 'required' => false,
                 'description' => 'Über 60 Admin-Verbesserungen inkl. SVG-Upload.',
-                'check' => fn() => defined('ASENHA_VERSION'),
+                'check' => fn () => defined('ASENHA_VERSION'),
             ],
 
             // === RECOMMENDED: Security & Backup (Premium) ===
@@ -801,7 +389,7 @@ class PluginServiceProvider extends ServiceProvider
                 'slug' => 'solid-security',
                 'required' => false,
                 'description' => 'Umfassende WordPress-Sicherheit (ehem. iThemes Security).',
-                'check' => fn() => defined('ITSEC_CORE_VER') || class_exists('ITSEC_Core'),
+                'check' => fn () => defined('ITSEC_CORE_VER') || class_exists('ITSEC_Core'),
                 'external' => 'https://developer.wordpress.org/plugins/solid-security/',
             ],
             'solid-backups' => [
@@ -809,7 +397,7 @@ class PluginServiceProvider extends ServiceProvider
                 'slug' => 'solid-backups',
                 'required' => false,
                 'description' => 'Automatische Backups und Migration (ehem. BackupBuddy).',
-                'check' => fn() => class_exists('pb_backupbuddy') || defined('JETRAIL_BUDDY_VER'),
+                'check' => fn () => class_exists('pb_backupbuddy') || defined('JETRAIL_BUDDY_VER'),
                 'external' => 'https://developer.wordpress.org/plugins/backup-backup/',
             ],
         ];
@@ -823,7 +411,7 @@ class PluginServiceProvider extends ServiceProvider
     private function getPluginsByCategory(): array
     {
         return [
-            'Erforderlich' => array_filter($this->plugins, fn($p) => $p['required']),
+            'Erforderlich' => array_filter($this->plugins, fn ($p) => $p['required']),
             'SEO & Content' => [
                 'wordpress-seo' => $this->plugins['wordpress-seo'],
                 'acf-content-analysis-for-yoast-seo' => $this->plugins['acf-content-analysis-for-yoast-seo'],
@@ -857,7 +445,7 @@ class PluginServiceProvider extends ServiceProvider
             __('Theme Setup', 'wp-starter'),
             'install_plugins',
             self::setupPageSlug(),
-            [$this, 'renderSetupPage']
+            [$this, 'renderSetupPage'],
         );
     }
 
@@ -866,7 +454,6 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function onThemeActivation(): void
     {
-        // Set transient to redirect to setup page
         set_transient(ThemeContext::optionKey('activation_redirect'), true, 60);
     }
 
@@ -881,7 +468,6 @@ class PluginServiceProvider extends ServiceProvider
 
         delete_transient(ThemeContext::optionKey('activation_redirect'));
 
-        // Don't redirect on bulk activation or AJAX
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Core WordPress bulk activation parameter
         if (wp_doing_ajax() || isset($_GET['activate-multi'])) {
             return;
@@ -892,349 +478,27 @@ class PluginServiceProvider extends ServiceProvider
     }
 
     /**
-     * Render the setup page
+     * Render the setup page via Blade view (templates/admin/setup-page.blade.php).
      */
     public function renderSetupPage(): void
     {
-        // Dismiss the styleguide welcome notice - user is already doing setup
         update_option(ThemeContext::optionKey('welcome_dismissed'), true);
 
         $categories = $this->getPluginsByCategory();
         $selectedPlugins = $this->getSelectedPlugins();
-        $missingSelectedPlugins = array_filter($selectedPlugins, fn($p) => !( $p['check'] )());
+        $missingSelectedPlugins = array_filter($selectedPlugins, fn ($p) => !( $p['check'] )());
         $hasConfig = $this->hasSetupConfig();
 
-        ?>
-        <div class="wrap">
-            <h1><?php esc_html_e('WP-Starter Theme Setup', 'wp-starter'); ?></h1>
-
-            <div class="wp-starter-setup-header" style="background: #fff; padding: 20px; margin: 20px 0; border-left: 4px solid #2271b1; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
-                <h2 style="margin-top: 0;"><?php esc_html_e('Willkommen beim WP-Starter Theme!', 'wp-starter'); ?></h2>
-                <p><?php esc_html_e('Plugins werden über Composer verwaltet. Führen Sie "composer install" aus, um die konfigurierten Plugins zu installieren.', 'wp-starter'); ?></p>
-                <p style="color: #50575e; font-size: 13px;">
-                    <span class="dashicons dashicons-info-outline"></span>
-                    <?php esc_html_e('ACF PRO muss manuell installiert werden (Premium-Plugin).', 'wp-starter'); ?>
-                </p>
-
-                <?php if (!empty($missingSelectedPlugins)) : ?>
-                    <p>
-                        <button type="button" id="wp-starter-install-all" class="button button-primary button-hero">
-                            <?php
-                            printf(
-                                // translators: %d is the number of plugins to activate/install
-                                esc_html__('Plugins aktivieren (%d)', 'wp-starter'),
-                                count($missingSelectedPlugins)
-                            );
-                            ?>
-                        </button>
-                    </p>
-                <?php else : ?>
-                    <p style="color: #00a32a; font-weight: 600;">
-                        <span class="dashicons dashicons-yes-alt"></span>
-                        <?php esc_html_e('Alle Plugins sind aktiv!', 'wp-starter'); ?>
-                    </p>
-                <?php endif; ?>
-            </div>
-
-            <div id="wp-starter-install-progress" style="display: none; background: #fff; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04); border-left: 4px solid #2271b1;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3 style="margin: 0;"><?php esc_html_e('Installation läuft...', 'wp-starter'); ?></h3>
-                    <div style="text-align: right;">
-                        <span class="wp-starter-progress-counter" style="font-size: 14px; color: #50575e;"></span>
-                        <span class="wp-starter-elapsed-time" style="font-size: 12px; color: #787c82; display: block;"></span>
-                    </div>
-                </div>
-                <div class="wp-starter-progress-bar" style="background: #ddd; height: 24px; border-radius: 4px; overflow: hidden; position: relative;">
-                    <div class="wp-starter-progress-fill" style="background: linear-gradient(90deg, #2271b1 0%, #135e96 100%); height: 100%; width: 0%; transition: width 0.3s;"></div>
-                    <span class="wp-starter-progress-percent" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; font-weight: 600; color: #1d2327;"></span>
-                </div>
-                <div class="wp-starter-current-plugin" style="margin-top: 15px; padding: 12px; background: #f0f6fc; border-radius: 4px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span class="wp-starter-spinner" style="display: inline-block; width: 20px; height: 20px; border: 2px solid #2271b1; border-top-color: transparent; border-radius: 50%; animation: wp-starter-spin 1s linear infinite;"></span>
-                        <div>
-                            <strong class="wp-starter-plugin-name" style="display: block; color: #1d2327;"></strong>
-                            <span class="wp-starter-plugin-step" style="font-size: 12px; color: #50575e;"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="wp-starter-install-log" style="max-height: 200px; overflow-y: auto; margin-top: 15px; padding: 12px; background: #f6f7f7; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; line-height: 1.6;"></div>
-            </div>
-            <style>
-                @keyframes wp-starter-spin {
-                    to { transform: rotate(360deg); }
-                }
-            </style>
-
-            <?php foreach ($categories as $categoryName => $categoryPlugins) : ?>
-                <div class="wp-starter-plugin-category" style="background: #fff; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
-                    <h2><?php echo esc_html($categoryName); ?></h2>
-                    <table class="wp-list-table widefat plugins">
-                        <tbody>
-                            <?php foreach ($categoryPlugins as $key => $plugin) : ?>
-                                <?php
-                                $isActive = ( $plugin['check'] )();
-                                $isExternal = !empty($plugin['external']);
-                                $isInstalled = !$isExternal && PluginInstaller::isInstalled($plugin['slug']);
-                                ?>
-                                <tr class="<?php echo $isActive ? 'active' : 'inactive'; ?>" data-slug="<?php echo esc_attr($plugin['slug']); ?>">
-                                    <td class="plugin-title column-primary" style="padding: 15px;">
-                                        <strong><?php echo esc_html($plugin['name']); ?></strong>
-                                        <?php if ($isExternal) : ?>
-                                            <span style="background: #d63638; color: #fff; padding: 2px 8px; border-radius: 3px; font-size: 11px; margin-left: 5px;">Premium</span>
-                                        <?php endif; ?>
-                                        <?php if ($plugin['required']) : ?>
-                                            <span style="background: #dba617; color: #fff; padding: 2px 8px; border-radius: 3px; font-size: 11px; margin-left: 5px;">Erforderlich</span>
-                                        <?php endif; ?>
-                                        <p class="description" style="margin: 5px 0 0;"><?php echo esc_html($plugin['description']); ?></p>
-                                    </td>
-                                    <td class="column-status" style="padding: 15px; text-align: right; white-space: nowrap;">
-                                        <?php if ($isActive) : ?>
-                                            <span style="color: #00a32a;"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Aktiv', 'wp-starter'); ?></span>
-                                        <?php elseif ($isExternal) : ?>
-                                            <a href="<?php echo esc_url($plugin['external']); ?>" class="button" target="_blank" rel="noopener">
-                                                <?php esc_html_e('Website besuchen', 'wp-starter'); ?>
-                                                <span class="dashicons dashicons-external" style="line-height: 1.4;"></span>
-                                            </a>
-                                        <?php elseif ($isInstalled) : ?>
-                                            <button type="button" class="button button-primary wp-starter-activate-plugin" data-slug="<?php echo esc_attr($plugin['slug']); ?>">
-                                                <?php esc_html_e('Aktivieren', 'wp-starter'); ?>
-                                            </button>
-                                        <?php else : ?>
-                                            <button type="button" class="button button-primary wp-starter-install-plugin" data-slug="<?php echo esc_attr($plugin['slug']); ?>">
-                                                <?php esc_html_e('Installieren & Aktivieren', 'wp-starter'); ?>
-                                            </button>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endforeach; ?>
-
-            <div style="margin-top: 30px; text-align: center;">
-                <a href="<?php echo esc_url(admin_url()); ?>" class="button button-secondary button-hero">
-                    <?php esc_html_e('Zum Dashboard', 'wp-starter'); ?>
-                </a>
-            </div>
-        </div>
-
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var nonce = '<?php echo esc_attr( wp_create_nonce( self::nonceInstall() ) ); ?>';
-
-            function doAjax(data, onSuccess, onError) {
-                var controller = new AbortController();
-                var timeoutId = setTimeout(function() { controller.abort(); }, 120000);
-
-                fetch(ajaxurl, {
-                    method: 'POST',
-                    signal: controller.signal,
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams(data).toString()
-                })
-                .then(function(res) { return res.json(); })
-                .then(function(response) {
-                    clearTimeout(timeoutId);
-                    onSuccess(response);
-                })
-                .catch(function(err) {
-                    clearTimeout(timeoutId);
-                    onError(err && err.name === 'AbortError' ? 'timeout' : 'error', err);
-                });
-            }
-
-            // Single plugin install
-            document.querySelectorAll('.wp-starter-install-plugin, .wp-starter-activate-plugin').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    var slug = button.getAttribute('data-slug');
-                    var row = button.closest('tr');
-
-                    button.disabled = true;
-                    button.textContent = '<?php esc_html_e('Wird installiert...', 'wp-starter'); ?>';
-
-                    doAjax(
-                        { action: '<?php echo esc_js(self::ajaxActionInstallPlugin()); ?>', slug: slug, nonce: nonce },
-                        function(response) {
-                            if (response.success) {
-                                if (row) { row.classList.remove('inactive'); row.classList.add('active'); }
-                                var span = document.createElement('span');
-                                span.style.color = '#00a32a';
-                                span.innerHTML = '<span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Aktiv', 'wp-starter'); ?>';
-                                button.replaceWith(span);
-                            } else {
-                                button.disabled = false;
-                                button.textContent = '<?php esc_html_e('Fehler - Erneut versuchen', 'wp-starter'); ?>';
-                                var errorMsg = response.data && response.data.message ? response.data.message : '<?php esc_html_e('Installation fehlgeschlagen.', 'wp-starter'); ?>';
-                                console.error('Plugin install error:', errorMsg);
-                                alert(errorMsg);
-                            }
-                        },
-                        function(status, err) {
-                            button.disabled = false;
-                            button.textContent = '<?php esc_html_e('Fehler - Erneut versuchen', 'wp-starter'); ?>';
-                            console.error('Plugin install fetch error:', status, err);
-                            if (status === 'timeout') {
-                                alert('<?php esc_html_e('Die Installation hat zu lange gedauert. Bitte versuchen Sie es erneut.', 'wp-starter'); ?>');
-                            } else {
-                                alert('<?php esc_html_e('Netzwerkfehler bei der Installation. Bitte versuchen Sie es erneut.', 'wp-starter'); ?>');
-                            }
-                        }
-                    );
-                });
-            });
-
-            // Install all plugins
-            var installAllBtn = document.getElementById('wp-starter-install-all');
-            if (installAllBtn) {
-                installAllBtn.addEventListener('click', function() {
-                    var progressEl = document.getElementById('wp-starter-install-progress');
-                    var progressBar = progressEl.querySelector('.wp-starter-progress-fill');
-                    var progressPercent = progressEl.querySelector('.wp-starter-progress-percent');
-                    var progressCounter = progressEl.querySelector('.wp-starter-progress-counter');
-                    var elapsedTime = progressEl.querySelector('.wp-starter-elapsed-time');
-                    var pluginName = progressEl.querySelector('.wp-starter-plugin-name');
-                    var pluginStep = progressEl.querySelector('.wp-starter-plugin-step');
-                    var currentPlugin = progressEl.querySelector('.wp-starter-current-plugin');
-                    var log = progressEl.querySelector('.wp-starter-install-log');
-
-                    // Build plugin list with names
-                    var plugins = [];
-                    var pluginNames = {};
-                    document.querySelectorAll('.wp-starter-install-plugin').forEach(function(btn) {
-                        var slug = btn.getAttribute('data-slug');
-                        var nameEl = btn.closest('tr') && btn.closest('tr').querySelector('strong');
-                        plugins.push(slug);
-                        pluginNames[slug] = nameEl ? nameEl.textContent.trim() : slug;
-                    });
-
-                    if (plugins.length === 0) {
-                        alert('<?php esc_html_e('Alle Plugins sind bereits installiert!', 'wp-starter'); ?>');
-                        return;
-                    }
-
-                    installAllBtn.disabled = true;
-                    progressEl.style.display = '';
-                    log.innerHTML = '';
-
-                    var total = plugins.length;
-                    var completed = 0;
-                    var startTime = Date.now();
-
-                    var timerInterval = setInterval(function() {
-                        var elapsed = Math.floor((Date.now() - startTime) / 1000);
-                        var minutes = Math.floor(elapsed / 60);
-                        var seconds = elapsed % 60;
-                        elapsedTime.textContent = '<?php esc_html_e('Verstrichene Zeit:', 'wp-starter'); ?> ' +
-                            (minutes > 0 ? minutes + ' min ' : '') + seconds + ' s';
-                    }, 1000);
-
-                    function updateProgress(current, tot, percent) {
-                        progressBar.style.width = percent + '%';
-                        progressPercent.textContent = percent + '%';
-                        progressCounter.textContent = 'Plugin ' + current + ' / ' + tot;
-                    }
-
-                    function logMessage(type, slug, message, details) {
-                        var name = pluginNames[slug] || slug;
-                        var timestamp = new Date().toLocaleTimeString('de-DE');
-                        var icon = type === 'success' ? '✓' : (type === 'error' ? '✗' : '○');
-                        var color = type === 'success' ? '#00a32a' : (type === 'error' ? '#d63638' : '#50575e');
-                        var div = document.createElement('div');
-                        div.style.cssText = 'color:' + color + ';padding:4px 0;border-bottom:1px solid #e0e0e0;';
-                        var tsSpan = document.createElement('span');
-                        tsSpan.style.cssText = 'color:#787c82;margin-right:8px;';
-                        tsSpan.textContent = '[' + timestamp + ']';
-                        var strong = document.createElement('strong');
-                        strong.textContent = icon + ' ' + name;
-                        div.appendChild(tsSpan);
-                        div.appendChild(strong);
-                        if (message) {
-                            var msgSpan = document.createElement('span');
-                            msgSpan.style.cssText = 'color:#50575e;';
-                            msgSpan.textContent = ' — ' + message;
-                            div.appendChild(msgSpan);
-                        }
-                        if (details) {
-                            var detailDiv = document.createElement('div');
-                            detailDiv.style.cssText = 'font-size:11px;color:#787c82;margin-left:20px;';
-                            detailDiv.textContent = details;
-                            div.appendChild(detailDiv);
-                        }
-                        log.appendChild(div);
-                        log.scrollTop = log.scrollHeight;
-                    }
-
-                    function installNext() {
-                        if (plugins.length === 0) {
-                            clearInterval(timerInterval);
-                            currentPlugin.innerHTML = '<div style="display:flex;align-items:center;gap:10px;color:#00a32a;">' +
-                                '<span class="dashicons dashicons-yes-alt" style="font-size:24px;"></span>' +
-                                '<strong><?php esc_html_e('Alle Plugins wurden erfolgreich installiert!', 'wp-starter'); ?></strong></div>';
-                            progressEl.querySelector('h3').textContent = '<?php esc_html_e('Installation abgeschlossen', 'wp-starter'); ?>';
-                            progressEl.style.borderLeftColor = '#00a32a';
-                            installAllBtn.style.display = 'none';
-                            logMessage('success', '', '<?php esc_html_e('Installation abgeschlossen', 'wp-starter'); ?>',
-                                '<?php esc_html_e('Seite wird neu geladen...', 'wp-starter'); ?>');
-                            setTimeout(function() { location.reload(); }, 2000);
-                            return;
-                        }
-
-                        var slug = plugins.shift();
-                        var currentNum = completed + 1;
-                        var percent = Math.round((completed / total) * 100);
-
-                        updateProgress(currentNum, total, percent);
-                        pluginName.textContent = pluginNames[slug];
-                        pluginStep.textContent = '<?php esc_html_e('Lade Plugin von WordPress.org herunter...', 'wp-starter'); ?>';
-                        logMessage('info', slug, '<?php esc_html_e('Installation gestartet', 'wp-starter'); ?>');
-
-                        var stepTimeout = setTimeout(function() {
-                            pluginStep.textContent = '<?php esc_html_e('Entpacke und installiere...', 'wp-starter'); ?>';
-                        }, 2000);
-                        var stepTimeout2 = setTimeout(function() {
-                            pluginStep.textContent = '<?php esc_html_e('Aktiviere Plugin...', 'wp-starter'); ?>';
-                        }, 4000);
-
-                        doAjax(
-                            { action: '<?php echo esc_js(self::ajaxActionInstallPlugin()); ?>', slug: slug, nonce: nonce },
-                            function(response) {
-                                clearTimeout(stepTimeout);
-                                clearTimeout(stepTimeout2);
-                                completed++;
-                                updateProgress(completed, total, Math.round((completed / total) * 100));
-
-                                if (response.success) {
-                                    var details = response.data && response.data.installed ?
-                                        '<?php esc_html_e('Neu installiert und aktiviert', 'wp-starter'); ?>' :
-                                        '<?php esc_html_e('Aktiviert', 'wp-starter'); ?>';
-                                    logMessage('success', slug, '<?php esc_html_e('Erfolgreich', 'wp-starter'); ?>', details);
-                                } else {
-                                    var errorMsg = response.data && response.data.message ? response.data.message : '<?php esc_html_e('Unbekannter Fehler', 'wp-starter'); ?>';
-                                    logMessage('error', slug, '<?php esc_html_e('Fehlgeschlagen', 'wp-starter'); ?>', errorMsg);
-                                }
-                                installNext();
-                            },
-                            function(status, err) {
-                                clearTimeout(stepTimeout);
-                                clearTimeout(stepTimeout2);
-                                completed++;
-                                updateProgress(completed, total, Math.round((completed / total) * 100));
-                                var errorDetail = status === 'timeout' ?
-                                    '<?php esc_html_e('Zeitüberschreitung', 'wp-starter'); ?>' :
-                                    (err && err.message ? err.message : status);
-                                logMessage('error', slug, '<?php esc_html_e('Netzwerkfehler', 'wp-starter'); ?>', errorDetail);
-                                installNext();
-                            }
-                        );
-                    }
-
-                    installNext();
-                });
-            }
-        });
-        </script>
-        <?php
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaping happens inside the Blade view
+        echo blade('admin.setup-page', [
+            'categories' => $categories,
+            'selectedPlugins' => $selectedPlugins,
+            'missingSelectedPlugins' => $missingSelectedPlugins,
+            'hasConfig' => $hasConfig,
+            'nonce' => wp_create_nonce(self::nonceInstall()),
+            'ajaxActionInstallPlugin' => self::ajaxActionInstallPlugin(),
+            'ajaxActionInstallAll' => self::ajaxActionInstallAllPlugins(),
+        ]);
     }
 
     /**
@@ -1281,7 +545,7 @@ class PluginServiceProvider extends ServiceProvider
         }
 
         $selectedPlugins = $this->getSelectedPlugins();
-        $missingPlugins = array_filter($selectedPlugins, fn($p) => !( $p['check'] )());
+        $missingPlugins = array_filter($selectedPlugins, fn ($p) => !( $p['check'] )());
         $slugs = array_column($missingPlugins, 'slug');
 
         $results = PluginInstaller::bulkInstallAndActivate($slugs);
@@ -1296,7 +560,7 @@ class PluginServiceProvider extends ServiceProvider
      */
     private function getFreePlugins(): array
     {
-        return array_filter($this->plugins, fn($p) => empty($p['external']));
+        return array_filter($this->plugins, fn ($p) => empty($p['external']));
     }
 
     /**
@@ -1308,16 +572,14 @@ class PluginServiceProvider extends ServiceProvider
     {
         $freePlugins = $this->getFreePlugins();
 
-        // If no setup config, return all free plugins
         if (empty($this->selectedPlugins)) {
             return $freePlugins;
         }
 
-        // Filter to only selected plugins
         return array_filter(
             $freePlugins,
-            fn($plugin, $key) => in_array($plugin['slug'], $this->selectedPlugins, true),
-            ARRAY_FILTER_USE_BOTH
+            fn ($plugin, $key) => in_array($plugin['slug'], $this->selectedPlugins, true),
+            ARRAY_FILTER_USE_BOTH,
         );
     }
 
@@ -1334,7 +596,6 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function displayPluginNotices(): void
     {
-        // Don't show on plugin install page or setup page
         global $pagenow;
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading page parameter for display logic only
         $page = isset($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
@@ -1347,7 +608,6 @@ class PluginServiceProvider extends ServiceProvider
         $missingRecommended = [];
 
         foreach ($this->plugins as $key => $plugin) {
-            // Skip if already dismissed (for recommended plugins)
             if (!$plugin['required'] && $this->isDismissed($key)) {
                 continue;
             }
@@ -1361,12 +621,10 @@ class PluginServiceProvider extends ServiceProvider
             }
         }
 
-        // Show required plugins notice
         if (!empty($missingRequired)) {
             $this->renderNotice($missingRequired, true);
         }
 
-        // Show recommended plugins notice (link to setup page)
         if (!empty($missingRecommended) && !$this->isDismissed('recommended')) {
             $this->renderRecommendedNotice(count($missingRecommended));
         }
@@ -1380,8 +638,7 @@ class PluginServiceProvider extends ServiceProvider
     private function renderNotice(array $plugins, bool $isRequired): void
     {
         $setupUrl = admin_url('themes.php?page=' . self::setupPageSlug());
-
-        $pluginNames = array_map(fn($p) => $p['name'], $plugins);
+        $pluginNames = array_map(fn ($p) => $p['name'], $plugins);
 
         printf(
             '<div class="notice notice-error"><p><strong>%s</strong></p><p>%s: %s</p><p><a href="%s" class="button button-primary">%s</a></p></div>',
@@ -1389,7 +646,7 @@ class PluginServiceProvider extends ServiceProvider
             esc_html__('Das Theme benötigt folgende Plugins', 'wp-starter'),
             esc_html(implode(', ', $pluginNames)),
             esc_url($setupUrl),
-            esc_html__('Zum Theme Setup', 'wp-starter')
+            esc_html__('Zum Theme Setup', 'wp-starter'),
         );
     }
 
@@ -1401,7 +658,7 @@ class PluginServiceProvider extends ServiceProvider
         $setupUrl = admin_url('themes.php?page=' . self::setupPageSlug());
         $dismissUrl = wp_nonce_url(
             add_query_arg(self::paramDismissPlugins(), '1'),
-            self::paramDismissPlugins()
+            self::paramDismissPlugins(),
         );
 
         printf(
@@ -1409,12 +666,12 @@ class PluginServiceProvider extends ServiceProvider
             sprintf(
                 // translators: %d is the number of recommended plugins available
                 esc_html__('Es sind %d empfohlene Plugins für das WP-Starter Theme verfügbar.', 'wp-starter'),
-                (int) $count
+                (int) $count,
             ),
             esc_url($setupUrl),
             esc_html__('Plugins anzeigen & installieren', 'wp-starter'),
             esc_url($dismissUrl),
-            esc_html__('Ausblenden', 'wp-starter')
+            esc_html__('Ausblenden', 'wp-starter'),
         );
     }
 
@@ -1457,6 +714,7 @@ class PluginServiceProvider extends ServiceProvider
                 $missing[$key] = $plugin;
             }
         }
+
         return $missing;
     }
 
@@ -1476,6 +734,7 @@ class PluginServiceProvider extends ServiceProvider
         if (!function_exists('is_plugin_active')) {
             include_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
+
         return is_plugin_active($plugin);
     }
 
@@ -1485,11 +744,11 @@ class PluginServiceProvider extends ServiceProvider
      * @param string $url Image URL to download
      * @param string $title Title for the attachment
      * @param int $postId Post ID to attach the image to
+     *
      * @return int|false Attachment ID or false on failure
      */
     private function downloadAndAttachImage(string $url, string $title, int $postId): int|false
     {
-        // Download the image
         $response = wp_remote_get($url, [
             'timeout' => 30,
             'redirection' => 5,
@@ -1504,17 +763,13 @@ class PluginServiceProvider extends ServiceProvider
             return false;
         }
 
-        // Create a unique filename
         $filename = sanitize_file_name($title) . '-' . time() . '.jpg';
-
-        // Upload the image
         $upload = wp_upload_bits($filename, null, $imageData);
 
         if (!empty($upload['error'])) {
             return false;
         }
 
-        // Create attachment
         $attachment = [
             'post_mime_type' => 'image/jpeg',
             'post_title' => $title,
@@ -1529,7 +784,6 @@ class PluginServiceProvider extends ServiceProvider
             return false;
         }
 
-        // Generate attachment metadata
         $attachmentData = wp_generate_attachment_metadata($attachmentId, $upload['file']);
         wp_update_attachment_metadata($attachmentId, $attachmentData);
 

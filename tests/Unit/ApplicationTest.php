@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use ReflectionClass;
 use Tests\Support\TestCase;
 use WordpressStarter\Application;
-use WordpressStarter\Providers\ThemeServiceProvider;
 use WordpressStarter\Providers\BladeServiceProvider;
 use WordpressStarter\Providers\SecurityServiceProvider;
+use WordpressStarter\Providers\ThemeServiceProvider;
 
 /**
  * Tests for the Application class.
@@ -32,7 +33,7 @@ final class ApplicationTest extends TestCase
      */
     private function resetApplicationInstance(): void
     {
-        $reflection = new \ReflectionClass(Application::class);
+        $reflection = new ReflectionClass(Application::class);
         $property = $reflection->getProperty('instance');
         $property->setAccessible(true);
         $property->setValue(null, null);
@@ -114,17 +115,30 @@ final class ApplicationTest extends TestCase
 
     public function testAllProvidersAreAccessible(): void
     {
+        // Admin-only providers (PluginServiceProvider, DesignTokenServiceProvider)
+        // are only registered when is_admin() is true. The flag is only needed
+        // while the provider list is built (constructor); boot() must run with
+        // is_admin() === false so ThemeUpdateProvider skips the PUC update
+        // checker, which cannot run in the test environment.
+        $GLOBALS['wp_mock_is_admin'] = true;
         $app = Application::getInstance();
+        $GLOBALS['wp_mock_is_admin'] = false;
+
         $app->boot();
 
         $providerClasses = [
             \WordpressStarter\Providers\PluginServiceProvider::class,
+            \WordpressStarter\Providers\DesignTokenServiceProvider::class,
             \WordpressStarter\Providers\WelcomeServiceProvider::class,
-            \WordpressStarter\Providers\SecurityServiceProvider::class,
-            \WordpressStarter\Providers\BladeServiceProvider::class,
+            SecurityServiceProvider::class,
+            BladeServiceProvider::class,
             \WordpressStarter\Providers\AcfServiceProvider::class,
             \WordpressStarter\Providers\MenuServiceProvider::class,
-            \WordpressStarter\Providers\ThemeServiceProvider::class,
+            ThemeServiceProvider::class,
+            \WordpressStarter\Providers\MediaServiceProvider::class,
+            \WordpressStarter\Providers\AssetOptimizationServiceProvider::class,
+            \WordpressStarter\Providers\EditorIntegrationServiceProvider::class,
+            \WordpressStarter\Providers\BrandingServiceProvider::class,
             \WordpressStarter\Providers\EditorStylesServiceProvider::class,
         ];
 
@@ -132,6 +146,31 @@ final class ApplicationTest extends TestCase
             $provider = $app->getProvider($providerClass);
             $this->assertInstanceOf($providerClass, $provider, "Provider {$providerClass} should be registered");
         }
+
+        unset($GLOBALS['wp_mock_is_admin']);
+    }
+
+    public function testAdminOnlyProvidersAreNotRegisteredOnFrontend(): void
+    {
+        $GLOBALS['wp_mock_is_admin'] = false;
+
+        $app = Application::getInstance();
+        $app->boot();
+
+        $this->assertNull($app->getProvider(\WordpressStarter\Providers\PluginServiceProvider::class));
+        $this->assertNull($app->getProvider(\WordpressStarter\Providers\DesignTokenServiceProvider::class));
+
+        // Frontend-relevant providers must remain registered
+        $this->assertInstanceOf(
+            \WordpressStarter\Providers\PluginConfiguratorServiceProvider::class,
+            $app->getProvider(\WordpressStarter\Providers\PluginConfiguratorServiceProvider::class),
+        );
+        $this->assertInstanceOf(
+            \WordpressStarter\Providers\WelcomeServiceProvider::class,
+            $app->getProvider(\WordpressStarter\Providers\WelcomeServiceProvider::class),
+        );
+
+        unset($GLOBALS['wp_mock_is_admin']);
     }
 
     public function testBootRunsMigration(): void
@@ -145,7 +184,7 @@ final class ApplicationTest extends TestCase
         $app->boot();
 
         $this->assertTrue(
-            (bool) get_option('wordpress_starter_theme_migration_done')
+            (bool) get_option('wordpress_starter_theme_migration_done'),
         );
     }
 }

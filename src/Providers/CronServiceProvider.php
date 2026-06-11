@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\Services\TransientCleanupService;
 use WordpressStarter\ThemeContext;
 
 /**
@@ -28,7 +29,6 @@ class CronServiceProvider extends ServiceProvider
         return ThemeContext::prefix() . '_cleanup_revisions';
     }
 
-
     public function register(): void
     {
         // Add custom cron schedules
@@ -52,6 +52,7 @@ class CronServiceProvider extends ServiceProvider
      * Add custom cron schedules
      *
      * @param array<string, array{interval: int, display: string}> $schedules
+     *
      * @return array<string, array{interval: int, display: string}>
      */
     public function addCronSchedules(array $schedules): array
@@ -90,87 +91,25 @@ class CronServiceProvider extends ServiceProvider
     }
 
     /**
-     * Cleanup expired transients from the database
+     * Cleanup expired transients from the database.
      *
      * WordPress should handle this automatically, but this ensures
      * cleanup happens regularly for better database performance.
      */
     public function cleanupExpiredTransients(): void
     {
-        global $wpdb;
-
-        // Delete expired transients
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-        $wpdb->query(
-            $wpdb->prepare(
-                "DELETE a, b FROM {$wpdb->options} a
-                INNER JOIN {$wpdb->options} b ON b.option_name = CONCAT('_transient_timeout_', SUBSTRING(a.option_name, 12))
-                WHERE a.option_name LIKE %s
-                AND b.option_value < %d",
-                $wpdb->esc_like('_transient_') . '%',
-                time()
-            )
-        );
-
-        // Delete orphaned transient timeouts
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-        $wpdb->query(
-            $wpdb->prepare(
-                "DELETE FROM {$wpdb->options}
-                WHERE option_name LIKE %s
-                AND option_value < %d",
-                $wpdb->esc_like('_transient_timeout_') . '%',
-                time()
-            )
-        );
-
-        // Log the cleanup
+        ( new TransientCleanupService() )->deleteExpiredTransients();
         LogServiceProvider::info('Transient cleanup completed');
     }
 
     /**
-     * Cleanup old post revisions
+     * Cleanup old post revisions.
      *
      * Keeps the last 5 revisions per post, removes older ones.
      */
     public function cleanupOldRevisions(): void
     {
-        global $wpdb;
-
-        // Get posts with more than 5 revisions
-        $posts_with_revisions = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-            $wpdb->prepare(
-                "SELECT post_parent, COUNT(*) as revision_count
-                FROM {$wpdb->posts}
-                WHERE post_type = %s
-                GROUP BY post_parent
-                HAVING revision_count > 5", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                'revision'
-            )
-        );
-
-        $deleted = 0;
-
-        foreach ($posts_with_revisions as $post) {
-            // Get revisions to delete (keep newest 5)
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-            $revisions = $wpdb->get_col(
-                $wpdb->prepare(
-                    "SELECT ID FROM {$wpdb->posts}
-                    WHERE post_parent = %d
-                    AND post_type = 'revision'
-                    ORDER BY post_date DESC
-                    LIMIT %d, 999999",
-                    $post->post_parent,
-                    5
-                )
-            );
-
-            foreach ($revisions as $revision_id) {
-                wp_delete_post_revision( (int) $revision_id);
-                ++$deleted;
-            }
-        }
+        $deleted = ( new TransientCleanupService() )->deleteOldRevisions(5);
 
         if ($deleted > 0) {
             LogServiceProvider::info('Revision cleanup completed', ['deleted' => $deleted]);
@@ -178,7 +117,7 @@ class CronServiceProvider extends ServiceProvider
     }
 
     /**
-     * Manually trigger a cleanup task
+     * Manually trigger a cleanup task.
      *
      * @param string $task Task name: 'transients' or 'revisions'
      */

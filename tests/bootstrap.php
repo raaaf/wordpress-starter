@@ -97,14 +97,14 @@ if (!function_exists('get_template_directory_uri')) {
 if (!function_exists('get_theme_file_path')) {
     function get_theme_file_path(string $file = ''): string
     {
-        return get_template_directory() . ($file ? '/' . ltrim($file, '/') : '');
+        return get_template_directory() . ( $file ? '/' . ltrim($file, '/') : '' );
     }
 }
 
 if (!function_exists('get_theme_file_uri')) {
     function get_theme_file_uri(string $file = ''): string
     {
-        return get_template_directory_uri() . ($file ? '/' . ltrim($file, '/') : '');
+        return get_template_directory_uri() . ( $file ? '/' . ltrim($file, '/') : '' );
     }
 }
 
@@ -334,7 +334,7 @@ if (!function_exists('have_rows')) {
 
         if ($index[$key] < count($rows)) {
             $GLOBALS['wp_mock_current_row'] = $rows[$index[$key]];
-            $index[$key]++;
+            ++$index[$key];
 
             return true;
         }
@@ -548,7 +548,7 @@ if (!function_exists('get_the_ID')) {
 if (!function_exists('wp_get_theme')) {
     function wp_get_theme(): object
     {
-        return new class () {
+        return new class() {
             public function get(string $header): string
             {
                 return match ($header) {
@@ -614,21 +614,21 @@ if (!function_exists('wp_get_attachment_image_url')) {
 if (!function_exists('home_url')) {
     function home_url(string $path = ''): string
     {
-        return 'https://example.com' . ($path ? '/' . ltrim($path, '/') : '');
+        return 'https://example.com' . ( $path ? '/' . ltrim($path, '/') : '' );
     }
 }
 
 if (!function_exists('site_url')) {
     function site_url(string $path = ''): string
     {
-        return 'https://example.com' . ($path ? '/' . ltrim($path, '/') : '');
+        return 'https://example.com' . ( $path ? '/' . ltrim($path, '/') : '' );
     }
 }
 
 if (!function_exists('admin_url')) {
     function admin_url(string $path = ''): string
     {
-        return 'https://example.com/wp-admin' . ($path ? '/' . ltrim($path, '/') : '');
+        return 'https://example.com/wp-admin' . ( $path ? '/' . ltrim($path, '/') : '' );
     }
 }
 
@@ -690,25 +690,25 @@ if (!function_exists('get_posts')) {
 if (!function_exists('get_permalink')) {
     function get_permalink(int|object|null $post = null): string|false
     {
-        $id = is_object($post) ? ($post->ID ?? 0) : (int) ($post ?? 0);
+        $id = is_object($post) ? ( $post->ID ?? 0 ) : (int) ( $post ?? 0 );
 
-        return $GLOBALS['wp_mock_permalinks'][$id] ?? ('https://example.com/?p=' . $id);
+        return $GLOBALS['wp_mock_permalinks'][$id] ?? ( 'https://example.com/?p=' . $id );
     }
 }
 
 if (!function_exists('get_the_title')) {
     function get_the_title(int|object|null $post = null): string
     {
-        $id = is_object($post) ? ($post->ID ?? 0) : (int) ($post ?? 0);
+        $id = is_object($post) ? ( $post->ID ?? 0 ) : (int) ( $post ?? 0 );
 
-        return $GLOBALS['wp_mock_titles'][$id] ?? ('Post ' . $id);
+        return $GLOBALS['wp_mock_titles'][$id] ?? ( 'Post ' . $id );
     }
 }
 
 if (!function_exists('get_post_field')) {
     function get_post_field(string $field, int|object $post): string
     {
-        $id = is_object($post) ? ($post->ID ?? 0) : (int) $post;
+        $id = is_object($post) ? ( $post->ID ?? 0 ) : (int) $post;
 
         return $GLOBALS['wp_mock_post_fields'][$id][$field] ?? '';
     }

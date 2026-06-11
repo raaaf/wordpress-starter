@@ -7,14 +7,18 @@ namespace WordpressStarter;
 use Closure;
 use Illuminate\Container\Container;
 use WordpressStarter\Providers\AcfServiceProvider;
+use WordpressStarter\Providers\AssetOptimizationServiceProvider;
 use WordpressStarter\Providers\BladeServiceProvider;
+use WordpressStarter\Providers\BrandingServiceProvider;
 use WordpressStarter\Providers\CronServiceProvider;
 use WordpressStarter\Providers\DesignTokenServiceProvider;
+use WordpressStarter\Providers\EditorIntegrationServiceProvider;
 use WordpressStarter\Providers\EditorStylesServiceProvider;
 use WordpressStarter\Providers\IconShortcodeServiceProvider;
 use WordpressStarter\Providers\ImageServiceProvider;
 use WordpressStarter\Providers\LlmsTxtProvider;
 use WordpressStarter\Providers\LogServiceProvider;
+use WordpressStarter\Providers\MediaServiceProvider;
 use WordpressStarter\Providers\MemberAreaServiceProvider;
 use WordpressStarter\Providers\MenuServiceProvider;
 use WordpressStarter\Providers\PluginConfiguratorServiceProvider;
@@ -65,14 +69,17 @@ class Application
     private function registerProviders(): void
     {
         $this->providers = [
-            PluginServiceProvider::class,
-            PluginConfiguratorServiceProvider::class,
-            WelcomeServiceProvider::class,
+            PluginConfiguratorServiceProvider::class, // not admin-gated: registers frontend CF7 filters (wpcf7_form_elements, wpcf7_spam)
+            WelcomeServiceProvider::class, // not admin-gated: acf/init prefill fires on frontend and fills options the frontend renders
             SecurityServiceProvider::class,
             BladeServiceProvider::class,
             AcfServiceProvider::class,
             MenuServiceProvider::class,
             ThemeServiceProvider::class,
+            MediaServiceProvider::class,
+            AssetOptimizationServiceProvider::class,
+            EditorIntegrationServiceProvider::class,
+            BrandingServiceProvider::class,
             SeoServiceProvider::class,
             LlmsTxtProvider::class,
             ImageServiceProvider::class,
@@ -80,11 +87,19 @@ class Application
             PostTypeServiceProvider::class,
             LogServiceProvider::class,
             CronServiceProvider::class,
-            DesignTokenServiceProvider::class,
             EditorStylesServiceProvider::class,
             IconShortcodeServiceProvider::class,
             MemberAreaServiceProvider::class,
         ];
+
+        // Admin-only providers: every hook they register is admin-side
+        // (admin_*, after_switch_theme, wp_ajax_* — admin-ajax requests have
+        // is_admin() === true, so AJAX handlers keep working). Skipping them on
+        // frontend requests avoids needless hook registration and config I/O.
+        if (is_admin()) {
+            $this->providers[] = PluginServiceProvider::class;
+            $this->providers[] = DesignTokenServiceProvider::class;
+        }
     }
 
     public function boot(): void

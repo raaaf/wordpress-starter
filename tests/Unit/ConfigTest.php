@@ -116,13 +116,13 @@ final class ConfigTest extends TestCase
 
     public function testLoadOnlyExecutesOnce(): void
     {
-        $this->tempDir = $this->createTempEnvFile("COUNTER_KEY=first_value");
+        $this->tempDir = $this->createTempEnvFile('COUNTER_KEY=first_value');
 
         // First load
         Config::get('COUNTER_KEY');
 
         // Modify the env file
-        file_put_contents($this->tempDir . '/.env', "COUNTER_KEY=second_value");
+        file_put_contents($this->tempDir . '/.env', 'COUNTER_KEY=second_value');
 
         // Second access should still return first value (cached)
         $result = Config::get('COUNTER_KEY');
