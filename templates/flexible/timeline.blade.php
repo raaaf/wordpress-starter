@@ -36,7 +36,7 @@
 
                         {{-- Content card --}}
                         <div class="w-full md:w-[calc(50%-2rem)] {{ $isEven ? 'md:text-right' : 'md:text-left' }}">
-                            <x-card variant="filled" padding="lg" class="rounded-xl">
+                            <x-card variant="filled" padding="lg">
                                 @if($year)
                                     <x-badge variant="accent" size="md" class="mb-3">{{ $year }}</x-badge>
                                 @endif

@@ -31,7 +31,7 @@
     <figure class="mx-auto max-w-4xl">
         @if($imageId)
             {!! wp_get_attachment_image($imageId, 'content', false, [
-                'class' => 'w-full rounded-lg shadow-xl ' . $borderClass,
+                'class' => 'w-full rounded-[var(--card-radius)] shadow-xl ' . $borderClass,
                 'loading' => 'lazy',
                 'sizes' => '(max-width: 896px) 100vw, 896px',
             ]) !!}

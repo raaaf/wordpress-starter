@@ -39,7 +39,7 @@
         <div
             id="{{ $uniqueId }}"
             x-data="beforeAfterSlider()"
-            class="relative max-w-4xl mx-auto overflow-hidden rounded-xl select-none"
+            class="relative max-w-4xl mx-auto overflow-hidden rounded-[var(--card-radius)] select-none"
         >
             {{-- After image (background) --}}
             {!! wp_get_attachment_image($afterId, 'content', false, [

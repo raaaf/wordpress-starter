@@ -320,6 +320,8 @@ html {
     margin-bottom: 0.5em;
   }
 
+  /* h5 and h6 share the same size token intentionally — no --typography-h6-size exists
+     in the token scale. Add a --typography-h6-size token (between h5 and body) to differentiate. */
   h5,
   h6,
   .text-h5 {
@@ -959,14 +961,17 @@ html {
     cursor: pointer;
     transition:
       color 0.2s ease,
-      background 0.2s ease,
       border-color 0.2s ease,
       box-shadow 0.2s ease,
       transform 0.2s ease;
   }
 
+  /* button-primary uses an ::after cross-fade for the hover gradient so that only
+     opacity is animated (GPU-composited) instead of repainting background each frame. */
   .prose a.button-primary,
   .button-primary {
+    position: relative;
+    overflow: hidden;
     background: linear-gradient(
       to bottom,
       var(--gradient-primary-start),
@@ -977,13 +982,37 @@ html {
     box-shadow: var(--shadow-button);
   }
 
-  .prose a.button-primary:hover,
-  .button-primary:hover {
+  /* Hover gradient layer — fades in via opacity, no background repaint */
+  .prose a.button-primary::after,
+  .button-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
     background: linear-gradient(
       to bottom,
       var(--gradient-primary-hover-start),
       var(--gradient-primary-hover-end)
     );
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Button content (text/icon) must stay above the ::after layer */
+  .prose a.button-primary > *,
+  .button-primary > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .prose a.button-primary:hover::after,
+  .button-primary:hover::after {
+    opacity: 1;
+  }
+
+  .prose a.button-primary:hover,
+  .button-primary:hover {
     box-shadow: var(--shadow-button-hover);
     color: var(--color-content-inverse);
     text-decoration: none;
@@ -998,6 +1027,12 @@ html {
     );
     box-shadow: var(--shadow-inner);
     transform: scale(0.98);
+  }
+
+  /* Hide hover layer when active so the active gradient shows through */
+  .prose a.button-primary:active::after,
+  .button-primary:active::after {
+    opacity: 0;
   }
 
   .prose a.button-secondary,
@@ -1108,13 +1143,15 @@ html {
    MEDIUM-ZOOM LIGHTBOX STYLES
    ============================================ */
 
-/* Overlay z-index must be above sticky header (z-50) */
+/* Overlay z-index must be above sticky header (z-50).
+   medium-zoom appends overlay/image to <body>, which shares the root stacking context
+   with the sticky header — so z-index 100/101 naturally layers above z-50 without !important. */
 .medium-zoom-overlay {
-  z-index: 100 !important;
+  z-index: 100;
 }
 
 .medium-zoom-image--opened {
-  z-index: 101 !important;
+  z-index: 101;
   border-radius: 0.5rem;
 }
 

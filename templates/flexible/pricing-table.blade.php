@@ -35,7 +35,7 @@
                     $features = $plan['features'] ?? '';
                     $cta = $plan['cta'] ?? null;
                 @endphp
-                <div class="relative flex flex-col p-8 rounded-xl {{ $isFeatured ? 'bg-surface-brand text-content-inverse ring-4 ring-surface-brand ring-offset-2' : 'bg-surface-secondary' }}">
+                <div class="relative flex flex-col p-8 rounded-[var(--card-radius)] {{ $isFeatured ? 'bg-surface-brand text-content-inverse ring-4 ring-surface-brand ring-offset-2' : 'bg-surface-secondary' }}">
                     @if($isFeatured)
                         <x-badge variant="accent" size="md" class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
                             {{ __('Empfohlen', 'wp-starter') }}

@@ -65,7 +65,7 @@
                 @endphp
                 <div class="text-center group">
                     @if($imageId)
-                        <div class="relative mb-6 overflow-hidden rounded-xl aspect-square">
+                        <div class="relative mb-6 overflow-hidden rounded-[var(--card-radius)] aspect-square">
                             {!! wp_get_attachment_image($imageId, 'team-portrait', false, [
                                 'class' => 'object-cover w-full h-full transition-transform duration-300 group-hover:scale-105',
                                 'loading' => 'lazy',
@@ -73,7 +73,7 @@
                             ]) !!}
                         </div>
                     @else
-                        <div class="flex items-center justify-center mb-6 rounded-xl aspect-square bg-surface-secondary">
+                        <div class="flex items-center justify-center mb-6 rounded-[var(--card-radius)] aspect-square bg-surface-secondary">
                             <x-icon name="user" class="w-24 h-24 text-content-tertiary" />
                         </div>
                     @endif
