@@ -11,6 +11,10 @@
     $badge = get_sub_field('badge');
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $copy = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('copy'));
+
+    // Render h1 only for the first hero on a singular page; all others use h2.
+    // $layoutCounters is set by the flexible loop in page.blade.php.
+    $heroHeadingTag = (is_singular() && ($layoutCounters['hero'] ?? 1) === 1) ? 'h1' : 'h2';
     $cta_primary = get_sub_field('cta_primary');
     $cta_secondary = get_sub_field('cta_secondary');
     $image = get_sub_field('image');
@@ -88,9 +92,9 @@
                 @endif
 
                 @if($title)
-                    <h1 class="text-display mb-6">
+                    <{{ $heroHeadingTag }} class="text-display mb-6">
                         {!! $title !!}
-                    </h1>
+                    </{{ $heroHeadingTag }}>
                 @endif
 
                 @if($copy)
@@ -133,9 +137,9 @@
                 @endif
 
                 @if($title)
-                    <h1 class="mb-6">
+                    <{{ $heroHeadingTag }} class="mb-6">
                         {!! $title !!}
-                    </h1>
+                    </{{ $heroHeadingTag }}>
                 @endif
 
                 @if($copy)
@@ -198,9 +202,9 @@
             @endif
 
             @if($title)
-                <h1 class="mb-6">
+                <{{ $heroHeadingTag }} class="mb-6">
                     {!! $title !!}
-                </h1>
+                </{{ $heroHeadingTag }}>
             @endif
 
             @if($copy)

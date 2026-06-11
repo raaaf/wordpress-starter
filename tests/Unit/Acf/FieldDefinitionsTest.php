@@ -309,7 +309,7 @@ final class FieldDefinitionsTest extends TestCase
         // Find the variant field
         $variantField = null;
         foreach ($fields as $field) {
-            if (($field['name'] ?? '') === 'variant') {
+            if (( $field['name'] ?? '' ) === 'variant') {
                 $variantField = $field;
                 break;
             }
@@ -328,7 +328,7 @@ final class FieldDefinitionsTest extends TestCase
         // Find image field (should be conditional on split variant)
         $imageField = null;
         foreach ($fields as $field) {
-            if (($field['name'] ?? '') === 'image') {
+            if (( $field['name'] ?? '' ) === 'image') {
                 $imageField = $field;
                 break;
             }

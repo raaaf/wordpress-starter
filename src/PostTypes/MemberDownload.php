@@ -4,18 +4,29 @@ declare(strict_types=1);
 
 namespace WordpressStarter\PostTypes;
 
+use WordpressStarter\Acf\FieldDefinitions;
+
 class MemberDownload extends AbstractPostType
 {
-    protected static string $postType        = 'member_download';
-    protected static string $singular        = 'Dokument';
-    protected static string $plural          = 'Dokumente';
-    protected static string $menuIcon        = 'dashicons-download';
-    protected static int $menuPosition    = 30;
-    protected static bool $public          = false;
-    protected static bool $showInRest      = false;
-    protected static bool $hasArchive      = false;
-    protected static array|false $rewrite    = false;
-    protected static array $taxonomies      = ['download_category'];
+    protected static string $postType = 'member_download';
+
+    protected static string $singular = 'Dokument';
+
+    protected static string $plural = 'Dokumente';
+
+    protected static string $menuIcon = 'dashicons-download';
+
+    protected static int $menuPosition = 30;
+
+    protected static bool $public = false;
+
+    protected static bool $showInRest = false;
+
+    protected static bool $hasArchive = false;
+
+    protected static array|false $rewrite = false;
+
+    protected static array $taxonomies = ['download_category'];
 
     /** @var array<string> */
     protected static array $supports = ['title'];
@@ -31,11 +42,13 @@ class MemberDownload extends AbstractPostType
 
     /**
      * @param array<string, string> $columns
+     *
      * @return array<string, string>
      */
     public static function addSyncColumn(array $columns): array
     {
         $columns['sftp_sync'] = __('Sync', 'wp-starter');
+
         return $columns;
     }
 
@@ -48,15 +61,17 @@ class MemberDownload extends AbstractPostType
         $sourceType = get_post_meta($postId, 'download_source_type', true);
         if ($sourceType !== 'sftp') {
             echo '—';
+
             return;
         }
 
         $sftpSource = get_post_meta($postId, 'download_sftp_source', true);
-        $isSynced   = get_post_meta($postId, '_sftp_synced', true) === '1';
+        $isSynced = get_post_meta($postId, '_sftp_synced', true) === '1';
 
         if (!empty($sftpSource)) {
             // Child entry
             echo '<span style="color:#2271b1;">&#8618; ' . esc_html($sftpSource) . '</span>';
+
             return;
         }
 
@@ -88,15 +103,15 @@ class MemberDownload extends AbstractPostType
             [static::class, 'renderSyncNoticeMetaBox'],
             'member_download',
             'side',
-            'high'
+            'high',
         );
     }
 
     public static function renderSyncNoticeMetaBox(\WP_Post $post): void
     {
         $isSynced = get_post_meta($post->ID, '_sftp_synced', true) === '1';
-        $host     = get_post_meta($post->ID, 'download_sftp_host', true) ?: '—';
-        $path     = get_post_meta($post->ID, 'download_sftp_path', true) ?: '—';
+        $host = get_post_meta($post->ID, 'download_sftp_host', true) ?: '—';
+        $path = get_post_meta($post->ID, 'download_sftp_path', true) ?: '—';
 
         $color = $isSynced ? '#00a32a' : '#dba617';
         $label = $isSynced
@@ -188,165 +203,132 @@ class MemberDownload extends AbstractPostType
             return;
         }
 
+        $sftpCondition = [
+            [
+                [
+                    'field' => 'field_mdl_source_type',
+                    'operator' => '==',
+                    'value' => 'sftp',
+                ],
+            ],
+        ];
+
         acf_add_local_field_group([
-            'key'    => 'group_member_download_fields',
-            'title'  => __('Dokument', 'wp-starter'),
+            'key' => 'group_member_download_fields',
+            'title' => __('Dokument', 'wp-starter'),
             'fields' => [
-                [
-                    'key'           => 'field_mdl_source_type',
-                    'label'         => __('Quelle', 'wp-starter'),
-                    'name'          => 'download_source_type',
-                    'type'          => 'radio',
-                    'choices'       => [
-                        'upload'   => __('Hochgeladene Datei', 'wp-starter'),
+                FieldDefinitions::radioField(
+                    'field_mdl_source_type',
+                    __('Quelle', 'wp-starter'),
+                    'download_source_type',
+                    [
+                        'upload' => __('Hochgeladene Datei', 'wp-starter'),
                         'external' => __('Externe URL', 'wp-starter'),
-                        'sftp'     => __('SFTP-Ordner', 'wp-starter'),
+                        'sftp' => __('SFTP-Ordner', 'wp-starter'),
                     ],
-                    'default_value' => 'upload',
-                    'layout'        => 'horizontal',
-                ],
-                [
-                    'key'   => 'field_mdl_description',
-                    'label' => __('Beschreibung', 'wp-starter'),
-                    'name'  => 'download_description',
-                    'type'  => 'textarea',
-                    'rows'  => 2,
-                ],
+                    'upload',
+                    'horizontal',
+                ),
+                FieldDefinitions::textareaField(
+                    'field_mdl_description',
+                    __('Beschreibung', 'wp-starter'),
+                    'download_description',
+                    2,
+                ),
                 // upload: WP media file
-                [
-                    'key'               => 'field_mdl_file',
-                    'label'             => __('Datei', 'wp-starter'),
-                    'name'              => 'download_file',
-                    'type'              => 'file',
-                    'return_format'     => 'array',
-                    'library'           => 'all',
-                    'mime_types'        => 'pdf,doc,docx,xls,xlsx,zip',
-                    'instructions'      => __('Erlaubt: PDF, Word, Excel, ZIP', 'wp-starter'),
-                    'conditional_logic' => [
+                FieldDefinitions::fileField(
+                    'field_mdl_file',
+                    __('Datei', 'wp-starter'),
+                    'download_file',
+                    'pdf,doc,docx,xls,xlsx,zip',
+                    'array',
+                    [
                         [
                             [
-                                'field'    => 'field_mdl_source_type',
+                                'field' => 'field_mdl_source_type',
                                 'operator' => '==',
-                                'value'    => 'upload',
+                                'value' => 'upload',
                             ],
                         ],
                     ],
-                ],
+                    __('Erlaubt: PDF, Word, Excel, ZIP', 'wp-starter'),
+                ),
                 // external: direct URL
-                [
-                    'key'               => 'field_mdl_external_url',
-                    'label'             => __('Externe URL', 'wp-starter'),
-                    'name'              => 'download_external_url',
-                    'type'              => 'text',
-                    'instructions'      => __('Direkte URL zur Datei (muss https:// verwenden).', 'wp-starter'),
-                    'placeholder'       => 'https://example.com/dokument.pdf',
-                    'conditional_logic' => [
+                FieldDefinitions::textField(
+                    'field_mdl_external_url',
+                    __('Externe URL', 'wp-starter'),
+                    'download_external_url',
+                    false,
+                    __('Direkte URL zur Datei (muss https:// verwenden).', 'wp-starter'),
+                    'https://example.com/dokument.pdf',
+                    [
                         [
                             [
-                                'field'    => 'field_mdl_source_type',
+                                'field' => 'field_mdl_source_type',
                                 'operator' => '==',
-                                'value'    => 'external',
+                                'value' => 'external',
                             ],
                         ],
                     ],
-                ],
+                ),
                 // sftp: SFTP directory listing
-                [
-                    'key'               => 'field_mdl_sftp_host',
-                    'label'             => __('SFTP-Host', 'wp-starter'),
-                    'name'              => 'download_sftp_host',
-                    'type'              => 'text',
-                    'instructions'      => __('Hostname des SFTP-Servers, z.B. sftp.example.com oder storagebox.hetzner.de', 'wp-starter'),
-                    'placeholder'       => 'sftp.example.com',
-                    'conditional_logic' => [
-                        [
-                            [
-                                'field'    => 'field_mdl_source_type',
-                                'operator' => '==',
-                                'value'    => 'sftp',
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    'key'               => 'field_mdl_sftp_port',
-                    'label'             => __('SFTP-Port', 'wp-starter'),
-                    'name'              => 'download_sftp_port',
-                    'type'              => 'number',
-                    'instructions'      => __('Standard: 22', 'wp-starter'),
-                    'default_value'     => 22,
-                    'min'               => 1,
-                    'max'               => 65535,
-                    'wrapper'           => ['width' => '25'],
-                    'conditional_logic' => [
-                        [
-                            [
-                                'field'    => 'field_mdl_source_type',
-                                'operator' => '==',
-                                'value'    => 'sftp',
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    'key'               => 'field_mdl_sftp_username',
-                    'label'             => __('SFTP-Benutzername', 'wp-starter'),
-                    'name'              => 'download_sftp_username',
-                    'type'              => 'text',
-                    'instructions'      => __('Bei Hetzner Storage Box: dein Hauptbenutzer, z.B. u123456, oder ein Unterbenutzer.', 'wp-starter'),
-                    'placeholder'       => 'u123456',
-                    'wrapper'           => ['width' => '37'],
-                    'conditional_logic' => [
-                        [
-                            [
-                                'field'    => 'field_mdl_source_type',
-                                'operator' => '==',
-                                'value'    => 'sftp',
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    'key'               => 'field_mdl_sftp_password',
-                    'label'             => __('SFTP-Passwort', 'wp-starter'),
-                    'name'              => 'download_sftp_password',
-                    'type'              => 'password',
-                    'instructions'      => __('Wird im Klartext in der Datenbank gespeichert.', 'wp-starter'),
-                    'wrapper'           => ['width' => '38'],
-                    'conditional_logic' => [
-                        [
-                            [
-                                'field'    => 'field_mdl_source_type',
-                                'operator' => '==',
-                                'value'    => 'sftp',
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    'key'               => 'field_mdl_sftp_path',
-                    'label'             => __('Remote-Pfad', 'wp-starter'),
-                    'name'              => 'download_sftp_path',
-                    'type'              => 'text',
-                    'instructions'      => __('Absoluter Pfad auf dem Server, z.B. /dokumente/', 'wp-starter'),
-                    'placeholder'       => '/dokumente/',
-                    'conditional_logic' => [
-                        [
-                            [
-                                'field'    => 'field_mdl_source_type',
-                                'operator' => '==',
-                                'value'    => 'sftp',
-                            ],
-                        ],
-                    ],
-                ],
+                FieldDefinitions::textField(
+                    'field_mdl_sftp_host',
+                    __('SFTP-Host', 'wp-starter'),
+                    'download_sftp_host',
+                    false,
+                    __('Hostname des SFTP-Servers, z.B. sftp.example.com oder storagebox.hetzner.de', 'wp-starter'),
+                    'sftp.example.com',
+                    $sftpCondition,
+                ),
+                FieldDefinitions::numberField(
+                    'field_mdl_sftp_port',
+                    __('SFTP-Port', 'wp-starter'),
+                    'download_sftp_port',
+                    22,
+                    1,
+                    65535,
+                    1,
+                    '',
+                    __('Standard: 22', 'wp-starter'),
+                    $sftpCondition,
+                    ['width' => '25'],
+                ),
+                FieldDefinitions::textField(
+                    'field_mdl_sftp_username',
+                    __('SFTP-Benutzername', 'wp-starter'),
+                    'download_sftp_username',
+                    false,
+                    __('Bei Hetzner Storage Box: dein Hauptbenutzer, z.B. u123456, oder ein Unterbenutzer.', 'wp-starter'),
+                    'u123456',
+                    $sftpCondition,
+                    ['width' => '37'],
+                ),
+                FieldDefinitions::passwordField(
+                    'field_mdl_sftp_password',
+                    __('SFTP-Passwort', 'wp-starter'),
+                    'download_sftp_password',
+                    __('Wird im Klartext in der Datenbank gespeichert.', 'wp-starter'),
+                    '',
+                    $sftpCondition,
+                    ['width' => '38'],
+                ),
+                FieldDefinitions::textField(
+                    'field_mdl_sftp_path',
+                    __('Remote-Pfad', 'wp-starter'),
+                    'download_sftp_path',
+                    false,
+                    __('Absoluter Pfad auf dem Server, z.B. /dokumente/', 'wp-starter'),
+                    '/dokumente/',
+                    $sftpCondition,
+                ),
             ],
             'location' => [
                 [
                     [
-                        'param'    => 'post_type',
+                        'param' => 'post_type',
                         'operator' => '==',
-                        'value'    => 'member_download',
+                        'value' => 'member_download',
                     ],
                 ],
             ],
@@ -354,31 +336,33 @@ class MemberDownload extends AbstractPostType
 
         // Sidebar: status fields shown on all member_download entries
         acf_add_local_field_group([
-            'key'      => 'group_member_download_status',
-            'title'    => __('Status', 'wp-starter'),
-            'fields'   => [
-                [
-                    'key'           => 'field_mdl_available',
-                    'label'         => __('Verfügbar', 'wp-starter'),
-                    'name'          => 'download_available',
-                    'type'          => 'true_false',
-                    'default_value' => 1,
-                    'ui'            => 1,
-                ],
-                [
-                    'key'      => 'field_mdl_last_modified',
-                    'label'    => __('Zuletzt geändert', 'wp-starter'),
-                    'name'     => 'download_last_modified',
-                    'type'     => 'text',
-                    'readonly' => 1,
-                ],
+            'key' => 'group_member_download_status',
+            'title' => __('Status', 'wp-starter'),
+            'fields' => [
+                FieldDefinitions::trueFalseField(
+                    'field_mdl_available',
+                    __('Verfügbar', 'wp-starter'),
+                    'download_available',
+                    true,
+                ),
+                FieldDefinitions::textField(
+                    'field_mdl_last_modified',
+                    __('Zuletzt geändert', 'wp-starter'),
+                    'download_last_modified',
+                    false,
+                    '',
+                    '',
+                    null,
+                    null,
+                    true,
+                ),
             ],
             'location' => [
                 [
                     [
-                        'param'    => 'post_type',
+                        'param' => 'post_type',
                         'operator' => '==',
-                        'value'    => 'member_download',
+                        'value' => 'member_download',
                     ],
                 ],
             ],
@@ -387,37 +371,49 @@ class MemberDownload extends AbstractPostType
 
         // Sidebar: SFTP import details — only shown on child entries (download_sftp_source is set)
         acf_add_local_field_group([
-            'key'      => 'group_member_download_sftp_info',
-            'title'    => __('SFTP-Import', 'wp-starter'),
-            'fields'   => [
-                [
-                    'key'      => 'field_mdl_sftp_source',
-                    'label'    => __('SFTP-Quelle', 'wp-starter'),
-                    'name'     => 'download_sftp_source',
-                    'type'     => 'text',
-                    'readonly' => 1,
-                ],
-                [
-                    'key'      => 'field_mdl_sftp_remote_file',
-                    'label'    => __('Remote-Datei', 'wp-starter'),
-                    'name'     => 'download_sftp_remote_file',
-                    'type'     => 'text',
-                    'readonly' => 1,
-                ],
-                [
-                    'key'      => 'field_mdl_sftp_identifier',
-                    'label'    => __('SFTP-Identifier', 'wp-starter'),
-                    'name'     => 'download_sftp_identifier',
-                    'type'     => 'text',
-                    'readonly' => 1,
-                ],
+            'key' => 'group_member_download_sftp_info',
+            'title' => __('SFTP-Import', 'wp-starter'),
+            'fields' => [
+                FieldDefinitions::textField(
+                    'field_mdl_sftp_source',
+                    __('SFTP-Quelle', 'wp-starter'),
+                    'download_sftp_source',
+                    false,
+                    '',
+                    '',
+                    null,
+                    null,
+                    true,
+                ),
+                FieldDefinitions::textField(
+                    'field_mdl_sftp_remote_file',
+                    __('Remote-Datei', 'wp-starter'),
+                    'download_sftp_remote_file',
+                    false,
+                    '',
+                    '',
+                    null,
+                    null,
+                    true,
+                ),
+                FieldDefinitions::textField(
+                    'field_mdl_sftp_identifier',
+                    __('SFTP-Identifier', 'wp-starter'),
+                    'download_sftp_identifier',
+                    false,
+                    '',
+                    '',
+                    null,
+                    null,
+                    true,
+                ),
             ],
             'location' => [
                 [
                     [
-                        'param'    => 'post_type',
+                        'param' => 'post_type',
                         'operator' => '==',
-                        'value'    => 'member_download',
+                        'value' => 'member_download',
                     ],
                 ],
             ],

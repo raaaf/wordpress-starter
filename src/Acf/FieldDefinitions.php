@@ -135,6 +135,9 @@ class FieldDefinitions
      * @param bool $required Whether field is required
      * @param string $instructions Field instructions
      * @param string $placeholder Placeholder text
+     * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
+     * @param array<string, string>|null $wrapper Wrapper attributes (e.g. ['width' => '50'])
+     * @param bool|null $readonly Set field as read-only in admin
      *
      * @return array<string, mixed>
      */
@@ -145,6 +148,9 @@ class FieldDefinitions
         bool $required = false,
         string $instructions = '',
         string $placeholder = '',
+        ?array $conditionalLogic = null,
+        ?array $wrapper = null,
+        ?bool $readonly = null,
     ): array {
         $field = [
             'key' => $key,
@@ -157,6 +163,18 @@ class FieldDefinitions
 
         if ($placeholder !== '') {
             $field['placeholder'] = $placeholder;
+        }
+
+        if ($conditionalLogic !== null) {
+            $field['conditional_logic'] = $conditionalLogic;
+        }
+
+        if ($wrapper !== null) {
+            $field['wrapper'] = $wrapper;
+        }
+
+        if ($readonly !== null) {
+            $field['readonly'] = $readonly ? 1 : 0;
         }
 
         return $field;
@@ -629,12 +647,14 @@ class FieldDefinitions
      * @param string $key Unique field key
      * @param string $label Field label
      * @param string $name Field name
-     * @param int $defaultValue Default value
-     * @param int $min Minimum value
-     * @param int $max Maximum value
-     * @param int $step Step increment
+     * @param int|float $defaultValue Default value
+     * @param int|float $min Minimum value
+     * @param int|float $max Maximum value
+     * @param int|float $step Step increment
      * @param string $append Text to append (e.g., 'px')
      * @param string $instructions Field instructions
+     * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
+     * @param array<string, string>|null $wrapper Wrapper attributes (e.g. ['width' => '25'])
      *
      * @return array<string, mixed>
      */
@@ -648,6 +668,8 @@ class FieldDefinitions
         int|float $step = 1,
         string $append = '',
         string $instructions = '',
+        ?array $conditionalLogic = null,
+        ?array $wrapper = null,
     ): array {
         $field = [
             'key' => $key,
@@ -663,6 +685,164 @@ class FieldDefinitions
 
         if ($append !== '') {
             $field['append'] = $append;
+        }
+
+        if ($conditionalLogic !== null) {
+            $field['conditional_logic'] = $conditionalLogic;
+        }
+
+        if ($wrapper !== null) {
+            $field['wrapper'] = $wrapper;
+        }
+
+        return $field;
+    }
+
+    /**
+     * Get radio field definition
+     *
+     * @param string $key Unique field key
+     * @param string $label Field label
+     * @param string $name Field name
+     * @param array<string, string> $choices Choices array (value => label)
+     * @param string $defaultValue Default selected value
+     * @param string $layout Layout style: vertical or horizontal
+     * @param string $instructions Field instructions
+     * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
+     * @param array<string, string>|null $wrapper Wrapper attributes (e.g. ['width' => '25'])
+     * @param bool $allowCustom Allow custom user-entered value
+     *
+     * @return array<string, mixed>
+     */
+    public static function radioField(
+        string $key,
+        string $label,
+        string $name,
+        array $choices,
+        string $defaultValue = '',
+        string $layout = 'vertical',
+        string $instructions = '',
+        ?array $conditionalLogic = null,
+        ?array $wrapper = null,
+        bool $allowCustom = false,
+    ): array {
+        $field = [
+            'key' => $key,
+            'label' => $label,
+            'name' => $name,
+            'type' => 'radio',
+            'instructions' => $instructions,
+            'choices' => $choices,
+            'default_value' => $defaultValue,
+            'layout' => $layout,
+        ];
+
+        if ($allowCustom) {
+            $field['allow_custom'] = 1;
+        }
+
+        if ($conditionalLogic !== null) {
+            $field['conditional_logic'] = $conditionalLogic;
+        }
+
+        if ($wrapper !== null) {
+            $field['wrapper'] = $wrapper;
+        }
+
+        return $field;
+    }
+
+    /**
+     * Get checkbox field definition
+     *
+     * @param string $key Unique field key
+     * @param string $label Field label
+     * @param string $name Field name
+     * @param array<string, string> $choices Choices array (value => label)
+     * @param string $defaultValue Default selected value
+     * @param string $layout Layout style: vertical or horizontal
+     * @param string $returnFormat Return format: value, label, or array
+     * @param string $instructions Field instructions
+     * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
+     * @param array<string, string>|null $wrapper Wrapper attributes (e.g. ['width' => '75'])
+     *
+     * @return array<string, mixed>
+     */
+    public static function checkboxField(
+        string $key,
+        string $label,
+        string $name,
+        array $choices,
+        string $defaultValue = '',
+        string $layout = 'vertical',
+        string $returnFormat = 'value',
+        string $instructions = '',
+        ?array $conditionalLogic = null,
+        ?array $wrapper = null,
+    ): array {
+        $field = [
+            'key' => $key,
+            'label' => $label,
+            'name' => $name,
+            'type' => 'checkbox',
+            'instructions' => $instructions,
+            'choices' => $choices,
+            'default_value' => $defaultValue,
+            'layout' => $layout,
+            'return_format' => $returnFormat,
+        ];
+
+        if ($conditionalLogic !== null) {
+            $field['conditional_logic'] = $conditionalLogic;
+        }
+
+        if ($wrapper !== null) {
+            $field['wrapper'] = $wrapper;
+        }
+
+        return $field;
+    }
+
+    /**
+     * Get password field definition
+     *
+     * @param string $key Unique field key
+     * @param string $label Field label
+     * @param string $name Field name
+     * @param string $instructions Field instructions
+     * @param string $placeholder Placeholder text
+     * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
+     * @param array<string, string>|null $wrapper Wrapper attributes (e.g. ['width' => '38'])
+     *
+     * @return array<string, mixed>
+     */
+    public static function passwordField(
+        string $key,
+        string $label,
+        string $name,
+        string $instructions = '',
+        string $placeholder = '',
+        ?array $conditionalLogic = null,
+        ?array $wrapper = null,
+    ): array {
+        $field = [
+            'key' => $key,
+            'label' => $label,
+            'name' => $name,
+            'type' => 'password',
+            'instructions' => $instructions,
+        ];
+
+        if ($placeholder !== '') {
+            $field['placeholder'] = $placeholder;
+        }
+
+        if ($conditionalLogic !== null) {
+            $field['conditional_logic'] = $conditionalLogic;
+        }
+
+        if ($wrapper !== null) {
+            $field['wrapper'] = $wrapper;
         }
 
         return $field;
@@ -728,6 +908,8 @@ class FieldDefinitions
      * @param int $rows Number of rows
      * @param string $instructions Field instructions
      * @param string $placeholder Placeholder text
+     * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
+     * @param array<string, string>|null $wrapper Wrapper attributes (e.g. ['width' => '50'])
      *
      * @return array<string, mixed>
      */
@@ -738,6 +920,8 @@ class FieldDefinitions
         int $rows = 4,
         string $instructions = '',
         string $placeholder = '',
+        ?array $conditionalLogic = null,
+        ?array $wrapper = null,
     ): array {
         $field = [
             'key' => $key,
@@ -750,6 +934,14 @@ class FieldDefinitions
 
         if ($placeholder !== '') {
             $field['placeholder'] = $placeholder;
+        }
+
+        if ($conditionalLogic !== null) {
+            $field['conditional_logic'] = $conditionalLogic;
+        }
+
+        if ($wrapper !== null) {
+            $field['wrapper'] = $wrapper;
         }
 
         return $field;
@@ -1389,6 +1581,13 @@ class FieldDefinitions
                 __('Direkter Link zu einer Videodatei (MP4, WebM, OGG).', 'wp-starter'),
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'url']]],
                 'https://cdn.example.com/video.mp4',
+            ),
+            self::textField(
+                "field_{$prefix}_video_title",
+                __('Video-Titel', 'wp-starter'),
+                'video_title',
+                false,
+                __('Optionaler Titel des Videos. Wird als title-Attribut des iFrames (YouTube/Vimeo) und als aria-label des video-Elements verwendet, um das Video für Screenreader und Suchmaschinen zu beschriften. Leer lassen = generischer Fallback.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),

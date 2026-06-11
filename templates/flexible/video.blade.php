@@ -10,6 +10,7 @@
     $video = get_sub_field('video'); // URL string for self-hosted
     $video_url = get_sub_field('video_url'); // YouTube/Vimeo URL
     $video_file_url = get_sub_field('video_file_url'); // Direct file URL (CDN etc.)
+    $video_title = get_sub_field('video_title'); // Optional accessible title
     $background = get_sub_field('background_color') ?: 'primary';
 
     // Detect video type from URL for external videos
@@ -122,7 +123,7 @@
                                 allowfullscreen
                                 loading="lazy"
                                 class="absolute inset-0 w-full h-full"
-                                title="{{ __('YouTube-Video', 'wp-starter') }}"
+                                title="{{ $video_title ? sprintf(__('Video: %s', 'wp-starter'), $video_title) : __('YouTube-Video', 'wp-starter') }}"
                                 x-on:load="iframeLoaded = true"
                                 x-on:error="iframeError = true"
                             ></iframe>
@@ -134,7 +135,7 @@
                                 allowfullscreen
                                 loading="lazy"
                                 class="absolute inset-0 w-full h-full"
-                                title="{{ __('Vimeo-Video', 'wp-starter') }}"
+                                title="{{ $video_title ? sprintf(__('Video: %s', 'wp-starter'), $video_title) : __('Vimeo-Video', 'wp-starter') }}"
                                 x-on:load="iframeLoaded = true"
                                 x-on:error="iframeError = true"
                             ></iframe>
@@ -145,7 +146,7 @@
                     <video
                         controls
                         preload="metadata"
-                        aria-label="{{ __('Video', 'wp-starter') }}"
+                        aria-label="{{ $video_title ? sprintf(__('Video: %s', 'wp-starter'), $video_title) : __('Video', 'wp-starter') }}"
                         class="w-full aspect-video object-cover rounded-lg"
                     >
                         <source src="{{ esc_url($video) }}" type="video/mp4">
@@ -156,7 +157,7 @@
                     <video
                         controls
                         preload="metadata"
-                        aria-label="{{ __('Video', 'wp-starter') }}"
+                        aria-label="{{ $video_title ? sprintf(__('Video: %s', 'wp-starter'), $video_title) : __('Video', 'wp-starter') }}"
                         class="w-full aspect-video object-cover rounded-lg"
                     >
                         <source src="{{ esc_url($video_file_url) }}">
