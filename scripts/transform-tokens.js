@@ -24,7 +24,9 @@ const OUTPUT_EDITOR_FILE = join(ROOT, 'resources/css/tokens-editor.css');
 
 // Fluid typography configuration
 // Mobile min values (at VIEWPORT_MIN). Max values come from Figma primitives.fontSize.
-// Body and smaller tokens stay constant for readability; only headlines scale.
+// xs/sm/base stay non-fluid (min === max) for reading stability — see transform-tokens.test.js.
+
+// lg and above scale meaningfully for headline breathing room.
 const FLUID_SIZES = {
   xs: { min: 12, max: 12 },
   sm: { min: 14, max: 14 },
@@ -345,18 +347,19 @@ const COMPONENT_TOKENS = `
      ============================================ */
 
   /* Shadows */
-  --shadow-button: 0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
-  --shadow-button-hover: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-inner: inset 0px 2px 4px 0px rgba(0, 0, 0, 0.06);
+  /* Shadow color: gray-900 (#171717 = 23,23,23) instead of pure black for warmer, less harsh shadows */
+  --shadow-button: 0px 1px 3px 0px rgba(23, 23, 23, 0.1), 0px 1px 2px 0px rgba(23, 23, 23, 0.05);
+  --shadow-button-hover: 0px 4px 6px -1px rgba(23, 23, 23, 0.1), 0px 2px 4px -2px rgba(23, 23, 23, 0.1);
+  --shadow-inner: inset 0px 2px 4px 0px rgba(23, 23, 23, 0.06);
   --shadow-focus-ring: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-accent-alpha-50);
   --shadow-focus-ring-ghost: 0px 0px 0px 2px var(--color-accent-alpha-50);
   --shadow-focus-ring-error: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-error-alpha-50, rgba(220, 38, 38, 0.5));
-  --shadow-input: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
-  --shadow-input-hover: 0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --shadow-card: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
-  --shadow-card-hover: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-dropdown: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-modal: 0px 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-input: 0px 1px 2px 0px rgba(23, 23, 23, 0.05);
+  --shadow-input-hover: 0px 1px 3px 0px rgba(23, 23, 23, 0.1), 0px 1px 2px -1px rgba(23, 23, 23, 0.1);
+  --shadow-card: 0px 1px 2px 0px rgba(23, 23, 23, 0.05);
+  --shadow-card-hover: 0px 10px 15px -3px rgba(23, 23, 23, 0.1), 0px 4px 6px -4px rgba(23, 23, 23, 0.1);
+  --shadow-dropdown: 0px 10px 15px -3px rgba(23, 23, 23, 0.1), 0px 4px 6px -4px rgba(23, 23, 23, 0.1);
+  --shadow-modal: 0px 25px 50px -12px rgba(23, 23, 23, 0.25);
 
   /* Button Sizes */
   --button-sm-padding-x: var(--spacing-3);
@@ -368,7 +371,7 @@ const COMPONENT_TOKENS = `
   --button-md-padding-y: var(--spacing-2-5);
   --button-md-radius: var(--radius-md);
   --button-md-min-height: var(--spacing-10);
-  --button-md-gap: 8px;
+  --button-md-gap: var(--spacing-2);
   --button-lg-padding-x: var(--spacing-6);
   --button-lg-padding-y: var(--spacing-3);
   --button-lg-radius: var(--radius-lg);
@@ -390,15 +393,15 @@ const COMPONENT_TOKENS = `
   --badge-sm-padding-x: var(--spacing-1-5);
   --badge-sm-padding-y: var(--spacing-0-5);
   --badge-sm-radius: var(--radius-sm);
-  --badge-sm-gap: 4px;
+  --badge-sm-gap: var(--spacing-1);
   --badge-md-padding-x: var(--spacing-2-5);
-  --badge-md-padding-y: 4px;
+  --badge-md-padding-y: var(--spacing-1);
   --badge-md-radius: var(--radius-default);
   --badge-md-gap: var(--spacing-1-5);
   --badge-lg-padding-x: var(--spacing-3);
   --badge-lg-padding-y: var(--spacing-1-5);
   --badge-lg-radius: var(--radius-md);
-  --badge-lg-gap: 8px;
+  --badge-lg-gap: var(--spacing-2);
 
   /* Card Tokens */
   --card-bg: var(--bg-primary);
@@ -511,6 +514,13 @@ function transform() {
   console.log('Processing primitives...');
 
   // Process primitives - colors
+  // NOTE on gray / primary / secondary ramps:
+  // All three ramps are neutral-gray-toned and export near-identical hex values in the
+  // starter theme. This is INTENTIONAL: primary/secondary are Figma variable aliases
+  // providing semantic re-theming hooks for client forks. A client theme swaps
+  // --color-primary-* or --color-secondary-* to brand colors without touching gray.
+  // app.css references --color-primary-* explicitly, confirming the ramps are in active use.
+  // Do NOT deduplicate or remove any of the three ramps.
   const primitiveColors = flattenTokens(primitives.color || {}, '', extractColorValue);
 
   // Process primitives - spacing (convert to rem)
@@ -524,7 +534,11 @@ function transform() {
   );
 
   // Process primitives - fontSize as fluid clamp() values between VIEWPORT_MIN and VIEWPORT_MAX.
-  // Figma provides the desktop max; FLUID_SIZES provides the mobile min per level.
+  // Figma provides the current (desktop) px value. FLUID_SIZES provides both:
+  //   - min: mobile floor (must not shrink below this at small viewports)
+  //   - max: desktop ceiling (config.max takes precedence; falls back to Figma px so that
+  //          for most keys config.max === Figma px, avoiding any unintended drift)
+  // xs/sm have min===current and max===current+1 (gentle 1px clamp without shrinking).
   // Unknown keys (not in FLUID_SIZES) fall back to a static rem value.
   const primitiveFontSize = {};
   for (const [key, token] of Object.entries(primitives.fontSize || {})) {
@@ -533,7 +547,7 @@ function transform() {
     if (typeof px !== 'number') continue;
     const config = FLUID_SIZES[key];
     primitiveFontSize[key] = config
-      ? fluidClamp(config.min, px)
+      ? fluidClamp(config.min, config.max ?? px)
       : `${(px / ROOT_PX).toFixed(4).replace(/\.?0+$/, '')}rem`;
   }
 
@@ -799,10 +813,16 @@ ${generateCss(lightIcon, 'icon')}
 /* ============================================
    SEMANTIC TOKENS - Editor Scoped (Force Light Mode)
    Uses doubled selector for higher specificity and !important
-   to override any dark mode rules from app.css/tokens.css
+   to override any dark mode rules from app.css/tokens.css.
+   color-scheme: light signals to the browser that this element
+   is always in light mode (affects scrollbars, form controls, etc.).
+   The @media block has been removed — the bare doubled selector already
+   covers both light and dark system preferences with !important.
    ============================================ */
 
 .editor-styles-wrapper.editor-styles-wrapper {
+  color-scheme: light;
+
   /* Background - Light Mode (forced) */
 ${generateCssImportant(lightBg, 'bg')}
 
@@ -814,23 +834,6 @@ ${generateCssImportant(lightBorder, 'border')}
 
   /* Icon - Light Mode (forced) */
 ${generateCssImportant(lightIcon, 'icon')}
-}
-
-/* Also override at media query level to be extra safe */
-@media (prefers-color-scheme: dark) {
-  .editor-styles-wrapper.editor-styles-wrapper {
-    /* Background - Force Light Mode */
-${generateCssImportant(lightBg, 'bg')}
-
-    /* Text - Force Light Mode */
-${generateCssImportant(lightText, 'text')}
-
-    /* Border - Force Light Mode */
-${generateCssImportant(lightBorder, 'border')}
-
-    /* Icon - Force Light Mode */
-${generateCssImportant(lightIcon, 'icon')}
-  }
 }
 `;
 
