@@ -27,15 +27,10 @@ class YoastSeoConfigurator extends AbstractPluginConfigurator
         return defined('WPSEO_VERSION');
     }
 
-    public static function configure(): void
+    protected static function doConfigure(): void
     {
-        if (!self::isPluginActive() || self::isConfigured()) {
-            return;
-        }
-
         self::configureGeneralSettings();
-        self::configureBreadcrumbs();
-        self::configureSchema();
+        self::configureTitles();
         self::disableUnusedFeatures();
 
         self::markConfigured();
@@ -68,47 +63,31 @@ class YoastSeoConfigurator extends AbstractPluginConfigurator
     }
 
     /**
-     * Configure breadcrumbs with German labels
+     * Configure breadcrumbs (German labels) and schema in a single read-modify-write
      */
-    private static function configureBreadcrumbs(): void
+    private static function configureTitles(): void
     {
         $options = get_option('wpseo_titles', []);
 
-        // Enable breadcrumbs
+        // --- Breadcrumbs ---
         $options['breadcrumbs-enable'] = true;
-
-        // German labels and separators
         $options['breadcrumbs-sep'] = ' > ';
         $options['breadcrumbs-home'] = __('Startseite', 'wp-starter');
         $options['breadcrumbs-prefix'] = '';
         $options['breadcrumbs-archiveprefix'] = __('Archiv:', 'wp-starter');
         $options['breadcrumbs-searchprefix'] = __('Suche:', 'wp-starter');
         $options['breadcrumbs-404crumb'] = __('Seite nicht gefunden', 'wp-starter');
-
-        // Show blog page in breadcrumbs
         $options['breadcrumbs-display-blog-page'] = true;
 
-        update_option('wpseo_titles', $options);
-    }
-
-    /**
-     * Configure schema settings
-     */
-    private static function configureSchema(): void
-    {
-        $options = get_option('wpseo_titles', []);
-
-        // Default to Organization (most business sites)
+        // --- Schema ---
         $options['company_or_person'] = 'company';
 
-        // Get company name from theme options if available
         if (function_exists('get_field')) {
             $companyName = get_field('company_name', 'option');
             if ($companyName) {
                 $options['company_name'] = $companyName;
             }
 
-            // Get logo from theme options
             $logo = get_field('site_logo', 'option');
             if ($logo && isset($logo['url'])) {
                 $options['company_logo'] = $logo['url'];

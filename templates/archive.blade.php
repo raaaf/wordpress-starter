@@ -208,19 +208,11 @@
                     'next_text' => __('Weiter', 'wp-starter'),
                 ]);
             @endphp
-            @if ($pagination)
-                <nav class="mt-16" aria-label="{{ __('Archiv-Navigation', 'wp-starter') }}">
-                    <ul class="flex flex-wrap justify-center gap-2">
-                        @foreach ($pagination as $link)
-                            <li>{!! str_replace(
-                                ['page-numbers', 'current'],
-                                ['px-4 py-2 rounded-lg border border-line text-content hover:bg-surface-secondary transition-colors', 'bg-surface-brand text-content-inverse border-surface-brand hover:bg-surface-brand'],
-                                $link
-                            ) !!}</li>
-                        @endforeach
-                    </ul>
-                </nav>
-            @endif
+            @include('partials.pagination', [
+                'pagination' => $pagination,
+                'ariaLabel'  => __('Archiv-Navigation', 'wp-starter'),
+                'navClass'   => 'mt-16',
+            ])
         @else
             {{-- No Posts --}}
             <div class="text-center py-12">

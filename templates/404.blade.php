@@ -11,10 +11,10 @@
             </div>
 
             {{-- Error Message --}}
-            <h1 class="text-display text-content-tertiary mb-4">404</h1>
-            <h2 class="mb-4">
+            <div class="text-display text-content-tertiary mb-4" aria-hidden="true">404</div>
+            <h1 class="mb-4">
                 {{ __('Seite nicht gefunden', 'wp-starter') }}
-            </h2>
+            </h1>
             <p class="text-lg text-content-secondary mb-8">
                 {{ __('Die angeforderte Seite existiert nicht oder wurde verschoben.', 'wp-starter') }}
             </p>

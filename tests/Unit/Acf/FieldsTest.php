@@ -67,7 +67,7 @@ final class FieldsTest extends TestCase
 
     public function testOptionReturnsCachedValue(): void
     {
-        $this->setMockCache('acf_option_cached_field', 'cached_value', 'theme');
+        $this->setMockCache('wordpress_starter_theme_acf_option_cached_field', 'cached_value', 'theme');
 
         $result = Fields::option('cached_field');
 
@@ -81,7 +81,7 @@ final class FieldsTest extends TestCase
         $result = Fields::option('option_field');
 
         $this->assertSame('fresh_value', $result);
-        $this->assertSame('fresh_value', $this->getMockCache('acf_option_option_field', 'theme'));
+        $this->assertSame('fresh_value', $this->getMockCache('wordpress_starter_theme_acf_option_option_field', 'theme'));
     }
 
     public function testOptionReturnsDefaultForNullField(): void

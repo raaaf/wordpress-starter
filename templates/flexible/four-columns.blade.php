@@ -21,9 +21,9 @@
 <x-section :anchor="$sectionAnchor" :background="$background" class="four-columns">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="4" gap="lg">
-        <x-prose>{!! $column_1 !!}</x-prose>
-        <x-prose>{!! $column_2 !!}</x-prose>
-        <x-prose>{!! $column_3 !!}</x-prose>
-        <x-prose>{!! $column_4 !!}</x-prose>
+        <x-prose>@kses($column_1)</x-prose>
+        <x-prose>@kses($column_2)</x-prose>
+        <x-prose>@kses($column_3)</x-prose>
+        <x-prose>@kses($column_4)</x-prose>
     </x-grid>
 </x-section>

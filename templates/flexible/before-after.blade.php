@@ -23,8 +23,11 @@
         $afterId = $afterId['ID'] ?? $afterId['id'] ?? null;
     }
 
-    $imageBefore = $beforeId ? wp_get_attachment_image_src($beforeId, 'content') : null;
-    $imageAfter = $afterId ? wp_get_attachment_image_src($afterId, 'content') : null;
+    $hasImageBefore = $beforeId && wp_attachment_is_image($beforeId);
+    $hasImageAfter  = $afterId && wp_attachment_is_image($afterId);
+
+    $altBefore = $beforeId ? (get_post_meta($beforeId, '_wp_attachment_image_alt', true) ?: $labelBefore) : $labelBefore;
+    $altAfter  = $afterId  ? (get_post_meta($afterId,  '_wp_attachment_image_alt', true) ?: $labelAfter)  : $labelAfter;
 @endphp
 
 <x-section :anchor="$sectionAnchor" :background="$background" class="before-after">
@@ -32,31 +35,29 @@
         <h2 class="mb-8 text-center">{!! $title !!}</h2>
     @endif
 
-    @if($imageBefore && $imageAfter)
+    @if($hasImageBefore && $hasImageAfter)
         <div
             id="{{ $uniqueId }}"
             x-data="beforeAfterSlider()"
             class="relative max-w-4xl mx-auto overflow-hidden rounded-xl select-none"
         >
             {{-- After image (background) --}}
-            <img
-                src="{{ $imageAfter[0] }}"
-                alt="{{ $labelAfter }}"
-                class="block w-full"
-                loading="lazy"
-            >
+            {!! wp_get_attachment_image($afterId, 'content', false, [
+                'class'   => 'block w-full',
+                'alt'     => $altAfter,
+                'loading' => 'lazy',
+            ]) !!}
 
             {{-- Before image (clipped) --}}
             <div
                 class="absolute inset-0 overflow-hidden"
                 :style="'clip-path: inset(0 ' + (100 - position) + '% 0 0)'"
             >
-                <img
-                    src="{{ $imageBefore[0] }}"
-                    alt="{{ $labelBefore }}"
-                    class="block w-full"
-                    loading="lazy"
-                >
+                {!! wp_get_attachment_image($beforeId, 'content', false, [
+                    'class'   => 'block w-full',
+                    'alt'     => $altBefore,
+                    'loading' => 'lazy',
+                ]) !!}
             </div>
 
             {{-- Slider handle (48px hit area with 1px visual bar) --}}

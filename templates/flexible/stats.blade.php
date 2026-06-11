@@ -51,10 +51,10 @@
                         </div>
                     @endif
 
-                    <div class="text-display tabular-nums mb-2 text-content" role="status" aria-live="polite" aria-atomic="true">
-                        <span x-text="current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })" aria-hidden="true">0</span>@if($suffix)<span aria-hidden="true"> {{ $suffix }}</span>@endif
-                        <span class="sr-only" x-text="`${current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{{ $suffix ? ' ' . $suffix : '' }}`">{{ $number }}{{ $suffix ? ' ' . $suffix : '' }}</span>
+                    <div class="text-display tabular-nums mb-2 text-content" aria-hidden="true">
+                        <span x-text="current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })">0</span>@if($suffix)<span> {{ $suffix }}</span>@endif
                     </div>
+                    <span class="sr-only">{{ $number }}{{ $suffix ? ' ' . $suffix : '' }}</span>
 
                     @if($label)
                         <p class="text-body-large text-content-secondary" id="stat-label-{{ $loop->index }}">{{ $label }}</p>

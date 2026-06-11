@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace WordpressStarter;
 
-use WordpressStarter\ThemeContext;
-
 /**
  * Vite Asset Management
  *
@@ -16,6 +14,7 @@ class Vite
 {
     /** @var array<string, array{file: string, src?: string, css?: array<string>}>|null */
     private static ?array $manifest = null;
+
     private static bool $isDev = false;
 
     public static function init(): void
@@ -33,6 +32,14 @@ class Vite
     }
 
     /**
+     * Whether the Vite dev server is active (determined once in init()).
+     */
+    public static function isDev(): bool
+    {
+        return self::$isDev;
+    }
+
+    /**
      * Add type="module" to Vite-built scripts for ES module support.
      */
     public static function addModuleType(string $tag, string $handle, string $src): string
@@ -42,6 +49,7 @@ class Vite
         if (in_array($handle, $moduleHandles, true)) {
             // Remove existing type attribute first, then add type="module"
             $tag = preg_replace('/\s+type=["\'][^"\']*["\']/', '', $tag) ?? $tag;
+
             return str_replace('<script ', '<script type="module" ', $tag);
         }
 
@@ -82,7 +90,7 @@ class Vite
                     get_theme_file_uri('dist/' . $jsFile),
                     [],
                     null,
-                    ['in_footer' => true, 'strategy' => 'defer']
+                    ['in_footer' => true, 'strategy' => 'defer'],
                 );
             }
         }
@@ -174,7 +182,7 @@ class Vite
     private static function getThemeIcons(): array
     {
         // Try to get cached icons first
-        $cacheKey = 'theme_icons_' . wp_get_theme()->get('Version');
+        $cacheKey = ThemeContext::prefix() . '_theme_icons_' . wp_get_theme()->get('Version');
         $cachedIcons = get_transient($cacheKey);
 
         if ($cachedIcons !== false && is_array($cachedIcons)) {
@@ -218,91 +226,91 @@ class Vite
         $iconsJson = wp_json_encode($icons);
 
         return <<<JS
-(function() {
-    const icons = {$iconsJson};
+            (function() {
+                const icons = {$iconsJson};
 
-    function enhanceLabels(container) {
-        const labels = container.querySelectorAll('.acf-radio-list label');
+                function enhanceLabels(container) {
+                    const labels = container.querySelectorAll('.acf-radio-list label');
 
-        labels.forEach(function(label) {
-            // Skip if already enhanced
-            if (label.dataset.iconEnhanced) return;
-            label.dataset.iconEnhanced = 'true';
+                    labels.forEach(function(label) {
+                        // Skip if already enhanced
+                        if (label.dataset.iconEnhanced) return;
+                        label.dataset.iconEnhanced = 'true';
 
-            const input = label.querySelector('input[type="radio"]');
-            if (!input) return;
+                        const input = label.querySelector('input[type="radio"]');
+                        if (!input) return;
 
-            const iconName = input.value;
-            label.dataset.icon = iconName;
+                        const iconName = input.value;
+                        label.dataset.icon = iconName;
 
-            // Get the text content (the label text)
-            const textContent = label.textContent.trim();
+                        // Get the text content (the label text)
+                        const textContent = label.textContent.trim();
 
-            if (iconName && icons[iconName]) {
-                // Replace content with SVG
-                label.innerHTML = '';
-                label.appendChild(input);
-                label.insertAdjacentHTML('beforeend', icons[iconName]);
-                // Add hidden text for accessibility
-                const srText = document.createElement('span');
-                srText.className = 'screen-reader-text';
-                srText.textContent = textContent;
-                label.appendChild(srText);
-            } else if (iconName === '') {
-                // "No icon" option - keep text but wrap it
-                label.innerHTML = '';
-                label.appendChild(input);
-                const textSpan = document.createElement('span');
-                textSpan.textContent = window.themeAdminStrings?.noIcon || 'No Icon';
-                label.appendChild(textSpan);
-            }
-        });
-    }
+                        if (iconName && icons[iconName]) {
+                            // Replace content with SVG
+                            label.innerHTML = '';
+                            label.appendChild(input);
+                            label.insertAdjacentHTML('beforeend', icons[iconName]);
+                            // Add hidden text for accessibility
+                            const srText = document.createElement('span');
+                            srText.className = 'screen-reader-text';
+                            srText.textContent = textContent;
+                            label.appendChild(srText);
+                        } else if (iconName === '') {
+                            // "No icon" option - keep text but wrap it
+                            label.innerHTML = '';
+                            label.appendChild(input);
+                            const textSpan = document.createElement('span');
+                            textSpan.textContent = window.themeAdminStrings?.noIcon || 'No Icon';
+                            label.appendChild(textSpan);
+                        }
+                    });
+                }
 
-    function enhanceAllIconFields() {
-        const fields = document.querySelectorAll('.acf-icon-radio-field');
-        fields.forEach(function(wrapper) {
-            enhanceLabels(wrapper);
-        });
-    }
+                function enhanceAllIconFields() {
+                    const fields = document.querySelectorAll('.acf-icon-radio-field');
+                    fields.forEach(function(wrapper) {
+                        enhanceLabels(wrapper);
+                    });
+                }
 
-    // Wait for ACF to be ready, then use proper hooks
-    function initAcfHooks() {
-        if (typeof acf === 'undefined') {
-            setTimeout(initAcfHooks, 100);
-            return;
-        }
+                // Wait for ACF to be ready, then use proper hooks
+                function initAcfHooks() {
+                    if (typeof acf === 'undefined') {
+                        setTimeout(initAcfHooks, 100);
+                        return;
+                    }
 
-        // Use ACF's field-specific hooks for radio fields
-        acf.addAction('ready_field/type=radio', function(field) {
-            if (field.\$el && field.\$el[0].classList.contains('acf-icon-radio-field')) {
-                enhanceLabels(field.\$el[0]);
-            }
-        });
+                    // Use ACF's field-specific hooks for radio fields
+                    acf.addAction('ready_field/type=radio', function(field) {
+                        if (field.\$el && field.\$el[0].classList.contains('acf-icon-radio-field')) {
+                            enhanceLabels(field.\$el[0]);
+                        }
+                    });
 
-        acf.addAction('append_field/type=radio', function(field) {
-            if (field.\$el && field.\$el[0].classList.contains('acf-icon-radio-field')) {
-                enhanceLabels(field.\$el[0]);
-            }
-        });
+                    acf.addAction('append_field/type=radio', function(field) {
+                        if (field.\$el && field.\$el[0].classList.contains('acf-icon-radio-field')) {
+                            enhanceLabels(field.\$el[0]);
+                        }
+                    });
 
-        // Also run on general ready/append for safety
-        acf.addAction('ready', function() {
-            enhanceAllIconFields();
-        });
-        acf.addAction('append', function() {
-            enhanceAllIconFields();
-        });
-    }
+                    // Also run on general ready/append for safety
+                    acf.addAction('ready', function() {
+                        enhanceAllIconFields();
+                    });
+                    acf.addAction('append', function() {
+                        enhanceAllIconFields();
+                    });
+                }
 
-    // Start initialization
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAcfHooks);
-    } else {
-        initAcfHooks();
-    }
-})();
-JS;
+                // Start initialization
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initAcfHooks);
+                } else {
+                    initAcfHooks();
+                }
+            })();
+            JS;
     }
 
     /**
@@ -312,63 +320,63 @@ JS;
     private static function getAcfIconRadioCss(): string
     {
         return <<<'CSS'
-/* ACF Icon Radio Field Enhancement */
-.acf-icon-radio-field .acf-radio-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-.acf-icon-radio-field .acf-radio-list li {
-    margin: 0 !important;
-}
-.acf-icon-radio-field .acf-radio-list input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    pointer-events: none;
-}
-.acf-icon-radio-field .acf-radio-list label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: #fff;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    padding: 0;
-    margin: 0;
-    position: relative;
-}
-.acf-icon-radio-field .acf-radio-list label:hover {
-    border-color: #007cba;
-    background: #f0f7fc;
-}
-.acf-icon-radio-field .acf-radio-list label:has(input[type="radio"]:checked) {
-    border-color: #007cba;
-    background: #007cba;
-    color: #fff;
-}
-.acf-icon-radio-field .acf-radio-list label:has(input[type="radio"]:checked) svg {
-    color: #fff;
-}
-.acf-icon-radio-field .acf-radio-list label svg {
-    width: 20px;
-    height: 20px;
-}
-.acf-icon-radio-field .acf-radio-list label[data-icon=""] {
-    width: auto;
-    padding: 0 12px;
-    font-size: 12px;
-    color: #666;
-}
-.acf-icon-radio-field .acf-radio-list label .acf-icon-label-text {
-    display: none;
-}
-CSS;
+            /* ACF Icon Radio Field Enhancement */
+            .acf-icon-radio-field .acf-radio-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .acf-icon-radio-field .acf-radio-list li {
+                margin: 0 !important;
+            }
+            .acf-icon-radio-field .acf-radio-list input[type="radio"] {
+                position: absolute;
+                opacity: 0;
+                width: 0;
+                height: 0;
+                pointer-events: none;
+            }
+            .acf-icon-radio-field .acf-radio-list label {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                background: #fff;
+                cursor: pointer;
+                transition: all 0.15s ease;
+                padding: 0;
+                margin: 0;
+                position: relative;
+            }
+            .acf-icon-radio-field .acf-radio-list label:hover {
+                border-color: #007cba;
+                background: #f0f7fc;
+            }
+            .acf-icon-radio-field .acf-radio-list label:has(input[type="radio"]:checked) {
+                border-color: #007cba;
+                background: #007cba;
+                color: #fff;
+            }
+            .acf-icon-radio-field .acf-radio-list label:has(input[type="radio"]:checked) svg {
+                color: #fff;
+            }
+            .acf-icon-radio-field .acf-radio-list label svg {
+                width: 20px;
+                height: 20px;
+            }
+            .acf-icon-radio-field .acf-radio-list label[data-icon=""] {
+                width: auto;
+                padding: 0 12px;
+                font-size: 12px;
+                color: #666;
+            }
+            .acf-icon-radio-field .acf-radio-list label .acf-icon-label-text {
+                display: none;
+            }
+            CSS;
     }
 
     private static function loadManifest(): void
@@ -384,6 +392,7 @@ CSS;
                     // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     error_log(ThemeContext::logPrefix() . ': Vite manifest not found at ' . $manifestPath . '. Run "npm run build".');
                 }
+
                 return;
             }
 
@@ -393,6 +402,7 @@ CSS;
                 self::$manifest = [];
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 error_log(ThemeContext::logPrefix() . ': Could not read Vite manifest at ' . $manifestPath);
+
                 return;
             }
 
@@ -402,6 +412,7 @@ CSS;
                 self::$manifest = [];
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 error_log(ThemeContext::logPrefix() . ': Invalid JSON in Vite manifest: ' . json_last_error_msg());
+
                 return;
             }
 
@@ -446,8 +457,10 @@ CSS;
         $socket = @fsockopen($host, $port, $errno, $errstr, 0.1);
         if ($socket) {
             fclose($socket);
+
             return true;
         }
+
         return false;
     }
 
@@ -459,6 +472,7 @@ CSS;
         if (self::$isDev) {
             $host = config('vite.dev_server.host', 'localhost');
             $port = self::getDevServerPort();
+
             return "http://{$host}:{$port}/" . ltrim($path, '/');
         }
 

@@ -184,32 +184,19 @@
                     'next_text' => __('Weiter', 'wp-starter'),
                 ]);
             @endphp
-            @if ($pagination)
-                <nav class="mt-16" aria-label="{{ __('Navigation', 'wp-starter') }}">
-                    <ul class="flex flex-wrap justify-center gap-2">
-                        @foreach ($pagination as $link)
-                            <li>{!! str_replace(
-                                ['page-numbers', 'current'],
-                                ['px-4 py-2 rounded-lg border border-line text-content hover:bg-surface-secondary transition-colors', 'bg-surface-brand text-content-inverse border-surface-brand hover:bg-surface-brand'],
-                                $link
-                            ) !!}</li>
-                        @endforeach
-                    </ul>
-                </nav>
-            @endif
+            @include('partials.pagination', [
+                'pagination' => $pagination,
+                'ariaLabel'  => __('Navigation', 'wp-starter'),
+                'navClass'   => 'mt-16',
+            ])
         @else
             {{-- No Posts --}}
-            <div class="text-center py-12">
-                <svg class="w-16 h-16 mx-auto text-content-tertiary mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                </svg>
-                <h2 class="text-h3 mb-4">
-                    {{ __('Keine Beiträge gefunden', 'wp-starter') }}
-                </h2>
-                <p class="text-content-secondary mb-8 max-w-md mx-auto">
-                    {{ __('Es sind noch keine Inhalte vorhanden.', 'wp-starter') }}
-                </p>
-            </div>
+            @include('partials.empty-state', [
+                'title'       => __('Keine Beiträge gefunden', 'wp-starter'),
+                'text'        => __('Es sind noch keine Inhalte vorhanden.', 'wp-starter'),
+                'buttonLabel' => __('Zur Startseite', 'wp-starter'),
+                'buttonUrl'   => home_url('/'),
+            ])
         @endif
     </x-section>
 @endsection

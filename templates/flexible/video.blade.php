@@ -71,7 +71,7 @@
                         <p class="mb-4 text-content-secondary">
                             {{ __('Zum Abspielen des Videos wird ein externer Dienst geladen.', 'wp-starter') }}<br>
                             @if($privacyLink)
-                                {{ __('Es gelten die', 'wp-starter') }} <x-link url="{{ $privacyLink }}" target="_blank">{{ __('Datenschutzbestimmungen von', 'wp-starter') }} {{ $providerName }}</x-link>.
+                                {{ __('Es gelten die', 'wp-starter') }} <x-link url="{{ $privacyLink }}" target="_blank">{{ __('Datenschutzbestimmungen von', 'wp-starter') }} {{ $providerName }}<span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></x-link>.
                             @endif
                         </p>
                         <x-button

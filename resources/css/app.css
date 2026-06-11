@@ -1192,8 +1192,10 @@ html {
     transition: color 0.15s ease;
   }
 
-  .desktop-nav > ul > li > a:hover {
-    color: var(--text-primary);
+  @media (hover: hover) and (pointer: fine) {
+    .desktop-nav > ul > li > a:hover {
+      color: var(--text-primary);
+    }
   }
 
   .desktop-nav > ul > li.current-menu-item > a,
@@ -1237,7 +1239,7 @@ html {
     transition:
       opacity 0.2s ease-out,
       transform 0.2s ease-out,
-      visibility 0.2s;
+      visibility 0.2s ease-out;
     z-index: 50;
   }
 
@@ -1301,8 +1303,10 @@ html {
   transition: color 0.15s ease;
 }
 
-.mobile-nav > ul > li > a:hover {
-  color: var(--text-primary);
+@media (hover: hover) and (pointer: fine) {
+  .mobile-nav > ul > li > a:hover {
+    color: var(--text-primary);
+  }
 }
 
 .mobile-nav > ul > li.current-menu-item > a,
@@ -1360,8 +1364,10 @@ html {
   transition: color 0.15s ease;
 }
 
-.mobile-nav .sub-menu a:hover {
-  color: var(--text-primary);
+@media (hover: hover) and (pointer: fine) {
+  .mobile-nav .sub-menu a:hover {
+    color: var(--text-primary);
+  }
 }
 
 .mobile-nav .sub-menu .current-menu-item > a {

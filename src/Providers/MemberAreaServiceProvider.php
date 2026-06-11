@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
-use WordpressStarter\MemberArea\Acf;
+use RuntimeException;
 use WordpressStarter\MemberArea\Access;
+use WordpressStarter\MemberArea\Acf;
 use WordpressStarter\MemberArea\Auth;
 use WordpressStarter\MemberArea\Crypto;
 use WordpressStarter\MemberArea\DownloadQuery;
@@ -43,7 +44,7 @@ class MemberAreaServiceProvider extends ServiceProvider
             add_role(
                 'member_area_access',
                 __('Zugang Interner Bereich', 'wp-starter'),
-                []
+                [],
             );
         });
 
@@ -53,7 +54,7 @@ class MemberAreaServiceProvider extends ServiceProvider
             if (in_array('member_area_access', (array) $user->roles, true)) {
                 wp_die(
                     esc_html__('Sie haben keinen Zugriff auf den Administrationsbereich.', 'wp-starter'),
-                    403
+                    403,
                 );
             }
         });
@@ -65,6 +66,7 @@ class MemberAreaServiceProvider extends ServiceProvider
             return true;
         }
         $flag = get_field('member_area_active', 'option');
+
         // Treat null (not yet saved) as active
         return $flag === null || (bool) $flag;
     }
@@ -101,8 +103,8 @@ class MemberAreaServiceProvider extends ServiceProvider
         \WordpressStarter\RateLimiter::enforce('member_get_nonces', 30, 60);
 
         wp_send_json_success([
-            'login'     => wp_create_nonce('member_area_login'),
-            'logout'    => wp_create_nonce('member_area_logout'),
+            'login' => wp_create_nonce('member_area_login'),
+            'logout' => wp_create_nonce('member_area_logout'),
             'downloads' => wp_create_nonce('member_downloads_query'),
         ]);
     }
@@ -119,7 +121,7 @@ class MemberAreaServiceProvider extends ServiceProvider
         $credential = sanitize_text_field(wp_unslash($_POST['credential'] ?? ''));
         // Passwords must not be sanitized — sanitize_text_field strips characters that
         // may be part of a valid password (e.g. <, >, &, multiple spaces).
-        $password    = isset($_POST['password']) ? wp_unslash($_POST['password']) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+        $password = isset($_POST['password']) ? wp_unslash($_POST['password']) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
         if (empty($credential)) {
             wp_send_json_error(['message' => __('Bitte alle Felder ausfüllen.', 'wp-starter')], 400);
@@ -226,10 +228,10 @@ class MemberAreaServiceProvider extends ServiceProvider
             }
 
             $posts = get_posts([
-                'post_type'      => 'member_download',
-                'post_status'    => ['publish', 'draft'],
+                'post_type' => 'member_download',
+                'post_status' => ['publish', 'draft'],
                 'posts_per_page' => -1,
-                'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+                'meta_query' => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
                     ['key' => 'download_source_type', 'value' => 'sftp'],
                     ['key' => 'download_sftp_password', 'compare' => 'EXISTS'],
                 ],
@@ -241,10 +243,12 @@ class MemberAreaServiceProvider extends ServiceProvider
                 if (!is_string($pw) || $pw === '' || Crypto::isEncrypted($pw)) {
                     continue;
                 }
+
                 try {
                     update_post_meta($postId, 'download_sftp_password', Crypto::encrypt($pw));
-                } catch (\RuntimeException) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-                    // AUTH_KEY not configured — skip silently
+                } catch (RuntimeException $e) {
+                    // AUTH_KEY not configured — skip, but make the condition visible
+                    error_log(ThemeContext::logPrefix() . ': SFTP password migration skipped for post ' . $postId . ' — ' . $e->getMessage()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 }
             }
 
@@ -264,9 +268,17 @@ class MemberAreaServiceProvider extends ServiceProvider
 
             try {
                 return Crypto::encrypt($value);
-            } catch (\RuntimeException) {
-                // AUTH_KEY not configured — store plaintext rather than silently break sync
-                return $value;
+            } catch (RuntimeException $e) {
+                // AUTH_KEY not configured — never store the plaintext password
+                error_log(ThemeContext::logPrefix() . ': SFTP password was not saved — ' . $e->getMessage()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+
+                add_action('admin_notices', static function (): void {
+                    echo '<div class="notice notice-error is-dismissible"><p>'
+                        . esc_html__('Das SFTP-Passwort wurde nicht gespeichert: AUTH_KEY ist in der wp-config.php nicht konfiguriert. Bitte AUTH_KEY setzen und das Passwort erneut eingeben.', 'wp-starter')
+                        . '</p></div>';
+                });
+
+                return '';
             }
         });
     }
@@ -288,7 +300,7 @@ class MemberAreaServiceProvider extends ServiceProvider
             // Nonces are intentionally omitted here — they are fetched on-demand
             // via the member_get_nonces AJAX endpoint to avoid stale-cache issues.
             wp_localize_script('app-js', 'memberAreaConfig', [
-                'ajaxUrl'  => admin_url('admin-ajax.php'),
+                'ajaxUrl' => admin_url('admin-ajax.php'),
                 'authMode' => Auth::getAuthMode(),
             ]);
         });

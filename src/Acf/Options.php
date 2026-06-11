@@ -124,7 +124,7 @@ class Options
                 FieldDefinitions::infoBoxField(
                     'field_options_identity_info',
                     __('<strong>Website-Identität</strong><br>Logo und Favicon erscheinen im Header, Footer und Browser-Tab. Für beste Ergebnisse verwende SVG-Dateien oder PNGs mit transparentem Hintergrund.', 'wp-starter'),
-                    'info'
+                    'info',
                 ),
                 array_merge(
                     FieldDefinitions::imageField(
@@ -134,9 +134,9 @@ class Options
                         false,
                         'array',
                         null,
-                        __('Das Hauptlogo der Website.', 'wp-starter')
+                        __('Das Hauptlogo der Website.', 'wp-starter'),
                     ),
-                    ['wrapper' => ['width' => '50']]
+                    ['wrapper' => ['width' => '50']],
                 ),
                 array_merge(
                     FieldDefinitions::imageField(
@@ -146,9 +146,9 @@ class Options
                         false,
                         'array',
                         null,
-                        __('Für dunkle Hintergründe.', 'wp-starter')
+                        __('Für dunkle Hintergründe.', 'wp-starter'),
                     ),
-                    ['wrapper' => ['width' => '50']]
+                    ['wrapper' => ['width' => '50']],
                 ),
                 FieldDefinitions::imageField(
                     'field_options_favicon',
@@ -157,7 +157,7 @@ class Options
                     false,
                     'id',
                     null,
-                    __('Das Favicon für Browser-Tabs. Empfohlen: 512x512px PNG.', 'wp-starter')
+                    __('Das Favicon für Browser-Tabs. Empfohlen: 512x512px PNG.', 'wp-starter'),
                 ),
                 FieldDefinitions::imageField(
                     'field_options_social_image',
@@ -166,7 +166,7 @@ class Options
                     false,
                     'id',
                     null,
-                    __('Standardbild für Social Media Vorschauen (Facebook, Twitter, LinkedIn). Empfohlene Größe: 1200×630 Pixel (1.91:1). Mindestens 600×315 Pixel. Max. 5 MB. Formate: JPG oder PNG.', 'wp-starter')
+                    __('Standardbild für Social Media Vorschauen (Facebook, Twitter, LinkedIn). Empfohlene Größe: 1200×630 Pixel (1.91:1). Mindestens 600×315 Pixel. Max. 5 MB. Formate: JPG oder PNG.', 'wp-starter'),
                 ),
 
                 // Contact Tab (default selected)
@@ -179,7 +179,7 @@ class Options
                 FieldDefinitions::infoBoxField(
                     'field_options_contact_info',
                     __('<strong>Kontaktdaten</strong><br>Diese Daten werden im Footer und auf der Kontaktseite verwendet. Halte sie aktuell!', 'wp-starter'),
-                    'info'
+                    'info',
                 ),
                 FieldDefinitions::textField(
                     'field_options_company_name',
@@ -187,7 +187,7 @@ class Options
                     'company_name',
                     false,
                     __('Der vollständige Firmenname für Impressum und Footer.', 'wp-starter'),
-                    __('Musterfirma GmbH', 'wp-starter')
+                    __('Musterfirma GmbH', 'wp-starter'),
                 ),
                 FieldDefinitions::textareaField(
                     'field_options_address',
@@ -195,7 +195,7 @@ class Options
                     'address',
                     3,
                     __('Die vollständige Geschäftsadresse.', 'wp-starter'),
-                    __("Musterstraße 123\n12345 Musterstadt", 'wp-starter')
+                    __("Musterstraße 123\n12345 Musterstadt", 'wp-starter'),
                 ),
                 array_merge(
                     FieldDefinitions::textField(
@@ -204,9 +204,9 @@ class Options
                         'phone',
                         false,
                         __('Haupttelefonnummer.', 'wp-starter'),
-                        '+49 123 456789'
+                        '+49 123 456789',
                     ),
-                    ['wrapper' => ['width' => '50']]
+                    ['wrapper' => ['width' => '50']],
                 ),
                 array_merge(
                     FieldDefinitions::emailField(
@@ -214,9 +214,9 @@ class Options
                         __('E-Mail', 'wp-starter'),
                         'email',
                         __('Haupt-E-Mail-Adresse.', 'wp-starter'),
-                        'info@example.com'
+                        'info@example.com',
                     ),
-                    ['wrapper' => ['width' => '50']]
+                    ['wrapper' => ['width' => '50']],
                 ),
                 FieldDefinitions::urlField(
                     'field_options_maps_link',
@@ -224,7 +224,7 @@ class Options
                     'maps_link',
                     __('Link zur Google Maps Position (für „Anfahrt" Button).', 'wp-starter'),
                     null,
-                    'https://goo.gl/maps/...'
+                    'https://goo.gl/maps/...',
                 ),
 
                 // Tab: Darstellung
@@ -244,14 +244,14 @@ class Options
                     ],
                     'system',
                     false,
-                    __('Bestimmt das Standard-Farbschema der Website. „Systemeinstellung" passt sich automatisch an die Browser-/OS-Einstellung des Besuchers an.', 'wp-starter')
+                    __('Bestimmt das Standard-Farbschema der Website. „Systemeinstellung" passt sich automatisch an die Browser-/OS-Einstellung des Besuchers an.', 'wp-starter'),
                 ),
                 FieldDefinitions::trueFalseField(
                     'field_options_animations_enabled',
                     __('Scroll-Animationen', 'wp-starter'),
                     'animations_enabled',
                     true,
-                    __('Sanfte Einblend-Animationen beim Scrollen. Automatisch deaktiviert bei „reduzierte Bewegung".', 'wp-starter')
+                    __('Sanfte Einblend-Animationen beim Scrollen. Automatisch deaktiviert bei „reduzierte Bewegung".', 'wp-starter'),
                 ),
             ],
             'location' => [
@@ -278,7 +278,7 @@ class Options
                 FieldDefinitions::infoBoxField(
                     'field_options_header_tip',
                     __('<strong>Tipp:</strong> Ein CTA-Button im Header erhöht die Conversion-Rate. Verwende eine klare Handlungsaufforderung wie „Jetzt anfragen" oder „Termin buchen".', 'wp-starter'),
-                    'tip'
+                    'tip',
                 ),
                 array_merge(
                     FieldDefinitions::trueFalseField(
@@ -286,9 +286,9 @@ class Options
                         __('Sticky Header', 'wp-starter'),
                         'header_sticky',
                         true,
-                        __('Header bleibt beim Scrollen oben fixiert.', 'wp-starter')
+                        __('Header bleibt beim Scrollen oben fixiert.', 'wp-starter'),
                     ),
-                    ['wrapper' => ['width' => '50']]
+                    ['wrapper' => ['width' => '50']],
                 ),
                 array_merge(
                     FieldDefinitions::trueFalseField(
@@ -296,9 +296,9 @@ class Options
                         __('CTA-Button anzeigen', 'wp-starter'),
                         'header_cta_show',
                         true,
-                        __('Zeigt einen Call-to-Action Button im Header.', 'wp-starter')
+                        __('Zeigt einen Call-to-Action Button im Header.', 'wp-starter'),
                     ),
-                    ['wrapper' => ['width' => '50']]
+                    ['wrapper' => ['width' => '50']],
                 ),
                 array_merge(
                     FieldDefinitions::linkField(
@@ -306,7 +306,7 @@ class Options
                         __('CTA-Button', 'wp-starter'),
                         'header_cta',
                         false,
-                        __('Link und Text für den Header-CTA-Button.', 'wp-starter')
+                        __('Link und Text für den Header-CTA-Button.', 'wp-starter'),
                     ),
                     [
                         'conditional_logic' => [
@@ -318,7 +318,7 @@ class Options
                                 ],
                             ],
                         ],
-                    ]
+                    ],
                 ),
             ],
             'location' => [
@@ -355,9 +355,9 @@ class Options
                         __('Logo anzeigen', 'wp-starter'),
                         'footer_show_logo',
                         true,
-                        __('Zeigt das Site-Logo im Footer.', 'wp-starter')
+                        __('Zeigt das Site-Logo im Footer.', 'wp-starter'),
                     ),
-                    ['wrapper' => ['width' => '50']]
+                    ['wrapper' => ['width' => '50']],
                 ),
                 array_merge(
                     FieldDefinitions::trueFalseField(
@@ -365,9 +365,9 @@ class Options
                         __('Firmenname anzeigen', 'wp-starter'),
                         'footer_show_company',
                         true,
-                        __('Zeigt den Firmennamen.', 'wp-starter')
+                        __('Zeigt den Firmennamen.', 'wp-starter'),
                     ),
-                    ['wrapper' => ['width' => '50']]
+                    ['wrapper' => ['width' => '50']],
                 ),
                 FieldDefinitions::wysiwygField(
                     'field_options_footer_text',
@@ -375,7 +375,7 @@ class Options
                     'footer_text',
                     false,
                     null,
-                    __('Optionaler Text im Footer (z.B. Firmenbeschreibung).', 'wp-starter')
+                    __('Optionaler Text im Footer (z.B. Firmenbeschreibung).', 'wp-starter'),
                 ),
 
                 // === Spalte 2: Navigation ===
@@ -389,7 +389,7 @@ class Options
                     __('Navigation anzeigen', 'wp-starter'),
                     'footer_show_nav',
                     true,
-                    __('Zeigt das Footer-Navigationsmenü.', 'wp-starter')
+                    __('Zeigt das Footer-Navigationsmenü.', 'wp-starter'),
                 ),
                 array_merge(
                     FieldDefinitions::textField(
@@ -398,14 +398,14 @@ class Options
                         'footer_nav_title',
                         false,
                         __('Überschrift über dem Menü.', 'wp-starter'),
-                        __('Navigation', 'wp-starter')
+                        __('Navigation', 'wp-starter'),
                     ),
                     [
                         'wrapper' => ['width' => '50'],
                         'conditional_logic' => [
                             [['field' => 'field_options_footer_nav_show', 'operator' => '==', 'value' => '1']],
                         ],
-                    ]
+                    ],
                 ),
                 array_merge(
                     [
@@ -425,7 +425,7 @@ class Options
                         'conditional_logic' => [
                             [['field' => 'field_options_footer_nav_show', 'operator' => '==', 'value' => '1']],
                         ],
-                    ]
+                    ],
                 ),
 
                 // === Spalte 3: Kontakt ===
@@ -439,7 +439,7 @@ class Options
                     __('Kontaktdaten anzeigen', 'wp-starter'),
                     'footer_show_contact',
                     true,
-                    __('Zeigt Adresse, Telefon und E-Mail.', 'wp-starter')
+                    __('Zeigt Adresse, Telefon und E-Mail.', 'wp-starter'),
                 ),
                 array_merge(
                     FieldDefinitions::infoBoxField(
@@ -447,15 +447,15 @@ class Options
                         sprintf(
                             /* translators: %s: URL to general settings page */
                             __('Verwendet Daten aus den <a href="%s">allgemeinen Einstellungen</a> (Kontaktdaten Tab).', 'wp-starter'),
-                            \admin_url('admin.php?page=theme-options-general')
+                            \admin_url('admin.php?page=theme-options-general'),
                         ),
-                        'info'
+                        'info',
                     ),
                     [
                         'conditional_logic' => [
                             [['field' => 'field_options_footer_contact_show', 'operator' => '==', 'value' => '1']],
                         ],
-                    ]
+                    ],
                 ),
                 array_merge(
                     FieldDefinitions::textField(
@@ -464,13 +464,13 @@ class Options
                         'footer_contact_title',
                         false,
                         __('Überschrift über den Kontaktdaten.', 'wp-starter'),
-                        __('Kontakt', 'wp-starter')
+                        __('Kontakt', 'wp-starter'),
                     ),
                     [
                         'conditional_logic' => [
                             [['field' => 'field_options_footer_contact_show', 'operator' => '==', 'value' => '1']],
                         ],
-                    ]
+                    ],
                 ),
 
                 // === Spalte 4: Social ===
@@ -484,7 +484,7 @@ class Options
                     __('Social Links anzeigen', 'wp-starter'),
                     'footer_show_social',
                     true,
-                    __('Zeigt die Social Media Icons im Footer.', 'wp-starter')
+                    __('Zeigt die Social Media Icons im Footer.', 'wp-starter'),
                 ),
                 array_merge(
                     FieldDefinitions::infoBoxField(
@@ -492,15 +492,15 @@ class Options
                         sprintf(
                             /* translators: %s: URL to social media settings page */
                             __('Verwendet Icons aus den <a href="%s">Social Media Einstellungen</a>.', 'wp-starter'),
-                            \admin_url('admin.php?page=theme-options-social')
+                            \admin_url('admin.php?page=theme-options-social'),
                         ),
-                        'info'
+                        'info',
                     ),
                     [
                         'conditional_logic' => [
                             [['field' => 'field_options_footer_social_show', 'operator' => '==', 'value' => '1']],
                         ],
-                    ]
+                    ],
                 ),
                 array_merge(
                     FieldDefinitions::textField(
@@ -509,13 +509,13 @@ class Options
                         'footer_social_title',
                         false,
                         __('Überschrift über den Icons.', 'wp-starter'),
-                        __('Folge uns', 'wp-starter')
+                        __('Folge uns', 'wp-starter'),
                     ),
                     [
                         'conditional_logic' => [
                             [['field' => 'field_options_footer_social_show', 'operator' => '==', 'value' => '1']],
                         ],
-                    ]
+                    ],
                 ),
 
                 // === Untere Leiste ===
@@ -530,14 +530,14 @@ class Options
                     'copyright_text',
                     false,
                     __('Der Copyright-Hinweis. {year} wird automatisch durch das aktuelle Jahr ersetzt.', 'wp-starter'),
-                    __('© {year} Firmenname. Alle Rechte vorbehalten.', 'wp-starter')
+                    __('© {year} Firmenname. Alle Rechte vorbehalten.', 'wp-starter'),
                 ),
                 FieldDefinitions::trueFalseField(
                     'field_options_footer_legal_show',
                     __('Rechtliches Menü anzeigen', 'wp-starter'),
                     'footer_show_legal',
                     true,
-                    __('Zeigt das Legal-Menü (Impressum, Datenschutz) in der unteren Leiste.', 'wp-starter')
+                    __('Zeigt das Legal-Menü (Impressum, Datenschutz) in der unteren Leiste.', 'wp-starter'),
                 ),
 
                 // === Hinweisleiste ===
@@ -549,7 +549,7 @@ class Options
                 FieldDefinitions::infoBoxField(
                     'field_options_footer_alerts_info',
                     __('Hinweise werden zwischen Seiteninhalt und Footer angezeigt. Ideal für rechtliche Hinweise, Risikobelehrungen oder temporäre Mitteilungen. Bei Textänderung erscheint ein zuvor geschlossener Hinweis erneut.', 'wp-starter'),
-                    'info'
+                    'info',
                 ),
                 array_merge(
                     FieldDefinitions::repeaterField(
@@ -561,14 +561,14 @@ class Options
                                 'field_options_footer_alert_active',
                                 __('Aktiv', 'wp-starter'),
                                 'active',
-                                true
+                                true,
                             ),
                             FieldDefinitions::trueFalseField(
                                 'field_options_footer_alert_dismissible',
                                 __('Schliessbar', 'wp-starter'),
                                 'dismissible',
                                 false,
-                                __('Besucher kann den Hinweis ausblenden (localStorage, 7 Tage).', 'wp-starter')
+                                __('Besucher kann den Hinweis ausblenden (localStorage, 7 Tage).', 'wp-starter'),
                             ),
                             [
                                 'key' => 'field_options_footer_alert_text',
@@ -590,7 +590,7 @@ class Options
                                     'only' => __('Nur ausgewählte Seiten', 'wp-starter'),
                                     'except' => __('Alle ausser ausgewählte Seiten', 'wp-starter'),
                                 ],
-                                'all'
+                                'all',
                             ),
                             [
                                 'key' => 'field_options_footer_alert_pages',
@@ -609,9 +609,9 @@ class Options
                         ],
                         __('Hinweis hinzufügen', 'wp-starter'),
                         0,
-                        'block'
+                        'block',
                     ),
-                    ['max' => 5]
+                    ['max' => 5],
                 ),
             ],
             'location' => [
@@ -638,7 +638,7 @@ class Options
                 FieldDefinitions::infoBoxField(
                     'field_options_social_info',
                     __('<strong>Social Media</strong><br>Diese Icons werden im Footer angezeigt (wenn aktiviert). Die Reihenfolge hier bestimmt die Anzeige-Reihenfolge.', 'wp-starter'),
-                    'info'
+                    'info',
                 ),
                 FieldDefinitions::repeaterField(
                     'field_options_social_links',
@@ -663,9 +663,9 @@ class Options
                                 ],
                                 'linkedin',
                                 true,
-                                ''
+                                '',
                             ),
-                            ['wrapper' => ['width' => '40']]
+                            ['wrapper' => ['width' => '40']],
                         ),
                         array_merge(
                             FieldDefinitions::urlField(
@@ -674,15 +674,15 @@ class Options
                                 'url',
                                 '',
                                 null,
-                                'https://linkedin.com/company/...'
+                                'https://linkedin.com/company/...',
                             ),
-                            ['wrapper' => ['width' => '60']]
+                            ['wrapper' => ['width' => '60']],
                         ),
                     ],
                     __('Kanal hinzufügen', 'wp-starter'),
                     0,
                     'table',
-                    ''
+                    '',
                 ),
             ],
             'location' => [
@@ -711,16 +711,16 @@ class Options
                 FieldDefinitions::infoBoxField(
                     'field_options_analytics_success',
                     __('<strong>Cookie-freie Website</strong><br>Dieses Theme verwendet ausschließlich DSGVO-konforme Analytics ohne Cookies. Kein Cookie-Banner erforderlich!', 'wp-starter'),
-                    'success'
+                    'success',
                 ),
                 FieldDefinitions::infoBoxField(
                     'field_options_analytics_rybbit',
                     sprintf(
                         /* translators: %s: URL to Rybbit Analytics settings */
                         __('<strong>Rybbit Analytics</strong><br>Analytics wird über das Rybbit-Plugin konfiguriert. Gehe zu <a href="%s">Einstellungen → Rybbit Analytics</a>, um deine Site ID einzutragen.', 'wp-starter'),
-                        esc_url(admin_url('options-general.php?page=rybbit-analytics'))
+                        esc_url(admin_url('options-general.php?page=rybbit-analytics')),
                     ),
-                    'info'
+                    'info',
                 ),
             ],
             'location' => [
@@ -753,11 +753,11 @@ class Options
             // Page is in trash - offer to restore or delete permanently
             $restoreUrl = wp_nonce_url(
                 admin_url('?' . ThemeContext::kebabPrefix() . '-restore-styleguide=1'),
-                ThemeContext::kebabPrefix() . '-restore-styleguide'
+                ThemeContext::kebabPrefix() . '-restore-styleguide',
             );
             $deleteUrl = wp_nonce_url(
                 admin_url('?' . ThemeContext::kebabPrefix() . '-delete-styleguide=1'),
-                ThemeContext::kebabPrefix() . '-delete-styleguide'
+                ThemeContext::kebabPrefix() . '-delete-styleguide',
             );
             $statusMessage = sprintf(
                 '<div style="padding: 15px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">
@@ -768,7 +768,7 @@ class Options
                     </p>
                 </div>',
                 esc_url($restoreUrl),
-                esc_url($deleteUrl)
+                esc_url($deleteUrl),
             );
         } elseif ($styleguideExists) {
             $editUrl = get_edit_post_link( (int) $styleguidePageId, 'raw');
@@ -782,7 +782,7 @@ class Options
                     </p>
                 </div>',
                 esc_url($editUrl ?? ''),
-                esc_url($viewUrl ?? '')
+                esc_url($viewUrl ?? ''),
             );
         } else {
             // Clear the option if it references a non-existent page
@@ -791,7 +791,7 @@ class Options
             }
             $createUrl = wp_nonce_url(
                 admin_url('?' . ThemeContext::kebabPrefix() . '-create-styleguide=1'),
-                ThemeContext::kebabPrefix() . '-create-styleguide'
+                ThemeContext::kebabPrefix() . '-create-styleguide',
             );
             $statusMessage = sprintf(
                 '<div style="padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; margin-bottom: 20px;">
@@ -800,14 +800,14 @@ class Options
                         <a href="%s" class="button button-primary">Styleguide-Seite erstellen</a>
                     </p>
                 </div>',
-                esc_url($createUrl)
+                esc_url($createUrl),
             );
         }
 
         // Regenerate option (always show)
         $regenerateUrl = wp_nonce_url(
             admin_url('?' . ThemeContext::kebabPrefix() . '-regenerate-styleguide=1'),
-            ThemeContext::kebabPrefix() . '-regenerate-styleguide'
+            ThemeContext::kebabPrefix() . '-regenerate-styleguide',
         );
         $regenerateMessage = sprintf(
             '<div style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
@@ -817,14 +817,14 @@ class Options
                     <a href="%s" class="button" onclick="return confirm(\'Styleguide-Seite wirklich neu erstellen? Die bestehende Seite wird gelöscht.\');">Neu generieren</a>
                 </p>
             </div>',
-            esc_url($regenerateUrl)
+            esc_url($regenerateUrl),
         );
 
         // Content Setup section
         $contentSetupComplete = get_option(ThemeContext::optionKey('content_setup_complete'));
         $contentSetupUrl = wp_nonce_url(
             admin_url('?' . ThemeContext::kebabPrefix() . '-rerun-content-setup=1'),
-            ThemeContext::kebabPrefix() . '-rerun-content-setup'
+            ThemeContext::kebabPrefix() . '-rerun-content-setup',
         );
 
         if ($contentSetupComplete) {
@@ -835,7 +835,7 @@ class Options
                         <a href="%s" class="button" onclick="return confirm(\'Content-Setup wirklich erneut ausführen? Bestehende Seiten bleiben erhalten, fehlende werden erstellt.\');">Erneut ausführen</a>
                     </p>
                 </div>',
-                esc_url($contentSetupUrl)
+                esc_url($contentSetupUrl),
             );
         } else {
             $contentSetupMessage = sprintf(
@@ -846,7 +846,7 @@ class Options
                         <a href="%s" class="button button-primary">Content-Setup jetzt ausführen</a>
                     </p>
                 </div>',
-                esc_url($contentSetupUrl)
+                esc_url($contentSetupUrl),
             );
         }
 
@@ -921,12 +921,12 @@ class Options
 
         $generateUrl = wp_nonce_url(
             admin_url('?' . ThemeContext::kebabPrefix() . '-generate-demo-posts=1'),
-            ThemeContext::kebabPrefix() . '-generate-demo-posts'
+            ThemeContext::kebabPrefix() . '-generate-demo-posts',
         );
 
         $deleteUrl = wp_nonce_url(
             admin_url('?' . ThemeContext::kebabPrefix() . '-delete-demo-posts=1'),
-            ThemeContext::kebabPrefix() . '-delete-demo-posts'
+            ThemeContext::kebabPrefix() . '-delete-demo-posts',
         );
 
         if ($postCount > 0) {
@@ -942,7 +942,7 @@ class Options
                 $postCount,
                 esc_url($generateUrl),
                 esc_url($deleteUrl),
-                esc_url(admin_url('edit.php'))
+                esc_url(admin_url('edit.php')),
             );
         }
 
@@ -954,7 +954,7 @@ class Options
                     <a href="%s" class="button button-primary">Demo-Beiträge erstellen</a>
                 </p>
             </div>',
-            esc_url($generateUrl)
+            esc_url($generateUrl),
         );
     }
 
@@ -973,7 +973,7 @@ class Options
                     'blog_title',
                     false,
                     __('Überschrift der Blog-Seite. Leer lassen für Standard „Blog".', 'wp-starter'),
-                    __('Blog', 'wp-starter')
+                    __('Blog', 'wp-starter'),
                 ),
                 FieldDefinitions::textareaField(
                     'field_options_blog_description',
@@ -981,7 +981,7 @@ class Options
                     'blog_description',
                     3,
                     __('Einleitungstext unter dem Titel.', 'wp-starter'),
-                    __('Einblicke, Neuigkeiten und Wissenswertes...', 'wp-starter')
+                    __('Einblicke, Neuigkeiten und Wissenswertes...', 'wp-starter'),
                 ),
             ],
             'location' => [
@@ -1032,7 +1032,7 @@ class Options
                 // Tab: Standard (JSON from Figma)
                 FieldDefinitions::tabField(
                     'field_tokens_tab_standard',
-                    __('Standard (Figma)', 'wp-starter')
+                    __('Standard (Figma)', 'wp-starter'),
                 ),
 
                 // Info box for standard workflow
@@ -1040,7 +1040,7 @@ class Options
                     'field_tokens_standard_info',
                     '<strong>' . esc_html__('Figma-Workflow', 'wp-starter') . '</strong><br>' .
                     esc_html__('Exportiere Design-Tokens aus Figma, lade sie hier hoch und generiere das CSS. Dies ist der empfohlene Weg für konsistente Design-Systeme.', 'wp-starter'),
-                    'info'
+                    'info',
                 ),
 
                 // Download section
@@ -1090,7 +1090,7 @@ class Options
                 // Tab: Extended (Color Pickers for users without Figma)
                 FieldDefinitions::tabField(
                     'field_tokens_tab_extended',
-                    __('Erweitert (ohne Figma)', 'wp-starter')
+                    __('Erweitert (ohne Figma)', 'wp-starter'),
                 ),
 
                 // Info box for extended
@@ -1098,7 +1098,7 @@ class Options
                     'field_tokens_extended_info',
                     '<strong>' . esc_html__('Direkte Farbanpassung', 'wp-starter') . '</strong><br>' .
                     esc_html__('Hier kannst du Farben direkt anpassen, ohne Figma zu verwenden. Nach dem Speichern werden die Token-Dateien automatisch aktualisiert und das CSS neu generiert.', 'wp-starter'),
-                    'info'
+                    'info',
                 ),
 
                 // === Brand Colors (Palettes) ===
@@ -1119,7 +1119,7 @@ class Options
                     'token_accent_color',
                     '#FF6B35',
                     false,
-                    __('Die Hauptakzentfarbe. Wird für CTAs, Links und interaktive Elemente verwendet.', 'wp-starter')
+                    __('Die Hauptakzentfarbe. Wird für CTAs, Links und interaktive Elemente verwendet.', 'wp-starter'),
                 ),
 
                 // Primary Color
@@ -1129,7 +1129,7 @@ class Options
                     'token_primary_color',
                     '#1E3A5F',
                     false,
-                    __('Die Hauptmarkenfarbe. Oft für Headlines, Navigation und wichtige UI-Elemente.', 'wp-starter')
+                    __('Die Hauptmarkenfarbe. Oft für Headlines, Navigation und wichtige UI-Elemente.', 'wp-starter'),
                 ),
 
                 // Secondary Color
@@ -1139,7 +1139,7 @@ class Options
                     'token_secondary_color',
                     '#3B82F6',
                     false,
-                    __('Eine ergänzende Farbe für sekundäre Elemente und Variationen.', 'wp-starter')
+                    __('Eine ergänzende Farbe für sekundäre Elemente und Variationen.', 'wp-starter'),
                 ),
 
                 // Gray Color
@@ -1149,7 +1149,7 @@ class Options
                     'token_gray_color',
                     '#6B7280',
                     false,
-                    __('Basis-Grauton für Text, Rahmen und neutrale Elemente.', 'wp-starter')
+                    __('Basis-Grauton für Text, Rahmen und neutrale Elemente.', 'wp-starter'),
                 ),
 
                 // === Status Colors ===
@@ -1170,7 +1170,7 @@ class Options
                     'token_success_color',
                     '#22C55E',
                     false,
-                    __('Farbe für Erfolgsmeldungen und positive Aktionen.', 'wp-starter')
+                    __('Farbe für Erfolgsmeldungen und positive Aktionen.', 'wp-starter'),
                 ),
 
                 // Warning Color
@@ -1180,7 +1180,7 @@ class Options
                     'token_warning_color',
                     '#F59E0B',
                     false,
-                    __('Farbe für Warnungen und Hinweise.', 'wp-starter')
+                    __('Farbe für Warnungen und Hinweise.', 'wp-starter'),
                 ),
 
                 // Error Color
@@ -1190,7 +1190,7 @@ class Options
                     'token_error_color',
                     '#EF4444',
                     false,
-                    __('Farbe für Fehlermeldungen und kritische Aktionen.', 'wp-starter')
+                    __('Farbe für Fehlermeldungen und kritische Aktionen.', 'wp-starter'),
                 ),
             ],
             'location' => [
@@ -1211,13 +1211,27 @@ class Options
     }
 
     /**
+     * Returns an error notice HTML string when DesignTokenServiceProvider is unavailable,
+     * or null when it is loaded and safe to use.
+     */
+    private static function designTokenGuard(): ?string
+    {
+        if (!class_exists(\WordpressStarter\Providers\DesignTokenServiceProvider::class)) {
+            return '<p class="notice notice-error">' . esc_html__('DesignTokenServiceProvider nicht geladen.', 'wp-starter') . '</p>';
+        }
+
+        return null;
+    }
+
+    /**
      * Generate download buttons HTML for token files
      */
     private static function getTokenDownloadButtons(): string
     {
         // Check if service provider class exists
-        if (!class_exists(\WordpressStarter\Providers\DesignTokenServiceProvider::class)) {
-            return '<p class="notice notice-error">' . esc_html__('DesignTokenServiceProvider nicht geladen.', 'wp-starter') . '</p>';
+        $guard = self::designTokenGuard();
+        if ($guard !== null) {
+            return $guard;
         }
 
         $downloadUrls = [
@@ -1239,7 +1253,7 @@ class Options
             esc_html__('light.tokens.json', 'wp-starter'),
             esc_url($downloadUrls['dark']),
             esc_html__('dark.tokens.json', 'wp-starter'),
-            esc_html__('Lade die Dateien herunter, bearbeite sie in einem Texteditor und lade sie unten wieder hoch.', 'wp-starter')
+            esc_html__('Lade die Dateien herunter, bearbeite sie in einem Texteditor und lade sie unten wieder hoch.', 'wp-starter'),
         );
     }
 
@@ -1248,9 +1262,9 @@ class Options
      */
     private static function getTokenUploadForm(): string
     {
-        // Check if service provider class exists
-        if (!class_exists(\WordpressStarter\Providers\DesignTokenServiceProvider::class)) {
-            return '<p class="notice notice-error">' . esc_html__('DesignTokenServiceProvider nicht geladen.', 'wp-starter') . '</p>';
+        $guard = self::designTokenGuard();
+        if ($guard !== null) {
+            return $guard;
         }
 
         $nonce = \WordpressStarter\Providers\DesignTokenServiceProvider::getUploadNonce();
@@ -1283,7 +1297,7 @@ class Options
             esc_html__('Light Mode (Semantische Tokens)', 'wp-starter'),
             esc_html__('Dark Mode (Semantische Tokens)', 'wp-starter'),
             esc_html__('Tokens hochladen und anwenden', 'wp-starter'),
-            esc_html__('Du kannst einzelne Dateien oder alle drei gleichzeitig hochladen. Ein Backup wird automatisch erstellt.', 'wp-starter')
+            esc_html__('Du kannst einzelne Dateien oder alle drei gleichzeitig hochladen. Ein Backup wird automatisch erstellt.', 'wp-starter'),
         );
     }
 
@@ -1292,9 +1306,9 @@ class Options
      */
     private static function getBackupRestoreForm(): string
     {
-        // Check if service provider class exists
-        if (!class_exists(\WordpressStarter\Providers\DesignTokenServiceProvider::class)) {
-            return '<p class="notice notice-error">' . esc_html__('DesignTokenServiceProvider nicht geladen.', 'wp-starter') . '</p>';
+        $guard = self::designTokenGuard();
+        if ($guard !== null) {
+            return $guard;
         }
 
         $backupSets = \WordpressStarter\Providers\DesignTokenServiceProvider::getAvailableBackupSets();
@@ -1304,7 +1318,7 @@ class Options
                 '<div style="background: #f0f0f1; padding: 15px; border-radius: 4px;">
                     <p style="margin: 0; color: #666;">%s</p>
                 </div>',
-                esc_html__('Keine Backups vorhanden. Backups werden automatisch erstellt, wenn Tokens geändert werden.', 'wp-starter')
+                esc_html__('Keine Backups vorhanden. Backups werden automatisch erstellt, wenn Tokens geändert werden.', 'wp-starter'),
             );
         }
 
@@ -1317,12 +1331,12 @@ class Options
             $label = sprintf(
                 '%s (%s)',
                 $backup['date'],
-                $typesLabel
+                $typesLabel,
             );
             $options .= sprintf(
                 '<option value="%s">%s</option>',
                 esc_attr($backup['timestamp']),
-                esc_html($label)
+                esc_html($label),
             );
         }
 
@@ -1349,7 +1363,7 @@ class Options
             $options,
             esc_js(__('Backup wirklich wiederherstellen? Die aktuellen Token-Dateien werden überschrieben.', 'wp-starter')),
             esc_html__('Wiederherstellen', 'wp-starter'),
-            esc_html__('Stellt alle Token-Dateien vom gewählten Zeitpunkt wieder her. Die aktuellen Dateien werden überschrieben.', 'wp-starter')
+            esc_html__('Stellt alle Token-Dateien vom gewählten Zeitpunkt wieder her. Die aktuellen Dateien werden überschrieben.', 'wp-starter'),
         );
     }
 
@@ -1358,9 +1372,9 @@ class Options
      */
     private static function getTokenStatusMessage(): string
     {
-        // Check if service provider class exists
-        if (!class_exists(\WordpressStarter\Providers\DesignTokenServiceProvider::class)) {
-            return '<p class="notice notice-error">' . esc_html__('DesignTokenServiceProvider nicht geladen.', 'wp-starter') . '</p>';
+        $guard = self::designTokenGuard();
+        if ($guard !== null) {
+            return $guard;
         }
 
         $lastBackup = \WordpressStarter\Providers\DesignTokenServiceProvider::getLastBackupTime();
@@ -1370,7 +1384,7 @@ class Options
             ? sprintf(
                 /* translators: %s: date and time */
                 __('Letztes Backup: %s', 'wp-starter'),
-                $lastBackup
+                $lastBackup,
             )
             : __('Noch kein Backup vorhanden', 'wp-starter');
 
@@ -1383,7 +1397,7 @@ class Options
             esc_html($backupStatus),
             esc_html__('Klicke auf den Button unten, um die CSS-Tokens manuell neu zu generieren.', 'wp-starter'),
             esc_url($regenerateUrl),
-            esc_html__('CSS neu generieren', 'wp-starter')
+            esc_html__('CSS neu generieren', 'wp-starter'),
         );
     }
 }

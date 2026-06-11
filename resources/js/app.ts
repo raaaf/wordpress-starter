@@ -4,6 +4,7 @@ import collapse from '@alpinejs/collapse';
 import intersect from '@alpinejs/intersect';
 import type { AlpineMagics } from '../../src/types/alpine';
 import { registerMemberAreaComponents } from './member-area';
+import { createStatsCounterCore } from './stats-counter';
 
 // Declare localized strings from WordPress (object name is fixed as 'themeStrings' for all themes)
 declare const themeStrings: {
@@ -149,65 +150,17 @@ export function createNavigationComponent(): NavigationComponent {
 // Stats Counter Component
 // ============================================
 
-export interface StatsCounterComponent extends AlpineMagics {
-  target: number;
-  current: number;
-  decimals: number;
-  duration: number;
-  started: boolean;
-  observer: IntersectionObserver | null;
-  init(): void;
-  animate(): void;
-}
+export type StatsCounterComponent = ReturnType<typeof createStatsCounterComponent>;
 
 export function createStatsCounterComponent(target: number): StatsCounterComponent {
-  const decimals = (target.toString().split('.')[1] || '').length;
   return {
     // Alpine magic properties ($el, $nextTick, etc.) are injected at runtime
     ...({} as AlpineMagics),
-    target,
-    current: 0,
-    decimals,
-    duration: 2000,
-    started: false,
-    observer: null,
-
-    init() {
-      // Check for reduced motion preference - WCAG 2.3.3
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      this.observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting && !this.started) {
-            this.started = true;
-            this.observer?.disconnect();
-            // Skip animation if user prefers reduced motion
-            if (prefersReducedMotion) {
-              this.current = this.target;
-            } else {
-              this.animate();
-            }
-          }
-        },
-        { threshold: 0.5 }
-      );
-      this.observer.observe(this.$el as Element);
-    },
-
-    animate() {
-      const start = performance.now();
-      const step = (timestamp: number) => {
-        const progress = Math.min((timestamp - start) / this.duration, 1);
-        const multiplier = Math.pow(10, this.decimals);
-        this.current = Math.round(progress * this.target * multiplier) / multiplier;
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        } else {
-          this.current = this.target;
-        }
-      };
-      requestAnimationFrame(step);
-    },
+    ...createStatsCounterCore(target, {
+      respectReducedMotion: true,
+      useIntersectionObserver: true,
+      preserveDecimals: true,
+    }),
   };
 }
 
@@ -352,7 +305,6 @@ export async function initGalleryZoom(): Promise<void> {
 
 export interface BeforeAfterComponent {
   position: number;
-  init(): void;
   handleMouseDown(event: MouseEvent): void;
   handleTouchStart(event: TouchEvent): void;
 }
@@ -360,10 +312,6 @@ export interface BeforeAfterComponent {
 export function createBeforeAfterComponent(): BeforeAfterComponent {
   return {
     position: 50,
-
-    init() {
-      // Component initialized
-    },
 
     handleMouseDown(event: MouseEvent) {
       event.preventDefault();

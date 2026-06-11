@@ -31,12 +31,24 @@
             if (is_array($logoId)) {
                 $logoId = $logoId['ID'] ?? $logoId['id'] ?? null;
             }
-            $logoUrl = $logoId ? wp_get_attachment_image_url($logoId, 'logo') : '';
+            if ($logoId) {
+                $logoMeta = wp_get_attachment_metadata($logoId);
+                $logoW = $logoMeta['width'] ?? null;
+                $logoH = $logoMeta['height'] ?? null;
+                $logoUrl = wp_get_attachment_image_url($logoId, 'logo') ?: '';
+            } else {
+                $logoUrl = '';
+                $logoW = null;
+                $logoH = null;
+            }
             if ($logoUrl) {
                 $logoData[] = [
-                    'url' => $logoUrl,
-                    'link' => $logo['link'] ?? '',
-                    'name' => $logo['name'] ?? ''
+                    'id'     => $logoId,
+                    'url'    => $logoUrl,
+                    'link'   => $logo['link'] ?? '',
+                    'name'   => $logo['name'] ?? '',
+                    'width'  => $logoW,
+                    'height' => $logoH,
                 ];
             }
         }
@@ -75,18 +87,20 @@
                     <div class="flex-shrink-0 w-32 flex items-center justify-center">
                         @if($logo['link'])
                             <a
-                                href="{{ $logo['link'] }}"
+                                href="{{ esc_url($logo['link']) }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="block transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0"
-                                @if($logo['name']) title="{{ $logo['name'] }}" @endif
+                                @if($logo['name']) aria-label="{{ $logo['name'] }}" @endif
                             >
                                 <img
                                     src="{{ $logo['url'] }}"
-                                    alt="{{ $logo['name'] }}"
+                                    alt=""
                                     class="object-contain w-full h-12 dark:invert"
                                     loading="lazy"
-                                >
+                                    @if($logo['width']) width="{{ $logo['width'] }}" @endif
+                                    @if($logo['height']) height="{{ $logo['height'] }}" @endif
+                                ><span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
                             </a>
                         @else
                             <div class="transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0">
@@ -95,6 +109,8 @@
                                     alt="{{ $logo['name'] }}"
                                     class="object-contain w-full h-12 dark:invert"
                                     loading="lazy"
+                                    @if($logo['width']) width="{{ $logo['width'] }}" @endif
+                                    @if($logo['height']) height="{{ $logo['height'] }}" @endif
                                 >
                             </div>
                         @endif
@@ -104,21 +120,23 @@
                 {{-- Duplicate set for infinite scroll effect --}}
                 @if($autoplay)
                     @foreach($logoData as $logo)
-                        <div class="flex-shrink-0 w-32 flex items-center justify-center" aria-hidden="true" inert
+                        <div class="flex-shrink-0 w-32 flex items-center justify-center" aria-hidden="true" inert>
                             @if($logo['link'])
                                 <a
-                                    href="{{ $logo['link'] }}"
+                                    href="{{ esc_url($logo['link']) }}"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     class="block transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0"
-                                    @if($logo['name']) title="{{ $logo['name'] }}" @endif
+                                    @if($logo['name']) aria-label="{{ $logo['name'] }}" @endif
                                 >
                                     <img
                                         src="{{ $logo['url'] }}"
-                                        alt="{{ $logo['name'] }}"
+                                        alt=""
                                         class="object-contain w-full h-12 dark:invert"
                                         loading="lazy"
-                                    >
+                                        @if($logo['width']) width="{{ $logo['width'] }}" @endif
+                                        @if($logo['height']) height="{{ $logo['height'] }}" @endif
+                                    ><span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
                                 </a>
                             @else
                                 <div class="transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0">
@@ -127,6 +145,8 @@
                                         alt="{{ $logo['name'] }}"
                                         class="object-contain w-full h-12 dark:invert"
                                         loading="lazy"
+                                        @if($logo['width']) width="{{ $logo['width'] }}" @endif
+                                        @if($logo['height']) height="{{ $logo['height'] }}" @endif
                                     >
                                 </div>
                             @endif
@@ -150,6 +170,11 @@
                     }
                     100% {
                         transform: translateX(calc(-{{ count($logoData) }} * (8rem + 3rem)));
+                    }
+                }
+                @media (prefers-reduced-motion: reduce) {
+                    #{{ $uniqueId }} .logo-scroll {
+                        animation: none;
                     }
                 }
             </style>

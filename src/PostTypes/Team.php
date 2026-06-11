@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace WordpressStarter\PostTypes;
 
 use WordpressStarter\Acf\FieldDefinitions;
+use WP_Post;
+use WP_Query;
 
 /**
  * Team Member Custom Post Type
@@ -15,10 +17,15 @@ use WordpressStarter\Acf\FieldDefinitions;
 class Team extends AbstractPostType
 {
     protected static string $postType = 'team_member';
+
     protected static string $singular = 'Teammitglied';
+
     protected static string $plural = 'Team';
+
     protected static string $menuIcon = 'dashicons-groups';
+
     protected static int $menuPosition = 26;
+
     protected static bool $hasArchive = false;
 
     /** @var array<string> */
@@ -55,6 +62,7 @@ class Team extends AbstractPostType
                     $newColumns['display_order'] = __('Reihenfolge', 'wp-starter');
                 }
             }
+
             return $newColumns;
         });
 
@@ -62,7 +70,7 @@ class Team extends AbstractPostType
         add_action('manage_' . self::$postType . '_posts_custom_column', function (string $column, int $postId): void {
             switch ($column) {
                 case 'thumbnail':
-                    $thumbnail = get_the_post_thumbnail( $postId, [50, 50], ['style' => 'border-radius: 50%; object-fit: cover;'] );
+                    $thumbnail = get_the_post_thumbnail($postId, [50, 50], ['style' => 'border-radius: 50%; object-fit: cover;']);
                     // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_the_post_thumbnail() returns safe HTML
                     echo $thumbnail ?: '<span style="color: #999;">—</span>';
                     break;
@@ -83,11 +91,12 @@ class Team extends AbstractPostType
         add_filter('manage_edit-' . self::$postType . '_sortable_columns', function (array $columns): array {
             $columns['display_order'] = 'display_order';
             $columns['position'] = 'position';
+
             return $columns;
         });
 
         // Handle sorting
-        add_action('pre_get_posts', function (\WP_Query $query): void {
+        add_action('pre_get_posts', function (WP_Query $query): void {
             if (!is_admin() || !$query->is_main_query()) {
                 return;
             }
@@ -157,7 +166,7 @@ class Team extends AbstractPostType
                     999,
                     1,
                     '',
-                    __('Sortierreihenfolge (niedrigere Zahlen zuerst).', 'wp-starter')
+                    __('Sortierreihenfolge (niedrigere Zahlen zuerst).', 'wp-starter'),
                 ),
                 [
                     'key' => 'team_member_thumbnail_hint',
@@ -199,7 +208,7 @@ class Team extends AbstractPostType
                 'position',
                 false,
                 __('Jobtitel oder Rolle im Unternehmen.', 'wp-starter'),
-                __('z.B. Geschäftsführer', 'wp-starter')
+                __('z.B. Geschäftsführer', 'wp-starter'),
             ),
             FieldDefinitions::textareaField(
                 'team_member_bio',
@@ -207,7 +216,7 @@ class Team extends AbstractPostType
                 'bio',
                 3,
                 __('Kurze Beschreibung der Person.', 'wp-starter'),
-                __('z.B. Seit 2020 im Unternehmen...', 'wp-starter')
+                __('z.B. Seit 2020 im Unternehmen...', 'wp-starter'),
             ),
 
             // Accordion: Kontaktdaten
@@ -260,6 +269,7 @@ class Team extends AbstractPostType
      * @param int $limit Number of members to return (-1 for all)
      * @param string $orderby Order by field ('menu_order', 'title', 'date', 'rand')
      * @param string $order Order direction
+     *
      * @return array<int, array{
      *   id: int,
      *   name: string,
@@ -290,17 +300,7 @@ class Team extends AbstractPostType
         $members = [];
         foreach ($posts as $post) {
             $fields = get_fields($post->ID) ?: [];
-            $members[] = [
-                'id'       => $post->ID,
-                'name'     => $post->post_title,
-                'position' => $fields['position'] ?? '',
-                'bio'      => $fields['bio'] ?? '',
-                'email'    => $fields['email'] ?: null,
-                'phone'    => $fields['phone'] ?: null,
-                'linkedin' => $fields['linkedin'] ?: null,
-                'xing'     => $fields['xing'] ?: null,
-                'image'    => get_post_thumbnail_id($post->ID) ?: null,
-            ];
+            $members[] = self::buildMemberData($post, $fields);
         }
 
         return $members;
@@ -310,6 +310,7 @@ class Team extends AbstractPostType
      * Get a single team member by ID
      *
      * @param int $id Post ID
+     *
      * @return array<string, mixed>|null
      */
     public static function getMember(int $id): ?array
@@ -319,15 +320,29 @@ class Team extends AbstractPostType
             return null;
         }
 
+        $fields = get_fields($post->ID) ?: [];
+
+        return self::buildMemberData($post, $fields);
+    }
+
+    /**
+     * Build the member data array from a post and pre-fetched fields.
+     *
+     * @param array<string, mixed> $fields Result of get_fields($post->ID)
+     *
+     * @return array{id: int, name: string, position: string, bio: string, email: string|null, phone: string|null, linkedin: string|null, xing: string|null, image: int|null}
+     */
+    private static function buildMemberData(WP_Post $post, array $fields): array
+    {
         return [
             'id' => $post->ID,
             'name' => $post->post_title,
-            'position' => get_field('position', $post->ID) ?: '',
-            'bio' => get_field('bio', $post->ID) ?: '',
-            'email' => get_field('email', $post->ID) ?: null,
-            'phone' => get_field('phone', $post->ID) ?: null,
-            'linkedin' => get_field('linkedin', $post->ID) ?: null,
-            'xing' => get_field('xing', $post->ID) ?: null,
+            'position' => $fields['position'] ?? '',
+            'bio' => $fields['bio'] ?? '',
+            'email' => $fields['email'] ?: null,
+            'phone' => $fields['phone'] ?: null,
+            'linkedin' => $fields['linkedin'] ?: null,
+            'xing' => $fields['xing'] ?: null,
             'image' => get_post_thumbnail_id($post->ID) ?: null,
         ];
     }

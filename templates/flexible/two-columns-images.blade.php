@@ -20,9 +20,12 @@
     $column_2 = get_sub_field('column_2');
     $accordion_2 = get_sub_field('accordion_2') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
+    $layoutId = uniqid();
 
-    // Handle ID vs array format for images with proper sizing
+    // Preserve numeric IDs for wp_get_attachment_image; also build array fallback
+    $imageIds = [];
     foreach (['image_1', 'image_2'] as $var) {
+        $imageIds[$var] = is_numeric($$var) ? (int) $$var : null;
         if (is_numeric($$var)) {
             $imgSrc = wp_get_attachment_image_src($$var, 'hero-split');
             $$var = [
@@ -42,6 +45,7 @@
             @php
                 $lbl = ${'label_' . $col};
                 $img = ${'image_' . $col};
+                $imgId = $imageIds['image_' . $col];
                 $text = ${'column_' . $col};
                 $acc = ${'accordion_' . $col};
             @endphp
@@ -52,7 +56,14 @@
                         <p class="text-sm font-bold uppercase tracking-wider text-content-secondary mb-4">{{ $lbl }}</p>
                     </div>
                 @endif
-                @if($img && !empty($img['url']))
+                @if($imgId)
+                    {!! wp_get_attachment_image($imgId, 'hero-split', false, [
+                        'class' => 'w-full object-cover',
+                        'alt' => $img['alt'] ?? '',
+                        'loading' => 'lazy',
+                        'decoding' => 'async',
+                    ]) !!}
+                @elseif($img && !empty($img['url']))
                     <img src="{{ $img['url'] }}"
                          alt="{{ $img['alt'] ?? '' }}"
                          @if(!empty($img['width']) && !empty($img['height']))width="{{ $img['width'] }}" height="{{ $img['height'] }}"@endif
@@ -61,37 +72,14 @@
                 @endif
                 @if($text)
                     <div class="p-6 lg:p-8">
-                        <x-prose>{!! $text !!}</x-prose>
+                        <x-prose>@kses($text)</x-prose>
                     </div>
                 @endif
                 @if(!empty($acc))
-                    <div class="p-6 lg:p-8" x-data="{ active: null }">
-                        @foreach($acc as $aIdx => $aItem)
-                            <div class="border-b border-line last:border-b-0">
-                                <button id="acc-btn-{{ $col }}-{{ $aIdx }}"
-                                        @click="active = active === {{ $aIdx }} ? null : {{ $aIdx }}"
-                                        :aria-expanded="active === {{ $aIdx }}"
-                                        aria-controls="acc-{{ $col }}-{{ $aIdx }}"
-                                        class="group flex items-center justify-between w-full py-3 font-bold text-left cursor-pointer transition-colors hover:text-content-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus focus-visible:ring-offset-2"
-                                        :class="{ 'text-content-brand': active === {{ $aIdx }} }">
-                                    {{ $aItem['title'] }}
-                                    <svg class="w-4 h-4 shrink-0 transition-transform duration-200"
-                                         :class="{ 'rotate-180': active === {{ $aIdx }} }"
-                                         fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
-                                <div x-show="active === {{ $aIdx }}"
-                                     x-collapse
-                                     id="acc-{{ $col }}-{{ $aIdx }}"
-                                     role="region"
-                                     aria-labelledby="acc-btn-{{ $col }}-{{ $aIdx }}"
-                                     class="pb-4">
-                                    <x-prose class="text-sm">{!! $aItem['content'] !!}</x-prose>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
+                    @include('partials.inline-accordion', [
+                        'items' => $acc,
+                        'idPrefix' => 'acc-tci-' . $layoutId . '-' . $col,
+                    ])
                 @endif
             </x-card>
             @endif

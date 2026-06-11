@@ -112,7 +112,7 @@ body.mce-content-body p:last-child {
 body.mce-content-body a {
   color: var(--text-link);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 4px;
 }
 
 body.mce-content-body ul,
@@ -239,7 +239,7 @@ body.mce-content-body .text-h3 {
 }
 
 body.mce-content-body .text-h4 {
-  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h4-size);
   font-weight: var(--typography-h4-weight);
   line-height: var(--typography-h4-line-height);
@@ -247,7 +247,7 @@ body.mce-content-body .text-h4 {
 }
 
 body.mce-content-body .text-h5 {
-  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h5-size);
   font-weight: var(--typography-h5-weight);
   line-height: var(--typography-h5-line-height);

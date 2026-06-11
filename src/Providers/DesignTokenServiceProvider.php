@@ -133,14 +133,14 @@ class DesignTokenServiceProvider extends ServiceProvider
         // Prefill color pickers with current token values (palette colors)
         foreach (self::PALETTE_COLORS as $colorName => $fieldKey) {
             add_filter("acf/load_field/key={$fieldKey}", function (array $field) use ($colorName) {
-                return $this->prefillPaletteColor($field, $colorName);
+                return $this->prefillColor($field, $colorName, false);
             });
         }
 
         // Prefill color pickers with current token values (status colors)
         foreach (self::STATUS_COLORS as $colorName => $fieldKey) {
             add_filter("acf/load_field/key={$fieldKey}", function (array $field) use ($colorName) {
-                return $this->prefillStatusColor($field, $colorName);
+                return $this->prefillColor($field, $colorName, true);
             });
         }
 
@@ -166,7 +166,7 @@ class DesignTokenServiceProvider extends ServiceProvider
         delete_transient(self::transientTokenNotice());
 
         $type = isset($notice['type']) ? sanitize_key($notice['type']) : 'info';
-        $message = isset($notice['message']) ? $notice['message'] : '';
+        $message = $notice['message'] ?? '';
 
         if (empty($message)) {
             return;
@@ -175,7 +175,7 @@ class DesignTokenServiceProvider extends ServiceProvider
         printf(
             '<div class="notice notice-%s is-dismissible"><p>%s</p></div>',
             esc_attr($type),
-            wp_kses_post(nl2br($message))
+            wp_kses_post(nl2br($message)),
         );
     }
 
@@ -500,13 +500,15 @@ class DesignTokenServiceProvider extends ServiceProvider
     }
 
     /**
-     * Prefill palette color picker with current token value
+     * Prefill color picker with current token value
      *
      * @param array<string, mixed> $field ACF field configuration
-     * @param string $colorName Color name (accent, primary, secondary, gray)
+     * @param string $colorName Color name (palette: accent, primary, secondary, gray; status: success, warning, error)
+     * @param bool $isStatus Whether the color is a status color (otherwise palette)
+     *
      * @return array<string, mixed>
      */
-    private function prefillPaletteColor(array $field, string $colorName): array
+    private function prefillColor(array $field, string $colorName, bool $isStatus): array
     {
         // Get option name from field key
         $optionName = 'options_token_' . $colorName . '_color';
@@ -514,34 +516,14 @@ class DesignTokenServiceProvider extends ServiceProvider
         // Use get_option directly to avoid recursion (get_field triggers load_field filter)
         $savedValue = get_option($optionName);
         if (!$savedValue) {
-            $currentColor = self::getCurrentTokenColor($colorName, '500');
+            $currentColor = $isStatus
+                ? self::getCurrentStatusColor($colorName)
+                : self::getCurrentTokenColor($colorName, '500');
             if ($currentColor) {
                 $field['default_value'] = $currentColor;
             }
         }
-        return $field;
-    }
 
-    /**
-     * Prefill status color picker with current token value
-     *
-     * @param array<string, mixed> $field ACF field configuration
-     * @param string $colorName Color name (success, warning, error)
-     * @return array<string, mixed>
-     */
-    private function prefillStatusColor(array $field, string $colorName): array
-    {
-        // Get option name from field key
-        $optionName = 'options_token_' . $colorName . '_color';
-
-        // Use get_option directly to avoid recursion (get_field triggers load_field filter)
-        $savedValue = get_option($optionName);
-        if (!$savedValue) {
-            $currentColor = self::getCurrentStatusColor($colorName);
-            if ($currentColor) {
-                $field['default_value'] = $currentColor;
-            }
-        }
         return $field;
     }
 
@@ -598,6 +580,92 @@ class DesignTokenServiceProvider extends ServiceProvider
     }
 
     /**
+     * Validate uploaded token files (shared by form POST and AJAX upload paths).
+     *
+     * Checks upload errors, MIME type, readability, and token JSON validity
+     * for each token type present in the given files array.
+     *
+     * @param array<string, array<string, mixed>> $files Raw $_FILES array
+     *
+     * @return array{errors: array<int, string>, uploaded: array<string, string>} Error messages and valid tmp paths keyed by token type
+     */
+    private function validateUploadedFiles(array $files): array
+    {
+        $validator = new DesignTokenValidator();
+        $errors = [];
+        $uploaded = [];
+
+        foreach (self::TOKEN_TYPES as $type) {
+            $fileKey = "token_{$type}";
+
+            // Check if file was uploaded
+            if (!isset($files[$fileKey]['error']) || !isset($files[$fileKey]['tmp_name'])) {
+                continue;
+            }
+
+            $fileError = (int) $files[$fileKey]['error'];
+            $tmpName = $files[$fileKey]['tmp_name'];
+
+            if ($fileError === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+
+            if ($fileError !== UPLOAD_ERR_OK) {
+                $errors[] = sprintf(
+                    /* translators: 1: token type, 2: error code */
+                    __('Upload-Fehler für %1$s: Code %2$s', 'wp-starter'),
+                    $type,
+                    (string) $fileError,
+                );
+                continue;
+            }
+
+            // Validate tmp_name is a valid uploaded file
+            if (!is_uploaded_file($tmpName)) {
+                continue;
+            }
+
+            // Check MIME type
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($tmpName);
+
+            if (!in_array($mimeType, ['application/json', 'text/plain'], true)) {
+                $errors[] = sprintf(
+                    /* translators: %s: token type */
+                    __('Ungültiger Dateityp für %s', 'wp-starter'),
+                    $type,
+                );
+                continue;
+            }
+
+            // Read and validate JSON
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+            $content = file_get_contents($tmpName);
+            if ($content === false) {
+                $errors[] = sprintf(
+                    /* translators: %s: token type */
+                    __('Konnte Datei %s nicht lesen', 'wp-starter'),
+                    $type,
+                );
+                continue;
+            }
+
+            $validation = $validator->validate($content, $type);
+
+            if (!$validation['valid']) {
+                foreach ($validation['errors'] as $error) {
+                    $errors[] = "{$type}: {$error}";
+                }
+                continue;
+            }
+
+            $uploaded[$type] = $tmpName;
+        }
+
+        return ['errors' => $errors, 'uploaded' => $uploaded];
+    }
+
+    /**
      * Handle token file upload
      */
     private function handleUploadTokens(): void
@@ -622,94 +690,25 @@ class DesignTokenServiceProvider extends ServiceProvider
         // Rate limiting
         if (!RateLimiter::check('token_upload', 5, 60)) {
             $this->addAdminNotice('error', __('Zu viele Anfragen. Bitte warte eine Minute.', 'wp-starter'));
+
             return;
         }
 
-        $validator = new DesignTokenValidator();
-        $errors = [];
-        $uploaded = [];
-
-        // Process each token type
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- File uploads handled via WordPress file functions
-        $files = $_FILES;
-
-        foreach (self::TOKEN_TYPES as $type) {
-            $fileKey = "token_{$type}";
-
-            // Check if file was uploaded
-            if (!isset($files[$fileKey]['error']) || !isset($files[$fileKey]['tmp_name'])) {
-                continue;
-            }
-
-            $fileError = (int) $files[$fileKey]['error'];
-            $tmpName = $files[$fileKey]['tmp_name'];
-
-            if ($fileError === UPLOAD_ERR_NO_FILE) {
-                continue;
-            }
-
-            if ($fileError !== UPLOAD_ERR_OK) {
-                $errors[] = sprintf(
-                    /* translators: 1: token type, 2: error code */
-                    __('Upload-Fehler für %1$s: Code %2$s', 'wp-starter'),
-                    $type,
-                    (string) $fileError
-                );
-                continue;
-            }
-
-            // Validate tmp_name is a valid uploaded file
-            if (!is_uploaded_file($tmpName)) {
-                continue;
-            }
-
-            // Check MIME type
-            $finfo = new \finfo(FILEINFO_MIME_TYPE);
-            $mimeType = $finfo->file($tmpName);
-
-            if (!in_array($mimeType, ['application/json', 'text/plain'], true)) {
-                $errors[] = sprintf(
-                    /* translators: %s: token type */
-                    __('Ungültiger Dateityp für %s', 'wp-starter'),
-                    $type
-                );
-                continue;
-            }
-
-            // Read and validate JSON
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-            $content = file_get_contents($tmpName);
-            if ($content === false) {
-                $errors[] = sprintf(
-                    /* translators: %s: token type */
-                    __('Konnte Datei %s nicht lesen', 'wp-starter'),
-                    $type
-                );
-                continue;
-            }
-
-            $validation = $validator->validate($content, $type);
-
-            if (!$validation['valid']) {
-                foreach ($validation['errors'] as $error) {
-                    $errors[] = "{$type}: {$error}";
-                }
-                continue;
-            }
-
-            $uploaded[$type] = $tmpName;
-        }
+        ['errors' => $errors, 'uploaded' => $uploaded] = $this->validateUploadedFiles($_FILES);
 
         if (!empty($errors)) {
             $this->addAdminNotice(
                 'error',
-                __('Token-Upload fehlgeschlagen:', 'wp-starter') . '<ul><li>' . implode('</li><li>', array_map('esc_html', $errors)) . '</li></ul>'
+                __('Token-Upload fehlgeschlagen:', 'wp-starter') . '<ul><li>' . implode('</li><li>', array_map('esc_html', $errors)) . '</li></ul>',
             );
+
             return;
         }
 
         if (empty($uploaded)) {
             $this->addAdminNotice('warning', __('Keine Dateien zum Upload ausgewählt.', 'wp-starter'));
+
             return;
         }
 
@@ -727,13 +726,14 @@ class DesignTokenServiceProvider extends ServiceProvider
                 $copyErrors[] = sprintf(
                     /* translators: %s: token type */
                     __('Konnte %s nicht speichern', 'wp-starter'),
-                    $type
+                    $type,
                 );
             }
         }
 
         if (!empty($copyErrors)) {
             $this->addAdminNotice('error', implode('<br>', array_map('esc_html', $copyErrors)));
+
             return;
         }
 
@@ -849,12 +849,14 @@ class DesignTokenServiceProvider extends ServiceProvider
 
         if (empty($timestamp)) {
             $this->addAdminNotice('error', __('Kein Backup-Zeitpunkt ausgewählt.', 'wp-starter'));
+
             return;
         }
 
         // Validate timestamp format (YYYY-MM-DD_HH-MM-SS)
         if (!preg_match('/^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/', $timestamp)) {
             $this->addAdminNotice('error', __('Ungültiger Zeitstempel.', 'wp-starter'));
+
             return;
         }
 
@@ -878,13 +880,14 @@ class DesignTokenServiceProvider extends ServiceProvider
                 $errors[] = sprintf(
                     /* translators: %s: token type */
                     __('Konnte %s nicht wiederherstellen', 'wp-starter'),
-                    $type
+                    $type,
                 );
             }
         }
 
         if (empty($restored)) {
             $this->addAdminNotice('error', __('Keine Backup-Dateien für diesen Zeitpunkt gefunden.', 'wp-starter'));
+
             return;
         }
 
@@ -909,7 +912,7 @@ class DesignTokenServiceProvider extends ServiceProvider
             $noticeMessage .= sprintf(
                 /* translators: %s: list of restored token types */
                 __('Backup erfolgreich wiederhergestellt: %s', 'wp-starter'),
-                implode(', ', $restored)
+                implode(', ', $restored),
             );
         } else {
             $noticeMessage .= $result['message'];
@@ -948,77 +951,8 @@ class DesignTokenServiceProvider extends ServiceProvider
             wp_send_json_error(['message' => __('Zu viele Anfragen. Bitte warte eine Minute.', 'wp-starter')]);
         }
 
-        $validator = new DesignTokenValidator();
-        $errors = [];
-        $uploaded = [];
-
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- File uploads handled via WordPress file functions
-        $files = $_FILES;
-
-        foreach (self::TOKEN_TYPES as $type) {
-            $fileKey = "token_{$type}";
-
-            if (!isset($files[$fileKey]['error']) || !isset($files[$fileKey]['tmp_name'])) {
-                continue;
-            }
-
-            $fileError = (int) $files[$fileKey]['error'];
-            $tmpName = $files[$fileKey]['tmp_name'];
-
-            if ($fileError === UPLOAD_ERR_NO_FILE) {
-                continue;
-            }
-
-            if ($fileError !== UPLOAD_ERR_OK) {
-                $errors[] = sprintf(
-                    /* translators: 1: token type, 2: error code */
-                    __('Upload-Fehler für %1$s: Code %2$s', 'wp-starter'),
-                    $type,
-                    (string) $fileError
-                );
-                continue;
-            }
-
-            if (!is_uploaded_file($tmpName)) {
-                continue;
-            }
-
-            // Check MIME type
-            $finfo = new \finfo(FILEINFO_MIME_TYPE);
-            $mimeType = $finfo->file($tmpName);
-
-            if (!in_array($mimeType, ['application/json', 'text/plain'], true)) {
-                $errors[] = sprintf(
-                    /* translators: %s: token type */
-                    __('Ungültiger Dateityp für %s', 'wp-starter'),
-                    $type
-                );
-                continue;
-            }
-
-            // Read and validate JSON
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-            $content = file_get_contents($tmpName);
-            if ($content === false) {
-                $errors[] = sprintf(
-                    /* translators: %s: token type */
-                    __('Konnte Datei %s nicht lesen', 'wp-starter'),
-                    $type
-                );
-                continue;
-            }
-
-            $validation = $validator->validate($content, $type);
-
-            if (!$validation['valid']) {
-                foreach ($validation['errors'] as $error) {
-                    $errors[] = "{$type}: {$error}";
-                }
-                continue;
-            }
-
-            $uploaded[$type] = $tmpName;
-        }
+        ['errors' => $errors, 'uploaded' => $uploaded] = $this->validateUploadedFiles($_FILES);
 
         if (!empty($errors)) {
             wp_send_json_error([
@@ -1044,7 +978,7 @@ class DesignTokenServiceProvider extends ServiceProvider
                 $copyErrors[] = sprintf(
                     /* translators: %s: token type */
                     __('Konnte %s nicht speichern', 'wp-starter'),
-                    $type
+                    $type,
                 );
             }
         }
@@ -1121,7 +1055,7 @@ class DesignTokenServiceProvider extends ServiceProvider
                 $errors[] = sprintf(
                     /* translators: %s: token type */
                     __('Konnte %s nicht wiederherstellen', 'wp-starter'),
-                    $type
+                    $type,
                 );
             }
         }
@@ -1147,7 +1081,7 @@ class DesignTokenServiceProvider extends ServiceProvider
                 'message' => sprintf(
                     /* translators: %s: list of restored token types */
                     __('Backup erfolgreich wiederhergestellt: %s', 'wp-starter'),
-                    implode(', ', $restored)
+                    implode(', ', $restored),
                 ),
             ]);
         } else {
@@ -1183,13 +1117,14 @@ class DesignTokenServiceProvider extends ServiceProvider
         // so ACF's save_post fires with old color values that would overwrite the uploaded files
         if (get_transient(self::transientTokensJustUploaded())) {
             delete_transient(self::transientTokensJustUploaded());
+
             return;
         }
 
         // Check if color fields were submitted (more reliable than checking screen)
         // ACF handles nonce verification and we only check array keys, values are handled by ACF
         // phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-        $acfFields = isset( $_POST['acf'] ) && is_array( wp_unslash( $_POST['acf'] ) ) ? wp_unslash( $_POST['acf'] ) : [];
+        $acfFields = isset($_POST['acf']) && is_array(wp_unslash($_POST['acf'])) ? wp_unslash($_POST['acf']) : [];
         // phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
         // Check if any of our color field keys are in the submitted data
@@ -1222,7 +1157,7 @@ class DesignTokenServiceProvider extends ServiceProvider
         if ($result !== null) {
             set_transient(self::transientTokenNotice(), [
                 'type' => $result['success'] ? 'success' : 'error',
-                'message' => $result['message'] . ( ! empty( $result['details'] ) ? "\n" . $result['details'] : '' ),
+                'message' => $result['message'] . ( !empty($result['details']) ? "\n" . $result['details'] : '' ),
             ], 30);
         }
     }
@@ -1338,7 +1273,7 @@ class DesignTokenServiceProvider extends ServiceProvider
         array $primitives,
         ColorPaletteGenerator $generator,
         array $paletteColors,
-        array $statusColors
+        array $statusColors,
     ): void {
         $modes = ['light', 'dark'];
 
@@ -1377,6 +1312,7 @@ class DesignTokenServiceProvider extends ServiceProvider
      * @param array<string, mixed> &$tokens Semantic tokens (modified by reference)
      * @param array<string, mixed> $primitives Updated primitives
      * @param array<string, string> $paletteColors Changed palette colors
+     *
      * @return bool Whether any tokens were updated
      */
     private function updateSemanticReferences(array &$tokens, array $primitives, array $paletteColors): bool
@@ -1418,6 +1354,7 @@ class DesignTokenServiceProvider extends ServiceProvider
      * @param array<string, mixed> &$tokens Semantic tokens (modified by reference)
      * @param array<string, mixed> $primitives Updated primitives
      * @param array<string, string> $statusColors Changed status colors
+     *
      * @return bool Whether any tokens were updated
      */
     private function updateSemanticStatusColors(array &$tokens, array $primitives, array $statusColors): bool
@@ -1527,6 +1464,7 @@ class DesignTokenServiceProvider extends ServiceProvider
      * Create a color token in Figma format
      *
      * @param string $hex Hex color value
+     *
      * @return array<string, mixed> Token array
      */
     private function createColorToken(string $hex): array
@@ -1564,7 +1502,7 @@ class DesignTokenServiceProvider extends ServiceProvider
         // Create backup directory if needed
         if (!is_dir($backupDir)) {
             // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
-            mkdir($backupDir, 0755, true);
+            mkdir($backupDir, 0o755, true);
         }
 
         $timestamp = gmdate('Y-m-d_H-i-s');
@@ -1661,7 +1599,7 @@ class DesignTokenServiceProvider extends ServiceProvider
             $descriptors,
             $pipes,
             $themeDir,
-            $env
+            $env,
         );
 
         $output = [];
@@ -1693,7 +1631,7 @@ class DesignTokenServiceProvider extends ServiceProvider
                 $descriptors,
                 $buildPipes,
                 $themeDir,
-                $env
+                $env,
             );
 
             $buildOutput = [];
@@ -1728,7 +1666,7 @@ class DesignTokenServiceProvider extends ServiceProvider
             'message' => sprintf(
                 /* translators: %s: duration in seconds */
                 __('Design Tokens aktualisiert und Build abgeschlossen (%ss)', 'wp-starter'),
-                $duration
+                $duration,
             ),
             'duration' => $duration,
         ];
@@ -1868,7 +1806,7 @@ class DesignTokenServiceProvider extends ServiceProvider
             printf(
                 '<div class="notice notice-%s is-dismissible"><p>%s</p></div>',
                 esc_attr($type),
-                wp_kses_post($message)
+                wp_kses_post($message),
             );
         });
     }
@@ -1879,6 +1817,7 @@ class DesignTokenServiceProvider extends ServiceProvider
      * This is generated in PHP to avoid ACF's HTML escaping in message fields.
      *
      * @return string Form HTML
+     *
      * @phpstan-ignore method.unused (Reserved for future restore UI integration)
      */
     private function generateRestoreFormHtml(): string
@@ -1892,7 +1831,7 @@ class DesignTokenServiceProvider extends ServiceProvider
                     <p style="margin: 0; color: #666;">%s</p>
                 </div>',
                 esc_html__('Backup wiederherstellen', 'wp-starter'),
-                esc_html__('Keine Backups vorhanden. Backups werden automatisch erstellt, wenn Tokens geändert werden.', 'wp-starter')
+                esc_html__('Keine Backups vorhanden. Backups werden automatisch erstellt, wenn Tokens geändert werden.', 'wp-starter'),
             );
         }
 
@@ -1903,12 +1842,12 @@ class DesignTokenServiceProvider extends ServiceProvider
             $label = sprintf(
                 '%s (%s)',
                 $backup['date'],
-                $typesLabel
+                $typesLabel,
             );
             $options .= sprintf(
                 '<option value="%s">%s</option>',
                 esc_attr($backup['timestamp']),
-                esc_html($label)
+                esc_html($label),
             );
         }
 
@@ -1937,7 +1876,7 @@ class DesignTokenServiceProvider extends ServiceProvider
             $options,
             esc_js(__('Backup wirklich wiederherstellen? Die aktuellen Token-Dateien werden überschrieben.', 'wp-starter')),
             esc_html__('Wiederherstellen', 'wp-starter'),
-            esc_html__('Stellt alle Token-Dateien vom gewählten Zeitpunkt wieder her. Die aktuellen Dateien werden überschrieben.', 'wp-starter')
+            esc_html__('Stellt alle Token-Dateien vom gewählten Zeitpunkt wieder her. Die aktuellen Dateien werden überschrieben.', 'wp-starter'),
         );
     }
 
@@ -1945,6 +1884,7 @@ class DesignTokenServiceProvider extends ServiceProvider
      * Get download URL for a token file
      *
      * @param string $type Token type (primitives, light, dark)
+     *
      * @return string Download URL
      */
     public static function getDownloadUrl(string $type): string
@@ -1954,7 +1894,7 @@ class DesignTokenServiceProvider extends ServiceProvider
                 self::paramDownloadToken() => '1',
                 'type' => $type,
             ], admin_url()),
-            self::nonceDownload()
+            self::nonceDownload(),
         );
     }
 
@@ -1967,7 +1907,7 @@ class DesignTokenServiceProvider extends ServiceProvider
     {
         return wp_nonce_url(
             add_query_arg(self::paramRegenerateTokens(), '1', admin_url()),
-            self::nonceRegenerate()
+            self::nonceRegenerate(),
         );
     }
 
@@ -2077,6 +2017,7 @@ class DesignTokenServiceProvider extends ServiceProvider
      *
      * @param string $colorName Color name (e.g., 'accent', 'secondary')
      * @param string $shade Shade level (e.g., '500')
+     *
      * @return string|null Hex color value or null if not found
      */
     public static function getCurrentTokenColor(string $colorName, string $shade = '500'): ?string
@@ -2113,6 +2054,7 @@ class DesignTokenServiceProvider extends ServiceProvider
      * Get current status color value from token file
      *
      * @param string $colorName Color name (success, warning, error)
+     *
      * @return string|null Hex color value or null if not found
      */
     public static function getCurrentStatusColor(string $colorName): ?string

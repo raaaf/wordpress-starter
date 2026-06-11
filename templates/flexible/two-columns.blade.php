@@ -19,7 +19,7 @@
 <x-section :anchor="$sectionAnchor" :background="$background" class="two-columns">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="2" gap="lg">
-        <x-prose>{!! $column_1 !!}</x-prose>
-        <x-prose>{!! $column_2 !!}</x-prose>
+        <x-prose>@kses($column_1)</x-prose>
+        <x-prose>@kses($column_2)</x-prose>
     </x-grid>
 </x-section>

@@ -16,8 +16,10 @@
     $content = get_sub_field('content');
     $accordion = get_sub_field('accordion') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
+    $accordionPrefix = 'acc-oci-' . uniqid();
 
-    // Handle ID vs array format for image with proper sizing
+    // Preserve numeric ID for wp_get_attachment_image; also build array fallback
+    $imageId = is_numeric($image) ? (int) $image : null;
     if (is_numeric($image)) {
         $imgSrc = wp_get_attachment_image_src($image, 'hero-split');
         $image = [
@@ -38,7 +40,14 @@
                     <p class="text-sm font-bold uppercase tracking-wider text-content-secondary mb-4">{{ $label }}</p>
                 </div>
             @endif
-            @if($image && !empty($image['url']))
+            @if($imageId)
+                {!! wp_get_attachment_image($imageId, 'hero-split', false, [
+                    'class' => 'w-full object-cover',
+                    'alt' => $image['alt'] ?? '',
+                    'loading' => 'lazy',
+                    'decoding' => 'async',
+                ]) !!}
+            @elseif($image && !empty($image['url']))
                 <img src="{{ $image['url'] }}"
                      alt="{{ $image['alt'] ?? '' }}"
                      @if(!empty($image['width']) && !empty($image['height']))width="{{ $image['width'] }}" height="{{ $image['height'] }}"@endif
@@ -47,37 +56,14 @@
             @endif
             @if($content)
                 <div class="p-6 lg:p-8">
-                    <x-prose>{!! $content !!}</x-prose>
+                    <x-prose>@kses($content)</x-prose>
                 </div>
             @endif
             @if(!empty($accordion))
-                <div class="p-6 lg:p-8" x-data="{ active: null }">
-                    @foreach($accordion as $aIdx => $aItem)
-                        <div class="border-b border-line last:border-b-0">
-                            <button id="acc-btn-{{ $aIdx }}"
-                                    @click="active = active === {{ $aIdx }} ? null : {{ $aIdx }}"
-                                    :aria-expanded="active === {{ $aIdx }}"
-                                    aria-controls="acc-{{ $aIdx }}"
-                                    class="group flex items-center justify-between w-full py-3 font-bold text-left cursor-pointer transition-colors hover:text-content-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus focus-visible:ring-offset-2"
-                                    :class="{ 'text-content-brand': active === {{ $aIdx }} }">
-                                {{ $aItem['title'] }}
-                                <svg class="w-4 h-4 shrink-0 transition-transform duration-200"
-                                     :class="{ 'rotate-180': active === {{ $aIdx }} }"
-                                     fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                            <div x-show="active === {{ $aIdx }}"
-                                 x-collapse
-                                 id="acc-{{ $aIdx }}"
-                                 role="region"
-                                 aria-labelledby="acc-btn-{{ $aIdx }}"
-                                 class="pb-4">
-                                <x-prose class="text-sm">{!! $aItem['content'] !!}</x-prose>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
+                @include('partials.inline-accordion', [
+                    'items' => $accordion,
+                    'idPrefix' => $accordionPrefix,
+                ])
             @endif
         </x-card>
     </div>

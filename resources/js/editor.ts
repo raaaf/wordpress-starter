@@ -5,14 +5,17 @@
 
 import Alpine from 'alpinejs';
 import collapse from '@alpinejs/collapse';
+import { createStatsCounterCore } from './stats-counter';
 
 // Stats Counter Component for block editor
 interface StatsCounterComponent {
   $el: HTMLElement;
   target: number;
   current: number;
+  decimals: number;
   duration: number;
   started: boolean;
+  observer: IntersectionObserver | null;
   init(): void;
   animate(): void;
 }
@@ -20,37 +23,11 @@ interface StatsCounterComponent {
 function createStatsCounterComponent(target: number): StatsCounterComponent {
   return {
     $el: null as unknown as HTMLElement,
-    target,
-    current: 0,
-    duration: 2000,
-    started: false,
-
-    init() {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting && !this.started) {
-            this.started = true;
-            this.animate();
-          }
-        },
-        { threshold: 0.5 }
-      );
-      observer.observe(this.$el);
-    },
-
-    animate() {
-      const start = performance.now();
-      const step = (timestamp: number) => {
-        const progress = Math.min((timestamp - start) / this.duration, 1);
-        this.current = Math.floor(progress * this.target);
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        } else {
-          this.current = this.target;
-        }
-      };
-      requestAnimationFrame(step);
-    },
+    ...createStatsCounterCore(target, {
+      respectReducedMotion: false,
+      useIntersectionObserver: true,
+      preserveDecimals: false,
+    }),
   };
 }
 
@@ -68,15 +45,16 @@ Alpine.start();
 
 // Re-initialize Alpine when block previews are updated
 // Use MutationObserver to detect when ACF refreshes block previews
+const ALPINE_SELECTOR = '[x-data]';
 const observer = new MutationObserver((mutations) => {
   for (const mutation of mutations) {
-    if (mutation.addedNodes.length > 0) {
-      // Check if any added nodes contain Alpine directives
-      mutation.addedNodes.forEach((node) => {
-        if (node instanceof HTMLElement && node.querySelector('[x-data]')) {
-          Alpine.initTree(node);
-        }
-      });
+    for (const node of mutation.addedNodes) {
+      if (
+        node instanceof Element &&
+        (node.matches(ALPINE_SELECTOR) || node.querySelector(ALPINE_SELECTOR))
+      ) {
+        Alpine.initTree(node as HTMLElement);
+      }
     }
   }
 });
@@ -84,6 +62,9 @@ const observer = new MutationObserver((mutations) => {
 // Observe the editor for changes
 const editorRoot = document.getElementById('editor') || document.body;
 observer.observe(editorRoot, { childList: true, subtree: true });
+
+/** Validates an icon name: only lowercase letters, digits, and hyphens. */
+const ICON_NAME_RE = /^[a-z0-9-]+$/;
 
 /**
  * ACF Icon Radio Field Enhancement
@@ -123,8 +104,19 @@ const iconRadioEnhancer = {
     this.enhanceAllIconRadios();
 
     // Watch for new ACF fields (when blocks are added/edited)
-    const acfObserver = new MutationObserver(() => {
-      this.enhanceAllIconRadios();
+    const ACF_SELECTOR = '.acf-icon-radio-field .acf-radio-list';
+    const acfObserver = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (
+            node instanceof Element &&
+            (node.matches(ACF_SELECTOR) || node.querySelector(ACF_SELECTOR))
+          ) {
+            this.enhanceAllIconRadios();
+            return;
+          }
+        }
+      }
     });
 
     acfObserver.observe(document.body, {
@@ -169,6 +161,10 @@ const iconRadioEnhancer = {
       label.setAttribute('data-icon', iconName);
 
       if (iconName && this.themeUrl) {
+        // Validate iconName before using it in a URL
+        if (!ICON_NAME_RE.test(iconName)) {
+          return;
+        }
         // Load and insert icon (keep the input, replace text)
         this.loadIcon(iconName).then((svg) => {
           if (svg) {
@@ -202,6 +198,13 @@ const iconRadioEnhancer = {
       const response = await fetch(`${this.themeUrl}/resources/icons/${iconName}.svg`);
       if (response.ok) {
         let svg = await response.text();
+
+        // Cheap safety guard: must look like an SVG and must not contain scripts
+        const trimmed = svg.trimStart();
+        if (!trimmed.startsWith('<svg') || trimmed.includes('<script')) {
+          return '';
+        }
+
         // Remove width/height attributes for flexible sizing
         svg = svg.replace(/\s*(width|height)="[^"]*"/g, '');
         // Add currentColor for proper color inheritance

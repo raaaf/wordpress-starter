@@ -176,16 +176,7 @@ class SeoServiceProvider extends ServiceProvider
                 ];
 
                 // Add logo if available (ACF first, then Customizer)
-                $logoUrl = null;
-                $acfLogo = $themeOptions['site_logo'] ?? null;
-                if ($acfLogo && !empty($acfLogo['url'])) {
-                    $logoUrl = $acfLogo['url'];
-                } else {
-                    $customLogoId = get_theme_mod('custom_logo');
-                    if ($customLogoId) {
-                        $logoUrl = wp_get_attachment_image_url($customLogoId, 'full');
-                    }
-                }
+                $logoUrl = \WordpressStarter\Acf\Fields::siteLogoUrl();
                 if ($logoUrl) {
                     $orgSchema['logo'] = $logoUrl;
                 }
@@ -599,21 +590,7 @@ class SeoServiceProvider extends ServiceProvider
      */
     private function getOrganizationLogoUrl(): string
     {
-        $themeOptions = $this->getThemeOptions();
-        $acfLogo = $themeOptions['site_logo'] ?? null;
-        if ($acfLogo && !empty($acfLogo['url'])) {
-            return $acfLogo['url'];
-        }
-
-        $customLogoId = get_theme_mod('custom_logo');
-        if ($customLogoId) {
-            $url = wp_get_attachment_image_url( (int) $customLogoId, 'full');
-            if ($url) {
-                return $url;
-            }
-        }
-
-        return '';
+        return \WordpressStarter\Acf\Fields::siteLogoUrl() ?? '';
     }
 
     /**

@@ -1,7 +1,5 @@
 # Schnellstart-Anleitung
 
-Diese Anleitung hilft dir, das WP-Starter Theme in wenigen Minuten einzurichten.
-
 ## Voraussetzungen
 
 Stelle sicher, dass folgende Software installiert ist:
@@ -75,14 +73,14 @@ Das Theme benötigt **Advanced Custom Fields PRO**:
 npm run dev
 ```
 
-Dies startet den Entwicklungsserver auf `http://localhost:5173` mit Hot Module Replacement (HMR).
+Dies startet den Entwicklungsserver auf `http://localhost:5180` mit Hot Module Replacement (HMR).
 
 ### Prüfen ob alles funktioniert
 
 1. Öffne deine WordPress-Seite im Browser
 2. Erstelle eine neue Seite mit der Vorlage "Flexibler Seiteninhalt"
 3. Im Classic Editor siehst du den "Sektion hinzufügen" Button
-4. Wähle eines der 28 verfügbaren Layouts aus
+4. Wähle eines der 32 verfügbaren Layouts aus
 
 ## Erste Schritte nach der Installation
 
@@ -106,25 +104,25 @@ Dies startet den Entwicklungsserver auf `http://localhost:5173` mit Hot Module R
 
 ## Verfügbare Layouts
 
-Das Theme enthält 28 vorgefertigte Flexible Content Layouts:
+Das Theme enthält 32 vorgefertigte Flexible Content Layouts:
 
-| Kategorie  | Layouts                                                                                           |
-| ---------- | ------------------------------------------------------------------------------------------------- |
-| Header     | Hero-Bereich                                                                                      |
-| Layout     | Eine Spalte, Zwei Spalten, Drei Spalten, Vier Spalten, 1/3+2/3, 2/3+1/3, Zwei Spalten mit Bildern |
-| Inhalte    | Akkordeon, Tabs, CTA, Button                                                                      |
-| Medien     | Bild, Video, Galerie, Vorher/Nachher                                                              |
-| Interaktiv | Kundenstimmen, Karten, Statistiken, Zeitstrahl, Team, Preistabelle                                |
-| Formulare  | Kontaktformular, Google Maps                                                                      |
-| Beiträge   | Posts, Tabelle                                                                                    |
-| Sonstiges  | Trenner/Abstand, Logo-Slider                                                                      |
+| Kategorie  | Layouts                                                                                                                                               |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Header     | Hero-Bereich                                                                                                                                          |
+| Layout     | Eine Spalte, Zwei Spalten, Drei Spalten, Vier Spalten, 1/3+2/3, 2/3+1/3, Zwei Spalten mit Bildern, Drei Spalten mit Bildern, Vier Spalten mit Bildern |
+| Inhalte    | Akkordeon, Tabs, CTA, Button                                                                                                                          |
+| Medien     | Bild, Video, Galerie, Vorher/Nachher                                                                                                                  |
+| Interaktiv | Kundenstimmen, Karten, Statistiken, Zeitstrahl, Team, Preistabelle, Downloads (Interner Bereich)                                                      |
+| Formulare  | Kontaktformular, Google Maps                                                                                                                          |
+| Beiträge   | Posts, Tabelle                                                                                                                                        |
+| Sonstiges  | Trenner/Abstand, Logo-Slider                                                                                                                          |
 
 ## Wichtige Dateien
 
 | Datei/Ordner                   | Beschreibung                                   |
 | ------------------------------ | ---------------------------------------------- |
 | `templates/`                   | Blade-Templates                                |
-| `templates/flexible/`          | Flexible Content Layout-Templates (28 Layouts) |
+| `templates/flexible/`          | Flexible Content Layout-Templates (32 Layouts) |
 | `src/Acf/FlexibleContent.php`  | Layout-Definitionen                            |
 | `src/Acf/FieldDefinitions.php` | Feld-Definitionen                              |
 | `resources/css/`               | CSS-Quelldateien (TailwindCSS)                 |

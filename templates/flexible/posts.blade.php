@@ -99,6 +99,11 @@
         </ul>
         @php wp_reset_postdata(); @endphp
     @else
-        <p class="text-center text-content-secondary">{{ __('Keine Beiträge gefunden.', 'wp-starter') }}</p>
+        @include('partials.empty-state', [
+            'title'       => __('Keine Beiträge gefunden', 'wp-starter'),
+            'text'        => __('Es sind noch keine Beiträge in diesem Bereich vorhanden.', 'wp-starter'),
+            'buttonLabel' => __('Zur Startseite', 'wp-starter'),
+            'buttonUrl'   => home_url('/'),
+        ])
     @endif
 </x-section>

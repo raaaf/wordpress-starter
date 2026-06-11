@@ -54,10 +54,26 @@ abstract class AbstractPluginConfigurator
     /**
      * Apply the default configuration
      *
-     * Should be idempotent - safe to call multiple times.
+     * Guards against inactive plugin or already-configured state,
+     * then delegates to {@see static::doConfigure()}.
+     * Safe to call multiple times (idempotent).
+     */
+    public static function configure(): void
+    {
+        if (!static::isPluginActive() || static::isConfigured()) {
+            return;
+        }
+
+        static::doConfigure();
+    }
+
+    /**
+     * Perform the actual configuration
+     *
+     * Called only when the plugin is active and not yet configured.
      * Must call markConfigured() at the end on success.
      */
-    abstract public static function configure(): void;
+    abstract protected static function doConfigure(): void;
 
     /**
      * Get a human-readable summary of the configuration

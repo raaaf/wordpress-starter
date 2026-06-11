@@ -69,6 +69,7 @@ class FieldDefinitions
      * Get background color field definition
      *
      * @param string $prefix Unique prefix for the field key
+     *
      * @return array<string, mixed>
      */
     public static function backgroundColorField(string $prefix): array
@@ -95,6 +96,7 @@ class FieldDefinitions
      * @param bool $required Whether field is required
      * @param string|null $width Wrapper width percentage
      * @param string $instructions Field instructions
+     *
      * @return array<string, mixed>
      */
     public static function wysiwygField(
@@ -103,7 +105,7 @@ class FieldDefinitions
         string $name,
         bool $required = true,
         ?string $width = null,
-        string $instructions = ''
+        string $instructions = '',
     ): array {
         $field = [
             'key' => $key,
@@ -133,6 +135,7 @@ class FieldDefinitions
      * @param bool $required Whether field is required
      * @param string $instructions Field instructions
      * @param string $placeholder Placeholder text
+     *
      * @return array<string, mixed>
      */
     public static function textField(
@@ -141,7 +144,7 @@ class FieldDefinitions
         string $name,
         bool $required = false,
         string $instructions = '',
-        string $placeholder = ''
+        string $placeholder = '',
     ): array {
         $field = [
             'key' => $key,
@@ -170,6 +173,7 @@ class FieldDefinitions
      * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
      * @param string $instructions Field instructions
      * @param string|null $width Wrapper width percentage
+     *
      * @return array<string, mixed>
      */
     public static function imageField(
@@ -180,7 +184,7 @@ class FieldDefinitions
         string $returnFormat = 'array',
         ?array $conditionalLogic = null,
         string $instructions = '',
-        ?string $width = null
+        ?string $width = null,
     ): array {
         $field = [
             'key' => $key,
@@ -213,6 +217,7 @@ class FieldDefinitions
      * @param string $name Field name
      * @param bool $required Whether field is required
      * @param string $instructions Field instructions
+     *
      * @return array<string, mixed>
      */
     public static function linkField(
@@ -220,7 +225,7 @@ class FieldDefinitions
         string $label,
         string $name,
         bool $required = false,
-        string $instructions = ''
+        string $instructions = '',
     ): array {
         return [
             'key' => $key,
@@ -242,6 +247,7 @@ class FieldDefinitions
      * @param string $instructions Field instructions
      * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
      * @param string $placeholder Placeholder text
+     *
      * @return array<string, mixed>
      */
     public static function urlField(
@@ -250,7 +256,7 @@ class FieldDefinitions
         string $name,
         string $instructions = '',
         ?array $conditionalLogic = null,
-        string $placeholder = ''
+        string $placeholder = '',
     ): array {
         $field = [
             'key' => $key,
@@ -281,6 +287,7 @@ class FieldDefinitions
      * @param string $defaultValue Default value
      * @param bool $required Whether field is required
      * @param string $instructions Field instructions
+     *
      * @return array<string, mixed>
      */
     public static function selectField(
@@ -290,7 +297,7 @@ class FieldDefinitions
         array $choices,
         string $defaultValue = '',
         bool $required = false,
-        string $instructions = ''
+        string $instructions = '',
     ): array {
         return [
             'key' => $key,
@@ -314,6 +321,7 @@ class FieldDefinitions
      * @param string $defaultValue Default color value (hex)
      * @param bool $enableOpacity Enable RGBA opacity support
      * @param string $instructions Field instructions
+     *
      * @return array<string, mixed>
      */
     public static function colorPickerField(
@@ -322,7 +330,7 @@ class FieldDefinitions
         string $name,
         string $defaultValue = '#ffffff',
         bool $enableOpacity = false,
-        string $instructions = ''
+        string $instructions = '',
     ): array {
         return [
             'key' => $key,
@@ -346,6 +354,7 @@ class FieldDefinitions
      * @param string $defaultValue Default selected value
      * @param string $instructions Field instructions
      * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
+     *
      * @return array<string, mixed>
      */
     public static function buttonGroupField(
@@ -355,7 +364,7 @@ class FieldDefinitions
         array $choices,
         string $defaultValue = '',
         string $instructions = '',
-        ?array $conditionalLogic = null
+        ?array $conditionalLogic = null,
     ): array {
         $field = [
             'key' => $key,
@@ -383,13 +392,14 @@ class FieldDefinitions
      * @param string $label Field label
      * @param string $name Field name
      * @param string $instructions Field instructions
+     *
      * @return array<string, mixed>
      */
     public static function iconRadioField(
         string $key,
         string $label,
         string $name,
-        string $instructions = ''
+        string $instructions = '',
     ): array {
         return [
             'key' => $key,
@@ -417,6 +427,7 @@ class FieldDefinitions
      * @param string $returnFormat Return format (array, url, id)
      * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
      * @param string $instructions Field instructions
+     *
      * @return array<string, mixed>
      */
     public static function fileField(
@@ -426,7 +437,7 @@ class FieldDefinitions
         string $mimeTypes = '',
         string $returnFormat = 'array',
         ?array $conditionalLogic = null,
-        string $instructions = ''
+        string $instructions = '',
     ): array {
         $field = [
             'key' => $key,
@@ -457,6 +468,7 @@ class FieldDefinitions
      * @param string $name Field name
      * @param bool $defaultValue Default value
      * @param string $instructions Field instructions
+     *
      * @return array<string, mixed>
      */
     public static function trueFalseField(
@@ -464,7 +476,7 @@ class FieldDefinitions
         string $label,
         string $name,
         bool $defaultValue = false,
-        string $instructions = ''
+        string $instructions = '',
     ): array {
         return [
             'key' => $key,
@@ -483,12 +495,13 @@ class FieldDefinitions
      * @param string $key Unique field key
      * @param string $label Tab label
      * @param string $placement Tab placement (top or left)
+     *
      * @return array<string, mixed>
      */
     public static function tabField(
         string $key,
         string $label,
-        string $placement = 'top'
+        string $placement = 'top',
     ): array {
         return [
             'key' => $key,
@@ -505,12 +518,13 @@ class FieldDefinitions
      * @param string $key Unique field key
      * @param string $message The message content (HTML allowed)
      * @param string $label Optional label above the message
+     *
      * @return array<string, mixed>
      */
     public static function messageField(
         string $key,
         string $message,
-        string $label = ''
+        string $label = '',
     ): array {
         return [
             'key' => $key,
@@ -528,12 +542,13 @@ class FieldDefinitions
      * @param string $key Unique field key
      * @param string $message The message content (HTML allowed)
      * @param string $type Box type: info, success, warning, tip
+     *
      * @return array<string, mixed>
      */
     public static function infoBoxField(
         string $key,
         string $message,
-        string $type = 'info'
+        string $type = 'info',
     ): array {
         $icons = [
             'info' => 'dashicons-info',
@@ -573,7 +588,7 @@ class FieldDefinitions
                 $color,
                 $icon,
                 $color,
-                $message
+                $message,
             ),
             'new_lines' => '',
             'esc_html' => 0,
@@ -588,6 +603,7 @@ class FieldDefinitions
      * @param bool $open Whether the accordion is open by default
      * @param bool $multiExpand Allow multiple sections to be open at once
      * @param bool $endpoint Whether this is an endpoint (closes previous accordion)
+     *
      * @return array<string, mixed>
      */
     public static function accordionField(
@@ -595,7 +611,7 @@ class FieldDefinitions
         string $label,
         bool $open = false,
         bool $multiExpand = true,
-        bool $endpoint = false
+        bool $endpoint = false,
     ): array {
         return [
             'key' => $key,
@@ -619,6 +635,7 @@ class FieldDefinitions
      * @param int $step Step increment
      * @param string $append Text to append (e.g., 'px')
      * @param string $instructions Field instructions
+     *
      * @return array<string, mixed>
      */
     public static function numberField(
@@ -630,7 +647,7 @@ class FieldDefinitions
         int|float $max = 100,
         int|float $step = 1,
         string $append = '',
-        string $instructions = ''
+        string $instructions = '',
     ): array {
         $field = [
             'key' => $key,
@@ -664,6 +681,7 @@ class FieldDefinitions
      * @param string $instructions Field instructions
      * @param string $append Text to append (e.g., '%')
      * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
+     *
      * @return array<string, mixed>
      */
     public static function rangeField(
@@ -676,7 +694,7 @@ class FieldDefinitions
         int $defaultValue = 50,
         string $instructions = '',
         string $append = '',
-        ?array $conditionalLogic = null
+        ?array $conditionalLogic = null,
     ): array {
         $field = [
             'key' => $key,
@@ -710,6 +728,7 @@ class FieldDefinitions
      * @param int $rows Number of rows
      * @param string $instructions Field instructions
      * @param string $placeholder Placeholder text
+     *
      * @return array<string, mixed>
      */
     public static function textareaField(
@@ -718,7 +737,7 @@ class FieldDefinitions
         string $name,
         int $rows = 4,
         string $instructions = '',
-        string $placeholder = ''
+        string $placeholder = '',
     ): array {
         $field = [
             'key' => $key,
@@ -747,6 +766,7 @@ class FieldDefinitions
      * @param int $min Minimum rows
      * @param string $layout Layout style (table, block, row)
      * @param string $instructions Field instructions
+     *
      * @return array<string, mixed>
      */
     public static function repeaterField(
@@ -758,7 +778,7 @@ class FieldDefinitions
         int $min = 0,
         string $layout = 'block',
         string $instructions = '',
-        ?string $width = null
+        ?string $width = null,
     ): array {
         $field = [
             'key' => $key,
@@ -788,6 +808,7 @@ class FieldDefinitions
      * @param string $name Field name
      * @param string $instructions Field instructions
      * @param string $placeholder Placeholder text
+     *
      * @return array<string, mixed>
      */
     public static function emailField(
@@ -795,7 +816,7 @@ class FieldDefinitions
         string $label,
         string $name,
         string $instructions = '',
-        string $placeholder = ''
+        string $placeholder = '',
     ): array {
         $field = [
             'key' => $key,
@@ -820,6 +841,7 @@ class FieldDefinitions
      * @param string $name Field name
      * @param array<int, string> $postTypes Post types to query
      * @param string $instructions Field instructions
+     *
      * @return array<string, mixed>
      */
     public static function postObjectField(
@@ -827,7 +849,7 @@ class FieldDefinitions
         string $label,
         string $name,
         array $postTypes = ['page'],
-        string $instructions = ''
+        string $instructions = '',
     ): array {
         return [
             'key' => $key,
@@ -849,6 +871,7 @@ class FieldDefinitions
      * Get Hero layout fields with 3 variants: centered, split, background
      *
      * @param string $prefix Key prefix (e.g., 'hero' or 'block_hero')
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function heroFields(string $prefix): array
@@ -903,7 +926,7 @@ class FieldDefinitions
                     'background' => __('Hintergrund', 'wp-starter'),
                 ],
                 'centered',
-                __('Wähle das Layout für den Hero-Bereich.', 'wp-starter')
+                __('Wähle das Layout für den Hero-Bereich.', 'wp-starter'),
             ),
 
             // Inhalt
@@ -913,7 +936,7 @@ class FieldDefinitions
                 'badge',
                 false,
                 __('Optionaler Badge-Text über der Überschrift.', 'wp-starter'),
-                __('z.B. NEU, Coming Soon...', 'wp-starter')
+                __('z.B. NEU, Coming Soon...', 'wp-starter'),
             ),
             self::textField(
                 "field_{$prefix}_title",
@@ -921,7 +944,7 @@ class FieldDefinitions
                 'title',
                 true,
                 __('Die Hauptüberschrift des Hero-Bereichs.', 'wp-starter'),
-                __('z.B. Willkommen bei...', 'wp-starter')
+                __('z.B. Willkommen bei...', 'wp-starter'),
             ),
             self::textareaField(
                 "field_{$prefix}_copy",
@@ -929,7 +952,7 @@ class FieldDefinitions
                 'copy',
                 3,
                 __('Kurzer Beschreibungstext unter der Überschrift.', 'wp-starter'),
-                __('z.B. Wir helfen Ihnen...', 'wp-starter')
+                __('z.B. Wir helfen Ihnen...', 'wp-starter'),
             ),
 
             // Buttons (nebeneinander)
@@ -962,7 +985,7 @@ class FieldDefinitions
                 false,
                 'array',
                 $showOnSplit,
-                __('Empfohlene Größe: mindestens 960×800 Pixel (6:5).', 'wp-starter')
+                __('Empfohlene Größe: mindestens 960×800 Pixel (6:5).', 'wp-starter'),
             ),
 
             // Hintergrundbild (nur bei Background-Variante)
@@ -973,7 +996,7 @@ class FieldDefinitions
                 false,
                 'array',
                 $showOnBackground,
-                __('Empfohlene Größe: mindestens 1920×1080 Pixel (16:9).', 'wp-starter')
+                __('Empfohlene Größe: mindestens 1920×1080 Pixel (16:9).', 'wp-starter'),
             ),
 
             // Overlay-Transparenz (nur bei Background-Variante)
@@ -987,7 +1010,7 @@ class FieldDefinitions
                 80,
                 __('0% = transparent, 100% = vollständig deckend.', 'wp-starter'),
                 '%',
-                $showOnBackground
+                $showOnBackground,
             ),
 
             // Hintergrundfarbe (nur bei Centered und Split)
@@ -1010,6 +1033,7 @@ class FieldDefinitions
      * Get Section Header fields (toggle + chip + headline + description)
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function sectionHeaderFields(string $prefix): array
@@ -1021,7 +1045,7 @@ class FieldDefinitions
             __('Chip', 'wp-starter'),
             'section_chip',
             false,
-            __('Optionaler Chip/Badge über der Überschrift.', 'wp-starter')
+            __('Optionaler Chip/Badge über der Überschrift.', 'wp-starter'),
         );
         $chipField['conditional_logic'] = $showWhenEnabled;
         $chipField['wrapper'] = ['width' => '40'];
@@ -1031,7 +1055,7 @@ class FieldDefinitions
             __('Überschrift', 'wp-starter'),
             'section_headline',
             false,
-            __('H2-Überschrift. Nutze [br] für Zeilenumbrüche.', 'wp-starter')
+            __('H2-Überschrift. Nutze [br] für Zeilenumbrüche.', 'wp-starter'),
         );
         $headlineField['conditional_logic'] = $showWhenEnabled;
         $headlineField['wrapper'] = ['width' => '40'];
@@ -1041,7 +1065,7 @@ class FieldDefinitions
             __('Beschreibung', 'wp-starter'),
             'section_description',
             3,
-            __('Optionale Beschreibung unter der Überschrift.', 'wp-starter')
+            __('Optionale Beschreibung unter der Überschrift.', 'wp-starter'),
         );
         $descriptionField['conditional_logic'] = $showWhenEnabled;
 
@@ -1050,12 +1074,12 @@ class FieldDefinitions
             __('Ausrichtung', 'wp-starter'),
             'section_alignment',
             [
-                'left'   => __('Linksbündig', 'wp-starter'),
+                'left' => __('Linksbündig', 'wp-starter'),
                 'center' => __('Zentriert', 'wp-starter'),
             ],
             'center',
             __('Textausrichtung des Section Headers.', 'wp-starter'),
-            $showWhenEnabled
+            $showWhenEnabled,
         );
         $alignmentField['wrapper'] = ['width' => '20'];
 
@@ -1065,7 +1089,7 @@ class FieldDefinitions
                 __('Section Header anzeigen', 'wp-starter'),
                 'show_section_header',
                 false,
-                __('Zeigt Chip, Überschrift und Beschreibung über dem Inhalt an.', 'wp-starter')
+                __('Zeigt Chip, Überschrift und Beschreibung über dem Inhalt an.', 'wp-starter'),
             ),
             $alignmentField,
             $chipField,
@@ -1078,6 +1102,7 @@ class FieldDefinitions
      * Get Two Columns layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function twoColumnsFields(string $prefix): array
@@ -1090,7 +1115,7 @@ class FieldDefinitions
                 'column_1',
                 false,
                 '50',
-                __('Inhalt der linken Spalte (50% Breite).', 'wp-starter')
+                __('Inhalt der linken Spalte (50% Breite).', 'wp-starter'),
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
@@ -1098,7 +1123,7 @@ class FieldDefinitions
                 'column_2',
                 false,
                 '50',
-                __('Inhalt der rechten Spalte (50% Breite).', 'wp-starter')
+                __('Inhalt der rechten Spalte (50% Breite).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1109,6 +1134,7 @@ class FieldDefinitions
      * Get Three Columns layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function threeColumnsFields(string $prefix): array
@@ -1121,7 +1147,7 @@ class FieldDefinitions
                 'column_1',
                 false,
                 '33.333',
-                __('Inhalt der ersten Spalte (1/3 Breite).', 'wp-starter')
+                __('Inhalt der ersten Spalte (1/3 Breite).', 'wp-starter'),
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
@@ -1129,7 +1155,7 @@ class FieldDefinitions
                 'column_2',
                 false,
                 '33.333',
-                __('Inhalt der mittleren Spalte (1/3 Breite).', 'wp-starter')
+                __('Inhalt der mittleren Spalte (1/3 Breite).', 'wp-starter'),
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_3",
@@ -1137,7 +1163,7 @@ class FieldDefinitions
                 'column_3',
                 false,
                 '33.333',
-                __('Inhalt der dritten Spalte (1/3 Breite).', 'wp-starter')
+                __('Inhalt der dritten Spalte (1/3 Breite).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1148,6 +1174,7 @@ class FieldDefinitions
      * Get Four Columns layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function fourColumnsFields(string $prefix): array
@@ -1160,7 +1187,7 @@ class FieldDefinitions
                 'column_1',
                 false,
                 '25',
-                __('Inhalt der ersten Spalte (1/4 Breite).', 'wp-starter')
+                __('Inhalt der ersten Spalte (1/4 Breite).', 'wp-starter'),
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
@@ -1168,7 +1195,7 @@ class FieldDefinitions
                 'column_2',
                 false,
                 '25',
-                __('Inhalt der zweiten Spalte (1/4 Breite).', 'wp-starter')
+                __('Inhalt der zweiten Spalte (1/4 Breite).', 'wp-starter'),
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_3",
@@ -1176,7 +1203,7 @@ class FieldDefinitions
                 'column_3',
                 false,
                 '25',
-                __('Inhalt der dritten Spalte (1/4 Breite).', 'wp-starter')
+                __('Inhalt der dritten Spalte (1/4 Breite).', 'wp-starter'),
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_4",
@@ -1184,7 +1211,7 @@ class FieldDefinitions
                 'column_4',
                 false,
                 '25',
-                __('Inhalt der vierten Spalte (1/4 Breite).', 'wp-starter')
+                __('Inhalt der vierten Spalte (1/4 Breite).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1195,6 +1222,7 @@ class FieldDefinitions
      * Get Accordion layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function accordionFields(string $prefix): array
@@ -1209,7 +1237,7 @@ class FieldDefinitions
                         "field_{$prefix}_accordion_icon",
                         __('Icon', 'wp-starter'),
                         'icon',
-                        __('Optionales Icon vor dem Titel.', 'wp-starter')
+                        __('Optionales Icon vor dem Titel.', 'wp-starter'),
                     ),
                     self::textField(
                         "field_{$prefix}_accordion_title",
@@ -1217,7 +1245,7 @@ class FieldDefinitions
                         'title',
                         true,
                         __('Der klickbare Titel des Accordion-Elements.', 'wp-starter'),
-                        __('z.B. Wie funktioniert...?', 'wp-starter')
+                        __('z.B. Wie funktioniert...?', 'wp-starter'),
                     ),
                     self::wysiwygField(
                         "field_{$prefix}_accordion_content",
@@ -1225,13 +1253,13 @@ class FieldDefinitions
                         'content',
                         true,
                         null,
-                        __('Der ausgeklappte Inhalt des Accordion-Elements.', 'wp-starter')
+                        __('Der ausgeklappte Inhalt des Accordion-Elements.', 'wp-starter'),
                     ),
                 ],
                 __('Eintrag hinzufügen', 'wp-starter'),
                 1,
                 'block',
-                __('Füge beliebig viele auf- und zuklappbare Elemente hinzu.', 'wp-starter')
+                __('Füge beliebig viele auf- und zuklappbare Elemente hinzu.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1242,6 +1270,7 @@ class FieldDefinitions
      * Get CTA layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function ctaFields(string $prefix): array
@@ -1253,7 +1282,7 @@ class FieldDefinitions
                 'title',
                 true,
                 __('Die Hauptüberschrift des Call-to-Action Bereichs.', 'wp-starter'),
-                __('z.B. Jetzt starten!', 'wp-starter')
+                __('z.B. Jetzt starten!', 'wp-starter'),
             ),
             self::textareaField(
                 "field_{$prefix}_content",
@@ -1261,14 +1290,14 @@ class FieldDefinitions
                 'content',
                 3,
                 __('Kurzer Text, der zum Handeln auffordert.', 'wp-starter'),
-                __('z.B. Kontaktieren Sie uns für ein unverbindliches Angebot.', 'wp-starter')
+                __('z.B. Kontaktieren Sie uns für ein unverbindliches Angebot.', 'wp-starter'),
             ),
             self::linkField(
                 "field_{$prefix}_button",
                 __('Button', 'wp-starter'),
                 'button',
                 true,
-                __('Der Call-to-Action Button mit Link und Text.', 'wp-starter')
+                __('Der Call-to-Action Button mit Link und Text.', 'wp-starter'),
             ),
         ];
     }
@@ -1282,6 +1311,7 @@ class FieldDefinitions
      * - Only brand colors are available (design constraint)
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function ctaBlockFields(string $prefix): array
@@ -1293,7 +1323,7 @@ class FieldDefinitions
                 'title',
                 true,
                 __('Die Hauptüberschrift des Call-to-Action Bereichs.', 'wp-starter'),
-                __('z.B. Jetzt starten!', 'wp-starter')
+                __('z.B. Jetzt starten!', 'wp-starter'),
             ),
             self::wysiwygField(
                 "field_{$prefix}_content",
@@ -1301,14 +1331,14 @@ class FieldDefinitions
                 'content',
                 false,
                 null,
-                __('Kurzer Text, der zum Handeln auffordert.', 'wp-starter')
+                __('Kurzer Text, der zum Handeln auffordert.', 'wp-starter'),
             ),
             self::linkField(
                 "field_{$prefix}_cta",
                 __('Button', 'wp-starter'),
                 'cta',
                 true,
-                __('Der Call-to-Action Button mit Link und Text.', 'wp-starter')
+                __('Der Call-to-Action Button mit Link und Text.', 'wp-starter'),
             ),
         ];
     }
@@ -1317,6 +1347,7 @@ class FieldDefinitions
      * Get Video layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function videoFields(string $prefix): array
@@ -1332,7 +1363,7 @@ class FieldDefinitions
                     'url' => __('Externer Link', 'wp-starter'),
                 ],
                 'wordpress',
-                __('Wähle, woher das Video kommt.', 'wp-starter')
+                __('Wähle, woher das Video kommt.', 'wp-starter'),
             ),
             self::fileField(
                 "field_{$prefix}_video",
@@ -1341,7 +1372,7 @@ class FieldDefinitions
                 'mp4,webm,ogg',
                 'url',
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'wordpress']]],
-                __('Lade eine MP4, WebM oder OGG Datei hoch.', 'wp-starter')
+                __('Lade eine MP4, WebM oder OGG Datei hoch.', 'wp-starter'),
             ),
             self::urlField(
                 "field_{$prefix}_video_url",
@@ -1349,7 +1380,7 @@ class FieldDefinitions
                 'video_url',
                 __('Füge die YouTube oder Vimeo URL ein.', 'wp-starter'),
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'external']]],
-                'https://www.youtube.com/watch?v=...'
+                'https://www.youtube.com/watch?v=...',
             ),
             self::urlField(
                 "field_{$prefix}_video_file_url",
@@ -1357,7 +1388,7 @@ class FieldDefinitions
                 'video_file_url',
                 __('Direkter Link zu einer Videodatei (MP4, WebM, OGG).', 'wp-starter'),
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'url']]],
-                'https://cdn.example.com/video.mp4'
+                'https://cdn.example.com/video.mp4',
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1368,6 +1399,7 @@ class FieldDefinitions
      * Get Image layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function imageFields(string $prefix): array
@@ -1380,7 +1412,7 @@ class FieldDefinitions
                 true,
                 'id',
                 null,
-                __('Das anzuzeigende Bild.', 'wp-starter')
+                __('Das anzuzeigende Bild.', 'wp-starter'),
             ),
             [
                 'key' => "field_{$prefix}_show_border",
@@ -1411,6 +1443,7 @@ class FieldDefinitions
      * Get Divider layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function dividerFields(string $prefix): array
@@ -1427,7 +1460,7 @@ class FieldDefinitions
                     'space' => __('Abstand', 'wp-starter'),
                 ],
                 'line',
-                __('Wähle das Aussehen des Trenners.', 'wp-starter')
+                __('Wähle das Aussehen des Trenners.', 'wp-starter'),
             ),
             [
                 'key' => "field_{$prefix}_height",
@@ -1449,6 +1482,7 @@ class FieldDefinitions
      * Get One Third / Two Thirds layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function oneThirdTwoThirdsFields(string $prefix): array
@@ -1461,7 +1495,7 @@ class FieldDefinitions
                 'column_1',
                 false,
                 '33.333',
-                __('Inhalt der schmalen linken Spalte (ca. 1/3 der Breite).', 'wp-starter')
+                __('Inhalt der schmalen linken Spalte (ca. 1/3 der Breite).', 'wp-starter'),
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
@@ -1469,7 +1503,7 @@ class FieldDefinitions
                 'column_2',
                 false,
                 '66.667',
-                __('Inhalt der breiten rechten Spalte (ca. 2/3 der Breite).', 'wp-starter')
+                __('Inhalt der breiten rechten Spalte (ca. 2/3 der Breite).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1480,6 +1514,7 @@ class FieldDefinitions
      * Get Two Thirds / One Third layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function twoThirdsOneThirdFields(string $prefix): array
@@ -1492,7 +1527,7 @@ class FieldDefinitions
                 'column_1',
                 false,
                 '66.667',
-                __('Inhalt der breiten linken Spalte (ca. 2/3 der Breite).', 'wp-starter')
+                __('Inhalt der breiten linken Spalte (ca. 2/3 der Breite).', 'wp-starter'),
             ),
             self::wysiwygField(
                 "field_{$prefix}_column_2",
@@ -1500,7 +1535,7 @@ class FieldDefinitions
                 'column_2',
                 false,
                 '33.333',
-                __('Inhalt der schmalen rechten Spalte (ca. 1/3 der Breite).', 'wp-starter')
+                __('Inhalt der schmalen rechten Spalte (ca. 1/3 der Breite).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1511,6 +1546,7 @@ class FieldDefinitions
      * Get Two Columns with Images layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function oneColumnImageFields(string $prefix): array
@@ -1522,7 +1558,7 @@ class FieldDefinitions
                 __('Label', 'wp-starter'),
                 'label',
                 false,
-                __('Optionale Überschrift über dem Bild.', 'wp-starter')
+                __('Optionale Überschrift über dem Bild.', 'wp-starter'),
             ),
             self::imageField(
                 "field_{$prefix}_image",
@@ -1532,7 +1568,7 @@ class FieldDefinitions
                 'id',
                 null,
                 __('Bild für die Karte.', 'wp-starter'),
-                '25'
+                '25',
             ),
             self::wysiwygField(
                 "field_{$prefix}_content",
@@ -1540,7 +1576,7 @@ class FieldDefinitions
                 'content',
                 false,
                 '75',
-                __('Text unter dem Bild.', 'wp-starter')
+                __('Text unter dem Bild.', 'wp-starter'),
             ),
             self::repeaterField(
                 "field_{$prefix}_accordion",
@@ -1552,7 +1588,7 @@ class FieldDefinitions
                         __('Titel', 'wp-starter'),
                         'title',
                         true,
-                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
+                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter'),
                     ),
                     self::wysiwygField(
                         "field_{$prefix}_accordion_content",
@@ -1560,13 +1596,13 @@ class FieldDefinitions
                         'content',
                         true,
                         null,
-                        __('Der ausgeklappte Inhalt.', 'wp-starter')
+                        __('Der ausgeklappte Inhalt.', 'wp-starter'),
                     ),
                 ],
                 __('Eintrag hinzufügen', 'wp-starter'),
                 0,
                 'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -1574,115 +1610,99 @@ class FieldDefinitions
     }
 
     /**
+     * Build the per-column field block (label + image + wysiwyg + accordion) for
+     * the *-columns-images layouts. All field keys and names are derived from
+     * $prefix and $n so that they remain byte-identical to the previously
+     * inlined versions.
+     *
+     * @param string $prefix Key prefix passed to the parent method
+     * @param int $n Column number (1-based)
+     * @param string $imageInstruction Instruction string for the image field (varies by layout and position)
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private static function buildColumnImageBlock(string $prefix, int $n, string $imageInstruction): array
+    {
+        $ordinals = [
+            1 => __('ersten', 'wp-starter'),
+            2 => __('zweiten', 'wp-starter'),
+            3 => __('dritten', 'wp-starter'),
+            4 => __('vierten', 'wp-starter'),
+        ];
+        $ordinal = $ordinals[$n];
+
+        return [
+            self::textField(
+                "field_{$prefix}_label_{$n}",
+                /* translators: %d: column number */
+                sprintf(__('Label %d', 'wp-starter'), $n),
+                "label_{$n}",
+                false,
+                /* translators: %s: ordinal column word (e.g. ersten, zweiten) */
+                sprintf(__('Optionale Überschrift über dem %s Bild.', 'wp-starter'), $ordinal),
+            ),
+            self::imageField(
+                "field_{$prefix}_image_{$n}",
+                /* translators: %d: column number */
+                sprintf(__('Bild %d', 'wp-starter'), $n),
+                "image_{$n}",
+                false,
+                'id',
+                null,
+                $imageInstruction,
+                '25',
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_column_{$n}",
+                /* translators: %d: column number */
+                sprintf(__('Inhalt %d', 'wp-starter'), $n),
+                "column_{$n}",
+                false,
+                '75',
+                /* translators: %s: ordinal column word (e.g. ersten, zweiten) */
+                sprintf(__('Text unter dem %s Bild.', 'wp-starter'), $ordinal),
+            ),
+            self::repeaterField(
+                "field_{$prefix}_accordion_{$n}",
+                /* translators: %d: column number */
+                sprintf(__('Akkordeon %d', 'wp-starter'), $n),
+                "accordion_{$n}",
+                [
+                    self::textField(
+                        "field_{$prefix}_accordion_{$n}_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter'),
+                    ),
+                    self::wysiwygField(
+                        "field_{$prefix}_accordion_{$n}_content",
+                        __('Inhalt', 'wp-starter'),
+                        'content',
+                        true,
+                        null,
+                        __('Der ausgeklappte Inhalt.', 'wp-starter'),
+                    ),
+                ],
+                __('Eintrag hinzufügen', 'wp-starter'),
+                0,
+                'block',
+                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
+            ),
+        ];
+    }
+
+    /**
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function twoColumnsImagesFields(string $prefix): array
     {
         return [
             ...self::sectionHeaderFields($prefix),
-            self::textField(
-                "field_{$prefix}_label_1",
-                __('Label 1', 'wp-starter'),
-                'label_1',
-                false,
-                __('Optionale Überschrift über dem ersten Bild.', 'wp-starter')
-            ),
-            self::imageField(
-                "field_{$prefix}_image_1",
-                __('Bild 1', 'wp-starter'),
-                'image_1',
-                false,
-                'id',
-                null,
-                __('Bild für die linke Karte.', 'wp-starter'),
-                '25'
-            ),
-            self::wysiwygField(
-                "field_{$prefix}_column_1",
-                __('Inhalt 1', 'wp-starter'),
-                'column_1',
-                false,
-                '75',
-                __('Text unter dem ersten Bild.', 'wp-starter')
-            ),
-            self::repeaterField(
-                "field_{$prefix}_accordion_1",
-                __('Akkordeon 1', 'wp-starter'),
-                'accordion_1',
-                [
-                    self::textField(
-                        "field_{$prefix}_accordion_1_title",
-                        __('Titel', 'wp-starter'),
-                        'title',
-                        true,
-                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
-                    ),
-                    self::wysiwygField(
-                        "field_{$prefix}_accordion_1_content",
-                        __('Inhalt', 'wp-starter'),
-                        'content',
-                        true,
-                        null,
-                        __('Der ausgeklappte Inhalt.', 'wp-starter')
-                    ),
-                ],
-                __('Eintrag hinzufügen', 'wp-starter'),
-                0,
-                'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
-            ),
-            self::textField(
-                "field_{$prefix}_label_2",
-                __('Label 2', 'wp-starter'),
-                'label_2',
-                false,
-                __('Optionale Überschrift über dem zweiten Bild.', 'wp-starter')
-            ),
-            self::imageField(
-                "field_{$prefix}_image_2",
-                __('Bild 2', 'wp-starter'),
-                'image_2',
-                false,
-                'id',
-                null,
-                __('Bild für die rechte Karte.', 'wp-starter'),
-                '25'
-            ),
-            self::wysiwygField(
-                "field_{$prefix}_column_2",
-                __('Inhalt 2', 'wp-starter'),
-                'column_2',
-                false,
-                '75',
-                __('Text unter dem zweiten Bild.', 'wp-starter')
-            ),
-            self::repeaterField(
-                "field_{$prefix}_accordion_2",
-                __('Akkordeon 2', 'wp-starter'),
-                'accordion_2',
-                [
-                    self::textField(
-                        "field_{$prefix}_accordion_2_title",
-                        __('Titel', 'wp-starter'),
-                        'title',
-                        true,
-                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
-                    ),
-                    self::wysiwygField(
-                        "field_{$prefix}_accordion_2_content",
-                        __('Inhalt', 'wp-starter'),
-                        'content',
-                        true,
-                        null,
-                        __('Der ausgeklappte Inhalt.', 'wp-starter')
-                    ),
-                ],
-                __('Eintrag hinzufügen', 'wp-starter'),
-                0,
-                'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
-            ),
+            ...self::buildColumnImageBlock($prefix, 1, __('Bild für die linke Karte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 2, __('Bild für die rechte Karte.', 'wp-starter')),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
         ];
@@ -1690,165 +1710,16 @@ class FieldDefinitions
 
     /**
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function threeColumnsImagesFields(string $prefix): array
     {
         return [
             ...self::sectionHeaderFields($prefix),
-            self::textField(
-                "field_{$prefix}_label_1",
-                __('Label 1', 'wp-starter'),
-                'label_1',
-                false,
-                __('Optionale Überschrift über dem ersten Bild.', 'wp-starter')
-            ),
-            self::imageField(
-                "field_{$prefix}_image_1",
-                __('Bild 1', 'wp-starter'),
-                'image_1',
-                false,
-                'id',
-                null,
-                __('Bild für die linke Karte.', 'wp-starter'),
-                '25'
-            ),
-            self::wysiwygField(
-                "field_{$prefix}_column_1",
-                __('Inhalt 1', 'wp-starter'),
-                'column_1',
-                false,
-                '75',
-                __('Text unter dem ersten Bild.', 'wp-starter')
-            ),
-            self::repeaterField(
-                "field_{$prefix}_accordion_1",
-                __('Akkordeon 1', 'wp-starter'),
-                'accordion_1',
-                [
-                    self::textField(
-                        "field_{$prefix}_accordion_1_title",
-                        __('Titel', 'wp-starter'),
-                        'title',
-                        true,
-                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
-                    ),
-                    self::wysiwygField(
-                        "field_{$prefix}_accordion_1_content",
-                        __('Inhalt', 'wp-starter'),
-                        'content',
-                        true,
-                        null,
-                        __('Der ausgeklappte Inhalt.', 'wp-starter')
-                    ),
-                ],
-                __('Eintrag hinzufügen', 'wp-starter'),
-                0,
-                'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
-            ),
-            self::textField(
-                "field_{$prefix}_label_2",
-                __('Label 2', 'wp-starter'),
-                'label_2',
-                false,
-                __('Optionale Überschrift über dem zweiten Bild.', 'wp-starter')
-            ),
-            self::imageField(
-                "field_{$prefix}_image_2",
-                __('Bild 2', 'wp-starter'),
-                'image_2',
-                false,
-                'id',
-                null,
-                __('Bild für die mittlere Karte.', 'wp-starter'),
-                '25'
-            ),
-            self::wysiwygField(
-                "field_{$prefix}_column_2",
-                __('Inhalt 2', 'wp-starter'),
-                'column_2',
-                false,
-                '75',
-                __('Text unter dem zweiten Bild.', 'wp-starter')
-            ),
-            self::repeaterField(
-                "field_{$prefix}_accordion_2",
-                __('Akkordeon 2', 'wp-starter'),
-                'accordion_2',
-                [
-                    self::textField(
-                        "field_{$prefix}_accordion_2_title",
-                        __('Titel', 'wp-starter'),
-                        'title',
-                        true,
-                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
-                    ),
-                    self::wysiwygField(
-                        "field_{$prefix}_accordion_2_content",
-                        __('Inhalt', 'wp-starter'),
-                        'content',
-                        true,
-                        null,
-                        __('Der ausgeklappte Inhalt.', 'wp-starter')
-                    ),
-                ],
-                __('Eintrag hinzufügen', 'wp-starter'),
-                0,
-                'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
-            ),
-            self::textField(
-                "field_{$prefix}_label_3",
-                __('Label 3', 'wp-starter'),
-                'label_3',
-                false,
-                __('Optionale Überschrift über dem dritten Bild.', 'wp-starter')
-            ),
-            self::imageField(
-                "field_{$prefix}_image_3",
-                __('Bild 3', 'wp-starter'),
-                'image_3',
-                false,
-                'id',
-                null,
-                __('Bild für die rechte Karte.', 'wp-starter'),
-                '25'
-            ),
-            self::wysiwygField(
-                "field_{$prefix}_column_3",
-                __('Inhalt 3', 'wp-starter'),
-                'column_3',
-                false,
-                '75',
-                __('Text unter dem dritten Bild.', 'wp-starter')
-            ),
-            self::repeaterField(
-                "field_{$prefix}_accordion_3",
-                __('Akkordeon 3', 'wp-starter'),
-                'accordion_3',
-                [
-                    self::textField(
-                        "field_{$prefix}_accordion_3_title",
-                        __('Titel', 'wp-starter'),
-                        'title',
-                        true,
-                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
-                    ),
-                    self::wysiwygField(
-                        "field_{$prefix}_accordion_3_content",
-                        __('Inhalt', 'wp-starter'),
-                        'content',
-                        true,
-                        null,
-                        __('Der ausgeklappte Inhalt.', 'wp-starter')
-                    ),
-                ],
-                __('Eintrag hinzufügen', 'wp-starter'),
-                0,
-                'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
-            ),
+            ...self::buildColumnImageBlock($prefix, 1, __('Bild für die linke Karte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 2, __('Bild für die mittlere Karte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 3, __('Bild für die rechte Karte.', 'wp-starter')),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
         ];
@@ -1856,216 +1727,17 @@ class FieldDefinitions
 
     /**
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function fourColumnsImagesFields(string $prefix): array
     {
         return [
             ...self::sectionHeaderFields($prefix),
-            self::textField(
-                "field_{$prefix}_label_1",
-                __('Label 1', 'wp-starter'),
-                'label_1',
-                false,
-                __('Optionale Überschrift über dem ersten Bild.', 'wp-starter')
-            ),
-            self::imageField(
-                "field_{$prefix}_image_1",
-                __('Bild 1', 'wp-starter'),
-                'image_1',
-                false,
-                'id',
-                null,
-                __('Bild für die erste Karte.', 'wp-starter'),
-                '25'
-            ),
-            self::wysiwygField(
-                "field_{$prefix}_column_1",
-                __('Inhalt 1', 'wp-starter'),
-                'column_1',
-                false,
-                '75',
-                __('Text unter dem ersten Bild.', 'wp-starter')
-            ),
-            self::repeaterField(
-                "field_{$prefix}_accordion_1",
-                __('Akkordeon 1', 'wp-starter'),
-                'accordion_1',
-                [
-                    self::textField(
-                        "field_{$prefix}_accordion_1_title",
-                        __('Titel', 'wp-starter'),
-                        'title',
-                        true,
-                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
-                    ),
-                    self::wysiwygField(
-                        "field_{$prefix}_accordion_1_content",
-                        __('Inhalt', 'wp-starter'),
-                        'content',
-                        true,
-                        null,
-                        __('Der ausgeklappte Inhalt.', 'wp-starter')
-                    ),
-                ],
-                __('Eintrag hinzufügen', 'wp-starter'),
-                0,
-                'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
-            ),
-            self::textField(
-                "field_{$prefix}_label_2",
-                __('Label 2', 'wp-starter'),
-                'label_2',
-                false,
-                __('Optionale Überschrift über dem zweiten Bild.', 'wp-starter')
-            ),
-            self::imageField(
-                "field_{$prefix}_image_2",
-                __('Bild 2', 'wp-starter'),
-                'image_2',
-                false,
-                'id',
-                null,
-                __('Bild für die zweite Karte.', 'wp-starter'),
-                '25'
-            ),
-            self::wysiwygField(
-                "field_{$prefix}_column_2",
-                __('Inhalt 2', 'wp-starter'),
-                'column_2',
-                false,
-                '75',
-                __('Text unter dem zweiten Bild.', 'wp-starter')
-            ),
-            self::repeaterField(
-                "field_{$prefix}_accordion_2",
-                __('Akkordeon 2', 'wp-starter'),
-                'accordion_2',
-                [
-                    self::textField(
-                        "field_{$prefix}_accordion_2_title",
-                        __('Titel', 'wp-starter'),
-                        'title',
-                        true,
-                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
-                    ),
-                    self::wysiwygField(
-                        "field_{$prefix}_accordion_2_content",
-                        __('Inhalt', 'wp-starter'),
-                        'content',
-                        true,
-                        null,
-                        __('Der ausgeklappte Inhalt.', 'wp-starter')
-                    ),
-                ],
-                __('Eintrag hinzufügen', 'wp-starter'),
-                0,
-                'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
-            ),
-            self::textField(
-                "field_{$prefix}_label_3",
-                __('Label 3', 'wp-starter'),
-                'label_3',
-                false,
-                __('Optionale Überschrift über dem dritten Bild.', 'wp-starter')
-            ),
-            self::imageField(
-                "field_{$prefix}_image_3",
-                __('Bild 3', 'wp-starter'),
-                'image_3',
-                false,
-                'id',
-                null,
-                __('Bild für die dritte Karte.', 'wp-starter'),
-                '25'
-            ),
-            self::wysiwygField(
-                "field_{$prefix}_column_3",
-                __('Inhalt 3', 'wp-starter'),
-                'column_3',
-                false,
-                '75',
-                __('Text unter dem dritten Bild.', 'wp-starter')
-            ),
-            self::repeaterField(
-                "field_{$prefix}_accordion_3",
-                __('Akkordeon 3', 'wp-starter'),
-                'accordion_3',
-                [
-                    self::textField(
-                        "field_{$prefix}_accordion_3_title",
-                        __('Titel', 'wp-starter'),
-                        'title',
-                        true,
-                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
-                    ),
-                    self::wysiwygField(
-                        "field_{$prefix}_accordion_3_content",
-                        __('Inhalt', 'wp-starter'),
-                        'content',
-                        true,
-                        null,
-                        __('Der ausgeklappte Inhalt.', 'wp-starter')
-                    ),
-                ],
-                __('Eintrag hinzufügen', 'wp-starter'),
-                0,
-                'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
-            ),
-            self::textField(
-                "field_{$prefix}_label_4",
-                __('Label 4', 'wp-starter'),
-                'label_4',
-                false,
-                __('Optionale Überschrift über dem vierten Bild.', 'wp-starter')
-            ),
-            self::imageField(
-                "field_{$prefix}_image_4",
-                __('Bild 4', 'wp-starter'),
-                'image_4',
-                false,
-                'id',
-                null,
-                __('Bild für die vierte Karte.', 'wp-starter'),
-                '25'
-            ),
-            self::wysiwygField(
-                "field_{$prefix}_column_4",
-                __('Inhalt 4', 'wp-starter'),
-                'column_4',
-                false,
-                '75',
-                __('Text unter dem vierten Bild.', 'wp-starter')
-            ),
-            self::repeaterField(
-                "field_{$prefix}_accordion_4",
-                __('Akkordeon 4', 'wp-starter'),
-                'accordion_4',
-                [
-                    self::textField(
-                        "field_{$prefix}_accordion_4_title",
-                        __('Titel', 'wp-starter'),
-                        'title',
-                        true,
-                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter')
-                    ),
-                    self::wysiwygField(
-                        "field_{$prefix}_accordion_4_content",
-                        __('Inhalt', 'wp-starter'),
-                        'content',
-                        true,
-                        null,
-                        __('Der ausgeklappte Inhalt.', 'wp-starter')
-                    ),
-                ],
-                __('Eintrag hinzufügen', 'wp-starter'),
-                0,
-                'block',
-                __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter')
-            ),
+            ...self::buildColumnImageBlock($prefix, 1, __('Bild für die erste Karte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 2, __('Bild für die zweite Karte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 3, __('Bild für die dritte Karte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 4, __('Bild für die vierte Karte.', 'wp-starter')),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
         ];
@@ -2079,6 +1751,7 @@ class FieldDefinitions
      * Get Testimonials layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function testimonialsFields(string $prefix): array
@@ -2093,7 +1766,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über den Testimonials.', 'wp-starter'),
-                __('z.B. Das sagen unsere Kunden', 'wp-starter')
+                __('z.B. Das sagen unsere Kunden', 'wp-starter'),
             ),
             self::buttonGroupField(
                 "field_{$prefix}_source",
@@ -2104,7 +1777,7 @@ class FieldDefinitions
                     'cpt' => __('Aus Testimonials-Verwaltung', 'wp-starter'),
                 ],
                 'manual',
-                __('Wähle, woher die Testimonials kommen sollen.', 'wp-starter')
+                __('Wähle, woher die Testimonials kommen sollen.', 'wp-starter'),
             ),
             [
                 'key' => "field_{$prefix}_testimonials",
@@ -2123,7 +1796,7 @@ class FieldDefinitions
                         'quote',
                         3,
                         __('Das Zitat oder die Bewertung des Kunden.', 'wp-starter'),
-                        __('z.B. Die Zusammenarbeit war hervorragend...', 'wp-starter')
+                        __('z.B. Die Zusammenarbeit war hervorragend...', 'wp-starter'),
                     ),
                     self::textField(
                         "field_{$prefix}_testimonial_author",
@@ -2131,7 +1804,7 @@ class FieldDefinitions
                         'author',
                         true,
                         __('Name der Person.', 'wp-starter'),
-                        __('z.B. Max Mustermann', 'wp-starter')
+                        __('z.B. Max Mustermann', 'wp-starter'),
                     ),
                     self::textField(
                         "field_{$prefix}_testimonial_role",
@@ -2139,7 +1812,7 @@ class FieldDefinitions
                         'role',
                         false,
                         __('Position oder Firmenname.', 'wp-starter'),
-                        __('z.B. Geschäftsführer, Musterfirma GmbH', 'wp-starter')
+                        __('z.B. Geschäftsführer, Musterfirma GmbH', 'wp-starter'),
                     ),
                     self::imageField(
                         "field_{$prefix}_testimonial_image",
@@ -2148,7 +1821,7 @@ class FieldDefinitions
                         false,
                         'id',
                         null,
-                        __('Optionales Foto der Person.', 'wp-starter')
+                        __('Optionales Foto der Person.', 'wp-starter'),
                     ),
                 ],
             ],
@@ -2162,7 +1835,7 @@ class FieldDefinitions
                     '3' => '3',
                 ],
                 '3',
-                __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
+                __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -2173,6 +1846,7 @@ class FieldDefinitions
      * Get Cards/Features layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function cardsFields(string $prefix): array
@@ -2184,7 +1858,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über den Karten.', 'wp-starter'),
-                __('z.B. Unsere Leistungen', 'wp-starter')
+                __('z.B. Unsere Leistungen', 'wp-starter'),
             ),
             self::repeaterField(
                 "field_{$prefix}_cards",
@@ -2195,7 +1869,7 @@ class FieldDefinitions
                         "field_{$prefix}_card_icon",
                         __('Icon', 'wp-starter'),
                         'icon',
-                        __('Wähle ein Icon aus dem Theme.', 'wp-starter')
+                        __('Wähle ein Icon aus dem Theme.', 'wp-starter'),
                     ),
                     self::textField(
                         "field_{$prefix}_card_title",
@@ -2203,7 +1877,7 @@ class FieldDefinitions
                         'title',
                         true,
                         __('Titel der Karte.', 'wp-starter'),
-                        __('z.B. Beratung', 'wp-starter')
+                        __('z.B. Beratung', 'wp-starter'),
                     ),
                     self::textareaField(
                         "field_{$prefix}_card_content",
@@ -2211,20 +1885,20 @@ class FieldDefinitions
                         'content',
                         3,
                         __('Kurze Beschreibung.', 'wp-starter'),
-                        __('z.B. Wir beraten Sie umfassend...', 'wp-starter')
+                        __('z.B. Wir beraten Sie umfassend...', 'wp-starter'),
                     ),
                     self::linkField(
                         "field_{$prefix}_card_link",
                         __('Link', 'wp-starter'),
                         'link',
                         false,
-                        __('Optionaler Link zu mehr Informationen.', 'wp-starter')
+                        __('Optionaler Link zu mehr Informationen.', 'wp-starter'),
                     ),
                 ],
                 __('Karte hinzufügen', 'wp-starter'),
                 1,
                 'block',
-                __('Füge beliebig viele Karten hinzu.', 'wp-starter')
+                __('Füge beliebig viele Karten hinzu.', 'wp-starter'),
             ),
             self::buttonGroupField(
                 "field_{$prefix}_columns",
@@ -2236,7 +1910,7 @@ class FieldDefinitions
                     '4' => '4',
                 ],
                 '3',
-                __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
+                __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -2247,6 +1921,7 @@ class FieldDefinitions
      * Get Gallery layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function galleryFields(string $prefix): array
@@ -2258,7 +1933,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über der Galerie.', 'wp-starter'),
-                __('z.B. Unsere Projekte', 'wp-starter')
+                __('z.B. Unsere Projekte', 'wp-starter'),
             ),
             [
                 'key' => "field_{$prefix}_images",
@@ -2283,7 +1958,7 @@ class FieldDefinitions
                     '5' => '5',
                 ],
                 '3',
-                __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
+                __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -2294,6 +1969,7 @@ class FieldDefinitions
      * Get Logo Slider layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function logoSliderFields(string $prefix): array
@@ -2305,7 +1981,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über dem Logo-Slider.', 'wp-starter'),
-                __('z.B. Unsere Partner', 'wp-starter')
+                __('z.B. Unsere Partner', 'wp-starter'),
             ),
             self::repeaterField(
                 "field_{$prefix}_logos",
@@ -2319,7 +1995,7 @@ class FieldDefinitions
                         true,
                         'id',
                         null,
-                        __('Das Logo (idealerweise mit transparentem Hintergrund).', 'wp-starter')
+                        __('Das Logo (idealerweise mit transparentem Hintergrund).', 'wp-starter'),
                     ),
                     self::textField(
                         "field_{$prefix}_logo_name",
@@ -2327,7 +2003,7 @@ class FieldDefinitions
                         'name',
                         false,
                         __('Name des Partners (für Barrierefreiheit).', 'wp-starter'),
-                        __('z.B. Musterfirma GmbH', 'wp-starter')
+                        __('z.B. Musterfirma GmbH', 'wp-starter'),
                     ),
                     self::urlField(
                         "field_{$prefix}_logo_link",
@@ -2335,20 +2011,20 @@ class FieldDefinitions
                         'link',
                         __('Optionaler Link zur Partner-Website.', 'wp-starter'),
                         null,
-                        'https://...'
+                        'https://...',
                     ),
                 ],
                 __('Logo hinzufügen', 'wp-starter'),
                 1,
                 'table',
-                __('Füge Partner- oder Kundenlogos hinzu.', 'wp-starter')
+                __('Füge Partner- oder Kundenlogos hinzu.', 'wp-starter'),
             ),
             self::trueFalseField(
                 "field_{$prefix}_autoplay",
                 __('Automatisch abspielen', 'wp-starter'),
                 'autoplay',
                 true,
-                __('Logos automatisch durchlaufen lassen.', 'wp-starter')
+                __('Logos automatisch durchlaufen lassen.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -2359,6 +2035,7 @@ class FieldDefinitions
      * Get Contact Form layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function contactFormFields(string $prefix): array
@@ -2368,7 +2045,7 @@ class FieldDefinitions
             self::tabField("field_{$prefix}_tab_form", __('Formular', 'wp-starter')),
             self::messageField(
                 "field_{$prefix}_form_help",
-                __('<strong>So findest du die Formular-ID:</strong><br>1) Gehe zu <em>Formulare</em> im Menü<br>2) Wähle dein Formular aus<br>3) Die ID steht in der URL (z.B. post=<strong>123</strong>) oder im Shortcode', 'wp-starter')
+                __('<strong>So findest du die Formular-ID:</strong><br>1) Gehe zu <em>Formulare</em> im Menü<br>2) Wähle dein Formular aus<br>3) Die ID steht in der URL (z.B. post=<strong>123</strong>) oder im Shortcode', 'wp-starter'),
             ),
             [
                 'key' => "field_{$prefix}_form_id",
@@ -2388,7 +2065,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Überschrift für den Kontaktbereich.', 'wp-starter'),
-                __('z.B. Kontaktieren Sie uns', 'wp-starter')
+                __('z.B. Kontaktieren Sie uns', 'wp-starter'),
             ),
             self::wysiwygField(
                 "field_{$prefix}_content",
@@ -2396,7 +2073,7 @@ class FieldDefinitions
                 'content',
                 false,
                 null,
-                __('Optionaler Text über dem Formular.', 'wp-starter')
+                __('Optionaler Text über dem Formular.', 'wp-starter'),
             ),
 
             // Tab: Optionen
@@ -2406,7 +2083,7 @@ class FieldDefinitions
                 __('Kontaktdaten anzeigen', 'wp-starter'),
                 'show_contact_info',
                 true,
-                __('Zeigt die Kontaktdaten aus den Theme-Einstellungen an.', 'wp-starter')
+                __('Zeigt die Kontaktdaten aus den Theme-Einstellungen an.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -2417,6 +2094,7 @@ class FieldDefinitions
      * Get Google Maps layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function mapFields(string $prefix): array
@@ -2426,7 +2104,7 @@ class FieldDefinitions
             self::tabField("field_{$prefix}_tab_map", __('Karte', 'wp-starter')),
             self::messageField(
                 "field_{$prefix}_map_help",
-                __('<strong>So bekommst du die Einbettungs-URL:</strong><br>1) Öffne <a href="https://maps.google.com" target="_blank">Google Maps</a><br>2) Suche deinen Standort<br>3) Klicke auf "Teilen" → "Karte einbetten"<br>4) Kopiere die URL aus dem HTML-Code (beginnt mit https://www.google.com/maps/embed)', 'wp-starter')
+                __('<strong>So bekommst du die Einbettungs-URL:</strong><br>1) Öffne <a href="https://maps.google.com" target="_blank">Google Maps</a><br>2) Suche deinen Standort<br>3) Klicke auf "Teilen" → "Karte einbetten"<br>4) Kopiere die URL aus dem HTML-Code (beginnt mit https://www.google.com/maps/embed)', 'wp-starter'),
             ),
             self::urlField(
                 "field_{$prefix}_embed_url",
@@ -2434,7 +2112,7 @@ class FieldDefinitions
                 'embed_url',
                 __('Der Block zeigt automatisch einen DSGVO-Hinweis.', 'wp-starter'),
                 null,
-                'https://www.google.com/maps/embed?pb=...'
+                'https://www.google.com/maps/embed?pb=...',
             ),
             self::numberField(
                 "field_{$prefix}_height",
@@ -2445,7 +2123,7 @@ class FieldDefinitions
                 800,
                 50,
                 'px',
-                __('Höhe der Karte in Pixeln.', 'wp-starter')
+                __('Höhe der Karte in Pixeln.', 'wp-starter'),
             ),
 
             // Tab: Inhalt
@@ -2456,7 +2134,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über der Karte.', 'wp-starter'),
-                __('z.B. So finden Sie uns', 'wp-starter')
+                __('z.B. So finden Sie uns', 'wp-starter'),
             ),
             self::textareaField(
                 "field_{$prefix}_address",
@@ -2464,14 +2142,14 @@ class FieldDefinitions
                 'address',
                 2,
                 __('Die vollständige Adresse (für den "Route planen" Link).', 'wp-starter'),
-                __('Musterstraße 123, 12345 Musterstadt', 'wp-starter')
+                __('Musterstraße 123, 12345 Musterstadt', 'wp-starter'),
             ),
             self::trueFalseField(
                 "field_{$prefix}_show_directions_link",
                 __('„Route planen" Link anzeigen', 'wp-starter'),
                 'show_directions_link',
                 true,
-                __('Zeigt einen Link zum Planen der Route an.', 'wp-starter')
+                __('Zeigt einen Link zum Planen der Route an.', 'wp-starter'),
             ),
 
             // Tab: Darstellung
@@ -2485,6 +2163,7 @@ class FieldDefinitions
      * Get Tabs layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function tabsFields(string $prefix): array
@@ -2496,7 +2175,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über den Tabs.', 'wp-starter'),
-                __('z.B. Häufige Fragen', 'wp-starter')
+                __('z.B. Häufige Fragen', 'wp-starter'),
             ),
             self::repeaterField(
                 "field_{$prefix}_tabs",
@@ -2507,7 +2186,7 @@ class FieldDefinitions
                         "field_{$prefix}_tab_icon",
                         __('Icon', 'wp-starter'),
                         'icon',
-                        __('Optionales Icon neben dem Tab-Titel.', 'wp-starter')
+                        __('Optionales Icon neben dem Tab-Titel.', 'wp-starter'),
                     ),
                     self::textField(
                         "field_{$prefix}_tab_title",
@@ -2515,7 +2194,7 @@ class FieldDefinitions
                         'title',
                         true,
                         __('Der Titel des Tabs (im Tab-Button sichtbar).', 'wp-starter'),
-                        __('z.B. Übersicht', 'wp-starter')
+                        __('z.B. Übersicht', 'wp-starter'),
                     ),
                     self::wysiwygField(
                         "field_{$prefix}_tab_content",
@@ -2523,13 +2202,13 @@ class FieldDefinitions
                         'content',
                         true,
                         null,
-                        __('Der Inhalt, der angezeigt wird, wenn dieser Tab aktiv ist.', 'wp-starter')
+                        __('Der Inhalt, der angezeigt wird, wenn dieser Tab aktiv ist.', 'wp-starter'),
                     ),
                 ],
                 __('Tab hinzufügen', 'wp-starter'),
                 2,
                 'block',
-                __('Füge mindestens 2 Tabs hinzu.', 'wp-starter')
+                __('Füge mindestens 2 Tabs hinzu.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -2544,6 +2223,7 @@ class FieldDefinitions
      * Get Pricing Table layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function pricingTableFields(string $prefix): array
@@ -2555,7 +2235,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über der Preistabelle.', 'wp-starter'),
-                __('z.B. Unsere Pakete', 'wp-starter')
+                __('z.B. Unsere Pakete', 'wp-starter'),
             ),
             self::repeaterField(
                 "field_{$prefix}_plans",
@@ -2598,7 +2278,7 @@ class FieldDefinitions
                         __('Hervorheben', 'wp-starter'),
                         'is_featured',
                         false,
-                        __('Dieses Paket als „Empfohlen" hervorheben.', 'wp-starter')
+                        __('Dieses Paket als „Empfohlen" hervorheben.', 'wp-starter'),
                     ),
                     // Accordion: Leistungen
                     self::accordionField("field_{$prefix}_acc_features", __('Leistungen', 'wp-starter')),
@@ -2608,7 +2288,7 @@ class FieldDefinitions
                         'features',
                         true,
                         null,
-                        __('Liste der enthaltenen Leistungen (als Aufzählung).', 'wp-starter')
+                        __('Liste der enthaltenen Leistungen (als Aufzählung).', 'wp-starter'),
                     ),
                     // Accordion: Aktion
                     self::accordionField("field_{$prefix}_acc_cta", __('Aktion', 'wp-starter')),
@@ -2617,7 +2297,7 @@ class FieldDefinitions
                         __('Button', 'wp-starter'),
                         'cta',
                         false,
-                        __('Call-to-Action Button für dieses Paket.', 'wp-starter')
+                        __('Call-to-Action Button für dieses Paket.', 'wp-starter'),
                     ),
                     // Accordion Ende
                     self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
@@ -2625,7 +2305,7 @@ class FieldDefinitions
                 __('Paket hinzufügen', 'wp-starter'),
                 1,
                 'block',
-                __('Füge Preispakete hinzu (empfohlen: 3 Pakete).', 'wp-starter')
+                __('Füge Preispakete hinzu (empfohlen: 3 Pakete).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -2636,6 +2316,7 @@ class FieldDefinitions
      * Get Team Members layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function teamFields(string $prefix): array
@@ -2650,7 +2331,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über dem Team.', 'wp-starter'),
-                __('z.B. Unser Team', 'wp-starter')
+                __('z.B. Unser Team', 'wp-starter'),
             ),
             self::buttonGroupField(
                 "field_{$prefix}_source",
@@ -2661,7 +2342,7 @@ class FieldDefinitions
                     'cpt' => __('Aus Team-Verwaltung', 'wp-starter'),
                 ],
                 'manual',
-                __('Wähle, woher die Teammitglieder kommen sollen.', 'wp-starter')
+                __('Wähle, woher die Teammitglieder kommen sollen.', 'wp-starter'),
             ),
             [
                 'key' => "field_{$prefix}_members",
@@ -2683,7 +2364,7 @@ class FieldDefinitions
                         false,
                         'id',
                         null,
-                        __('Portraitfoto (quadratisch empfohlen).', 'wp-starter')
+                        __('Portraitfoto (quadratisch empfohlen).', 'wp-starter'),
                     ),
                     self::textField(
                         "field_{$prefix}_member_name",
@@ -2691,7 +2372,7 @@ class FieldDefinitions
                         'name',
                         true,
                         __('Vollständiger Name.', 'wp-starter'),
-                        __('z.B. Max Mustermann', 'wp-starter')
+                        __('z.B. Max Mustermann', 'wp-starter'),
                     ),
                     self::textField(
                         "field_{$prefix}_member_position",
@@ -2699,7 +2380,7 @@ class FieldDefinitions
                         'position',
                         false,
                         __('Jobtitel oder Rolle.', 'wp-starter'),
-                        __('z.B. Geschäftsführer', 'wp-starter')
+                        __('z.B. Geschäftsführer', 'wp-starter'),
                     ),
                     // Accordion: Details
                     self::accordionField("field_{$prefix}_acc_details", __('Details', 'wp-starter')),
@@ -2709,7 +2390,7 @@ class FieldDefinitions
                         'bio',
                         2,
                         __('Optionale kurze Beschreibung.', 'wp-starter'),
-                        __('z.B. Seit 2020 im Unternehmen...', 'wp-starter')
+                        __('z.B. Seit 2020 im Unternehmen...', 'wp-starter'),
                     ),
                     // Accordion: Kontakt
                     self::accordionField("field_{$prefix}_acc_contact", __('Kontakt', 'wp-starter')),
@@ -2745,7 +2426,7 @@ class FieldDefinitions
                     '4' => '4',
                 ],
                 '3',
-                __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
+                __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -2756,6 +2437,7 @@ class FieldDefinitions
      * Get Stats/Counter layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function statsFields(string $prefix): array
@@ -2767,7 +2449,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über den Statistiken.', 'wp-starter'),
-                __('z.B. Zahlen & Fakten', 'wp-starter')
+                __('z.B. Zahlen & Fakten', 'wp-starter'),
             ),
             self::repeaterField(
                 "field_{$prefix}_stats",
@@ -2783,7 +2465,7 @@ class FieldDefinitions
                         999999999,
                         0.01,
                         '',
-                        __('Die anzuzeigende Zahl (wird animiert).', 'wp-starter')
+                        __('Die anzuzeigende Zahl (wird animiert).', 'wp-starter'),
                     ),
                     self::textField(
                         "field_{$prefix}_stat_suffix",
@@ -2791,7 +2473,7 @@ class FieldDefinitions
                         'suffix',
                         false,
                         __('Optionales Suffix nach der Zahl.', 'wp-starter'),
-                        __('z.B. +, %, Jahre', 'wp-starter')
+                        __('z.B. +, %, Jahre', 'wp-starter'),
                     ),
                     self::textField(
                         "field_{$prefix}_stat_label",
@@ -2799,19 +2481,19 @@ class FieldDefinitions
                         'label',
                         true,
                         __('Was diese Zahl bedeutet.', 'wp-starter'),
-                        __('z.B. Zufriedene Kunden', 'wp-starter')
+                        __('z.B. Zufriedene Kunden', 'wp-starter'),
                     ),
                     self::iconRadioField(
                         "field_{$prefix}_stat_icon",
                         __('Icon', 'wp-starter'),
                         'icon',
-                        __('Optionales Icon für diese Statistik.', 'wp-starter')
+                        __('Optionales Icon für diese Statistik.', 'wp-starter'),
                     ),
                 ],
                 __('Statistik hinzufügen', 'wp-starter'),
                 1,
                 'table',
-                __('Füge Kennzahlen hinzu (empfohlen: 3-4).', 'wp-starter')
+                __('Füge Kennzahlen hinzu (empfohlen: 3-4).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -2822,6 +2504,7 @@ class FieldDefinitions
      * Get Timeline layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function timelineFields(string $prefix): array
@@ -2833,7 +2516,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über dem Zeitstrahl.', 'wp-starter'),
-                __('z.B. Unsere Geschichte', 'wp-starter')
+                __('z.B. Unsere Geschichte', 'wp-starter'),
             ),
             self::repeaterField(
                 "field_{$prefix}_events",
@@ -2870,7 +2553,7 @@ class FieldDefinitions
                         'content',
                         false,
                         null,
-                        __('Detaillierte Beschreibung des Ereignisses.', 'wp-starter')
+                        __('Detaillierte Beschreibung des Ereignisses.', 'wp-starter'),
                     ),
                     self::imageField(
                         "field_{$prefix}_event_image",
@@ -2879,7 +2562,7 @@ class FieldDefinitions
                         false,
                         'id',
                         null,
-                        __('Optionales Bild zum Ereignis.', 'wp-starter')
+                        __('Optionales Bild zum Ereignis.', 'wp-starter'),
                     ),
                     // Accordion Ende
                     self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
@@ -2887,7 +2570,7 @@ class FieldDefinitions
                 __('Ereignis hinzufügen', 'wp-starter'),
                 2,
                 'block',
-                __('Füge Ereignisse in chronologischer Reihenfolge hinzu.', 'wp-starter')
+                __('Füge Ereignisse in chronologischer Reihenfolge hinzu.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -2898,6 +2581,7 @@ class FieldDefinitions
      * Get Blog Posts layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function postsFields(string $prefix): array
@@ -2922,7 +2606,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über den Beiträgen.', 'wp-starter'),
-                __('z.B. Aktuelle Neuigkeiten', 'wp-starter')
+                __('z.B. Aktuelle Neuigkeiten', 'wp-starter'),
             ),
             self::buttonGroupField(
                 "field_{$prefix}_post_type",
@@ -2933,7 +2617,7 @@ class FieldDefinitions
                     'page' => __('Seiten', 'wp-starter'),
                 ],
                 'post',
-                __('Welcher Beitragstyp angezeigt werden soll.', 'wp-starter')
+                __('Welcher Beitragstyp angezeigt werden soll.', 'wp-starter'),
             ),
             [
                 'key' => "field_{$prefix}_category",
@@ -2956,7 +2640,7 @@ class FieldDefinitions
                 12,
                 1,
                 __('Beiträge', 'wp-starter'),
-                __('Wie viele Beiträge angezeigt werden sollen.', 'wp-starter')
+                __('Wie viele Beiträge angezeigt werden sollen.', 'wp-starter'),
             ),
 
             // Tab: Anzeige
@@ -3004,7 +2688,7 @@ class FieldDefinitions
                     '4' => '4',
                 ],
                 '3',
-                __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
+                __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionAnchorField($prefix),
@@ -3015,6 +2699,7 @@ class FieldDefinitions
      * Get Before/After Slider layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function beforeAfterFields(string $prefix): array
@@ -3026,7 +2711,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über dem Vergleich.', 'wp-starter'),
-                __('z.B. Vorher vs. Nachher', 'wp-starter')
+                __('z.B. Vorher vs. Nachher', 'wp-starter'),
             ),
             self::imageField(
                 "field_{$prefix}_image_before",
@@ -3036,7 +2721,7 @@ class FieldDefinitions
                 'id',
                 null,
                 __('Das „Vorher"-Bild (links).', 'wp-starter'),
-                '50'
+                '50',
             ),
             self::imageField(
                 "field_{$prefix}_image_after",
@@ -3046,7 +2731,7 @@ class FieldDefinitions
                 'id',
                 null,
                 __('Das „Nachher"-Bild (rechts). Sollte gleiche Maße haben.', 'wp-starter'),
-                '50'
+                '50',
             ),
             [
                 'key' => "field_{$prefix}_label_before",
@@ -3075,6 +2760,7 @@ class FieldDefinitions
      * Get Table layout fields
      *
      * @param string $prefix Key prefix
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function tableFields(string $prefix): array
@@ -3086,7 +2772,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über der Tabelle.', 'wp-starter'),
-                __('z.B. Preisübersicht', 'wp-starter')
+                __('z.B. Preisübersicht', 'wp-starter'),
             ),
             self::repeaterField(
                 "field_{$prefix}_headers",
@@ -3099,13 +2785,13 @@ class FieldDefinitions
                         'label',
                         true,
                         __('Name der Spalte.', 'wp-starter'),
-                        __('z.B. Produkt, Preis, Menge', 'wp-starter')
+                        __('z.B. Produkt, Preis, Menge', 'wp-starter'),
                     ),
                 ],
                 __('Spalte hinzufügen', 'wp-starter'),
                 1,
                 'table',
-                __('Definiere die Spalten der Tabelle.', 'wp-starter')
+                __('Definiere die Spalten der Tabelle.', 'wp-starter'),
             ),
             self::repeaterField(
                 "field_{$prefix}_rows",
@@ -3123,19 +2809,19 @@ class FieldDefinitions
                                 'content',
                                 1,
                                 __('Inhalt der Zelle (HTML erlaubt).', 'wp-starter'),
-                                ''
+                                '',
                             ),
                         ],
                         __('Zelle hinzufügen', 'wp-starter'),
                         1,
                         'table',
-                        ''
+                        '',
                     ),
                 ],
                 __('Zeile hinzufügen', 'wp-starter'),
                 1,
                 'row',
-                __('Füge Datenzeilen hinzu.', 'wp-starter')
+                __('Füge Datenzeilen hinzu.', 'wp-starter'),
             ),
             [
                 'key' => "field_{$prefix}_striped",
@@ -3168,6 +2854,7 @@ class FieldDefinitions
      * No configuration needed — the downloads component is self-contained.
      *
      * @param string $prefix Unique prefix for the field key
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function memberDownloadsFields(string $prefix): array
@@ -3181,6 +2868,7 @@ class FieldDefinitions
      * Get section anchor field for manual anchor-ID override
      *
      * @param string $prefix Key prefix
+     *
      * @return array<string, mixed>
      */
     public static function sectionAnchorField(string $prefix): array
@@ -3191,7 +2879,7 @@ class FieldDefinitions
             'section_anchor',
             false,
             __('Optionale ID für Anker-Links (z.B. "kontakt"). Wird automatisch generiert wenn leer.', 'wp-starter'),
-            'z.B. kontakt'
+            'z.B. kontakt',
         );
     }
 }

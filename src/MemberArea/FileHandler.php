@@ -4,22 +4,14 @@ declare(strict_types=1);
 
 namespace WordpressStarter\MemberArea;
 
+use InvalidArgumentException;
+use RuntimeException;
+use Throwable;
+
 class FileHandler
 {
     private const POST_TYPE = 'member_download';
     private const NONCE_PREFIX = 'member_download_';
-    private const ALLOWED_PROTOCOLS = ['https', 'http'];
-    private const SSRF_BLOCKED_RANGES = [
-        '/^127\./',
-        '/^10\./',
-        '/^192\.168\./',
-        '/^172\.(1[6-9]|2[0-9]|3[01])\./',
-        '/^::1$/',
-        '/^localhost$/i',
-        '/^0\./',
-        '/^169\.254\./',
-        '/^fc[0-9a-f]{2}:/i',
-    ];
 
     public static function handleDownload(): void
     {
@@ -27,7 +19,7 @@ class FileHandler
             wp_send_json_error(['message' => __('Nicht authentifiziert.', 'wp-starter')], 401);
         }
 
-        $nonce  = sanitize_text_field(wp_unslash($_GET['nonce'] ?? ''));
+        $nonce = sanitize_text_field(wp_unslash($_GET['nonce'] ?? ''));
         $postId = isset($_GET['download_id']) ? absint($_GET['download_id']) : 0;
 
         if ($postId <= 0) {
@@ -45,13 +37,13 @@ class FileHandler
 
         $fields = get_fields($postId) ?: [];
         $entry = [
-            'download_source_type'      => $fields['download_source_type'] ?? null,
-            'download_file'             => $fields['download_file'] ?? null,
-            'download_external_url'     => $fields['download_external_url'] ?? null,
-            'download_sftp_host'        => $fields['download_sftp_host'] ?? null,
-            'download_sftp_port'        => $fields['download_sftp_port'] ?? null,
-            'download_sftp_username'    => $fields['download_sftp_username'] ?? null,
-            'download_sftp_password'    => $fields['download_sftp_password'] ?? null,
+            'download_source_type' => $fields['download_source_type'] ?? null,
+            'download_file' => $fields['download_file'] ?? null,
+            'download_external_url' => $fields['download_external_url'] ?? null,
+            'download_sftp_host' => $fields['download_sftp_host'] ?? null,
+            'download_sftp_port' => $fields['download_sftp_port'] ?? null,
+            'download_sftp_username' => $fields['download_sftp_username'] ?? null,
+            'download_sftp_password' => $fields['download_sftp_password'] ?? null,
             'download_sftp_remote_file' => $fields['download_sftp_remote_file'] ?? null,
         ];
 
@@ -63,10 +55,10 @@ class FileHandler
         $sourceType = $entry['download_source_type'] ?? 'upload';
 
         match ($sourceType) {
-            'upload'   => self::streamUpload($entry),
+            'upload' => self::streamUpload($entry),
             'external' => self::redirectExternal($entry),
-            'sftp'     => self::streamSftp($entry),
-            default    => wp_send_json_error(['message' => __('Unbekannter Quelltyp.', 'wp-starter')], 400),
+            'sftp' => self::streamSftp($entry),
+            default => wp_send_json_error(['message' => __('Unbekannter Quelltyp.', 'wp-starter')], 400),
         };
     }
 
@@ -80,7 +72,7 @@ class FileHandler
             wp_send_json_error(['message' => __('Keine Datei hinterlegt.', 'wp-starter')], 404);
         }
 
-        $fileId   = is_array($file) ? ( $file['ID'] ?? 0 ) : (int) $file;
+        $fileId = is_array($file) ? ( $file['ID'] ?? 0 ) : (int) $file;
         $filePath = get_attached_file($fileId);
 
         if (!$filePath || !file_exists($filePath)) {
@@ -89,7 +81,7 @@ class FileHandler
 
         $fileName = is_array($file) ? ( $file['filename'] ?? '' ) : '';
         if (empty($fileName)) {
-            $fileUrl  = wp_get_attachment_url($fileId);
+            $fileUrl = wp_get_attachment_url($fileId);
             $fileName = $fileUrl ? basename($fileUrl) : 'download';
         }
 
@@ -138,10 +130,10 @@ class FileHandler
      */
     private static function streamSftp(array $entry): never
     {
-        $host       = $entry['download_sftp_host']        ?? '';
-        $port       = (int) ( $entry['download_sftp_port'] ?? 22 ) ?: 22;
-        $username   = $entry['download_sftp_username']    ?? '';
-        $password   = Crypto::decrypt($entry['download_sftp_password'] ?? '') ?? '';
+        $host = $entry['download_sftp_host'] ?? '';
+        $port = (int) ( $entry['download_sftp_port'] ?? 22 ) ?: 22;
+        $username = $entry['download_sftp_username'] ?? '';
+        $password = Crypto::decrypt($entry['download_sftp_password'] ?? '') ?? '';
         $remotePath = $entry['download_sftp_remote_file'] ?? '';
 
         if (empty($host) || empty($username) || empty($password) || empty($remotePath)) {
@@ -150,14 +142,14 @@ class FileHandler
 
         try {
             SftpClient::assertSafeHost($host);
-        } catch (\RuntimeException) {
+        } catch (RuntimeException) {
             wp_send_json_error(['message' => __('Diese URL ist nicht erlaubt.', 'wp-starter')], 403);
         }
 
         try {
-            $sftp     = SftpClient::connect($host, $port, $username, $password);
+            $sftp = SftpClient::connect($host, $port, $username, $password);
             $contents = SftpClient::readFile($sftp, $remotePath);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             wp_send_json_error(['message' => __('Datei konnte nicht abgerufen werden.', 'wp-starter')], 502);
         }
 
@@ -188,30 +180,24 @@ class FileHandler
     private static function guessMimeType(string $fileName): string
     {
         return match (strtolower(pathinfo($fileName, PATHINFO_EXTENSION))) {
-            'pdf'  => 'application/pdf',
-            'doc'  => 'application/msword',
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
             'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'xls'  => 'application/vnd.ms-excel',
+            'xls' => 'application/vnd.ms-excel',
             'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'zip'  => 'application/zip',
+            'zip' => 'application/zip',
             default => 'application/octet-stream',
         };
     }
 
     private static function assertSafeUrl(string $url): void
     {
-        $parsed = wp_parse_url($url);
-
-        if (!$parsed || empty($parsed['scheme']) || !in_array($parsed['scheme'], self::ALLOWED_PROTOCOLS, true)) {
+        try {
+            SsrfGuard::assertSafeUrl($url);
+        } catch (InvalidArgumentException) {
             wp_send_json_error(['message' => __('Ungültiges URL-Schema.', 'wp-starter')], 400);
-        }
-
-        $host = $parsed['host'] ?? '';
-
-        foreach (self::SSRF_BLOCKED_RANGES as $pattern) {
-            if (preg_match($pattern, $host)) {
-                wp_send_json_error(['message' => __('Diese URL ist nicht erlaubt.', 'wp-starter')], 403);
-            }
+        } catch (RuntimeException) {
+            wp_send_json_error(['message' => __('Diese URL ist nicht erlaubt.', 'wp-starter')], 403);
         }
     }
 }

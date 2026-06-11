@@ -13,7 +13,7 @@
 
 <x-section :anchor="$sectionAnchor" :background="$background" class="timeline">
     @if($title)
-        <h2 class="mb-12 text-center">{!! $title !!}</h2>
+        <h2 class="mb-12 text-center">@kses($title)</h2>
     @endif
 
     @if(!empty($events))
@@ -47,7 +47,7 @@
 
                                 @if($content)
                                     <div class="prose text-content-secondary">
-                                        {!! $content !!}
+                                        @kses($content)
                                     </div>
                                 @endif
 

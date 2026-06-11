@@ -65,7 +65,7 @@
                         <x-button
                             :url="$cta['url'] ?? '#'"
                             :target="$cta['target'] ?? '_self'"
-                            :title="$cta['title'] ?? 'Auswählen'"
+                            :title="$cta['title'] ?? __('Auswählen', 'wp-starter')"
                             :variant="$isFeatured ? 'secondary' : 'primary'"
                             size="lg"
                             class="w-full justify-center"

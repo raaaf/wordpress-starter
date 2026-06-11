@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace WordpressStarter\MemberArea;
 
 use WordpressStarter\RateLimiter;
+use WP_Post;
+use WP_Query;
 
 class DownloadQuery
 {
@@ -12,12 +14,12 @@ class DownloadQuery
     private const DEFAULT_PER_PAGE = 20;
 
     private const EXT_VARIANTS = [
-        'pdf'  => 'error',
-        'xls'  => 'success',
+        'pdf' => 'error',
+        'xls' => 'success',
         'xlsx' => 'success',
-        'doc'  => 'brand',
+        'doc' => 'brand',
         'docx' => 'brand',
-        'zip'  => 'warning',
+        'zip' => 'warning',
     ];
 
     public static function handle(): void
@@ -38,11 +40,11 @@ class DownloadQuery
             wp_send_json_success(self::facets());
         }
 
-        $search   = sanitize_text_field(wp_unslash($_GET['search']   ?? ''));
-        $category = sanitize_key(wp_unslash($_GET['category']        ?? ''));
-        $ext      = sanitize_key(wp_unslash($_GET['ext']             ?? ''));
-        $page     = max(1, absint($_GET['page']     ?? 1));
-        $perPage  = absint($_GET['per_page'] ?? self::DEFAULT_PER_PAGE);
+        $search = sanitize_text_field(wp_unslash($_GET['search'] ?? ''));
+        $category = sanitize_key(wp_unslash($_GET['category'] ?? ''));
+        $ext = sanitize_key(wp_unslash($_GET['ext'] ?? ''));
+        $page = max(1, absint($_GET['page'] ?? 1));
+        $perPage = absint($_GET['per_page'] ?? self::DEFAULT_PER_PAGE);
 
         if (!in_array($perPage, self::ALLOWED_PER_PAGE, true)) {
             $perPage = self::DEFAULT_PER_PAGE;
@@ -61,28 +63,20 @@ class DownloadQuery
         string $category,
         string $ext,
         int $page,
-        int $perPage
+        int $perPage,
     ): array {
         // Base meta_query: exclude SFTP parent folder entries
-        $metaQuery = [
-            'relation' => 'OR',
-            ['key' => 'download_source_type', 'value' => 'sftp', 'compare' => '!='],
-            [
-                'relation' => 'AND',
-                ['key' => 'download_source_type', 'value' => 'sftp', 'compare' => '='],
-                ['key' => 'download_sftp_source', 'value' => '', 'compare' => '!='],
-            ],
-        ];
+        $metaQuery = self::sftpParentExclusionMetaQuery();
 
         $args = [
-            'post_type'      => 'member_download',
-            'post_status'    => 'publish',
+            'post_type' => 'member_download',
+            'post_status' => 'publish',
             'posts_per_page' => $ext ? -1 : $perPage,
-            'paged'          => $ext ? 1 : $page,
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-            'no_found_rows'  => (bool) $ext,
-            'meta_query'     => $metaQuery, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+            'paged' => $ext ? 1 : $page,
+            'orderby' => 'title',
+            'order' => 'ASC',
+            'no_found_rows' => (bool) $ext,
+            'meta_query' => $metaQuery, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
         ];
 
         if (!empty($search)) {
@@ -93,8 +87,8 @@ class DownloadQuery
             $args['tax_query'] = [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
                 [
                     'taxonomy' => 'download_category',
-                    'field'    => 'slug',
-                    'terms'    => $category,
+                    'field' => 'slug',
+                    'terms' => $category,
                 ],
             ];
         }
@@ -102,7 +96,7 @@ class DownloadQuery
         // Extend search to also match download_description meta field
         $extendSearch = null;
         if (!empty($search)) {
-            $extendSearch = static function (string $searchSql, \WP_Query $wpQuery) use ($search): string {
+            $extendSearch = static function (string $searchSql, WP_Query $wpQuery) use ($search): string {
                 global $wpdb;
                 if (!$wpQuery->get('s')) {
                     return $searchSql;
@@ -111,14 +105,15 @@ class DownloadQuery
                 $searchSql .= $wpdb->prepare(
                     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                     " OR ({$wpdb->postmeta}.meta_key = 'download_description' AND {$wpdb->postmeta}.meta_value LIKE %s)",
-                    $term
+                    $term,
                 );
+
                 return $searchSql;
             };
             add_filter('posts_search', $extendSearch, 10, 2);
         }
 
-        $wpQuery = new \WP_Query($args);
+        $wpQuery = new WP_Query($args);
 
         if ($extendSearch !== null) {
             remove_filter('posts_search', $extendSearch, 10);
@@ -132,14 +127,14 @@ class DownloadQuery
 
         // PHP-level extension filter (avoids complex SQL JOIN on attachments table)
         if (!empty($ext)) {
-            $posts = array_filter($posts, static function (\WP_Post $post) use ($ext): bool {
+            $posts = array_filter($posts, static function (WP_Post $post) use ($ext): bool {
                 return self::getPostExt($post->ID) === strtolower($ext);
             });
             $posts = array_values($posts);
 
             $total = count($posts);
             $pages = max(1, (int) ceil($total / $perPage));
-            $page  = min($page, $pages);
+            $page = min($page, $pages);
             $posts = array_slice($posts, ( $page - 1 ) * $perPage, $perPage);
         } else {
             $total = $wpQuery->found_posts;
@@ -147,8 +142,8 @@ class DownloadQuery
         }
 
         // Build term label cache
-        $terms       = get_terms(['taxonomy' => 'download_category', 'hide_empty' => false]);
-        $termLabels  = [];
+        $terms = get_terms(['taxonomy' => 'download_category', 'hide_empty' => false]);
+        $termLabels = [];
         if (!is_wp_error($terms)) {
             foreach ($terms as $term) {
                 $termLabels[$term->slug] = $term->name;
@@ -158,49 +153,49 @@ class DownloadQuery
         $dateFormat = get_option('date_format');
         $items = [];
         foreach ($posts as $post) {
-            $postId       = $post->ID;
-            $postTerms    = get_the_terms($postId, 'download_category');
-            $termSlug     = ( !is_wp_error($postTerms) && !empty($postTerms) ) ? $postTerms[0]->slug : '';
+            $postId = $post->ID;
+            $postTerms = get_the_terms($postId, 'download_category');
+            $termSlug = ( !is_wp_error($postTerms) && !empty($postTerms) ) ? $postTerms[0]->slug : '';
             $lastModified = get_field('download_last_modified', $postId) ?: '';
-            $available    = (bool) ( get_field('download_available', $postId) ?? true );
+            $available = (bool) ( get_field('download_available', $postId) ?? true );
 
-            $fileExt      = self::getPostExt($postId);
-            $extVariant   = self::EXT_VARIANTS[$fileExt] ?? 'gray';
+            $fileExt = self::getPostExt($postId);
+            $extVariant = self::EXT_VARIANTS[$fileExt] ?? 'gray';
 
             $lastModifiedLabel = '';
-            $isUpdated         = false;
+            $isUpdated = false;
             if ($lastModified) {
                 $timestamp = strtotime($lastModified);
                 if ($timestamp !== false) {
                     $lastModifiedLabel = date_i18n($dateFormat, $timestamp);
-                    $isUpdated         = $timestamp > ( time() - 7 * DAY_IN_SECONDS );
+                    $isUpdated = $timestamp > ( time() - 7 * DAY_IN_SECONDS );
                 }
             }
 
             $downloadNonce = wp_create_nonce('member_download_' . $postId);
-            $downloadUrl   = admin_url('admin-ajax.php')
+            $downloadUrl = admin_url('admin-ajax.php')
                 . '?action=member_download&download_id=' . $postId
                 . '&nonce=' . $downloadNonce;
 
             $items[] = [
-                'id'             => $postId,
-                'title'          => $post->post_title,
-                'ext'            => strtoupper($fileExt),
-                'ext_variant'    => $extVariant,
+                'id' => $postId,
+                'title' => $post->post_title,
+                'ext' => strtoupper($fileExt),
+                'ext_variant' => $extVariant,
                 'category_label' => $termSlug ? ( $termLabels[$termSlug] ?? $termSlug ) : '',
-                'last_modified'  => $lastModifiedLabel,
-                'is_updated'     => $isUpdated,
-                'available'      => $available,
-                'download_url'   => $downloadUrl,
+                'last_modified' => $lastModifiedLabel,
+                'is_updated' => $isUpdated,
+                'available' => $available,
+                'download_url' => $downloadUrl,
             ];
         }
 
         return [
-            'items'        => $items,
-            'total'        => $total,
-            'pages'        => $pages,
+            'items' => $items,
+            'total' => $total,
+            'pages' => $pages,
             'current_page' => $page,
-            'per_page'     => $perPage,
+            'per_page' => $perPage,
         ];
     }
 
@@ -209,19 +204,41 @@ class DownloadQuery
         $sourceType = get_field('download_source_type', $postId) ?: 'upload';
 
         if ($sourceType === 'upload') {
-            $file     = get_field('download_file', $postId);
+            $file = get_field('download_file', $postId);
             $fileName = is_array($file) ? ( $file['filename'] ?? '' ) : '';
+
             return strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
         }
 
         if ($sourceType === 'sftp') {
             $remotePath = get_field('download_sftp_remote_file', $postId) ?: '';
+
             return strtolower(pathinfo($remotePath, PATHINFO_EXTENSION));
         }
 
         // external
         $url = get_field('download_external_url', $postId) ?: '';
+
         return strtolower(pathinfo( (string) wp_parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+    }
+
+    /**
+     * Meta query that excludes SFTP parent folder entries
+     * (SFTP entries without a download_sftp_source are admin-created parents).
+     *
+     * @return array<int|string, mixed>
+     */
+    private static function sftpParentExclusionMetaQuery(): array
+    {
+        return [
+            'relation' => 'OR',
+            ['key' => 'download_source_type', 'value' => 'sftp', 'compare' => '!='],
+            [
+                'relation' => 'AND',
+                ['key' => 'download_source_type', 'value' => 'sftp', 'compare' => '='],
+                ['key' => 'download_sftp_source', 'value' => '', 'compare' => '!='],
+            ],
+        ];
     }
 
     /**
@@ -233,19 +250,11 @@ class DownloadQuery
     {
         // Fetch all published, non-parent downloads
         $posts = get_posts([
-            'post_type'      => 'member_download',
-            'post_status'    => 'publish',
+            'post_type' => 'member_download',
+            'post_status' => 'publish',
             'posts_per_page' => -1,
-            'no_found_rows'  => true,
-            'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-                'relation' => 'OR',
-                ['key' => 'download_source_type', 'value' => 'sftp', 'compare' => '!='],
-                [
-                    'relation' => 'AND',
-                    ['key' => 'download_source_type', 'value' => 'sftp', 'compare' => '='],
-                    ['key' => 'download_sftp_source', 'value' => '', 'compare' => '!='],
-                ],
-            ],
+            'no_found_rows' => true,
+            'meta_query' => self::sftpParentExclusionMetaQuery(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
             'fields' => 'ids',
         ]);
 
@@ -263,7 +272,7 @@ class DownloadQuery
             $terms = get_the_terms($postId, 'download_category');
             if (!is_wp_error($terms) && !empty($terms)) {
                 foreach ($terms as $term) {
-                    $categoryCounts[$term->slug] = $categoryCounts[$term->slug] ?? ['label' => $term->name, 'count' => 0];
+                    $categoryCounts[$term->slug] ??= ['label' => $term->name, 'count' => 0];
                     ++$categoryCounts[$term->slug]['count'];
                 }
             }
@@ -279,7 +288,7 @@ class DownloadQuery
         $categories = [];
         foreach ($categoryCounts as $slug => $data) {
             $categories[] = [
-                'slug'  => $slug,
+                'slug' => $slug,
                 'label' => $data['label'],
                 'count' => $data['count'],
             ];

@@ -39,13 +39,23 @@
                 {{-- Author Info --}}
                 <footer class="flex items-center gap-4">
                     @if($authorImage)
-                        <img
-                            src="{{ $authorImage['sizes']['thumbnail'] ?? $authorImage['url'] }}"
-                            alt="{{ $authorName }}"
-                            class="w-16 h-16 rounded-full object-cover"
-                            width="64"
-                            height="64"
-                        >
+                        @php $authorImageId = $authorImage['ID'] ?? $authorImage['id'] ?? null; @endphp
+                        @if($authorImageId)
+                            {!! wp_get_attachment_image($authorImageId, 'thumbnail', false, [
+                                'class'  => 'w-16 h-16 rounded-full object-cover',
+                                'alt'    => $authorName,
+                                'width'  => '64',
+                                'height' => '64',
+                            ]) !!}
+                        @else
+                            <img
+                                src="{{ $authorImage['sizes']['thumbnail'] ?? $authorImage['url'] }}"
+                                alt="{{ $authorName }}"
+                                class="w-16 h-16 rounded-full object-cover"
+                                width="64"
+                                height="64"
+                            >
+                        @endif
                     @else
                         <div class="w-16 h-16 rounded-full bg-surface-tertiary flex items-center justify-center">
                             <span class="text-2xl font-bold text-content-secondary">
@@ -75,7 +85,7 @@
                             variant="dark"
                             size="sm"
                             iconRight="external-link"
-                        >{{ __('Original-Bewertung ansehen', 'wp-starter') }}</x-link>
+                        >{{ __('Original-Bewertung ansehen', 'wp-starter') }}<span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></x-link>
                     </div>
                 @endif
             </div>

@@ -36,17 +36,23 @@
     ];
 
     $sizeClass = $sizes[$size] ?? $size;
-    $iconPath = get_template_directory() . '/resources/icons/' . $name . '.svg';
+    $safeName = basename($name);
+    $iconPath = get_template_directory() . '/resources/icons/' . $safeName . '.svg';
+
+    static $iconCache = [];
 
     $svgContent = '';
     if (file_exists($iconPath)) {
-        $svgContent = file_get_contents($iconPath);
-        $svgContent = trim($svgContent);
-        $svgContent = preg_replace('/\s*(width|height)="[^"]*"/', '', $svgContent);
+        if (!isset($iconCache[$safeName])) {
+            $raw = file_get_contents($iconPath);
+            $raw = trim($raw);
+            $raw = preg_replace('/\s*(width|height)="[^"]*"/', '', $raw);
+            $iconCache[$safeName] = $raw;
+        }
         $svgContent = preg_replace(
             '/<svg/',
-            '<svg class="icon ' . $sizeClass . ' ' . $class . ' inline-block align-middle shrink-0" aria-hidden="true"',
-            $svgContent,
+            '<svg class="icon ' . $sizeClass . ' ' . esc_attr($class) . ' inline-block align-middle shrink-0" aria-hidden="true"',
+            $iconCache[$safeName],
             1
         );
     }

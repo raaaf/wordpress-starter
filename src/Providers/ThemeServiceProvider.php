@@ -129,7 +129,7 @@ class ThemeServiceProvider extends ServiceProvider
                 printf(
                     '<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin="anonymous">%s',
                     esc_url($fontsDir . $font),
-                    "\n"
+                    "\n",
                 );
             }
         }, 1);
@@ -755,21 +755,7 @@ class ThemeServiceProvider extends ServiceProvider
      */
     private function getLogoUrl(): ?string
     {
-        // Try ACF option first
-        if (function_exists('get_field')) {
-            $acfLogo = \WordpressStarter\Acf\Fields::option('site_logo');
-            if ($acfLogo && !empty($acfLogo['url'])) {
-                return $acfLogo['url'];
-            }
-        }
-
-        // Fallback to Customizer
-        $customLogoId = get_theme_mod('custom_logo');
-        if ($customLogoId) {
-            return wp_get_attachment_image_url($customLogoId, 'full');
-        }
-
-        return null;
+        return \WordpressStarter\Acf\Fields::siteLogoUrl();
     }
 
     /**

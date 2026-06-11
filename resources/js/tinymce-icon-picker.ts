@@ -16,6 +16,15 @@ declare global {
   }
 }
 
+function escapeAttr(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 (function () {
   if (typeof window.tinymce === 'undefined') {
     return;
@@ -41,15 +50,17 @@ declare global {
                 let html =
                   '<div style="display:flex;flex-wrap:wrap;gap:8px;max-width:600px;padding:8px;">';
                 data.icons.forEach((name: string) => {
+                  const safe = escapeAttr(name);
+                  const safeBase = escapeAttr(data.baseUrl);
                   html += `<button type="button"
-                    data-icon="${name}"
-                    title="${name}"
+                    data-icon="${safe}"
+                    title="${safe}"
                     style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;font-size:11px;min-width:64px;"
                     onmouseover="this.style.background='#f0f0f0'"
                     onmouseout="this.style.background='#fff'"
                   >
-                    <img src="${data.baseUrl}${name}.svg" width="24" height="24" alt="${name}" style="opacity:0.7;">
-                    ${name}
+                    <img src="${safeBase}${safe}.svg" width="24" height="24" alt="${safe}" style="opacity:0.7;">
+                    ${safe}
                   </button>`;
                 });
                 html += '</div>';

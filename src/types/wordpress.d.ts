@@ -1,19 +1,19 @@
 // WordPress Global Types
 declare global {
   interface Window {
-    wp: any;
+    wp: unknown;
     Alpine: import('alpinejs').Alpine;
   }
 
   // ACF Types
-  function get_field(field: string, postId?: number | string | false): any;
+  function get_field(field: string, postId?: number | string | false): unknown;
   function the_field(field: string, postId?: number | string | false): void;
   function have_rows(field: string, postId?: number | string | false): boolean;
   function the_row(): void;
-  function get_sub_field(field: string): any;
+  function get_sub_field(field: string): unknown;
   function the_sub_field(field: string): void;
-  function get_field_object(field: string, postId?: number | string | false): any;
-  
+  function get_field_object(field: string, postId?: number | string | false): unknown;
+
   // WordPress Functions
   function __(text: string, domain?: string): string;
   function _e(text: string, domain?: string): void;
@@ -23,12 +23,12 @@ declare global {
   function esc_url(url: string): string;
   function wp_nonce_field(action: string, name?: string, referer?: boolean, echo?: boolean): string;
   function wp_verify_nonce(nonce: string, action: string): boolean | number;
-  
+
   // WordPress Variables
   const ajaxurl: string;
-  
+
   interface WP_REST_Response {
-    data: any;
+    data: unknown;
     headers: Headers;
     status: number;
   }
@@ -60,14 +60,14 @@ export interface ACFBlock {
 }
 
 // ACF Field Types
-export interface ACFField<T = any> {
+export interface ACFField<T = unknown> {
   key: string;
   label: string;
   name: string;
   type: string;
   value: T;
   required?: boolean;
-  conditional_logic?: any;
+  conditional_logic?: unknown;
   wrapper?: {
     width?: string;
     class?: string;
@@ -99,9 +99,9 @@ export interface ACFLinkField {
   target: string;
 }
 
-export interface ACFRepeaterField<T = any> extends Array<T> {}
+export interface ACFRepeaterField<T = unknown> extends Array<T> {}
 
-export interface ACFFlexibleContentLayout<T = any> {
+export interface ACFFlexibleContentLayout<T = unknown> {
   acf_fc_layout: string;
   [key: string]: T;
 }

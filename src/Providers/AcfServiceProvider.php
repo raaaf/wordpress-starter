@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
-use WordpressStarter\Acf\AcfExtended;
-use WordpressStarter\Acf\Options;
-use WordpressStarter\Acf\FlexibleContent;
-use WordpressStarter\Vite;
 use Illuminate\Support\Facades\Blade;
+use WordpressStarter\Acf\AcfExtended;
+use WordpressStarter\Acf\FlexibleContent;
+use WordpressStarter\Acf\Options;
+use WordpressStarter\Vite;
 
 class AcfServiceProvider extends ServiceProvider
 {
@@ -69,6 +69,7 @@ class AcfServiceProvider extends ServiceProvider
         add_filter('acf/settings/load_json', function ($paths) use ($jsonPath) {
             unset($paths[0]);
             $paths[] = $jsonPath;
+
             return $paths;
         });
     }
@@ -191,8 +192,8 @@ class AcfServiceProvider extends ServiceProvider
                 return;
             }
 
-            // Check if Vite dev server is running
-            $isDev = defined('WP_DEBUG') && WP_DEBUG && \WordpressStarter\Vite::isDevServerRunning();
+            // Use dev-mode flag determined once in Vite::init() (runs before Application boot)
+            $isDev = Vite::isDev();
 
             if ($isDev) {
                 // Development mode - load from Vite dev server
@@ -203,7 +204,7 @@ class AcfServiceProvider extends ServiceProvider
                     "http://{$host}:{$port}/resources/js/admin/flexible-titles.ts",
                     ['acf-input'],
                     null,
-                    true
+                    true,
                 );
             } else {
                 // Production mode - load from manifest
@@ -214,7 +215,7 @@ class AcfServiceProvider extends ServiceProvider
                         $scriptUrl,
                         ['acf-input'],
                         null,
-                        true
+                        true,
                     );
                 }
             }

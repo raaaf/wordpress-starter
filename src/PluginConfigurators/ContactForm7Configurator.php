@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\PluginConfigurators;
 
+use WordpressStarter\ThemeContext;
+
 /**
  * Configures Contact Form 7 plugin
  *
@@ -39,12 +41,8 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
         return defined('WPCF7_VERSION');
     }
 
-    public static function configure(): void
+    protected static function doConfigure(): void
     {
-        if (!self::isPluginActive() || self::isConfigured()) {
-            return;
-        }
-
         // CF7 has very limited global options
         // Most settings are stored per-form as post meta
 
@@ -112,7 +110,7 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
                 . '<input type="hidden" name="%2$s" value="%3$s">',
             esc_attr(self::HONEYPOT_FIELD),
             esc_attr(self::TIMESTAMP_FIELD),
-            esc_attr($token)
+            esc_attr($token),
         );
 
         return $elements . $traps;
@@ -169,11 +167,11 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
     /**
      * Check the text against a conservative, high-confidence spam keyword list.
      *
-     * Extend per site via the `theme_cf7_spam_keywords` filter.
+     * Extend per site via the `<prefix>_cf7_spam_keywords` filter.
      */
     public static function containsDisallowedKeyword(string $text): bool
     {
-        $keywords = apply_filters('theme_cf7_spam_keywords', self::defaultSpamKeywords());
+        $keywords = apply_filters(ThemeContext::prefix() . '_cf7_spam_keywords', self::defaultSpamKeywords());
         $haystack = strtolower($text);
 
         foreach ( (array) $keywords as $keyword) {

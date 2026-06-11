@@ -92,7 +92,18 @@ function createMemberLoginComponent(): MemberLoginState {
         const data = await response.json();
 
         if (data.success) {
-          window.location.href = data.data?.redirect || window.location.href;
+          const redirect: unknown = data.data?.redirect;
+          let destination = window.location.href;
+          if (typeof redirect === 'string') {
+            try {
+              if (new URL(redirect, window.location.origin).origin === window.location.origin) {
+                destination = redirect;
+              }
+            } catch {
+              // Malformed URL — stay on current page
+            }
+          }
+          window.location.href = destination;
         } else {
           this.error = data.data?.message || 'Anmeldung fehlgeschlagen.';
         }
@@ -146,7 +157,7 @@ interface DownloadTableState extends AlpineMagics {
   fetch(): Promise<void>;
   setPage(page: number): void;
   pageNumbers(): (number | string)[];
-  badgeClass(variant: string): string;
+  badgeClass(): string;
 }
 
 function createDownloadTableComponent(): DownloadTableState {
@@ -290,7 +301,7 @@ function createDownloadTableComponent(): DownloadTableState {
       return pages;
     },
 
-    badgeClass(_variant: string): string {
+    badgeClass(): string {
       return 'bg-transparent text-content border border-line';
     },
   };

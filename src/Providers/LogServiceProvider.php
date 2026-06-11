@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use Throwable;
+use WordpressStarter\ThemeContext;
+
 /**
  * Provides simple logging functionality for the theme
  *
@@ -120,7 +123,7 @@ class LogServiceProvider extends ServiceProvider
         $levelUpper = strtoupper($level);
         $contextString = !empty($context) ? ' ' . wp_json_encode($context) : '';
 
-        $formattedMessage = "[{$timestamp}] wp-starter.{$levelUpper}: {$message}{$contextString}";
+        $formattedMessage = "[{$timestamp}] " . ThemeContext::logPrefix() . ".{$levelUpper}: {$message}{$contextString}";
 
         // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
         error_log($formattedMessage);
@@ -129,10 +132,10 @@ class LogServiceProvider extends ServiceProvider
     /**
      * Log an exception
      *
-     * @param \Throwable $exception
+     * @param Throwable $exception
      * @param string $level
      */
-    public static function exception(\Throwable $exception, string $level = 'error'): void
+    public static function exception(Throwable $exception, string $level = 'error'): void
     {
         self::log($level, $exception->getMessage(), [
             'exception' => get_class($exception),

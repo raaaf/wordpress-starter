@@ -47,7 +47,7 @@
         />
 
         {{-- Custom checkbox --}}
-        <span class="w-5 h-5 rounded-[var(--radius-sm)] border-2 transition-all duration-200 flex items-center justify-center
+        <span class="w-5 h-5 rounded-[var(--radius-sm)] border-2 transition-[background-color,border-color,box-shadow] duration-200 flex items-center justify-center
             {{ $disabled
                 ? 'border-line-disabled bg-surface-disabled'
                 : 'border-line hover:border-line-strong peer-focus-visible:shadow-[var(--shadow-focus-ring)]'

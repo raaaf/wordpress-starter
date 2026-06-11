@@ -41,7 +41,7 @@
         />
 
         {{-- Track --}}
-        <span class="block w-11 h-6 rounded-full transition-all duration-200
+        <span class="block w-11 h-6 rounded-full transition-[background-color,box-shadow] duration-200
             {{ $disabled
                 ? 'bg-surface-disabled'
                 : 'bg-surface-tertiary peer-checked:bg-surface-accent peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
@@ -49,7 +49,7 @@
         "></span>
 
         {{-- Knob --}}
-        <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface-on-color shadow-md transition-all duration-200
+        <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface-on-color shadow-md transition-[transform,background-color] duration-200
             peer-checked:translate-x-5
             {{ $disabled ? 'bg-surface-secondary' : '' }}
         "></span>

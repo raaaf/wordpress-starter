@@ -11,15 +11,17 @@ Diese Anleitung hilft bei häufigen Problemen mit dem WP-Starter Theme.
 **Lösungen:**
 
 1. **Prüfe ob Vite läuft:**
+
    ```bash
    npm run dev
    ```
+
    Die Konsole sollte `VITE ready` anzeigen.
 
 2. **Prüfe die Konsole im Browser:**
    - Öffne die Entwicklertools (F12)
    - Schau in der Konsole nach WebSocket-Fehlern
-   - HMR verbindet zu `localhost:5173`
+   - HMR verbindet zu `localhost:5180`
 
 3. **Bei Local by Flywheel:**
    - Stelle sicher, dass deine Site unter `http://` (nicht `https://`) läuft
@@ -41,6 +43,7 @@ Diese Anleitung hilft bei häufigen Problemen mit dem WP-Starter Theme.
 1. **Development-Modus:** Stelle sicher, dass `npm run dev` läuft
 
 2. **Production-Modus:** Erstelle die Assets:
+
    ```bash
    npm run build
    ```
@@ -58,6 +61,7 @@ Diese Anleitung hilft bei häufigen Problemen mit dem WP-Starter Theme.
 **Lösungen:**
 
 1. **Cache leeren:**
+
    ```bash
    # Compiled-Ordner leeren
    rm -rf compiled/*
@@ -126,6 +130,7 @@ Diese Anleitung hilft bei häufigen Problemen mit dem WP-Starter Theme.
 **Lösungen:**
 
 1. **Composer Autoload aktualisieren:**
+
    ```bash
    composer dump-autoload
    ```
@@ -141,6 +146,7 @@ Diese Anleitung hilft bei häufigen Problemen mit dem WP-Starter Theme.
 
 **Lösung:**
 Erhöhe das PHP-Speicherlimit in `wp-config.php`:
+
 ```php
 define('WP_MEMORY_LIMIT', '256M');
 ```
@@ -152,11 +158,13 @@ define('WP_MEMORY_LIMIT', '256M');
 **Lösungen:**
 
 1. **Node.js Version prüfen:**
+
    ```bash
    node --version  # Sollte 18+ sein
    ```
 
 2. **node_modules löschen und neu installieren:**
+
    ```bash
    rm -rf node_modules package-lock.json
    npm install
@@ -173,6 +181,7 @@ define('WP_MEMORY_LIMIT', '256M');
 ### Debug-Modus aktivieren
 
 Füge in `wp-config.php` hinzu:
+
 ```php
 define('WP_DEBUG', true);
 define('WP_DEBUG_LOG', true);

@@ -1,7 +1,5 @@
 # Beitragsrichtlinien
 
-Danke, dass du zum WP-Starter Theme beitragen möchtest! Diese Richtlinien helfen, die Code-Qualität hoch zu halten.
-
 ## Entwicklungsumgebung einrichten
 
 1. Klone das Repository
@@ -23,7 +21,7 @@ Danke, dass du zum WP-Starter Theme beitragen möchtest! Diese Richtlinien helfe
 
 ### PHP
 
-- **PHP 8.2+** mit `declare(strict_types=1)`
+- **PHP 8.3+** mit `declare(strict_types=1)`
 - **PSR-4** Autoloading unter `WordpressStarter\` Namespace
 - Folge den WordPress Coding Standards (mit Anpassungen, siehe `phpcs.xml`)
 
@@ -52,7 +50,7 @@ npm run format      # Mit Prettier formatieren
 ### CSS
 
 - **TailwindCSS v4** für Styling
-- Verwende die **Design-Token** aus `theme.json`
+- Verwende die **Design-Token** aus `resources/css/tokens.css` (generiert via `npm run tokens` aus `config/design-tokens/*.tokens.json`)
 - Eigene Styles in `resources/css/` (sparsam verwenden)
 
 ### Blade Templates
@@ -87,7 +85,7 @@ style: Formatierung in FieldDefinitions.php
 
 ## Branch-Strategie
 
-- `main` - Produktionsreifer Code
+- `master` - Produktionsreifer Code
 - `feature/name` - Neue Features
 - `fix/name` - Bugfixes
 - `docs/name` - Dokumentation
@@ -123,7 +121,7 @@ Checkliste:
 
 - [ ] `block.json` mit deutschem Titel und Beschreibung
 - [ ] Felder in `FieldDefinitions.php` definiert
-- [ ] Block in `BlockFields.php` registriert
+- [ ] Layout in `FlexibleContent.php` in `getLayouts()` registriert
 - [ ] Template mit `<x-section>` Wrapper
 - [ ] Empty State für leere Inhalte
 - [ ] Im Editor und Frontend getestet

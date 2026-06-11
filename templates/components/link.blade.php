@@ -69,4 +69,8 @@
     @if($iconRight)
         <x-icon name="{{ $iconRight }}" class="{{ $iconSize }}" />
     @endif
+
+    @if($target === '_blank' && !$ariaLabel)
+        <span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
+    @endif
 </a>

@@ -148,7 +148,7 @@
                 @if($disabled) disabled @endif
             >
                 <x-icon name="close" class="{{ $sizeConfig['icon'] }}" />
-                <span class="sr-only">Eingabe löschen</span>
+                <span class="sr-only">{{ __('Eingabe löschen', 'wp-starter') }}</span>
             </button>
         @elseif($iconRight)
             <div class="absolute {{ $sizeConfig['iconRight'] }} top-1/2 -translate-y-1/2 pointer-events-none text-icon-secondary">

@@ -47,12 +47,8 @@ class IThemesSecurityConfigurator extends AbstractPluginConfigurator
         return class_exists('ITSEC_Modules');
     }
 
-    public static function configure(): void
+    protected static function doConfigure(): void
     {
-        if (!self::isPluginActive() || self::isConfigured()) {
-            return;
-        }
-
         self::configureBruteForce();
         self::configureWordPressTweaks();
         self::configureSystemTweaks();
@@ -69,10 +65,10 @@ class IThemesSecurityConfigurator extends AbstractPluginConfigurator
         $current = \ITSEC_Modules::get_settings('brute-force');
 
         \ITSEC_Modules::set_settings('brute-force', array_merge($current, [
-            'auto_ban_admin'    => true,  // Ban any IP trying to login as "admin"
+            'auto_ban_admin' => true,  // Ban any IP trying to login as "admin"
             'max_attempts_host' => 5,     // 5 failed attempts → host locked out
             'max_attempts_user' => 10,    // 10 failed attempts → user locked out
-            'check_period'      => 5,     // Remember bad logins for 5 minutes
+            'check_period' => 5,     // Remember bad logins for 5 minutes
         ]));
     }
 
@@ -84,8 +80,8 @@ class IThemesSecurityConfigurator extends AbstractPluginConfigurator
         $current = \ITSEC_Modules::get_settings('wordpress-tweaks');
 
         \ITSEC_Modules::set_settings('wordpress-tweaks', array_merge($current, [
-            'file_editor'              => true,      // Disable wp-admin theme/plugin editor
-            'disable_xmlrpc'           => 'disable', // Fully disable XML-RPC
+            'file_editor' => true,      // Disable wp-admin theme/plugin editor
+            'disable_xmlrpc' => 'disable', // Fully disable XML-RPC
             'disable_unused_author_pages' => true,   // Hide author pages for users with no posts
         ]));
     }
@@ -98,11 +94,11 @@ class IThemesSecurityConfigurator extends AbstractPluginConfigurator
         $current = \ITSEC_Modules::get_settings('system-tweaks');
 
         \ITSEC_Modules::set_settings('system-tweaks', array_merge($current, [
-            'protect_files'       => true, // Block access to readme.html, wp-config.php etc.
-            'directory_browsing'  => true, // Disable directory listing
-            'uploads_php'         => true, // Block PHP execution in uploads/
-            'plugins_php'         => true, // Block PHP execution in plugins/
-            'themes_php'          => true, // Block PHP execution in themes/
+            'protect_files' => true, // Block access to readme.html, wp-config.php etc.
+            'directory_browsing' => true, // Disable directory listing
+            'uploads_php' => true, // Block PHP execution in uploads/
+            'plugins_php' => true, // Block PHP execution in plugins/
+            'themes_php' => true, // Block PHP execution in themes/
         ]));
     }
 
@@ -115,7 +111,7 @@ class IThemesSecurityConfigurator extends AbstractPluginConfigurator
 
         \ITSEC_Modules::set_settings('ban-users', array_merge($current, [
             'enable_ban_lists' => true, // Enable ban list feature
-            'default'          => true, // Include HackRepair.com known-bad-actor list
+            'default' => true, // Include HackRepair.com known-bad-actor list
         ]));
     }
 

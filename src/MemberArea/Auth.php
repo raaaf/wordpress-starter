@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace WordpressStarter\MemberArea;
 
+use WP_Error;
+
 class Auth
 {
     private const COOKIE_NAME = 'wp_member_area_auth';
+    private const MODE_WORDPRESS = 'wordpress'; // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
 
     private static ?string $cachedAuthMode = null;
+
     private static bool $authModeCached = false;
+
     private static int|false $cachedCookieTtl = false;
+
     private static string|false $cachedSharedPassword = false;
 
     public static function getAuthMode(): string
@@ -22,6 +28,7 @@ class Auth
             self::$cachedAuthMode = get_field('member_auth_mode', 'option') ?: 'password';
             self::$authModeCached = true;
         }
+
         return self::$cachedAuthMode;
     }
 
@@ -30,6 +37,7 @@ class Auth
         if (self::$cachedCookieTtl === false) {
             self::$cachedCookieTtl = (int) ( get_field('member_cookie_ttl', 'option') ?: 14 );
         }
+
         return self::$cachedCookieTtl;
     }
 
@@ -38,6 +46,7 @@ class Auth
         if (self::$cachedSharedPassword === false) {
             self::$cachedSharedPassword = get_field('member_shared_password', 'option') ?: '';
         }
+
         return self::$cachedSharedPassword;
     }
 
@@ -50,7 +59,7 @@ class Auth
 
         $mode = self::getAuthMode();
 
-        if (strtolower($mode) === 'wordpress') { // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
+        if (strtolower($mode) === self::MODE_WORDPRESS) {
             if (!is_user_logged_in()) {
                 return false;
             }
@@ -59,11 +68,12 @@ class Auth
                 return true;
             }
             $user = wp_get_current_user();
+
             return !empty(array_intersect($user->roles, (array) $allowedRoles));
         }
 
         // Password mode: validate HMAC-signed cookie
-        $cookie = sanitize_text_field( wp_unslash( $_COOKIE[self::COOKIE_NAME] ?? '' ) );
+        $cookie = sanitize_text_field(wp_unslash($_COOKIE[self::COOKIE_NAME] ?? ''));
         if (empty($cookie)) {
             return false;
         }
@@ -78,6 +88,7 @@ class Auth
 
         if ( (int) $timestamp + $ttlSeconds < time()) {
             self::clearCookie();
+
             return false;
         }
 
@@ -88,13 +99,13 @@ class Auth
     }
 
     /**
-     * @return bool|\WP_Error
+     * @return bool|WP_Error
      */
-    public static function login(string $credential, ?string $password = null): bool|\WP_Error
+    public static function login(string $credential, ?string $password = null): bool|WP_Error
     {
         $mode = self::getAuthMode();
 
-        if (strtolower($mode) === 'wordpress') { // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
+        if (strtolower($mode) === self::MODE_WORDPRESS) {
             $result = wp_signon([
                 'user_login' => $credential,
                 'user_password' => $password ?? '',
@@ -115,14 +126,15 @@ class Auth
         // Password mode
         $passwordHash = self::getSharedPassword();
         if (empty($passwordHash)) {
-            return new \WP_Error('no_password', __('Kein Passwort konfiguriert.', 'wp-starter'));
+            return new WP_Error('no_password', __('Kein Passwort konfiguriert.', 'wp-starter'));
         }
 
         if (!wp_check_password($credential, $passwordHash)) {
-            return new \WP_Error('wrong_password', __('Falsches Passwort.', 'wp-starter'));
+            return new WP_Error('wrong_password', __('Falsches Passwort.', 'wp-starter'));
         }
 
         self::setCookie($passwordHash);
+
         return true;
     }
 
@@ -130,8 +142,9 @@ class Auth
     {
         $mode = self::getAuthMode();
 
-        if (strtolower($mode) === 'wordpress') { // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
+        if (strtolower($mode) === self::MODE_WORDPRESS) {
             wp_logout();
+
             return;
         }
 

@@ -57,12 +57,8 @@ class AdminSiteEnhancementsConfigurator extends AbstractPluginConfigurator
         return defined('ASENHA_VERSION');
     }
 
-    public static function configure(): void
+    protected static function doConfigure(): void
     {
-        if (!self::isPluginActive() || self::isConfigured()) {
-            return;
-        }
-
         $options = get_option('admin_site_enhancements', []);
 
         // === Content Management ===

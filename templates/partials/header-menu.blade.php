@@ -36,8 +36,8 @@
                 @endif
             </a>
 
-            {{-- Desktop navigation --}}
-            <nav class="desktop-nav hidden md:flex" aria-label="Hauptnavigation">
+            {{-- Desktop navigation (landmark provided by outer nav in header.blade.php) --}}
+            <div class="desktop-nav hidden md:flex">
                 @php(
                 wp_nav_menu([
                     'container' => false,
@@ -48,7 +48,7 @@
                     'items_wrap' => '<ul id="%1$s" class="%2$s">%3$s</ul>',
                 ])
             )
-            </nav>
+            </div>
         </div>
 
         {{-- Mobile menu button - visible below md --}}
@@ -95,7 +95,7 @@
          @keydown="trapFocus($event)"
          class="mobile-nav-container absolute top-full left-0 right-0 bg-surface shadow-lg rounded-md md:hidden z-50"
          x-cloak>
-        <nav id="mobile-navigation" class="mobile-nav" aria-label="Mobile Navigation">
+        <nav id="mobile-navigation" class="mobile-nav" aria-label="{{ __('Mobile Navigation', 'wp-starter') }}">
             @php(
             wp_nav_menu([
                 'container' => false,

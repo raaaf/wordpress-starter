@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Acf;
 
+use WordpressStarter\ThemeContext;
+
 class Fields
 {
     /**
@@ -16,7 +18,7 @@ class Fields
         }
 
         $value = get_field($field, $postId);
-        
+
         return $value !== null && $value !== false ? $value : $default;
     }
 
@@ -29,18 +31,18 @@ class Fields
             return $default;
         }
 
-        $cacheKey = 'acf_option_' . $field;
+        $cacheKey = ThemeContext::prefix() . '_acf_option_' . $field;
         $cached = wp_cache_get($cacheKey, 'theme');
-        
+
         if ($cached !== false) {
             return $cached;
         }
 
         $value = get_field($field, 'option');
         $result = $value !== null && $value !== false ? $value : $default;
-        
+
         wp_cache_set($cacheKey, $result, 'theme', HOUR_IN_SECONDS);
-        
+
         return $result;
     }
 
@@ -88,11 +90,11 @@ class Fields
         }
 
         $value = get_field($field, $postId);
-        
+
         if (is_array($value)) {
             return !empty($value);
         }
-        
+
         return $value !== null && $value !== false && $value !== '';
     }
 
@@ -104,7 +106,7 @@ class Fields
     public static function image(string $field, string $size = 'full', mixed $postId = null): ?array
     {
         $imageId = self::get($field, $postId);
-        
+
         if (!$imageId) {
             return null;
         }
@@ -114,7 +116,7 @@ class Fields
         }
 
         $image = wp_get_attachment_image_src($imageId, $size);
-        
+
         if (!$image) {
             return null;
         }
@@ -192,7 +194,7 @@ class Fields
             $html .= sprintf(
                 '<source type="image/webp" srcset="%s"%s>',
                 esc_attr($webpSrcset),
-                $sizes ? sprintf(' sizes="%s"', esc_attr($sizes)) : ''
+                $sizes ? sprintf(' sizes="%s"', esc_attr($sizes)) : '',
             );
         }
 
@@ -201,7 +203,7 @@ class Fields
             esc_url($image[0]),
             $srcset ? sprintf(' srcset="%s"', esc_attr($srcset)) : '',
             $sizes ? sprintf(' sizes="%s"', esc_attr($sizes)) : '',
-            $attrString
+            $attrString,
         );
 
         $html .= '</picture>';
@@ -224,6 +226,7 @@ class Fields
 
         if (!$metadata || empty($metadata['sizes'])) {
             $cache[$imageId] = '';
+
             return $cache[$imageId];
         }
 
@@ -243,6 +246,7 @@ class Fields
         }
 
         $cache[$imageId] = implode(', ', $webpSrcset);
+
         return $cache[$imageId];
     }
 
@@ -254,7 +258,7 @@ class Fields
     public static function link(string $field, mixed $postId = null): ?array
     {
         $link = self::get($field, $postId);
-        
+
         if (!is_array($link) || empty($link['url'])) {
             return null;
         }
@@ -267,12 +271,37 @@ class Fields
     }
 
     /**
+     * Get site logo URL from ACF option or Customizer fallback.
+     *
+     * Fallback order: ACF site_logo['url'] → Customizer custom_logo → null.
+     */
+    public static function siteLogoUrl(): ?string
+    {
+        if (function_exists('get_field')) {
+            $acfLogo = self::option('site_logo');
+            if ($acfLogo && !empty($acfLogo['url'])) {
+                return $acfLogo['url'];
+            }
+        }
+
+        $customLogoId = get_theme_mod('custom_logo');
+        if ($customLogoId) {
+            $url = wp_get_attachment_image_url( (int) $customLogoId, 'full');
+            if ($url) {
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Output link HTML
      */
     public static function linkHtml(string $field, string $class = '', mixed $postId = null): string
     {
         $link = self::link($field, $postId);
-        
+
         if (!$link) {
             return '';
         }
@@ -281,11 +310,11 @@ class Fields
             'href' => esc_url($link['url']),
             'target' => esc_attr($link['target']),
         ];
-        
+
         if ($class) {
             $attributes['class'] = esc_attr($class);
         }
-        
+
         if ($link['target'] === '_blank') {
             $attributes['rel'] = 'noopener noreferrer';
         }

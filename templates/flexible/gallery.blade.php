@@ -46,7 +46,7 @@
                         ]) !!}
                         </button>
                         @if($caption)
-                            <figcaption class="absolute inset-x-0 bottom-0 p-3 text-body-small text-content-inverse transition-opacity duration-200 ease-out opacity-0 bg-gradient-to-t from-surface-inverse/70 to-transparent group-hover:opacity-100">
+                            <figcaption class="absolute inset-x-0 bottom-0 p-3 text-body-small text-content-inverse transition-opacity duration-200 ease-out opacity-0 bg-gradient-to-t from-surface-inverse/70 to-transparent group-hover:opacity-100 group-focus-within:opacity-100">
                                 {{ $caption }}
                             </figcaption>
                         @endif

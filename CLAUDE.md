@@ -37,7 +37,7 @@ templates/             # Blade templates
 ├── layouts/          # Base layouts
 ├── partials/         # Reusable partials
 ├── components/       # Blade components
-├── flexible/         # Flexible Content layouts (28 layouts)
+├── flexible/         # Flexible Content layouts (32 layouts)
 resources/
 ├── css/              # TailwindCSS + tokens.css
 ├── js/               # TypeScript + Alpine.js
@@ -46,10 +46,12 @@ tests/
 ├── js/               # Vitest tests
 ├── e2e/              # Playwright E2E tests
 docs/                 # Documentation
-├── ARCHITECTURE.md   # Service provider pattern
-├── DEPLOYMENT.md     # Production deployment
-├── SECURITY.md       # Security practices
-├── SEO.md            # SEO implementation
+├── ARCHITECTURE.md        # Service provider pattern
+├── BLOCK-DEVELOPMENT.md   # Adding new flexible layouts
+├── COMPONENT-DEVELOPMENT.md # Adding new Blade components
+├── DEPLOYMENT.md          # Production deployment
+├── SECURITY.md            # Security practices
+├── SEO.md                 # SEO implementation
 ```
 
 ### Key Technologies
@@ -104,20 +106,20 @@ color: var(--text-primary);
 
 ## ACF Flexible Content
 
-All pages use Flexible Content as the primary content builder. 28 layouts in `templates/flexible/`.
+All pages use Flexible Content as the primary content builder. 32 layouts in `templates/flexible/`.
 
 ### Layout Categories (ACF Extended)
 
-| Category   | Layouts                                                                                                              |
-| ---------- | -------------------------------------------------------------------------------------------------------------------- |
-| Header     | hero                                                                                                                 |
-| Layout     | one-column, two-columns, three-columns, four-columns, one-third-two-thirds, two-thirds-one-third, two-columns-images |
-| Inhalte    | accordion, tabs, cta, button                                                                                         |
-| Medien     | image, video, gallery, before-after                                                                                  |
-| Interaktiv | testimonials, cards, stats, timeline, team, pricing-table                                                            |
-| Formulare  | contact-form, map                                                                                                    |
-| Beiträge   | posts, table                                                                                                         |
-| Sonstiges  | divider, logo-slider                                                                                                 |
+| Category   | Layouts                                                                                                                                                         |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Header     | hero                                                                                                                                                            |
+| Layout     | one-column, two-columns, three-columns, four-columns, one-third-two-thirds, two-thirds-one-third, two-columns-images, three-columns-images, four-columns-images |
+| Inhalte    | accordion, tabs, cta, button                                                                                                                                    |
+| Medien     | image, video, gallery, before-after                                                                                                                             |
+| Interaktiv | testimonials, cards, stats, timeline, team, pricing-table, member-downloads                                                                                     |
+| Formulare  | contact-form, map                                                                                                                                               |
+| Beiträge   | posts, table                                                                                                                                                    |
+| Sonstiges  | divider, logo-slider                                                                                                                                            |
 
 ### Flexible Template Pattern
 
@@ -198,15 +200,14 @@ Available under "Theme-Einstellungen" in admin:
 
 ## Alpine.js Components
 
-Defined in `resources/js/app.ts`:
+Registered via `Alpine.data()` in `resources/js/app.ts`:
 
 - `navigation` - Mobile menu with focus trap
 - `statsCounter` - Animated number counters
-- `tabs` - Tab navigation
-- `accordion` - Expandable content
-- `gallery` - Medium-zoom lightbox
+- `beforeAfterSlider` - Image comparison slider
 - `logoSlider` - Partner logo carousel
-- `beforeAfter` - Image comparison slider
+
+Components using inline `x-data` (not registered via `Alpine.data`): `tabs`, `accordion`. The gallery uses medium-zoom directly, not Alpine.
 
 ## Adding New Layouts
 

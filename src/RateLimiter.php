@@ -19,15 +19,17 @@ namespace WordpressStarter;
 class RateLimiter
 {
     private string $key;
+
     private int $maxAttempts;
+
     private int $decaySeconds;
 
     /**
      * Create a new rate limiter instance
      *
-     * @param string $action     Unique identifier for the rate limited action
-     * @param int    $maxAttempts Maximum number of attempts allowed in the time window
-     * @param int    $decaySeconds Time window in seconds
+     * @param string $action Unique identifier for the rate limited action
+     * @param int $maxAttempts Maximum number of attempts allowed in the time window
+     * @param int $decaySeconds Time window in seconds
      */
     public function __construct(string $action, int $maxAttempts = 10, int $decaySeconds = 60)
     {
@@ -55,6 +57,7 @@ class RateLimiter
         }
 
         $this->incrementAttempts($current);
+
         return true;
     }
 
@@ -109,6 +112,7 @@ class RateLimiter
         // Check if the window has expired
         if (isset($data['expires']) && $data['expires'] <= time()) {
             delete_transient($this->key);
+
             return 0;
         }
 
@@ -140,6 +144,11 @@ class RateLimiter
     /**
      * Get the client IP address
      *
+     * By default only REMOTE_ADDR is used — forwarded headers are client-controlled
+     * and would allow trivial rate-limit bypass via spoofing. When the site runs
+     * behind a trusted proxy/load balancer, enable the
+     * `{theme_prefix}_trust_proxy_headers` filter to honour the forwarded headers.
+     *
      * Returns a hashed version for privacy while still allowing
      * per-IP rate limiting.
      */
@@ -147,13 +156,16 @@ class RateLimiter
     {
         $ip = '';
 
-        // Check for forwarded IP (behind proxy/load balancer)
-        $forwardedHeaders = [
-            'HTTP_CF_CONNECTING_IP', // Cloudflare
-            'HTTP_X_FORWARDED_FOR',
-            'HTTP_X_REAL_IP',
-            'REMOTE_ADDR',
-        ];
+        // Forwarded headers are only trusted behind an explicitly enabled trusted proxy
+        $forwardedHeaders = ['REMOTE_ADDR'];
+        if (apply_filters(ThemeContext::prefix() . '_trust_proxy_headers', false)) {
+            $forwardedHeaders = [
+                'HTTP_CF_CONNECTING_IP', // Cloudflare
+                'HTTP_X_FORWARDED_FOR',
+                'HTTP_X_REAL_IP',
+                'REMOTE_ADDR',
+            ];
+        }
 
         foreach ($forwardedHeaders as $header) {
             if (!empty($_SERVER[$header])) {
@@ -173,23 +185,25 @@ class RateLimiter
     /**
      * Static helper to quickly check and enforce rate limiting
      *
-     * @param string $action      Action identifier
-     * @param int    $maxAttempts Maximum attempts
-     * @param int    $decaySeconds Time window
+     * @param string $action Action identifier
+     * @param int $maxAttempts Maximum attempts
+     * @param int $decaySeconds Time window
+     *
      * @return bool True if allowed, false if rate limited
      */
     public static function check(string $action, int $maxAttempts = 10, int $decaySeconds = 60): bool
     {
         $limiter = new self($action, $maxAttempts, $decaySeconds);
+
         return $limiter->attempt();
     }
 
     /**
      * Static helper that sends a 429 response if rate limited
      *
-     * @param string $action      Action identifier
-     * @param int    $maxAttempts Maximum attempts
-     * @param int    $decaySeconds Time window
+     * @param string $action Action identifier
+     * @param int $maxAttempts Maximum attempts
+     * @param int $decaySeconds Time window
      */
     public static function enforce(string $action, int $maxAttempts = 10, int $decaySeconds = 60): void
     {
@@ -201,7 +215,7 @@ class RateLimiter
                     'message' => __('Zu viele Anfragen. Bitte versuchen Sie es später erneut.', 'wp-starter'),
                     'retry_after' => $limiter->retryAfter(),
                 ],
-                429
+                429,
             );
         }
     }

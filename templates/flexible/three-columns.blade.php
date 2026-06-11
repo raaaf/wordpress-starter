@@ -20,8 +20,8 @@
 <x-section :anchor="$sectionAnchor" :background="$background" class="three-columns">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="3" gap="xl">
-        <x-prose>{!! $column_1 !!}</x-prose>
-        <x-prose>{!! $column_2 !!}</x-prose>
-        <x-prose>{!! $column_3 !!}</x-prose>
+        <x-prose>@kses($column_1)</x-prose>
+        <x-prose>@kses($column_2)</x-prose>
+        <x-prose>@kses($column_3)</x-prose>
     </x-grid>
 </x-section>

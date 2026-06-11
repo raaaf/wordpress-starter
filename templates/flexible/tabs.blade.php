@@ -61,7 +61,7 @@
                         @if(!empty($tab['icon']))
                             <x-icon :name="$tab['icon']" size="md" />
                         @endif
-                        {{ $tab['title'] ?? 'Tab ' . ($index + 1) }}
+                        {{ $tab['title'] ?? __('Tab', 'wp-starter') . ' ' . ($index + 1) }}
                     </button>
                 @endforeach
             </div>

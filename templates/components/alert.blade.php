@@ -44,7 +44,7 @@
 @endphp
 
 <div
-    role="alert"
+    role="{{ $variant === 'error' ? 'alert' : 'status' }}"
     @if($dismissible) x-data="{ show: true }" x-show="show" @endif
     class="flex items-start gap-3 p-4 rounded-lg {{ $config['wrapper'] }} {{ $class }}"
 >
@@ -60,7 +60,7 @@
         <button
             type="button"
             @click="show = false"
-            class="shrink-0 text-current opacity-70 hover:opacity-100 transition-opacity"
+            class="shrink-0 text-current opacity-70 hover:opacity-100 transition-opacity duration-150"
             aria-label="{{ __('Schließen', 'wp-starter') }}"
         >
             <x-icon name="close" class="w-4 h-4" />

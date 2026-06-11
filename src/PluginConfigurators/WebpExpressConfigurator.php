@@ -26,12 +26,8 @@ class WebpExpressConfigurator extends AbstractPluginConfigurator
         return class_exists('\\WebPExpress\\Config') || defined('WEBPEXPRESS_PLUGIN');
     }
 
-    public static function configure(): void
+    protected static function doConfigure(): void
     {
-        if (!self::isPluginActive() || self::isConfigured()) {
-            return;
-        }
-
         // WebP Express stores config in a JSON file and wp_options
         $config = [
             // Enable conversion

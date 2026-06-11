@@ -78,7 +78,7 @@
             @if($showNav)
                 <div>
                     <h3 class="text-h5 mb-4">{{ $navTitle }}</h3>
-                    <nav class="footer-nav" aria-label="Fußnavigation">
+                    <nav class="footer-nav" aria-label="{{ __('Fußnavigation', 'wp-starter') }}">
                         <?php
                         wp_nav_menu([
                             'container' => false,
@@ -129,7 +129,7 @@
                                    target="_blank"
                                    rel="noopener noreferrer"
                                    class="text-content-secondary hover:text-content transition-colors"
-                                   aria-label="{{ $social['platform'] ?? 'Social Media' }}">
+                                   aria-label="{{ ($social['platform'] ?? 'Social Media') . ' ' . __('(öffnet in neuem Tab)', 'wp-starter') }}">
                                     @switch($social['platform'] ?? '')
                                         @case('facebook')
                                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -182,7 +182,7 @@
 
                 {{-- Legal Menu --}}
                 @if($showLegal)
-                    <nav class="legal-nav" aria-label="Rechtliche Links">
+                    <nav class="legal-nav" aria-label="{{ __('Rechtliche Links', 'wp-starter') }}">
                         <?php
                         wp_nav_menu([
                             'container' => false,

@@ -77,7 +77,7 @@
                              role="region"
                              :aria-labelledby="'accordion-header-{{ $index }}'"
                              class="mb-8">
-                            <x-prose>{!! $item['content'] !!}</x-prose>
+                            <x-prose>@kses($item['content'])</x-prose>
                         </div>
                     </div>
                 @endforeach

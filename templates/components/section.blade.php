@@ -40,9 +40,7 @@
     $paddingClass = $paddings[$padding] ?? $paddings['lg'];
 
     // Determine if animations should be enabled
-    $globalAnimations = function_exists('get_field')
-        ? get_field('animations_enabled', 'option')
-        : false;
+    $globalAnimations = \WordpressStarter\Acf\Fields::option('animations_enabled', false);
     $shouldAnimate = $animate ?? $globalAnimations;
 @endphp
 

@@ -16,6 +16,33 @@
                 @if($hasYoast)
                     <?php yoast_breadcrumb(); ?>
                 @else
+                    @php
+                        $breadcrumbItems = [
+                            [
+                                '@type'    => 'ListItem',
+                                'position' => 1,
+                                'name'     => __('Startseite', 'wp-starter'),
+                                'item'     => home_url('/'),
+                            ],
+                        ];
+                        if (!is_front_page()) {
+                            $breadcrumbItems[] = [
+                                '@type'    => 'ListItem',
+                                'position' => 2,
+                                'name'     => get_the_title(),
+                                'item'     => get_permalink() ?: home_url('/'),
+                            ];
+                        }
+                        $breadcrumbSchema = [
+                            '@context'        => 'https://schema.org',
+                            '@type'           => 'BreadcrumbList',
+                            'itemListElement' => $breadcrumbItems,
+                        ];
+                        $nonce = $GLOBALS['csp_nonce'] ?? '';
+                    @endphp
+                    <script type="application/ld+json" @if($nonce) nonce="{{ $nonce }}" @endif>
+                        {!! wp_json_encode($breadcrumbSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+                    </script>
                     <ol class="flex items-center gap-1 text-sm text-content-secondary">
                         <li>
                             <a href="{{ home_url('/') }}" class="hover:text-content transition-colors">{{ __('Startseite', 'wp-starter') }}</a>

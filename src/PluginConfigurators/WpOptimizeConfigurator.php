@@ -26,12 +26,8 @@ class WpOptimizeConfigurator extends AbstractPluginConfigurator
         return class_exists('WP_Optimize');
     }
 
-    public static function configure(): void
+    protected static function doConfigure(): void
     {
-        if (!self::isPluginActive() || self::isConfigured()) {
-            return;
-        }
-
         self::configureCaching();
         self::configureDatabaseCleanup();
         self::configureImageCompression();
