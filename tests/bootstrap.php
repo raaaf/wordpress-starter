@@ -110,9 +110,9 @@ if (!function_exists('get_theme_file_uri')) {
 
 // WordPress escaping functions
 if (!function_exists('esc_url')) {
-    function esc_url(string $url): string
+    function esc_url(?string $url): string
     {
-        return htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars($url ?? '', ENT_QUOTES, 'UTF-8');
     }
 }
 
@@ -471,10 +471,10 @@ if (!function_exists('wp_add_inline_script')) {
 
 // Sanitization functions
 if (!function_exists('wp_kses_post')) {
-    function wp_kses_post(string $content): string
+    function wp_kses_post(?string $content): string
     {
-        // Simplified - just return the content in tests
-        return $content;
+        // Simplified - just return the content in tests (core accepts null)
+        return $content ?? '';
     }
 }
 

@@ -2,6 +2,7 @@ includes:
     - vendor/szepeviktor/phpstan-wordpress/extension.neon
 
 parameters:
+    phpVersion: 80300 # match composer.json minimum — flags newer-PHP-only functions
     level: 6
     parallel:
         jobSize: 20
