@@ -31,22 +31,8 @@
     // Get social links
     $socialLinks = \WordpressStarter\Acf\Fields::option('social_links', []);
 
-    // Get logo (same logic as header)
-    $logo_url = null;
-    if ($showLogo) {
-        $acf_logo = \WordpressStarter\Acf\Fields::option('site_logo');
-        if ($acf_logo && !empty($acf_logo['url'])) {
-            $logo_url = $acf_logo['url'];
-        } else {
-            $custom_logo_id = get_theme_mod('custom_logo');
-            if ($custom_logo_id) {
-                $logo_data = wp_get_attachment_image_src($custom_logo_id, 'logo');
-                if ($logo_data) {
-                    $logo_url = $logo_data[0];
-                }
-            }
-        }
-    }
+    // Get logo (same fallback order as header, see Fields::siteLogoUrl)
+    $logo_url = $showLogo ? \WordpressStarter\Acf\Fields::siteLogoUrl() : null;
 
     // Replace {year} placeholder
     $copyrightText = str_replace('{year}', wp_date('Y'), $copyrightText);

@@ -9,15 +9,8 @@
         {{-- Left side: Logo + Desktop Navigation --}}
         <div class="flex items-center gap-8">
             @php
-                // Try ACF option first, then Customizer, then default
-                $acf_logo = \WordpressStarter\Acf\Fields::option('site_logo');
-                $logo_id   = null;
-
-                if (!empty($acf_logo['ID'])) {
-                    $logo_id = $acf_logo['ID'];
-                } else {
-                    $logo_id = get_theme_mod('custom_logo') ?: null;
-                }
+                // ACF option first, then Customizer, then default (see Fields::siteLogoId)
+                $logo_id = \WordpressStarter\Acf\Fields::siteLogoId();
             @endphp
 
             <a href="{{ esc_url(get_bloginfo('url')) }}"

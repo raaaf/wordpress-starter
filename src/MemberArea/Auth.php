@@ -103,6 +103,15 @@ class Auth
      */
     public static function login(string $credential, ?string $password = null): bool|WP_Error
     {
+        // Defense-in-depth: throttle callers that bypass the AJAX wrapper.
+        // Uses a separate key ('member_login_auth') with the same budget as the
+        // wrapper's 'member_login' key (5 attempts / 300 s). Both counters
+        // increment on every call, so when the wrapper already enforced its limit
+        // this inner check never trips first — the inner counter reaches 5 only
+        // after the outer one does. Direct callers (e.g. CLI, tests) are still
+        // capped at the same budget.
+        \WordpressStarter\RateLimiter::enforce('member_login_auth', 5, 300);
+
         $mode = self::getAuthMode();
 
         if (strtolower($mode) === self::MODE_WORDPRESS) {

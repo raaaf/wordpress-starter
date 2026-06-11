@@ -271,6 +271,32 @@ class Fields
     }
 
     /**
+     * Get site logo attachment ID from ACF option or Customizer fallback.
+     *
+     * Sibling of siteLogoUrl() with identical fallback order:
+     * ACF site_logo['ID'] → Customizer custom_logo → null.
+     */
+    public static function siteLogoId(): ?int
+    {
+        if (function_exists('get_field')) {
+            $acfLogo = self::option('site_logo');
+            if (is_array($acfLogo)) {
+                $id = $acfLogo['ID'] ?? $acfLogo['id'] ?? null;
+                if ($id) {
+                    return (int) $id;
+                }
+            }
+        }
+
+        $customLogoId = get_theme_mod('custom_logo');
+        if ($customLogoId) {
+            return (int) $customLogoId;
+        }
+
+        return null;
+    }
+
+    /**
      * Get site logo URL from ACF option or Customizer fallback.
      *
      * Fallback order: ACF site_logo['url'] → Customizer custom_logo → null.

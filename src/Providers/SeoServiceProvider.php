@@ -128,11 +128,18 @@ class SeoServiceProvider extends ServiceProvider
         }
 
         $options = [];
-        if (function_exists('get_field')) {
-            // Batch load all commonly used theme options
+        if (function_exists('get_fields')) {
+            // Batch load all option fields in one call instead of one
+            // get_field() query per field. get_fields() returns false when
+            // no options are saved — treat that as an empty set.
+            $allOptions = get_fields('option');
+            if (!is_array($allOptions)) {
+                $allOptions = [];
+            }
+
             $fieldNames = ['company_name', 'address', 'phone', 'email', 'site_logo', 'site_favicon', 'social_sharing_image'];
             foreach ($fieldNames as $fieldName) {
-                $options[$fieldName] = get_field($fieldName, 'option');
+                $options[$fieldName] = $allOptions[$fieldName] ?? null;
             }
         }
 
@@ -145,7 +152,7 @@ class SeoServiceProvider extends ServiceProvider
     private function addStructuredData(): void
     {
         add_action('wp_head', function (): void {
-            $nonce = $GLOBALS['csp_nonce'] ?? '';
+            $nonce = \WordpressStarter\Security::getNonce();
 
             // WebSite Schema (front page only)
             if (is_front_page()) {
@@ -280,7 +287,7 @@ class SeoServiceProvider extends ServiceProvider
                 'itemListElement' => $listItems,
             ];
 
-            $nonce = $GLOBALS['csp_nonce'] ?? '';
+            $nonce = \WordpressStarter\Security::getNonce();
             echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
         }, 15);
     }
@@ -658,7 +665,7 @@ class SeoServiceProvider extends ServiceProvider
             'mainEntity' => $mainEntity,
         ];
 
-        $nonce = $GLOBALS['csp_nonce'] ?? '';
+        $nonce = \WordpressStarter\Security::getNonce();
         echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
             . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
             . '</script>' . "\n";
@@ -713,7 +720,7 @@ class SeoServiceProvider extends ServiceProvider
             ];
         }
 
-        $nonce = $GLOBALS['csp_nonce'] ?? '';
+        $nonce = \WordpressStarter\Security::getNonce();
         echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
             . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
             . '</script>' . "\n";

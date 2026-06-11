@@ -5,21 +5,22 @@ declare(strict_types=1);
 namespace WordpressStarter\Providers;
 
 use Illuminate\Container\Container;
-use WordpressStarter\BladeApplication;
-use Illuminate\View\Factory;
 use Illuminate\Events\Dispatcher;
-use Illuminate\View\FileViewFinder;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\View\Engines\PhpEngine;
-use Illuminate\View\Engines\EngineResolver;
-use Illuminate\View\Engines\CompilerEngine;
-use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Facade;
+use Illuminate\View\Compilers\BladeCompiler;
+use Illuminate\View\Engines\CompilerEngine;
+use Illuminate\View\Engines\EngineResolver;
+use Illuminate\View\Engines\PhpEngine;
+use Illuminate\View\Factory;
+use Illuminate\View\FileViewFinder;
+use WordpressStarter\BladeApplication;
 
 class BladeServiceProvider extends ServiceProvider
 {
     private BladeApplication $container;
+
     private Factory $viewFactory;
 
     public function register(): void
@@ -34,6 +35,22 @@ class BladeServiceProvider extends ServiceProvider
         $this->registerBladeComponents();
     }
 
+    /**
+     * Create the Blade container and install it as the GLOBAL container instance.
+     *
+     * Application::__construct() sets its own plain Container as the global
+     * instance (Application.php). This method intentionally REPLACES that global
+     * instance with a BladeApplication: Illuminate's ComponentTagCompiler and
+     * Facades resolve dependencies via Container::getInstance() and need the
+     * view bindings registered here ('view', 'blade.compiler', etc.).
+     *
+     * Consequences:
+     * - From this provider's register() onward, Container::getInstance() returns
+     *   the BladeApplication, NOT Application's container. Anything that needs
+     *   Application's container must use Application::getContainer().
+     * - Code running before this provider registers must not cache or rely on
+     *   Container::getInstance() — the instance it sees will be superseded.
+     */
     private function setupContainer(): void
     {
         $this->container = new BladeApplication();
@@ -49,29 +66,29 @@ class BladeServiceProvider extends ServiceProvider
         $compiler = new BladeCompiler($filesystem, $this->getCompiledPath());
 
         $viewResolver = new EngineResolver();
-        $viewResolver->register('blade', fn() => new CompilerEngine($compiler));
-        $viewResolver->register('php', fn() => new PhpEngine($filesystem));
+        $viewResolver->register('blade', fn () => new CompilerEngine($compiler));
+        $viewResolver->register('php', fn () => new PhpEngine($filesystem));
 
-        $this->container->singleton('blade.compiler', fn() => $compiler);
+        $this->container->singleton('blade.compiler', fn () => $compiler);
 
         $viewFinder = new FileViewFinder($filesystem, $this->getViewPaths());
         $this->viewFactory = new Factory(
             $viewResolver,
             $viewFinder,
-            new Dispatcher()
+            new Dispatcher(),
         );
 
         // Set container on view factory for component resolution
         $this->viewFactory->setContainer($this->container);
 
         // Register view factory under multiple aliases for Laravel compatibility
-        $this->container->singleton('view', fn() => $this->viewFactory);
-        $this->container->singleton(\Illuminate\Contracts\View\Factory::class, fn() => $this->viewFactory);
-        $this->container->singleton(\Illuminate\View\Factory::class, fn() => $this->viewFactory);
-        $this->container->singleton('view.finder', fn() => $viewFinder);
+        $this->container->singleton('view', fn () => $this->viewFactory);
+        $this->container->singleton(\Illuminate\Contracts\View\Factory::class, fn () => $this->viewFactory);
+        $this->container->singleton(Factory::class, fn () => $this->viewFactory);
+        $this->container->singleton('view.finder', fn () => $viewFinder);
 
         // Bind Application contract so Blade components can resolve it
-        $this->container->singleton(\Illuminate\Contracts\Foundation\Application::class, fn() => $this->container);
+        $this->container->singleton(\Illuminate\Contracts\Foundation\Application::class, fn () => $this->container);
         $this->container->instance('app', $this->container);
     }
 
