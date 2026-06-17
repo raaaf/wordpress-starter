@@ -239,3 +239,9 @@ ACF Pro muss manuell installiert werden (Premium).
 - [docs/SECURITY.md](docs/SECURITY.md) — CSP, Sicherheitspraktiken
 - [docs/SEO.md](docs/SEO.md) — Schema.org, strukturierte Daten
 - [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) — Token-System
+
+## Author
+
+Rafael Alex — Designer & Developer from Fürth, Germany.
+Websites, apps and AI tools, built by one person.
+[rafaelalex.de](https://rafaelalex.de) · [@raaaf](https://github.com/raaaf)
