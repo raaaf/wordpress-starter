@@ -1,31 +1,31 @@
 # WordPress Starter Theme
 
-Eigenes WordPress-Theme-Framework als Basis für alle Client-Projekte. Kein Page-Builder, kein Gutenberg — stattdessen Classic Editor, ACF Flexible Content und ein sauberer Service-Provider-Stack.
+My own WordPress theme framework as the basis for every client project. No page builder, no Gutenberg — Classic Editor, ACF Flexible Content and a clean service-provider stack instead.
 
 ## Stack
 
-| Technologie                   | Version        | Zweck                              |
+| Technology                    | Version        | Purpose                            |
 | ----------------------------- | -------------- | ---------------------------------- |
-| PHP                           | 8.4+           | Strict types, moderne Features     |
+| PHP                           | 8.4+           | Strict types, modern features      |
 | Laravel Blade                 | Illuminate v13 | Templating                         |
-| TailwindCSS                   | v4.1           | Utility CSS, Design Tokens         |
-| Alpine.js                     | v3.15          | Interaktive Komponenten, gebündelt |
-| Vite                          | 7.3            | Build-Tool mit HMR                 |
-| ACF Pro + ACF Extended (FREE) | —              | Flexible Content Page Builder      |
+| TailwindCSS                   | v4.1           | Utility CSS, design tokens         |
+| Alpine.js                     | v3.15          | Interactive components, bundled    |
+| Vite                          | 7.3            | Build tool with HMR                |
+| ACF Pro + ACF Extended (FREE) | —              | Flexible Content page builder      |
 | TypeScript                    | —              | Type-safe JS                       |
 
-Gutenberg ist deaktiviert. Content-Modell: Classic Editor + ACF Flexible Content.
+Gutenberg is disabled. Content model: Classic Editor + ACF Flexible Content.
 
-## Voraussetzungen
+## Requirements
 
 - PHP 8.4+
 - Composer
 - Node.js 20.19+ / 22.12+
 - WordPress 6.8+
-- ACF Pro (manuell installieren — Premium-Plugin)
+- ACF Pro (install manually — premium plugin)
 - Local by Flywheel
 
-## Neues Client-Projekt anlegen
+## Create a new client project
 
 ```bash
 git clone https://github.com/raaaf/starter.git theme-name
@@ -33,108 +33,108 @@ cd theme-name
 php bin/setup.php
 ```
 
-Der Setup-Wizard:
+The setup wizard:
 
-1. Setzt Theme-Name, Autor, Text Domain
-2. Ersetzt den Namespace `WordpressStarter\` in allen Dateien
-3. Lässt Plugins auswählen (werden per Composer verwaltet)
-4. Konfiguriert initiale Seiten und Permalinks
-5. Führt `composer install`, `npm install`, `npm run build` aus
-6. Erstellt `.env` aus `.env.example`
+1. Sets theme name, author, text domain
+2. Replaces the `WordpressStarter\` namespace across all files
+3. Lets you select plugins (managed via Composer)
+4. Configures initial pages and permalinks
+5. Runs `composer install`, `npm install`, `npm run build`
+6. Creates `.env` from `.env.example`
 
-Danach Theme in WordPress aktivieren, dann:
+Then activate the theme in WordPress and run:
 
 ```bash
 npm run dev
 ```
 
-## Verzeichnisstruktur
+## Directory structure
 
 ```
-├── acf-json/              # ACF Field Group JSON (versioniert)
+├── acf-json/              # ACF field group JSON (versioned)
 ├── bin/
-│   └── setup.php          # Setup-Wizard für neue Projekte
-├── compiled/              # Blade-Cache (gitignored)
+│   └── setup.php          # Setup wizard for new projects
+├── compiled/              # Blade cache (gitignored)
 ├── config/
-│   ├── app.php            # Theme-Konfiguration
+│   ├── app.php            # Theme configuration
 │   └── functions.php      # Bootstrap
-├── dist/                  # Compiled Assets (gitignored)
-├── docs/                  # Erweiterte Dokumentation
+├── dist/                  # Compiled assets (gitignored)
+├── docs/                  # Extended documentation
 ├── resources/
 │   ├── css/
-│   │   ├── app.css        # Haupt-Stylesheet
-│   │   ├── tokens.css     # Design Tokens (aus Figma generiert)
+│   │   ├── app.css        # Main stylesheet
+│   │   ├── tokens.css     # Design tokens (generated from Figma)
 │   │   └── editor-style.css
 │   ├── js/
-│   │   └── app.ts         # TypeScript-Einstiegspunkt
+│   │   └── app.ts         # TypeScript entry point
 │   └── fonts/
 ├── src/
 │   ├── Acf/
-│   │   ├── AcfExtended.php      # ACF Extended Konfiguration
-│   │   ├── FieldDefinitions.php # Zentrale Felddefinitionen
-│   │   ├── Fields.php           # Feld-Helpers
-│   │   ├── FlexibleContent.php  # 28 Flexible Content Layouts
-│   │   └── Options.php          # Theme Options Pages
-│   ├── MemberArea/              # Member-Bereich (optional)
-│   ├── PostTypes/               # Custom Post Types
-│   ├── Providers/               # Service Providers
-│   ├── Taxonomies/              # Custom Taxonomies
+│   │   ├── AcfExtended.php      # ACF Extended configuration
+│   │   ├── FieldDefinitions.php # Central field definitions
+│   │   ├── Fields.php           # Field helpers
+│   │   ├── FlexibleContent.php  # 28 Flexible Content layouts
+│   │   └── Options.php          # Theme options pages
+│   ├── MemberArea/              # Member area (optional)
+│   ├── PostTypes/               # Custom post types
+│   ├── Providers/               # Service providers
+│   ├── Taxonomies/              # Custom taxonomies
 │   ├── Application.php
 │   ├── Config.php
 │   ├── EditorConfig.php
 │   ├── RateLimiter.php
 │   ├── Security.php
-│   ├── ThemeContext.php         # Multisite-Isolation
+│   ├── ThemeContext.php         # Multisite isolation
 │   └── Vite.php
 └── templates/
-    ├── components/        # Blade-Komponenten (<x-button>, <x-section> etc.)
-    ├── flexible/          # Flexible Content Templates (28 Layouts)
-    ├── layouts/           # Base-Layouts
-    └── partials/          # Wiederverwendbare Partials
+    ├── components/        # Blade components (<x-button>, <x-section> etc.)
+    ├── flexible/          # Flexible Content templates (28 layouts)
+    ├── layouts/           # Base layouts
+    └── partials/          # Reusable partials
 ```
 
-## Entwicklung
+## Development
 
 ```bash
-npm run dev          # Vite Dev Server mit HMR (localhost:5180)
-npm run build        # Production Build
+npm run dev          # Vite dev server with HMR (localhost:5180)
+npm run build        # Production build
 npm run lint         # ESLint
 composer lint        # PHPCS + PHPStan
 composer test        # PHPUnit
-npm run test:e2e     # Playwright E2E Tests
-npm run test:a11y    # Accessibility Tests
+npm run test:e2e     # Playwright E2E tests
+npm run test:a11y    # Accessibility tests
 ```
 
-## Service Provider
+## Service providers
 
-Alle Provider in `src/Providers/` werden automatisch registriert via `Application::boot()`.
+All providers in `src/Providers/` are registered automatically via `Application::boot()`.
 
-| Provider                            | Aufgabe                                            |
+| Provider                            | Responsibility                                     |
 | ----------------------------------- | -------------------------------------------------- |
-| `ThemeServiceProvider`              | Theme Support, Favicon, Login-Logo, Script-Loading |
-| `BladeServiceProvider`              | Blade Engine, Cache-Verzeichnis                    |
-| `AcfServiceProvider`                | ACF Felder, Blade-Direktiven, REST API             |
-| `MenuServiceProvider`               | Nav-Menus registrieren                             |
-| `SecurityServiceProvider`           | CSP-Header, Nonces                                 |
-| `ImageServiceProvider`              | Custom Image Sizes                                 |
-| `PostTypeServiceProvider`           | CPTs und Taxonomien                                |
-| `MemberAreaServiceProvider`         | Member-Bereich (Login, Downloads, SFTP-Sync)       |
-| `PluginServiceProvider`             | Plugin-Setup bei Theme-Aktivierung                 |
-| `PluginConfiguratorServiceProvider` | Auto-Konfiguration von Plugins                     |
-| `WelcomeServiceProvider`            | Welcome-Notice, ACF Options Prefill                |
-| `SeoServiceProvider`                | Schema.org, OG-Tags, Canonical                     |
-| `DesignTokenServiceProvider`        | Token-Upload aus Figma                             |
-| `CronServiceProvider`               | Transient- und Revision-Cleanup                    |
-| `LogServiceProvider`                | Strukturiertes Logging in debug.log                |
-| `ThemeUpdateProvider`               | GitHub-basierte Theme-Updates                      |
+| `ThemeServiceProvider`              | Theme support, favicon, login logo, script loading |
+| `BladeServiceProvider`              | Blade engine, cache directory                      |
+| `AcfServiceProvider`                | ACF fields, Blade directives, REST API             |
+| `MenuServiceProvider`               | Register nav menus                                 |
+| `SecurityServiceProvider`           | CSP headers, nonces                                |
+| `ImageServiceProvider`              | Custom image sizes                                 |
+| `PostTypeServiceProvider`           | CPTs and taxonomies                                |
+| `MemberAreaServiceProvider`         | Member area (login, downloads, SFTP sync)          |
+| `PluginServiceProvider`             | Plugin setup on theme activation                   |
+| `PluginConfiguratorServiceProvider` | Auto-configuration of plugins                      |
+| `WelcomeServiceProvider`            | Welcome notice, ACF options prefill                |
+| `SeoServiceProvider`                | Schema.org, OG tags, canonical                     |
+| `DesignTokenServiceProvider`        | Token upload from Figma                            |
+| `CronServiceProvider`               | Transient and revision cleanup                     |
+| `LogServiceProvider`                | Structured logging to debug.log                    |
+| `ThemeUpdateProvider`               | GitHub-based theme updates                         |
 
-## Blade-Direktiven
+## Blade directives
 
 ```blade
 @field('name')          {{-- escaped --}}
 @fieldRaw('name')       {{-- wp_kses_post --}}
-@option('name')         {{-- Theme Option, escaped --}}
-@optionRaw('name')      {{-- Theme Option, HTML --}}
+@option('name')         {{-- theme option, escaped --}}
+@optionRaw('name')      {{-- theme option, HTML --}}
 
 @hasfield('name') ... @endhasfield
 @repeater('name') ... @endrepeater
@@ -142,23 +142,23 @@ Alle Provider in `src/Providers/` werden automatisch registriert via `Applicatio
 @layout('hero') ... @endlayout
 ```
 
-## Flexible Content Layouts
+## Flexible Content layouts
 
-28 Layouts in `src/Acf/FlexibleContent.php`, Templates in `templates/flexible/`.
+28 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
 
-**Struktur:** one-column, two-columns, three-columns, four-columns, one-third-two-thirds, two-thirds-one-third, two-columns-images
+**Structure:** one-column, two-columns, three-columns, four-columns, one-third-two-thirds, two-thirds-one-third, two-columns-images
 
-**Inhalte:** hero, accordion, cta, button, image, video, divider
+**Content:** hero, accordion, cta, button, image, video, divider
 
-**Interaktiv:** testimonials, cards, gallery, logo-slider, tabs, stats, timeline, team, before-after, pricing-table
+**Interactive:** testimonials, cards, gallery, logo-slider, tabs, stats, timeline, team, before-after, pricing-table
 
-**Formulare:** contact-form, map
+**Forms:** contact-form, map
 
-**Beiträge:** posts, table
+**Posts:** posts, table
 
-### Neues Layout hinzufügen
+### Add a new layout
 
-1. Methode in `src/Acf/FlexibleContent.php`:
+1. Method in `src/Acf/FlexibleContent.php`:
 
 ```php
 private static function myLayout(): array
@@ -174,13 +174,13 @@ private static function myLayout(): array
 }
 ```
 
-2. Felddefinitionen in `src/Acf/FieldDefinitions.php`
+2. Field definitions in `src/Acf/FieldDefinitions.php`
 3. Template `templates/flexible/my.blade.php`
-4. In `getLayouts()` eintragen
+4. Add it to `getLayouts()`
 
-## Design Tokens
+## Design tokens
 
-Tokens werden aus Figma exportiert und via `npm run tokens` in `resources/css/tokens.css` generiert. Semantische Variablen:
+Tokens are exported from Figma and generated into `resources/css/tokens.css` via `npm run tokens`. Semantic variables:
 
 ```css
 background: var(--bg-primary);
@@ -188,9 +188,9 @@ color: var(--text-primary);
 border-color: var(--border-default);
 ```
 
-Dark Mode via `<html data-theme="dark">` oder automatisch per `prefers-color-scheme`.
+Dark mode via `<html data-theme="dark">` or automatically through `prefers-color-scheme`.
 
-## Custom Post Types
+## Custom post types
 
 ```php
 namespace WordpressStarter\PostTypes;
@@ -206,39 +206,39 @@ class Service extends AbstractPostType
 }
 ```
 
-Registrierung in `PostTypeServiceProvider::boot()`:
+Registration in `PostTypeServiceProvider::boot()`:
 
 ```php
 Service::register();
 ```
 
-## Member-Bereich
+## Member area
 
-Optional aktivierbar. Features: ACF-gesteuerte Download-Verwaltung, SFTP-Sync, Passwort-Verschlüsselung, Session-basiertes Login ohne WordPress-User-Account.
+Optional. Features: ACF-driven download management, SFTP sync, password encryption, session-based login without a WordPress user account.
 
-Konfiguration in `src/Acf/Options.php` (ACF-Optionen: `member_area_active`, SFTP-Credentials).
+Configuration in `src/Acf/Options.php` (ACF options: `member_area_active`, SFTP credentials).
 
 ## Multisite
 
-Das Theme ist Multisite-safe. `ThemeContext` isoliert alle Option-Keys und Setup-Hooks pro Site. Mehrere Subsites können das Theme gleichzeitig aktiv haben, ohne sich gegenseitig zu beeinflussen.
+The theme is multisite-safe. `ThemeContext` isolates all option keys and setup hooks per site. Multiple subsites can run the theme at the same time without interfering with each other.
 
 ## Plugins
 
-Plugins werden per Composer verwaltet:
+Plugins are managed via Composer:
 
 ```bash
 composer require wpackagist-plugin/contact-form-7
 ```
 
-ACF Pro muss manuell installiert werden (Premium).
+ACF Pro must be installed manually (premium).
 
-## Dokumentation
+## Documentation
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Service Provider Pattern, Bootstrap-Flow
-- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Production Deployment
-- [docs/SECURITY.md](docs/SECURITY.md) — CSP, Sicherheitspraktiken
-- [docs/SEO.md](docs/SEO.md) — Schema.org, strukturierte Daten
-- [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) — Token-System
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Service provider pattern, bootstrap flow
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Production deployment
+- [docs/SECURITY.md](docs/SECURITY.md) — CSP, security practices
+- [docs/SEO.md](docs/SEO.md) — Schema.org, structured data
+- [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) — Token system
 
 ## Author
 
