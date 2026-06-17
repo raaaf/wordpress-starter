@@ -1,6 +1,6 @@
 /node_modules
 /plugins
-# /vendor is tracked — required for WordPress theme updates via SFTP (no shell access)
+/vendor
 /dist
 /fonts
 /favicons
