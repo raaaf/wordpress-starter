@@ -44,6 +44,9 @@ class AcfServiceProvider extends ServiceProvider
         // Register Blade directives
         $this->registerBladeDirectives();
 
+        // Keep [video]/[audio] shortcode <source> tags in kses'd WYSIWYG output.
+        add_filter('wp_kses_allowed_html', [self::class, 'allowMediaSourceTag'], 20, 2);
+
         // Add ACF admin styles
         $this->addAdminStyles();
 
@@ -154,6 +157,31 @@ class AcfServiceProvider extends ServiceProvider
         Blade::directive('kses', function ($expression) {
             return "<?php echo wp_kses_post({$expression}); ?>";
         });
+    }
+
+    /**
+     * Allow <source> elements in post-context kses.
+     *
+     * Core's post allowlist permits <video>/<audio> but not <source>,
+     * so wp_kses_post() strips the sources that wp_video_shortcode()
+     * and wp_audio_shortcode() emit inside WYSIWYG content.
+     *
+     * Applies to every post-context kses call site-wide; the allowance is
+     * limited to src/type attributes and source cannot execute scripts.
+     *
+     * @param array<string, array<string, bool>|mixed> $tags    Allowed tags.
+     * @param string                                   $context Kses context.
+     * @return array<string, array<string, bool>|mixed>
+     */
+    public static function allowMediaSourceTag(array $tags, string $context): array
+    {
+        if ($context === 'post') {
+            $tags['source'] = [
+                'src'  => true,
+                'type' => true,
+            ];
+        }
+        return $tags;
     }
 
     private function addAdminStyles(): void
