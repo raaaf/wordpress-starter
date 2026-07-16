@@ -6,9 +6,9 @@
   "author": "Rafael Alex",
   "repository": {
     "type": "git",
-    "url": "https://github.com/raaaf/starter"
+    "url": "https://github.com/raaaf/wordpress-starter"
   },
-  "theme_uri": "https://github.com/raaaf/starter",
+  "theme_uri": "https://github.com/raaaf/wordpress-starter",
   "author_uri": "https://rafaelalex.de",
   "text_domain": "wp-starter",
   "license": "GPL-2.0",
