@@ -1,3 +1,10 @@
+## [2.21.1](https://github.com/raaaf/wordpress-starter/compare/v2.21.0...v2.21.1) (2026-07-16)
+
+### Bug Fixes
+
+- **ci:** point repository and theme_uri at renamed wordpress-starter repo ([2ac25fc](https://github.com/raaaf/wordpress-starter/commit/2ac25fc2d5a39bd1539c32df3900e168d110b1ff))
+- **kses:** keep video/audio shortcode source tags in sanitized WYSIWYG output ([94b08dc](https://github.com/raaaf/wordpress-starter/commit/94b08dcbd1142795164c71c6d1e540a1df2158f5))
+
 # 1.0.0 (2026-06-17)
 
 ### Bug Fixes
