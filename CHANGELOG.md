@@ -1,3 +1,9 @@
+## [2.21.4](https://github.com/raaaf/wordpress-starter/compare/v2.21.3...v2.21.4) (2026-07-27)
+
+### Bug Fixes
+
+- **seo:** keep contact details in the schema when Yoast owns the graph ([57f7aa5](https://github.com/raaaf/wordpress-starter/commit/57f7aa572a02095d6e999ee16bd30b8d8e07fa42))
+
 ## [2.21.3](https://github.com/raaaf/wordpress-starter/compare/v2.21.2...v2.21.3) (2026-07-27)
 
 ### Bug Fixes
