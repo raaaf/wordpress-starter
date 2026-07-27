@@ -1475,6 +1475,37 @@ html {
 }
 
 /* ============================================
+   MULTI-COLUMN TEXT ALIGNMENT
+   ============================================ */
+
+@layer components {
+  /* In an equal-column layout the body copy starts one line lower in any
+     column whose headline wraps, because each column is its own text flow.
+     Reserving a fixed number of lines for the leading headline lines the
+     columns back up. This replaces the editorial workaround of padding the
+     short headlines with a second line in white.
+
+     Two lines cover the common case. Where a headline genuinely needs three,
+     raise --column-heading-lines on that section instead of editing content.
+     Single-column and mobile layouts are untouched, so no space is wasted
+     where there is nothing to align. */
+  @media (min-width: 768px) {
+    :is(
+        .two-columns,
+        .two-columns-images,
+        .three-columns,
+        .three-columns-images,
+        .four-columns,
+        .four-columns-images
+      )
+      .prose
+      > :is(h2, h3, h4, h5):first-of-type {
+      min-height: var(--column-heading-lines, 2lh);
+    }
+  }
+}
+
+/* ============================================
    PRINT
    ============================================ */
 
