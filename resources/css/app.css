@@ -1525,3 +1525,18 @@ html {
   opacity: 1 !important;
   transform: none !important;
 }
+
+/* ============================================
+   PRINT
+   ============================================ */
+
+@media print {
+  /* Sections only reveal once they enter the viewport. Without this, every
+     section the reader never scrolled to prints as a blank block, because
+     Alpine leaves display:none / opacity:0 on the wrapper. */
+  .section[x-data] > div {
+    display: block !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
