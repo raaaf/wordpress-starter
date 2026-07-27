@@ -86,6 +86,35 @@
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
 
+@layer base {
+  /* @tailwindcss/forms adds its own 1px ring on focus, in Tailwind's default
+     blue, which composes with the theme's --shadow-focus-ring into a visible
+     double ring around every focused field. The theme supplies the ring, so
+     the plugin's is switched off here. Deliberate ring-* utilities elsewhere
+     (skip link, cards) are untouched. */
+  :is(
+    [type='text'],
+    [type='email'],
+    [type='url'],
+    [type='password'],
+    [type='number'],
+    [type='date'],
+    [type='datetime-local'],
+    [type='month'],
+    [type='search'],
+    [type='tel'],
+    [type='time'],
+    [type='week'],
+    [type='checkbox'],
+    [type='radio'],
+    [multiple],
+    textarea,
+    select
+  ):focus {
+    --tw-ring-shadow: 0 0 #0000;
+  }
+}
+
 /* Dark mode via data-theme attribute (matches tokens.css selector) */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
