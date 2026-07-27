@@ -1,3 +1,9 @@
+## [2.24.1](https://github.com/raaaf/wordpress-starter/compare/v2.24.0...v2.24.1) (2026-07-27)
+
+### Bug Fixes
+
+- **pages:** drop the protected prefix from the password form heading ([7d048fb](https://github.com/raaaf/wordpress-starter/commit/7d048fbec1f769d3c232f04ab65a0eb2afd335c9))
+
 # [2.24.0](https://github.com/raaaf/wordpress-starter/compare/v2.23.0...v2.24.0) (2026-07-27)
 
 ### Bug Fixes
