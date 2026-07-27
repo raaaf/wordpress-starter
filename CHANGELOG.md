@@ -1,3 +1,9 @@
+## [2.21.3](https://github.com/raaaf/wordpress-starter/compare/v2.21.2...v2.21.3) (2026-07-27)
+
+### Bug Fixes
+
+- **forms:** repair Contact Form 7 state styling and tidy the loading state ([b2a4d94](https://github.com/raaaf/wordpress-starter/commit/b2a4d94de6e5ec26dd063fdb39a3581f609bbebf))
+
 ## [2.21.2](https://github.com/raaaf/wordpress-starter/compare/v2.21.1...v2.21.2) (2026-07-27)
 
 ### Bug Fixes
