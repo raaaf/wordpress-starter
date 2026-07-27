@@ -1,3 +1,16 @@
+## [2.21.2](https://github.com/raaaf/wordpress-starter/compare/v2.21.1...v2.21.2) (2026-07-27)
+
+### Bug Fixes
+
+- **a11y:** dialable tel links, active menu item, footer heading level ([2dfea0d](https://github.com/raaaf/wordpress-starter/commit/2dfea0dd79623e50d0960199ef59445d40c29f98))
+- **css:** keep scroll-revealed sections visible when printing ([51a4437](https://github.com/raaaf/wordpress-starter/commit/51a443720eb278f8d2974eb0606012ce94aa13bd))
+- **security:** send clickjacking, MIME-sniffing and referrer headers ([543a9cf](https://github.com/raaaf/wordpress-starter/commit/543a9cf4a19afdf65e9b1e64a2b907db34673833))
+- **seo:** stop duplicating Yoast schema and structure the postal address ([0ae343e](https://github.com/raaaf/wordpress-starter/commit/0ae343e8100c907106b41cb6b25c6265a40c4613))
+
+### Performance Improvements
+
+- **assets:** remove emoji script and scope Contact Form 7 assets ([456b7c7](https://github.com/raaaf/wordpress-starter/commit/456b7c7fdd1fd34dfdf16f79535c675e4374adc0))
+
 ## [2.21.1](https://github.com/raaaf/wordpress-starter/compare/v2.21.0...v2.21.1) (2026-07-16)
 
 ### Bug Fixes
