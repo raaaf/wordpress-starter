@@ -33,6 +33,26 @@ class MenuServiceProvider extends ServiceProvider
         // Add custom classes to menu items
         add_filter('nav_menu_css_class', [$this, 'addMenuItemClasses'], 10, 4);
         add_filter('nav_menu_submenu_css_class', [$this, 'addSubmenuClasses'], 10, 3);
+        add_filter('nav_menu_link_attributes', [$this, 'addAriaCurrent'], 10, 4);
+    }
+
+    /**
+     * Expose the active menu item to assistive technology.
+     *
+     * WordPress only marks it with a CSS class, which screen readers ignore.
+     *
+     * @param array<string, string> $atts
+     * @return array<string, string>
+     */
+    public function addAriaCurrent(array $atts, \WP_Post $item, \stdClass $args, int $depth): array
+    {
+        $classes = $item->classes ?? [];
+
+        if (in_array('current-menu-item', (array) $classes, true) || in_array('current_page_item', (array) $classes, true)) {
+            $atts['aria-current'] = 'page';
+        }
+
+        return $atts;
     }
 
     /**

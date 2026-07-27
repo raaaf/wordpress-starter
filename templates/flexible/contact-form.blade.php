@@ -48,7 +48,7 @@
                     @if($phone)
                         <p class="flex items-center gap-2 mb-2 text-content-secondary">
                             <x-icon name="phone" size="lg" />
-                            <x-link url="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" variant="dark">{{ $phone }}</x-link>
+                            <x-link url="tel:{{ \WordpressStarter\Helpers\Text::telHref($phone) }}" variant="dark">{{ $phone }}</x-link>
                         </p>
                     @endif
 

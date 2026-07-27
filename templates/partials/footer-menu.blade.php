@@ -33,6 +33,7 @@
 
     // Get logo (same fallback order as header, see Fields::siteLogoUrl)
     $logo_url = $showLogo ? \WordpressStarter\Acf\Fields::siteLogoUrl() : null;
+    $logo_id = $showLogo ? \WordpressStarter\Acf\Fields::siteLogoId() : null;
 
     // Replace {year} placeholder
     $copyrightText = str_replace('{year}', wp_date('Y'), $copyrightText);
@@ -43,15 +44,23 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             {{-- Logo / Company Info / Footer Text --}}
             <div class="lg:col-span-1">
-                @if($showLogo && $logo_url)
+                @if($showLogo && ($logo_id || $logo_url))
                     <a href="{{ esc_url(home_url('/')) }}" class="inline-block mb-4">
-                        <img src="{{ esc_url($logo_url) }}"
-                             alt="{{ esc_attr(get_bloginfo('name')) }}"
-                             class="h-10 w-auto">
+                        @if($logo_id)
+                            {!! wp_get_attachment_image($logo_id, 'logo', false, [
+                                'alt' => esc_attr(get_bloginfo('name')),
+                                'class' => 'h-10 w-auto',
+                                'sizes' => '(max-width: 768px) 128px, 256px',
+                            ]) !!}
+                        @else
+                            <img src="{{ esc_url($logo_url) }}"
+                                 alt="{{ esc_attr(get_bloginfo('name')) }}"
+                                 class="h-10 w-auto">
+                        @endif
                     </a>
                 @endif
                 @if($showCompany && $company)
-                    <h3 class="text-h5 mb-4">{{ $company }}</h3>
+                    <h2 class="text-h5 mb-4">{{ $company }}</h2>
                 @endif
                 @if($footerText)
                     <div class="text-content-secondary text-sm prose prose-sm">
@@ -63,7 +72,7 @@
             {{-- Footer Navigation --}}
             @if($showNav)
                 <div>
-                    <h3 class="text-h5 mb-4">{{ $navTitle }}</h3>
+                    <h2 class="text-h5 mb-4">{{ $navTitle }}</h2>
                     <nav class="footer-nav" aria-label="{{ __('Fußnavigation', 'wp-starter') }}">
                         <?php
                         wp_nav_menu([
@@ -81,14 +90,14 @@
             {{-- Contact Info --}}
             @if($showContact && ($address || $phone || $email))
                 <div>
-                    <h3 class="text-h5 mb-4">{{ $contactTitle }}</h3>
+                    <h2 class="text-h5 mb-4">{{ $contactTitle }}</h2>
                     <address class="not-italic text-content-secondary text-sm space-y-2">
                         @if($address)
                             <p>{!! nl2br(esc_html($address)) !!}</p>
                         @endif
                         @if($phone)
                             <p>
-                                <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" class="hover:text-content transition-colors">
+                                <a href="tel:{{ \WordpressStarter\Helpers\Text::telHref($phone) }}" class="hover:text-content transition-colors">
                                     {{ $phone }}
                                 </a>
                             </p>
@@ -107,7 +116,7 @@
             {{-- Social Links --}}
             @if($showSocial && !empty($socialLinks))
                 <div>
-                    <h3 class="text-h5 mb-4">{{ $socialTitle }}</h3>
+                    <h2 class="text-h5 mb-4">{{ $socialTitle }}</h2>
                     <div class="flex gap-4">
                         @foreach($socialLinks as $social)
                             @if(!empty($social['url']))
