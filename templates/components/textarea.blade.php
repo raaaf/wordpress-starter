@@ -47,7 +47,7 @@
     // Size classes from Figma tokens
     $sizes = [
         'sm' => [
-            'textarea' => 'text-sm px-[var(--input-sm-padding-x)] py-[var(--input-sm-padding-y)] rounded-[var(--input-sm-radius)]',
+            'textarea' => 'text-base md:text-sm px-[var(--input-sm-padding-x)] py-[var(--input-sm-padding-y)] rounded-[var(--input-sm-radius)]',
             'rows' => 3,
         ],
         'md' => [

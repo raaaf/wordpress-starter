@@ -52,8 +52,10 @@
 
     // Size classes
     $sizes = [
+        // Below 16px iOS Safari zooms the page on focus, so the small size
+        // stays at 16px on phones and drops to 14px from md up.
         'sm' => [
-            'input' => 'h-8 text-sm',
+            'input' => 'h-8 text-base md:text-sm',
             'padding' => $iconLeft ? 'pl-8 pr-3' : 'px-3',
             'paddingRight' => $iconRight || $clearable ? 'pr-8' : '',
             'icon' => 'w-3.5 h-3.5',

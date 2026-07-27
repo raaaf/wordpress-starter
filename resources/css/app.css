@@ -40,6 +40,10 @@
   --ring-focus: var(--color-accent-600);
   --shadow-focus-ring: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--ring-focus);
   --shadow-focus-ring-ghost: 0px 0px 0px 2px var(--ring-focus);
+  /* tokens.css points this at --color-error-alpha-50, which it never defines,
+     so it fell back to an inline 50 percent alpha with the same washed-out
+     result the accent ring had. Solid, like the others. */
+  --shadow-focus-ring-error: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-error);
 }
 
 [data-theme='dark'] {
@@ -56,6 +60,20 @@
     --text-warning: var(--color-warning-light);
     --text-error: var(--color-error-light);
   }
+}
+
+/* ============================================
+   SPACING SCALE GAPS
+
+   The Figma export defines 0-5, 1-5, 2-5, 3, 4, 5 and up, but skips the two
+   plainest steps of its own 4px scale. Four component tokens reference them,
+   so a medium button lost the gap between icon and label and badges lost
+   their vertical padding entirely.
+   ============================================ */
+
+:root {
+  --spacing-1: 4px;
+  --spacing-2: 8px;
 }
 
 /* ============================================

@@ -46,7 +46,7 @@
 
     // Size classes
     $sizes = [
-        'sm' => 'h-8 text-sm pl-3 pr-8',
+        'sm' => 'h-8 text-base md:text-sm pl-3 pr-8',
         'md' => 'h-10 text-base pl-4 pr-10',
         'lg' => 'h-12 text-lg pl-5 pr-12',
     ];
