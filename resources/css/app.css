@@ -12,6 +12,32 @@
 @import './tokens.css';
 
 @import 'tailwindcss';
+
+/* ============================================
+   PLACEHOLDER COLOUR
+
+   Not part of the Figma token export. The obvious candidate, --text-tertiary,
+   only reaches 2.2:1 to 3.1:1 against the input background in every theme,
+   well under the 4.5:1 that placeholder text needs. --text-secondary would
+   pass but sits so close to the body text in some palettes that a placeholder
+   reads as an entered value. This is the lightest shade of each theme's own
+   palette that still clears 4.5:1.
+   ============================================ */
+
+:root {
+  --text-placeholder: var(--color-gray-500);
+}
+
+[data-theme='dark'] {
+  --text-placeholder: var(--color-gray-400);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --text-placeholder: var(--color-gray-400);
+  }
+}
+
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
 
@@ -169,6 +195,7 @@ html {
   --color-content: var(--text-primary);
   --color-content-secondary: var(--text-secondary);
   --color-content-tertiary: var(--text-tertiary);
+  --color-content-placeholder: var(--text-placeholder);
   --color-content-inverse: var(--text-inverse);
   --color-content-brand: var(--text-brand);
   --color-content-accent: var(--text-accent);
@@ -599,7 +626,7 @@ html {
   .wpcf7-form input[type='date']::placeholder,
   .wpcf7-form input[type='time']::placeholder,
   .wpcf7-form input[type='password']::placeholder {
-    color: var(--text-tertiary);
+    color: var(--text-placeholder);
   }
 
   .wpcf7-form input[type='text']:hover,
@@ -647,7 +674,7 @@ html {
   }
 
   .wpcf7-form textarea::placeholder {
-    color: var(--text-tertiary);
+    color: var(--text-placeholder);
   }
 
   .wpcf7-form textarea:hover {
