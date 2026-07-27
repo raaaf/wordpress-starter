@@ -8,9 +8,6 @@
 
 @php
     $fieldId = 'pwbox-' . (int) get_the_ID();
-    // get_the_title() runs through protected_title_format and would read
-    // "Geschützt: Kalkulationstool", which the sentence below already says.
-    $rawTitle = get_post_field('post_title', get_the_ID()) ?: get_the_title();
     // A cookie that is present while the gate still shows means the previous
     // attempt was wrong. COOKIEHASH is guarded so the template also renders
     // outside a full WordPress bootstrap.
@@ -26,7 +23,7 @@
                         <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-accent-subtle mb-4">
                             <x-icon name="lock" class="w-8 h-8 text-icon-brand" />
                         </div>
-                        <h1 class="text-h3 mb-2">{{ $rawTitle }}</h1>
+                        <h1 class="text-h3 mb-2">{{ get_the_title() }}</h1>
                         <p class="text-content-secondary">
                             {{ __('Diese Seite ist passwortgeschützt. Bitte geben Sie das Passwort ein.', 'wp-starter') }}
                         </p>

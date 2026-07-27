@@ -24,6 +24,23 @@ class ThemeServiceProvider extends ServiceProvider
         $this->addThemeSupport();
         $this->addTemplateFilter();
         $this->registerBladePageTemplates();
+        $this->dropProtectedTitlePrefix();
+    }
+
+    /**
+     * Drop WordPress' "Geschützt: " prefix from protected page titles.
+     *
+     * Core prepends it to every the_title() call while the gate is up, so the
+     * breadcrumb and the browser tab said "Geschützt: Kalkulationstool" while
+     * the gate card itself showed the plain title and already explained, in a
+     * full sentence, that the page is protected. Two names for one page.
+     *
+     * Only affects the gate: once the password is accepted, core stops
+     * applying the format anyway.
+     */
+    private function dropProtectedTitlePrefix(): void
+    {
+        add_filter('protected_title_format', static fn (): string => '%s');
     }
 
     private function setupThemeVersion(): void
