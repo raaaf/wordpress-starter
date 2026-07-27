@@ -30,7 +30,17 @@
                     </div>
 
                     @if($hasError)
-                        <div class="mb-6">
+                        {{-- Appears after a full page load following a server round
+                             trip, never on a keystroke, so a transition is safe. --}}
+                        <div
+                            class="mb-6"
+                            x-data="{ shown: false }"
+                            x-init="requestAnimationFrame(() => (shown = true))"
+                            x-show="shown"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 -translate-y-1"
+                            x-cloak
+                        >
                             <x-alert variant="error">
                                 {{ __('Das eingegebene Passwort war nicht korrekt.', 'wp-starter') }}
                             </x-alert>
