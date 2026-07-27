@@ -1,3 +1,13 @@
+# [2.24.0](https://github.com/raaaf/wordpress-starter/compare/v2.23.0...v2.24.0) (2026-07-27)
+
+### Bug Fixes
+
+- **a11y:** make placeholder text readable ([66c515f](https://github.com/raaaf/wordpress-starter/commit/66c515fecf4f9e5bebc1c22e039ba979676b6dd3))
+
+### Features
+
+- **pages:** support WordPress' per-page password protection ([94fba78](https://github.com/raaaf/wordpress-starter/commit/94fba78c521a373ecc1c657ccfc5bc58567b1afc))
+
 # [2.23.0](https://github.com/raaaf/wordpress-starter/compare/v2.22.0...v2.23.0) (2026-07-27)
 
 ### Features
