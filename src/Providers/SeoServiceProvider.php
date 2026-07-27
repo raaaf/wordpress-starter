@@ -100,6 +100,7 @@ class SeoServiceProvider extends ServiceProvider
      * Add robots meta tag overrides for pages that must not be indexed.
      *
      * 404 pages: noindex, follow (broken URLs should not be indexed)
+     * Password-protected pages: noindex, nofollow (only the gate is public)
      */
     private function addRobotsOverrides(): void
     {
@@ -107,6 +108,15 @@ class SeoServiceProvider extends ServiceProvider
             if (is_404()) {
                 $robots['noindex'] = true;
                 unset($robots['nofollow']);
+
+                return $robots;
+            }
+
+            // Without this the password form itself gets indexed, which puts an
+            // unlisted page into the search results under its own title.
+            if (is_singular() && post_password_required()) {
+                $robots['noindex'] = true;
+                $robots['nofollow'] = true;
             }
 
             return $robots;

@@ -4,6 +4,11 @@
     @if (have_posts())
         @while (have_posts()) @php(the_post())
             <article class="page">
+                {{-- ACF sections bypass the_content(), so the password gate has to
+                     be checked explicitly or protected pages would render in full. --}}
+                @if(post_password_required())
+                    @include('partials.password-form')
+                @else
                 {{-- Only show page header if no ACF sections (title is in Hero block) --}}
                 @unless(is_front_page() || have_rows('page_sections'))
                     <header class="page-header max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -29,6 +34,7 @@
                     <div class="page-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         @php(the_content())
                     </div>
+                @endif
                 @endif
             </article>
         @endwhile
