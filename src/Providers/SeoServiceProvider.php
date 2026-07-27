@@ -154,8 +154,12 @@ class SeoServiceProvider extends ServiceProvider
         add_action('wp_head', function (): void {
             $nonce = \WordpressStarter\Security::getNonce();
 
+            // Yoast emits WebSite and Organization itself; two competing nodes
+            // for the same entity are worse than one.
+            $seoPluginOwnsSchema = defined('WPSEO_VERSION');
+
             // WebSite Schema (front page only)
-            if (is_front_page()) {
+            if (is_front_page() && !$seoPluginOwnsSchema) {
                 $websiteSchema = [
                     '@context' => 'https://schema.org',
                     '@type' => 'WebSite',
@@ -174,7 +178,7 @@ class SeoServiceProvider extends ServiceProvider
             $themeOptions = $this->getThemeOptions();
             $companyName = $themeOptions['company_name'] ?? null;
 
-            if ($companyName) {
+            if ($companyName && !$seoPluginOwnsSchema) {
                 $orgSchema = [
                     '@context' => 'https://schema.org',
                     '@type' => 'Organization',
@@ -200,10 +204,7 @@ class SeoServiceProvider extends ServiceProvider
                     $orgSchema['email'] = $email;
                 }
                 if ($address) {
-                    $orgSchema['address'] = [
-                        '@type' => 'PostalAddress',
-                        'streetAddress' => $address,
-                    ];
+                    $orgSchema['address'] = $this->buildPostalAddress($address);
                 }
 
                 echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($orgSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
@@ -240,6 +241,35 @@ class SeoServiceProvider extends ServiceProvider
                 echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($articleSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
             }
         });
+    }
+
+    /**
+     * Split a free-text address into PostalAddress parts.
+     *
+     * Expects "street\npostcode city". Anything that does not match that shape
+     * is kept as a single streetAddress so no information is lost.
+     *
+     * @return array<string, string>
+     */
+    private function buildPostalAddress(string $address): array
+    {
+        $schema = ['@type' => 'PostalAddress'];
+
+        $lines = array_values(array_filter(array_map('trim', (array) preg_split('/\r\n|\r|\n/', $address))));
+        $lastLine = $lines ? end($lines) : '';
+
+        if (count($lines) < 2 || !preg_match('/^(\d{4,5})\s+(.+)$/', $lastLine, $matches)) {
+            $schema['streetAddress'] = $address;
+
+            return $schema;
+        }
+
+        array_pop($lines);
+        $schema['streetAddress'] = implode(', ', $lines);
+        $schema['postalCode'] = $matches[1];
+        $schema['addressLocality'] = $matches[2];
+
+        return $schema;
     }
 
     /**
