@@ -59,7 +59,7 @@
                     ? 'border-line-disabled bg-surface-disabled'
                     : ($hasError
                         ? 'border-line-error peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
-                        : 'border-line hover:border-line-strong peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
+                        : 'border-line-control hover:border-line-strong peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
                     )
                 }}
                 peer-checked:border-surface-accent

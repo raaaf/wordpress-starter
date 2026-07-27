@@ -14,6 +14,51 @@
 @import 'tailwindcss';
 
 /* ============================================
+   CONTROL BORDER, FOCUS RING, DARK STATUS COLOURS
+
+   Three corrections to tokens.css that cannot live there, because that file
+   is regenerated from Figma.
+
+   1. --border-control: the boundary of a form control is the only thing that
+      shows where the field is, and WCAG 1.4.11 asks for 3:1. --border-default
+      reaches 1.2 to 1.5:1 in every palette. This is the lightest shade of each
+      theme's own greys that still clears 3:1, per colour scheme. Card borders
+      and dividers keep --border-default; 1.4.11 does not apply to them.
+
+   2. --ring-focus: the focus ring used a 50 percent alpha accent, which blends
+      to roughly 1.8:1 against the page. Solid, and picked per theme so it also
+      clears 3:1 against the dark background, where a near-black accent would
+      otherwise be invisible.
+
+   3. Dark status text: dark mode set --bg-* to the dark tone but left --text-*
+      on the mid tone, leaving two similar lightnesses on top of each other
+      (1.7 to 3.0:1). The text moves to the light tone of the same ramp.
+   ============================================ */
+
+:root {
+  --border-control: var(--color-gray-500);
+  --ring-focus: var(--color-accent-600);
+  --shadow-focus-ring: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--ring-focus);
+  --shadow-focus-ring-ghost: 0px 0px 0px 2px var(--ring-focus);
+}
+
+[data-theme='dark'] {
+  --border-control: var(--color-gray-500);
+  --text-success: var(--color-success-light);
+  --text-warning: var(--color-warning-light);
+  --text-error: var(--color-error-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --border-control: var(--color-gray-500);
+    --text-success: var(--color-success-light);
+    --text-warning: var(--color-warning-light);
+    --text-error: var(--color-error-light);
+  }
+}
+
+/* ============================================
    PLACEHOLDER COLOUR
 
    Not part of the Figma token export. The obvious candidate, --text-tertiary,
@@ -196,6 +241,7 @@ html {
   --color-content-secondary: var(--text-secondary);
   --color-content-tertiary: var(--text-tertiary);
   --color-content-placeholder: var(--text-placeholder);
+  --color-line-control: var(--border-control);
   --color-content-inverse: var(--text-inverse);
   --color-content-brand: var(--text-brand);
   --color-content-accent: var(--text-accent);
