@@ -1306,6 +1306,12 @@ html {
   .desktop-nav > ul > li.current-menu-item > a,
   .desktop-nav > ul > li.current-menu-ancestor > a {
     color: var(--text-brand);
+    /* Colour alone is not a signal here: --text-brand and --text-secondary sit
+       at almost the same lightness, so in greyscale or with a colour vision
+       deficiency the current page is indistinguishable. WCAG 1.4.1. */
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
   }
 
   /* Parent menu item with submenu */
@@ -1377,6 +1383,12 @@ html {
 
   .desktop-nav .sub-menu .current-menu-item > a {
     color: var(--text-brand);
+    /* Colour alone is not a signal here: --text-brand and --text-secondary sit
+       at almost the same lightness, so in greyscale or with a colour vision
+       deficiency the current page is indistinguishable. WCAG 1.4.1. */
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
   }
 
   /* Nested submenus (level 3+) */
@@ -1417,6 +1429,12 @@ html {
 .mobile-nav > ul > li.current-menu-item > a,
 .mobile-nav > ul > li.current-menu-ancestor > a {
   color: var(--text-brand);
+  /* Colour alone is not a signal here: --text-brand and --text-secondary sit
+     at almost the same lightness, so in greyscale or with a colour vision
+     deficiency the current page is indistinguishable. WCAG 1.4.1. */
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
 /* Toggle button for mobile submenu */
@@ -1477,6 +1495,12 @@ html {
 
 .mobile-nav .sub-menu .current-menu-item > a {
   color: var(--text-brand);
+  /* Colour alone is not a signal here: --text-brand and --text-secondary sit
+     at almost the same lightness, so in greyscale or with a colour vision
+     deficiency the current page is indistinguishable. WCAG 1.4.1. */
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
 /* ============================================
@@ -1495,6 +1519,12 @@ html {
 
 .footer-nav .current-menu-item > a {
   color: var(--text-brand);
+  /* Colour alone is not a signal here: --text-brand and --text-secondary sit
+     at almost the same lightness, so in greyscale or with a colour vision
+     deficiency the current page is indistinguishable. WCAG 1.4.1. */
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
 /* ============================================
@@ -1513,6 +1543,12 @@ html {
 
 .legal-nav .current-menu-item > a {
   color: var(--text-brand);
+  /* Colour alone is not a signal here: --text-brand and --text-secondary sit
+     at almost the same lightness, so in greyscale or with a colour vision
+     deficiency the current page is indistinguishable. WCAG 1.4.1. */
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
 /* ============================================
