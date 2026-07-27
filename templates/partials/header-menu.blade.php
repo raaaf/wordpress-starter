@@ -20,6 +20,8 @@
                         'alt'   => esc_attr(get_bloginfo('name')),
                         'class' => 'h-12 w-auto',
                         'sizes' => '(max-width: 768px) 128px, 256px',
+                        'loading' => 'eager',
+                        'fetchpriority' => 'high',
                     ]) !!}
                 @else
                     <img src="{{ esc_url(get_template_directory_uri() . '/resources/img/default-logo.png') }}"

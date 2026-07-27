@@ -21,6 +21,106 @@ class AssetOptimizationServiceProvider extends ServiceProvider
     {
         $this->optimizeScriptLoading();
         $this->addResourcePreloading();
+        $this->disableEmojiAssets();
+        $this->limitFormAssets();
+    }
+
+    /**
+     * Drop the WordPress emoji detection script and styles.
+     *
+     * Every browser the theme supports renders emoji natively, so the script
+     * is pure overhead on every request.
+     */
+    private function disableEmojiAssets(): void
+    {
+        add_action('init', function (): void {
+            remove_action('wp_head', 'print_emoji_detection_script', 7);
+            remove_action('wp_print_styles', 'print_emoji_styles');
+            remove_action('admin_print_scripts', 'print_emoji_detection_script');
+            remove_action('admin_print_styles', 'print_emoji_styles');
+            remove_filter('the_content_feed', 'wp_staticize_emoji');
+            remove_filter('comment_text_rss', 'wp_staticize_emoji');
+            remove_filter('wp_mail', 'wp_staticize_emoji_for_email');
+        });
+
+        add_filter('tiny_mce_plugins', function (array $plugins): array {
+            return array_values(array_diff($plugins, ['wpemoji']));
+        });
+    }
+
+    /**
+     * Load the Contact Form 7 assets only where a form is rendered.
+     *
+     * CF7 enqueues a stylesheet plus three scripts on every request, including
+     * pages that contain no form at all.
+     */
+    private function limitFormAssets(): void
+    {
+        add_action('wp_enqueue_scripts', function (): void {
+            if ($this->currentPageHasForm()) {
+                return;
+            }
+
+            global $wp_scripts, $wp_styles;
+
+            $scriptQueue = $wp_scripts->queue ?? [];
+            $styleQueue = $wp_styles->queue ?? [];
+
+            foreach ($scriptQueue as $handle) {
+                $src = strval($wp_scripts->registered[$handle]->src ?? '');
+                if (str_contains($src, '/contact-form-7')) {
+                    wp_dequeue_script($handle);
+                }
+            }
+
+            foreach ($styleQueue as $handle) {
+                $src = strval($wp_styles->registered[$handle]->src ?? '');
+                if (str_contains($src, '/contact-form-7')) {
+                    wp_dequeue_style($handle);
+                }
+            }
+        }, 100);
+    }
+
+    /**
+     * Whether the current request renders a contact form.
+     *
+     * Errs on the side of keeping the assets: an unknown context returns true.
+     */
+    private function currentPageHasForm(): bool
+    {
+        $postId = get_queried_object_id();
+
+        if (!$postId) {
+            return true;
+        }
+
+        $sections = get_post_meta($postId, 'page_sections', true);
+        if (is_array($sections) && in_array('contact_form', $sections, true)) {
+            return true;
+        }
+
+        $post = get_post($postId);
+        if ($post instanceof \WP_Post) {
+            $content = strval($post->post_content);
+            if (has_shortcode($content, 'contact-form-7')) {
+                return true;
+            }
+        }
+
+        // Editors can also paste the shortcode into any ACF field, so scan the
+        // post meta. get_post_meta() without a key is served from the object
+        // cache primed by the main query, so this costs no extra round trip.
+        foreach (get_post_meta($postId) as $values) {
+            $values = is_array($values) ? $values : [$values];
+            foreach ($values as $value) {
+                if (is_string($value) && str_contains($value, '[contact-form-7')) {
+                    return true;
+                }
+            }
+        }
+
+        return (bool) apply_filters('theme_needs_form_assets', false, $postId);
     }
 
     /**
