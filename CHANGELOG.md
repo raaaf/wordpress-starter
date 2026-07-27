@@ -1,3 +1,10 @@
+## [2.25.1](https://github.com/raaaf/wordpress-starter/compare/v2.25.0...v2.25.1) (2026-07-27)
+
+### Bug Fixes
+
+- **acf:** keep form shortcodes intact in WYSIWYG fields ([e89a6cb](https://github.com/raaaf/wordpress-starter/commit/e89a6cb594fe476090b5ce9b454db12325d1570d))
+- **button:** keep the label visible while hovering a primary button ([b2f802c](https://github.com/raaaf/wordpress-starter/commit/b2f802c8d36d8f98dd83b0c420fa163d510debe7))
+
 # [2.25.0](https://github.com/raaaf/wordpress-starter/compare/v2.24.1...v2.25.0) (2026-07-27)
 
 ### Bug Fixes
