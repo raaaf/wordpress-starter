@@ -1061,6 +1061,9 @@ html {
   .prose a.button-primary,
   .button-primary {
     position: relative;
+    /* Own stacking context, so the hover layer can sit at z-index -1: above
+       this element's own background, below its text. */
+    isolation: isolate;
     overflow: hidden;
     background: linear-gradient(
       to bottom,
@@ -1086,14 +1089,7 @@ html {
     opacity: 0;
     transition: opacity 0.2s ease;
     pointer-events: none;
-    z-index: 0;
-  }
-
-  /* Button content (text/icon) must stay above the ::after layer */
-  .prose a.button-primary > *,
-  .button-primary > * {
-    position: relative;
-    z-index: 1;
+    z-index: -1;
   }
 
   .prose a.button-primary:hover::after,
