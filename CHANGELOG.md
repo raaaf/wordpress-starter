@@ -1,3 +1,13 @@
+# [2.22.0](https://github.com/raaaf/wordpress-starter/compare/v2.21.4...v2.22.0) (2026-07-27)
+
+### Bug Fixes
+
+- **forms:** move the Contact Form 7 overrides out of the cascade layer ([09b3359](https://github.com/raaaf/wordpress-starter/commit/09b3359e95bfb13e9cd830cf5da014dc9e0f86cc))
+
+### Features
+
+- **layout:** align body copy across equal-width text columns ([74f1df5](https://github.com/raaaf/wordpress-starter/commit/74f1df5031c8c36ec460b6efbccb9b96d2265782))
+
 ## [2.21.4](https://github.com/raaaf/wordpress-starter/compare/v2.21.3...v2.21.4) (2026-07-27)
 
 ### Bug Fixes
