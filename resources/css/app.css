@@ -77,6 +77,28 @@
 }
 
 /* ============================================
+   CONTRAST PREFERENCE AND MOTION VOCABULARY
+   ============================================ */
+
+@media (prefers-contrast: more) {
+  :root {
+    /* Escalate one step along the roles that already exist: dividers take the
+       strength of a control border, controls take the strength of text. */
+    --border-default: var(--border-control);
+    --border-control: var(--text-secondary);
+  }
+}
+
+:root {
+  /* One vocabulary for the whole theme. Entrances may take their time,
+     exits should get out of the way, so they are shorter and ease in. */
+  --motion-enter-duration: 200ms;
+  --motion-exit-duration: 150ms;
+  --motion-enter-ease: cubic-bezier(0, 0, 0.2, 1);
+  --motion-exit-ease: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ============================================
    PLACEHOLDER COLOUR
 
    Not part of the Figma token export. The obvious candidate, --text-tertiary,
@@ -1348,9 +1370,9 @@ html {
     visibility: hidden;
     transform: translateY(0.25rem);
     transition:
-      opacity 0.2s ease-out,
-      transform 0.2s ease-out,
-      visibility 0.2s ease-out;
+      opacity var(--motion-exit-duration) var(--motion-exit-ease),
+      transform var(--motion-exit-duration) var(--motion-exit-ease),
+      visibility var(--motion-exit-duration) var(--motion-exit-ease);
     z-index: 50;
   }
 
@@ -1359,6 +1381,11 @@ html {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+    /* The entrance is allowed to be slower than the exit. */
+    transition:
+      opacity var(--motion-enter-duration) var(--motion-enter-ease),
+      transform var(--motion-enter-duration) var(--motion-enter-ease),
+      visibility var(--motion-enter-duration) var(--motion-enter-ease);
   }
 
   /* Submenu items */
