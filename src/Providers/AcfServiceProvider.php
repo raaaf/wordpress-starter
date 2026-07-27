@@ -47,6 +47,9 @@ class AcfServiceProvider extends ServiceProvider
         // Keep [video]/[audio] shortcode <source> tags in kses'd WYSIWYG output.
         add_filter('wp_kses_allowed_html', [self::class, 'allowMediaSourceTag'], 20, 2);
 
+        // Keep the form controls of form shortcodes in kses'd WYSIWYG output.
+        add_filter('wp_kses_allowed_html', [self::class, 'allowFormControlTags'], 20, 2);
+
         // Add ACF admin styles
         $this->addAdminStyles();
 
@@ -181,6 +184,129 @@ class AcfServiceProvider extends ServiceProvider
                 'type' => true,
             ];
         }
+        return $tags;
+    }
+
+    /**
+     * Allow form-control tags in post-context kses.
+     *
+     * Core's post allowlist permits <label>, <fieldset> and <textarea> but not
+     * <form>, <input>, <select> or <option>. A form shortcode placed in a
+     * WYSIWYG field therefore renders as a half-built form: the labels and a
+     * textarea survive while the <form> element and every input are stripped,
+     * with nothing to tell the editor what happened.
+     *
+     * Applies to every post-context kses call site-wide. Attributes are listed
+     * explicitly because tags added through this filter do not inherit core's
+     * global attributes, and kses still drops on* handlers and javascript:
+     * URLs, so no script can enter this way. A <form> pointing at an arbitrary
+     * action does become possible for anyone who may edit content, which is
+     * the same trust level already required to place arbitrary links.
+     *
+     * @param array<string, array<string, bool>|mixed> $tags    Allowed tags.
+     * @param string                                   $context Kses context.
+     * @return array<string, array<string, bool>|mixed>
+     */
+    public static function allowFormControlTags(array $tags, string $context): array
+    {
+        if ($context !== 'post') {
+            return $tags;
+        }
+
+        // Tags added by a filter miss core's global attributes, so the ones
+        // form markup relies on are repeated for each tag below.
+        $common = [
+            'class'            => true,
+            'id'               => true,
+            'style'            => true,
+            'title'            => true,
+            'role'             => true,
+            'dir'              => true,
+            'lang'             => true,
+            'hidden'           => true,
+            'tabindex'         => true,
+            'data-*'           => true,
+            'aria-describedby' => true,
+            'aria-hidden'      => true,
+            'aria-invalid'     => true,
+            'aria-label'       => true,
+            'aria-labelledby'  => true,
+            'aria-live'        => true,
+            'aria-required'    => true,
+        ];
+
+        $tags['form'] = array_merge($common, [
+            'action'         => true,
+            'method'         => true,
+            'enctype'        => true,
+            'accept-charset' => true,
+            'name'           => true,
+            'target'         => true,
+            'novalidate'     => true,
+        ]);
+
+        $tags['input'] = array_merge($common, [
+            'type'           => true,
+            'name'           => true,
+            'value'          => true,
+            'placeholder'    => true,
+            'size'           => true,
+            'maxlength'      => true,
+            'minlength'      => true,
+            'min'            => true,
+            'max'            => true,
+            'step'           => true,
+            'pattern'        => true,
+            'accept'         => true,
+            'autocomplete'   => true,
+            'autocapitalize' => true,
+            'checked'        => true,
+            'multiple'       => true,
+            'required'       => true,
+            'readonly'       => true,
+            'disabled'       => true,
+        ]);
+
+        $tags['select'] = array_merge($common, [
+            'name'         => true,
+            'size'         => true,
+            'multiple'     => true,
+            'autocomplete' => true,
+            'required'     => true,
+            'disabled'     => true,
+        ]);
+
+        $tags['option'] = array_merge($common, [
+            'value'    => true,
+            'label'    => true,
+            'selected' => true,
+            'disabled' => true,
+        ]);
+
+        $tags['optgroup'] = array_merge($common, [
+            'label'    => true,
+            'disabled' => true,
+        ]);
+
+        // Core allows <textarea> but only a handful of attributes, which drops
+        // the placeholder and validation hints form plugins emit.
+        $tags['textarea'] = array_merge(
+            is_array($tags['textarea'] ?? null) ? $tags['textarea'] : [],
+            $common,
+            [
+                'cols'        => true,
+                'rows'        => true,
+                'wrap'        => true,
+                'name'        => true,
+                'placeholder' => true,
+                'maxlength'   => true,
+                'minlength'   => true,
+                'required'    => true,
+                'readonly'    => true,
+                'disabled'    => true,
+            ]
+        );
+
         return $tags;
     }
 
