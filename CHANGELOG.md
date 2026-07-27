@@ -1,3 +1,9 @@
+# [2.23.0](https://github.com/raaaf/wordpress-starter/compare/v2.22.0...v2.23.0) (2026-07-27)
+
+### Features
+
+- **layout:** size column headlines to the tallest one in their row ([e83b8ca](https://github.com/raaaf/wordpress-starter/commit/e83b8ca1cb90eea6aef379cf911ee48e21e1d537))
+
 # [2.22.0](https://github.com/raaaf/wordpress-starter/compare/v2.21.4...v2.22.0) (2026-07-27)
 
 ### Bug Fixes
