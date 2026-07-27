@@ -5,6 +5,7 @@ import intersect from '@alpinejs/intersect';
 import type { AlpineMagics } from '../../src/types/alpine';
 import { registerMemberAreaComponents } from './member-area';
 import { createStatsCounterCore } from './stats-counter';
+import { initColumnHeadingAlignment } from './column-headings';
 
 // Declare localized strings from WordPress (object name is fixed as 'themeStrings' for all themes)
 declare const themeStrings: {
@@ -474,6 +475,7 @@ export function initHeaderHeight(): void {
 // Initialize features on DOM ready
 document.addEventListener('DOMContentLoaded', async () => {
   initHeaderHeight();
+  initColumnHeadingAlignment();
   initRybbitTracking();
   initVideoConsent();
   await initGalleryZoom();
