@@ -139,6 +139,7 @@ class Security
             "font-src 'self' data: https://fonts.gstatic.com" . $localSources,
             "img-src 'self' data: https:" . $localSources,
             "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com",
+            "frame-ancestors 'self'",
             "media-src 'self' https:" . $localSources,
         ];
 
@@ -164,8 +165,30 @@ class Security
     /**
      * Initialize security features.
      */
+    /**
+     * Send hardening headers that do not depend on the CSP.
+     *
+     * Registered before the CSP guard so disabling the CSP does not silently
+     * drop clickjacking and MIME-sniffing protection as well.
+     */
+    private static function addHardeningHeaders(): void
+    {
+        add_action('send_headers', function (): void {
+            if (is_admin() || wp_doing_ajax()) {
+                return;
+            }
+
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=()');
+        });
+    }
+
     public static function init(): void
     {
+        self::addHardeningHeaders();
+
         // Skip CSP if disabled in config
         if (!config('security.enable_csp', true)) {
             return;
