@@ -149,8 +149,40 @@ class SeoServiceProvider extends ServiceProvider
     /**
      * Add structured data (JSON-LD) for WebSite, Organization, and Article schemas
      */
+    /**
+     * Feed the theme's contact details into Yoast's Organization node.
+     *
+     * When Yoast is active the theme yields the node to avoid two competing
+     * Organization entities, so without this the telephone, email and address
+     * would disappear from the structured data entirely.
+     */
+    private function enrichSeoPluginOrganization(): void
+    {
+        add_filter('wpseo_schema_organization', function (array $data): array {
+            $themeOptions = $this->getThemeOptions();
+
+            $phone = $themeOptions['phone'] ?? null;
+            $email = $themeOptions['email'] ?? null;
+            $address = $themeOptions['address'] ?? null;
+
+            if ($phone && empty($data['telephone'])) {
+                $data['telephone'] = $phone;
+            }
+            if ($email && empty($data['email'])) {
+                $data['email'] = $email;
+            }
+            if ($address && empty($data['address'])) {
+                $data['address'] = $this->buildPostalAddress($address);
+            }
+
+            return $data;
+        });
+    }
+
     private function addStructuredData(): void
     {
+        $this->enrichSeoPluginOrganization();
+
         add_action('wp_head', function (): void {
             $nonce = \WordpressStarter\Security::getNonce();
 
