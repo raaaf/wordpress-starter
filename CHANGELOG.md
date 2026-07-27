@@ -1,3 +1,17 @@
+# [2.25.0](https://github.com/raaaf/wordpress-starter/compare/v2.24.1...v2.25.0) (2026-07-27)
+
+### Bug Fixes
+
+- **a11y:** make control borders, focus rings and dark status colours legible ([041abe7](https://github.com/raaaf/wordpress-starter/commit/041abe7e184fdd58fb14b0fcd456443c335e1e65))
+- **a11y:** mark the current menu item by more than colour ([82353dc](https://github.com/raaaf/wordpress-starter/commit/82353dcbeb0626e52df0a5582816f4285998b485))
+- **forms:** remove the plugin focus ring stacked under the theme ring ([468cf72](https://github.com/raaaf/wordpress-starter/commit/468cf722b89d44fa2c360b42e9bd83f01967e011))
+- **pages:** stop showing two names for a protected page ([0a4b617](https://github.com/raaaf/wordpress-starter/commit/0a4b617d30faba5310ebf1a2f0a3a75ac72985ad))
+
+### Features
+
+- **ui:** let the wrong-password notice arrive instead of appearing ([c91fc20](https://github.com/raaaf/wordpress-starter/commit/c91fc20f2884332533bf79a297f387b3372a6618))
+- **ui:** support a raised contrast preference and unify the motion vocabulary ([edf794d](https://github.com/raaaf/wordpress-starter/commit/edf794d093cdde86d0a9cd7b681d1ad2959a1f84))
+
 ## [2.24.1](https://github.com/raaaf/wordpress-starter/compare/v2.24.0...v2.24.1) (2026-07-27)
 
 ### Bug Fixes
