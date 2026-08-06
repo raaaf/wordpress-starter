@@ -1,3 +1,25 @@
+# [2.26.0](https://github.com/raaaf/wordpress-starter/compare/v2.25.1...v2.26.0) (2026-08-06)
+
+### Bug Fixes
+
+- **a11y:** repair dead focus trap, silent live regions and dropped attributes ([319d77f](https://github.com/raaaf/wordpress-starter/commit/319d77faa9caaccf4d6f474374fac98511f415d8))
+- **deps:** bring the starter back to PHP 8.2, matching the client hosts ([6727953](https://github.com/raaaf/wordpress-starter/commit/6727953d653d3fb203cab6bd9d9079a1f3171a3c))
+- **deps:** close two CVEs and pin the resolution platform ([89e62a9](https://github.com/raaaf/wordpress-starter/commit/89e62a916dfb9c1fedf388fa5df493c548c6a596))
+- **deps:** resolve 3 npm advisories including one critical ([602074b](https://github.com/raaaf/wordpress-starter/commit/602074be4d3211d2470a6edb8aaf079bc184cac1))
+- **security:** close SSRF bypasses, scope demo-post deletion, stop trace leaks ([a0bbaa6](https://github.com/raaaf/wordpress-starter/commit/a0bbaa6890884ed10cbc36873814a7f2d70e61b4))
+- **setup:** stop orphaning styleguide media, verify stale page ids before use ([58c7673](https://github.com/raaaf/wordpress-starter/commit/58c7673a01184ad8d9d173ee95f3659efe7fce3b))
+- **templates:** stop rendering empty sections and correct two content bugs ([a4e84d7](https://github.com/raaaf/wordpress-starter/commit/a4e84d7e79191f28b6025593915fa95121f8e01b))
+
+### Features
+
+- **acf:** register the button layout and complete the styleguide seeder ([6c0235b](https://github.com/raaaf/wordpress-starter/commit/6c0235ba482ca49d0c64f31855c49fc83317682c))
+- **seo:** emit a meta description when no SEO plugin does ([74388ce](https://github.com/raaaf/wordpress-starter/commit/74388cef7bd5e30303ddece23209a0ca5e7fe0ba))
+- **video:** allow WebVTT captions on self-hosted videos ([73af3f5](https://github.com/raaaf/wordpress-starter/commit/73af3f5a33b35d71b2ad2d75879ee1febd42f407))
+
+### Performance Improvements
+
+- stop running admin-only work on every frontend request ([3b618c3](https://github.com/raaaf/wordpress-starter/commit/3b618c3ab52c7a15e8cda9201e11fed1bca973f8))
+
 ## [2.25.1](https://github.com/raaaf/wordpress-starter/compare/v2.25.0...v2.25.1) (2026-07-27)
 
 ### Bug Fixes
