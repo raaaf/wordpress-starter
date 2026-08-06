@@ -1,28 +1,28 @@
 # WordPress Starter Theme
 
-My own WordPress theme framework as the basis for every client project. No page builder, no Gutenberg — Classic Editor, ACF Flexible Content and a clean service-provider stack instead.
+My own WordPress theme framework as the basis for every client project. No page builder, no Gutenberg: Classic Editor, ACF Flexible Content and a clean service-provider stack instead.
 
 ## Stack
 
 | Technology                    | Version        | Purpose                            |
 | ----------------------------- | -------------- | ---------------------------------- |
-| PHP                           | 8.4+           | Strict types, modern features      |
+| PHP                           | 8.3+           | Strict types, modern features      |
 | Laravel Blade                 | Illuminate v13 | Templating                         |
 | TailwindCSS                   | v4.1           | Utility CSS, design tokens         |
 | Alpine.js                     | v3.15          | Interactive components, bundled    |
 | Vite                          | 7.3            | Build tool with HMR                |
-| ACF Pro + ACF Extended (FREE) | —              | Flexible Content page builder      |
-| TypeScript                    | —              | Type-safe JS                       |
+| ACF Pro + ACF Extended (FREE) | -              | Flexible Content page builder      |
+| TypeScript                    | -              | Type-safe JS                       |
 
 Gutenberg is disabled. Content model: Classic Editor + ACF Flexible Content.
 
 ## Requirements
 
-- PHP 8.4+
+- PHP 8.3+
 - Composer
 - Node.js 20.19+ / 22.12+
 - WordPress 6.8+
-- ACF Pro (install manually — premium plugin)
+- ACF Pro (install manually, premium plugin)
 - Local by Flywheel
 
 ## Create a new client project
@@ -73,7 +73,7 @@ npm run dev
 │   │   ├── AcfExtended.php      # ACF Extended configuration
 │   │   ├── FieldDefinitions.php # Central field definitions
 │   │   ├── Fields.php           # Field helpers
-│   │   ├── FlexibleContent.php  # 28 Flexible Content layouts
+│   │   ├── FlexibleContent.php  # 32 Flexible Content layouts
 │   │   └── Options.php          # Theme options pages
 │   ├── MemberArea/              # Member area (optional)
 │   ├── PostTypes/               # Custom post types
@@ -88,7 +88,7 @@ npm run dev
 │   └── Vite.php
 └── templates/
     ├── components/        # Blade components (<x-button>, <x-section> etc.)
-    ├── flexible/          # Flexible Content templates (28 layouts)
+    ├── flexible/          # Flexible Content templates (32 layouts)
     ├── layouts/           # Base layouts
     └── partials/          # Reusable partials
 ```
@@ -111,22 +111,29 @@ All providers in `src/Providers/` are registered automatically via `Application:
 
 | Provider                            | Responsibility                                     |
 | ----------------------------------- | -------------------------------------------------- |
-| `ThemeServiceProvider`              | Theme support, favicon, login logo, script loading |
+| `ThemeServiceProvider`              | Theme support, theme version, template routing     |
 | `BladeServiceProvider`              | Blade engine, cache directory                      |
 | `AcfServiceProvider`                | ACF fields, Blade directives, REST API             |
 | `MenuServiceProvider`               | Register nav menus                                 |
-| `SecurityServiceProvider`           | CSP headers, nonces                                |
+| `SecurityServiceProvider`           | CSP headers, nonces, HSTS                          |
 | `ImageServiceProvider`              | Custom image sizes                                 |
 | `PostTypeServiceProvider`           | CPTs and taxonomies                                |
 | `MemberAreaServiceProvider`         | Member area (login, downloads, SFTP sync)          |
-| `PluginServiceProvider`             | Plugin setup on theme activation                   |
-| `PluginConfiguratorServiceProvider` | Auto-configuration of plugins                      |
-| `WelcomeServiceProvider`            | Welcome notice, ACF options prefill                |
-| `SeoServiceProvider`                | Schema.org, OG tags, canonical                     |
-| `DesignTokenServiceProvider`        | Token upload from Figma                            |
+| `PluginServiceProvider`             | Plugin recommendations, setup wizard, content scaffolding |
+| `PluginConfiguratorServiceProvider` | Auto-configuration of plugins on activation         |
+| `WelcomeServiceProvider`            | Welcome notice, styleguide page, ACF options prefill |
+| `SeoServiceProvider`                | JSON-LD, OG tags, canonical URLs, robots meta      |
+| `DesignTokenServiceProvider`        | Token file upload/download/validation, CSS regeneration |
 | `CronServiceProvider`               | Transient and revision cleanup                     |
 | `LogServiceProvider`                | Structured logging to debug.log                    |
 | `ThemeUpdateProvider`               | GitHub-based theme updates                         |
+| `AssetOptimizationServiceProvider`  | Defers non-critical scripts, preloads fonts/styles, inlines above-the-fold CSS |
+| `BrandingServiceProvider`           | Favicon, login logo, syncs ACF branding with WP core custom_logo/site_icon |
+| `EditorIntegrationServiceProvider`  | Disables Gutenberg and unused editor features, removes Global Styles output |
+| `EditorStylesServiceProvider`       | Editor stylesheet, style-select toolbar, custom formats, icon picker |
+| `IconShortcodeServiceProvider`      | Renders inline SVG icons via `[icon name="..."]` shortcode |
+| `LlmsTxtProvider`                   | Serves `/llms.txt` and `/llms-full.txt` for AI crawlers |
+| `MediaServiceProvider`              | SVG upload permissions, sanitization, dimension resolution |
 
 ## Blade directives
 
@@ -144,7 +151,7 @@ All providers in `src/Providers/` are registered automatically via `Application:
 
 ## Flexible Content layouts
 
-28 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
+32 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
 
 **Structure:** one-column, two-columns, three-columns, four-columns, one-third-two-thirds, two-thirds-one-third, two-columns-images
 
@@ -234,14 +241,14 @@ ACF Pro must be installed manually (premium).
 
 ## Documentation
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Service provider pattern, bootstrap flow
-- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Production deployment
-- [docs/SECURITY.md](docs/SECURITY.md) — CSP, security practices
-- [docs/SEO.md](docs/SEO.md) — Schema.org, structured data
-- [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) — Token system
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): Service provider pattern, bootstrap flow
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md): Production deployment
+- [docs/SECURITY.md](docs/SECURITY.md): CSP, security practices
+- [docs/SEO.md](docs/SEO.md): Schema.org, structured data
+- [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md): Token system
 
 ## Author
 
-Rafael Alex — Designer & Developer from Fürth, Germany.
+Rafael Alex, Designer & Developer from Fürth, Germany.
 Websites, apps and AI tools, built by one person.
 [rafaelalex.de](https://rafaelalex.de) · [@raaaf](https://github.com/raaaf)

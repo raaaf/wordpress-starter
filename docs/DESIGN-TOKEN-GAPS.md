@@ -40,11 +40,11 @@ Der Token existiert, sein Wert taugt nicht.
 
 ## Was der Test prüft
 
-1. **Vollständigkeit** — jede `var(--x)`-Referenz ohne Fallback muss auflösbar sein, in `tokens.css` wie in den Theme-Overrides.
-2. **Kontrast** — pro Farbmodus:
+1. **Vollständigkeit**: jede `var(--x)`-Referenz ohne Fallback muss auflösbar sein, in `tokens.css` wie in den Theme-Overrides.
+2. **Kontrast**: pro Farbmodus:
    - Text auf Fläche mindestens 4,5:1 (`--text-primary`, `--text-secondary`, `--text-placeholder`, sowie die drei Statuspaare)
    - Feldrand und Fokusring auf Fläche mindestens 3:1
-3. **Deckkraft** — `--ring-focus` darf nicht halbtransparent sein.
+3. **Deckkraft**: `--ring-focus` darf nicht halbtransparent sein.
 
 `--text-tertiary` steht bewusst nicht im Vertrag. Es ist die zurückgenommene Rolle und trägt keinen Text, der gelesen werden muss.
 

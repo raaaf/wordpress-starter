@@ -1,329 +1,185 @@
-# ACF Block Entwicklung
+# Flexible Content Layout Entwicklung
 
-Diese Anleitung erklärt Schritt für Schritt, wie du einen neuen ACF-Block erstellst.
+Diese Anleitung erklärt Schritt für Schritt, wie du ein neues ACF Flexible Content Layout erstellst.
 
-## Block-Struktur
+Gutenberg ist deaktiviert. Es gibt keine ACF-Blocks (kein `blocks/`-Verzeichnis, kein `block.json`, kein `acf_register_block_type`). Der Page-Builder basiert ausschließlich auf ACF Flexible Content: ein Layout ist eine PHP-Methode in `FlexibleContent.php`, eine Feld-Definition in `FieldDefinitions.php` und ein Blade-Template in `templates/flexible/`.
 
-Jeder Block besteht aus mindestens zwei Dateien:
+## Layout-Struktur
+
+Ein Layout besteht aus drei Teilen:
 
 ```
-blocks/
-└── mein-block/
-    ├── block.json      # Block-Definition
-    └── template.blade.php  # Template
+src/Acf/FlexibleContent.php        # Layout-Definition (key, name, label, sub_fields, category)
+src/Acf/FieldDefinitions.php       # Feld-Definitionen für das Layout
+templates/flexible/mein-layout.blade.php  # Template
 ```
 
-## Schritt 1: Block-Ordner erstellen
+Alle Layouts werden zentral in `FlexibleContent::getLayouts()` registriert und stehen im Feld `page_sections` (Flexible Content, `group_page_builder`) zur Verfügung.
 
-Erstelle einen neuen Ordner in `blocks/` mit dem Block-Namen (kebab-case):
+## Schritt 1: Felder in FieldDefinitions.php definieren
 
-```bash
-mkdir blocks/mein-block
-```
+Öffne `src/Acf/FieldDefinitions.php` und füge eine neue Methode hinzu, die ein Array von ACF-Sub-Fields zurückgibt. Nutze dafür die vorhandenen Feld-Helper:
 
-## Schritt 2: block.json erstellen
+| Methode                  | Beschreibung                                                                                                            |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `textField()`            | Einzeiliges Textfeld                                                                                                    |
+| `textareaField()`        | Mehrzeiliges Textfeld                                                                                                   |
+| `wysiwygField()`         | WYSIWYG-Editor                                                                                                          |
+| `imageField()`           | Bildauswahl                                                                                                             |
+| `linkField()`            | Link mit URL, Text, Target                                                                                              |
+| `urlField()`             | URL-Feld                                                                                                                |
+| `selectField()`          | Dropdown-Auswahl                                                                                                        |
+| `colorPickerField()`     | Farbauswahl                                                                                                             |
+| `buttonGroupField()`     | Button-Gruppe (Auswahl)                                                                                                 |
+| `iconRadioField()`       | Icon-Auswahl (Radio)                                                                                                    |
+| `fileField()`            | Datei-Upload                                                                                                            |
+| `trueFalseField()`       | Ja/Nein Toggle                                                                                                          |
+| `numberField()`          | Zahlenfeld                                                                                                              |
+| `radioField()`           | Radio-Auswahl                                                                                                           |
+| `checkboxField()`        | Checkbox-Liste                                                                                                          |
+| `rangeField()`           | Zahlen-Slider                                                                                                           |
+| `repeaterField()`        | Wiederholbare Felder                                                                                                    |
+| `postObjectField()`      | Auswahl eines Beitrags/einer Seite                                                                                      |
+| `backgroundColorField()` | Standard-Hintergrundfarbe (`background_color`)                                                                          |
+| `sectionHeaderFields()`  | Standard-Header (`show_section_header`, `section_chip`, `section_headline`, `section_description`, `section_alignment`) |
+| `sectionAnchorField()`   | Anker-ID-Override (`section_anchor`)                                                                                    |
 
-Erstelle `blocks/mein-block/block.json`:
+Fast jedes Layout endet mit `backgroundColorField($prefix)` und `sectionAnchorField($prefix)`, damit Hintergrundfarbe und manuelle Sprungmarken-IDs konsistent verfügbar sind. Layouts mit optionaler Überschrift/Beschreibung nutzen zusätzlich `sectionHeaderFields($prefix)`.
 
-```json
-{
-    "name": "mein-block",
-    "title": "Mein Block",
-    "description": "Beschreibung was der Block macht",
-    "category": "theme",
-    "icon": "admin-post",
-    "keywords": ["mein", "block", "beispiel"],
-    "supports": {
-        "align": ["full", "wide"],
-        "mode": true,
-        "jsx": true,
-        "anchor": true
-    }
-}
-```
-
-### Wichtige Felder
-
-| Feld | Beschreibung |
-|------|--------------|
-| `name` | Eindeutiger Name (ohne `acf/` Prefix) |
-| `title` | Anzeigename im Editor (Deutsch) |
-| `description` | Kurze Beschreibung (Deutsch) |
-| `category` | `theme` für Theme-Blöcke |
-| `icon` | [Dashicon-Name](https://developer.wordpress.org/resource/dashicons/) |
-| `keywords` | Suchbegriffe für Block-Einfüger |
-
-### Verfügbare Icons
-
-Häufig verwendete Icons:
-- `admin-post` - Beitrag
-- `format-image` - Bild
-- `columns` - Spalten
-- `list-view` - Liste
-- `megaphone` - Aufforderung
-- `video-alt3` - Video
-- `groups` - Team
-
-## Schritt 3: Felder in FieldDefinitions.php definieren
-
-Öffne `src/Acf/FieldDefinitions.php` und füge eine neue Methode hinzu:
+Beispiel (angelehnt an `statsFields()`):
 
 ```php
-/**
- * Mein Block Fields
- */
-public static function meinBlockFields(string $prefix): array
+public static function myNewFields(string $prefix): array
 {
     return [
         self::textField(
             "field_{$prefix}_title",
-            'Überschrift',
+            __('Überschrift', 'wp-starter'),
             'title',
-            true,  // required
-            'Die Hauptüberschrift des Blocks.',
-            'z.B. Willkommen'
-        ),
-        self::wysiwygField(
-            "field_{$prefix}_content",
-            'Inhalt',
-            'content',
-            false,  // not required
-            null,
-            'Der Haupttext des Blocks.'
-        ),
-        self::imageField(
-            "field_{$prefix}_image",
-            'Bild',
-            'image',
             false,
-            'array',
-            null,
-            'Optionales Bild.'
+            __('Optionale Überschrift.', 'wp-starter'),
+            __('z.B. Willkommen', 'wp-starter'),
+        ),
+        self::repeaterField(
+            "field_{$prefix}_items",
+            __('Einträge', 'wp-starter'),
+            'items',
+            [
+                self::textField(
+                    "field_{$prefix}_item_label",
+                    __('Beschriftung', 'wp-starter'),
+                    'label',
+                    true,
+                ),
+            ],
+            __('Eintrag hinzufügen', 'wp-starter'),
+            1,
+            'table',
         ),
         self::backgroundColorField($prefix),
+        self::sectionAnchorField($prefix),
     ];
 }
 ```
 
-### Verfügbare Feld-Methoden
+## Schritt 2: Layout in FlexibleContent.php registrieren
 
-| Methode | Beschreibung |
-|---------|--------------|
-| `textField()` | Einzeiliges Textfeld |
-| `textareaField()` | Mehrzeiliges Textfeld |
-| `wysiwygField()` | WYSIWYG-Editor |
-| `imageField()` | Bildauswahl |
-| `linkField()` | Link mit URL, Text, Target |
-| `selectField()` | Dropdown-Auswahl |
-| `trueFalseField()` | Ja/Nein Toggle |
-| `numberField()` | Zahlenfeld |
-| `urlField()` | URL-Feld |
-| `repeaterField()` | Wiederholbare Felder |
-| `backgroundColorField()` | Standard-Hintergrundfarbe |
-
-## Schritt 4: Block in BlockFields.php registrieren
-
-Öffne `src/Acf/BlockFields.php` und füge den Block zur `register()`-Methode hinzu:
+Öffne `src/Acf/FlexibleContent.php` und füge eine private static Methode hinzu, die `key`, `name`, `label`, `sub_fields` und `acfe_flexible_category` zurückgibt:
 
 ```php
-public static function register(): void
+/**
+ * My New layout
+ *
+ * @return array<string, mixed>
+ */
+private static function myNewLayout(): array
 {
-    // ... andere Blöcke ...
-
-    self::registerBlockFields('mein-block', FieldDefinitions::meinBlockFields('mein_block'));
+    return [
+        'key' => 'layout_my_new',
+        'name' => 'my_new',
+        'label' => __('Mein neues Layout', 'wp-starter'),
+        'display' => 'block',
+        'sub_fields' => FieldDefinitions::myNewFields('flex_my_new'),
+        'acfe_flexible_category' => self::getCategories()['content'],
+    ];
 }
 ```
 
-## Schritt 5: Template erstellen
+Trage die neue Methode danach in `getLayouts()` ein (Liste der Layout-Aufrufe, sortiert nach Kategorie-Kommentaren):
 
-Erstelle `blocks/mein-block/template.blade.php`:
+```php
+private static function getLayouts(): array
+{
+    return [
+        // ...
+        self::myNewLayout(),
+        // ...
+    ];
+}
+```
+
+### Kategorien (`getCategories()`)
+
+`acfe_flexible_category` ordnet das Layout einer Kategorie im ACF-Extended-Auswahl-Modal zu. Verfügbare Kategorien (`self::getCategories()[...]`):
+
+| Key           | Label      |
+| ------------- | ---------- |
+| `header`      | Header     |
+| `layout`      | Layout     |
+| `content`     | Inhalte    |
+| `media`       | Medien     |
+| `interactive` | Interaktiv |
+| `forms`       | Formulare  |
+| `posts`       | Beiträge   |
+| `misc`        | Sonstiges  |
+
+## Schritt 3: Template erstellen
+
+Erstelle `templates/flexible/my-new.blade.php` (kebab-case, `name` mit `_` durch `-` ersetzt). Layouts lesen ihre Felder direkt über die native ACF-Funktion `get_sub_field()`, nicht über die `@field`-Blade-Direktiven (die sind für einzelne Felder außerhalb der Flexible-Content-Schleife gedacht). Die Variable `$sectionAnchor` steht automatisch zur Verfügung, sie wird pro Zeile in `templates/page.blade.php` aus `section_anchor` oder einem generierten Fallback (`{layout}-{n}`) berechnet.
 
 ```blade
 {{--
-    Mein Block
+    My New - Flexible Content Layout
 
     Uses shared components: x-section
-    Fields: title, content, image, background_color
+    Fields: title, items (repeater: label), background_color
 --}}
 
 @php
-    $title = $fields['title'] ?? '';
-    $content = $fields['content'] ?? '';
-    $image = $fields['image'] ?? null;
-    $background = $fields['background_color'] ?? 'primary';
+    $title = get_sub_field('title');
+    $items = get_sub_field('items') ?: [];
+    $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }} mein-block">
+<x-section :anchor="$sectionAnchor" :background="$background" class="my-new">
     @if($title)
         <h2 class="text-h2 mb-6 text-content">{{ $title }}</h2>
     @endif
 
-    @if($content)
-        <x-prose>
-            {!! $content !!}
-        </x-prose>
-    @endif
-
-    @if($image)
-        <img
-            src="{{ esc_url($image['url']) }}"
-            alt="{{ esc_attr($image['alt']) }}"
-            class="mt-8 rounded-lg"
-        >
+    @if(!empty($items))
+        <ul>
+            @foreach($items as $item)
+                <li>{{ $item['label'] ?? '' }}</li>
+            @endforeach
+        </ul>
     @endif
 </x-section>
 ```
 
-### Template-Variablen
+Escaping: `{{ }}` für Text (auto-escaped), `{!! !!}` nur für vertrauenswürdigen HTML-Inhalt (z.B. WYSIWYG-Felder), `@kses($content)` als Blade-Direktive für `wp_kses_post()`.
 
-Diese Variablen stehen automatisch zur Verfügung:
-
-| Variable | Beschreibung |
-|----------|--------------|
-| `$fields` | Array mit allen Feldwerten |
-| `$anchor` | Block-Anker (für Sprungmarken) |
-| `$classes` | Zusätzliche CSS-Klassen |
-| `$is_preview` | `true` wenn im Editor |
-
-### Wichtige Komponenten
-
-- `<x-section>` - Wrapper mit Hintergrundfarbe und Padding
-- `<x-prose>` - Für WYSIWYG-Inhalte mit Typografie-Stilen
-- `<x-button>` - Buttons in verschiedenen Varianten
-- `<x-grid>` - CSS-Grid Container
-
-## Schritt 6: Block testen
+## Schritt 4: Testen
 
 1. Speichere alle Dateien
-2. Leere den Cache: `rm -rf compiled/*`
-3. Öffne den WordPress-Editor
-4. Suche nach deinem Block unter "Theme Blocks"
-
-## Beispiel: Kompletter Block mit Repeater
-
-### block.json
-
-```json
-{
-    "name": "features",
-    "title": "Features",
-    "description": "Liste von Features mit Icons",
-    "category": "theme",
-    "icon": "star-filled",
-    "keywords": ["features", "liste", "vorteile"]
-}
-```
-
-### FieldDefinitions.php
-
-```php
-public static function featuresFields(string $prefix): array
-{
-    return [
-        self::textField(
-            "field_{$prefix}_title",
-            'Überschrift',
-            'title',
-            false,
-            'Optionale Überschrift über den Features.'
-        ),
-        self::repeaterField(
-            "field_{$prefix}_items",
-            'Features',
-            'items',
-            [
-                self::textField(
-                    "field_{$prefix}_item_icon",
-                    'Icon (Emoji)',
-                    'icon',
-                    false,
-                    'Emoji als Icon. Mac: Ctrl+Cmd+Leertaste',
-                    'z.B. ✓, ⭐, 🚀'
-                ),
-                self::textField(
-                    "field_{$prefix}_item_title",
-                    'Titel',
-                    'title',
-                    true,
-                    'Feature-Titel'
-                ),
-                self::textareaField(
-                    "field_{$prefix}_item_text",
-                    'Beschreibung',
-                    'text',
-                    false,
-                    2,
-                    'Kurze Beschreibung'
-                ),
-            ],
-            'Feature hinzufügen',
-            1,
-            'block'
-        ),
-        self::backgroundColorField($prefix),
-    ];
-}
-```
-
-### template.blade.php
-
-```blade
-@php
-    $title = $fields['title'] ?? '';
-    $items = $fields['items'] ?? [];
-    $background = $fields['background_color'] ?? 'primary';
-@endphp
-
-<x-section :background="$background" :anchor="$anchor" class="{{ $classes }}">
-    @if($title)
-        <h2 class="text-h2 mb-8 text-center text-content">{{ $title }}</h2>
-    @endif
-
-    @if(!empty($items))
-        <div class="grid gap-6 md:grid-cols-3">
-            @foreach($items as $item)
-                <div class="p-6 rounded-lg bg-surface-secondary">
-                    @if($item['icon'] ?? false)
-                        <span class="text-3xl">{{ $item['icon'] }}</span>
-                    @endif
-                    @if($item['title'] ?? false)
-                        <h3 class="text-h4 mt-4 text-content">{{ $item['title'] }}</h3>
-                    @endif
-                    @if($item['text'] ?? false)
-                        <p class="mt-2 text-content-secondary">{{ $item['text'] }}</p>
-                    @endif
-                </div>
-            @endforeach
-        </div>
-    @else
-        <div class="p-8 text-center rounded-lg bg-surface-secondary">
-            <p class="text-content-secondary">Bitte füge mindestens ein Feature hinzu.</p>
-        </div>
-    @endif
-</x-section>
-```
-
-## Plugin-Abhängigkeiten
-
-Falls dein Block ein Plugin benötigt, füge `requires` zur block.json hinzu:
-
-```json
-{
-    "name": "mein-form-block",
-    "requires": ["contact-form-7"]
-}
-```
-
-Verfügbare Requirement-Keys:
-- `contact-form-7`
-- `woocommerce`
-- `class:ClassName` - Prüft ob Klasse existiert
-- `function:function_name` - Prüft ob Funktion existiert
+2. Leere den Blade-Cache bei Problemen: `rm -rf compiled/*`
+3. Öffne den WordPress-Editor auf einer Seite, füge eine neue Sektion hinzu
+4. Suche das neue Layout im Modal (ggf. über die zugewiesene Kategorie)
+5. Prüfe das Layout im Editor UND im Frontend
 
 ## Tipps
 
-1. **Immer Empty States:** Zeige hilfreiche Meldungen wenn Felder leer sind
-2. **Escaping:** Verwende `{{ }}` für Text, `{!! !!}` nur für vertrauenswürdigen HTML
-3. **Komponenten nutzen:** Verwende `<x-section>`, `<x-button>` etc.
-4. **Deutsche Texte:** Alle Labels und Instructions auf Deutsch
-5. **Testen:** Prüfe Block im Editor UND im Frontend
+1. **Immer Empty States:** Zeige hilfreiche Meldungen oder verstecke Ausgaben, wenn Felder leer sind (`@if($title) ... @endif`).
+2. **Deutsche Texte:** Alle Labels und Instructions in `FieldDefinitions.php` nutzen `__('...', 'wp-starter')`.
+3. **Komponenten nutzen:** `<x-section>`, `<x-button>`, `<x-prose>` etc. statt raues HTML, siehe `docs/COMPONENT-DEVELOPMENT.md`.
+4. **Hintergrundfarben:** `primary`, `secondary`, `tertiary`, `brand`, `brand-subtle`, `inverse` (siehe `FieldDefinitions::getBackgroundColors()`).
+5. **Layout-Anzahl:** Aktuell 32 Layouts in `templates/flexible/`, gepflegt in `FlexibleContent::getLayouts()`.

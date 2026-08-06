@@ -58,9 +58,9 @@ Recommended plugins (auto-install via `composer install`):
 
 | Requirement         | Version              |
 | ------------------- | -------------------- |
-| PHP                 | 8.4+                 |
+| PHP                 | 8.3+                 |
 | MySQL               | 5.7+ / MariaDB 10.3+ |
-| WordPress           | 6.4+                 |
+| WordPress           | 6.8+                 |
 | Memory Limit        | 256M                 |
 | Max Execution Time  | 60s                  |
 | Upload Max Filesize | 64M                  |
@@ -93,7 +93,7 @@ max_input_vars = 3000
 
 ```bash
 cd /path/to/wp-content/themes
-git clone https://github.com/your-repo/starter.git starter
+git clone https://github.com/raaaf/starter.git starter
 cd starter
 ```
 
@@ -335,6 +335,6 @@ VITE_BASE_URL=https://your-domain.com
 
 For issues, check:
 
-1. [GitHub Issues](https://github.com/your-repo/starter/issues)
+1. [GitHub Issues](https://github.com/raaaf/starter/issues)
 2. WordPress Debug Log
 3. Server error logs
