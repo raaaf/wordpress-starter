@@ -19,7 +19,7 @@
     }
   ],
   "require": {
-    "php": "^8.3",
+    "php": "^8.4",
     "symfony/translation": "^8.0",
     "symfony/clock": "^8.0",
     "composer/installers": "^2.0",
@@ -94,6 +94,9 @@
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "composer/installers": true
+    },
+    "platform": {
+      "php": "8.4.1"
     }
   },
   "extra": {
