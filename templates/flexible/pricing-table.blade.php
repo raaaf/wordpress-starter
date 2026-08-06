@@ -47,7 +47,7 @@
                     @endif
 
                     <div class="mb-6">
-                        @if($price)
+                        @if($price !== '')
                             <span class="text-h1 tabular-nums {{ $isFeatured ? 'text-content-inverse' : 'text-content' }}">{{ $price }}</span>
                         @endif
                         @if($period)

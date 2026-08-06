@@ -37,6 +37,7 @@
     }
 @endphp
 
+@if($title || !empty($testimonials))
 <x-section :anchor="$sectionAnchor" :background="$background" class="testimonials">
     @if($title)
         <h2 class="mb-12 text-center">{!! $title !!}</h2>
@@ -78,3 +79,4 @@
         </x-grid>
     @endif
 </x-section>
+@endif

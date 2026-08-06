@@ -14,9 +14,11 @@
     $content = get_sub_field('content');
 @endphp
 
+@if($chip || $headline || $description || $content)
 <x-section :anchor="$sectionAnchor" class="one-column">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" class="max-w-2xl mx-auto" />
     <div class="max-w-2xl mx-auto">
         <x-prose>@kses($content)</x-prose>
     </div>
 </x-section>
+@endif

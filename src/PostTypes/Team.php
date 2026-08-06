@@ -28,11 +28,22 @@ class Team extends AbstractPostType
 
     protected static bool $hasArchive = false;
 
+    /**
+     * Not public: there is no single-team_member template and content lives
+     * entirely in ACF fields, so a public single URL would only ever render
+     * an empty page (falls back to the generic single.blade.php). Team
+     * members are displayed via the "team" flexible layout instead.
+     * show_ui stays true (hardcoded in AbstractPostType), so the CPT remains
+     * fully editable, listed, and queryable in wp-admin and via get_posts()/
+     * ACF relationship fields.
+     */
+    protected static bool $public = false;
+
     /** @var array<string> */
     protected static array $supports = ['title', 'thumbnail'];
 
     /** @var array<string, mixed>|false */
-    protected static array|false $rewrite = ['slug' => 'team'];
+    protected static array|false $rewrite = false;
 
     /**
      * Register the custom post type with admin columns

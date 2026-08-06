@@ -31,6 +31,7 @@
     }
 @endphp
 
+@if($chip || $headline || $description || $label || $imageId || ($image && !empty($image['url'])) || $content || !empty($accordion))
 <x-section :anchor="$sectionAnchor" :background="$background" class="one-column-image">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <div class="mx-auto max-w-3xl">
@@ -68,3 +69,4 @@
         </x-card>
     </div>
 </x-section>
+@endif
