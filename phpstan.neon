@@ -2,7 +2,7 @@ includes:
     - vendor/szepeviktor/phpstan-wordpress/extension.neon
 
 parameters:
-    phpVersion: 80400 # match composer.json minimum — flags newer-PHP-only functions
+    phpVersion: 80200 # production hosts run PHP 8.2 — flag newer-PHP-only functions
     level: 6
     parallel:
         jobSize: 20
