@@ -24,7 +24,7 @@ try {
         echo $blade->make('index')->render();
         return;
     }
-} catch (Exception $e) {
+} catch (Throwable $e) {
     // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Intentional error logging for debugging
     error_log('Blade rendering error: ' . $e->getMessage());
 }

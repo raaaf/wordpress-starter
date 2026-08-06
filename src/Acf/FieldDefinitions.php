@@ -1536,6 +1536,74 @@ class FieldDefinitions
     }
 
     /**
+     * Get Button layout fields
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function buttonFields(string $prefix): array
+    {
+        return [
+            self::linkField(
+                "field_{$prefix}_button",
+                __('Button', 'wp-starter'),
+                'button',
+                true,
+                __('Der Button mit Link und Text.', 'wp-starter'),
+            ),
+            self::selectField(
+                "field_{$prefix}_variant",
+                __('Variante', 'wp-starter'),
+                'variant',
+                [
+                    'primary' => __('Primär', 'wp-starter'),
+                    'secondary' => __('Sekundär', 'wp-starter'),
+                    'ghost' => __('Dezent', 'wp-starter'),
+                    'inverse' => __('Invertiert', 'wp-starter'),
+                    'danger' => __('Warnung', 'wp-starter'),
+                ],
+                'primary',
+                false,
+                __('Optischer Stil des Buttons.', 'wp-starter'),
+            ),
+            self::selectField(
+                "field_{$prefix}_size",
+                __('Größe', 'wp-starter'),
+                'size',
+                [
+                    'sm' => __('Klein', 'wp-starter'),
+                    'md' => __('Mittel', 'wp-starter'),
+                    'lg' => __('Groß', 'wp-starter'),
+                ],
+                'md',
+                false,
+                __('Größe des Buttons.', 'wp-starter'),
+            ),
+            self::trueFalseField(
+                "field_{$prefix}_full_width",
+                __('Volle Breite', 'wp-starter'),
+                'full_width',
+                false,
+                __('Button nimmt die volle verfügbare Breite ein.', 'wp-starter'),
+            ),
+            self::selectField(
+                "field_{$prefix}_alignment",
+                __('Ausrichtung', 'wp-starter'),
+                'alignment',
+                [
+                    'left' => __('Linksbündig', 'wp-starter'),
+                    'center' => __('Zentriert', 'wp-starter'),
+                    'right' => __('Rechtsbündig', 'wp-starter'),
+                ],
+                'left',
+                false,
+                __('Ausrichtung des Buttons innerhalb der Sektion.', 'wp-starter'),
+            ),
+        ];
+    }
+
+    /**
      * Get Video layout fields
      *
      * @param string $prefix Key prefix
@@ -1581,6 +1649,40 @@ class FieldDefinitions
                 __('Direkter Link zu einer Videodatei (MP4, WebM, OGG).', 'wp-starter'),
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'url']]],
                 'https://cdn.example.com/video.mp4',
+            ),
+            self::fileField(
+                "field_{$prefix}_captions",
+                __('Untertitel (WebVTT)', 'wp-starter'),
+                'captions',
+                'vtt',
+                'url',
+                [
+                    [['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'wordpress']],
+                    [['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'url']],
+                ],
+                __('WebVTT-Datei (.vtt) mit den Untertiteln. Ohne Untertitel ist ein Video für gehörlose und schwerhörige Nutzer nicht zugänglich (WCAG 1.2.2, Stufe A). Bei YouTube und Vimeo werden stattdessen die Untertitel des Anbieters genutzt.', 'wp-starter'),
+            ),
+            array_merge(
+                self::selectField(
+                    "field_{$prefix}_captions_language",
+                    __('Sprache der Untertitel', 'wp-starter'),
+                    'captions_language',
+                    [
+                        'de' => __('Deutsch', 'wp-starter'),
+                        'en' => __('Englisch', 'wp-starter'),
+                        'fr' => __('Französisch', 'wp-starter'),
+                        'es' => __('Spanisch', 'wp-starter'),
+                        'it' => __('Italienisch', 'wp-starter'),
+                    ],
+                    'de',
+                    false,
+                    __('Bestimmt srclang und die Beschriftung der Untertitelspur im Player.', 'wp-starter'),
+                ),
+                [
+                    'conditional_logic' => [
+                        [['field' => "field_{$prefix}_captions", 'operator' => '!=empty']],
+                    ],
+                ],
             ),
             self::textField(
                 "field_{$prefix}_video_title",

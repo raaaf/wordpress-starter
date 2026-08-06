@@ -16,6 +16,7 @@
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
+@if($chip || $headline || $description || $column_1 || $column_2)
 <x-section :anchor="$sectionAnchor" :background="$background" class="one-third-two-thirds">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="1/3-2/3" gap="lg" align="items-center">
@@ -25,3 +26,4 @@
         </x-card>
     </x-grid>
 </x-section>
+@endif

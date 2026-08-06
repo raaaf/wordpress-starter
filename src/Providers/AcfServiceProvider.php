@@ -172,18 +172,20 @@ class AcfServiceProvider extends ServiceProvider
      * Applies to every post-context kses call site-wide; the allowance is
      * limited to src/type attributes and source cannot execute scripts.
      *
-     * @param array<string, array<string, bool>|mixed> $tags    Allowed tags.
-     * @param string                                   $context Kses context.
+     * @param array<string, array<string, bool>|mixed> $tags Allowed tags.
+     * @param string $context Kses context.
+     *
      * @return array<string, array<string, bool>|mixed>
      */
     public static function allowMediaSourceTag(array $tags, string $context): array
     {
         if ($context === 'post') {
             $tags['source'] = [
-                'src'  => true,
+                'src' => true,
                 'type' => true,
             ];
         }
+
         return $tags;
     }
 
@@ -203,8 +205,9 @@ class AcfServiceProvider extends ServiceProvider
      * action does become possible for anyone who may edit content, which is
      * the same trust level already required to place arbitrary links.
      *
-     * @param array<string, array<string, bool>|mixed> $tags    Allowed tags.
-     * @param string                                   $context Kses context.
+     * @param array<string, array<string, bool>|mixed> $tags Allowed tags.
+     * @param string $context Kses context.
+     *
      * @return array<string, array<string, bool>|mixed>
      */
     public static function allowFormControlTags(array $tags, string $context): array
@@ -216,75 +219,75 @@ class AcfServiceProvider extends ServiceProvider
         // Tags added by a filter miss core's global attributes, so the ones
         // form markup relies on are repeated for each tag below.
         $common = [
-            'class'            => true,
-            'id'               => true,
-            'style'            => true,
-            'title'            => true,
-            'role'             => true,
-            'dir'              => true,
-            'lang'             => true,
-            'hidden'           => true,
-            'tabindex'         => true,
-            'data-*'           => true,
+            'class' => true,
+            'id' => true,
+            'style' => true,
+            'title' => true,
+            'role' => true,
+            'dir' => true,
+            'lang' => true,
+            'hidden' => true,
+            'tabindex' => true,
+            'data-*' => true,
             'aria-describedby' => true,
-            'aria-hidden'      => true,
-            'aria-invalid'     => true,
-            'aria-label'       => true,
-            'aria-labelledby'  => true,
-            'aria-live'        => true,
-            'aria-required'    => true,
+            'aria-hidden' => true,
+            'aria-invalid' => true,
+            'aria-label' => true,
+            'aria-labelledby' => true,
+            'aria-live' => true,
+            'aria-required' => true,
         ];
 
         $tags['form'] = array_merge($common, [
-            'action'         => true,
-            'method'         => true,
-            'enctype'        => true,
+            'action' => true,
+            'method' => true,
+            'enctype' => true,
             'accept-charset' => true,
-            'name'           => true,
-            'target'         => true,
-            'novalidate'     => true,
+            'name' => true,
+            'target' => true,
+            'novalidate' => true,
         ]);
 
         $tags['input'] = array_merge($common, [
-            'type'           => true,
-            'name'           => true,
-            'value'          => true,
-            'placeholder'    => true,
-            'size'           => true,
-            'maxlength'      => true,
-            'minlength'      => true,
-            'min'            => true,
-            'max'            => true,
-            'step'           => true,
-            'pattern'        => true,
-            'accept'         => true,
-            'autocomplete'   => true,
+            'type' => true,
+            'name' => true,
+            'value' => true,
+            'placeholder' => true,
+            'size' => true,
+            'maxlength' => true,
+            'minlength' => true,
+            'min' => true,
+            'max' => true,
+            'step' => true,
+            'pattern' => true,
+            'accept' => true,
+            'autocomplete' => true,
             'autocapitalize' => true,
-            'checked'        => true,
-            'multiple'       => true,
-            'required'       => true,
-            'readonly'       => true,
-            'disabled'       => true,
+            'checked' => true,
+            'multiple' => true,
+            'required' => true,
+            'readonly' => true,
+            'disabled' => true,
         ]);
 
         $tags['select'] = array_merge($common, [
-            'name'         => true,
-            'size'         => true,
-            'multiple'     => true,
+            'name' => true,
+            'size' => true,
+            'multiple' => true,
             'autocomplete' => true,
-            'required'     => true,
-            'disabled'     => true,
+            'required' => true,
+            'disabled' => true,
         ]);
 
         $tags['option'] = array_merge($common, [
-            'value'    => true,
-            'label'    => true,
+            'value' => true,
+            'label' => true,
             'selected' => true,
             'disabled' => true,
         ]);
 
         $tags['optgroup'] = array_merge($common, [
-            'label'    => true,
+            'label' => true,
             'disabled' => true,
         ]);
 
@@ -294,17 +297,17 @@ class AcfServiceProvider extends ServiceProvider
             is_array($tags['textarea'] ?? null) ? $tags['textarea'] : [],
             $common,
             [
-                'cols'        => true,
-                'rows'        => true,
-                'wrap'        => true,
-                'name'        => true,
+                'cols' => true,
+                'rows' => true,
+                'wrap' => true,
+                'name' => true,
                 'placeholder' => true,
-                'maxlength'   => true,
-                'minlength'   => true,
-                'required'    => true,
-                'readonly'    => true,
-                'disabled'    => true,
-            ]
+                'maxlength' => true,
+                'minlength' => true,
+                'required' => true,
+                'readonly' => true,
+                'disabled' => true,
+            ],
         );
 
         return $tags;

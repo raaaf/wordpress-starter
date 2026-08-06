@@ -27,15 +27,14 @@
     $borderClass = $showBorder ? 'border border-line' : '';
 @endphp
 
+@if($imageId)
 <x-section :anchor="$sectionAnchor" :background="$background" padding="md" class="image">
     <figure class="mx-auto max-w-4xl">
-        @if($imageId)
-            {!! wp_get_attachment_image($imageId, 'content', false, [
-                'class' => 'w-full rounded-[var(--card-radius)] shadow-xl ' . $borderClass,
-                'loading' => 'lazy',
-                'sizes' => '(max-width: 896px) 100vw, 896px',
-            ]) !!}
-        @endif
+        {!! wp_get_attachment_image($imageId, 'content', false, [
+            'class' => 'w-full rounded-[var(--card-radius)] shadow-xl ' . $borderClass,
+            'loading' => 'lazy',
+            'sizes' => '(max-width: 896px) 100vw, 896px',
+        ]) !!}
 
         @if($showCaption && ($caption || $alt))
             <figcaption class="mt-4 text-sm text-content-secondary text-center">
@@ -44,3 +43,4 @@
         @endif
     </figure>
 </x-section>
+@endif

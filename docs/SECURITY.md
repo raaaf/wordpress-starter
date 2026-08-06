@@ -8,19 +8,24 @@ The theme implements a strict Content Security Policy to prevent XSS attacks.
 
 ### Implementation
 
-Located in `src/Security.php`:
+Built by `Security::getCSPHeader()` in `src/Security.php`:
 
 ```php
-$csp = [
-    "default-src 'self'",
-    "script-src 'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "img-src 'self' data: https: blob:",
-    "font-src 'self' https://fonts.gstatic.com",
-    "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://www.google.com",
-    "connect-src 'self' http://localhost:* https://tracking.maki-it.de",
+$directives = [
+    "default-src 'self'" . $localSources,
+    "font-src 'self' data: https://fonts.gstatic.com" . $localSources,
+    "img-src 'self' data: https:" . $localSources,
+    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com",
+    "frame-ancestors 'self'",
+    "media-src 'self' https:" . $localSources,
+    "script-src 'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'" . $localSources,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com" . $localSources,
+    "connect-src 'self'" . $localSources,
+    "worker-src 'self' blob:",
 ];
 ```
+
+`$localSources` (from `Security::getLocalSources()`) appends a space-separated list of `http://` and `ws://` origins for `localhost` and `127.0.0.1` across common dev ports (3000, 3001, 4173, 5173, 5180-5182, 8000, 8080, 8888, 9000, plus the dynamic Vite port read from `.vite-port`). It only applies when `WP_ENVIRONMENT_TYPE` is `local`; in production it resolves to an empty string. `default-src`, `font-src`, `img-src`, `media-src`, `script-src`, `style-src` and `connect-src` all carry this suffix, `frame-src`, `frame-ancestors` and `worker-src` do not.
 
 ### Nonce-Based Script Loading
 
@@ -43,11 +48,11 @@ The nonce is automatically generated per-request using cryptographically secure 
 
 ### Customizing CSP
 
-Edit `src/Security.php` to adjust policies for your needs:
+Edit the `$directives` array in `Security::getCSPHeader()` (`src/Security.php`) to adjust policies for your needs. Edit the existing directive line directly rather than appending a new one; a repeated directive of the same type is ignored by the browser, not merged:
 
 ```php
-// Add a new domain to img-src
-$csp[] = "img-src 'self' https://cdn.example.com";
+// Add a domain to the existing img-src line
+"img-src 'self' data: https: https://cdn.example.com" . $localSources,
 ```
 
 ## SVG Sanitization
@@ -72,11 +77,12 @@ SVG uploads are sanitized using the `enshrined/svg-sanitize` library.
 ### Implementation
 
 ```php
-// In ThemeServiceProvider.php
+// In MediaServiceProvider.php
 private function sanitizeSvg(string $content): string
 {
     $sanitizer = new \enshrined\svgSanitize\Sanitizer();
     $sanitizer->removeRemoteReferences(true);
+    $sanitizer->removeXMLTag(false); // Keep the XML declaration
     return $sanitizer->sanitize($content) ?: $content;
 }
 ```
@@ -205,6 +211,7 @@ Additional security headers sent with responses:
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=()');
 ```
 
 ## Database Security

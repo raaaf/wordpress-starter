@@ -10,25 +10,20 @@ use RuntimeException;
 /**
  * Centralised SSRF protection for all outbound requests in the MemberArea module.
  *
- * Checks both the literal hostname/IP AND the DNS-resolved IP so that a public
- * hostname that resolves to a private address (DNS-rebinding / split-horizon DNS)
- * is also blocked.
+ * Checks the literal host/IP and, if the host is not already an IP address, the
+ * DNS-resolved IP too, against private/reserved IP ranges at validation time.
+ *
+ * Known limitation (TOCTOU / DNS-rebinding): this class only validates the host
+ * at check time. The actual connection is made afterwards by SftpClient::connect()
+ * and by wp_remote_head() in FolderSync, and each performs its own independent DNS
+ * lookup. An attacker controlling a low-TTL DNS record can therefore resolve to a
+ * public IP during this check and to a private IP at connect time. Closing that
+ * gap requires pinning the connection to the IP validated here, which this class
+ * does not do.
  */
 final class SsrfGuard
 {
     private const ALLOWED_PROTOCOLS = ['https'];
-
-    private const BLOCKED_RANGES = [
-        '/^127\./',
-        '/^10\./',
-        '/^192\.168\./',
-        '/^172\.(1[6-9]|2[0-9]|3[01])\./',
-        '/^::1$/',
-        '/^localhost$/i',
-        '/^0\./',
-        '/^169\.254\./',
-        '/^fc[0-9a-f]{2}:/i',
-    ];
 
     private function __construct()
     {
@@ -46,16 +41,7 @@ final class SsrfGuard
     public static function assertSafeHost(string $host): void
     {
         self::assertHostNotBlocked($host);
-
-        // If it is not already an IP, resolve and check the resolved address.
-        if (filter_var($host, FILTER_VALIDATE_IP) === false) {
-            $resolved = gethostbyname($host);
-            // gethostbyname() returns the original string on failure — treat as blocked.
-            if ($resolved === $host) {
-                throw new RuntimeException('SFTP host could not be resolved: ' . $host); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-            }
-            self::assertHostNotBlocked($resolved);
-        }
+        self::assertResolvedHostNotBlocked($host, 'SFTP host could not be resolved: ');
     }
 
     /**
@@ -66,7 +52,7 @@ final class SsrfGuard
      *
      * @throws InvalidArgumentException on invalid URL / disallowed protocol.
      * @throws RuntimeException if the host is blocked or unresolvable.
-     */
+     */ // phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag -- both exceptions genuinely propagate from this method (the second via the helper methods it calls), the sniff only sees the single literal throw in this method's own body
     public static function assertSafeUrl(string $url): void
     {
         $parsed = wp_parse_url($url);
@@ -78,13 +64,24 @@ final class SsrfGuard
         $host = $parsed['host'] ?? '';
 
         self::assertHostNotBlocked($host);
+        self::assertResolvedHostNotBlocked($host, 'URL host could not be resolved: ');
+    }
 
-        // Resolve and check DNS if the host is not already an IP.
+    /**
+     * If the host is not already an IP address, resolve it via gethostbyname()
+     * and validate the resolved IP against the blocked ranges too. Shared by
+     * assertSafeHost() and assertSafeUrl() so a future SSRF fix only needs to
+     * land in one place.
+     *
+     * @throws RuntimeException if the host cannot be resolved or the resolved IP is blocked.
+     */
+    private static function assertResolvedHostNotBlocked(string $host, string $unresolvableMessage): void
+    {
         if (filter_var($host, FILTER_VALIDATE_IP) === false) {
             $resolved = gethostbyname($host);
-            // gethostbyname() returns the original string when resolution fails — treat as blocked.
+            // gethostbyname() returns the original string on failure — treat as blocked.
             if ($resolved === $host) {
-                throw new RuntimeException('URL host could not be resolved: ' . $host); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+                throw new RuntimeException($unresolvableMessage . $host); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
             }
             self::assertHostNotBlocked($resolved);
         }
@@ -93,14 +90,23 @@ final class SsrfGuard
     /**
      * Check a single host/IP literal against the blocked ranges.
      *
-     * @throws RuntimeException if matched.
+     * Bare "localhost" is blocked explicitly since filter_var() only validates
+     * IPs. Any other non-IP hostname falls through here unblocked and is
+     * caught, if at all, by the DNS-resolution check in assertResolvedHostNotBlocked().
+     *
+     * @throws RuntimeException if blocked.
      */
     private static function assertHostNotBlocked(string $host): void
     {
-        foreach (self::BLOCKED_RANGES as $pattern) {
-            if (preg_match($pattern, $host)) {
-                throw new RuntimeException('Host is in a blocked IP range: ' . $host); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-            }
+        if (strcasecmp($host, 'localhost') === 0) {
+            throw new RuntimeException('Host is in a blocked IP range: ' . $host); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+        }
+
+        if (
+            filter_var($host, FILTER_VALIDATE_IP) !== false
+            && filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false
+        ) {
+            throw new RuntimeException('Host is in a blocked IP range: ' . $host); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
         }
     }
 }

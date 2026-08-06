@@ -57,19 +57,31 @@ Service providers are the central place for bootstrapping theme functionality.
 
 ### Registered Providers
 
-| Provider                  | Responsibility                       |
-| ------------------------- | ------------------------------------ |
-| `PluginServiceProvider`   | Plugin recommendations, setup wizard |
-| `WelcomeServiceProvider`  | Theme activation, onboarding         |
-| `SecurityServiceProvider` | CSP headers, nonce generation        |
-| `BladeServiceProvider`    | Blade templating engine              |
-| `AcfServiceProvider`      | ACF configuration, directives        |
-| `MenuServiceProvider`     | Navigation menus                     |
-| `ThemeServiceProvider`    | Core theme features, SEO             |
-| `ImageServiceProvider`    | Custom image sizes                   |
-| `SeoServiceProvider`      | SEO enhancements                     |
-| `ThemeUpdateProvider`     | GitHub-based updates                 |
-| `PostTypeServiceProvider` | Custom post types                    |
+| Provider                            | Responsibility                                                                 |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| `PluginServiceProvider`             | Plugin recommendations, setup wizard, content scaffolding                      |
+| `WelcomeServiceProvider`            | Theme activation, onboarding, styleguide page                                  |
+| `SecurityServiceProvider`           | CSP headers, nonce generation, HSTS                                            |
+| `BladeServiceProvider`              | Blade templating engine                                                        |
+| `AcfServiceProvider`                | ACF configuration, directives                                                  |
+| `MenuServiceProvider`               | Navigation menus                                                               |
+| `ThemeServiceProvider`              | Core theme features, template routing                                          |
+| `ImageServiceProvider`              | Custom image sizes                                                             |
+| `SeoServiceProvider`                | JSON-LD, OG tags, canonical URLs, robots meta                                  |
+| `ThemeUpdateProvider`               | GitHub-based updates                                                           |
+| `PostTypeServiceProvider`           | Custom post types and taxonomies                                               |
+| `MemberAreaServiceProvider`         | Member area (login, downloads, SFTP sync)                                      |
+| `PluginConfiguratorServiceProvider` | Auto-configuration of plugins on activation                                    |
+| `DesignTokenServiceProvider`        | Token file upload/download/validation, CSS regeneration                        |
+| `CronServiceProvider`               | Transient and revision cleanup                                                 |
+| `LogServiceProvider`                | Structured logging to debug.log                                                |
+| `AssetOptimizationServiceProvider`  | Defers non-critical scripts, preloads fonts/styles, inlines above-the-fold CSS |
+| `BrandingServiceProvider`           | Favicon, login logo, syncs ACF branding with WP core custom_logo/site_icon     |
+| `EditorIntegrationServiceProvider`  | Disables Gutenberg and unused editor features, removes Global Styles output    |
+| `EditorStylesServiceProvider`       | Editor stylesheet, style-select toolbar, custom formats, icon picker           |
+| `IconShortcodeServiceProvider`      | Renders inline SVG icons via `[icon name="..."]` shortcode                     |
+| `LlmsTxtProvider`                   | Serves `/llms.txt` and `/llms-full.txt` for AI crawlers                        |
+| `MediaServiceProvider`              | SVG upload permissions, sanitization, dimension resolution                     |
 
 ### Creating a New Provider
 
@@ -212,11 +224,19 @@ Blade templates use Laravel's Illuminate View package:
         @include('flexible.hero')
     @endlayout
 @endflexible
+
+{{-- Groups --}}
+@group('group_field')
+    ...
+@endgroup
+
+{{-- Sanitized HTML --}}
+@kses($htmlString)
 ```
 
 ## ACF Flexible Content
 
-The page builder uses ACF Flexible Content with 28 layouts organized by category.
+The page builder uses ACF Flexible Content with 32 layouts organized by category.
 
 ### Adding a New Layout
 

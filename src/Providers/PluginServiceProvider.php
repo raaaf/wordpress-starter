@@ -87,6 +87,18 @@ class PluginServiceProvider extends ServiceProvider
 
     private ContentSetupService $contentSetupService;
 
+    /**
+     * Meta key marking a post as generated demo content, so deletion only
+     * removes posts this theme created and never real published content.
+     */
+    private const DEMO_POST_META_KEY = '_wp_starter_demo_post';
+
+    /**
+     * Guards loadSetupConfig() against re-parsing composer.json and
+     * re-including config/setup-options.php more than once per request.
+     */
+    private bool $setupConfigLoaded = false;
+
     public function register(): void
     {
         $this->definePlugins();
@@ -117,6 +129,12 @@ class PluginServiceProvider extends ServiceProvider
      */
     private function loadSetupConfig(): void
     {
+        if ($this->setupConfigLoaded) {
+            return;
+        }
+
+        $this->setupConfigLoaded = true;
+
         $composerPath = get_template_directory() . '/composer.json';
         if (file_exists($composerPath)) {
             $composer = json_decode(file_get_contents($composerPath), true);
@@ -248,6 +266,9 @@ class PluginServiceProvider extends ServiceProvider
                 'post_type' => 'post',
                 'post_date' => $postDate,
                 'post_date_gmt' => $postDate,
+                'meta_input' => [
+                    self::DEMO_POST_META_KEY => 1,
+                ],
             ]);
 
             if ($postId && !is_wp_error($postId)) {
@@ -294,6 +315,8 @@ class PluginServiceProvider extends ServiceProvider
             'post_type' => 'post',
             'post_status' => 'any',
             'numberposts' => -1,
+            'meta_key' => self::DEMO_POST_META_KEY,
+            'meta_compare' => 'EXISTS',
         ]);
 
         foreach ($posts as $post) {
@@ -608,7 +631,7 @@ class PluginServiceProvider extends ServiceProvider
         $missingRecommended = [];
 
         foreach ($this->plugins as $key => $plugin) {
-            if (!$plugin['required'] && $this->isDismissed($key)) {
+            if (!$plugin['required'] && $this->isDismissed()) {
                 continue;
             }
 
@@ -625,7 +648,7 @@ class PluginServiceProvider extends ServiceProvider
             $this->renderNotice($missingRequired, true);
         }
 
-        if (!empty($missingRecommended) && !$this->isDismissed('recommended')) {
+        if (!empty($missingRecommended) && !$this->isDismissed()) {
             $this->renderRecommendedNotice(count($missingRecommended));
         }
     }
@@ -696,7 +719,7 @@ class PluginServiceProvider extends ServiceProvider
     /**
      * Check if notice is dismissed
      */
-    private function isDismissed(string $pluginKey): bool
+    private function isDismissed(): bool
     {
         return (bool) get_option(ThemeContext::optionKey('dismissed_plugin_notice'), false);
     }

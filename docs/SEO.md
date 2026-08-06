@@ -181,6 +181,28 @@ When Yoast SEO is active:
 Sitemap: https://example.com/sitemap_index.xml
 ```
 
+## llms.txt / llms-full.txt
+
+`LlmsTxtProvider` (`src/Providers/LlmsTxtProvider.php`) serves a curated plain-text overview for LLM crawlers and AI search engines, following the emerging [llms.txt](https://llmstxt.org/) proposal. It hooks `template_redirect` directly, so no rewrite rules and no permalink flush are needed.
+
+- `/llms.txt`: short index. Site title, description, `Home`/`Organization`/`Contact` lines from theme options, a curated "Key pages" list (front page, blog page, up to 20 top-level published pages), and a link to the full index.
+- `/llms-full.txt`: expanded index. The same header, then every published page (up to 200) and every published post (up to 200) as a markdown link line with a truncated excerpt.
+
+Both responses are served as `Content-Type: text/plain` with `X-Robots-Tag: noindex, follow`, and the rendered body is cached in a transient for 12 hours. The cache is flushed automatically on `save_post`, `switch_theme` and `acf/save_post`.
+
+The line arrays are filterable before caching, so client themes can extend without overriding the provider:
+
+```php
+add_filter('wp_starter_llms_txt_index_lines', function (array $lines): array {
+    $lines[] = '- Custom entry';
+    return $lines;
+});
+
+add_filter('wp_starter_llms_txt_full_lines', function (array $lines): array {
+    return $lines;
+});
+```
+
 ## Meta Tags Best Practices
 
 ### Title Tags
@@ -324,24 +346,32 @@ Add fields in `src/Acf/Options.php` for custom schema data.
 
 ### Programmatically
 
-Use the Spatie Schema.org package:
+There is no schema-building package (no `spatie/schema-org`). Schemas are plain PHP arrays, encoded with `wp_json_encode()` and echoed inside a nonced `<script type="application/ld+json">` tag, following the pattern in `SeoServiceProvider::buildPublisherSchema()` and `SeoServiceProvider::emitFaqSchema()`:
 
 ```php
-use Spatie\SchemaOrg\Schema;
+$schema = [
+    '@context' => 'https://schema.org',
+    '@type' => 'LocalBusiness',
+    'name' => 'Business Name',
+    'address' => [
+        '@type' => 'PostalAddress',
+        'streetAddress' => 'Street 123',
+        'addressLocality' => 'City',
+        'postalCode' => '12345',
+    ],
+    'telephone' => '+49 123 456789',
+];
 
-$localBusiness = Schema::localBusiness()
-    ->name('Business Name')
-    ->address(
-        Schema::postalAddress()
-            ->streetAddress('Street 123')
-            ->addressLocality('City')
-            ->postalCode('12345')
-    )
-    ->telephone('+49 123 456789')
-    ->openingHours('Mo-Fr 09:00-18:00');
-
-echo $localBusiness->toScript();
+$nonce = \WordpressStarter\Security::getNonce();
+echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
+    . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+    . '</script>';
 ```
+
+Two ready-made helpers already exist on `SeoServiceProvider` for reuse in flexible layouts:
+
+- `SeoServiceProvider::emitFaqSchema(array $items)`: renders a `FAQPage` schema from `question`/`answer` pairs, skips rendering if the list is empty (used from the accordion layout).
+- `SeoServiceProvider::emitPersonSchema(array $person)`: renders a `Person` schema (name, jobTitle, image, sameAs, etc.) for team/author pages.
 
 ## Troubleshooting
 
@@ -353,12 +383,7 @@ echo $localBusiness->toScript();
 
 ### Duplicate Schemas
 
-When using Yoast SEO, some schemas may duplicate. This is generally fine as search engines handle it, but you can disable theme schemas:
-
-```php
-// Disable theme Organization schema
-add_filter('wp_starter_output_organization_schema', '__return_false');
-```
+There is no filter to disable the theme's WebSite/Organization schema manually. Instead, `SeoServiceProvider::addStructuredData()` checks `defined('WPSEO_VERSION')` and skips emitting its own WebSite and Organization schema whenever Yoast SEO is active, since Yoast emits both itself and two competing nodes for the same entity are worse than one. Article and BreadcrumbList schema are unaffected and still render alongside Yoast.
 
 ### Missing Open Graph Image
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Services;
 
+use WordpressStarter\Providers\WelcomeServiceProvider;
 use WordpressStarter\ThemeContext;
 use WP_Query;
 
@@ -75,11 +76,48 @@ class ContentSetupService
         }
 
         delete_option(ThemeContext::optionKey('content_setup_complete'));
-        delete_option(ThemeContext::optionKey('styleguide_images'));
+        $this->deleteCachedStyleguideImages();
 
         $this->execute($setupOptions);
 
         update_option(ThemeContext::optionKey('content_setup_complete'), true);
+    }
+
+    /**
+     * Delete the styleguide placeholder attachments the ID cache pointed at,
+     * before the cache itself is cleared.
+     *
+     * Without this, a rerun discards the ID cache and re-imports fresh
+     * placeholders while the old attachments stay in the media library,
+     * orphaned forever. Only attachments created by the styleguide importer
+     * (marked via WelcomeServiceProvider::STYLEGUIDE_IMAGE_META_KEY) are
+     * deleted, and only if the cached ID still resolves to an attachment.
+     * A stale ID may point at nothing, or at a post a user has since
+     * re-purposed.
+     */
+    private function deleteCachedStyleguideImages(): void
+    {
+        $cachedImages = get_option(ThemeContext::optionKey('styleguide_images'), []);
+
+        delete_option(ThemeContext::optionKey('styleguide_images'));
+
+        if (!is_array($cachedImages)) {
+            return;
+        }
+
+        foreach ($cachedImages as $attachmentId) {
+            $attachmentId = (int) $attachmentId;
+
+            if ($attachmentId <= 0 || get_post_type($attachmentId) !== 'attachment') {
+                continue;
+            }
+
+            if (!get_post_meta($attachmentId, WelcomeServiceProvider::STYLEGUIDE_IMAGE_META_KEY, true)) {
+                continue;
+            }
+
+            wp_delete_attachment($attachmentId, true);
+        }
     }
 
     /**

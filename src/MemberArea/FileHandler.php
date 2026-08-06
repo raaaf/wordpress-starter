@@ -7,6 +7,7 @@ namespace WordpressStarter\MemberArea;
 use InvalidArgumentException;
 use RuntimeException;
 use Throwable;
+use WordpressStarter\RateLimiter;
 
 class FileHandler
 {
@@ -29,6 +30,12 @@ class FileHandler
         if (!wp_verify_nonce($nonce, self::NONCE_PREFIX . $postId)) {
             wp_send_json_error(['message' => __('Ungültige Anfrage.', 'wp-starter')], 403);
         }
+
+        // Downloads trigger a backend file fetch (local read or SFTP round-trip) per
+        // request, so the budget is far tighter than DownloadQuery's 60/60 listing
+        // limit: 20 downloads per 60 seconds still covers a burst of manual clicks
+        // through a result table without allowing scripted mass-fetching.
+        RateLimiter::enforce('member_download', 20, 60);
 
         $post = get_post($postId);
         if (!$post || $post->post_type !== self::POST_TYPE || $post->post_status !== 'publish') {
@@ -90,18 +97,7 @@ class FileHandler
             $mimeType = get_post_mime_type($fileId) ?: 'application/octet-stream';
         }
 
-        $mimeType = sanitize_mime_type($mimeType);
-        if (empty($mimeType)) {
-            $mimeType = 'application/octet-stream';
-        }
-
-        $fileName = preg_replace('/["\r\n]/', '', $fileName);
-
-        nocache_headers();
-        header('Content-Type: ' . $mimeType);
-        header('Content-Disposition: attachment; filename="' . $fileName . '"');
-        header('Content-Length: ' . filesize($filePath));
-        header('X-Content-Type-Options: nosniff');
+        self::sendFileHeaders($fileName, $mimeType, (int) filesize($filePath));
 
         readfile($filePath);
         exit;
@@ -148,32 +144,28 @@ class FileHandler
 
         try {
             $sftp = SftpClient::connect($host, $port, $username, $password);
-            $contents = SftpClient::readFile($sftp, $remotePath);
+            $stat = $sftp->stat($remotePath);
         } catch (Throwable) {
             wp_send_json_error(['message' => __('Datei konnte nicht abgerufen werden.', 'wp-starter')], 502);
         }
 
-        if ($contents === null) {
+        if (!is_array($stat) || !isset($stat['size'])) {
             wp_send_json_error(['message' => __('Datei nicht verfügbar.', 'wp-starter')], 404);
         }
 
         $fileName = basename($remotePath);
         $mimeType = self::guessMimeType($fileName);
 
-        $mimeType = sanitize_mime_type($mimeType);
-        if (empty($mimeType)) {
-            $mimeType = 'application/octet-stream';
-        }
+        self::sendFileHeaders($fileName, $mimeType, (int) $stat['size']);
 
-        $fileName = preg_replace('/["\r\n]/', '', $fileName);
+        // Stream chunk-by-chunk via phpseclib's callback overload of get() instead of
+        // buffering the whole remote file into a PHP string first, which would hold
+        // the entire file in memory for the duration of the request.
+        $sftp->get($remotePath, static function (string $chunk): void {
+            echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            flush();
+        });
 
-        nocache_headers();
-        header('Content-Type: ' . $mimeType);
-        header('Content-Disposition: attachment; filename="' . $fileName . '"');
-        header('Content-Length: ' . strlen($contents));
-        header('X-Content-Type-Options: nosniff');
-
-        echo $contents; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         exit;
     }
 
@@ -188,6 +180,32 @@ class FileHandler
             'zip' => 'application/zip',
             default => 'application/octet-stream',
         };
+    }
+
+    /**
+     * Strip characters that could break out of the Content-Disposition header value.
+     */
+    private static function sanitizeFilename(string $fileName): string
+    {
+        return preg_replace('/["\r\n]/', '', $fileName) ?? $fileName;
+    }
+
+    /**
+     * Send the shared nocache/Content-Type/Content-Disposition/Content-Length/
+     * X-Content-Type-Options header sequence used by every download source.
+     */
+    private static function sendFileHeaders(string $fileName, string $mimeType, int $contentLength): void
+    {
+        $mimeType = sanitize_mime_type($mimeType);
+        if (empty($mimeType)) {
+            $mimeType = 'application/octet-stream';
+        }
+
+        nocache_headers();
+        header('Content-Type: ' . $mimeType);
+        header('Content-Disposition: attachment; filename="' . self::sanitizeFilename($fileName) . '"');
+        header('Content-Length: ' . $contentLength);
+        header('X-Content-Type-Options: nosniff');
     }
 
     private static function assertSafeUrl(string $url): void

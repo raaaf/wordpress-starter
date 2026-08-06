@@ -18,6 +18,9 @@ use WP_Post_Type;
  */
 class SeoServiceProvider extends ServiceProvider
 {
+    /** Upper bound for meta descriptions; search engines truncate well before this. */
+    private const DESCRIPTION_MAX_LENGTH = 155;
+
     public function register(): void
     {
         // No registration needed
@@ -31,6 +34,7 @@ class SeoServiceProvider extends ServiceProvider
         $this->addBreadcrumbSchema();
         $this->addCanonicalUrl();
         $this->addOpenGraphTags();
+        $this->addMetaDescription();
     }
 
     /**
@@ -74,6 +78,13 @@ class SeoServiceProvider extends ServiceProvider
                 return $output;
             }
 
+            // A crawler only obeys the most specific group matching its own
+            // name and ignores `User-agent: *` entirely (RFC 9309), so each
+            // named group below must repeat whatever restrictions core (and
+            // Yoast, if active) already put in the default group — otherwise
+            // it silently becomes a wider grant than `*`, not a narrower one.
+            $defaultGroupRestrictions = $this->extractDefaultGroupRestrictions($output);
+
             $lines = ['', '# AI crawlers (managed by theme)'];
             foreach ($crawlers as $agent) {
                 $agent = (string) $agent;
@@ -81,6 +92,9 @@ class SeoServiceProvider extends ServiceProvider
                     continue;
                 }
                 $lines[] = 'User-agent: ' . $agent;
+                foreach ($defaultGroupRestrictions as $restriction) {
+                    $lines[] = $restriction;
+                }
                 $lines[] = 'Allow: /';
                 $lines[] = '';
             }
@@ -94,6 +108,38 @@ class SeoServiceProvider extends ServiceProvider
 
             return rtrim($output) . "\n" . $block;
         }, 20, 2);
+    }
+
+    /**
+     * Extract the Disallow/Allow directives WordPress core (and, if active,
+     * Yoast) placed in the default (`User-agent: *`) group of $output, so the
+     * named crawler groups can repeat them instead of hardcoding a guess.
+     *
+     * @return array<int, string>
+     */
+    private function extractDefaultGroupRestrictions(string $output): array
+    {
+        $restrictions = [];
+        $inDefaultGroup = false;
+
+        foreach (preg_split('/\r\n|\r|\n/', $output) as $line) {
+            $trimmed = trim( (string) $line);
+
+            if (preg_match('/^User-agent:\s*\*$/i', $trimmed)) {
+                $inDefaultGroup = true;
+                continue;
+            }
+
+            if ($inDefaultGroup && preg_match('/^User-agent:/i', $trimmed)) {
+                break;
+            }
+
+            if ($inDefaultGroup && preg_match('/^(Disallow|Allow):/i', $trimmed)) {
+                $restrictions[] = $trimmed;
+            }
+        }
+
+        return $restrictions;
     }
 
     /**
@@ -157,9 +203,6 @@ class SeoServiceProvider extends ServiceProvider
     }
 
     /**
-     * Add structured data (JSON-LD) for WebSite, Organization, and Article schemas
-     */
-    /**
      * Feed the theme's contact details into Yoast's Organization node.
      *
      * When Yoast is active the theme yields the node to avoid two competing
@@ -189,6 +232,9 @@ class SeoServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Add structured data (JSON-LD) for WebSite, Organization, and Article schemas
+     */
     private function addStructuredData(): void
     {
         $this->enrichSeoPluginOrganization();
@@ -486,9 +532,15 @@ class SeoServiceProvider extends ServiceProvider
 
     /**
      * Get the canonical URL for the current page
+     *
+     * Self-references the actual paginated page (via get_pagenum_link()) from
+     * page 2 onward, since Google dropped rel=prev/next and a page-1-only
+     * canonical on a paginated archive/index just contradicts the real URL.
      */
     private function getCanonicalUrl(): ?string
     {
+        $paged = (int) get_query_var('paged');
+
         if (is_singular()) {
             return get_permalink();
         }
@@ -498,25 +550,170 @@ class SeoServiceProvider extends ServiceProvider
         }
 
         if (is_home() && get_option('page_for_posts')) {
-            return get_permalink(get_option('page_for_posts'));
+            return $paged > 1 ? get_pagenum_link($paged) : get_permalink(get_option('page_for_posts'));
         }
 
         if (is_post_type_archive()) {
-            return get_post_type_archive_link(get_queried_object()->name ?? '');
+            return $paged > 1 ? get_pagenum_link($paged) : get_post_type_archive_link(get_queried_object()->name ?? '');
         }
 
         if (is_archive()) {
             // For date/author archives, use the current URL without query params
             global $wp;
 
-            return home_url($wp->request);
+            return $paged > 1 ? get_pagenum_link($paged) : home_url($wp->request);
         }
 
         if (is_search()) {
-            return get_search_link();
+            return $paged > 1 ? get_pagenum_link($paged) : get_search_link();
         }
 
         return null;
+    }
+
+    /**
+     * Emit <meta name="description"> when no SEO plugin is doing it.
+     *
+     * Yoast is listed as recommended, not required, so a site without it had no
+     * meta description on any page at all — only og:description and
+     * twitter:description, which search engines do not use for the snippet.
+     */
+    private function addMetaDescription(): void
+    {
+        add_action('wp_head', function (): void {
+            // Yoast owns the description tag when active; two would conflict.
+            if (defined('WPSEO_VERSION')) {
+                return;
+            }
+
+            $description = $this->getMetaDescription();
+
+            if ($description === '') {
+                return;
+            }
+
+            echo '<meta name="description" content="' . esc_attr($description) . '">' . "\n";
+        }, 1);
+    }
+
+    /**
+     * Build a description for the current request.
+     *
+     * The excerpt alone is not enough in this theme: page content lives in ACF
+     * Flexible Content, so post_content is usually empty and WordPress derives
+     * no excerpt from it. Measured on a real install, half the pages had no
+     * excerpt whatsoever. The flexible sections are therefore consulted before
+     * falling back to the site tagline.
+     */
+    private function getMetaDescription(): string
+    {
+        if (!is_singular()) {
+            if (is_search() || is_404()) {
+                return '';
+            }
+
+            $archive = wp_strip_all_tags( (string) get_the_archive_description());
+
+            return $this->normalizeDescription($archive !== '' ? $archive : (string) get_bloginfo('description'));
+        }
+
+        // Password-protected posts describe nothing. get_the_excerpt() returns
+        // WordPress' "there is no excerpt because this is a protected post"
+        // placeholder, and the ACF sections are readable even while the
+        // password gate is up, because they bypass the_content(). Deriving a
+        // description from either would publish protected content in a meta
+        // tag that every crawler reads.
+        if (post_password_required()) {
+            return $this->normalizeDescription( (string) get_bloginfo('description'));
+        }
+
+        $excerpt = wp_strip_all_tags( (string) get_the_excerpt());
+
+        if (trim($excerpt) !== '') {
+            return $this->normalizeDescription($excerpt);
+        }
+
+        $fromSections = $this->descriptionFromSections( (int) get_the_ID());
+
+        if ($fromSections !== '') {
+            return $this->normalizeDescription($fromSections);
+        }
+
+        return $this->normalizeDescription( (string) get_bloginfo('description'));
+    }
+
+    /**
+     * Pull prose out of the ACF Flexible Content sections, in page order.
+     *
+     * Only fields that actually carry sentences are considered — headlines and
+     * labels make a poor snippet, and a description assembled from button
+     * captions is worse than none.
+     *
+     * @param int $postId Post to read the sections from
+     */
+    private function descriptionFromSections(int $postId): string
+    {
+        if (!function_exists('get_field')) {
+            return '';
+        }
+
+        $sections = get_field('page_sections', $postId);
+
+        if (!is_array($sections)) {
+            return '';
+        }
+
+        $proseFields = ['section_description', 'copy', 'content', 'column_1'];
+        $collected = '';
+
+        foreach ($sections as $section) {
+            if (!is_array($section)) {
+                continue;
+            }
+
+            foreach ($proseFields as $field) {
+                $value = $section[$field] ?? null;
+
+                if (!is_string($value)) {
+                    continue;
+                }
+
+                $text = trim(wp_strip_all_tags($value));
+
+                if ($text === '') {
+                    continue;
+                }
+
+                $collected = trim($collected . ' ' . $text);
+
+                if (mb_strlen($collected) >= self::DESCRIPTION_MAX_LENGTH) {
+                    return $collected;
+                }
+            }
+        }
+
+        return $collected;
+    }
+
+    /**
+     * Collapse whitespace and cut to length on a word boundary.
+     */
+    private function normalizeDescription(string $text): string
+    {
+        $text = trim( (string) preg_replace('/\s+/u', ' ', wp_strip_all_tags($text)));
+
+        if ($text === '' || mb_strlen($text) <= self::DESCRIPTION_MAX_LENGTH) {
+            return $text;
+        }
+
+        $cut = mb_substr($text, 0, self::DESCRIPTION_MAX_LENGTH);
+        $lastSpace = mb_strrpos($cut, ' ');
+
+        if ($lastSpace !== false && $lastSpace > 0) {
+            $cut = mb_substr($cut, 0, $lastSpace);
+        }
+
+        return rtrim($cut, ' ,;:-') . '…';
     }
 
     /**
@@ -531,9 +728,9 @@ class SeoServiceProvider extends ServiceProvider
             }
 
             $title = is_singular() ? get_the_title() : get_bloginfo('name');
-            $description = is_singular()
-                ? wp_strip_all_tags(get_the_excerpt())
-                : ( get_bloginfo('description') ?: get_the_archive_title() ?: get_bloginfo('name') );
+            // Same source as <meta name="description">: on ACF-built pages the
+            // excerpt alone is usually empty, so the sections are consulted too.
+            $description = $this->getMetaDescription() ?: ( get_bloginfo('description') ?: get_bloginfo('name') );
             if (is_singular()) {
                 $url = get_permalink() ?: home_url('/');
             } elseif (is_search()) {

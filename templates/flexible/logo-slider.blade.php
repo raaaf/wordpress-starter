@@ -55,6 +55,7 @@
     }
 @endphp
 
+@if($title || !empty($logoData))
 <x-section :anchor="$sectionAnchor" :background="$background" padding="md" class="logo-slider">
     @if($title)
         <h2 class="text-h3 mb-8 text-center">{!! $title !!}</h2>
@@ -91,7 +92,7 @@
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="block transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0"
-                                @if($logo['name']) aria-label="{{ $logo['name'] }}" @endif
+                                aria-label="{{ $logo['name'] ? $logo['name'] . ' ' : '' }}{{ __('(öffnet in neuem Tab)', 'wp-starter') }}"
                             >
                                 <img
                                     src="{{ $logo['url'] }}"
@@ -100,7 +101,7 @@
                                     loading="lazy"
                                     @if($logo['width']) width="{{ $logo['width'] }}" @endif
                                     @if($logo['height']) height="{{ $logo['height'] }}" @endif
-                                ><span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
+                                >
                             </a>
                         @else
                             <div class="transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0">
@@ -127,7 +128,7 @@
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     class="block transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0"
-                                    @if($logo['name']) aria-label="{{ $logo['name'] }}" @endif
+                                    aria-label="{{ $logo['name'] ? $logo['name'] . ' ' : '' }}{{ __('(öffnet in neuem Tab)', 'wp-starter') }}"
                                 >
                                     <img
                                         src="{{ $logo['url'] }}"
@@ -136,7 +137,7 @@
                                         loading="lazy"
                                         @if($logo['width']) width="{{ $logo['width'] }}" @endif
                                         @if($logo['height']) height="{{ $logo['height'] }}" @endif
-                                    ><span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
+                                    >
                                 </a>
                             @else
                                 <div class="transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0">
@@ -181,3 +182,4 @@
         @endif
     @endif
 </x-section>
+@endif

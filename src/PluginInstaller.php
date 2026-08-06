@@ -15,6 +15,7 @@ class PluginInstaller
      * Install a plugin from WordPress.org
      *
      * @param string $slug Plugin slug
+     *
      * @return array{success: bool, message: string}
      */
     public static function install(string $slug): array
@@ -49,11 +50,6 @@ class PluginInstaller
         require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
         require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
         require_once ABSPATH . 'wp-admin/includes/class-plugin-upgrader.php';
-
-        // Initialize WP_Filesystem - required for plugin installation
-        if (!function_exists('WP_Filesystem')) {
-            require_once ABSPATH . 'wp-admin/includes/file.php';
-        }
 
         // Use direct filesystem access (no FTP credentials needed for local)
         if (!WP_Filesystem(false, false, true)) {
@@ -110,6 +106,7 @@ class PluginInstaller
             $errorMessage = is_wp_error($errors[0])
                 ? $errors[0]->get_error_message()
                 : (string) $errors[0];
+
             return [
                 'success' => false,
                 'message' => $errorMessage,
@@ -136,6 +133,7 @@ class PluginInstaller
      * Activate a plugin
      *
      * @param string $slug Plugin slug
+     *
      * @return array{success: bool, message: string}
      */
     public static function activate(string $slug): array
@@ -187,6 +185,7 @@ class PluginInstaller
      * Install and activate a plugin
      *
      * @param string $slug Plugin slug
+     *
      * @return array{success: bool, message: string, installed: bool, activated: bool}
      */
     public static function installAndActivate(string $slug): array
@@ -262,6 +261,7 @@ class PluginInstaller
      * Bulk install and activate multiple plugins
      *
      * @param array<string> $slugs Plugin slugs
+     *
      * @return array<string, array{success: bool, message: string}>
      */
     public static function bulkInstallAndActivate(array $slugs): array
@@ -274,7 +274,6 @@ class PluginInstaller
 
         return $results;
     }
-
 
     /**
      * Create a quiet skin for silent plugin installation

@@ -271,6 +271,38 @@ class Fields
     }
 
     /**
+     * Get the raw ACF site_logo option value, or null when ACF's get_field()
+     * is unavailable or no logo is set.
+     *
+     * Shared by siteLogoId() and siteLogoUrl(), which each apply their own
+     * field extraction (ID vs. url) on top of this.
+     *
+     * @return array<string, mixed>|null
+     */
+    private static function acfSiteLogo(): ?array
+    {
+        if (!function_exists('get_field')) {
+            return null;
+        }
+
+        $acfLogo = self::option('site_logo');
+
+        return is_array($acfLogo) ? $acfLogo : null;
+    }
+
+    /**
+     * Get the Customizer custom_logo attachment ID, or null if none is set.
+     *
+     * Shared by siteLogoId() and siteLogoUrl() as their Customizer fallback.
+     */
+    private static function customizerLogoId(): ?int
+    {
+        $customLogoId = get_theme_mod('custom_logo');
+
+        return $customLogoId ? (int) $customLogoId : null;
+    }
+
+    /**
      * Get site logo attachment ID from ACF option or Customizer fallback.
      *
      * Sibling of siteLogoUrl() with identical fallback order:
@@ -278,22 +310,15 @@ class Fields
      */
     public static function siteLogoId(): ?int
     {
-        if (function_exists('get_field')) {
-            $acfLogo = self::option('site_logo');
-            if (is_array($acfLogo)) {
-                $id = $acfLogo['ID'] ?? $acfLogo['id'] ?? null;
-                if ($id) {
-                    return (int) $id;
-                }
+        $acfLogo = self::acfSiteLogo();
+        if ($acfLogo) {
+            $id = $acfLogo['ID'] ?? $acfLogo['id'] ?? null;
+            if ($id) {
+                return (int) $id;
             }
         }
 
-        $customLogoId = get_theme_mod('custom_logo');
-        if ($customLogoId) {
-            return (int) $customLogoId;
-        }
-
-        return null;
+        return self::customizerLogoId();
     }
 
     /**
@@ -303,16 +328,14 @@ class Fields
      */
     public static function siteLogoUrl(): ?string
     {
-        if (function_exists('get_field')) {
-            $acfLogo = self::option('site_logo');
-            if ($acfLogo && !empty($acfLogo['url'])) {
-                return $acfLogo['url'];
-            }
+        $acfLogo = self::acfSiteLogo();
+        if ($acfLogo && !empty($acfLogo['url'])) {
+            return $acfLogo['url'];
         }
 
-        $customLogoId = get_theme_mod('custom_logo');
+        $customLogoId = self::customizerLogoId();
         if ($customLogoId) {
-            $url = wp_get_attachment_image_url( (int) $customLogoId, 'full');
+            $url = wp_get_attachment_image_url($customLogoId, 'full');
             if ($url) {
                 return $url;
             }

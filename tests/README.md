@@ -43,7 +43,7 @@ composer test
 
 ## JavaScript/TypeScript Tests
 
-Located in `tests/js/`. Run with:
+Located in `resources/js/`. Run with:
 
 ```bash
 npm run test          # Run once

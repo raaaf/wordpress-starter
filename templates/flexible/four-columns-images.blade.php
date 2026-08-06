@@ -46,6 +46,11 @@
     }
 @endphp
 
+@if($chip || $headline || $description
+    || $label_1 || ($image_1 && !empty($image_1['url'])) || $column_1 || !empty($accordion_1)
+    || $label_2 || ($image_2 && !empty($image_2['url'])) || $column_2 || !empty($accordion_2)
+    || $label_3 || ($image_3 && !empty($image_3['url'])) || $column_3 || !empty($accordion_3)
+    || $label_4 || ($image_4 && !empty($image_4['url'])) || $column_4 || !empty($accordion_4))
 <x-section :anchor="$sectionAnchor" :background="$background" class="four-columns-images">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="4" gap="xl" align="items-stretch">
@@ -94,3 +99,4 @@
         @endforeach
     </x-grid>
 </x-section>
+@endif

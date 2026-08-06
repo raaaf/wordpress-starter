@@ -419,6 +419,7 @@ const COMPONENT_TOKENS = `
  */
 function validateAndFix(css) {
   const warnings = [];
+  const criticalWarnings = [];
   const fixes = [];
   let fixedCss = css;
 
@@ -488,6 +489,7 @@ function validateAndFix(css) {
   for (const token of requiredTokens) {
     if (!css.includes(token + ':')) {
       warnings.push(`Missing required token: ${token}`);
+      criticalWarnings.push(`Missing required token: ${token}`);
     }
   }
 
@@ -497,7 +499,7 @@ function validateAndFix(css) {
     warnings.push(`Tailwind opacity modifier in CSS won't work: ${match[0]}`);
   }
 
-  return { css: fixedCss, warnings, fixes };
+  return { css: fixedCss, warnings, criticalWarnings, fixes };
 }
 
 /**
@@ -712,7 +714,7 @@ ${generateCss(darkIcon, 'icon')}
 
   // Validate and auto-fix
   console.log('\nValidating generated CSS...');
-  const { css: validatedCss, warnings, fixes } = validateAndFix(css);
+  const { css: validatedCss, warnings, criticalWarnings, fixes } = validateAndFix(css);
 
   if (fixes.length > 0) {
     console.log('\n✅ Auto-fixes applied:');
@@ -879,9 +881,17 @@ ${generateCssImportant(lightIcon, 'icon')}
   console.log(`  Dark semantic:    ${stats.darkSemanticColors}`);
   console.log(`\nOutput written to: ${OUTPUT_FILE}`);
 
-  // Exit with error code if there are warnings (for CI)
+  // Exit with error code only for critical warnings (missing required tokens).
+  // Cosmetic warnings (unquoted font-family, px font-size, potentially invalid
+  // colors, Tailwind opacity modifiers) stay non-fatal: the first two are
+  // already auto-fixed in the written CSS, the latter two are heuristic and
+  // routinely non-fatal in normal use.
   if (warnings.length > 0) {
     console.log('\n⚠️  Token generation completed with warnings. Please review above.');
+  }
+  if (criticalWarnings.length > 0) {
+    console.error(`\n❌ ${criticalWarnings.length} required token(s) missing from generated CSS.`);
+    process.exitCode = 1;
   }
 }
 

@@ -186,7 +186,7 @@ class FlexibleContent
     }
 
     /**
-     * Get all flexible content layouts (31 total)
+     * Get all flexible content layouts (32 total)
      *
      * @return array<int, array<string, mixed>>
      */
@@ -212,6 +212,7 @@ class FlexibleContent
             self::accordionLayout(),
             self::tabsLayout(),
             self::ctaLayout(),
+            self::buttonLayout(),
 
             // Media display layouts
             self::imageLayout(),
@@ -502,6 +503,23 @@ class FlexibleContent
             'label' => __('Handlungsaufforderung (CTA)', 'wp-starter'),
             'display' => 'block',
             'sub_fields' => FieldDefinitions::ctaFields('flex_cta'),
+            'acfe_flexible_category' => self::getCategories()['content'],
+        ];
+    }
+
+    /**
+     * Button layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function buttonLayout(): array
+    {
+        return [
+            'key' => 'layout_button',
+            'name' => 'button',
+            'label' => __('Button', 'wp-starter'),
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::buttonFields('flex_button'),
             'acfe_flexible_category' => self::getCategories()['content'],
         ];
     }

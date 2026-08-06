@@ -12,6 +12,7 @@
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
+@if($title || !empty($cards))
 <x-section :anchor="$sectionAnchor" :background="$background" class="cards">
     @if($title)
         <h2 class="mb-12 text-center">{!! $title !!}</h2>
@@ -57,3 +58,4 @@
         </x-grid>
     @endif
 </x-section>
+@endif

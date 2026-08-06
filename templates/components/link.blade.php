@@ -59,6 +59,7 @@
    @if($target === '_blank' && !$disabled) rel="noopener noreferrer" @endif
    @if($disabled) aria-disabled="true" tabindex="-1" @endif
    @if($ariaLabel) aria-label="{{ esc_attr($ariaLabel) }}" @endif
+   {{ $disabled ? $attributes->except('tabindex') : $attributes }}
    class="link inline-flex items-center font-medium underline underline-offset-4 transition-colors duration-200 focus-visible:shadow-[var(--shadow-focus-ring-ghost)] focus-visible:outline-none {{ $variantClass }} {{ $sizeClass }} {{ $class }}">
     @if($iconLeft)
         <x-icon name="{{ $iconLeft }}" class="{{ $iconSize }}" />

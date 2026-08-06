@@ -58,7 +58,7 @@
                             </p>
 
                             <div class="flex items-center justify-between mt-auto">
-                                <x-link :url="get_permalink()" iconRight="chevron-right" class="relative z-20">
+                                <x-link :url="get_permalink()" iconRight="chevron-right" aria-hidden="true" tabindex="-1" class="relative z-20">
                                     {{ __('Weiterlesen', 'wp-starter') }}
                                 </x-link>
                                 <time datetime="{{ get_the_date('c') }}" class="text-sm text-content-tertiary">
@@ -109,7 +109,7 @@
                                     </p>
 
                                     <div class="flex items-center justify-between pt-4 border-t border-line">
-                                        <x-link :url="get_permalink()" iconRight="chevron-right" size="sm" class="relative z-20">
+                                        <x-link :url="get_permalink()" iconRight="chevron-right" size="sm" aria-hidden="true" tabindex="-1" class="relative z-20">
                                             {{ __('Weiterlesen', 'wp-starter') }}
                                         </x-link>
                                         <time datetime="{{ get_the_date('c') }}" class="text-sm text-content-tertiary">

@@ -17,6 +17,8 @@ class Vite
 
     private static bool $isDev = false;
 
+    private static ?int $devServerPort = null;
+
     public static function init(): void
     {
         self::$isDev = defined('WP_DEBUG') && WP_DEBUG && self::isDevServerRunning();
@@ -192,11 +194,12 @@ class Vite
         $iconDir = get_template_directory() . '/resources/icons/';
         $icons = [];
 
-        $iconNames = [
-            'calendar', 'check', 'chevron', 'chevron-up', 'chevron-down', 'chevron-left', 'chevron-right',
-            'close', 'eye', 'lock', 'mail', 'minus', 'phone', 'plus', 'search', 'user', 'warning',
-            'facebook', 'instagram', 'linkedin', 'x', 'xing', 'youtube',
-        ];
+        // Derive from the ACF field choices so both lists cannot drift apart.
+        $iconNames = array_keys(array_filter(
+            Acf\FieldDefinitions::getThemeIcons(),
+            fn (string $key) => $key !== '',
+            ARRAY_FILTER_USE_KEY,
+        ));
 
         foreach ($iconNames as $name) {
             $path = $iconDir . $name . '.svg';
@@ -423,19 +426,28 @@ class Vite
     /**
      * Get the dev server port from .vite-port file or config fallback.
      * The .vite-port file is written by Vite when the dev server starts.
+     * Cached in a static property to avoid re-reading the file on every call.
      */
     private static function getDevServerPort(): int
     {
+        if (self::$devServerPort !== null) {
+            return self::$devServerPort;
+        }
+
         $portFile = get_template_directory() . '/.vite-port';
 
         if (file_exists($portFile)) {
             $port = file_get_contents($portFile);
             if ($port !== false && is_numeric(trim($port))) {
-                return (int) trim($port);
+                self::$devServerPort = (int) trim($port);
+
+                return self::$devServerPort;
             }
         }
 
-        return (int) config('vite.dev_server.port', 5173);
+        self::$devServerPort = (int) config('vite.dev_server.port', 5173);
+
+        return self::$devServerPort;
     }
 
     /**

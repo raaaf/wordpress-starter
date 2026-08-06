@@ -55,9 +55,16 @@
     } elseif (is_array($background_image) && !empty($background_image['ID'])) {
         $background_image['ID'] = (int) $background_image['ID'];
     }
+
+    // A hero is worth rendering if it has any text/CTA content, or, per variant,
+    // an image that carries the section on its own (background image, split image).
+    $hasText = $badge || $title || $copy || $cta_primary || $cta_secondary;
+    $hasBackgroundImage = $background_image && (!empty($background_image['ID']) || !empty($background_image['url']));
+    $hasSplitImage = $imageId || ($image && !empty($image['url']));
 @endphp
 
 @if($variant === 'background')
+    @if($hasText || $hasBackgroundImage)
     {{-- BACKGROUND VARIANT: Full-width image with overlay --}}
     <section class="hero hero--background relative overflow-hidden flex items-center" style="min-height: calc(100vh - var(--header-height, 80px)); min-height: calc(100dvh - var(--header-height, 80px));">
         @if($background_image && (!empty($background_image['ID']) || !empty($background_image['url'])))
@@ -126,8 +133,10 @@
             </div>
         </div>
     </section>
+    @endif
 
 @elseif($variant === 'split')
+    @if($hasText || $hasSplitImage)
     {{-- SPLIT VARIANT: Content left, image right --}}
     <x-section :anchor="$sectionAnchor" :background="$background_color" padding="lg" class="hero hero--split">
         <div class="grid md:grid-cols-2 gap-12 items-center">
@@ -192,8 +201,10 @@
             @endif
         </div>
     </x-section>
+    @endif
 
 @else
+    @if($hasText)
     {{-- CENTERED VARIANT (default): Centered content --}}
     <x-section :anchor="$sectionAnchor" :background="$background_color" padding="xl" class="hero hero--centered">
         <div class="max-w-3xl mx-auto text-center">
@@ -235,4 +246,5 @@
             @endif
         </div>
     </x-section>
+    @endif
 @endif

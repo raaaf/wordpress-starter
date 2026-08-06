@@ -19,7 +19,7 @@
         <h2 class="mb-8 text-center">{!! $title !!}</h2>
     @endif
 
-    @if(!empty($headers) || !empty($rows))
+    @if(!empty($rows))
         <div class="overflow-x-auto rounded-lg">
             <table class="w-full {{ $bordered ? 'border border-line' : '' }}">
                 <caption class="sr-only">{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}</caption>
@@ -35,22 +35,20 @@
                     </thead>
                 @endif
 
-                @if(!empty($rows))
-                    <tbody>
-                        @foreach($rows as $rowIndex => $row)
-                            <tr class="{{ $striped && $rowIndex % 2 === 1 ? 'bg-surface-secondary' : 'bg-surface' }}">
-                                @php
-                                    $cells = $row['cells'] ?? [];
-                                @endphp
-                                @foreach($cells as $cell)
-                                    <td class="px-6 py-4 text-content tabular-nums {{ $bordered ? 'border border-line' : '' }}">
-                                        {!! wp_kses_post($cell['content'] ?? '') !!}
-                                    </td>
-                                @endforeach
-                            </tr>
-                        @endforeach
-                    </tbody>
-                @endif
+                <tbody>
+                    @foreach($rows as $rowIndex => $row)
+                        <tr class="{{ $striped && $rowIndex % 2 === 1 ? 'bg-surface-secondary' : 'bg-surface' }}">
+                            @php
+                                $cells = $row['cells'] ?? [];
+                            @endphp
+                            @foreach($cells as $cell)
+                                <td class="px-6 py-4 text-content tabular-nums {{ $bordered ? 'border border-line' : '' }}">
+                                    {!! wp_kses_post($cell['content'] ?? '') !!}
+                                </td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
             </table>
         </div>
     @else

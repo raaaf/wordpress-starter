@@ -759,30 +759,32 @@ class Options
                 admin_url('?' . ThemeContext::kebabPrefix() . '-delete-styleguide=1'),
                 ThemeContext::kebabPrefix() . '-delete-styleguide',
             );
-            $statusMessage = sprintf(
-                '<div style="padding: 15px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">
-                    <p style="margin: 0; color: #721c24;"><strong>⚠ Styleguide-Seite liegt im Papierkorb</strong></p>
-                    <p style="margin: 10px 0 0 0;">
+            $statusMessage = self::renderNoticeBox(
+                'error',
+                '⚠ Styleguide-Seite liegt im Papierkorb',
+                sprintf(
+                    '<p style="margin: 10px 0 0 0;">
                         <a href="%s" class="button button-primary">Wiederherstellen</a>
                         <a href="%s" class="button" onclick="return confirm(\'Styleguide-Seite endgültig löschen?\');">Endgültig löschen</a>
-                    </p>
-                </div>',
-                esc_url($restoreUrl),
-                esc_url($deleteUrl),
+                    </p>',
+                    esc_url($restoreUrl),
+                    esc_url($deleteUrl),
+                ),
             );
         } elseif ($styleguideExists) {
             $editUrl = get_edit_post_link( (int) $styleguidePageId, 'raw');
             $viewUrl = get_permalink( (int) $styleguidePageId);
-            $statusMessage = sprintf(
-                '<div style="padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
-                    <p style="margin: 0; color: #155724;"><strong>✓ Styleguide-Seite existiert</strong></p>
-                    <p style="margin: 10px 0 0 0; display: flex; gap: 8px; flex-wrap: wrap;">
+            $statusMessage = self::renderNoticeBox(
+                'success',
+                '✓ Styleguide-Seite existiert',
+                sprintf(
+                    '<p style="margin: 10px 0 0 0; display: flex; gap: 8px; flex-wrap: wrap;">
                         <a href="%s" class="button">Bearbeiten</a>
                         <a href="%s" class="button" target="_blank">Ansehen</a>
-                    </p>
-                </div>',
-                esc_url($editUrl ?? ''),
-                esc_url($viewUrl ?? ''),
+                    </p>',
+                    esc_url($editUrl ?? ''),
+                    esc_url($viewUrl ?? ''),
+                ),
             );
         } else {
             // Clear the option if it references a non-existent page
@@ -793,14 +795,15 @@ class Options
                 admin_url('?' . ThemeContext::kebabPrefix() . '-create-styleguide=1'),
                 ThemeContext::kebabPrefix() . '-create-styleguide',
             );
-            $statusMessage = sprintf(
-                '<div style="padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; margin-bottom: 20px;">
-                    <p style="margin: 0; color: #856404;"><strong>Keine Styleguide-Seite vorhanden</strong></p>
-                    <p style="margin: 10px 0 0 0;">
+            $statusMessage = self::renderNoticeBox(
+                'warning',
+                'Keine Styleguide-Seite vorhanden',
+                sprintf(
+                    '<p style="margin: 10px 0 0 0;">
                         <a href="%s" class="button button-primary">Styleguide-Seite erstellen</a>
-                    </p>
-                </div>',
-                esc_url($createUrl),
+                    </p>',
+                    esc_url($createUrl),
+                ),
             );
         }
 
@@ -828,25 +831,27 @@ class Options
         );
 
         if ($contentSetupComplete) {
-            $contentSetupMessage = sprintf(
-                '<div style="padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
-                    <p style="margin: 0; color: #155724;"><strong>✓ Content-Setup wurde bereits ausgeführt</strong></p>
-                    <p style="margin: 10px 0 0 0;">
+            $contentSetupMessage = self::renderNoticeBox(
+                'success',
+                '✓ Content-Setup wurde bereits ausgeführt',
+                sprintf(
+                    '<p style="margin: 10px 0 0 0;">
                         <a href="%s" class="button" onclick="return confirm(\'Content-Setup wirklich erneut ausführen? Bestehende Seiten bleiben erhalten, fehlende werden erstellt.\');">Erneut ausführen</a>
-                    </p>
-                </div>',
-                esc_url($contentSetupUrl),
+                    </p>',
+                    esc_url($contentSetupUrl),
+                ),
             );
         } else {
-            $contentSetupMessage = sprintf(
-                '<div style="padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; margin-bottom: 20px;">
-                    <p style="margin: 0; color: #856404;"><strong>Content-Setup wurde noch nicht ausgeführt</strong></p>
-                    <p style="margin: 10px 0; color: #856404;">Erstellt Standardseiten (Startseite, Über uns, Kontakt, etc.) und richtet Menüs ein.</p>
+            $contentSetupMessage = self::renderNoticeBox(
+                'warning',
+                'Content-Setup wurde noch nicht ausgeführt',
+                sprintf(
+                    '<p style="margin: 10px 0; color: #856404;">Erstellt Standardseiten (Startseite, Über uns, Kontakt, etc.) und richtet Menüs ein.</p>
                     <p style="margin: 10px 0 0 0;">
                         <a href="%s" class="button button-primary">Content-Setup jetzt ausführen</a>
-                    </p>
-                </div>',
-                esc_url($contentSetupUrl),
+                    </p>',
+                    esc_url($contentSetupUrl),
+                ),
             );
         }
 
@@ -907,17 +912,58 @@ class Options
     }
 
     /**
+     * Render a colored admin notice box (success/warning/error) used across
+     * the Tools settings page. Shares the outer card markup; only the color
+     * theme and inner HTML vary per caller.
+     */
+    private static function renderNoticeBox(string $type, string $heading, string $body): string
+    {
+        $colors = [
+            'success' => ['bg' => '#d4edda', 'border' => '#c3e6cb', 'text' => '#155724'],
+            'warning' => ['bg' => '#fff3cd', 'border' => '#ffeeba', 'text' => '#856404'],
+            'error' => ['bg' => '#f8d7da', 'border' => '#f5c6cb', 'text' => '#721c24'],
+        ];
+        $color = $colors[$type];
+
+        return sprintf(
+            '<div style="padding: 15px; background: %s; border: 1px solid %s; border-radius: 4px; margin-bottom: 20px;">
+                <p style="margin: 0; color: %s;"><strong>%s</strong></p>
+                %s
+            </div>',
+            $color['bg'],
+            $color['border'],
+            $color['text'],
+            $heading,
+            $body,
+        );
+    }
+
+    /**
      * Get demo content status message for Tools page
      */
     private static function getDemoContentMessage(): string
     {
-        // Count existing demo posts
-        $existingPosts = get_posts([
+        // This message field is admin-UI only; skip the query entirely on
+        // frontend requests, since acf/init (and therefore Options::register())
+        // fires on every page view, not just in wp-admin.
+        if (!is_admin()) {
+            return '';
+        }
+
+        // Count only demo posts, identified by the meta key set in
+        // PluginServiceProvider::DEMO_POST_META_KEY ('_wp_starter_demo_post').
+        // That constant is private to PluginServiceProvider, so the literal
+        // is mirrored here; PluginServiceProvider.php is the source of truth.
+        // Use 'fields' => 'ids' to count without loading full post objects.
+        $demoPostIds = get_posts([
             'post_type' => 'post',
             'post_status' => 'publish',
             'numberposts' => -1,
+            'meta_key' => '_wp_starter_demo_post',
+            'meta_compare' => 'EXISTS',
+            'fields' => 'ids',
         ]);
-        $postCount = count($existingPosts);
+        $postCount = count($demoPostIds);
 
         $generateUrl = wp_nonce_url(
             admin_url('?' . ThemeContext::kebabPrefix() . '-generate-demo-posts=1'),
@@ -930,31 +976,32 @@ class Options
         );
 
         if ($postCount > 0) {
-            return sprintf(
-                '<div style="padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
-                    <p style="margin: 0; color: #155724;"><strong>✓ %d Blogbeiträge vorhanden</strong></p>
-                    <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">
+            return self::renderNoticeBox(
+                'success',
+                sprintf('✓ %d Demo-Blogbeiträge vorhanden', $postCount),
+                sprintf(
+                    '<div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">
                         <a href="%s" class="button button-primary">5 weitere generieren</a>
-                        <a href="%s" class="button" onclick="return confirm(\'Alle Beiträge wirklich löschen?\');">Alle löschen</a>
+                        <a href="%s" class="button" onclick="return confirm(\'Alle Demo-Beiträge wirklich löschen?\');">Alle Demo-Beiträge löschen</a>
                         <a href="%s" class="button">Beiträge ansehen</a>
-                    </div>
-                </div>',
-                $postCount,
-                esc_url($generateUrl),
-                esc_url($deleteUrl),
-                esc_url(admin_url('edit.php')),
+                    </div>',
+                    esc_url($generateUrl),
+                    esc_url($deleteUrl),
+                    esc_url(admin_url('edit.php')),
+                ),
             );
         }
 
-        return sprintf(
-            '<div style="padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; margin-bottom: 20px;">
-                <p style="margin: 0; color: #856404;"><strong>Keine Blogbeiträge vorhanden</strong></p>
-                <p style="margin: 10px 0; color: #856404;">Erstellt 5 Beispiel-Blogbeiträge mit realistischem Inhalt zum Testen.</p>
+        return self::renderNoticeBox(
+            'warning',
+            'Keine Demo-Blogbeiträge vorhanden',
+            sprintf(
+                '<p style="margin: 10px 0; color: #856404;">Erstellt 5 Beispiel-Blogbeiträge mit realistischem Inhalt zum Testen.</p>
                 <p style="margin: 10px 0 0 0;">
                     <a href="%s" class="button button-primary">Demo-Beiträge erstellen</a>
-                </p>
-            </div>',
-            esc_url($generateUrl),
+                </p>',
+                esc_url($generateUrl),
+            ),
         );
     }
 
@@ -1311,6 +1358,12 @@ class Options
             return $guard;
         }
 
+        // This message field is admin-UI only; skip the backup directory
+        // scan on frontend requests (acf/init fires on every page view).
+        if (!is_admin()) {
+            return '';
+        }
+
         $backupSets = \WordpressStarter\Providers\DesignTokenServiceProvider::getAvailableBackupSets();
 
         if (empty($backupSets)) {
@@ -1375,6 +1428,12 @@ class Options
         $guard = self::designTokenGuard();
         if ($guard !== null) {
             return $guard;
+        }
+
+        // This message field is admin-UI only; skip the backup directory
+        // scan on frontend requests (acf/init fires on every page view).
+        if (!is_admin()) {
+            return '';
         }
 
         $lastBackup = \WordpressStarter\Providers\DesignTokenServiceProvider::getLastBackupTime();

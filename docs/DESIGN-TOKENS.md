@@ -118,9 +118,9 @@ Semantische Tokens referenzieren Primitives via Figma-Alias-Daten. Der Transform
 
 ```css
 .custom-element {
-  background: var(--bg-surface);
-  color: var(--text-content);
-  border-color: var(--border-line);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-default);
 }
 ```
 
@@ -147,12 +147,12 @@ Semantische Tokens referenzieren Primitives via Figma-Alias-Daten. Der Transform
 ### Rahmen (`border-*`)
 
 - `border-line` - Standard-Rahmen
-- `border-line-secondary` - Dezenter Rahmen
+- `border-line-subtle` - Dezenter Rahmen
 - `border-line-brand` - Markenfarbe
 
 ### Icons (`icon-*`)
 
-- `icon-default` - Standard-Icon-Farbe
+- `icon` - Standard-Icon-Farbe
 - `icon-secondary` - Gedämpft
 - `icon-brand` - Markenfarbe
 

@@ -4,7 +4,7 @@
     "module": "ESNext",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "jsx": "preserve",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowJs": true,
     "checkJs": false,
     "strict": true,
@@ -15,19 +15,10 @@
     "isolatedModules": true,
     "noEmit": true,
     "types": ["vite/client", "alpinejs"],
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["resources/*"]
+      "@/*": ["./resources/*"]
     }
   },
-  "include": [
-    "resources/**/*",
-    "src/types/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "vendor",
-    "dist",
-    "compiled"
-  ]
+  "include": ["resources/**/*", "src/types/**/*"],
+  "exclude": ["node_modules", "vendor", "dist", "compiled"]
 }

@@ -14,6 +14,7 @@
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
+@if($title || !empty($images))
 <x-section :anchor="$sectionAnchor" :background="$background" class="gallery">
     @if($title)
         <h2 class="mb-12 text-center">{!! $title !!}</h2>
@@ -30,8 +31,7 @@
                 @if($imageId && $full)
                     @php
                         $imgAlt = get_post_meta($imageId, '_wp_attachment_image_alt', true);
-                        $imgCaption = wp_get_attachment_caption($imageId);
-                        $accessibleLabel = $imgAlt ?: $imgCaption;
+                        $accessibleLabel = $imgAlt ?: $caption;
                         if (defined('WP_DEBUG') && WP_DEBUG && !$accessibleLabel) {
                             trigger_error(sprintf('Gallery image #%d is missing alt text and caption.', $imageId), E_USER_WARNING);
                         }
@@ -56,5 +56,6 @@
         </x-grid>
     @endif
 </x-section>
+@endif
 
 {{-- Gallery zoom is initialized in app.ts via initGalleryZoom() --}}

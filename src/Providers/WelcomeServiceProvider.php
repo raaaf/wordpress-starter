@@ -16,6 +16,15 @@ use WordpressStarter\ThemeContext;
  */
 class WelcomeServiceProvider extends ServiceProvider
 {
+    /**
+     * Post meta flag marking an attachment as one this importer created.
+     *
+     * Lets ContentSetupService::rerun() safely delete only the styleguide
+     * placeholder attachments it is responsible for, never an unrelated
+     * attachment that happens to share a cached ID.
+     */
+    public const STYLEGUIDE_IMAGE_META_KEY = '_wp_starter_styleguide_image';
+
     private static function optActivated(): string
     {
         return ThemeContext::optionKey('theme_activated');
@@ -29,6 +38,32 @@ class WelcomeServiceProvider extends ServiceProvider
     private static function optPageId(): string
     {
         return ThemeContext::optionKey('styleguide_page_id');
+    }
+
+    /**
+     * Resolve the cached styleguide page ID, tolerating a stale value.
+     *
+     * The cached option can point at a page that was deleted outright, or
+     * at a post ID a user has since re-purposed. Both must be treated as
+     * "no styleguide page" rather than trusted blindly.
+     *
+     * @return int Page ID if it still resolves to a page, 0 otherwise.
+     */
+    private static function resolveStyleguidePageId(): int
+    {
+        $pageId = (int) get_option(self::optPageId());
+
+        if ($pageId <= 0) {
+            return 0;
+        }
+
+        $post = get_post($pageId);
+
+        if (!$post || $post->post_type !== 'page') {
+            return 0;
+        }
+
+        return $pageId;
     }
 
     private static function optImages(): string
@@ -227,8 +262,7 @@ class WelcomeServiceProvider extends ServiceProvider
             return;
         }
 
-        $existingPageId = get_option(self::optPageId());
-        if ($existingPageId && get_post($existingPageId)) {
+        if (self::resolveStyleguidePageId() > 0) {
             return;
         }
 
@@ -462,9 +496,9 @@ class WelcomeServiceProvider extends ServiceProvider
             wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu erstellen.', 'wp-starter'));
         }
 
-        $existingPageId = get_option(self::optPageId());
-        if ($existingPageId && get_post($existingPageId)) {
-            wp_delete_post( (int) $existingPageId, true);
+        $existingPageId = self::resolveStyleguidePageId();
+        if ($existingPageId > 0) {
+            wp_delete_post($existingPageId, true);
         }
 
         $pageId = $this->createStyleguidePage();
@@ -503,11 +537,11 @@ class WelcomeServiceProvider extends ServiceProvider
             wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu bearbeiten.', 'wp-starter'));
         }
 
-        $existingPageId = get_option(self::optPageId());
-        if ($existingPageId) {
-            wp_untrash_post( (int) $existingPageId);
+        $existingPageId = self::resolveStyleguidePageId();
+        if ($existingPageId > 0) {
+            wp_untrash_post($existingPageId);
 
-            $editUrl = get_edit_post_link( (int) $existingPageId, 'url');
+            $editUrl = get_edit_post_link($existingPageId, 'url');
             if ($editUrl) {
                 wp_safe_redirect($editUrl);
                 exit;
@@ -537,11 +571,11 @@ class WelcomeServiceProvider extends ServiceProvider
             wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu löschen.', 'wp-starter'));
         }
 
-        $existingPageId = get_option(self::optPageId());
-        if ($existingPageId) {
-            wp_delete_post( (int) $existingPageId, true);
-            delete_option(self::optPageId());
+        $existingPageId = self::resolveStyleguidePageId();
+        if ($existingPageId > 0) {
+            wp_delete_post($existingPageId, true);
         }
+        delete_option(self::optPageId());
 
         wp_safe_redirect(admin_url('admin.php?page=theme-options-tools'));
         exit;
@@ -666,6 +700,9 @@ class WelcomeServiceProvider extends ServiceProvider
             'post_title' => $title,
             'post_content' => '',
             'post_status' => 'inherit',
+            'meta_input' => [
+                self::STYLEGUIDE_IMAGE_META_KEY => 1,
+            ],
         ];
 
         $attachmentId = wp_insert_attachment($attachment, $newFilePath);

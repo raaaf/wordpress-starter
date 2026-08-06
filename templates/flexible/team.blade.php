@@ -39,6 +39,7 @@
     }
 @endphp
 
+@if($title || !empty($members))
 <x-section :anchor="$sectionAnchor" :background="$background" class="team">
     @if($title)
         <h2 class="mb-12 text-center">{!! $title !!}</h2>
@@ -128,3 +129,4 @@
         </div>
     @endif
 </x-section>
+@endif

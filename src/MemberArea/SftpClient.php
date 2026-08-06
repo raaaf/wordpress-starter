@@ -110,15 +110,4 @@ class SftpClient
     {
         return $sftp->file_exists($remotePath);
     }
-
-    /**
-     * Read entire file contents from SFTP into a string.
-     * Returns null on failure.
-     */
-    public static function readFile(SFTP $sftp, string $remotePath): ?string
-    {
-        $contents = $sftp->get($remotePath);
-
-        return $contents === false ? null : $contents;
-    }
 }

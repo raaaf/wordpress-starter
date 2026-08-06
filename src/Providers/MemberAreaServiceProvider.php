@@ -227,31 +227,43 @@ class MemberAreaServiceProvider extends ServiceProvider
                 return;
             }
 
-            $posts = get_posts([
-                'post_type' => 'member_download',
-                'post_status' => ['publish', 'draft'],
-                'posts_per_page' => -1,
-                'meta_query' => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-                    ['key' => 'download_source_type', 'value' => 'sftp'],
-                    ['key' => 'download_sftp_password', 'compare' => 'EXISTS'],
-                ],
-                'fields' => 'ids',
-            ]);
+            $batchSize = 100;
+            $paged = 1;
 
-            foreach ($posts as $postId) {
-                $pw = get_post_meta($postId, 'download_sftp_password', true);
-                if (!is_string($pw) || $pw === '' || Crypto::isEncrypted($pw)) {
-                    continue;
+            do {
+                $posts = get_posts([
+                    'post_type' => 'member_download',
+                    'post_status' => ['publish', 'draft'],
+                    'posts_per_page' => $batchSize,
+                    'paged' => $paged,
+                    'meta_query' => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+                        ['key' => 'download_source_type', 'value' => 'sftp'],
+                        ['key' => 'download_sftp_password', 'compare' => 'EXISTS'],
+                    ],
+                    'fields' => 'ids',
+                ]);
+
+                foreach ($posts as $postId) {
+                    $pw = get_post_meta($postId, 'download_sftp_password', true);
+                    if (!is_string($pw) || $pw === '' || Crypto::isEncrypted($pw)) {
+                        continue;
+                    }
+
+                    try {
+                        update_post_meta($postId, 'download_sftp_password', Crypto::encrypt($pw));
+                    } catch (RuntimeException $e) {
+                        // AUTH_KEY not configured — skip, but make the condition visible
+                        error_log(ThemeContext::logPrefix() . ': SFTP password migration skipped for post ' . $postId . ' — ' . $e->getMessage()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                    }
                 }
 
-                try {
-                    update_post_meta($postId, 'download_sftp_password', Crypto::encrypt($pw));
-                } catch (RuntimeException $e) {
-                    // AUTH_KEY not configured — skip, but make the condition visible
-                    error_log(ThemeContext::logPrefix() . ': SFTP password migration skipped for post ' . $postId . ' — ' . $e->getMessage()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-                }
-            }
+                $postsCount = count($posts);
+                $paged++;
+            } while ($postsCount === $batchSize);
 
+            // Only mark the migration done once every batch has been processed —
+            // if this admin_init run is interrupted mid-loop, the flag stays unset
+            // and the next admin_init run resumes (already-encrypted values are skipped above).
             update_option(ThemeContext::optionKey('sftp_passwords_encrypted'), '1', autoload: false);
         });
 

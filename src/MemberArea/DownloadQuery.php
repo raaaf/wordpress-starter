@@ -139,6 +139,7 @@ class DownloadQuery
         } else {
             $total = $wpQuery->found_posts;
             $pages = max(1, (int) ceil($total / $perPage));
+            $page = min($page, $pages);
         }
 
         // Build term label cache

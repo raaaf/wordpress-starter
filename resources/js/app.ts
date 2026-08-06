@@ -4,7 +4,7 @@ import collapse from '@alpinejs/collapse';
 import intersect from '@alpinejs/intersect';
 import type { AlpineMagics } from '../../src/types/alpine';
 import { registerMemberAreaComponents } from './member-area';
-import { createStatsCounterCore } from './stats-counter';
+import { createStatsCounterCore, type StatsCounterCore } from './stats-counter';
 import { initColumnHeadingAlignment } from './column-headings';
 
 // Declare localized strings from WordPress (object name is fixed as 'themeStrings' for all themes)
@@ -22,7 +22,6 @@ declare const themeStrings: {
 export interface NavigationComponent extends AlpineMagics {
   isOpen: boolean;
   toggleButton: HTMLElement | null;
-  mobileNav: HTMLElement | null;
   mobileNavContainer: HTMLElement | null;
   toggle(): void;
   close(): void;
@@ -39,12 +38,10 @@ export function createNavigationComponent(): NavigationComponent {
     ...({} as AlpineMagics),
     isOpen: false,
     toggleButton: null,
-    mobileNav: null,
     mobileNavContainer: null,
 
     init() {
       this.toggleButton = this.$el.querySelector('[data-nav-toggle]');
-      this.mobileNav = this.$el.querySelector('nav[x-show="isOpen"]');
       this.mobileNavContainer = this.$el.querySelector('.mobile-nav-container');
       this.initMobileSubmenus();
     },
@@ -140,9 +137,13 @@ export function createNavigationComponent(): NavigationComponent {
     },
 
     getFocusableElements(): HTMLElement[] {
-      if (!this.mobileNav) return [];
+      if (!this.mobileNavContainer) return [];
       const selector = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
-      return Array.from(this.mobileNav.querySelectorAll<HTMLElement>(selector));
+      // offsetParent is null for display:none elements (e.g. collapsed submenus),
+      // filtering them out so the trap's boundaries are always elements Tab can reach.
+      return Array.from(this.mobileNavContainer.querySelectorAll<HTMLElement>(selector)).filter(
+        (el) => el.offsetParent !== null
+      );
     },
   };
 }
@@ -151,7 +152,7 @@ export function createNavigationComponent(): NavigationComponent {
 // Stats Counter Component
 // ============================================
 
-export type StatsCounterComponent = ReturnType<typeof createStatsCounterComponent>;
+export type StatsCounterComponent = StatsCounterCore & AlpineMagics;
 
 export function createStatsCounterComponent(target: number): StatsCounterComponent {
   return {
@@ -310,6 +311,11 @@ export interface BeforeAfterComponent {
   handleTouchStart(event: TouchEvent): void;
 }
 
+// Shared position math for both mouse and touch dragging.
+function calculateSliderPosition(clientX: number, rect: DOMRect): number {
+  return Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+}
+
 export function createBeforeAfterComponent(): BeforeAfterComponent {
   return {
     position: 50,
@@ -324,7 +330,7 @@ export function createBeforeAfterComponent(): BeforeAfterComponent {
       const rect = container.getBoundingClientRect();
 
       const onMove = (e: MouseEvent) => {
-        this.position = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+        this.position = calculateSliderPosition(e.clientX, rect);
       };
 
       const onUp = () => {
@@ -347,10 +353,7 @@ export function createBeforeAfterComponent(): BeforeAfterComponent {
 
       const onMove = (e: TouchEvent) => {
         const touch = e.touches[0];
-        this.position = Math.max(
-          0,
-          Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100)
-        );
+        this.position = calculateSliderPosition(touch.clientX, rect);
       };
 
       const onEnd = () => {
@@ -360,65 +363,6 @@ export function createBeforeAfterComponent(): BeforeAfterComponent {
 
       document.addEventListener('touchmove', onMove as EventListener);
       document.addEventListener('touchend', onEnd);
-    },
-  };
-}
-
-// ============================================
-// Logo Slider Component
-// ============================================
-
-export interface LogoSliderLogo {
-  image: string;
-  link: string;
-  name: string;
-}
-
-export interface LogoSliderComponent {
-  logos: LogoSliderLogo[];
-  autoplay: boolean;
-  currentIndex: number;
-  paused: boolean;
-  intervalId: ReturnType<typeof setInterval> | null;
-  init(): void;
-  pause(): void;
-  resume(): void;
-  destroy(): void;
-}
-
-export function createLogoSliderComponent(
-  logos: LogoSliderLogo[],
-  autoplay: boolean
-): LogoSliderComponent {
-  return {
-    logos,
-    autoplay,
-    currentIndex: 0,
-    paused: false,
-    intervalId: null,
-
-    init() {
-      if (this.autoplay && this.logos.length > 1) {
-        this.intervalId = setInterval(() => {
-          if (!this.paused) {
-            this.currentIndex = (this.currentIndex + 1) % this.logos.length;
-          }
-        }, 3000);
-      }
-    },
-
-    pause() {
-      this.paused = true;
-    },
-
-    resume() {
-      this.paused = false;
-    },
-
-    destroy() {
-      if (this.intervalId) {
-        clearInterval(this.intervalId);
-      }
     },
   };
 }
@@ -438,9 +382,6 @@ Alpine.plugin(intersect);
 Alpine.data('navigation', createNavigationComponent);
 Alpine.data('statsCounter', (target: number) => createStatsCounterComponent(target));
 Alpine.data('beforeAfterSlider', createBeforeAfterComponent);
-Alpine.data('logoSlider', (logos: LogoSliderLogo[], autoplay: boolean) =>
-  createLogoSliderComponent(logos, autoplay)
-);
 
 // Register member area components (only registered when the module is present)
 registerMemberAreaComponents(Alpine);

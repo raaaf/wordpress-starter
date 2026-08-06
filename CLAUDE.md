@@ -6,7 +6,7 @@ Guidance for Claude Code when working with this WordPress starter theme.
 
 - **Namespace:** `WordpressStarter\`
 - **Text Domain:** `wp-starter`
-- **PHP:** 8.4+ with strict types
+- **PHP:** 8.3+ with strict types
 - **Dev Server:** `npm run dev` (localhost:5180)
 - **Editor:** Classic Editor + ACF Flexible Content (Gutenberg disabled)
 
@@ -172,6 +172,11 @@ Configuration in `src/Acf/AcfExtended.php`.
 - `@flexible('field_name')...@endflexible`
 - `@layout('layout_name')...@endlayout`
 
+**Groups:**
+
+- `@group('name')...@endgroup` - Conditional block around an ACF group field
+- `@kses(...)` - Sanitize HTML via `wp_kses_post()`
+
 ## ACF Field Definitions
 
 Single source of truth in `src/Acf/FieldDefinitions.php`:
@@ -205,9 +210,12 @@ Registered via `Alpine.data()` in `resources/js/app.ts`:
 - `navigation` - Mobile menu with focus trap
 - `statsCounter` - Animated number counters
 - `beforeAfterSlider` - Image comparison slider
-- `logoSlider` - Partner logo carousel
+- `memberLogin` - Member area login form
+- `downloadTable` - Member area download table
 
-Components using inline `x-data` (not registered via `Alpine.data`): `tabs`, `accordion`. The gallery uses medium-zoom directly, not Alpine.
+`memberLogin` and `downloadTable` are registered in `resources/js/member-area.ts` and wired in via `registerMemberAreaComponents(Alpine)` in `resources/js/app.ts`.
+
+Components using inline `x-data` (not registered via `Alpine.data`): `tabs`, `accordion`. The logo slider (`templates/flexible/logo-slider.blade.php`) uses inline `x-data` plus a CSS animation, pausing on hover and focus and honouring `prefers-reduced-motion`. The gallery uses medium-zoom directly, not Alpine.
 
 ## Adding New Layouts
 
@@ -375,3 +383,11 @@ LogServiceProvider::exception($e);
 - SVG uploads sanitized via `enshrined/svg-sanitize`
 - AJAX handlers protected by rate limiting
 - See `docs/` for detailed documentation
+
+## Audit Context
+
+**kses `<form action>` allowlist (`AcfServiceProvider::allowFormControlTags()`):** `action` bleibt bewusst im Allowlist für `<form>` in Post-Kontext, überlebt also `wp_kses_post()`. Grund: ohne `action` rendert ein Contact-Form-7-Shortcode in einem WYSIWYG-Feld als kaputtes halbes Formular (Labels und ein Textarea, aber keine Inputs, kein `<form>`-Element).
+
+Akzeptiertes Risiko, unbeschönigt: jede Rolle, die Content bearbeiten darf, kann damit ein Formular veröffentlichen, das an eine beliebige externe URL sendet. Auf Multisite ist das weiter gefasst als auf einer Einzelseite, da dort selbst Administratoren kein `unfiltered_html` haben.
+
+Das ist eine getroffene Entscheidung, kein Defekt. Ein künftiger Audit soll das nicht erneut als Sicherheitslücke melden und entfernen. Soll sich das ändern, ist das eine Produktentscheidung, kein Audit-Fix.

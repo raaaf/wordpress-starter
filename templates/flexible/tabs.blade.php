@@ -13,6 +13,7 @@
     $uniqueId = 'tabs-' . uniqid();
 @endphp
 
+@if($title || !empty($tabs))
 <x-section :anchor="$sectionAnchor" :background="$background" class="tabs">
     @if($title)
         <h2 class="mb-8 text-center">{!! $title !!}</h2>
@@ -89,3 +90,4 @@
         </div>
     @endif
 </x-section>
+@endif

@@ -10,6 +10,7 @@
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $stats = get_sub_field('stats') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
+    $statsId = uniqid();
 
     // Use explicit grid classes to ensure Tailwind includes them
     $statsCount = count($stats);
@@ -21,6 +22,7 @@
     };
 @endphp
 
+@if($title || !empty($stats))
 <x-section :anchor="$sectionAnchor" :background="$background" class="stats">
     @if($title)
         <h2 class="mb-12 text-center">{!! $title !!}</h2>
@@ -40,7 +42,7 @@
                     class="p-6"
                     role="group"
                     @if($label)
-                        aria-labelledby="stat-label-{{ $loop->index }}"
+                        aria-labelledby="stat-label-{{ $statsId }}-{{ $loop->index }}"
                     @else
                         aria-label="{{ __('Statistik', 'wp-starter') }}"
                     @endif
@@ -57,10 +59,11 @@
                     <span class="sr-only">{{ $number }}{{ $suffix ? ' ' . $suffix : '' }}</span>
 
                     @if($label)
-                        <p class="text-body-large text-content-secondary" id="stat-label-{{ $loop->index }}">{{ $label }}</p>
+                        <p class="text-body-large text-content-secondary" id="stat-label-{{ $statsId }}-{{ $loop->index }}">{{ $label }}</p>
                     @endif
                 </div>
             @endforeach
         </div>
     @endif
 </x-section>
+@endif

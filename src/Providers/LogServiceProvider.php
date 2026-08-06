@@ -141,7 +141,26 @@ class LogServiceProvider extends ServiceProvider
             'exception' => get_class($exception),
             'file' => $exception->getFile(),
             'line' => $exception->getLine(),
-            'trace' => array_slice($exception->getTrace(), 0, 5),
+            'trace' => self::sanitizeTrace($exception),
         ]);
+    }
+
+    /**
+     * Build a loggable trace with call arguments stripped.
+     *
+     * PHP includes each frame's function arguments in Exception::getTrace()
+     * by default, so an exception thrown while a password, token or API key
+     * is on the call stack would otherwise write that value in plaintext
+     * into debug.log. File, line, function, class and type are kept since
+     * they carry no secrets and are what makes the trace useful.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private static function sanitizeTrace(Throwable $exception): array
+    {
+        return array_map(
+            static fn (array $frame): array => array_diff_key($frame, ['args' => true]),
+            array_slice($exception->getTrace(), 0, 5),
+        );
     }
 }
