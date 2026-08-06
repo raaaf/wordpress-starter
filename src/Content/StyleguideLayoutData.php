@@ -108,12 +108,15 @@ class StyleguideLayoutData
         ]);
 
         $layouts[] = $this->getOneColumnLayoutData();
+        $layouts[] = $this->getOneColumnImageLayoutData();
         $layouts[] = $this->getTwoColumnsLayoutData();
         $layouts[] = $this->getThreeColumnsLayoutData();
         $layouts[] = $this->getFourColumnsLayoutData();
         $layouts[] = $this->getOneThirdTwoThirdsLayoutData();
         $layouts[] = $this->getTwoThirdsOneThirdLayoutData();
         $layouts[] = $this->getTwoColumnsImagesLayoutData();
+        $layouts[] = $this->getThreeColumnsImagesLayoutData();
+        $layouts[] = $this->getFourColumnsImagesLayoutData();
         $layouts[] = $this->getDividerLayoutData();
 
         // =====================================================================
@@ -187,6 +190,7 @@ class StyleguideLayoutData
         ]);
 
         $layouts[] = $this->getCtaLayoutData();
+        $layouts[] = $this->getButtonLayoutData();
 
         // =====================================================================
         // TEIL 10: DATEN & TABELLEN
@@ -228,6 +232,26 @@ class StyleguideLayoutData
         return $this->layout('one_column', [
             'label' => 'Über uns',
             'content' => '<h3>Einspaltiger Inhalt</h3><p>Dies ist ein Beispiel für einen einspaltigen Textblock. Hier können Sie längere Texte, Überschriften und andere Inhalte platzieren. Der Text fließt über die gesamte verfügbare Breite.</p><p>Nutzen Sie dieses Layout für Einleitungstexte, ausführliche Beschreibungen oder wichtige Mitteilungen, die die volle Aufmerksamkeit des Lesers erfordern.</p>',
+            'background_color' => 'primary',
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function getOneColumnImageLayoutData(): array
+    {
+        return $this->layout('one_column_image', [
+            'show_section_header' => false,
+            'section_chip' => '',
+            'section_headline' => '',
+            'section_description' => '',
+            'section_alignment' => 'center',
+            'label' => 'Fallstudie',
+            'image' => $this->imageId(1),
+            'content' => '<h4>Projekt Alpha</h4><p>Eine ausführliche Fallstudie mit Bild und Beschreibung. Dieses Layout eignet sich für Referenzen, Case Studies oder einzelne Highlight-Projekte.</p>',
+            'accordion' => [
+                ['title' => 'Welche Herausforderung gab es?', 'content' => '<p>Der Kunde benötigte eine skalierbare Lösung für wachsende Anforderungen bei gleichbleibender Ladezeit.</p>'],
+                ['title' => 'Wie wurde sie gelöst?', 'content' => '<p>Durch eine modulare Architektur und gezielte Performance-Optimierungen konnte die Ladezeit spürbar reduziert werden.</p>'],
+            ],
             'background_color' => 'primary',
         ]);
     }
@@ -294,6 +318,60 @@ class StyleguideLayoutData
             'image_2' => $this->imageId(3),
             'column_2' => '<h4>Projekt B</h4><p>Beschreibung des zweiten Projekts. Beide Karten sind gleich groß und wirken ausgewogen.</p>',
             'background_color' => 'primary',
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function getThreeColumnsImagesLayoutData(): array
+    {
+        return $this->layout('three_columns_images', [
+            'show_section_header' => true,
+            'section_chip' => 'Portfolio',
+            'section_headline' => 'Unsere Projekte im Überblick',
+            'section_description' => 'Drei ausgewählte Referenzen mit Bild und kurzer Beschreibung.',
+            'section_alignment' => 'center',
+            'label_1' => '',
+            'image_1' => $this->imageId(2),
+            'column_1' => '<h4>Projekt A</h4><p>Relaunch einer Unternehmenswebsite mit Fokus auf Performance und Barrierefreiheit.</p>',
+            'accordion_1' => [],
+            'label_2' => '',
+            'image_2' => $this->imageId(3),
+            'column_2' => '<h4>Projekt B</h4><p>Entwicklung eines individuellen Mitgliederbereichs mit geschütztem Download-Center.</p>',
+            'accordion_2' => [],
+            'label_3' => '',
+            'image_3' => $this->imageId(4),
+            'column_3' => '<h4>Projekt C</h4><p>Konzeption und Umsetzung eines mehrsprachigen Onlineshops.</p>',
+            'accordion_3' => [],
+            'background_color' => 'secondary',
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function getFourColumnsImagesLayoutData(): array
+    {
+        return $this->layout('four_columns_images', [
+            'show_section_header' => false,
+            'section_chip' => '',
+            'section_headline' => '',
+            'section_description' => '',
+            'section_alignment' => 'center',
+            'label_1' => 'Schritt 1',
+            'image_1' => $this->imageId(5),
+            'column_1' => '<h4>Beratung</h4><p>Analyse der Anforderungen und Zielsetzung.</p>',
+            'accordion_1' => [],
+            'label_2' => 'Schritt 2',
+            'image_2' => $this->imageId(6),
+            'column_2' => '<h4>Konzeption</h4><p>Erarbeitung von Struktur und Design.</p>',
+            'accordion_2' => [],
+            'label_3' => 'Schritt 3',
+            'image_3' => $this->imageId(1),
+            'column_3' => '<h4>Umsetzung</h4><p>Technische Realisierung des Projekts.</p>',
+            'accordion_3' => [],
+            'label_4' => 'Schritt 4',
+            'image_4' => $this->imageId(2),
+            'column_4' => '<h4>Übergabe</h4><p>Launch und Einweisung in die Pflege der Inhalte.</p>',
+            'accordion_4' => [],
+            'background_color' => 'brand-subtle',
         ]);
     }
 
@@ -508,6 +586,16 @@ class StyleguideLayoutData
             'title' => 'Bereit loszulegen?',
             'content' => 'Kontaktieren Sie uns noch heute für ein unverbindliches Beratungsgespräch. Wir freuen uns darauf, gemeinsam mit Ihnen Ihre Ziele zu erreichen.',
             'button' => ['title' => 'Jetzt Kontakt aufnehmen', 'url' => '#kontakt', 'target' => ''],
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function getButtonLayoutData(): array
+    {
+        return $this->layout('button', [
+            'button' => ['title' => 'Beratungstermin vereinbaren', 'url' => '#kontakt', 'target' => ''],
+            'variant' => 'secondary',
+            'alignment' => 'center',
         ]);
     }
 
