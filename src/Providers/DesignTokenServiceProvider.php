@@ -372,6 +372,83 @@ class DesignTokenServiceProvider extends ServiceProvider
     }
 
     /**
+     * Validate, back up, copy, transform and sync uploaded token files
+     *
+     * Shared work for the POST form handler and the AJAX handler for token
+     * upload. Only produces a result - callers stay responsible for their own
+     * response style (redirect + admin notice vs. wp_send_json_*).
+     *
+     * @param array<string, array<string, mixed>> $files Raw $_FILES array
+     *
+     * @return array{
+     *     success: bool,
+     *     message: string,
+     *     details?: string,
+     *     duration?: float,
+     *     validationErrors?: array<int, string>,
+     *     noFilesSelected?: bool,
+     *     copyErrors?: array<int, string>,
+     * }
+     */
+    private function processTokenUpload(array $files): array
+    {
+        ['errors' => $errors, 'uploaded' => $uploaded] = $this->validateUploadedFiles($files);
+
+        if (!empty($errors)) {
+            return [
+                'success' => false,
+                'message' => __('Token-Upload fehlgeschlagen:', 'wp-starter'),
+                'validationErrors' => $errors,
+            ];
+        }
+
+        if (empty($uploaded)) {
+            return [
+                'success' => false,
+                'message' => __('Keine Dateien zum Upload ausgewählt.', 'wp-starter'),
+                'noFilesSelected' => true,
+            ];
+        }
+
+        // Create backup before overwriting
+        $this->createBackup();
+
+        // Copy files to tokens directory
+        $tokensDir = get_template_directory() . '/' . self::TOKENS_DIR;
+        $copyErrors = [];
+
+        foreach ($uploaded as $type => $tmpFile) {
+            $targetFile = $tokensDir . "/{$type}.tokens.json";
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy
+            if (!copy($tmpFile, $targetFile)) {
+                $copyErrors[] = sprintf(
+                    /* translators: %s: token type */
+                    __('Konnte %s nicht speichern', 'wp-starter'),
+                    $type,
+                );
+            }
+        }
+
+        if (!empty($copyErrors)) {
+            return [
+                'success' => false,
+                'message' => '',
+                'copyErrors' => $copyErrors,
+            ];
+        }
+
+        // Run transform script
+        $result = $this->runTokenTransform();
+
+        // Sync ACF color picker values from uploaded tokens
+        if ($result['success']) {
+            $this->syncColorPickersFromTokens();
+        }
+
+        return $result;
+    }
+
+    /**
      * Handle token file upload
      */
     private function handleUploadTokens(): void
@@ -401,54 +478,27 @@ class DesignTokenServiceProvider extends ServiceProvider
         }
 
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- File uploads handled via WordPress file functions
-        ['errors' => $errors, 'uploaded' => $uploaded] = $this->validateUploadedFiles($_FILES);
+        $result = $this->processTokenUpload($_FILES);
 
-        if (!empty($errors)) {
+        if (isset($result['validationErrors'])) {
             $this->addAdminNotice(
                 'error',
-                __('Token-Upload fehlgeschlagen:', 'wp-starter') . '<ul><li>' . implode('</li><li>', array_map('esc_html', $errors)) . '</li></ul>',
+                $result['message'] . '<ul><li>' . implode('</li><li>', array_map('esc_html', $result['validationErrors'])) . '</li></ul>',
             );
 
             return;
         }
 
-        if (empty($uploaded)) {
-            $this->addAdminNotice('warning', __('Keine Dateien zum Upload ausgewählt.', 'wp-starter'));
+        if (!empty($result['noFilesSelected'])) {
+            $this->addAdminNotice('warning', $result['message']);
 
             return;
         }
 
-        // Create backup before overwriting
-        $this->createBackup();
-
-        // Copy files to tokens directory
-        $tokensDir = get_template_directory() . '/' . self::TOKENS_DIR;
-        $copyErrors = [];
-
-        foreach ($uploaded as $type => $tmpFile) {
-            $targetFile = $tokensDir . "/{$type}.tokens.json";
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy
-            if (!copy($tmpFile, $targetFile)) {
-                $copyErrors[] = sprintf(
-                    /* translators: %s: token type */
-                    __('Konnte %s nicht speichern', 'wp-starter'),
-                    $type,
-                );
-            }
-        }
-
-        if (!empty($copyErrors)) {
-            $this->addAdminNotice('error', implode('<br>', array_map('esc_html', $copyErrors)));
+        if (isset($result['copyErrors'])) {
+            $this->addAdminNotice('error', implode('<br>', array_map('esc_html', $result['copyErrors'])));
 
             return;
-        }
-
-        // Run transform script
-        $result = $this->runTokenTransform();
-
-        // Sync ACF color picker values from uploaded tokens
-        if ($result['success']) {
-            $this->syncColorPickersFromTokens();
         }
 
         // Store notice as transient (survives redirect)
@@ -530,6 +580,89 @@ class DesignTokenServiceProvider extends ServiceProvider
     }
 
     /**
+     * Validate timestamp, restore backup files, transform and sync
+     *
+     * Shared work for the POST form handler and the AJAX handler for backup
+     * restore. Only produces a result - callers stay responsible for their
+     * own response style (redirect + admin notice vs. wp_send_json_*).
+     *
+     * @param string $timestamp Backup timestamp (YYYY-MM-DD_HH-MM-SS)
+     *
+     * @return array{
+     *     success: bool,
+     *     message: string,
+     *     details?: string,
+     *     duration?: float,
+     *     restored?: array<int, string>,
+     *     copyErrors?: array<int, string>,
+     * }
+     */
+    private function processBackupRestore(string $timestamp): array
+    {
+        if (empty($timestamp)) {
+            return [
+                'success' => false,
+                'message' => __('Kein Backup-Zeitpunkt ausgewählt.', 'wp-starter'),
+            ];
+        }
+
+        // Validate timestamp format (YYYY-MM-DD_HH-MM-SS)
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/', $timestamp)) {
+            return [
+                'success' => false,
+                'message' => __('Ungültiger Zeitstempel.', 'wp-starter'),
+            ];
+        }
+
+        $backupDir = get_template_directory() . '/' . self::BACKUP_DIR;
+        $tokensDir = get_template_directory() . '/' . self::TOKENS_DIR;
+        $restored = [];
+        $copyErrors = [];
+
+        foreach (self::TOKEN_TYPES as $type) {
+            $backupFile = $backupDir . "/{$type}_{$timestamp}.tokens.json";
+            $targetFile = $tokensDir . "/{$type}.tokens.json";
+
+            if (!file_exists($backupFile)) {
+                continue;
+            }
+
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy
+            if (copy($backupFile, $targetFile)) {
+                $restored[] = $type;
+            } else {
+                $copyErrors[] = sprintf(
+                    /* translators: %s: token type */
+                    __('Konnte %s nicht wiederherstellen', 'wp-starter'),
+                    $type,
+                );
+            }
+        }
+
+        if (empty($restored)) {
+            return [
+                'success' => false,
+                'message' => __('Keine Backup-Dateien für diesen Zeitpunkt gefunden.', 'wp-starter'),
+            ];
+        }
+
+        // Regenerate CSS
+        $result = $this->runTokenTransform();
+
+        // Sync ACF color picker values from restored tokens
+        if ($result['success']) {
+            $this->syncColorPickersFromTokens();
+        }
+
+        $result['restored'] = $restored;
+        if (!empty($copyErrors)) {
+            $result['copyErrors'] = $copyErrors;
+        }
+
+        return $result;
+    }
+
+    /**
      * Handle backup restore action
      */
     private function handleRestoreBackup(): void
@@ -553,64 +686,20 @@ class DesignTokenServiceProvider extends ServiceProvider
 
         $timestamp = isset($_POST['backup_timestamp']) ? sanitize_text_field(wp_unslash($_POST['backup_timestamp'])) : '';
 
-        if (empty($timestamp)) {
-            $this->addAdminNotice('error', __('Kein Backup-Zeitpunkt ausgewählt.', 'wp-starter'));
+        $result = $this->processBackupRestore($timestamp);
+
+        if (!isset($result['restored'])) {
+            $this->addAdminNotice('error', $result['message']);
 
             return;
-        }
-
-        // Validate timestamp format (YYYY-MM-DD_HH-MM-SS)
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/', $timestamp)) {
-            $this->addAdminNotice('error', __('Ungültiger Zeitstempel.', 'wp-starter'));
-
-            return;
-        }
-
-        $backupDir = get_template_directory() . '/' . self::BACKUP_DIR;
-        $tokensDir = get_template_directory() . '/' . self::TOKENS_DIR;
-        $restored = [];
-        $errors = [];
-
-        foreach (self::TOKEN_TYPES as $type) {
-            $backupFile = $backupDir . "/{$type}_{$timestamp}.tokens.json";
-            $targetFile = $tokensDir . "/{$type}.tokens.json";
-
-            if (!file_exists($backupFile)) {
-                continue;
-            }
-
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy
-            if (copy($backupFile, $targetFile)) {
-                $restored[] = $type;
-            } else {
-                $errors[] = sprintf(
-                    /* translators: %s: token type */
-                    __('Konnte %s nicht wiederherstellen', 'wp-starter'),
-                    $type,
-                );
-            }
-        }
-
-        if (empty($restored)) {
-            $this->addAdminNotice('error', __('Keine Backup-Dateien für diesen Zeitpunkt gefunden.', 'wp-starter'));
-
-            return;
-        }
-
-        // Regenerate CSS
-        $result = $this->runTokenTransform();
-
-        // Sync ACF color picker values from restored tokens
-        if ($result['success']) {
-            $this->syncColorPickersFromTokens();
         }
 
         // Build notice message
         $noticeMessage = '';
         $noticeType = 'success';
 
-        if (!empty($errors)) {
-            $noticeMessage = implode('<br>', array_map('esc_html', $errors)) . '<br><br>';
+        if (!empty($result['copyErrors'])) {
+            $noticeMessage = implode('<br>', array_map('esc_html', $result['copyErrors'])) . '<br><br>';
             $noticeType = 'warning';
         }
 
@@ -618,7 +707,7 @@ class DesignTokenServiceProvider extends ServiceProvider
             $noticeMessage .= sprintf(
                 /* translators: %s: list of restored token types */
                 __('Backup erfolgreich wiederhergestellt: %s', 'wp-starter'),
-                implode(', ', $restored),
+                implode(', ', $result['restored']),
             );
         } else {
             $noticeMessage .= $result['message'];
@@ -658,47 +747,20 @@ class DesignTokenServiceProvider extends ServiceProvider
         }
 
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- File uploads handled via WordPress file functions
-        ['errors' => $errors, 'uploaded' => $uploaded] = $this->validateUploadedFiles($_FILES);
+        $result = $this->processTokenUpload($_FILES);
 
-        if (!empty($errors)) {
+        if (isset($result['validationErrors'])) {
             wp_send_json_error([
-                'message' => __('Token-Upload fehlgeschlagen:', 'wp-starter') . ' ' . implode(', ', $errors),
+                'message' => $result['message'] . ' ' . implode(', ', $result['validationErrors']),
             ]);
         }
 
-        if (empty($uploaded)) {
-            wp_send_json_error(['message' => __('Keine Dateien zum Upload ausgewählt.', 'wp-starter')]);
+        if (!empty($result['noFilesSelected'])) {
+            wp_send_json_error(['message' => $result['message']]);
         }
 
-        // Create backup before overwriting
-        $this->createBackup();
-
-        // Copy files to tokens directory
-        $tokensDir = get_template_directory() . '/' . self::TOKENS_DIR;
-        $copyErrors = [];
-
-        foreach ($uploaded as $type => $tmpFile) {
-            $targetFile = $tokensDir . "/{$type}.tokens.json";
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy
-            if (!copy($tmpFile, $targetFile)) {
-                $copyErrors[] = sprintf(
-                    /* translators: %s: token type */
-                    __('Konnte %s nicht speichern', 'wp-starter'),
-                    $type,
-                );
-            }
-        }
-
-        if (!empty($copyErrors)) {
-            wp_send_json_error(['message' => implode(', ', $copyErrors)]);
-        }
-
-        // Run transform script
-        $result = $this->runTokenTransform();
-
-        // Sync ACF color picker values from uploaded tokens
-        if ($result['success']) {
-            $this->syncColorPickersFromTokens();
+        if (isset($result['copyErrors'])) {
+            wp_send_json_error(['message' => implode(', ', $result['copyErrors'])]);
         }
 
         if ($result['success']) {
@@ -732,54 +794,14 @@ class DesignTokenServiceProvider extends ServiceProvider
 
         $timestamp = isset($_POST['timestamp']) ? sanitize_text_field(wp_unslash($_POST['timestamp'])) : '';
 
-        if (empty($timestamp)) {
-            wp_send_json_error(['message' => __('Kein Backup-Zeitpunkt ausgewählt.', 'wp-starter')]);
+        $result = $this->processBackupRestore($timestamp);
+
+        if (!isset($result['restored'])) {
+            wp_send_json_error(['message' => $result['message']]);
         }
 
-        // Validate timestamp format (YYYY-MM-DD_HH-MM-SS)
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/', $timestamp)) {
-            wp_send_json_error(['message' => __('Ungültiger Zeitstempel.', 'wp-starter')]);
-        }
-
-        $backupDir = get_template_directory() . '/' . self::BACKUP_DIR;
-        $tokensDir = get_template_directory() . '/' . self::TOKENS_DIR;
-        $restored = [];
-        $errors = [];
-
-        foreach (self::TOKEN_TYPES as $type) {
-            $backupFile = $backupDir . "/{$type}_{$timestamp}.tokens.json";
-            $targetFile = $tokensDir . "/{$type}.tokens.json";
-
-            if (!file_exists($backupFile)) {
-                continue;
-            }
-
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy
-            if (copy($backupFile, $targetFile)) {
-                $restored[] = $type;
-            } else {
-                $errors[] = sprintf(
-                    /* translators: %s: token type */
-                    __('Konnte %s nicht wiederherstellen', 'wp-starter'),
-                    $type,
-                );
-            }
-        }
-
-        if (empty($restored)) {
-            wp_send_json_error(['message' => __('Keine Backup-Dateien für diesen Zeitpunkt gefunden.', 'wp-starter')]);
-        }
-
-        // Regenerate CSS
-        $result = $this->runTokenTransform();
-
-        // Sync ACF color picker values from restored tokens
-        if ($result['success']) {
-            $this->syncColorPickersFromTokens();
-        }
-
-        if (!empty($errors)) {
-            wp_send_json_error(['message' => implode(', ', $errors)]);
+        if (!empty($result['copyErrors'])) {
+            wp_send_json_error(['message' => implode(', ', $result['copyErrors'])]);
         }
 
         if ($result['success']) {
@@ -787,7 +809,7 @@ class DesignTokenServiceProvider extends ServiceProvider
                 'message' => sprintf(
                     /* translators: %s: list of restored token types */
                     __('Backup erfolgreich wiederhergestellt: %s', 'wp-starter'),
-                    implode(', ', $restored),
+                    implode(', ', $result['restored']),
                 ),
             ]);
         } else {
@@ -1175,24 +1197,21 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     private function createColorToken(string $hex): array
     {
-        // Normalize hex
-        $hex = ltrim($hex, '#');
-        if (strlen($hex) === 3) {
-            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
-        }
+        $rgb = ColorPaletteGenerator::hexToRgb($hex) ?? ['r' => 0, 'g' => 0, 'b' => 0];
 
-        // Convert to RGB components (0-1 range)
-        $r = hexdec(substr($hex, 0, 2)) / 255;
-        $g = hexdec(substr($hex, 2, 2)) / 255;
-        $b = hexdec(substr($hex, 4, 2)) / 255;
+        // Normalize hex for the output value
+        $normalizedHex = ltrim($hex, '#');
+        if (strlen($normalizedHex) === 3) {
+            $normalizedHex = $normalizedHex[0] . $normalizedHex[0] . $normalizedHex[1] . $normalizedHex[1] . $normalizedHex[2] . $normalizedHex[2];
+        }
 
         return [
             '$type' => 'color',
             '$value' => [
                 'colorSpace' => 'srgb',
-                'components' => [$r, $g, $b],
+                'components' => [$rgb['r'] / 255, $rgb['g'] / 255, $rgb['b'] / 255],
                 'alpha' => 1,
-                'hex' => '#' . strtoupper($hex),
+                'hex' => '#' . strtoupper($normalizedHex),
             ],
         ];
     }
@@ -1515,75 +1534,6 @@ class DesignTokenServiceProvider extends ServiceProvider
                 wp_kses_post($message),
             );
         });
-    }
-
-    /**
-     * Generate restore form HTML
-     *
-     * This is generated in PHP to avoid ACF's HTML escaping in message fields.
-     *
-     * @return string Form HTML
-     *
-     * @phpstan-ignore method.unused (Reserved for future restore UI integration)
-     */
-    private function generateRestoreFormHtml(): string
-    {
-        $backupSets = self::getAvailableBackupSets();
-
-        if (empty($backupSets)) {
-            return sprintf(
-                '<div style="background: #f0f0f1; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
-                    <h3 style="margin: 0 0 10px 0; font-size: 14px;">%s</h3>
-                    <p style="margin: 0; color: #666;">%s</p>
-                </div>',
-                esc_html__('Backup wiederherstellen', 'wp-starter'),
-                esc_html__('Keine Backups vorhanden. Backups werden automatisch erstellt, wenn Tokens geändert werden.', 'wp-starter'),
-            );
-        }
-
-        // Build select options
-        $options = '';
-        foreach ($backupSets as $backup) {
-            $typesLabel = implode(', ', $backup['types']);
-            $label = sprintf(
-                '%s (%s)',
-                $backup['date'],
-                $typesLabel,
-            );
-            $options .= sprintf(
-                '<option value="%s">%s</option>',
-                esc_attr($backup['timestamp']),
-                esc_html($label),
-            );
-        }
-
-        return sprintf(
-            '<form method="post" style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
-                %s
-                <input type="hidden" name="%s" value="1">
-                <h3 style="margin: 0 0 15px 0; font-size: 14px;">%s</h3>
-                <div style="display: flex; gap: 10px; align-items: end; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 250px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">%s</label>
-                        <select name="backup_timestamp" style="width: 100%%;">
-                            %s
-                        </select>
-                    </div>
-                    <div>
-                        <button type="submit" class="button" onclick="return confirm(\'%s\');">%s</button>
-                    </div>
-                </div>
-                <p class="description" style="margin-top: 10px;">%s</p>
-            </form>',
-            wp_nonce_field(self::nonceRestore(), '_wpnonce', true, false),
-            esc_attr(self::paramRestoreBackup()),
-            esc_html__('Backup wiederherstellen', 'wp-starter'),
-            esc_html__('Backup-Zeitpunkt auswählen', 'wp-starter'),
-            $options,
-            esc_js(__('Backup wirklich wiederherstellen? Die aktuellen Token-Dateien werden überschrieben.', 'wp-starter')),
-            esc_html__('Wiederherstellen', 'wp-starter'),
-            esc_html__('Stellt alle Token-Dateien vom gewählten Zeitpunkt wieder her. Die aktuellen Dateien werden überschrieben.', 'wp-starter'),
-        );
     }
 
     /**

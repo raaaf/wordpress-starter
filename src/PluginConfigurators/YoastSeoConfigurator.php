@@ -31,13 +31,13 @@ class YoastSeoConfigurator extends AbstractPluginConfigurator
     {
         self::configureGeneralSettings();
         self::configureTitles();
-        self::disableUnusedFeatures();
 
         self::markConfigured();
     }
 
     /**
-     * Configure general SEO settings
+     * Configure general SEO settings and disable unused/privacy-invasive
+     * features in a single read-modify-write pass on the 'wpseo' option.
      */
     private static function configureGeneralSettings(): void
     {
@@ -58,6 +58,8 @@ class YoastSeoConfigurator extends AbstractPluginConfigurator
 
         // Disable enhanced slack sharing
         $options['enable_enhanced_slack_sharing'] = false;
+
+        self::disableUnusedFeatures($options);
 
         update_option('wpseo', $options);
     }
@@ -98,12 +100,15 @@ class YoastSeoConfigurator extends AbstractPluginConfigurator
     }
 
     /**
-     * Disable features that are not needed or privacy-invasive
+     * Disable features that are not needed or privacy-invasive.
+     *
+     * Mutates the 'wpseo' options array passed in by configureGeneralSettings()
+     * instead of doing its own get_option()/update_option() round trip.
+     *
+     * @param array<string, mixed> $options
      */
-    private static function disableUnusedFeatures(): void
+    private static function disableUnusedFeatures(array &$options): void
     {
-        $options = get_option('wpseo', []);
-
         // Disable IndexNow (privacy)
         $options['enable_index_now'] = false;
 
@@ -118,8 +123,6 @@ class YoastSeoConfigurator extends AbstractPluginConfigurator
 
         // Disable Semrush integration
         $options['semrush_integration_active'] = false;
-
-        update_option('wpseo', $options);
     }
 
     public static function getConfigurationSummary(): string

@@ -36,11 +36,12 @@ class ColorPaletteGenerator
      * Generate a complete color palette from a base color
      *
      * @param string $hexColor Base color in hex format (#RRGGBB)
+     *
      * @return array<int, string> Array of shade => hex color
      */
     public function generate(string $hexColor): array
     {
-        $rgb = $this->hexToRgb($hexColor);
+        $rgb = self::hexToRgb($hexColor);
         if ($rgb === null) {
             return [];
         }
@@ -61,6 +62,7 @@ class ColorPaletteGenerator
         }
 
         ksort($palette);
+
         return $palette;
     }
 
@@ -69,6 +71,7 @@ class ColorPaletteGenerator
      *
      * @param float $lightness Current lightness (0-1)
      * @param float $adjustment Adjustment factor
+     *
      * @return float New lightness value (0-1)
      */
     private function adjustLightness(float $lightness, float $adjustment): float
@@ -86,9 +89,10 @@ class ColorPaletteGenerator
      * Convert hex color to RGB
      *
      * @param string $hex Hex color (#RGB or #RRGGBB)
+     *
      * @return array{r: int, g: int, b: int}|null
      */
-    private function hexToRgb(string $hex): ?array
+    public static function hexToRgb(string $hex): ?array
     {
         $hex = ltrim($hex, '#');
 
@@ -119,6 +123,7 @@ class ColorPaletteGenerator
      * @param int $r Red (0-255)
      * @param int $g Green (0-255)
      * @param int $b Blue (0-255)
+     *
      * @return string Hex color (#RRGGBB)
      */
     private function rgbToHex(int $r, int $g, int $b): string
@@ -127,7 +132,7 @@ class ColorPaletteGenerator
             '#%02X%02X%02X',
             max(0, min(255, $r)),
             max(0, min(255, $g)),
-            max(0, min(255, $b))
+            max(0, min(255, $b)),
         );
     }
 
@@ -137,6 +142,7 @@ class ColorPaletteGenerator
      * @param int $r Red (0-255)
      * @param int $g Green (0-255)
      * @param int $b Blue (0-255)
+     *
      * @return array{h: float, s: float, l: float}
      */
     private function rgbToHsl(int $r, int $g, int $b): array
@@ -177,6 +183,7 @@ class ColorPaletteGenerator
      * @param float $h Hue (0-1)
      * @param float $s Saturation (0-1)
      * @param float $l Lightness (0-1)
+     *
      * @return array{r: int, g: int, b: int}
      */
     private function hslToRgb(float $h, float $s, float $l): array
@@ -206,6 +213,7 @@ class ColorPaletteGenerator
      * @param float $p
      * @param float $q
      * @param float $t
+     *
      * @return float
      */
     private function hueToRgb(float $p, float $q, float $t): float
@@ -225,6 +233,7 @@ class ColorPaletteGenerator
         if ($t < 2 / 3) {
             return $p + ( $q - $p ) * ( 2 / 3 - $t ) * 6;
         }
+
         return $p;
     }
 
@@ -233,6 +242,7 @@ class ColorPaletteGenerator
      *
      * @param array<int, string> $palette Shade => hex color array
      * @param string $colorName Base name for the color (e.g., 'accent', 'primary')
+     *
      * @return array<int, array<string, mixed>> Figma-compatible token structure
      */
     public function toFigmaTokenFormat(array $palette, string $colorName): array
@@ -240,7 +250,7 @@ class ColorPaletteGenerator
         $tokens = [];
 
         foreach ($palette as $shade => $hex) {
-            $rgb = $this->hexToRgb($hex);
+            $rgb = self::hexToRgb($hex);
             if ($rgb === null) {
                 continue;
             }

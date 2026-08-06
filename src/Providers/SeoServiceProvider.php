@@ -74,6 +74,13 @@ class SeoServiceProvider extends ServiceProvider
                 return $output;
             }
 
+            // A crawler only obeys the most specific group matching its own
+            // name and ignores `User-agent: *` entirely (RFC 9309), so each
+            // named group below must repeat whatever restrictions core (and
+            // Yoast, if active) already put in the default group — otherwise
+            // it silently becomes a wider grant than `*`, not a narrower one.
+            $defaultGroupRestrictions = $this->extractDefaultGroupRestrictions($output);
+
             $lines = ['', '# AI crawlers (managed by theme)'];
             foreach ($crawlers as $agent) {
                 $agent = (string) $agent;
@@ -81,6 +88,9 @@ class SeoServiceProvider extends ServiceProvider
                     continue;
                 }
                 $lines[] = 'User-agent: ' . $agent;
+                foreach ($defaultGroupRestrictions as $restriction) {
+                    $lines[] = $restriction;
+                }
                 $lines[] = 'Allow: /';
                 $lines[] = '';
             }
@@ -94,6 +104,38 @@ class SeoServiceProvider extends ServiceProvider
 
             return rtrim($output) . "\n" . $block;
         }, 20, 2);
+    }
+
+    /**
+     * Extract the Disallow/Allow directives WordPress core (and, if active,
+     * Yoast) placed in the default (`User-agent: *`) group of $output, so the
+     * named crawler groups can repeat them instead of hardcoding a guess.
+     *
+     * @return array<int, string>
+     */
+    private function extractDefaultGroupRestrictions(string $output): array
+    {
+        $restrictions = [];
+        $inDefaultGroup = false;
+
+        foreach (preg_split('/\r\n|\r|\n/', $output) as $line) {
+            $trimmed = trim( (string) $line);
+
+            if (preg_match('/^User-agent:\s*\*$/i', $trimmed)) {
+                $inDefaultGroup = true;
+                continue;
+            }
+
+            if ($inDefaultGroup && preg_match('/^User-agent:/i', $trimmed)) {
+                break;
+            }
+
+            if ($inDefaultGroup && preg_match('/^(Disallow|Allow):/i', $trimmed)) {
+                $restrictions[] = $trimmed;
+            }
+        }
+
+        return $restrictions;
     }
 
     /**
@@ -157,9 +199,6 @@ class SeoServiceProvider extends ServiceProvider
     }
 
     /**
-     * Add structured data (JSON-LD) for WebSite, Organization, and Article schemas
-     */
-    /**
      * Feed the theme's contact details into Yoast's Organization node.
      *
      * When Yoast is active the theme yields the node to avoid two competing
@@ -189,6 +228,9 @@ class SeoServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Add structured data (JSON-LD) for WebSite, Organization, and Article schemas
+     */
     private function addStructuredData(): void
     {
         $this->enrichSeoPluginOrganization();
@@ -486,9 +528,15 @@ class SeoServiceProvider extends ServiceProvider
 
     /**
      * Get the canonical URL for the current page
+     *
+     * Self-references the actual paginated page (via get_pagenum_link()) from
+     * page 2 onward, since Google dropped rel=prev/next and a page-1-only
+     * canonical on a paginated archive/index just contradicts the real URL.
      */
     private function getCanonicalUrl(): ?string
     {
+        $paged = (int) get_query_var('paged');
+
         if (is_singular()) {
             return get_permalink();
         }
@@ -498,22 +546,22 @@ class SeoServiceProvider extends ServiceProvider
         }
 
         if (is_home() && get_option('page_for_posts')) {
-            return get_permalink(get_option('page_for_posts'));
+            return $paged > 1 ? get_pagenum_link($paged) : get_permalink(get_option('page_for_posts'));
         }
 
         if (is_post_type_archive()) {
-            return get_post_type_archive_link(get_queried_object()->name ?? '');
+            return $paged > 1 ? get_pagenum_link($paged) : get_post_type_archive_link(get_queried_object()->name ?? '');
         }
 
         if (is_archive()) {
             // For date/author archives, use the current URL without query params
             global $wp;
 
-            return home_url($wp->request);
+            return $paged > 1 ? get_pagenum_link($paged) : home_url($wp->request);
         }
 
         if (is_search()) {
-            return get_search_link();
+            return $paged > 1 ? get_pagenum_link($paged) : get_search_link();
         }
 
         return null;

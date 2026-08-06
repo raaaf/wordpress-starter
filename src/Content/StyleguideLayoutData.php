@@ -1065,12 +1065,12 @@ class StyleguideLayoutData
     }
 
     /**
-     * Get the first Contact Form 7 form ID, or empty string if CF7 is not active.
+     * Get the first Contact Form 7 form ID, or null if CF7 is not active.
      */
-    private function getFirstContactForm7Id(): int|string
+    private function getFirstContactForm7Id(): ?int
     {
         if (!class_exists('WPCF7')) {
-            return '';
+            return null;
         }
 
         $forms = get_posts([
@@ -1081,6 +1081,6 @@ class StyleguideLayoutData
             'post_status' => 'publish',
         ]);
 
-        return !empty($forms) ? $forms[0]->ID : '';
+        return !empty($forms) ? (int) $forms[0]->ID : null;
     }
 }
