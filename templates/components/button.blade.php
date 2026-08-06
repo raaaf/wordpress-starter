@@ -125,6 +125,9 @@
        {{ $attributes->merge(['class' => "{$baseClasses} {$variantClass} {$sizeClass} {$class}"]) }}>
         {{ $title }}
         {{ $slot ?? '' }}
+        @if($target === '_blank' && !$attributes->has('aria-label'))
+            <span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
+        @endif
     </a>
 @else
     {{-- Form button --}}

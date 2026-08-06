@@ -28,6 +28,14 @@
             x-data="{ loaded: false, iframeLoaded: false, iframeError: false }"
             style="min-height: {{ esc_attr($height) }}px;"
         >
+            {{-- Live region: always present in the DOM so screen readers pick up the text change (loading/error), never toggled with x-show/hidden --}}
+            <div
+                class="sr-only"
+                role="status"
+                aria-live="polite"
+                x-text="iframeError ? '{{ __('Die Karte konnte nicht geladen werden.', 'wp-starter') }}' : (loaded && !iframeLoaded ? '{{ __('Karte wird geladen...', 'wp-starter') }}' : '')"
+            ></div>
+
             {{-- Consent notice for GDPR compliance --}}
             <div
                 x-show="!loaded"
@@ -56,8 +64,6 @@
                 x-show="loaded && !iframeLoaded && !iframeError"
                 class="absolute inset-0 flex flex-col items-center justify-center bg-surface-secondary"
                 style="height: {{ esc_attr($height) }}px;"
-                role="status"
-                aria-live="polite"
             >
                 <div class="animate-spin rounded-full h-12 w-12 border-4 border-line border-t-line-brand mb-4"></div>
                 <span class="text-content-secondary">{{ __('Karte wird geladen...', 'wp-starter') }}</span>
@@ -106,7 +112,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                     </svg>
-                    {{ __('Route planen', 'wp-starter') }}<span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
+                    {{ __('Route planen', 'wp-starter') }}
                 </x-link>
             </div>
         @endif

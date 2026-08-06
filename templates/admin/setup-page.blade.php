@@ -102,6 +102,7 @@
                                     <a href="<?php echo esc_url($plugin['external']); ?>" class="button" target="_blank" rel="noopener">
                                         <?php esc_html_e('Website besuchen', 'wp-starter'); ?>
                                         <span class="dashicons dashicons-external" style="line-height: 1.4;"></span>
+                                        <span class="screen-reader-text"><?php esc_html_e('(öffnet in neuem Tab)', 'wp-starter'); ?></span>
                                     </a>
                                 <?php elseif ($isInstalled) : ?>
                                     <button type="button" class="button button-primary wp-starter-activate-plugin" data-slug="<?php echo esc_attr($plugin['slug']); ?>">

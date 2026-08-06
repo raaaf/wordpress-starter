@@ -57,6 +57,14 @@
                 x-ref="videoContainer"
             >
                 @if($source === 'external' && $video_id)
+                    {{-- Live region: always present in the DOM so screen readers pick up the text change (loading/error), never toggled with x-show/hidden --}}
+                    <div
+                        class="sr-only"
+                        role="status"
+                        aria-live="polite"
+                        x-text="iframeError ? '{{ __('Das Video konnte nicht geladen werden.', 'wp-starter') }}' : (loaded && !iframeLoaded ? '{{ __('Video wird geladen...', 'wp-starter') }}' : '')"
+                    ></div>
+
                     {{-- Consent notice for GDPR compliance --}}
                     <div
                         x-show="!loaded"
@@ -72,7 +80,7 @@
                         <p class="mb-4 text-content-secondary">
                             {{ __('Zum Abspielen des Videos wird ein externer Dienst geladen.', 'wp-starter') }}<br>
                             @if($privacyLink)
-                                {{ __('Es gelten die', 'wp-starter') }} <x-link url="{{ $privacyLink }}" target="_blank">{{ __('Datenschutzbestimmungen von', 'wp-starter') }} {{ $providerName }}<span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></x-link>.
+                                {{ __('Es gelten die', 'wp-starter') }} <x-link url="{{ $privacyLink }}" target="_blank">{{ __('Datenschutzbestimmungen von', 'wp-starter') }} {{ $providerName }}</x-link>.
                             @endif
                         </p>
                         <x-button
@@ -88,8 +96,6 @@
                     <div
                         x-show="loaded && !iframeLoaded && !iframeError"
                         class="absolute inset-0 flex flex-col items-center justify-center bg-surface-secondary"
-                        role="status"
-                        aria-live="polite"
                     >
                         <div class="animate-spin rounded-full h-12 w-12 border-4 border-line border-t-line-brand mb-4"></div>
                         <span class="text-content-secondary">{{ __('Video wird geladen...', 'wp-starter') }}</span>

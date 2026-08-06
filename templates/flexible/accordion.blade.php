@@ -10,6 +10,7 @@
 @php
     $items = get_sub_field('accordion') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
+    $accordionId = uniqid();
 
     // Build FAQPage schema for SEO
     $faqQuestions = [];
@@ -29,6 +30,7 @@
     }
 @endphp
 
+@if(!empty($items))
 <x-section :anchor="$sectionAnchor" :background="$background" padding="md" class="accordion">
     <div class="max-w-2xl mx-auto">
         @php $itemCount = count($items); @endphp
@@ -44,47 +46,46 @@
                 }
             }"
         >
-            @if(!empty($items))
-                @foreach($items as $index => $item)
-                    <div class="w-full overflow-hidden border-b border-line last:border-b-0">
-                        <button x-ref="accordion{{ $index }}"
-                                id="accordion-header-{{ $index }}"
-                                @click="active = active === {{ $index }} ? null : {{ $index }}"
-                                @keydown.down.prevent="focusItem(({{ $index }} + 1) % itemCount)"
-                                @keydown.up.prevent="focusItem(({{ $index }} - 1 + itemCount) % itemCount)"
-                                @keydown.home.prevent="focusItem(0)"
-                                @keydown.end.prevent="focusItem(itemCount - 1)"
-                                :aria-expanded="active === {{ $index }}"
-                                aria-controls="accordion-content-{{ $index }}"
-                                class="group flex items-center justify-between w-full py-4 px-3 mb-0 font-bold text-left cursor-pointer transition-colors rounded-[var(--radius-sm)] hover:text-content-brand focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
-                                :class="{ 'text-content-brand': active === {{ $index }} }">
-                            <span class="flex items-center gap-3">
-                                @if(!empty($item['icon']))
-                                    <x-icon :name="$item['icon']" class="w-5 h-5" />
-                                @endif
-                                {{ $item['title'] }}
-                            </span>
-                            <svg class="w-5 h-5 transition-all duration-200"
-                                 :class="{ 'rotate-180': active === {{ $index }} }"
-                                 fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                 aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <div x-show="active === {{ $index }}"
-                             x-collapse
-                             id="accordion-content-{{ $index }}"
-                             role="region"
-                             :aria-labelledby="'accordion-header-{{ $index }}'"
-                             class="mb-8">
-                            <x-prose>@kses($item['content'])</x-prose>
-                        </div>
+            @foreach($items as $index => $item)
+                <div class="w-full overflow-hidden border-b border-line last:border-b-0">
+                    <button x-ref="accordion{{ $index }}"
+                            id="accordion-header-{{ $accordionId }}-{{ $index }}"
+                            @click="active = active === {{ $index }} ? null : {{ $index }}"
+                            @keydown.down.prevent="focusItem(({{ $index }} + 1) % itemCount)"
+                            @keydown.up.prevent="focusItem(({{ $index }} - 1 + itemCount) % itemCount)"
+                            @keydown.home.prevent="focusItem(0)"
+                            @keydown.end.prevent="focusItem(itemCount - 1)"
+                            :aria-expanded="active === {{ $index }}"
+                            aria-controls="accordion-content-{{ $accordionId }}-{{ $index }}"
+                            class="group flex items-center justify-between w-full py-4 px-3 mb-0 font-bold text-left cursor-pointer transition-colors rounded-[var(--radius-sm)] hover:text-content-brand focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
+                            :class="{ 'text-content-brand': active === {{ $index }} }">
+                        <span class="flex items-center gap-3">
+                            @if(!empty($item['icon']))
+                                <x-icon :name="$item['icon']" class="w-5 h-5" />
+                            @endif
+                            {{ $item['title'] }}
+                        </span>
+                        <svg class="w-5 h-5 transition-all duration-200"
+                             :class="{ 'rotate-180': active === {{ $index }} }"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="active === {{ $index }}"
+                         x-collapse
+                         id="accordion-content-{{ $accordionId }}-{{ $index }}"
+                         role="region"
+                         :aria-labelledby="'accordion-header-{{ $accordionId }}-{{ $index }}'"
+                         class="mb-8">
+                        <x-prose>@kses($item['content'])</x-prose>
                     </div>
-                @endforeach
-            @endif
+                </div>
+            @endforeach
         </div>
     </div>
 </x-section>
+@endif
 
 {{-- FAQPage JSON-LD Schema for SEO --}}
 @if(!empty($faqQuestions))

@@ -85,7 +85,7 @@
                             variant="dark"
                             size="sm"
                             iconRight="external-link"
-                        >{{ __('Original-Bewertung ansehen', 'wp-starter') }}<span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></x-link>
+                        >{{ __('Original-Bewertung ansehen', 'wp-starter') }}</x-link>
                     </div>
                 @endif
             </div>
