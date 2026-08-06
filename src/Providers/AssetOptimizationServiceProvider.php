@@ -195,9 +195,10 @@ class AssetOptimizationServiceProvider extends ServiceProvider
                 return;
             }
 
-            $fontsDir = get_theme_file_uri('resources/fonts/');
-
             // Preload critical fonts (headline and body, most used weights)
+            // The URL has to come from the Vite manifest: the stylesheet requests
+            // the hashed file in dist/, so preloading the raw path in
+            // resources/fonts/ downloads a second copy that is never used.
             $criticalFonts = [
                 'colabthi-webfont.woff2',        // ColaborateLight (headlines)
                 'inter-v20-latin-regular.woff2', // Inter Regular (body)
@@ -205,9 +206,11 @@ class AssetOptimizationServiceProvider extends ServiceProvider
             ];
 
             foreach ($criticalFonts as $font) {
+                $url = \WordpressStarter\Vite::getAssetUrl('resources/fonts/' . $font);
+
                 printf(
                     '<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin="anonymous">%s',
-                    esc_url($fontsDir . $font),
+                    esc_url($url),
                     "\n",
                 );
             }
