@@ -308,7 +308,7 @@ class MemberDownload extends AbstractPostType
                     'field_mdl_sftp_password',
                     __('SFTP-Passwort', 'wp-starter'),
                     'download_sftp_password',
-                    __('Wird im Klartext in der Datenbank gespeichert.', 'wp-starter'),
+                    __('Wird verschlüsselt in der Datenbank gespeichert.', 'wp-starter'),
                     '',
                     $sftpCondition,
                     ['width' => '38'],
