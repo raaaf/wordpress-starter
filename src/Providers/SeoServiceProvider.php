@@ -18,6 +18,9 @@ use WP_Post_Type;
  */
 class SeoServiceProvider extends ServiceProvider
 {
+    /** Upper bound for meta descriptions; search engines truncate well before this. */
+    private const DESCRIPTION_MAX_LENGTH = 155;
+
     public function register(): void
     {
         // No registration needed
@@ -31,6 +34,7 @@ class SeoServiceProvider extends ServiceProvider
         $this->addBreadcrumbSchema();
         $this->addCanonicalUrl();
         $this->addOpenGraphTags();
+        $this->addMetaDescription();
     }
 
     /**
@@ -568,6 +572,151 @@ class SeoServiceProvider extends ServiceProvider
     }
 
     /**
+     * Emit <meta name="description"> when no SEO plugin is doing it.
+     *
+     * Yoast is listed as recommended, not required, so a site without it had no
+     * meta description on any page at all — only og:description and
+     * twitter:description, which search engines do not use for the snippet.
+     */
+    private function addMetaDescription(): void
+    {
+        add_action('wp_head', function (): void {
+            // Yoast owns the description tag when active; two would conflict.
+            if (defined('WPSEO_VERSION')) {
+                return;
+            }
+
+            $description = $this->getMetaDescription();
+
+            if ($description === '') {
+                return;
+            }
+
+            echo '<meta name="description" content="' . esc_attr($description) . '">' . "\n";
+        }, 1);
+    }
+
+    /**
+     * Build a description for the current request.
+     *
+     * The excerpt alone is not enough in this theme: page content lives in ACF
+     * Flexible Content, so post_content is usually empty and WordPress derives
+     * no excerpt from it. Measured on a real install, half the pages had no
+     * excerpt whatsoever. The flexible sections are therefore consulted before
+     * falling back to the site tagline.
+     */
+    private function getMetaDescription(): string
+    {
+        if (!is_singular()) {
+            if (is_search() || is_404()) {
+                return '';
+            }
+
+            $archive = wp_strip_all_tags( (string) get_the_archive_description());
+
+            return $this->normalizeDescription($archive !== '' ? $archive : (string) get_bloginfo('description'));
+        }
+
+        // Password-protected posts describe nothing. get_the_excerpt() returns
+        // WordPress' "there is no excerpt because this is a protected post"
+        // placeholder, and the ACF sections are readable even while the
+        // password gate is up, because they bypass the_content(). Deriving a
+        // description from either would publish protected content in a meta
+        // tag that every crawler reads.
+        if (post_password_required()) {
+            return $this->normalizeDescription( (string) get_bloginfo('description'));
+        }
+
+        $excerpt = wp_strip_all_tags( (string) get_the_excerpt());
+
+        if (trim($excerpt) !== '') {
+            return $this->normalizeDescription($excerpt);
+        }
+
+        $fromSections = $this->descriptionFromSections( (int) get_the_ID());
+
+        if ($fromSections !== '') {
+            return $this->normalizeDescription($fromSections);
+        }
+
+        return $this->normalizeDescription( (string) get_bloginfo('description'));
+    }
+
+    /**
+     * Pull prose out of the ACF Flexible Content sections, in page order.
+     *
+     * Only fields that actually carry sentences are considered — headlines and
+     * labels make a poor snippet, and a description assembled from button
+     * captions is worse than none.
+     *
+     * @param int $postId Post to read the sections from
+     */
+    private function descriptionFromSections(int $postId): string
+    {
+        if (!function_exists('get_field')) {
+            return '';
+        }
+
+        $sections = get_field('page_sections', $postId);
+
+        if (!is_array($sections)) {
+            return '';
+        }
+
+        $proseFields = ['section_description', 'copy', 'content', 'column_1'];
+        $collected = '';
+
+        foreach ($sections as $section) {
+            if (!is_array($section)) {
+                continue;
+            }
+
+            foreach ($proseFields as $field) {
+                $value = $section[$field] ?? null;
+
+                if (!is_string($value)) {
+                    continue;
+                }
+
+                $text = trim(wp_strip_all_tags($value));
+
+                if ($text === '') {
+                    continue;
+                }
+
+                $collected = trim($collected . ' ' . $text);
+
+                if (mb_strlen($collected) >= self::DESCRIPTION_MAX_LENGTH) {
+                    return $collected;
+                }
+            }
+        }
+
+        return $collected;
+    }
+
+    /**
+     * Collapse whitespace and cut to length on a word boundary.
+     */
+    private function normalizeDescription(string $text): string
+    {
+        $text = trim( (string) preg_replace('/\s+/u', ' ', wp_strip_all_tags($text)));
+
+        if ($text === '' || mb_strlen($text) <= self::DESCRIPTION_MAX_LENGTH) {
+            return $text;
+        }
+
+        $cut = mb_substr($text, 0, self::DESCRIPTION_MAX_LENGTH);
+        $lastSpace = mb_strrpos($cut, ' ');
+
+        if ($lastSpace !== false && $lastSpace > 0) {
+            $cut = mb_substr($cut, 0, $lastSpace);
+        }
+
+        return rtrim($cut, ' ,;:-') . '…';
+    }
+
+    /**
      * Add Open Graph and Twitter Card meta tags
      */
     private function addOpenGraphTags(): void
@@ -579,9 +728,9 @@ class SeoServiceProvider extends ServiceProvider
             }
 
             $title = is_singular() ? get_the_title() : get_bloginfo('name');
-            $description = is_singular()
-                ? wp_strip_all_tags(get_the_excerpt())
-                : ( get_bloginfo('description') ?: get_the_archive_title() ?: get_bloginfo('name') );
+            // Same source as <meta name="description">: on ACF-built pages the
+            // excerpt alone is usually empty, so the sections are consulted too.
+            $description = $this->getMetaDescription() ?: ( get_bloginfo('description') ?: get_bloginfo('name') );
             if (is_singular()) {
                 $url = get_permalink() ?: home_url('/');
             } elseif (is_search()) {

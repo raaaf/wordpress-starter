@@ -769,6 +769,34 @@ if (!function_exists('is_front_page')) {
     }
 }
 
+if (!function_exists('post_password_required')) {
+    function post_password_required(mixed $post = null): bool
+    {
+        return $GLOBALS['wp_mock_password_required'] ?? false;
+    }
+}
+
+if (!function_exists('get_the_excerpt')) {
+    function get_the_excerpt(mixed $post = null): string
+    {
+        return $GLOBALS['wp_mock_excerpt'] ?? '';
+    }
+}
+
+if (!function_exists('get_the_archive_description')) {
+    function get_the_archive_description(): string
+    {
+        return $GLOBALS['wp_mock_archive_description'] ?? '';
+    }
+}
+
+if (!function_exists('is_search')) {
+    function is_search(): bool
+    {
+        return $GLOBALS['wp_mock_is_search'] ?? false;
+    }
+}
+
 if (!function_exists('is_singular')) {
     function is_singular(string|array $type = ''): bool
     {
