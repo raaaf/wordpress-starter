@@ -478,6 +478,18 @@ html {
     margin-bottom: 0.5em;
   }
 
+  /* Headings on the brand surface
+     The base heading rules above set an explicit color, so the section's
+     text-content-inverse is never inherited by the heading and it renders
+     brand-on-brand (measured 1.11:1 on goldene-strategie/gold-investment).
+     Components that bring their own surface are excluded, their headings
+     sit on that surface and keep the brand color.
+     bg-surface-inverse is deliberately not covered: those headings already
+     contrast (8.64:1 measured) and --text-inverse would break them. */
+  .bg-surface-brand :is(h1, h2, h3, h4, h5, h6):not(:is(.card, .alert) *) {
+    color: var(--text-inverse);
+  }
+
   /* Paragraph spacing */
   p {
     margin-top: 0;
