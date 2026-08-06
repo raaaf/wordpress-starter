@@ -11,9 +11,7 @@ class Auth
     private const COOKIE_NAME = 'wp_member_area_auth';
     private const MODE_WORDPRESS = 'wordpress'; // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
 
-    private static ?string $cachedAuthMode = null;
-
-    private static bool $authModeCached = false;
+    private static string|false $cachedAuthMode = false;
 
     private static int|false $cachedCookieTtl = false;
 
@@ -24,9 +22,8 @@ class Auth
         if (!function_exists('get_field')) {
             return 'password';
         }
-        if (!self::$authModeCached) {
+        if (self::$cachedAuthMode === false) {
             self::$cachedAuthMode = get_field('member_auth_mode', 'option') ?: 'password';
-            self::$authModeCached = true;
         }
 
         return self::$cachedAuthMode;

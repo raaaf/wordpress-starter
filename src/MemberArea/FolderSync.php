@@ -7,7 +7,6 @@ namespace WordpressStarter\MemberArea;
 use phpseclib3\Net\SFTP;
 use Throwable;
 use WordpressStarter\Providers\LogServiceProvider;
-use WordpressStarter\ThemeContext;
 use WP_Query;
 
 class FolderSync
@@ -345,7 +344,10 @@ class FolderSync
         try {
             SsrfGuard::assertSafeUrl($url);
         } catch (Throwable $e) {
-            error_log(ThemeContext::logPrefix() . ': Skipping external availability check for post ' . $postId . ' — ' . $e->getMessage()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+            LogServiceProvider::warning('Skipping external availability check', [
+                'post_id' => $postId,
+                'message' => $e->getMessage(),
+            ]);
 
             return;
         }

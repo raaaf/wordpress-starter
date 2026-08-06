@@ -89,22 +89,32 @@ class AssetOptimizationServiceProvider extends ServiceProvider
      */
     private function currentPageHasForm(): bool
     {
+        static $cache = [];
+
         $postId = get_queried_object_id();
 
         if (!$postId) {
             return true;
         }
 
+        if (array_key_exists($postId, $cache)) {
+            return $cache[$postId];
+        }
+
         $sections = get_post_meta($postId, 'page_sections', true);
         if (is_array($sections) && in_array('contact_form', $sections, true)) {
-            return true;
+            $cache[$postId] = true;
+
+            return $cache[$postId];
         }
 
         $post = get_post($postId);
         if ($post instanceof \WP_Post) {
             $content = strval($post->post_content);
             if (has_shortcode($content, 'contact-form-7')) {
-                return true;
+                $cache[$postId] = true;
+
+                return $cache[$postId];
             }
         }
 
@@ -115,12 +125,16 @@ class AssetOptimizationServiceProvider extends ServiceProvider
             $values = is_array($values) ? $values : [$values];
             foreach ($values as $value) {
                 if (is_string($value) && str_contains($value, '[contact-form-7')) {
-                    return true;
+                    $cache[$postId] = true;
+
+                    return $cache[$postId];
                 }
             }
         }
 
-        return (bool) apply_filters('theme_needs_form_assets', false, $postId);
+        $cache[$postId] = (bool) apply_filters('theme_needs_form_assets', false, $postId);
+
+        return $cache[$postId];
     }
 
     /**

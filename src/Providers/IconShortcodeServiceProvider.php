@@ -6,6 +6,9 @@ namespace WordpressStarter\Providers;
 
 class IconShortcodeServiceProvider extends ServiceProvider
 {
+    /** @var array<string, string|null> Per-request cache of width/height-stripped SVG markup, keyed by icon name. */
+    private static array $iconCache = [];
+
     public function register(): void
     {
         // Nothing to bind in the container
@@ -20,6 +23,7 @@ class IconShortcodeServiceProvider extends ServiceProvider
      * Render an inline SVG icon from the [icon name="..."] shortcode.
      *
      * @param array<string, string>|string $atts Shortcode attributes
+     *
      * @return string Rendered HTML or empty string
      */
     public function renderIcon(array|string $atts): string
@@ -36,9 +40,9 @@ class IconShortcodeServiceProvider extends ServiceProvider
             return '';
         }
 
-        $svgPath = get_template_directory() . '/resources/icons/' . $name . '.svg';
+        $svg = $this->getIconSvg($name);
 
-        if (!file_exists($svgPath)) {
+        if ($svg === null) {
             return '';
         }
 
@@ -53,21 +57,48 @@ class IconShortcodeServiceProvider extends ServiceProvider
         $sizeClass = $sizes[$atts['size']] ?? $sizes['md'];
         $extraClass = $atts['class'] !== '' ? ' ' . $atts['class'] : '';
 
-        $svg = file_get_contents($svgPath);
-
-        if ($svg === false) {
-            return '';
-        }
-
-        $svg = trim($svg);
-        $svg = preg_replace('/\s*(width|height)="[^"]*"/', '', $svg) ?? $svg;
         $svg = preg_replace(
             '/<svg/',
             '<svg class="icon ' . $sizeClass . $extraClass . ' inline-block align-middle shrink-0" aria-hidden="true"',
             $svg,
-            1
+            1,
         ) ?? $svg;
 
         return '<span class="inline-icon">' . $svg . '</span>';
+    }
+
+    /**
+     * Read and cache the width/height-stripped SVG markup for an icon name.
+     * Caches per request so repeated [icon] shortcodes for the same icon
+     * don't re-read and re-process the file from disk.
+     */
+    private function getIconSvg(string $name): ?string
+    {
+        if (array_key_exists($name, self::$iconCache)) {
+            return self::$iconCache[$name];
+        }
+
+        $svgPath = get_template_directory() . '/resources/icons/' . $name . '.svg';
+
+        if (!file_exists($svgPath)) {
+            self::$iconCache[$name] = null;
+
+            return self::$iconCache[$name];
+        }
+
+        $svg = file_get_contents($svgPath);
+
+        if ($svg === false) {
+            self::$iconCache[$name] = null;
+
+            return self::$iconCache[$name];
+        }
+
+        $svg = trim($svg);
+        $svg = preg_replace('/\s*(width|height)="[^"]*"/', '', $svg) ?? $svg;
+
+        self::$iconCache[$name] = $svg;
+
+        return self::$iconCache[$name];
     }
 }
