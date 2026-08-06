@@ -22,7 +22,6 @@ interface StatsCounterComponent {
 
 function createStatsCounterComponent(target: number): StatsCounterComponent {
   return {
-    $el: null as unknown as HTMLElement,
     ...createStatsCounterCore(target, {
       respectReducedMotion: false,
       useIntersectionObserver: true,

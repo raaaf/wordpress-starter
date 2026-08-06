@@ -5,6 +5,44 @@
  * Clicking an icon inserts [icon name="..."] at the cursor position.
  */
 
+export {};
+
+/** Minimal surface of the legacy TinyMCE 3.x/4.x classic-UI API used by this plugin. */
+interface TinyMCEDialogWindow {
+  find(selector: string): Array<{ getEl(): HTMLElement | null }>;
+}
+
+interface TinyMCEEditor {
+  addButton(
+    name: string,
+    options: {
+      title: string;
+      icon: string;
+      onclick: () => void;
+    }
+  ): void;
+  windowManager: {
+    alert(message: string): void;
+    open(options: {
+      title: string;
+      body: Array<{ type: string; html: string }>;
+      buttons: Array<{ text: string; onclick: string }>;
+      width: number;
+      height: number;
+      onopen?: () => void;
+    }): void;
+    getWindows(): TinyMCEDialogWindow[];
+    close(): void;
+  };
+  insertContent(content: string): void;
+}
+
+interface TinyMCEGlobal {
+  PluginManager: {
+    add(name: string, callback: (editor: TinyMCEEditor) => void): void;
+  };
+}
+
 declare global {
   interface Window {
     themeIconsData?: {
@@ -12,7 +50,7 @@ declare global {
       baseUrl: string;
       nonce: string;
     };
-    tinymce: typeof import('tinymce');
+    tinymce: TinyMCEGlobal;
   }
 }
 
@@ -30,7 +68,7 @@ function escapeAttr(value: string): string {
     return;
   }
 
-  window.tinymce.PluginManager.add('themeicons', function (editor) {
+  window.tinymce.PluginManager.add('themeicons', function (editor: TinyMCEEditor) {
     editor.addButton('themeicons', {
       title: 'Icon einfügen',
       icon: 'image',
