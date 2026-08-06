@@ -117,3 +117,5 @@ tests/fixtures/compiled/
 !mstile-*.png
 !safari-pinned-tab.svg
 !site.webmanifest
+# Test coverage reports (build output)
+/coverage
