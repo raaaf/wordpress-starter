@@ -2,7 +2,8 @@
     Video - Flexible Content Layout
 
     Uses shared components: x-section, x-button, x-link
-    ACF Fields: source, video, video_url, video_file_url, background_color
+    ACF Fields: source, video, video_url, video_file_url, video_title,
+                captions, captions_language, background_color
 --}}
 
 @php
@@ -12,6 +13,21 @@
     $video_file_url = get_sub_field('video_file_url'); // Direct file URL (CDN etc.)
     $video_title = get_sub_field('video_title'); // Optional accessible title
     $background = get_sub_field('background_color') ?: 'primary';
+
+    // Captions (WCAG 1.2.2, Level A). Only self-hosted and direct-URL videos:
+    // YouTube and Vimeo serve their own caption tracks.
+    // A <track> is emitted only when a file exists — an empty one would claim
+    // captions that are not there, which is worse than none at all.
+    $captions = get_sub_field('captions');
+    $captionsLanguage = get_sub_field('captions_language') ?: 'de';
+    $captionsLabels = [
+        'de' => __('Deutsch', 'wp-starter'),
+        'en' => __('Englisch', 'wp-starter'),
+        'fr' => __('Französisch', 'wp-starter'),
+        'es' => __('Spanisch', 'wp-starter'),
+        'it' => __('Italienisch', 'wp-starter'),
+    ];
+    $captionsLabel = $captionsLabels[$captionsLanguage] ?? $captionsLanguage;
 
     // Detect video type from URL for external videos
     $video_type = 'self';
@@ -156,6 +172,15 @@
                         class="w-full aspect-video object-cover rounded-lg"
                     >
                         <source src="{{ esc_url($video) }}" type="video/mp4">
+                        @if($captions)
+                            <track
+                                kind="captions"
+                                src="{{ esc_url($captions) }}"
+                                srclang="{{ esc_attr($captionsLanguage) }}"
+                                label="{{ esc_attr($captionsLabel) }}"
+                                default
+                            >
+                        @endif
                         Ihr Browser unterstützt das Video-Tag nicht.
                     </video>
                 @elseif($source === 'url' && $video_file_url)
@@ -167,6 +192,15 @@
                         class="w-full aspect-video object-cover rounded-lg"
                     >
                         <source src="{{ esc_url($video_file_url) }}">
+                        @if($captions)
+                            <track
+                                kind="captions"
+                                src="{{ esc_url($captions) }}"
+                                srclang="{{ esc_attr($captionsLanguage) }}"
+                                label="{{ esc_attr($captionsLabel) }}"
+                                default
+                            >
+                        @endif
                         Ihr Browser unterstützt das Video-Tag nicht.
                     </video>
                 @endif

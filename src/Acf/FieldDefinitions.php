@@ -1650,6 +1650,40 @@ class FieldDefinitions
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'url']]],
                 'https://cdn.example.com/video.mp4',
             ),
+            self::fileField(
+                "field_{$prefix}_captions",
+                __('Untertitel (WebVTT)', 'wp-starter'),
+                'captions',
+                'vtt',
+                'url',
+                [
+                    [['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'wordpress']],
+                    [['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'url']],
+                ],
+                __('WebVTT-Datei (.vtt) mit den Untertiteln. Ohne Untertitel ist ein Video für gehörlose und schwerhörige Nutzer nicht zugänglich (WCAG 1.2.2, Stufe A). Bei YouTube und Vimeo werden stattdessen die Untertitel des Anbieters genutzt.', 'wp-starter'),
+            ),
+            array_merge(
+                self::selectField(
+                    "field_{$prefix}_captions_language",
+                    __('Sprache der Untertitel', 'wp-starter'),
+                    'captions_language',
+                    [
+                        'de' => __('Deutsch', 'wp-starter'),
+                        'en' => __('Englisch', 'wp-starter'),
+                        'fr' => __('Französisch', 'wp-starter'),
+                        'es' => __('Spanisch', 'wp-starter'),
+                        'it' => __('Italienisch', 'wp-starter'),
+                    ],
+                    'de',
+                    false,
+                    __('Bestimmt srclang und die Beschriftung der Untertitelspur im Player.', 'wp-starter'),
+                ),
+                [
+                    'conditional_logic' => [
+                        [['field' => "field_{$prefix}_captions", 'operator' => '!=empty']],
+                    ],
+                ],
+            ),
             self::textField(
                 "field_{$prefix}_video_title",
                 __('Video-Titel', 'wp-starter'),
