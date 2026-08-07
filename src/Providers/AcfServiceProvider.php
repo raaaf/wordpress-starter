@@ -163,8 +163,11 @@ class AcfServiceProvider extends ServiceProvider
         // bypass the_content(), so editor-inserted images were shipping the full
         // size file to phones (measured 432 KiB of overhead on one page).
         // Sanitize first, then add attributes, otherwise kses strips them again.
+        // ContentImages sits in between: core needs the wp-image-<id> class to
+        // resolve the attachment, and images inserted without a media library
+        // reference do not have it.
         Blade::directive('kses', function ($expression) {
-            return "<?php echo wp_filter_content_tags(wp_kses_post({$expression})); ?>";
+            return "<?php echo wp_filter_content_tags(\\WordpressStarter\\Support\\ContentImages::addAttachmentIds(wp_kses_post({$expression}))); ?>";
         });
     }
 
