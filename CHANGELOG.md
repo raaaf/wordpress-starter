@@ -1,3 +1,13 @@
+## [2.26.1](https://github.com/raaaf/wordpress-starter/compare/v2.26.0...v2.26.1) (2026-08-07)
+
+### Bug Fixes
+
+- heading contrast on brand surface sections ([14041ce](https://github.com/raaaf/wordpress-starter/commit/14041cef8f69d2d1e4cffdfce2e168978d62c989))
+
+### Performance Improvements
+
+- resolve font preloads through the vite manifest ([7080d2e](https://github.com/raaaf/wordpress-starter/commit/7080d2e3ee074c5ebfe5c9509926d754f4a73480))
+
 # [2.26.0](https://github.com/raaaf/wordpress-starter/compare/v2.25.1...v2.26.0) (2026-08-06)
 
 ### Bug Fixes
