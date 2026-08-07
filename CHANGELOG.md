@@ -1,3 +1,9 @@
+## [2.26.5](https://github.com/raaaf/wordpress-starter/compare/v2.26.4...v2.26.5) (2026-08-07)
+
+### Bug Fixes
+
+- resolve attachment ids for editor-inserted content images ([10924a8](https://github.com/raaaf/wordpress-starter/commit/10924a802243999c5d1f8637a3bd20dc397e50dd))
+
 ## [2.26.4](https://github.com/raaaf/wordpress-starter/compare/v2.26.3...v2.26.4) (2026-08-07)
 
 ### Bug Fixes
