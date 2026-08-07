@@ -1,3 +1,9 @@
+## [2.26.2](https://github.com/raaaf/wordpress-starter/compare/v2.26.1...v2.26.2) (2026-08-07)
+
+### Bug Fixes
+
+- demote pasted headings in the footer alert bar ([f691068](https://github.com/raaaf/wordpress-starter/commit/f6910689e7d8d71b2595e5e02e049e8cd11befcd))
+
 ## [2.26.1](https://github.com/raaaf/wordpress-starter/compare/v2.26.0...v2.26.1) (2026-08-07)
 
 ### Bug Fixes
