@@ -1,3 +1,10 @@
+## [2.26.3](https://github.com/raaaf/wordpress-starter/compare/v2.26.2...v2.26.3) (2026-08-07)
+
+### Performance Improvements
+
+- add responsive image attributes to acf wysiwyg content ([b719659](https://github.com/raaaf/wordpress-starter/commit/b719659dc8ab903b2af0bb01298a0cd9aebd9825))
+- preload only the font weights used above the fold ([9021b4b](https://github.com/raaaf/wordpress-starter/commit/9021b4b80400e1fc0d8aa48f48f56ad4beabddda))
+
 ## [2.26.2](https://github.com/raaaf/wordpress-starter/compare/v2.26.1...v2.26.2) (2026-08-07)
 
 ### Bug Fixes
