@@ -1,3 +1,9 @@
+## [2.26.6](https://github.com/raaaf/wordpress-starter/compare/v2.26.5...v2.26.6) (2026-08-07)
+
+### Bug Fixes
+
+- resolve attachments stored as the scaled original ([0e25359](https://github.com/raaaf/wordpress-starter/commit/0e2535977a22f8ecd86b2a3a7a5c248f23ff48c1))
+
 ## [2.26.5](https://github.com/raaaf/wordpress-starter/compare/v2.26.4...v2.26.5) (2026-08-07)
 
 ### Bug Fixes
