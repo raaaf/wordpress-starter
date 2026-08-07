@@ -1,3 +1,9 @@
+## [2.26.4](https://github.com/raaaf/wordpress-starter/compare/v2.26.3...v2.26.4) (2026-08-07)
+
+### Bug Fixes
+
+- reveal sections without collapsing them out of the layout ([fb16cd0](https://github.com/raaaf/wordpress-starter/commit/fb16cd02e18853e979c16a57653bab78338ba9d6))
+
 ## [2.26.3](https://github.com/raaaf/wordpress-starter/compare/v2.26.2...v2.26.3) (2026-08-07)
 
 ### Performance Improvements
