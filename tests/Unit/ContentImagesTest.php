@@ -78,6 +78,19 @@ final class ContentImagesTest extends TestCase
         $this->assertStringContainsString('wp-image-99', $result);
     }
 
+    public function testFallsBackToTheScaledOriginal(): void
+    {
+        // Live case from goldene-strategie.de: the bare filename 404s, WordPress
+        // registered the big image as -scaled because it exceeded the threshold.
+        $GLOBALS['wp_mock_attachments']['https://example.test/shutterstock_2578745199-scaled.webp'] = 55;
+
+        $result = ContentImages::addAttachmentIds(
+            '<img class="size-content" src="https://example.test/shutterstock_2578745199-1792x1195.webp" />',
+        );
+
+        $this->assertStringContainsString('wp-image-55', $result);
+    }
+
     public function testAnnotatesEveryImageInTheContent(): void
     {
         $GLOBALS['wp_mock_attachments']['https://example.test/a.webp'] = 1;

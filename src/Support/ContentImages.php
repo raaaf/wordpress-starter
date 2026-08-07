@@ -88,15 +88,40 @@ class ContentImages
         $id = attachment_url_to_postid($url);
 
         if ($id === 0) {
-            $unsized = preg_replace('/-\d+x\d+(\.[a-z0-9]+)$/i', '$1', $url);
+            foreach (self::candidateUrls($url) as $candidate) {
+                $id = attachment_url_to_postid($candidate);
 
-            if (is_string($unsized) && $unsized !== $url) {
-                $id = attachment_url_to_postid($unsized);
+                if ($id !== 0) {
+                    break;
+                }
             }
         }
 
         wp_cache_set($cacheKey, $id, 'theme', DAY_IN_SECONDS);
 
         return $id;
+    }
+
+    /**
+     * Alternative spellings of an image URL that may be the registered file.
+     *
+     * The editor inserts a generated size such as photo-1792x1195.webp. For a
+     * normal upload the attachment is photo.webp, for an image above the big
+     * image threshold WordPress registers photo-scaled.webp instead and the bare
+     * name does not exist at all.
+     *
+     * @return list<string>
+     */
+    private static function candidateUrls(string $url): array
+    {
+        $unsized = preg_replace('/-\d+x\d+(\.[a-z0-9]+)$/i', '$1', $url);
+
+        if (!is_string($unsized) || $unsized === $url) {
+            return [];
+        }
+
+        $scaled = preg_replace('/(\.[a-z0-9]+)$/i', '-scaled$1', $unsized);
+
+        return is_string($scaled) ? [$unsized, $scaled] : [$unsized];
     }
 }
