@@ -150,6 +150,14 @@ if (!function_exists('wp_cache_set')) {
     }
 }
 
+// Attachment lookup. Tests seed $GLOBALS['wp_mock_attachments'] with url => id.
+if (!function_exists('attachment_url_to_postid')) {
+    function attachment_url_to_postid(string $url): int
+    {
+        return (int) ($GLOBALS['wp_mock_attachments'][$url] ?? 0);
+    }
+}
+
 if (!function_exists('wp_cache_delete')) {
     function wp_cache_delete(string $key, string $group = 'default'): bool
     {
