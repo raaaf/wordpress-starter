@@ -57,12 +57,15 @@
 >
     @if($container)
         <div
-            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 @if($shouldAnimate) motion-reduce:opacity-100! motion-reduce:transform-none! @endif"
+            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 @if($shouldAnimate) transition duration-200 ease-out motion-reduce:opacity-100! motion-reduce:transform-none! motion-reduce:transition-none! @endif"
             @if($shouldAnimate)
-                x-show="shown"
-                x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0 translate-y-4"
-                x-transition:enter-end="opacity-100 translate-y-0"
+                {{-- Deliberately not x-show: that sets display:none until the
+                     intersection observer fires, so the section collapses out of
+                     the layout and everything below it jumps, twice. Measured
+                     0.765 CLS on the one page whose first section is animated.
+                     Toggling opacity and transform keeps the element in the
+                     layout the whole time. --}}
+                :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
             @endif
         >
             {{ $slot }}
@@ -70,11 +73,8 @@
     @else
         @if($shouldAnimate)
             <div
-                class="motion-reduce:opacity-100! motion-reduce:transform-none!"
-                x-show="shown"
-                x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0 translate-y-4"
-                x-transition:enter-end="opacity-100 translate-y-0"
+                class="transition duration-200 ease-out motion-reduce:opacity-100! motion-reduce:transform-none! motion-reduce:transition-none!"
+                :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
             >
                 {{ $slot }}
             </div>
