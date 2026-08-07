@@ -157,8 +157,14 @@ class AcfServiceProvider extends ServiceProvider
         });
 
         // @kses directive - sanitize WYSIWYG content
+        //
+        // wp_filter_content_tags() is what core runs on the_content() to add
+        // srcset, sizes, loading and decoding to content images. ACF sections
+        // bypass the_content(), so editor-inserted images were shipping the full
+        // size file to phones (measured 432 KiB of overhead on one page).
+        // Sanitize first, then add attributes, otherwise kses strips them again.
         Blade::directive('kses', function ($expression) {
-            return "<?php echo wp_kses_post({$expression}); ?>";
+            return "<?php echo wp_filter_content_tags(wp_kses_post({$expression})); ?>";
         });
     }
 
