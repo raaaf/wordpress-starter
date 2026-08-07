@@ -33,6 +33,8 @@ class FooterAlertBar
                 continue;
             }
 
+            $text = self::demoteHeadings($text);
+
             $visibility = $alert['visibility'] ?? 'all';
             $pageIds = array_map('intval', $alert['pages'] ?? []);
 
@@ -51,5 +53,20 @@ class FooterAlertBar
         }
 
         return $visible;
+    }
+
+    /**
+     * Demotes headings in alert text to bold paragraphs.
+     *
+     * The WYSIWYG toolbar offers no heading formats, but content pasted from
+     * Outlook or Word carries them in. The alert bar renders after the last
+     * content section, so any heading there lands out of order and fails the
+     * accessibility heading-order check.
+     */
+    public static function demoteHeadings(string $html): string
+    {
+        $html = (string) preg_replace('#<h[1-6](?:\s[^>]*)?>#i', '<p><strong>', $html);
+
+        return (string) preg_replace('#</h[1-6]>#i', '</strong></p>', $html);
     }
 }
