@@ -199,10 +199,16 @@ class AssetOptimizationServiceProvider extends ServiceProvider
             // The URL has to come from the Vite manifest: the stylesheet requests
             // the hashed file in dist/, so preloading the raw path in
             // resources/fonts/ downloads a second copy that is never used.
+            // Preload exactly the faces used above the fold. Header navigation and
+            // the header CTA sit at the top of every page, so their weights are
+            // always in the first viewport. Measured on the live site: preloading
+            // a weight that is not used above the fold delays the ones that are,
+            // which showed up as a 0.765 CLS on gold-investment.
             $criticalFonts = [
                 'colabthi-webfont.woff2',        // ColaborateLight (headlines)
                 'inter-v20-latin-regular.woff2', // Inter Regular (body)
-                'inter-v20-latin-700.woff2',     // Inter Bold (body emphasis)
+                'inter-v20-latin-500.woff2',     // Inter Medium (navigation)
+                'inter-v20-latin-600.woff2',     // Inter SemiBold (header CTA, h2-h4)
             ];
 
             foreach ($criticalFonts as $font) {
