@@ -5,7 +5,7 @@
     - 'manual': Uses repeater field for page-specific testimonials
     - 'cpt': Uses Testimonial CPT for centrally managed testimonials
 
-    Uses shared components: x-section, x-grid, x-card
+    Uses shared components: x-section, x-section-header, x-grid, x-card
     Fields: title, source, testimonials (repeater), columns, background_color
 --}}
 
@@ -39,9 +39,7 @@
 
 @if($title || !empty($testimonials))
 <x-section :anchor="$sectionAnchor" :background="$background" class="testimonials">
-    @if($title)
-        <h2 class="mb-12 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($testimonials))
         <x-grid :cols="$columns" gap="lg">

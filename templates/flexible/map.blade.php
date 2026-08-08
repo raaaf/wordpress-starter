@@ -1,7 +1,7 @@
 {{--
     Google Maps Flexible Content Layout
 
-    Uses shared components: x-section, x-button, x-link
+    Uses shared components: x-section, x-section-header, x-button, x-link
     Fields: title, address, embed_url, height, show_directions_link, background_color
 --}}
 
@@ -18,9 +18,7 @@
 @endphp
 
 <x-section :anchor="$sectionAnchor" :background="$background" class="map">
-    @if($title)
-        <h2 class="mb-8 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if($embedUrl)
         <div

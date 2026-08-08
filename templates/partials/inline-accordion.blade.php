@@ -14,7 +14,7 @@
                     @click="active = active === {{ $aIdx }} ? null : {{ $aIdx }}"
                     :aria-expanded="active === {{ $aIdx }}"
                     aria-controls="{{ $idPrefix }}-{{ $aIdx }}"
-                    class="group flex items-center justify-between w-full py-3 font-bold text-left cursor-pointer transition-colors hover:text-content-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-focus focus-visible:ring-offset-2"
+                    class="group flex items-center justify-between w-full py-3 font-bold text-left cursor-pointer transition-colors hover:text-content-brand focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
                     :class="{ 'text-content-brand': active === {{ $aIdx }} }">
                 {{ $aItem['title'] }}
                 <svg class="w-4 h-4 shrink-0 transition-transform duration-200"

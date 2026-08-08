@@ -1,7 +1,7 @@
 {{--
     Gallery - Flexible Content Layout
 
-    Uses shared components: x-section, x-grid
+    Uses shared components: x-section, x-section-header, x-grid
     Uses medium-zoom for lightbox functionality
     Uses wp_get_attachment_image() for automatic srcset/responsive images
     Fields: title, images (gallery), columns, background_color
@@ -16,9 +16,7 @@
 
 @if($title || !empty($images))
 <x-section :anchor="$sectionAnchor" :background="$background" class="gallery">
-    @if($title)
-        <h2 class="mb-12 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($images))
         <x-grid :cols="$columns" gap="md">
@@ -45,6 +43,14 @@
                             'data-zoom-src' => esc_url($full[0]),
                         ]) !!}
                         </button>
+                        {{-- Permanent zoom cue. The cursor change and the hover scale only
+                             exist for pointer devices, so touch had no signal at all. --}}
+                        <span
+                            class="absolute z-10 flex items-center justify-center w-8 h-8 rounded-full pointer-events-none top-2 right-2 bg-surface text-content shadow-[var(--shadow-card)]"
+                            aria-hidden="true"
+                        >
+                            <x-icon name="search" size="lg" />
+                        </span>
                         @if($caption)
                             <figcaption class="absolute inset-x-0 bottom-0 p-3 text-body-small text-content-inverse transition-opacity duration-200 ease-out opacity-0 bg-gradient-to-t from-surface-inverse/70 to-transparent group-hover:opacity-100 group-focus-within:opacity-100">
                                 {{ $caption }}

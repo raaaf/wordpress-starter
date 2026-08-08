@@ -41,7 +41,7 @@
 @endphp
 
 <div class="inline-flex flex-col gap-1.5">
-    <label class="checkbox inline-flex items-center gap-2 cursor-pointer {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }} {{ $class }}">
+    <label class="checkbox inline-flex items-center gap-3 cursor-pointer {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }} {{ $class }}">
         <span class="relative flex items-center justify-center">
             <input
                 type="checkbox"
@@ -72,7 +72,7 @@
             </span>
 
             {{-- Check/Minus icon (shown via CSS) --}}
-            <span class="absolute inset-0 flex items-center justify-center text-content-on-color pointer-events-none opacity-0 peer-checked:opacity-100 {{ $disabled ? 'text-content-disabled' : '' }}">
+            <span class="absolute inset-0 flex items-center justify-center text-content-on-accent pointer-events-none opacity-0 peer-checked:opacity-100 {{ $disabled ? 'text-content-disabled' : '' }}">
                 @if($indeterminate)
                     <x-icon name="minus" class="w-3 h-3" />
                 @else

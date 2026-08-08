@@ -182,7 +182,7 @@
             @if($imageId)
                 <div class="relative">
                     {!! wp_get_attachment_image($imageId, 'hero-split', false, [
-                        'class' => 'w-full h-auto rounded-2xl shadow-xl',
+                        'class' => 'w-full h-auto rounded-[var(--card-radius)] shadow-xl',
                         'loading' => 'eager',
                         'fetchpriority' => 'high',
                         'sizes' => '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px',
@@ -194,7 +194,7 @@
                     <img src="{{ $image['url'] }}"
                          alt="{{ $image['alt'] ?? '' }}"
                          @if(!empty($image['width']) && !empty($image['height']))width="{{ $image['width'] }}" height="{{ $image['height'] }}"@endif
-                         class="w-full h-auto rounded-2xl shadow-xl"
+                         class="w-full h-auto rounded-[var(--card-radius)] shadow-xl"
                          loading="eager"
                          fetchpriority="high">
                 </div>

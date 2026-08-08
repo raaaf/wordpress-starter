@@ -1,7 +1,7 @@
 {{--
     Before/After Slider Flexible Content Layout
 
-    Uses shared components: x-section
+    Uses shared components: x-section, x-section-header
     Uses Alpine.js beforeAfterSlider component for slider functionality
     Fields: title, image_before, image_after, label_before, label_after, background_color
 --}}
@@ -31,9 +31,7 @@
 @endphp
 
 <x-section :anchor="$sectionAnchor" :background="$background" class="before-after">
-    @if($title)
-        <h2 class="mb-8 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if($hasImageBefore && $hasImageAfter)
         <div

@@ -1,7 +1,7 @@
 {{--
     Button Flexible Content Layout
 
-    Uses shared component: x-button
+    Uses shared components: x-section, x-button
     Fields: button (link), variant, size, full_width, alignment
 --}}
 
@@ -22,14 +22,16 @@
 @endphp
 
 @if($button && !empty($button['url']))
-    <div class="button-block {{ $alignmentClasses }}">
-        <x-button
-            :url="$button['url']"
-            :title="$button['title'] ?: __('Mehr erfahren', 'wp-starter')"
-            :target="$button['target'] ?? '_self'"
-            :variant="$variant"
-            :size="$size"
-            :class="$fullWidth ? 'w-full' : ''"
-        />
-    </div>
+    <x-section :anchor="$sectionAnchor" padding="sm" class="button-block-section">
+        <div class="button-block {{ $alignmentClasses }}">
+            <x-button
+                :url="$button['url']"
+                :title="$button['title'] ?: __('Mehr erfahren', 'wp-starter')"
+                :target="$button['target'] ?? '_self'"
+                :variant="$variant"
+                :size="$size"
+                :class="$fullWidth ? 'w-full' : ''"
+            />
+        </div>
+    </x-section>
 @endif

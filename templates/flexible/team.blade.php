@@ -5,7 +5,7 @@
     - 'manual': Uses repeater field for page-specific team members
     - 'cpt': Uses Team CPT for centrally managed team members
 
-    Uses shared components: x-section, x-grid, x-icon, x-badge, x-button
+    Uses shared components: x-section, x-section-header, x-grid, x-icon, x-badge, x-button
     Fields: title, source, members (repeater), columns, background_color
 --}}
 
@@ -41,9 +41,7 @@
 
 @if($title || !empty($members))
 <x-section :anchor="$sectionAnchor" :background="$background" class="team">
-    @if($title)
-        <h2 class="mb-12 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($members))
         @php
@@ -68,7 +66,7 @@
                     @if($imageId)
                         <div class="relative mb-6 overflow-hidden rounded-[var(--card-radius)] aspect-square">
                             {!! wp_get_attachment_image($imageId, 'team-portrait', false, [
-                                'class' => 'object-cover w-full h-full transition-transform duration-300 group-hover:scale-105',
+                                'class' => 'object-cover w-full h-full transition-transform duration-200 ease-out group-hover:scale-105',
                                 'loading' => 'lazy',
                                 'sizes' => '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
                             ]) !!}
@@ -102,7 +100,7 @@
                                     :aria-label="__('E-Mail senden', 'wp-starter') . ': ' . $name"
                                     variant="secondary"
                                     size="sm"
-                                    class="p-2! min-h-0! hover:bg-surface-brand! hover:text-content-inverse!"
+                                    class="p-2! min-h-0! hover:bg-surface-brand! hover:text-content-on-brand!"
                                 >
                                     <x-icon name="mail" size="lg" />
                                     <span class="sr-only">{{ __('E-Mail', 'wp-starter') }}</span>
@@ -116,7 +114,7 @@
                                     target="_blank"
                                     variant="secondary"
                                     size="sm"
-                                    class="p-2! min-h-0! hover:bg-surface-brand! hover:text-content-inverse!"
+                                    class="p-2! min-h-0! hover:bg-surface-brand! hover:text-content-on-brand!"
                                 >
                                     <x-icon name="linkedin" size="lg" />
                                     <span class="sr-only">{{ __('LinkedIn', 'wp-starter') }}</span>

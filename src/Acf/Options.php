@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Acf;
 
+use WordpressStarter\Services\StyleguidePage;
 use WordpressStarter\ThemeContext;
 
 /**
@@ -740,16 +741,37 @@ class Options
      */
     private static function registerToolsFields(): void
     {
-        // Check if styleguide page exists
-        $styleguidePageId = get_option(ThemeContext::optionKey('styleguide_page_id'));
-        $styleguidePost = $styleguidePageId ? get_post($styleguidePageId) : null;
+        // This field group is admin-UI only (buttons/status messages on the
+        // Tools settings page, never read via @option() on the frontend).
+        // acf/init fires on every page view, and StyleguidePage::find() below
+        // writes (adopt()) and runs get_posts() — skip all of it on frontend
+        // requests, same reasoning as the guards elsewhere in this file.
+        if (!is_admin()) {
+            return;
+        }
 
-        // Check various states: exists, in trash, or missing
-        $styleguideExists = $styleguidePost && $styleguidePost->post_status !== 'trash';
-        $styleguideInTrash = $styleguidePost && $styleguidePost->post_status === 'trash';
+        // Single source of truth for "which page is the styleguide" — see
+        // StyleguidePage for why this must not be duplicated here.
+        $resolvedPageId = StyleguidePage::find();
+
+        // find() only ever resolves a non-trashed page. A page the option still
+        // points at but that has since been trashed needs its own check here,
+        // purely for the restore/delete recovery UI below — it plays no part
+        // in deciding whether a styleguide page "exists".
+        $trackedPageId = (int) get_option(StyleguidePage::optionKey());
+        $trackedPost = $trackedPageId > 0 ? get_post($trackedPageId) : null;
+        $styleguideInTrash = $resolvedPageId <= 0 && $trackedPost && $trackedPost->post_status === 'trash';
 
         // Build status message based on state
-        if ($styleguideInTrash) {
+        if ($resolvedPageId === StyleguidePage::AMBIGUOUS) {
+            // Several pages could be the styleguide — do not offer "create",
+            // that would only add a second one. Point at the ambiguity instead.
+            $statusMessage = self::renderNoticeBox(
+                'warning',
+                'Mehrere Seiten kommen als Styleguide in Frage',
+                '<p style="margin: 10px 0 0 0;">Bitte die richtige Seite öffnen und dort das Template "Styleguide" auswählen.</p>',
+            );
+        } elseif ($styleguideInTrash) {
             // Page is in trash - offer to restore or delete permanently
             $restoreUrl = wp_nonce_url(
                 admin_url('?' . ThemeContext::kebabPrefix() . '-restore-styleguide=1'),
@@ -771,9 +793,9 @@ class Options
                     esc_url($deleteUrl),
                 ),
             );
-        } elseif ($styleguideExists) {
-            $editUrl = get_edit_post_link( (int) $styleguidePageId, 'raw');
-            $viewUrl = get_permalink( (int) $styleguidePageId);
+        } elseif ($resolvedPageId > 0) {
+            $editUrl = get_edit_post_link($resolvedPageId, 'raw');
+            $viewUrl = get_permalink($resolvedPageId);
             $statusMessage = self::renderNoticeBox(
                 'success',
                 '✓ Styleguide-Seite existiert',
@@ -787,9 +809,10 @@ class Options
                 ),
             );
         } else {
-            // Clear the option if it references a non-existent page
-            if ($styleguidePageId && !$styleguidePost) {
-                delete_option(ThemeContext::optionKey('styleguide_page_id'));
+            // Stale pointer to a page that no longer exists at all — clear it
+            // through the service, so option and marker are cleared together.
+            if ($trackedPageId > 0 && !$trackedPost) {
+                StyleguidePage::forget();
             }
             $createUrl = wp_nonce_url(
                 admin_url('?' . ThemeContext::kebabPrefix() . '-create-styleguide=1'),

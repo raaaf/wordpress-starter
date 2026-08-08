@@ -49,7 +49,10 @@
         'default' => 'bg-[var(--card-bg,var(--bg-primary))] border border-[var(--card-border,var(--border-default))] shadow-[var(--shadow-card)]',
         'elevated' => 'bg-[var(--card-bg,var(--bg-primary))] shadow-lg',
         'outlined' => 'bg-[var(--card-bg,var(--bg-primary))] border border-line',
-        'filled' => 'bg-surface-secondary',
+        // Mit Rand, sonst verschwindet die Karte auf einer Sektion, die selbst
+        // bg-surface-secondary traegt — dann liest sie sich als eingerueckter Text
+        // statt als Kasten. Genau das passierte im Kontaktformular.
+        'filled' => 'bg-surface-secondary border border-line',
     ];
 
     $sizes = [

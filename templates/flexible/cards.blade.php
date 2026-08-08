@@ -1,7 +1,7 @@
 {{--
     Cards / Features - Flexible Content Layout
 
-    Uses shared components: x-section, x-grid, x-card, x-link
+    Uses shared components: x-section, x-section-header, x-grid, x-card, x-link
     Fields: title, cards (repeater: icon, title, content, link), columns, background_color
 --}}
 
@@ -14,9 +14,7 @@
 
 @if($title || !empty($cards))
 <x-section :anchor="$sectionAnchor" :background="$background" class="cards">
-    @if($title)
-        <h2 class="mb-12 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($cards))
         <x-grid :cols="$columns" gap="lg">

@@ -1,0 +1,202 @@
+{
+  "_comment": [
+    "Welche Icons das Theme ausliefert. Einzige Quelle der Wahrheit für resources/icons/",
+    "und für die Auswahlliste, die Redakteure in ACF sehen.",
+    "",
+    "Icon dazunehmen: hier eintragen, dann `npm run icons`. Das Script schreibt die SVG",
+    "und FieldDefinitions::getThemeIcons() liest dieselbe Datei — Auswahlliste und",
+    "vorhandene Dateien können damit nicht mehr auseinanderlaufen.",
+    "",
+    "source: 'phosphor' (MIT, ~1500 Icons) oder 'simple-icons' (CC0, nur Marken).",
+    "Phosphor führt die meisten Markenlogos selbst; simple-icons deckt nur ab, was dort fehlt.",
+    "label ist der deutsche Text im ACF-Dropdown."
+  ],
+  "weight": "regular",
+  "icons": {
+    "calendar": {
+      "source": "phosphor",
+      "name": "calendar-blank",
+      "label": "Kalender"
+    },
+    "check": {
+      "source": "phosphor",
+      "name": "check",
+      "label": "Häkchen"
+    },
+    "check-circle": {
+      "source": "phosphor",
+      "name": "check-circle",
+      "label": "Häkchen im Kreis"
+    },
+    "chevron": {
+      "source": "phosphor",
+      "name": "caret-down",
+      "label": "Pfeil"
+    },
+    "chevron-up": {
+      "source": "phosphor",
+      "name": "caret-up",
+      "label": "Pfeil hoch"
+    },
+    "chevron-down": {
+      "source": "phosphor",
+      "name": "caret-down",
+      "label": "Pfeil runter"
+    },
+    "chevron-left": {
+      "source": "phosphor",
+      "name": "caret-left",
+      "label": "Pfeil links"
+    },
+    "chevron-right": {
+      "source": "phosphor",
+      "name": "caret-right",
+      "label": "Pfeil rechts"
+    },
+    "arrow-right": {
+      "source": "phosphor",
+      "name": "arrow-right",
+      "label": "Pfeil nach rechts"
+    },
+    "close": {
+      "source": "phosphor",
+      "name": "x",
+      "label": "Schließen"
+    },
+    "download": {
+      "source": "phosphor",
+      "name": "download-simple",
+      "label": "Download"
+    },
+    "eye": {
+      "source": "phosphor",
+      "name": "eye",
+      "label": "Auge"
+    },
+    "info": {
+      "source": "phosphor",
+      "name": "info",
+      "label": "Information"
+    },
+    "lock": {
+      "source": "phosphor",
+      "name": "lock-simple",
+      "label": "Schloss"
+    },
+    "logout": {
+      "source": "phosphor",
+      "name": "sign-out",
+      "label": "Abmelden"
+    },
+    "mail": {
+      "source": "phosphor",
+      "name": "envelope-simple",
+      "label": "E-Mail"
+    },
+    "minus": {
+      "source": "phosphor",
+      "name": "minus",
+      "label": "Minus"
+    },
+    "phone": {
+      "source": "phosphor",
+      "name": "phone",
+      "label": "Telefon"
+    },
+    "plus": {
+      "source": "phosphor",
+      "name": "plus",
+      "label": "Plus"
+    },
+    "search": {
+      "source": "phosphor",
+      "name": "magnifying-glass",
+      "label": "Suche"
+    },
+    "shield": {
+      "source": "phosphor",
+      "name": "shield-check",
+      "label": "Schild"
+    },
+    "user": {
+      "source": "phosphor",
+      "name": "user",
+      "label": "Person"
+    },
+    "warning": {
+      "source": "phosphor",
+      "name": "warning-circle",
+      "label": "Warnung"
+    },
+    "clock": {
+      "source": "phosphor",
+      "name": "clock",
+      "label": "Uhr"
+    },
+    "map-pin": {
+      "source": "phosphor",
+      "name": "map-pin",
+      "label": "Standort"
+    },
+    "star": {
+      "source": "phosphor",
+      "name": "star",
+      "label": "Stern"
+    },
+    "quotes": {
+      "source": "phosphor",
+      "name": "quotes",
+      "label": "Anführungszeichen"
+    },
+    "file-text": {
+      "source": "phosphor",
+      "name": "file-text",
+      "label": "Dokument"
+    },
+    "chat": {
+      "source": "phosphor",
+      "name": "chat-circle",
+      "label": "Nachricht"
+    },
+    "lightbulb": {
+      "source": "phosphor",
+      "name": "lightbulb",
+      "label": "Idee"
+    },
+    "handshake": {
+      "source": "phosphor",
+      "name": "handshake",
+      "label": "Zusammenarbeit"
+    },
+    "facebook": {
+      "source": "phosphor",
+      "name": "facebook-logo",
+      "label": "Facebook"
+    },
+    "instagram": {
+      "source": "phosphor",
+      "name": "instagram-logo",
+      "label": "Instagram"
+    },
+    "linkedin": {
+      "source": "phosphor",
+      "name": "linkedin-logo",
+      "label": "LinkedIn"
+    },
+    "x": {
+      "source": "phosphor",
+      "name": "x-logo",
+      "label": "X"
+    },
+    "youtube": {
+      "source": "phosphor",
+      "name": "youtube-logo",
+      "label": "YouTube"
+    },
+    "xing": {
+      "source": "simple-icons",
+      "name": "xing",
+      "label": "Xing"
+    }
+  }
+}

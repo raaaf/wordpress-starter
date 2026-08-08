@@ -116,6 +116,7 @@ Jetzt kannst du die Komponente überall nutzen:
 ## Props vs. Slots
 
 ### Props
+
 Props sind benannte Attribute, die du der Komponente übergibst:
 
 ```blade
@@ -127,6 +128,7 @@ Props sind benannte Attribute, die du der Komponente übergibst:
 ```
 
 Verwendung:
+
 ```blade
 <x-button variant="secondary" size="lg" :disabled="true">
     Klick mich
@@ -134,6 +136,7 @@ Verwendung:
 ```
 
 ### Slots
+
 Slots sind Inhaltsbereiche:
 
 ```blade
@@ -146,6 +149,7 @@ Slots sind Inhaltsbereiche:
 ```
 
 Verwendung:
+
 ```blade
 <x-card>
     <x-slot:header>
@@ -183,6 +187,7 @@ Das Theme enthält bereits diese Komponenten:
 ### Layout-Komponenten
 
 **`<x-section>`** - Abschnitt mit Hintergrundfarbe
+
 ```blade
 <x-section background="secondary" padding="lg">
     Inhalt
@@ -190,6 +195,7 @@ Das Theme enthält bereits diese Komponenten:
 ```
 
 **`<x-grid>`** - CSS-Grid Container
+
 ```blade
 <x-grid cols="3" gap="6">
     <div>Spalte 1</div>
@@ -199,6 +205,7 @@ Das Theme enthält bereits diese Komponenten:
 ```
 
 **`<x-prose>`** - Typografie für WYSIWYG-Inhalte
+
 ```blade
 <x-prose>
     {!! $content !!}
@@ -208,6 +215,7 @@ Das Theme enthält bereits diese Komponenten:
 ### UI-Komponenten
 
 **`<x-button>`** - Button in verschiedenen Varianten
+
 ```blade
 <x-button url="/kontakt" variant="primary" size="lg">
     Kontakt aufnehmen
@@ -218,6 +226,7 @@ Varianten: `primary`, `secondary`, `ghost`, `danger`
 Größen: `sm`, `md`, `lg`
 
 **`<x-card>`** - Karten-Container
+
 ```blade
 <x-card variant="elevated">
     Karteninhalt
@@ -225,11 +234,13 @@ Größen: `sm`, `md`, `lg`
 ```
 
 **`<x-badge>`** - Kleine Labels
+
 ```blade
 <x-badge variant="success">Neu</x-badge>
 ```
 
 **`<x-link>`** - Gestylte Links
+
 ```blade
 <x-link url="/mehr" variant="underline">Mehr erfahren</x-link>
 ```
@@ -237,26 +248,31 @@ Größen: `sm`, `md`, `lg`
 ### Form-Komponenten
 
 **`<x-input>`** - Textfeld
+
 ```blade
 <x-input name="email" type="email" label="E-Mail" required />
 ```
 
 **`<x-textarea>`** - Mehrzeiliges Textfeld
+
 ```blade
 <x-textarea name="message" label="Nachricht" rows="5" />
 ```
 
 **`<x-select>`** - Dropdown
+
 ```blade
 <x-select name="country" label="Land" :options="$countries" />
 ```
 
 **`<x-checkbox>`** / **`<x-radio>`** - Auswahl
+
 ```blade
 <x-checkbox name="terms" label="AGB akzeptieren" />
 ```
 
 **`<x-toggle>`** - Toggle-Switch
+
 ```blade
 <x-toggle name="newsletter" label="Newsletter abonnieren" />
 ```
@@ -264,15 +280,29 @@ Größen: `sm`, `md`, `lg`
 ### Weitere Komponenten
 
 **`<x-icon>`** - Icon-Komponente
+
 ```blade
 <x-icon name="check" class="w-5 h-5" />
 ```
+
+### Icon-Pipeline
+
+Icons kommen nicht aus Handarbeit, sondern aus einer Pipeline:
+
+```
+config/icons.json → npm run icons → resources/icons/*.svg → FieldDefinitions::getThemeIcons()
+```
+
+`config/icons.json` ist die einzige Quelle der Wahrheit. Icon dazunehmen: dort eintragen (Name, Icon-Set-Quelle, deutsches Label), dann `npm run icons` laufen lassen. Das Script (`scripts/sync-icons.js`) schreibt die SVGs nach `resources/icons/`; `FieldDefinitions::getThemeIcons()` liest dieselbe `config/icons.json` für die Auswahlliste im ACF-Icon-Feld, sodass Dateien und Dropdown nicht auseinanderlaufen können.
+
+Quelle ist standardmässig **Phosphor** (MIT, ~1500 Icons, ein Grid, ein Gewicht). Für Markenlogos, die Phosphor nicht führt (z. B. `xing`), fällt der Eintrag auf **simple-icons** (CC0) zurück.
 
 ## Design-Token verwenden
 
 Verwende die semantischen CSS-Klassen aus dem Design-System:
 
 ### Hintergründe
+
 - `bg-surface` - Standard
 - `bg-surface-secondary` - Sekundär (grau)
 - `bg-surface-tertiary` - Tertiär
@@ -280,12 +310,14 @@ Verwende die semantischen CSS-Klassen aus dem Design-System:
 - `bg-surface-inverse` - Dunkel
 
 ### Textfarben
+
 - `text-content` - Standard
 - `text-content-secondary` - Gedämpft
 - `text-content-brand` - Markenfarbe
 - `text-content-inverse` - Auf dunklem Hintergrund
 
 ### Linien
+
 - `border-line` - Standard-Rahmen
 - `ring-line-focus` - Fokus-Ring
 

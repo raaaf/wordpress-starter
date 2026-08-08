@@ -1,7 +1,7 @@
 {{--
     Blog Posts Flexible Content Layout
 
-    Uses shared components: x-section, x-link, x-card
+    Uses shared components: x-section, x-section-header, x-link, x-card
     Uses get_the_post_thumbnail() for automatic srcset/responsive images
     Fields: title, post_type, posts_per_page, category, show_excerpt, show_date, show_author, columns, background_color
 --}}
@@ -41,9 +41,7 @@
 @endphp
 
 <x-section :anchor="$sectionAnchor" :background="$background" class="posts">
-    @if($title)
-        <h2 class="mb-12 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if($postsQuery->have_posts())
         <ul class="grid gap-8 {{ $gridClass }}" role="list">
@@ -54,7 +52,7 @@
                         @if(has_post_thumbnail())
                             <div class="block overflow-hidden aspect-video">
                                 {!! get_the_post_thumbnail(get_the_ID(), 'card-video', [
-                                    'class' => 'object-cover w-full h-full transition-transform duration-300 group-hover:scale-105',
+                                    'class' => 'object-cover w-full h-full transition-transform duration-200 ease-out group-hover:scale-105',
                                     'loading' => 'lazy',
                                 ]) !!}
                             </div>

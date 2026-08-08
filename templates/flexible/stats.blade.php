@@ -1,7 +1,7 @@
 {{--
     Stats/Counter Flexible Content Layout
 
-    Uses shared components: x-section
+    Uses shared components: x-section, x-section-header
     Uses Alpine.js for animated counting
     Fields: title, stats (repeater: number, suffix, label, icon), background_color
 --}}
@@ -24,9 +24,7 @@
 
 @if($title || !empty($stats))
 <x-section :anchor="$sectionAnchor" :background="$background" class="stats">
-    @if($title)
-        <h2 class="mb-12 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($stats))
         <div class="grid gap-8 text-center {{ $gridClass }}">

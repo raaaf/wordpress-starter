@@ -1,7 +1,7 @@
 {{--
     Logo Slider - Flexible Content Layout
 
-    Uses shared components: x-section
+    Uses shared components: x-section, x-section-header
     CSS-based infinite scrolling animation
     Fields: title, logos (repeater: logo, link, name), autoplay, background_color
 --}}
@@ -57,9 +57,7 @@
 
 @if($title || !empty($logoData))
 <x-section :anchor="$sectionAnchor" :background="$background" padding="md" class="logo-slider">
-    @if($title)
-        <h2 class="text-h3 mb-8 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($logoData))
         <div

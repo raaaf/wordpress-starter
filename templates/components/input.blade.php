@@ -56,7 +56,7 @@
         // stays at 16px on phones and drops to 14px from md up.
         'sm' => [
             'input' => 'h-8 text-base md:text-sm',
-            'padding' => $iconLeft ? 'pl-8 pr-3' : 'px-3',
+            'padding' => $iconLeft ? 'pl-8 pr-[var(--input-sm-padding-x)]' : 'px-[var(--input-sm-padding-x)]',
             'paddingRight' => $iconRight || $clearable ? 'pr-8' : '',
             'icon' => 'w-3.5 h-3.5',
             'iconLeft' => 'left-2.5',
@@ -64,7 +64,7 @@
         ],
         'md' => [
             'input' => 'h-10 text-base',
-            'padding' => $iconLeft ? 'pl-10 pr-4' : 'px-4',
+            'padding' => $iconLeft ? 'pl-10 pr-[var(--input-md-padding-x)]' : 'px-[var(--input-md-padding-x)]',
             'paddingRight' => $iconRight || $clearable ? 'pr-10' : '',
             'icon' => 'w-4 h-4',
             'iconLeft' => 'left-3',
@@ -72,7 +72,7 @@
         ],
         'lg' => [
             'input' => 'h-12 text-lg',
-            'padding' => $iconLeft ? 'pl-12 pr-5' : 'px-5',
+            'padding' => $iconLeft ? 'pl-12 pr-[var(--input-lg-padding-x)]' : 'px-[var(--input-lg-padding-x)]',
             'paddingRight' => $iconRight || $clearable ? 'pr-12' : '',
             'icon' => 'w-5 h-5',
             'iconLeft' => 'left-4',

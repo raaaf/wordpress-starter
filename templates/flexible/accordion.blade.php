@@ -4,7 +4,13 @@
     Uses shared components: x-section, x-prose
     Fields: accordion (repeater with icon, title, content), background_color
 
-    Includes FAQPage JSON-LD schema for SEO rich snippets
+    Includes FAQPage JSON-LD schema for SEO rich snippets, gated to singular,
+    published, non-password-protected pages (see $canPublishFaqSchema below).
+    The primary guard against leaking a password-protected preview's Q&A is
+    that all three callers (page.blade.php, page-styleguide.blade.php,
+    page-member-area.blade.php) already gate the whole page_sections loop
+    behind post_password_required() before this template ever runs;
+    $canPublishFaqSchema repeats that check here as defence in depth.
 --}}
 
 @php
@@ -12,9 +18,14 @@
     $background = get_sub_field('background_color') ?: 'primary';
     $accordionId = uniqid();
 
+    // Checks that this is a singular, published, non-password-protected
+    // page — schema is only emitted for content the public can actually
+    // reach.
+    $canPublishFaqSchema = is_singular() && get_post_status() === 'publish' && !post_password_required();
+
     // Build FAQPage schema for SEO
     $faqQuestions = [];
-    if (!empty($items)) {
+    if ($canPublishFaqSchema && !empty($items)) {
         foreach ($items as $item) {
             if (!empty($item['title']) && !empty($item['content'])) {
                 $faqQuestions[] = [
@@ -65,7 +76,7 @@
                             @endif
                             {{ $item['title'] }}
                         </span>
-                        <svg class="w-5 h-5 transition-all duration-200"
+                        <svg class="w-5 h-5 transition-transform duration-200"
                              :class="{ 'rotate-180': active === {{ $index }} }"
                              fill="none" stroke="currentColor" viewBox="0 0 24 24"
                              aria-hidden="true">

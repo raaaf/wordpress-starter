@@ -1,7 +1,7 @@
 {{--
     Timeline Flexible Content Layout
 
-    Uses shared components: x-section, x-badge, x-card
+    Uses shared components: x-section, x-section-header, x-badge, x-card
     Fields: title, events (repeater: year, title, content, image), background_color
 --}}
 
@@ -13,9 +13,7 @@
 
 @if($title || !empty($events))
 <x-section :anchor="$sectionAnchor" :background="$background" class="timeline">
-    @if($title)
-        <h2 class="mb-12 text-center">@kses($title)</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($events))
         <div class="relative">

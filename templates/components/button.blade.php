@@ -40,7 +40,8 @@
     $variants = [
         'primary' => implode(' ', [
             'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)]',
-            'text-content-inverse',
+            // Follows the fill, not the page: see --text-on-accent in app.css.
+            'text-content-on-accent',
             'border border-line',
             'shadow-[var(--shadow-button)]',
             'hover:from-[var(--gradient-primary-hover-start)] hover:to-[var(--gradient-primary-hover-end)]',
@@ -71,10 +72,13 @@
         ]),
         'danger' => implode(' ', [
             'bg-surface-error-strong',
-            'text-content-on-color',
+            // Flips with the scheme, like the content on every other fill.
+            'text-content-inverse',
             'border border-transparent',
             'shadow-[var(--shadow-button)]',
-            'hover:bg-error-dark',
+            // No colour step on hover: the status ramp has only light/base/dark
+            // and --bg-error-strong already takes the end of it. Elevation carries
+            // the state until the export ships a darker tone.
             'hover:shadow-[var(--shadow-button-hover)]',
             'active:shadow-[var(--shadow-inner)]',
             'focus-visible:shadow-[var(--shadow-focus-ring)]',

@@ -422,6 +422,13 @@ if (!function_exists('is_multisite')) {
     }
 }
 
+if (!function_exists('get_current_blog_id')) {
+    function get_current_blog_id(): int
+    {
+        return $GLOBALS['wp_mock_current_blog_id'] ?? 1;
+    }
+}
+
 // Block editor functions
 if (!function_exists('acf_register_block_type')) {
     function acf_register_block_type(array $settings): void
@@ -686,6 +693,44 @@ if (!function_exists('get_current_user_id')) {
 }
 
 // Posts / permalinks
+if (!function_exists('get_post')) {
+    /**
+     * Minimal get_post() stub.
+     *
+     * Reads $GLOBALS['wp_mock_posts_by_id'][$id] which tests fill with
+     * ['post_type' => 'page', 'post_status' => 'private'].
+     */
+    function get_post(int|object|null $post = null): ?object
+    {
+        $id = is_object($post) ? (int) $post->ID : (int) $post;
+        $data = $GLOBALS['wp_mock_posts_by_id'][$id] ?? null;
+
+        if ($data === null) {
+            return null;
+        }
+
+        return (object) array_merge(['ID' => $id, 'post_type' => 'page', 'post_status' => 'publish'], $data);
+    }
+}
+
+if (!function_exists('update_post_meta')) {
+    function update_post_meta(int $postId, string $key, mixed $value, mixed $prev = ''): bool
+    {
+        $GLOBALS['wp_mock_post_meta'][$postId][$key] = $value;
+
+        return true;
+    }
+}
+
+if (!function_exists('delete_post_meta')) {
+    function delete_post_meta(int $postId, string $key, mixed $value = ''): bool
+    {
+        unset($GLOBALS['wp_mock_post_meta'][$postId][$key]);
+
+        return true;
+    }
+}
+
 if (!function_exists('get_posts')) {
     function get_posts(array $args = []): array
     {

@@ -1,7 +1,7 @@
 {{--
     Pricing Table Flexible Content Layout
 
-    Uses shared components: x-section, x-grid, x-button, x-badge
+    Uses shared components: x-section, x-section-header, x-grid, x-button, x-badge
     Fields: title, plans (repeater: name, price, period, features, cta, is_featured), background_color
 --}}
 
@@ -20,9 +20,7 @@
 @endphp
 
 <x-section :anchor="$sectionAnchor" :background="$background" class="pricing-table">
-    @if($title)
-        <h2 class="mb-12 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($plans))
         <div class="grid gap-8 {{ $gridClass }}">
@@ -35,7 +33,7 @@
                     $features = $plan['features'] ?? '';
                     $cta = $plan['cta'] ?? null;
                 @endphp
-                <div class="relative flex flex-col p-8 rounded-[var(--card-radius)] {{ $isFeatured ? 'bg-surface-brand text-content-inverse ring-4 ring-surface-brand ring-offset-2' : 'bg-surface-secondary' }}">
+                <div class="relative flex flex-col p-8 rounded-[var(--card-radius)] border {{ $isFeatured ? 'bg-surface-brand text-content-on-brand border-line-brand shadow-[var(--shadow-card-hover)]' : 'bg-surface-secondary border-line shadow-[var(--shadow-card)]' }}">
                     @if($isFeatured)
                         <x-badge variant="accent" size="md" class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
                             {{ __('Empfohlen', 'wp-starter') }}
@@ -43,20 +41,20 @@
                     @endif
 
                     @if($name)
-                        <h3 class="text-h4 mb-4 {{ $isFeatured ? 'text-content-inverse' : '' }}">{{ $name }}</h3>
+                        <h3 class="text-h4 mb-4 {{ $isFeatured ? 'text-content-on-brand' : '' }}">{{ $name }}</h3>
                     @endif
 
                     <div class="mb-6">
                         @if($price !== '')
-                            <span class="text-h1 tabular-nums {{ $isFeatured ? 'text-content-inverse' : 'text-content' }}">{{ $price }}</span>
+                            <span class="text-h1 tabular-nums {{ $isFeatured ? 'text-content-on-brand' : 'text-content' }}">{{ $price }}</span>
                         @endif
                         @if($period)
-                            <span class="{{ $isFeatured ? 'text-content-inverse opacity-80' : 'text-content-secondary' }}">/ {{ $period }}</span>
+                            <span class="{{ $isFeatured ? 'text-content-on-brand' : 'text-content-secondary' }}">/ {{ $period }}</span>
                         @endif
                     </div>
 
                     @if($features)
-                        <div class="flex-grow mb-8 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_li]:pl-1 {{ $isFeatured ? 'text-content-inverse [&_li]:marker:text-content-inverse' : 'text-content [&_li]:marker:text-content-brand' }}">
+                        <div class="flex-grow mb-8 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_li]:pl-1 {{ $isFeatured ? 'text-content-on-brand [&_li]:marker:text-content-on-brand' : 'text-content [&_li]:marker:text-content-brand' }}">
                             {!! wp_kses_post($features ?? '') !!}
                         </div>
                     @endif
@@ -75,7 +73,7 @@
             @endforeach
         </div>
     @else
-        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+        <div class="p-8 text-center rounded-[var(--card-radius)] bg-surface-secondary">
             <p class="text-content-secondary">{{ __('Bitte füge mindestens ein Preispaket hinzu.', 'wp-starter') }}</p>
         </div>
     @endif

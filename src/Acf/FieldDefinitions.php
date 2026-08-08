@@ -32,37 +32,46 @@ class FieldDefinitions
     }
 
     /**
-     * Get theme icon choices from resources/icons/
+     * Icon choices for the editor, read from config/icons.json.
+     *
+     * The list used to be a second, hand-maintained copy next to the SVG files in
+     * resources/icons/, so a removed icon stayed selectable and a new one stayed
+     * invisible. Both now come from the same file, which `npm run icons` also uses
+     * to write the SVGs.
      *
      * @return array<string, string>
      */
     public static function getThemeIcons(): array
     {
-        return [
-            '' => __('— Kein Icon —', 'wp-starter'),
-            'calendar' => __('Kalender', 'wp-starter'),
-            'check' => __('Häkchen', 'wp-starter'),
-            'chevron' => __('Pfeil', 'wp-starter'),
-            'close' => __('Schließen', 'wp-starter'),
-            'eye' => __('Auge', 'wp-starter'),
-            'lock' => __('Schloss', 'wp-starter'),
-            'mail' => __('E-Mail', 'wp-starter'),
-            'minus' => __('Minus', 'wp-starter'),
-            'phone' => __('Telefon', 'wp-starter'),
-            'plus' => __('Plus', 'wp-starter'),
-            'search' => __('Suche', 'wp-starter'),
-            'user' => __('Person', 'wp-starter'),
-            'warning' => __('Warnung', 'wp-starter'),
-            'download' => __('Download', 'wp-starter'),
-            'logout' => __('Abmelden', 'wp-starter'),
-            'shield' => __('Schild', 'wp-starter'),
-            'facebook' => __('Facebook', 'wp-starter'),
-            'instagram' => __('Instagram', 'wp-starter'),
-            'linkedin' => __('LinkedIn', 'wp-starter'),
-            'x' => __('X (Twitter)', 'wp-starter'),
-            'xing' => __('Xing', 'wp-starter'),
-            'youtube' => __('YouTube', 'wp-starter'),
-        ];
+        static $choices = null;
+
+        if ($choices !== null) {
+            return $choices;
+        }
+
+        $choices = ['' => __('— Kein Icon —', 'wp-starter')];
+        $configPath = get_template_directory() . '/config/icons.json';
+
+        if (!file_exists($configPath)) {
+            return $choices;
+        }
+
+        $raw = (string) file_get_contents($configPath);
+        $config = json_decode($raw, true);
+
+        if (!is_array($config) || !isset($config['icons']) || !is_array($config['icons'])) {
+            return $choices;
+        }
+
+        foreach ($config['icons'] as $slug => $spec) {
+            if (!is_string($slug) || !is_array($spec)) {
+                continue;
+            }
+            $label = $spec['label'] ?? $slug;
+            $choices[$slug] = is_string($label) ? $label : $slug;
+        }
+
+        return $choices;
     }
 
     /**

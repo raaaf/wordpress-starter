@@ -1,7 +1,7 @@
 {{--
     Table Flexible Content Layout
 
-    Uses shared components: x-section
+    Uses shared components: x-section, x-section-header
     Fields: title, headers (repeater: label), rows (repeater: cells), striped, bordered, background_color
 --}}
 
@@ -15,9 +15,7 @@
 @endphp
 
 <x-section :anchor="$sectionAnchor" :background="$background" class="table-block">
-    @if($title)
-        <h2 class="mb-8 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($rows))
         <div class="overflow-x-auto rounded-lg">

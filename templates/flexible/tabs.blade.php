@@ -1,7 +1,7 @@
 {{--
     Tabs Flexible Content Layout
 
-    Uses shared components: x-section
+    Uses shared components: x-section, x-section-header
     Uses Alpine.js for tab switching
     Fields: title, tabs (repeater: title, content), background_color
 --}}
@@ -15,9 +15,7 @@
 
 @if($title || !empty($tabs))
 <x-section :anchor="$sectionAnchor" :background="$background" class="tabs">
-    @if($title)
-        <h2 class="mb-8 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($tabs))
         @php $tabCount = count($tabs); @endphp
@@ -55,7 +53,9 @@
                             : 'border-transparent text-content-secondary hover:text-content hover:border-line'"
                         :aria-selected="activeTab === {{ $index }}"
                         :tabindex="activeTab === {{ $index }} ? 0 : -1"
-                        class="inline-flex items-center gap-2 px-1 py-3 font-medium border-b-2 -mb-px transition-colors cursor-pointer rounded-[var(--radius-sm)] focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
+                        {{-- Radius nur oben: der Fokusring bleibt weich, die Unterstreichung des aktiven
+                             Tabs bleibt flach. Ein umlaufender Radius rundete auch sie ab. --}}
+                        class="inline-flex items-center gap-2 px-1 py-3 font-medium border-b-2 -mb-px transition-colors cursor-pointer rounded-t-[var(--radius-sm)] focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
                         role="tab"
                         aria-controls="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"
                     >

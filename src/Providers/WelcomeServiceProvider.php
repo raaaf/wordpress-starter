@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WordpressStarter\Providers;
 
 use WordpressStarter\Content\StyleguideLayoutData;
+use WordpressStarter\Services\StyleguidePage;
 use WordpressStarter\ThemeContext;
 
 /**
@@ -35,11 +36,6 @@ class WelcomeServiceProvider extends ServiceProvider
         return ThemeContext::optionKey('welcome_dismissed');
     }
 
-    private static function optPageId(): string
-    {
-        return ThemeContext::optionKey('styleguide_page_id');
-    }
-
     /**
      * Resolve the cached styleguide page ID, tolerating a stale value.
      *
@@ -51,19 +47,11 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private static function resolveStyleguidePageId(): int
     {
-        $pageId = (int) get_option(self::optPageId());
+        $pageId = StyleguidePage::find();
 
-        if ($pageId <= 0) {
-            return 0;
-        }
-
-        $post = get_post($pageId);
-
-        if (!$post || $post->post_type !== 'page') {
-            return 0;
-        }
-
-        return $pageId;
+        // AMBIGUOUS means several pages could be it. Treat that as "none" here:
+        // every caller of this method either deletes or overwrites the result.
+        return $pageId > 0 ? $pageId : 0;
     }
 
     private static function optImages(): string
@@ -104,6 +92,16 @@ class WelcomeServiceProvider extends ServiceProvider
     private static function nonceDeleteStyleguide(): string
     {
         return ThemeContext::kebabPrefix() . '-delete-styleguide';
+    }
+
+    private static function nonceMigrateStyleguide(): string
+    {
+        return ThemeContext::kebabPrefix() . '-migrate-styleguide';
+    }
+
+    private static function paramMigrateStyleguide(): string
+    {
+        return ThemeContext::kebabPrefix() . '-migrate-styleguide';
     }
 
     private static function paramCreateStyleguide(): string
@@ -151,6 +149,7 @@ class WelcomeServiceProvider extends ServiceProvider
     {
         add_action('admin_notices', [$this, 'displayWelcomeNotice']);
         add_action('admin_notices', [$this, 'displayImportOptionsNotice']);
+        add_action('admin_notices', [$this, 'displayStyleguideMigrationNotice']);
         add_action('admin_init', [$this, 'handleNoticeActions']);
     }
 
@@ -328,6 +327,7 @@ class WelcomeServiceProvider extends ServiceProvider
         $this->handleRegenerateStyleguide();
         $this->handleRestoreStyleguide();
         $this->handleDeleteStyleguide();
+        $this->handleMigrateStyleguide();
         $this->handleDismiss();
         $this->handleImportOptions();
     }
@@ -442,7 +442,6 @@ class WelcomeServiceProvider extends ServiceProvider
         $pageId = $this->createStyleguidePage();
 
         if ($pageId) {
-            update_option(self::optPageId(), $pageId);
             update_option(self::optDismissed(), true);
 
             $editUrl = get_edit_post_link($pageId, 'url');
@@ -504,7 +503,6 @@ class WelcomeServiceProvider extends ServiceProvider
         $pageId = $this->createStyleguidePage();
 
         if ($pageId) {
-            update_option(self::optPageId(), $pageId);
             update_option(self::optDismissed(), true);
 
             $editUrl = get_edit_post_link($pageId, 'url');
@@ -575,7 +573,7 @@ class WelcomeServiceProvider extends ServiceProvider
         if ($existingPageId > 0) {
             wp_delete_post($existingPageId, true);
         }
-        delete_option(self::optPageId());
+        StyleguidePage::forget();
 
         wp_safe_redirect(admin_url('admin.php?page=theme-options-tools'));
         exit;
@@ -586,6 +584,106 @@ class WelcomeServiceProvider extends ServiceProvider
      *
      * @return int Post ID on success, 0 on failure
      */
+    /**
+     * Offer the switch to the component-rendered styleguide.
+     *
+     * Deliberately a notice and not an automatic migration: this writes over a page
+     * on a site we know nothing about. The user clicks, or nothing happens.
+     *
+     * When several pages could be the styleguide, say so instead of picking one.
+     */
+    public function displayStyleguideMigrationNotice(): void
+    {
+        if (!current_user_can('publish_pages') || !ThemeContext::isActiveOnCurrentSite()) {
+            return;
+        }
+
+        $pageId = StyleguidePage::find();
+
+        if ($pageId === StyleguidePage::AMBIGUOUS) {
+            printf(
+                '<div class="notice notice-warning"><p>%s</p></div>',
+                esc_html__(
+                    'Mehrere Seiten kommen als Styleguide in Frage. Bitte die richtige Seite oeffnen und dort das Template "Styleguide" auswaehlen; automatisch wird hier nichts geaendert.',
+                    'wp-starter'
+                )
+            );
+
+            return;
+        }
+
+        if ($pageId <= 0 || !StyleguidePage::needsMigration($pageId)) {
+            return;
+        }
+
+        $url = wp_nonce_url(
+            add_query_arg(self::paramMigrateStyleguide(), '1', admin_url()),
+            self::nonceMigrateStyleguide()
+        );
+
+        printf(
+            '<div class="notice notice-info"><p>%s</p><p><a href="%s" class="button button-primary">%s</a> <a href="%s">%s</a></p></div>',
+            esc_html__(
+                'Der Styleguide zeigt die Design-System-Referenz noch als kopiertes HTML. Die neue Fassung rendert sie aus den echten Komponenten, bleibt damit automatisch aktuell und behaelt die Layout-Galerie.',
+                'wp-starter'
+            ),
+            esc_url($url),
+            esc_html__('Styleguide umstellen', 'wp-starter'),
+            esc_url( (string) get_edit_post_link($pageId, 'url') ),
+            esc_html__('Seite vorher ansehen', 'wp-starter')
+        );
+    }
+
+    /**
+     * Switch the styleguide page over: new template, layout gallery rebuilt.
+     *
+     * The gallery is regenerated rather than filtered, because the old content mixed
+     * reference sections and gallery sections in one flat list with no marker to tell
+     * them apart. Regenerating is safe here and only here: the page is generated
+     * content that nobody edits by hand, and it is identified by its own marker.
+     */
+    private function handleMigrateStyleguide(): void
+    {
+        if (!isset($_GET[self::paramMigrateStyleguide()])) {
+            return;
+        }
+
+        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
+
+        if (!wp_verify_nonce($nonce, self::nonceMigrateStyleguide())) {
+            wp_die(esc_html__('Sicherheitsueberpruefung fehlgeschlagen.', 'wp-starter'));
+        }
+
+        if (!current_user_can('publish_pages')) {
+            wp_die(esc_html__('Sie haben keine Berechtigung fuer diese Aktion.', 'wp-starter'));
+        }
+
+        if (!function_exists('update_field')) {
+            wp_die(esc_html__('ACF Pro ist nicht aktiv. Ohne ACF kann der Styleguide nicht umgestellt werden.', 'wp-starter'));
+        }
+
+        $pageId = StyleguidePage::find();
+
+        if ($pageId <= 0) {
+            wp_die(esc_html__('Es wurde keine eindeutige Styleguide-Seite gefunden.', 'wp-starter'));
+        }
+
+        $this->importPlaceholderImages();
+
+        update_post_meta($pageId, '_wp_page_template', StyleguidePage::TEMPLATE);
+        StyleguidePage::adopt($pageId);
+
+        $factory = new StyleguideLayoutData($this->imageIds);
+        update_field('page_sections', $factory->build(), $pageId);
+
+        $viewUrl = get_permalink($pageId);
+
+        if ($viewUrl) {
+            wp_safe_redirect($viewUrl);
+            exit;
+        }
+    }
+
     private function createStyleguidePage(): int
     {
         $this->importPlaceholderImages();
@@ -602,7 +700,8 @@ class WelcomeServiceProvider extends ServiceProvider
             return 0;
         }
 
-        update_post_meta($pageId, '_wp_page_template', 'page-flexible.blade.php');
+        update_post_meta($pageId, '_wp_page_template', StyleguidePage::TEMPLATE);
+        StyleguidePage::adopt($pageId);
 
         $factory = new StyleguideLayoutData($this->imageIds);
         $layouts = $factory->build();

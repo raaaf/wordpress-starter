@@ -103,6 +103,14 @@ Semantische Tokens referenzieren Primitives via Figma-Alias-Daten. Der Transform
 }
 ```
 
+## Fluide Zeilenhöhen
+
+`fluidLineHeight()` in `scripts/transform-tokens.js` berechnet die Zeilenhöhe für `display`, `h1`, `h2` und `h3` als `clamp()`, synchron mit der fluiden Schriftgröße derselben Stufe.
+
+Der Wert ist als **Länge** (`px`, fluid zwischen `VIEWPORT_MIN` und `VIEWPORT_MAX`) ausgegeben, nicht als unitless Verhältnis (`1.1`, `1.5`). Grund: `calc(1.44 - 0.0125vw)` zieht eine Länge von einer unitless-Zahl ab, das ist ungültiges CSS und lässt die ganze Deklaration fallen — zwischen 2026-04-16 und der Reparatur rendete dadurch jede `display`/`h1`/`h2`/`h3`-Zeile mit der geerbten Body-Zeilenhöhe von 1.5 statt der beabsichtigten 1.1 bis 1.35. `fluidLineHeight()` skaliert stattdessen `mobileLh`/`desktopLh` mit den bekannten Pixel-Endpunkten der Schriftgröße und gibt `calc()` bereits in `px` zurück.
+
+Details zur Herleitung: `.claude/plans/logs/2026-04-16-fluid-typography-scale.md`.
+
 ## Verwendung in Templates
 
 ### Mit TailwindCSS (empfohlen)

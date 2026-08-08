@@ -32,6 +32,15 @@ final class FieldDefinitionsTest extends TestCase
     // THEME_ICONS constant tests
     // ==========================================
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // getThemeIcons() reads config/icons.json from the theme root, so the tests
+        // have to point at the real one. That coupling is deliberate: the list the
+        // editor sees and the SVGs the theme ships come from the same file.
+        $this->setTemplateDirectory(dirname(__DIR__, 3));
+    }
+
     public function testThemeIconsContainsAllExpectedIcons(): void
     {
         $icons = FieldDefinitions::getThemeIcons();
@@ -42,6 +51,69 @@ final class FieldDefinitionsTest extends TestCase
         $this->assertArrayHasKey('phone', $icons);
         $this->assertArrayHasKey('facebook', $icons);
         $this->assertArrayHasKey('linkedin', $icons);
+    }
+
+    /**
+     * The guarantee that made config/icons.json worth introducing: every icon the
+     * editor can pick actually exists as a file, and every file is pickable. Before,
+     * the dropdown was a second hand-maintained copy and drifted from resources/icons/.
+     */
+    public function testEveryOfferedIconShipsAsAFile(): void
+    {
+        $root = dirname(__DIR__, 3);
+        $icons = FieldDefinitions::getThemeIcons();
+        unset($icons['']);
+
+        $missing = [];
+        foreach (array_keys($icons) as $slug) {
+            if (!file_exists($root . '/resources/icons/' . $slug . '.svg')) {
+                $missing[] = $slug;
+            }
+        }
+
+        $this->assertSame([], $missing, 'Auswaehlbar, aber keine Datei: ' . implode(', ', $missing));
+    }
+
+    public function testEveryShippedIconIsOfferedToEditors(): void
+    {
+        $root = dirname(__DIR__, 3);
+        $icons = FieldDefinitions::getThemeIcons();
+
+        $orphans = [];
+        foreach (glob($root . '/resources/icons/*.svg') ?: [] as $file) {
+            $slug = basename($file, '.svg');
+            if (!array_key_exists($slug, $icons)) {
+                $orphans[] = $slug;
+            }
+        }
+
+        $this->assertSame([], $orphans, 'Datei vorhanden, aber nicht auswaehlbar: ' . implode(', ', $orphans));
+    }
+
+    /**
+     * One icon set, one grid. The predecessor mixed a 16-unit house set with 24-unit
+     * Lucide icons, which cannot be balanced by CSS — they simply rendered at
+     * different sizes in the same box.
+     */
+    public function testAllIconsShareOneGrid(): void
+    {
+        $root = dirname(__DIR__, 3);
+        $grids = [];
+
+        foreach (glob($root . '/resources/icons/*.svg') ?: [] as $file) {
+            $svg = (string) file_get_contents($file);
+            if (preg_match('/viewBox="0 0 (\d+) (\d+)"/', $svg, $m)) {
+                $grids[$m[1]][] = basename($file, '.svg');
+            }
+        }
+
+        // Brand marks from simple-icons come on their own 24 grid; everything else
+        // is Phosphor at 256. More than those two means a third set crept in.
+        $this->assertLessThanOrEqual(
+            2,
+            count($grids),
+            'Mehr als zwei Raster in resources/icons/: ' . implode(' | ', array_keys($grids))
+        );
     }
 
     // ==========================================

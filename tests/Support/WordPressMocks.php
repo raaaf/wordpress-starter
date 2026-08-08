@@ -37,6 +37,11 @@ trait WordPressMocks
 
         // Reset Config static state
         $this->resetConfigState();
+
+        // Reset StyleguidePage::find() memoization cache (see $cachedResults doc
+        // there): otherwise a cached page ID from one test class can silently
+        // survive into the next without any test noticing.
+        $this->resetStyleguidePageCache();
     }
 
     /**
@@ -53,6 +58,18 @@ trait WordPressMocks
         $loadedProperty = $reflection->getProperty('loaded');
         $loadedProperty->setAccessible(true);
         $loadedProperty->setValue(null, false);
+    }
+
+    /**
+     * Reset StyleguidePage's per-blog find() memoization cache.
+     */
+    protected function resetStyleguidePageCache(): void
+    {
+        $reflection = new \ReflectionClass(\WordpressStarter\Services\StyleguidePage::class);
+
+        $cachedResultsProperty = $reflection->getProperty('cachedResults');
+        $cachedResultsProperty->setAccessible(true);
+        $cachedResultsProperty->setValue(null, []);
     }
 
     /**

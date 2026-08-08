@@ -23,7 +23,7 @@
         'primary' => 'bg-surface',
         'secondary' => 'bg-surface-secondary',
         'tertiary' => 'bg-surface-tertiary',
-        'brand' => 'bg-surface-brand text-content-inverse',
+        'brand' => 'bg-surface-brand text-content-on-brand',
         'brand-subtle' => 'bg-surface-brand-subtle',
         'inverse' => 'bg-surface-inverse text-content-inverse',
     ];

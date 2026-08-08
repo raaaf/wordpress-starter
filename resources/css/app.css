@@ -14,10 +14,17 @@
 @import 'tailwindcss';
 
 /* ============================================
-   CONTROL BORDER, FOCUS RING, DARK STATUS COLOURS
+   TOKEN CORRECTIONS
 
-   Three corrections to tokens.css that cannot live there, because that file
-   is regenerated from Figma.
+   Corrections to tokens.css that cannot live there, because that file is
+   regenerated from Figma.
+
+   One rule runs through most of them: every fill flips with the colour scheme,
+   and whatever sits on a fill uses --text-inverse, which flips with it. The
+   export broke that rule in one place only, the primary button gradient, which
+   is declared once and never flips. That is why the button got worse the more
+   you interacted with it in dark mode: the fill darkened while the text was
+   already dark.
 
    1. --border-control: the boundary of a form control is the only thing that
       shows where the field is, and WCAG 1.4.11 asks for 3:1. --border-default
@@ -30,7 +37,57 @@
       clears 3:1 against the dark background, where a near-black accent would
       otherwise be invisible.
 
-   3. Dark status text: dark mode set --bg-* to the dark tone but left --text-*
+   3. --shadow-color-*: the Tailwind theme block below builds --shadow-sm through
+      --shadow-2xl out of these, and the export never delivered them. An
+      unresolvable var() makes the whole box-shadow invalid at computed-value
+      time, so every plain shadow-sm/md/lg/xl/2xl utility rendered nothing at
+      all. The values follow the same rgba(23, 23, 23, a) vocabulary the
+      component shadows in tokens.css already use.
+
+   4. --text-on-brand: --bg-brand is accent-500. White on it measures 2.84:1,
+      under the 3:1 floor for large text; the inherited near-black measures
+      6.32:1 on the same orange. --text-inverse is the wrong role here, it
+      follows the page, not the brand surface.
+
+   5. Accent text roles: --text-link, --text-brand and --text-accent all point
+      at accent-600, which measures 3.74:1 on white, 3.58:1 on the secondary
+      surface and 3.46:1 inside a filled accent badge. All under 4.5:1. The
+      resting state was also weaker than its own hover, which already used
+      accent-700. One step down the same ramp clears the bar everywhere
+      (5.23 / 5.01 / 4.84:1), and hover moves to accent-800 to stay darker
+      than rest. Dark mode is untouched: accent-400 on gray-900 is 7.74:1.
+
+   6. Primary button gradient: the only fill in the theme that does not flip
+      with the scheme. Light gets the dark end of the ramp under white text
+      (5.23:1 at rest, improving to 7.39 and 10.36 as it is pressed), dark gets
+      the light end under near-black text (4.80:1 at rest, improving to 6.32
+      and 7.74). Both ladders now move away from the text, not towards it.
+
+   7. Filled controls: --bg-accent is the checked fill of checkbox, radio and
+      toggle. At accent-500 it measured 2.84:1 against a white page, so the
+      checked state itself was barely visible, and the white mark on it also
+      2.84:1. Light moves to accent-700 (5.23:1 both ways); dark keeps
+      accent-500, which is 6.32:1 against the dark page.
+
+   8. The --bg-*-strong fills are the ones meant to carry content on top of
+      them: the danger button, the solid status badges. All three pointed at
+      the mid tone of their ramp, which under white text gives 3.76:1 for
+      error, 2.28:1 for success and 2.15:1 for warning. Light takes the dark
+      tone (5.02 to 6.47:1); dark keeps the mid tone, where --text-inverse is
+      near-black and reaches 4.76 to 8.35:1.
+
+   9. Icon roles: --icon-secondary was gray-400 (2.52:1 on white) although it
+      carries the select chevron and the input clear control. The status icons
+      pointed at the mid tone of their ramp while sitting on the light tone of
+      the same ramp (2.07 to 3.08:1); they now take the tone their own
+      --text-* role already uses. --icon-brand and --icon-accent, and the
+      brand borders that draw the loading spinner and the card hover edge,
+      follow the accent text roles down to accent-700.
+
+  10. --border-focus is what focus:border-line-focus and ring-line-focus draw.
+      It stayed on accent-400 (2.32:1) after --ring-focus was corrected.
+
+  11. Dark status text: dark mode set --bg-* to the dark tone but left --text-*
       on the mid tone, leaving two similar lightnesses on top of each other
       (1.7 to 3.0:1). The text moves to the light tone of the same ramp.
    ============================================ */
@@ -44,6 +101,67 @@
      so it fell back to an inline 50 percent alpha with the same washed-out
      result the accent ring had. Solid, like the others. */
   --shadow-focus-ring-error: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-error);
+
+  /* Shadow colours the Figma export never delivered. Same ink and the same
+     alpha steps the component shadows in tokens.css use, so a plain
+     shadow-lg and --shadow-card-hover now read as one family. */
+  --shadow-color-sm: rgba(23, 23, 23, 0.05);
+  --shadow-color-default: rgba(23, 23, 23, 0.1);
+  --shadow-color-md: rgba(23, 23, 23, 0.1);
+  --shadow-color-lg: rgba(23, 23, 23, 0.1);
+  --shadow-color-xl: rgba(23, 23, 23, 0.1);
+  --shadow-color-2xl: rgba(23, 23, 23, 0.25);
+
+  /* Text that sits on --bg-brand. Deliberately the same value in both colour
+     schemes: the brand orange does not change with the scheme, so the text on
+     it must not either. */
+  --text-on-brand: var(--color-gray-900);
+
+  /* Text that sits on the ACCENT fill: the checkbox mark, the primary button
+     label. It defaults to --text-inverse, which is right whenever the accent
+     fill flips with the scheme the way the page does. It exists as its own role
+     because that assumption does not hold everywhere: a theme whose accent is
+     light in BOTH schemes needs a dark mark in both, and one whose accent is
+     deep in both needs a light label in both. --text-inverse follows the page,
+     this follows the fill. Themes that need the distinction override it. */
+  --text-on-accent: var(--text-inverse);
+
+  /* Accent text one step down the ramp, see 5. above. Light scheme only:
+     the dark scheme reads accent from the light end and already passes. */
+  --text-link: var(--color-accent-700);
+  --text-link-hover: var(--color-accent-800);
+  --text-brand: var(--color-accent-700);
+  --text-accent: var(--color-accent-700);
+
+  /* Fills, light scheme: dark end of the ramp, white content on top. */
+  --gradient-primary-start: var(--color-accent-700);
+  --gradient-primary-end: var(--color-accent-800);
+  --gradient-primary-hover-start: var(--color-accent-800);
+  --gradient-primary-hover-end: var(--color-accent-900);
+  --gradient-primary-active-start: var(--color-accent-900);
+  --gradient-primary-active-end: var(--color-accent-900);
+  --bg-accent: var(--color-accent-700);
+  --bg-error-strong: var(--color-error-dark);
+  --bg-success-strong: var(--color-success-dark);
+  --bg-warning-strong: var(--color-warning-dark);
+
+  /* Borders and icons follow the same step down the ramp. */
+  --border-focus: var(--ring-focus);
+  --border-brand: var(--color-accent-700);
+  --border-accent: var(--color-accent-700);
+  --icon-secondary: var(--color-gray-500);
+  --icon-brand: var(--color-accent-700);
+  --icon-accent: var(--color-accent-700);
+  --icon-success: var(--color-success-dark);
+  --icon-warning: var(--color-warning-dark);
+  --icon-error: var(--color-error-dark);
+
+  /* Native widgets the theme does not draw itself: checkboxes and radios in
+     WYSIWYG content, date pickers, scrollbars, form autofill. Without a
+     color-scheme they stay light in dark mode, which is why a raw
+     <input type="checkbox"> rendered as a white block on the dark page. */
+  color-scheme: light;
+  accent-color: var(--bg-accent);
 }
 
 [data-theme='dark'] {
@@ -51,6 +169,47 @@
   --text-success: var(--color-success-light);
   --text-warning: var(--color-warning-light);
   --text-error: var(--color-error-light);
+
+  /* Fills, dark scheme: light end of the ramp, near-black content on top.
+     The ladder runs the other way, so pressing still moves away from the text. */
+  --gradient-primary-start: var(--color-accent-500);
+  --gradient-primary-end: var(--color-accent-600);
+  --gradient-primary-hover-start: var(--color-accent-400);
+  --gradient-primary-hover-end: var(--color-accent-500);
+  --gradient-primary-active-start: var(--color-accent-300);
+  --gradient-primary-active-end: var(--color-accent-400);
+
+  /* The export already says gray-500 here; repeating it keeps the unscoped
+     :root correction above from burying that declaration on the next sync. */
+  --icon-secondary: var(--color-gray-500);
+  --icon-success: var(--color-success-light);
+  --icon-warning: var(--color-warning-light);
+  --icon-error: var(--color-error-light);
+
+  /* The export flipped these the wrong way: dark took the dark tone of the ramp
+     while --text-inverse is near-black there, giving 3.57:1. Error already used
+     the mid tone; success and warning now match it. */
+  --bg-success-strong: var(--color-success);
+  --bg-warning-strong: var(--color-warning);
+
+  /* The unlayered :root correction above (see the TOKEN CORRECTIONS comment
+     block at the top of this file) pins each of these to a step of the accent
+     ramp for light-mode contrast, but is not scoped to [data-theme='light'] --
+     so it also reaches dark mode through the cascade unless undone here. These
+     put dark back on the value the comment block above already documents as
+     correct for it (see points 5, 7, 8 and 9). */
+  --bg-accent: var(--color-accent-500);
+  --bg-error-strong: var(--color-error);
+  --text-link: var(--color-accent-400);
+  --text-link-hover: var(--color-accent-300);
+  --text-brand: var(--color-accent-400);
+  --text-accent: var(--color-accent-400);
+  --border-brand: var(--color-accent-500);
+  --border-accent: var(--color-accent-500);
+  --icon-brand: var(--color-accent-500);
+  --icon-accent: var(--color-accent-400);
+
+  color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -59,6 +218,40 @@
     --text-success: var(--color-success-light);
     --text-warning: var(--color-warning-light);
     --text-error: var(--color-error-light);
+
+    /* Fills, dark scheme: light end of the ramp, near-black content on top.
+       The ladder runs the other way, so pressing still moves away from the text. */
+    --gradient-primary-start: var(--color-accent-500);
+    --gradient-primary-end: var(--color-accent-600);
+    --gradient-primary-hover-start: var(--color-accent-400);
+    --gradient-primary-hover-end: var(--color-accent-500);
+    --gradient-primary-active-start: var(--color-accent-300);
+    --gradient-primary-active-end: var(--color-accent-400);
+
+    /* See the [data-theme='dark'] block above. */
+    --icon-secondary: var(--color-gray-500);
+    --icon-success: var(--color-success-light);
+    --icon-warning: var(--color-warning-light);
+    --icon-error: var(--color-error-light);
+
+    /* See the [data-theme='dark'] block above. */
+    --bg-success-strong: var(--color-success);
+    --bg-warning-strong: var(--color-warning);
+
+    /* See the [data-theme='dark'] block above -- same unscoped :root
+       correction, same fix. */
+    --bg-accent: var(--color-accent-500);
+    --bg-error-strong: var(--color-error);
+    --text-link: var(--color-accent-400);
+    --text-link-hover: var(--color-accent-300);
+    --text-brand: var(--color-accent-400);
+    --text-accent: var(--color-accent-400);
+    --border-brand: var(--color-accent-500);
+    --border-accent: var(--color-accent-500);
+    --icon-brand: var(--color-accent-500);
+    --icon-accent: var(--color-accent-400);
+
+    color-scheme: dark;
   }
 }
 
@@ -153,6 +346,22 @@
   ):focus {
     --tw-ring-shadow: 0 0 #0000;
   }
+
+  /* The same plugin hard-codes a white fill and a fixed grey border on
+     checkboxes and radios, and switches off appearance, so color-scheme cannot
+     reach them. In dark mode that left a white block on the dark page. Bound to
+     the theme's own roles instead; the plugin paints the checked state with
+     currentColor, so --bg-accent drives the mark. */
+  :is([type='checkbox'], [type='radio']) {
+    background-color: var(--bg-primary);
+    border-color: var(--border-control);
+    color: var(--bg-accent);
+  }
+
+  :is([type='checkbox'], [type='radio']):disabled {
+    background-color: var(--bg-disabled);
+    border-color: var(--border-disabled);
+  }
 }
 
 /* Dark mode via data-theme attribute (matches tokens.css selector) */
@@ -214,6 +423,80 @@ html {
   --tw-prose-code: var(--text-primary);
   --tw-prose-th-borders: var(--border-default);
   --tw-prose-td-borders: var(--border-default);
+}
+
+/* ============================================
+   ONE TYPE SCALE, ALSO INSIDE PROSE
+
+   Tailwind Typography ships its own heading scale and its own leading, and it
+   lands in @layer components — after the theme's own heading rules in @layer
+   base. Layer order beats specificity, so every heading written in a WYSIWYG
+   field came out at a different size and a different line-height than the same
+   level rendered as a section title. Measured on the styleguide: 50 headings
+   inside .prose still sat at 1.5 while the theme's scale had moved to 1.13-1.42.
+
+   These rules bind prose headings back to the same tokens. Margins stay with
+   the plugin, whose vertical rhythm for running text is good — except for the
+   heading-pair case below, which the plugin does not handle at all.
+
+   Declared in @layer utilities, not components: the plugin's size variants
+   (.prose-lg and friends) land in utilities, and layer order beats specificity.
+   Within utilities these selectors outrank the plugin's :where()-based ones, so
+   source order does not matter.
+   ============================================ */
+
+@layer utilities {
+  .prose :is(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    color: var(--text-primary);
+    text-wrap: balance;
+  }
+
+  .prose :is(h1) {
+    font-size: var(--typography-h1-size);
+    font-weight: var(--typography-h1-weight);
+    line-height: var(--typography-h1-line-height);
+    letter-spacing: var(--typography-h1-letter-spacing);
+  }
+
+  .prose :is(h2) {
+    font-size: var(--typography-h2-size);
+    font-weight: var(--typography-h2-weight);
+    line-height: var(--typography-h2-line-height);
+    letter-spacing: var(--typography-h2-letter-spacing);
+  }
+
+  .prose :is(h3) {
+    font-size: var(--typography-h3-size);
+    font-weight: var(--typography-h3-weight);
+    line-height: var(--typography-h3-line-height);
+    letter-spacing: var(--typography-h3-letter-spacing);
+  }
+
+  .prose :is(h4) {
+    font-size: var(--typography-h4-size);
+    font-weight: var(--typography-h4-weight);
+    line-height: var(--typography-h4-line-height);
+    letter-spacing: var(--typography-h4-letter-spacing);
+  }
+
+  .prose :is(h5, h6) {
+    font-size: var(--typography-h5-size);
+    font-weight: var(--typography-h5-weight);
+    line-height: var(--typography-h5-line-height);
+    letter-spacing: var(--typography-h5-letter-spacing);
+  }
+
+  /* The heading-pair rule from @layer base, repeated where the plugin can no
+     longer outrank it. WYSIWYG content is exactly where a title followed by a
+     subtitle actually occurs. */
+  .prose :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
+    margin-top: 0;
+  }
+
+  .prose :is(h1, h2, h3, h4, h5, h6):has(+ :is(h1, h2, h3, h4, h5, h6)) {
+    margin-bottom: 0.3em;
+  }
 }
 
 /* Auto-inherit for prose inside inverse/brand sections */
@@ -312,6 +595,8 @@ html {
   --color-content-placeholder: var(--text-placeholder);
   --color-line-control: var(--border-control);
   --color-content-inverse: var(--text-inverse);
+  --color-content-on-brand: var(--text-on-brand);
+  --color-content-on-accent: var(--text-on-accent);
   --color-content-brand: var(--text-brand);
   --color-content-accent: var(--text-accent);
   --color-content-link: var(--text-link);
@@ -487,7 +772,7 @@ html {
      bg-surface-inverse is deliberately not covered: those headings already
      contrast (8.64:1 measured) and --text-inverse would break them. */
   .bg-surface-brand :is(h1, h2, h3, h4, h5, h6):not(:is(.card, .alert) *) {
-    color: var(--text-inverse);
+    color: var(--text-on-brand);
   }
 
   /* Paragraph spacing */
@@ -504,6 +789,23 @@ html {
   h5:first-child,
   h6:first-child {
     margin-top: 0;
+  }
+
+  /* A heading directly after another heading is a subtitle: it belongs to the line
+     above it, not to the section that ended before it. The top margins here are
+     section breaks (h2 carries 1.5em), and margin collapsing hands the pair the
+     larger of the two — so an h1 followed by its own h2 was pushed 37px apart and
+     read as two unrelated blocks. The pair now sits at 0.3em of the upper heading,
+     which keeps it proportional: a bigger heading gets a slightly bigger gap.
+
+     Scoped to real heading tags on purpose. The .text-h* utilities are decoration
+     and get applied to spans and divs whose adjacency means nothing. */
+  :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
+    margin-top: 0;
+  }
+
+  :is(h1, h2, h3, h4, h5, h6):has(+ :is(h1, h2, h3, h4, h5, h6)) {
+    margin-bottom: 0.3em;
   }
 
   /* Remove bottom margin on last elements */
@@ -537,9 +839,12 @@ html {
     text-underline-offset: 4px;
   }
 
-  /* Focus-visible styles - WCAG 2.1 SC 2.4.7: Visible focus indicator */
+  /* Focus-visible styles - WCAG 2.1 SC 2.4.7 and 2.4.13: Visible focus indicator.
+     --border-focus is accent-400 and measures 2.32:1 on the page; --ring-focus
+     is the corrected token from the block at the top of this file (3.74:1) and
+     is what every component ring already uses. */
   :focus-visible {
-    outline: 2px solid var(--border-focus);
+    outline: 2px solid var(--ring-focus);
     outline-offset: 2px;
   }
 
@@ -954,7 +1259,9 @@ html {
     min-height: var(--button-md-min-height);
     font-size: var(--typography-body-small-size);
     font-weight: 600;
-    color: var(--text-on-color);
+    /* Mirrors button.blade.php primary: content on a fill uses --text-inverse,
+       which flips with the scheme exactly as the gradient now does. */
+    color: var(--text-inverse);
     background: linear-gradient(
       to bottom,
       var(--gradient-primary-start),
@@ -1179,7 +1486,8 @@ html {
 
   .button-danger {
     background-color: var(--color-surface-error-strong);
-    color: var(--text-on-color);
+    /* Mirrors button.blade.php danger. */
+    color: var(--text-inverse);
     border: 1px solid transparent;
     box-shadow: var(--shadow-button);
   }

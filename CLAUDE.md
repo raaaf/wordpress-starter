@@ -16,6 +16,7 @@ Guidance for Claude Code when working with this WordPress starter theme.
 npm run dev        # Development with HMR
 npm run build      # Production build
 npm run lint       # JS/TS linting
+npm run icons      # Sync resources/icons/ from config/icons.json
 npm run test:e2e   # Playwright E2E tests
 npm run test:a11y  # Accessibility tests
 composer lint      # PHP linting (phpcs + phpstan)
@@ -32,15 +33,23 @@ src/                    # PHP source code
 ├── PostTypes/         # Custom Post Types (AbstractPostType, Testimonial)
 ├── Taxonomies/        # Custom Taxonomies (AbstractTaxonomy)
 ├── Providers/         # Service providers
+├── Services/          # StyleguidePage.php
+├── Content/           # StyleguideReference.php
 ├── RateLimiter.php    # AJAX rate limiting
 templates/             # Blade templates
 ├── layouts/          # Base layouts
 ├── partials/         # Reusable partials
 ├── components/       # Blade components
 ├── flexible/         # Flexible Content layouts (32 layouts)
+├── styleguide/        # Styleguide page sections (components, tokens)
+├── page-styleguide.blade.php # Styleguide page template
 resources/
 ├── css/              # TailwindCSS + tokens.css
 ├── js/               # TypeScript + Alpine.js
+config/
+├── icons.json         # Single source of truth for theme icons
+scripts/
+├── sync-icons.js      # Generates resources/icons/ from config/icons.json
 tests/
 ├── Unit/             # PHPUnit tests
 ├── js/               # Vitest tests
