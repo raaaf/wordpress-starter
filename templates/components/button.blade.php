@@ -34,7 +34,9 @@
 @php
     // Base classes - common to all buttons
     // 'button' class is used for editor CSS overrides (prevents WordPress link styling)
-    $baseClasses = 'button inline-flex items-center justify-center font-semibold transition-[color,background,border-color,box-shadow,transform] duration-200 no-underline cursor-pointer select-none focus-visible:outline-none active:scale-[0.98]';
+    // active:scale-[0.98] is a Tailwind v4 `scale` utility, not `transform` --
+    // the transition list has to name the property that actually animates.
+    $baseClasses = 'button inline-flex items-center justify-center font-semibold transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-none active:scale-[0.98]';
 
     // Variants matching Figma design with gradients and shadows
     $variants = [
@@ -76,9 +78,12 @@
             'text-content-inverse',
             'border border-transparent',
             'shadow-[var(--shadow-button)]',
-            // No colour step on hover: the status ramp has only light/base/dark
-            // and --bg-error-strong already takes the end of it. Elevation carries
-            // the state until the export ships a darker tone.
+            // The status ramp has only light/base/dark and --bg-error-strong
+            // already takes the end of it, so there is no token to step to.
+            // --bg-error-strong-hover (app.css) mixes towards black in light
+            // mode and towards white in dark mode, i.e. away from whichever
+            // text colour sits on top, same rule the primary gradient follows.
+            'hover:bg-[var(--bg-error-strong-hover)]',
             'hover:shadow-[var(--shadow-button-hover)]',
             'active:shadow-[var(--shadow-inner)]',
             'focus-visible:shadow-[var(--shadow-focus-ring)]',

@@ -80,7 +80,8 @@
     $isInteractive = $hoverable || $url;
     $interactiveClasses = $isInteractive && !$disabled
         ? implode(' ', [
-            'transition-[color,background,border-color,box-shadow,transform] duration-200 cursor-pointer',
+            // active:scale-[0.99] is a Tailwind v4 `scale` utility, not `transform`.
+            'transition-[color,background,border-color,box-shadow,scale] duration-200 cursor-pointer',
             'hover:border-line-brand hover:shadow-[var(--shadow-card-hover)]',
             'active:shadow-[var(--shadow-inner)] active:scale-[0.99]',
             'focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]',

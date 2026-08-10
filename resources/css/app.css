@@ -145,6 +145,12 @@
   --bg-success-strong: var(--color-success-dark);
   --bg-warning-strong: var(--color-warning-dark);
 
+  /* Danger button hover: --bg-error-strong is already the darkest of the
+     three-step error ramp, so there is no further token to step to. Mixed
+     towards black instead, same direction the text-on-white fill needs to
+     move to gain contrast (6.47:1 at rest -> 8.15:1 on hover). */
+  --bg-error-strong-hover: color-mix(in srgb, var(--color-error-dark) 85%, black);
+
   /* Borders and icons follow the same step down the ramp. */
   --border-focus: var(--ring-focus);
   --border-brand: var(--color-accent-700);
@@ -200,6 +206,12 @@
      correct for it (see points 5, 7, 8 and 9). */
   --bg-accent: var(--color-accent-500);
   --bg-error-strong: var(--color-error);
+  /* Here --bg-error-strong is the mid tone under near-black text (4.76:1 at
+     rest, see point 8 above): darkening it the way light mode does would
+     push it towards the text instead of away, the same trap point 6 already
+     documents for the primary gradient. Mixed towards white instead
+     (4.76:1 -> 5.99:1). */
+  --bg-error-strong-hover: color-mix(in srgb, var(--color-error) 80%, white);
   --text-link: var(--color-accent-400);
   --text-link-hover: var(--color-accent-300);
   --text-brand: var(--color-accent-400);
@@ -208,6 +220,20 @@
   --border-accent: var(--color-accent-500);
   --icon-brand: var(--color-accent-500);
   --icon-accent: var(--color-accent-400);
+
+  /* The plain Tailwind shadow-sm..shadow-2xl scale (see the TOKEN CORRECTIONS
+     block above, point 3) is built from these --shadow-color-* custom
+     properties. The :root correction only ever set the light-mode ink,
+     rgba(23, 23, 23, ...), which is --bg-primary's own colour in dark mode --
+     every shadow-sm/md/lg/xl/2xl utility was invisible here for the same
+     reason the named component shadows below were. Same ink and alpha band
+     as those. */
+  --shadow-color-sm: rgba(4, 6, 20, 0.3);
+  --shadow-color-default: rgba(4, 6, 20, 0.35);
+  --shadow-color-md: rgba(4, 6, 20, 0.4);
+  --shadow-color-lg: rgba(4, 6, 20, 0.45);
+  --shadow-color-xl: rgba(4, 6, 20, 0.5);
+  --shadow-color-2xl: rgba(4, 6, 20, 0.55);
 
   /* Structural shadows: button, card, input, modal and dropdown, plus their
      hover steps. The export defines these once (see COMPONENT_TOKENS in
@@ -293,6 +319,8 @@
        correction, same fix. */
     --bg-accent: var(--color-accent-500);
     --bg-error-strong: var(--color-error);
+    /* See the [data-theme='dark'] block above: same trap, same fix. */
+    --bg-error-strong-hover: color-mix(in srgb, var(--color-error) 80%, white);
     --text-link: var(--color-accent-400);
     --text-link-hover: var(--color-accent-300);
     --text-brand: var(--color-accent-400);
@@ -301,6 +329,15 @@
     --border-accent: var(--color-accent-500);
     --icon-brand: var(--color-accent-500);
     --icon-accent: var(--color-accent-400);
+
+    /* See the [data-theme='dark'] block above: the plain shadow-sm..shadow-2xl
+       scale needs its own dark ink too, not just the named component shadows. */
+    --shadow-color-sm: rgba(4, 6, 20, 0.3);
+    --shadow-color-default: rgba(4, 6, 20, 0.35);
+    --shadow-color-md: rgba(4, 6, 20, 0.4);
+    --shadow-color-lg: rgba(4, 6, 20, 0.45);
+    --shadow-color-xl: rgba(4, 6, 20, 0.5);
+    --shadow-color-2xl: rgba(4, 6, 20, 0.55);
 
     /* See the [data-theme='dark'] block above for the measurement and the
        reasoning behind the ink and opacity change. */
@@ -1583,6 +1620,7 @@ html {
   }
 
   .button-danger:hover {
+    background-color: var(--bg-error-strong-hover);
     box-shadow: var(--shadow-button-hover);
   }
 

@@ -70,7 +70,7 @@
                      weil der Punkt ein Kind des Rings ist und nicht sein Geschwister — ein
                      peer-checked: direkt am Punkt erzeugt `.peer:checked ~ .punkt` und das
                      kann strukturell nie matchen. Der markierte Radio blieb dadurch hohl. --}}
-                <span class="w-2.5 h-2.5 rounded-full transition-[transform,background-color] duration-200 scale-0
+                <span class="w-2.5 h-2.5 rounded-full transition-[scale,background-color] duration-200 scale-0
                     {{ $disabled ? 'bg-content-disabled' : 'bg-surface-accent' }}
                 "></span>
             </span>

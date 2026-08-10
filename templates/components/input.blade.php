@@ -51,6 +51,9 @@
     $displayHint = $hasError && $errorMessage ? $errorMessage : $hint;
 
     // Size classes
+    // 'padding' puts the icon's right edge plus an 8px gap between the two
+    // ('iconLeft' offset + 'icon' width + 8px), the same icon-to-text gap
+    // used elsewhere in the theme (e.g. --button-md-gap).
     $sizes = [
         // Below 16px iOS Safari zooms the page on focus, so the small size
         // stays at 16px on phones and drops to 14px from md up.
@@ -64,7 +67,7 @@
         ],
         'md' => [
             'input' => 'h-10 text-base',
-            'padding' => $iconLeft ? 'pl-10 pr-[var(--input-md-padding-x)]' : 'px-[var(--input-md-padding-x)]',
+            'padding' => $iconLeft ? 'pl-9 pr-[var(--input-md-padding-x)]' : 'px-[var(--input-md-padding-x)]',
             'paddingRight' => $iconRight || $clearable ? 'pr-10' : '',
             'icon' => 'w-4 h-4',
             'iconLeft' => 'left-3',
@@ -72,7 +75,7 @@
         ],
         'lg' => [
             'input' => 'h-12 text-lg',
-            'padding' => $iconLeft ? 'pl-12 pr-[var(--input-lg-padding-x)]' : 'px-[var(--input-lg-padding-x)]',
+            'padding' => $iconLeft ? 'pl-11 pr-[var(--input-lg-padding-x)]' : 'px-[var(--input-lg-padding-x)]',
             'paddingRight' => $iconRight || $clearable ? 'pr-12' : '',
             'icon' => 'w-5 h-5',
             'iconLeft' => 'left-4',
@@ -115,8 +118,12 @@
     {{-- Input wrapper --}}
     <div class="relative" @if($clearable) x-data="{ hasValue: {{ $value ? 'true' : 'false' }} }" @endif>
         {{-- Left icon --}}
+        {{-- inset-y-0 + flex items-center, not top-1/2 -translate-y-1/2: the icon
+             is an inline-block SVG (align-middle, see icon.blade.php), so its
+             line-box baseline math left it 1px off centre under a transform.
+             Flex alignment centres on the icon's own box instead. --}}
         @if($iconLeft)
-            <div class="absolute {{ $sizeConfig['iconLeft'] }} top-1/2 -translate-y-1/2 pointer-events-none text-icon-secondary">
+            <div class="absolute {{ $sizeConfig['iconLeft'] }} inset-y-0 flex items-center pointer-events-none text-icon-secondary">
                 <x-icon name="{{ $iconLeft }}" class="{{ $sizeConfig['icon'] }}" />
             </div>
         @endif

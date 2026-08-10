@@ -78,7 +78,11 @@
                  Rand nach oben ausgleichen — der Button bleibt 24x24, sein Mittelpunkt
                  liegt aber auf der Zeilenmitte. Symmetrisch, damit er die Hoehe des
                  Hinweises nicht veraendert. --}}
-            class="flex h-6 w-6 -my-0.5 shrink-0 items-center justify-center text-current opacity-70 hover:opacity-100 transition-opacity duration-150"
+            {{-- bg-current/10 derives the hover fill from the button's own inherited
+                 colour (text-content, the same in every variant's wrapper), not a
+                 fixed value, so it reads on every alert colour without per-variant
+                 branching: a light-mode darken, a dark-mode lighten. --}}
+            class="flex h-6 w-6 -my-0.5 shrink-0 items-center justify-center rounded-md text-current opacity-70 hover:opacity-100 hover:bg-current/10 transition-[opacity,background-color] duration-150"
             aria-label="{{ __('Schließen', 'wp-starter') }}"
         >
             <x-icon name="close" class="w-4 h-4" />
