@@ -24,7 +24,7 @@
     <div class="mb-16 divide-y divide-line rounded-[var(--card-radius)] border border-line overflow-hidden">
         @foreach(StyleguideReference::typeScale() as $class => $label)
             <div class="flex flex-col gap-1 p-6 md:flex-row md:items-baseline md:gap-8">
-                <code class="shrink-0 text-body-small text-content-secondary md:w-48">.{{ $class }}</code>
+                <code class="shrink-0 font-mono text-body-small text-content-secondary md:w-48">.{{ $class }}</code>
                 <span class="{{ $class }} text-content">{{ $label }}</span>
             </div>
         @endforeach
@@ -43,7 +43,7 @@
                 </div>
                 <div class="p-3">
                     <p class="mb-0 text-body-small text-content">{{ $surface['label'] }}</p>
-                    <code class="text-caption text-content-secondary">{{ $surface['token'] }}</code>
+                    <code class="font-mono text-caption text-content-secondary">{{ $surface['token'] }}</code>
                 </div>
             </div>
         @endforeach
@@ -55,7 +55,7 @@
         @foreach(StyleguideReference::textRoles() as $token => $label)
             <div class="flex items-baseline gap-4 p-4 border rounded-[var(--card-radius)] border-line">
                 <span class="text-body" style="color: var({{ $token }})">Beispieltext</span>
-                <code class="ml-auto text-caption text-content-secondary">{{ $token }}</code>
+                <code class="ml-auto font-mono text-caption text-content-secondary">{{ $token }}</code>
             </div>
         @endforeach
     </div>
@@ -70,7 +70,7 @@
                     style="border: 2px solid var({{ $token }})"
                 ></div>
                 <p class="mb-0 text-body-small text-content">{{ $label }}</p>
-                <code class="text-caption text-content-secondary">{{ $token }}</code>
+                <code class="font-mono text-caption text-content-secondary">{{ $token }}</code>
             </div>
         @endforeach
     </div>
@@ -84,7 +84,7 @@
                 style="box-shadow: var({{ $token }})"
             >
                 <p class="mb-0 text-body-small text-content">{{ $label }}</p>
-                <code class="text-caption text-content-secondary">{{ $token }}</code>
+                <code class="font-mono text-caption text-content-secondary">{{ $token }}</code>
             </div>
         @endforeach
     </div>
@@ -100,7 +100,7 @@
                 ></div>
                 <div class="p-3">
                     <p class="mb-0 text-body-small text-content">{{ $gradient['label'] }}</p>
-                    <code class="text-caption text-content-secondary">{{ $gradient['start'] }} → {{ $gradient['end'] }}</code>
+                    <code class="font-mono text-caption text-content-secondary">{{ $gradient['start'] }} → {{ $gradient['end'] }}</code>
                 </div>
             </div>
         @endforeach
@@ -111,7 +111,7 @@
     <div class="mb-16 space-y-3">
         @foreach(StyleguideReference::spacing() as $token)
             <div class="flex items-center gap-4">
-                <code class="shrink-0 text-caption text-content-secondary w-28">{{ $token }}</code>
+                <code class="shrink-0 font-mono text-caption text-content-secondary w-28">{{ $token }}</code>
                 <div class="h-4 bg-surface-accent rounded-[var(--radius-sm)]" style="width: var({{ $token }})"></div>
             </div>
         @endforeach
