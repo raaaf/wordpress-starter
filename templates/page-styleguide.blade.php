@@ -47,6 +47,13 @@
                 --}}
                 @php($layoutCounters = ['hero' => 1])
                 @php($anchorCounters = [])
+                {{--
+                    Module labels come from the registered field group at runtime, not
+                    from a second hand-maintained list, so they can never drift from
+                    what FlexibleContent.php registers.
+                --}}
+                @php($sectionsField = get_field_object('page_sections'))
+                @php($layoutLabels = array_column($sectionsField['layouts'] ?? [], 'label', 'name'))
                 @while(have_rows('page_sections'))
                     @php(the_row())
                     @php($layout = get_row_layout())
@@ -54,6 +61,23 @@
                     @php($anchorCounters[$layout] = ($anchorCounters[$layout] ?? 0) + 1)
                     @php($customAnchor = get_sub_field('section_anchor'))
                     @php($sectionAnchor = $customAnchor ?: str_replace('_', '-', $layout) . '-' . $anchorCounters[$layout])
+                    {{--
+                        The intermission "one_column" rows (e.g. "Flexible Content
+                        Layouts", "Layout & Text") only exist to carry an <h2> between
+                        groups of real layouts -- StyleguideLayoutData builds them with
+                        an empty 'label' and the heading baked into 'content'. Labelling
+                        them as "Eine Spalte" would be noise, so they're detected by
+                        that leading <h2> and skipped.
+                    --}}
+                    @php($isIntermissionHeading = $layout === 'one_column' && preg_match('/^\s*<h2[\s>]/i', (string) get_sub_field('content')) === 1)
+                    @if(!$isIntermissionHeading && isset($layoutLabels[$layout]))
+                        <div class="bg-surface-secondary border-b border-line">
+                            <p class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-baseline gap-2 text-body-small text-content-secondary">
+                                <span class="font-medium text-content">{{ $layoutLabels[$layout] }}</span>
+                                <span class="text-code">{{ $layout }}</span>
+                            </p>
+                        </div>
+                    @endif
                     @includeIf('flexible.' . str_replace('_', '-', $layout))
                 @endwhile
             @endif
