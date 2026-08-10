@@ -133,7 +133,7 @@
             @foreach(['calendar', 'check', 'close', 'download', 'eye', 'info', 'lock', 'mail', 'phone', 'search', 'user', 'warning'] as $icon)
                 <span class="flex flex-col items-center gap-2">
                     <x-icon :name="$icon" size="xl" />
-                    <code class="font-mono text-caption text-content-secondary">{{ $icon }}</code>
+                    <code class="text-code text-content-secondary">{{ $icon }}</code>
                 </span>
             @endforeach
         </div>
