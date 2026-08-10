@@ -95,11 +95,11 @@
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center text-center w-full">
             <div class="max-w-3xl">
                 @if($badge)
-                    <x-badge variant="brand" style="outline" size="md" class="mb-4">{{ $badge }}</x-badge>
+                    <x-badge variant="brand" style="outline" size="md" class="mb-8">{{ $badge }}</x-badge>
                 @endif
 
                 @if($title)
-                    <{{ $heroHeadingTag }} class="text-display mb-6">
+                    <{{ $heroHeadingTag }} class="text-display mt-0! mb-6">
                         {!! $title !!}
                     </{{ $heroHeadingTag }}>
                 @endif
@@ -142,11 +142,11 @@
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
                 @if($badge)
-                    <x-badge variant="accent" size="md" class="mb-4">{{ $badge }}</x-badge>
+                    <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
                 @endif
 
                 @if($title)
-                    <{{ $heroHeadingTag }} class="mb-6">
+                    <{{ $heroHeadingTag }} class="mt-0! mb-6">
                         {!! $title !!}
                     </{{ $heroHeadingTag }}>
                 @endif
@@ -209,11 +209,11 @@
     <x-section :anchor="$sectionAnchor" :background="$background_color" padding="xl" class="hero hero--centered">
         <div class="max-w-3xl mx-auto text-center">
             @if($badge)
-                <x-badge variant="accent" size="md" class="mb-4">{{ $badge }}</x-badge>
+                <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
             @endif
 
             @if($title)
-                <{{ $heroHeadingTag }} class="mb-6">
+                <{{ $heroHeadingTag }} class="mt-0! mb-6">
                     {!! $title !!}
                 </{{ $heroHeadingTag }}>
             @endif

@@ -66,7 +66,7 @@
                 @endif
                 @if($imgId)
                     {!! wp_get_attachment_image($imgId, 'hero-split', false, [
-                        'class' => 'w-full object-cover',
+                        'class' => 'w-full aspect-[16/10] object-cover',
                         'alt' => $img['alt'] ?? '',
                         'loading' => 'lazy',
                         'decoding' => 'async',
@@ -75,7 +75,7 @@
                     <img src="{{ $img['url'] }}"
                          alt="{{ $img['alt'] ?? '' }}"
                          @if(!empty($img['width']) && !empty($img['height']))width="{{ $img['width'] }}" height="{{ $img['height'] }}"@endif
-                         class="w-full object-cover"
+                         class="w-full aspect-[16/10] object-cover"
                          loading="lazy">
                 @endif
                 @if($text)

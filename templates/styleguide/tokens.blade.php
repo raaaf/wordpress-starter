@@ -25,7 +25,7 @@
         @foreach(StyleguideReference::typeScale() as $class => $label)
             <div class="flex flex-col gap-1 p-6 md:flex-row md:items-baseline md:gap-8">
                 <code class="shrink-0 text-code text-content-secondary md:w-48">.{{ $class }}</code>
-                <span class="{{ $class }} text-content">{{ $label }}</span>
+                <span class="{{ $class }} text-content my-0!">{{ $label }}</span>
             </div>
         @endforeach
     </div>

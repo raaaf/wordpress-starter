@@ -64,14 +64,9 @@
             @endphp
             @if($lbl || ($img && !empty($img['url'])) || $text || !empty($acc))
             <x-card variant="outlined" padding="none" class="overflow-hidden">
-                @if($lbl)
-                    <div class="p-6 lg:p-8 pb-0 lg:pb-0">
-                        <p class="text-sm font-bold uppercase tracking-wider text-content-secondary mb-4">{{ $lbl }}</p>
-                    </div>
-                @endif
                 @if($imgId)
                     {!! wp_get_attachment_image($imgId, 'hero-split', false, [
-                        'class' => 'w-full object-cover',
+                        'class' => 'w-full aspect-[16/10] object-cover',
                         'alt' => $img['alt'] ?? '',
                         'loading' => 'lazy',
                         'decoding' => 'async',
@@ -80,12 +75,17 @@
                     <img src="{{ $img['url'] }}"
                          alt="{{ $img['alt'] ?? '' }}"
                          @if(!empty($img['width']) && !empty($img['height']))width="{{ $img['width'] }}" height="{{ $img['height'] }}"@endif
-                         class="w-full object-cover"
+                         class="w-full aspect-[16/10] object-cover"
                          loading="lazy">
                 @endif
-                @if($text)
+                @if($lbl || $text)
                     <div class="p-6 lg:p-8">
-                        <x-prose>@kses($text)</x-prose>
+                        @if($lbl)
+                            <p class="text-sm font-bold uppercase tracking-wider text-content-secondary mb-2">{{ $lbl }}</p>
+                        @endif
+                        @if($text)
+                            <x-prose>@kses($text)</x-prose>
+                        @endif
                     </div>
                 @endif
                 @if(!empty($acc))
