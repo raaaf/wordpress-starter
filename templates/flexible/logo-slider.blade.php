@@ -53,6 +53,19 @@
             }
         }
     }
+
+    // How many times the logo list must repeat so the track never runs out of
+    // material before the keyframe animation completes one loop. The keyframe
+    // shifts the track by exactly one list-width (see below), so the track has
+    // to cover that shift plus the widest viewport we expect, or the last
+    // stretch of the loop scrolls past the end of the material into a gap.
+    // One list item is w-32 (8rem = 128px) plus gap-12 (3rem = 48px) = 176px.
+    // copies = 1 + ceil(widest_viewport / list_width), minimum 2.
+    $logoCount = count($logoData);
+    $listWidthPx = $logoCount * 176;
+    $copies = ($autoplay && $listWidthPx > 0)
+        ? max(2, 1 + (int) ceil(1920 / $listWidthPx))
+        : 1;
 @endphp
 
 @if($title || !empty($logoData))
@@ -81,45 +94,17 @@
                 class="flex gap-12 {{ $autoplay ? 'logo-scroll' : '' }}"
                 @if($autoplay) :class="{ 'animation-paused': paused }" @endif
             >
-                {{-- First set of logos --}}
-                @foreach($logoData as $logo)
-                    <div class="flex-shrink-0 w-32 flex items-center justify-center">
-                        @if($logo['link'])
-                            <a
-                                href="{{ esc_url($logo['link']) }}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="block transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0"
-                                aria-label="{{ $logo['name'] ? $logo['name'] . ' ' : '' }}{{ __('(öffnet in neuem Tab)', 'wp-starter') }}"
-                            >
-                                <img
-                                    src="{{ $logo['url'] }}"
-                                    alt=""
-                                    class="object-contain w-full h-12 dark:invert"
-                                    loading="lazy"
-                                    @if($logo['width']) width="{{ $logo['width'] }}" @endif
-                                    @if($logo['height']) height="{{ $logo['height'] }}" @endif
-                                >
-                            </a>
-                        @else
-                            <div class="transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0">
-                                <img
-                                    src="{{ $logo['url'] }}"
-                                    alt="{{ $logo['name'] }}"
-                                    class="object-contain w-full h-12 dark:invert"
-                                    loading="lazy"
-                                    @if($logo['width']) width="{{ $logo['width'] }}" @endif
-                                    @if($logo['height']) height="{{ $logo['height'] }}" @endif
-                                >
-                            </div>
-                        @endif
-                    </div>
-                @endforeach
-
-                {{-- Duplicate set for infinite scroll effect --}}
-                @if($autoplay)
+                {{-- The list repeats $copies times so the track still has material
+                     left to show at the end of the keyframe's one-list-width shift
+                     (see the $copies calculation above). Only the first copy is
+                     real content; every repeat is presentation only and hidden
+                     from assistive tech and keyboard/tab order. --}}
+                @for($copy = 0; $copy < $copies; $copy++)
                     @foreach($logoData as $logo)
-                        <div class="flex-shrink-0 w-32 flex items-center justify-center" aria-hidden="true" inert>
+                        <div
+                            class="flex-shrink-0 w-32 flex items-center justify-center"
+                            @if($copy > 0) aria-hidden="true" inert @endif
+                        >
                             @if($logo['link'])
                                 <a
                                     href="{{ esc_url($logo['link']) }}"
@@ -138,7 +123,9 @@
                                     >
                                 </a>
                             @else
-                                <div class="transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0">
+                                {{-- Not linked: no hover promise to make, so no
+                                     hover/transition classes either. --}}
+                                <div class="opacity-50 grayscale">
                                     <img
                                         src="{{ $logo['url'] }}"
                                         alt="{{ $logo['name'] }}"
@@ -151,7 +138,7 @@
                             @endif
                         </div>
                     @endforeach
-                @endif
+                @endfor
             </div>
         </div>
 

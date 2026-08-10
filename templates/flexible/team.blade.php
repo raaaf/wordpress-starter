@@ -62,11 +62,14 @@
                     $email = $member['email'] ?? '';
                     $linkedin = $member['linkedin'] ?? '';
                 @endphp
-                <div class="text-center group">
+                <div class="text-center">
                     @if($imageId)
+                        {{-- No hover effect: the portrait is not a link and nothing
+                             else on the card is interactive, so a hover reveal
+                             would promise an interaction that isn't there. --}}
                         <div class="relative mb-6 overflow-hidden rounded-[var(--card-radius)] aspect-square">
                             {!! wp_get_attachment_image($imageId, 'team-portrait', false, [
-                                'class' => 'object-cover w-full h-full transition-transform duration-200 ease-out group-hover:scale-105',
+                                'class' => 'object-cover w-full h-full',
                                 'loading' => 'lazy',
                                 'sizes' => '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
                             ]) !!}

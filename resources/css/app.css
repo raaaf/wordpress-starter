@@ -209,7 +209,58 @@
   --icon-brand: var(--color-accent-500);
   --icon-accent: var(--color-accent-400);
 
+  /* Structural shadows: button, card, input, modal and dropdown, plus their
+     hover steps. The export defines these once (see COMPONENT_TOKENS in
+     scripts/transform-tokens.js) and dark mode inherits them unchanged. Their
+     ink is rgba(23, 23, 23, ...), i.e. --color-gray-900, and dark mode's own
+     --bg-primary is that exact colour, so on the styleguide every card, button
+     and dropdown measured with an invisible shadow: same value on both sides
+     of the edge.
+
+     Redefined here, not by darkening the same recipe further:
+     - Ink shifts to rgb(4, 6, 20), a near-black with a slight cool tint. Pure
+       black (0,0,0) read as pasted on in a side-by-side comparison; a tint
+       close to the page's own near-black reads as part of the surface.
+     - Opacity moves to the 0.3-0.55 band instead of 0.05-0.25. A shadow this
+       dark needs far more alpha than the light-mode version to still register
+       against a dark ground: the same alpha would be even less visible than
+       the light-mode original was against gray-900.
+     - Card, card-hover, modal and dropdown get three layers (tight near
+       + medium + soft wide) instead of one or two: elevation has to read from
+       silhouette alone here, since a single soft blur at low alpha just
+       smears into the background. Button and input stay at two layers, they
+       sit close to the surface and don't need the third. */
+  --shadow-button: 0px 1px 2px 0px rgba(4, 6, 20, 0.45), 0px 1px 3px 0px rgba(4, 6, 20, 0.3);
+  --shadow-button-hover:
+    0px 2px 4px -1px rgba(4, 6, 20, 0.5), 0px 4px 6px -2px rgba(4, 6, 20, 0.35);
+  --shadow-input: 0px 1px 2px 0px rgba(4, 6, 20, 0.4), 0px 1px 1px 0px rgba(4, 6, 20, 0.3);
+  --shadow-input-hover: 0px 1px 3px 0px rgba(4, 6, 20, 0.45), 0px 1px 2px -1px rgba(4, 6, 20, 0.35);
+  --shadow-card:
+    0px 1px 2px 0px rgba(4, 6, 20, 0.5), 0px 4px 8px 0px rgba(4, 6, 20, 0.35),
+    0px 12px 24px -4px rgba(4, 6, 20, 0.3);
+  --shadow-card-hover:
+    0px 2px 4px 0px rgba(4, 6, 20, 0.55), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
+    0px 20px 40px -8px rgba(4, 6, 20, 0.3);
+  --shadow-modal:
+    0px 4px 8px 0px rgba(4, 6, 20, 0.5), 0px 16px 32px 0px rgba(4, 6, 20, 0.4),
+    0px 40px 80px -16px rgba(4, 6, 20, 0.35);
+  --shadow-dropdown:
+    0px 2px 4px 0px rgba(4, 6, 20, 0.5), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
+    0px 20px 40px -8px rgba(4, 6, 20, 0.3);
+
   color-scheme: dark;
+}
+
+/* Elevated cards (`x-card variant="elevated"`, e.g. the "cards" flexible
+   layout) carry no border in any colour scheme and rely on `shadow-lg` alone
+   for their silhouette. `shadow-lg` is Tailwind's own utility, built from
+   --shadow-color-lg above, which is not part of the --shadow-card family and
+   stays at the light-mode ink even in dark mode, so this variant's edge
+   vanished the same way the --shadow-card ones did. A 1px line in the same
+   colour the default/filled/outlined variants already carry as a real border
+   fixes it without touching the shadow. */
+[data-theme='dark'] .card.shadow-lg {
+  border: 1px solid var(--border-default);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -251,7 +302,32 @@
     --icon-brand: var(--color-accent-500);
     --icon-accent: var(--color-accent-400);
 
+    /* See the [data-theme='dark'] block above for the measurement and the
+       reasoning behind the ink and opacity change. */
+    --shadow-button: 0px 1px 2px 0px rgba(4, 6, 20, 0.45), 0px 1px 3px 0px rgba(4, 6, 20, 0.3);
+    --shadow-button-hover:
+      0px 2px 4px -1px rgba(4, 6, 20, 0.5), 0px 4px 6px -2px rgba(4, 6, 20, 0.35);
+    --shadow-input: 0px 1px 2px 0px rgba(4, 6, 20, 0.4), 0px 1px 1px 0px rgba(4, 6, 20, 0.3);
+    --shadow-input-hover:
+      0px 1px 3px 0px rgba(4, 6, 20, 0.45), 0px 1px 2px -1px rgba(4, 6, 20, 0.35);
+    --shadow-card:
+      0px 1px 2px 0px rgba(4, 6, 20, 0.5), 0px 4px 8px 0px rgba(4, 6, 20, 0.35),
+      0px 12px 24px -4px rgba(4, 6, 20, 0.3);
+    --shadow-card-hover:
+      0px 2px 4px 0px rgba(4, 6, 20, 0.55), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
+      0px 20px 40px -8px rgba(4, 6, 20, 0.3);
+    --shadow-modal:
+      0px 4px 8px 0px rgba(4, 6, 20, 0.5), 0px 16px 32px 0px rgba(4, 6, 20, 0.4),
+      0px 40px 80px -16px rgba(4, 6, 20, 0.35);
+    --shadow-dropdown:
+      0px 2px 4px 0px rgba(4, 6, 20, 0.5), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
+      0px 20px 40px -8px rgba(4, 6, 20, 0.3);
+
     color-scheme: dark;
+  }
+
+  :root:not([data-theme='light']) .card.shadow-lg {
+    border: 1px solid var(--border-default);
   }
 }
 
