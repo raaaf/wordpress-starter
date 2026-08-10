@@ -771,7 +771,21 @@ html {
      sit on that surface and keep the brand color.
      bg-surface-inverse is deliberately not covered: those headings already
      contrast (8.64:1 measured) and --text-inverse would break them. */
-  .bg-surface-brand :is(h1, h2, h3, h4, h5, h6):not(:is(.card, .alert) *) {
+  .bg-surface-brand
+    :is(
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      .text-display,
+      .text-h1,
+      .text-h2,
+      .text-h3,
+      .text-h4,
+      .text-h5
+    ):not(:is(.card, .alert) *) {
     color: var(--text-on-brand);
   }
 
