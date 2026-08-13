@@ -58,7 +58,11 @@
             }"
         >
             @foreach($items as $index => $item)
-                <div class="w-full overflow-hidden border-b border-line last:border-b-0">
+                {{-- Bewusst ohne overflow-hidden: der Kopf ist w-full und sitzt buendig
+                     an der Oberkante, ein Zuschnitt haette seinen 2px-Fokusring bis auf
+                     die Unterkante weggeschnitten und als grünen Balken stehen lassen.
+                     x-collapse setzt overflow ohnehin selbst am Panel. --}}
+                <div class="w-full border-b border-line last:border-b-0">
                     <button x-ref="accordion{{ $index }}"
                             id="accordion-header-{{ $accordionId }}-{{ $index }}"
                             @click="active = active === {{ $index }} ? null : {{ $index }}"
@@ -88,7 +92,7 @@
                          id="accordion-content-{{ $accordionId }}-{{ $index }}"
                          @if(count($items) < 7) role="region" @endif
                          :aria-labelledby="'accordion-header-{{ $accordionId }}-{{ $index }}'"
-                         class="mb-8">
+                         class="px-3 pt-1 mb-6">
                         <x-prose>@kses($item['content'])</x-prose>
                     </div>
                 </div>
