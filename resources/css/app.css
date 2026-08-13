@@ -788,7 +788,17 @@ html {
    Selbst-Ausschluss: sonst wird ein Kind einer eigenen Flaeche innerhalb einer
    Karte trotzdem gezwungen -- z.B. die bg-surface-secondary Preistabelle in
    einer inverse-Sektion oder Video-Lade-/Fehler-Overlays, beide auf ~1:1
-   gemessen, bevor dieser Zusatz stand. */
+   gemessen, bevor dieser Zusatz stand.
+
+   Der Nachfahren-Ausschluss beginnt zwingend AN der Ausloeserklasse
+   (`:not(.bg-surface-inverse :is(...) *)`, nicht `:not(:is(...) *)`). Grund:
+   layouts/app.blade.php setzt bg-surface auf den body. Ein unverankerter
+   Ausschluss trifft damit ueber den body jedes Element der Seite und loescht
+   die Regel vollstaendig aus. Am 2026-08-13 im Dunkelmodus gemessen: weisse
+   Ueberschrift auf der hellen inverse-Flaeche, 1.06:1. Im Hellmodus fiel es
+   nicht auf, weil die Ueberschrift dort mit 3.25:1 knapp ueber der Schwelle
+   fuer grossen Text lag. Die Verankerung begrenzt den Ausschluss auf die
+   Sektion, wo er hingehoert. */
 .bg-surface-inverse
   :is(
     h1,
@@ -821,7 +831,8 @@ html {
       .bg-surface-inverse
     )
   ):not(
-    :is(
+    .bg-surface-inverse
+      :is(
         .card,
         .alert,
         .badge,
@@ -871,7 +882,8 @@ html {
       .bg-surface-inverse
     )
   ):not(
-    :is(
+    .bg-surface-brand
+      :is(
         .card,
         .alert,
         .badge,
