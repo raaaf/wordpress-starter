@@ -46,7 +46,7 @@
     <div class="max-w-2xl mx-auto">
         @php $itemCount = count($items); @endphp
         <div
-            class="flex flex-col overflow-hidden"
+            class="flex flex-col"
             x-data="{
                 active: null,
                 itemCount: {{ $itemCount }},
@@ -58,10 +58,12 @@
             }"
         >
             @foreach($items as $index => $item)
-                {{-- Bewusst ohne overflow-hidden: der Kopf ist w-full und sitzt buendig
-                     an der Oberkante, ein Zuschnitt haette seinen 2px-Fokusring bis auf
-                     die Unterkante weggeschnitten und als grünen Balken stehen lassen.
-                     x-collapse setzt overflow ohnehin selbst am Panel. --}}
+                {{-- Bewusst ohne overflow-hidden: weder an diesem Item-Wrapper noch am
+                     aeusseren x-data-Container zwei Ebenen hoeher. Der Kopf ist w-full und
+                     sitzt buendig an der Aussenkante, ein Zuschnitt haette den 2px-Fokusring
+                     links/rechts bei jedem Eintrag und oben beim ersten Eintrag
+                     weggeschnitten. x-collapse setzt overflow ohnehin selbst am Panel, nicht
+                     an diesen Containern. --}}
                 <div class="w-full border-b border-line last:border-b-0">
                     <button x-ref="accordion{{ $index }}"
                             id="accordion-header-{{ $accordionId }}-{{ $index }}"
@@ -114,7 +116,11 @@
         $faqSchema = ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => $faqQuestions];
         $nonce = $GLOBALS['csp_nonce'] ?? '';
     @endphp
+    {{-- JSON_HEX_TAG als zweite Verteidigungslinie: escaped < und > in JSON-Strings
+         (unsichtbar nach dem Parsen), damit eine spaetere Lockerung von
+         wp_strip_all_tags oben nicht stillschweigend zu gespeichertem XSS ueber einen
+         </script>-Ausbruch wird. --}}
     <script type="application/ld+json" @if($nonce) nonce="{{ $nonce }}" @endif>
-        {!! wp_json_encode($faqSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+        {!! wp_json_encode($faqSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_HEX_TAG) !!}
     </script>
 @endif

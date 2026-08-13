@@ -137,6 +137,33 @@ src/
 ├── Providers/              # Service providers
 │   ├── ServiceProvider.php  # Base provider class
 │   └── *.php               # Individual providers
+├── Content/                 # Styleguide reference/data classes
+│   ├── StyleguideFieldReference.php # Field reference data
+│   ├── StyleguideLayoutData.php     # Layout data
+│   ├── StyleguideReference.php      # Reference index
+│   └── StyleguideVariantLabels.php  # Variant labels
+├── Helpers/                 # Template helpers used across templates/flexible/
+│   ├── SectionHeader.php    # Reads section-header fields, returns array
+│   └── Text.php             # Text helpers
+├── Services/                 # Application services
+│   ├── StyleguidePage.php   # Styleguide page rendering
+│   └── *.php                # Blade service, content setup, transient cleanup
+├── MemberArea/               # Protected download area (auth, crypto, SFTP)
+│   ├── Auth.php              # Login/session handling
+│   └── *.php                 # Access, ACF fields, crypto, download query, file handling, folder sync, SFTP client, SSRF guard
+├── Exceptions/                        # Theme-specific exceptions
+│   ├── ConfigurationException.php     # Config errors
+│   ├── TemplateNotFoundException.php  # Missing Blade template
+│   └── ThemeException.php             # Base theme exception
+├── Support/                  # Small shared utilities
+│   ├── ContentImages.php     # Content image helpers
+│   └── FooterAlertBar.php    # Footer alert bar
+├── PluginConfigurators/               # Per-plugin config appliers
+│   ├── AbstractPluginConfigurator.php # Base configurator class
+│   └── *.php                          # Contact Form 7, Yoast SEO, iThemes Security, WebP Express, WP-Optimize, Admin Site Enhancements
+├── types/                   # TypeScript ambient declarations
+│   ├── alpine.d.ts          # Alpine.js types
+│   └── wordpress.d.ts       # WordPress globals
 ├── Application.php         # IoC container & bootstrap
 ├── Config.php              # Configuration loader
 ├── EditorConfig.php        # Gutenberg disabler

@@ -38,4 +38,13 @@ final class TextTest extends TestCase
         $this->assertSame('', Text::telHref(null));
         $this->assertSame('', Text::telHref(''));
     }
+
+    /**
+     * lineBreaks() passes an empty attribute allowlist for <br> to wp_kses(), so an
+     * injected attribute must not survive - only the bare tag is allowed.
+     */
+    public function testLineBreaksStripsAttributesFromBr(): void
+    {
+        $this->assertSame('a<br>b', Text::lineBreaks('a<br onclick="x">b'));
+    }
 }

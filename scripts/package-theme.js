@@ -73,10 +73,25 @@ async function packageTheme() {
       'languages',
     ];
 
+    // Generated per-site by bin/setup.php; acf-options.php also carries real client
+    // contact data (company name, address, phone, email). Never ship these in the zip.
+    const generatedConfigFiles = [
+      'setup-options.php',
+      'plugins-to-install.php',
+      'acf-options.php',
+      'acf-options.php.processed',
+    ];
+
     for (const dir of directories) {
       const dirPath = join(rootDir, dir);
       if (existsSync(dirPath)) {
-        archive.directory(dirPath, `${themeName}/${dir}`);
+        if (dir === 'config') {
+          archive.directory(dirPath, `${themeName}/${dir}`, (entryData) => {
+            return generatedConfigFiles.includes(entryData.name) ? false : entryData;
+          });
+        } else {
+          archive.directory(dirPath, `${themeName}/${dir}`);
+        }
       }
     }
 

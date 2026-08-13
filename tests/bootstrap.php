@@ -497,9 +497,20 @@ if (!function_exists('wp_kses')) {
 
         $erlaubt = array_keys($allowedTags);
 
-        return $erlaubt === []
+        $ergebnis = $erlaubt === []
             ? strip_tags($content)
             : strip_tags($content, '<' . implode('><', $erlaubt) . '>');
+
+        // Test-Double, kein vollstaendiges wp_kses: bildet nur nach, dass ein Tag mit LEERER
+        // Attribut-Allowlist keine Attribute behalten darf. Es prueft NICHT Attribut-Werte,
+        // URL-Protokolle oder Escaping - ein gruener Test hier ist kein Beweis fuer echtes wp_kses-Verhalten.
+        foreach ($allowedTags as $tag => $attributes) {
+            if ($attributes === []) {
+                $ergebnis = preg_replace('/<' . preg_quote((string) $tag, '/') . '\b[^>]*>/i', '<' . $tag . '>', $ergebnis);
+            }
+        }
+
+        return $ergebnis;
     }
 }
 

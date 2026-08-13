@@ -50,7 +50,8 @@ src/                    # PHP source code
 ├── Taxonomies/        # Custom Taxonomies (AbstractTaxonomy)
 ├── Providers/         # Service providers
 ├── Services/          # StyleguidePage.php
-├── Content/           # StyleguideReference.php
+├── Content/           # Styleguide reference/data classes
+├── Helpers/           # Text.php, SectionHeader.php (used across templates/flexible/)
 ├── RateLimiter.php    # AJAX rate limiting
 templates/             # Blade templates
 ├── layouts/          # Base layouts
