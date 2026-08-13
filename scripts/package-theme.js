@@ -85,13 +85,16 @@ async function packageTheme() {
     for (const dir of directories) {
       const dirPath = join(rootDir, dir);
       if (existsSync(dirPath)) {
-        if (dir === 'config') {
-          archive.directory(dirPath, `${themeName}/${dir}`, (entryData) => {
-            return generatedConfigFiles.includes(entryData.name) ? false : entryData;
-          });
-        } else {
-          archive.directory(dirPath, `${themeName}/${dir}`);
-        }
+        archive.directory(dirPath, `${themeName}/${dir}`, (entryData) => {
+          // macOS-Muell gehoert in kein ausgeliefertes Zip.
+          if (entryData.name.split('/').pop() === '.DS_Store') {
+            return false;
+          }
+
+          return dir === 'config' && generatedConfigFiles.includes(entryData.name)
+            ? false
+            : entryData;
+        });
       }
     }
 
