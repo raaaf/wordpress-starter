@@ -56,7 +56,6 @@ class FlexibleContent
         self::registerMemberDownloadsVisibilityFilter();
     }
 
-
     /**
      * Register filter to hide the member-downloads layout on non-member-area pages
      */
@@ -67,7 +66,7 @@ class FlexibleContent
                 return $field;
             }
 
-            $postId = absint( wp_unslash( $_GET['post'] ?? $_POST['post_id'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended
+            $postId = absint(wp_unslash($_GET['post'] ?? $_POST['post_id'] ?? 0)); // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended
             if (!$postId) {
                 return $field;
             }
@@ -77,7 +76,7 @@ class FlexibleContent
             if (!$isMemberArea) {
                 $field['layouts'] = array_values(array_filter(
                     $field['layouts'],
-                    fn(array $layout) => $layout['name'] !== 'member_downloads'
+                    fn (array $layout) => $layout['name'] !== 'member_downloads',
                 ));
             }
 
@@ -313,7 +312,7 @@ class FlexibleContent
                     'content',
                     true,
                     null,
-                    __('Der Textinhalt dieser Sektion.', 'wp-starter')
+                    __('Der Textinhalt dieser Sektion.', 'wp-starter'),
                 ),
                 FieldDefinitions::backgroundColorField('flex_one_column'),
                 FieldDefinitions::sectionAnchorField('flex_one_column'),
@@ -906,6 +905,18 @@ class FlexibleContent
             return $text;
         }
 
+        // Nur auf echten Redaktions-Screens: is_admin() ist auf
+        // /wp-admin/admin-ajax.php auch fuer anonyme Requests wahr, acf/init
+        // feuert dort ebenfalls, also schliesst is_admin() allein den
+        // Ajax-Vektor nicht. wp_doing_ajax() schliesst den anonymen
+        // Ajax-Vektor, current_user_can('edit_posts') stellt sicher, dass
+        // StyleguidePage::find() (adopt() schreibt Post-Meta/Options) nur
+        // fuer Redakteure aufgeloest wird, nicht manage_options, weil der
+        // Hinweis im Seiteneditor auch fuer Redakteure sichtbar sein soll.
+        if (!is_admin() || wp_doing_ajax() || !current_user_can('edit_posts')) {
+            return $text;
+        }
+
         $pageId = StyleguidePage::find();
         $url = $pageId > 0 ? get_permalink($pageId) : '';
         if (!$url) {
@@ -915,7 +926,7 @@ class FlexibleContent
         return $text . ' ' . sprintf(
             /* translators: %s: URL of the styleguide page */
             __('Alle Layouts mit ihren Varianten zeigt der <a href="%s" target="_blank" rel="noopener">Styleguide</a>.', 'wp-starter'),
-            esc_url($url)
+            esc_url($url),
         );
     }
 }

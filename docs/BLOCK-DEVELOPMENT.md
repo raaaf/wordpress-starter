@@ -101,9 +101,12 @@ private static function myNewLayout(): array
         'display' => 'block',
         'sub_fields' => FieldDefinitions::myNewFields('flex_my_new'),
         'acfe_flexible_category' => self::getCategories()['content'],
+        'acfe_flexible_thumbnail' => 'my_new.png',
     ];
 }
 ```
+
+`acfe_flexible_thumbnail` ist bei allen Layouts gesetzt und referenziert ein PNG in `resources/images/layouts/`. Die Grafiken sind schematisch (Flaeche fuer Bild, Balken fuer Ueberschrift, duenne Linien fuer Text, Pille fuer Button) und werden nicht von Hand gezeichnet, sondern generiert: neues Layout in der `LAYOUTS`-Konstante in `scripts/generate-layout-thumbnails.php` mit denselben Bausteinen beschreiben, dann `php scripts/generate-layout-thumbnails.php` laufen lassen. Das Script schreibt das passende PNG nach `resources/images/layouts/`.
 
 Trage die neue Methode danach in `getLayouts()` ein (Liste der Layout-Aufrufe, sortiert nach Kategorie-Kommentaren):
 
@@ -122,16 +125,17 @@ private static function getLayouts(): array
 
 `acfe_flexible_category` ordnet das Layout einer Kategorie im ACF-Extended-Auswahl-Modal zu. Verfügbare Kategorien (`self::getCategories()[...]`):
 
-| Key           | Label      |
-| ------------- | ---------- |
-| `header`      | Header     |
-| `layout`      | Layout     |
-| `content`     | Inhalte    |
-| `media`       | Medien     |
-| `interactive` | Interaktiv |
-| `forms`       | Formulare  |
-| `posts`       | Beiträge   |
-| `misc`        | Sonstiges  |
+| Key           | Label            |
+| ------------- | ---------------- |
+| `header`      | Header           |
+| `layout`      | Layout           |
+| `content`     | Inhalte          |
+| `media`       | Medien           |
+| `interactive` | Interaktiv       |
+| `forms`       | Formulare        |
+| `posts`       | Beiträge         |
+| `internal`    | Interner Bereich |
+| `misc`        | Sonstiges        |
 
 ## Schritt 3: Template erstellen
 
@@ -175,6 +179,7 @@ Escaping: `{{ }}` für Text (auto-escaped), `{!! !!}` nur für vertrauenswürdig
 3. Öffne den WordPress-Editor auf einer Seite, füge eine neue Sektion hinzu
 4. Suche das neue Layout im Modal (ggf. über die zugewiesene Kategorie)
 5. Prüfe das Layout im Editor UND im Frontend
+6. Seede jeden Wert jedes neuen Auswahlfeldes in `src/Content/StyleguideLayoutData.php`: `tests/Unit/Content/StyleguideVariantCoverageTest.php` erzwingt maschinell, dass jede Auswahlmöglichkeit im Styleguide vorkommt, sonst wird `composer test` rot. Neue Choice und Seed gehören in denselben Commit.
 
 ## Tipps
 

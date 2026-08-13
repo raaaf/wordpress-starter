@@ -59,7 +59,12 @@
                     @endif
 
                     <div class="text-display tabular-nums mb-2 text-content" aria-hidden="true">
-                        <span x-text="current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })">0</span>@if($suffix)<span>{{ in_array($suffix, ['%', '‰', '°C', '°F'], true) ? ' ' : '' }}{{ $suffix }}</span>@endif
+                        {{-- whitespace-nowrap statt NBSP: das Suffix ist dynamisch (ACF-Feld), ein
+                        NBSP muesste bei jeder moeglichen Zeichenkette manuell eingefuegt werden.
+                        Die Leerzeichen-Logik (Prozent/Promille/Grad mit Abstand, Rest ohne) bleibt
+                        unveraendert, nur der gemeinsame Wrapper verhindert den Umbruch zwischen
+                        Zahl und Suffix. --}}
+                        <span class="whitespace-nowrap"><span x-text="current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })">0</span>@if($suffix)<span>{{ in_array($suffix, ['%', '‰', '°C', '°F'], true) ? ' ' : '' }}{{ $suffix }}</span>@endif</span>
                     </div>
                     <span class="sr-only">{{ $number }}{{ $suffix ? ' ' . $suffix : '' }}</span>
 

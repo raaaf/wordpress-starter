@@ -617,7 +617,7 @@ class WelcomeServiceProvider extends ServiceProvider
             printf(
                 '<div class="notice notice-warning"><p>%s</p></div>',
                 esc_html__(
-                    'Mehrere Seiten kommen als Styleguide in Frage. Bitte die richtige Seite oeffnen und dort das Template "Styleguide" auswaehlen; automatisch wird hier nichts geaendert.',
+                    'Mehrere Seiten kommen als Styleguide in Frage. Öffne die richtige Seite und wähle dort das Template "Styleguide" aus; automatisch wird hier nichts geändert.',
                     'wp-starter'
                 )
             );
@@ -664,11 +664,11 @@ class WelcomeServiceProvider extends ServiceProvider
         $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
 
         if (!wp_verify_nonce($nonce, self::nonceMigrateStyleguide())) {
-            wp_die(esc_html__('Sicherheitsueberpruefung fehlgeschlagen.', 'wp-starter'));
+            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
         }
 
         if (!current_user_can('publish_pages')) {
-            wp_die(esc_html__('Du hast keine Berechtigung fuer diese Aktion.', 'wp-starter'));
+            wp_die(esc_html__('Du hast keine Berechtigung für diese Aktion.', 'wp-starter'));
         }
 
         if (!function_exists('update_field')) {

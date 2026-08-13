@@ -24,8 +24,10 @@
         aria-label="{{ __('Farbschema', 'wp-starter') }}"
         {{-- Stabiler Testanker: die Klassen sind Utility-Klassen und aendern sich. --}}
         data-theme-switcher
+        x-ref="optionen"
         x-data="{
             mode: localStorage.getItem('wp-starter-theme') || 'system',
+            werte: ['system', 'light', 'dark'],
             apply(next) {
                 this.mode = next;
                 if (next === 'system') {
@@ -35,14 +37,30 @@
                     localStorage.setItem('wp-starter-theme', next);
                     document.documentElement.setAttribute('data-theme', next);
                 }
+            },
+            waehlen(index) {
+                this.apply(this.werte[index]);
+                this.$refs.optionen.children[index].focus();
             }
         }"
+        {{-- Pfeiltasten mit Umlauf statt nur Klick: sonst ist per Tastatur nur
+             die gerade aktive Option erreichbar (WCAG 2.1.1). --}}
+        x-on:keydown.arrow-right.prevent="waehlen((werte.indexOf(mode) + 1) % werte.length)"
+        x-on:keydown.arrow-down.prevent="waehlen((werte.indexOf(mode) + 1) % werte.length)"
+        x-on:keydown.arrow-left.prevent="waehlen((werte.indexOf(mode) - 1 + werte.length) % werte.length)"
+        x-on:keydown.arrow-up.prevent="waehlen((werte.indexOf(mode) - 1 + werte.length) % werte.length)"
+        x-on:keydown.home.prevent="waehlen(0)"
+        x-on:keydown.end.prevent="waehlen(werte.length - 1)"
     >
         @foreach(['system' => __('System', 'wp-starter'), 'light' => __('Hell', 'wp-starter'), 'dark' => __('Dunkel', 'wp-starter')] as $value => $label)
             <button
                 type="button"
                 role="radio"
                 id="{{ $switcherId }}-{{ $value }}"
+                {{-- Serverseitiger Startwert vor Alpine-Boot: System ist der
+                     Default vor dem localStorage-Lesen, Alpine ueberschreibt danach. --}}
+                aria-checked="{{ $value === 'system' ? 'true' : 'false' }}"
+                tabindex="{{ $value === 'system' ? '0' : '-1' }}"
                 x-bind:aria-checked="mode === '{{ $value }}' ? 'true' : 'false'"
                 x-bind:tabindex="mode === '{{ $value }}' ? '0' : '-1'"
                 x-on:click="apply('{{ $value }}')"

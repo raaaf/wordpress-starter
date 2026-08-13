@@ -162,27 +162,10 @@
                              hiesse jeder Schalter nach dem Feld, in dem der Randfall
                              zufaellig abweicht, statt nach dem, was das Modul
                              unterscheidet. --}}
-                        @php($istZustand = array_map(
-                            static fn (array $i): bool => \WordpressStarter\Content\StyleguideVariantLabels::isState($i['anchor']),
-                            $m['instanzen']
-                        ))
-                        @php($werteOhneZustand = array_values(array_filter($m['werte'], static fn ($k): bool => !$istZustand[$k], ARRAY_FILTER_USE_KEY)))
-                        @php($variantenLabels = \WordpressStarter\Content\StyleguideVariantLabels::forModule($werteOhneZustand, $m['felder']))
-                        @php($variantenTooltips = \WordpressStarter\Content\StyleguideVariantLabels::tooltipsForModule($werteOhneZustand, $m['felder']))
-
-                        @php($varianten = [])
-                        @php($variantenTitel = [])
-                        @php($zaehler = 0)
-                        @foreach($m['instanzen'] as $i => $instanz)
-                            @if($istZustand[$i])
-                                @php($varianten[$i] = \WordpressStarter\Content\StyleguideVariantLabels::stateLabel($instanz['anchor']))
-                                @php($variantenTitel[$i] = '')
-                            @else
-                                @php($varianten[$i] = $variantenLabels[$zaehler] ?? '')
-                                @php($variantenTitel[$i] = $variantenTooltips[$zaehler] ?? '')
-                                @php($zaehler++)
-                            @endif
-                        @endforeach
+                        @php($varianteninfo = \WordpressStarter\Content\StyleguideVariantLabels::forInstances($m['instanzen'], $m['werte'], $m['felder']))
+                        @php($varianten = $varianteninfo['labels'])
+                        @php($variantenTitel = $varianteninfo['tooltips'])
+                        @php($istZustand = $varianteninfo['istZustand'])
                         @include('partials.styleguide-module', ['layout' => $layout, 'modul' => $m, 'varianten' => $varianten, 'variantenTitel' => $variantenTitel, 'istZustand' => $istZustand, 'alleVarianten' => $alleVarianten])
                     @endif
                 @endforeach

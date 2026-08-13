@@ -42,7 +42,12 @@ const CONTENT_FIELDS: readonly string[] = [
   'column_right',
   'copy',
 ];
-const MAX_LENGTH = 40;
+// Sicherheitsgrenze fuer das JS-Ellipsis: Die eigentliche Kappung passiert per
+// CSS (max-width: 250px, text-overflow: ellipsis) und reagiert auf die echte
+// Spaltenbreite. MAX_LENGTH greift nur als Fallback, falls kein CSS-Kontext
+// vorhanden ist (z.B. bei Zugriff auf `.textContent` im Test) und soll dem
+// CSS praktisch nie zuvorkommen.
+const MAX_LENGTH = 120;
 
 /**
  * Truncate text to max length with ellipsis
@@ -165,8 +170,10 @@ function updateLayoutTitle(layout: HTMLElement): void {
   if (!previewSpan && handle) {
     previewSpan = document.createElement('span');
     previewSpan.className = 'layout-preview-text';
+    // #646970 ist WordPress-Admin-Sekundaergrau, erreicht auf Weiss bei 13px
+    // ausreichenden Kontrast (im Gegensatz zu #888, ~3.5:1).
     previewSpan.style.cssText =
-      'color: #888; font-weight: normal; margin-left: 5px; font-size: 13px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; min-width: 0;';
+      'color: #646970; font-weight: normal; margin-left: 5px; font-size: 13px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; min-width: 0;';
     titleEl.after(previewSpan);
   }
   if (previewSpan) {
@@ -182,7 +189,7 @@ function updateAllLayoutTitles(): void {
   const layoutSelectors = [
     '.acf-flexible-content .layout',
     '.acf-flexible-content .acf-layout',
-    '[data-layout]',
+    '.acf-flexible-content [data-layout]',
   ];
 
   const allLayouts = new Set<HTMLElement>();
@@ -210,9 +217,46 @@ function debounce<T extends (...args: unknown[]) => void>(
 const debouncedUpdate = debounce(updateAllLayoutTitles, 300);
 
 /**
+ * Prueft, ob eine MutationObserver-Aenderung nur von der eigenen
+ * Vorschau-Schreiboperation stammt (titleEl.after(previewSpan) bzw.
+ * previewSpan.textContent = ...). Sonst zaehlt der Observer seine eigene
+ * Schreiboperation als Content-Aenderung und loest einen kompletten
+ * Zweitdurchlauf ueber alle Layouts aus.
+ */
+function isOwnPreviewMutation(mutation: MutationRecord): boolean {
+  const target = mutation.target as Element;
+  if (target.classList?.contains('layout-preview-text')) {
+    return true;
+  }
+  return Array.from(mutation.addedNodes).every(
+    (node) => node instanceof HTMLElement && node.classList.contains('layout-preview-text')
+  );
+}
+
+// Verhindert einen doppelten init()-Lauf: Auf ACF-Screens feuert sowohl der
+// DOMContentLoaded/Direktaufruf als auch acf.addAction('ready', init). Die
+// dokumentweiten Listener deduplizieren sich ueber ihre Funktionsreferenz,
+// der MutationObserver aber nicht - ein zweiter Lauf legt einen zweiten
+// Observer auf denselben Containern an.
+let initialisiert = false;
+
+/**
  * Initialize when ACF is ready
  */
 function init(): void {
+  if (initialisiert) {
+    return;
+  }
+
+  // Fruehe Abbruchbedingung: Auf Screens ohne Flexible-Content-Feld (fast
+  // alle wp-admin-Seiten) sollen weder die dokumentweiten input/change-
+  // Listener noch der MutationObserver ueberhaupt aktiv werden.
+  if (!document.querySelector('.acf-flexible-content')) {
+    return;
+  }
+
+  initialisiert = true;
+
   // Check if ACF is available
   if (typeof acf !== 'undefined') {
     // Update when layouts are reordered, added, or duplicated
@@ -244,7 +288,11 @@ function init(): void {
   const observer = new MutationObserver(function (mutations) {
     let shouldUpdate = false;
     for (const mutation of mutations) {
-      if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+      if (
+        mutation.type === 'childList' &&
+        mutation.addedNodes.length > 0 &&
+        !isOwnPreviewMutation(mutation)
+      ) {
         shouldUpdate = true;
         break;
       }

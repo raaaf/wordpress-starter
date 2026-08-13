@@ -171,19 +171,11 @@
             </table>
         </div>
 
-        {{-- Footer: total + pagination --}}
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4">
-
-            {{-- aria-live: Suche und Kategoriefilter tauschen die Tabelle aus,
-                 ohne dass die Seite neu laedt. Ohne Ansage erfaehrt niemand mit
-                 Screenreader, ob die Eingabe ueberhaupt etwas bewirkt hat oder
-                 wie viele Treffer geblieben sind (WCAG 4.1.3).
-
-                 polite statt assertive, damit die Meldung das Tippen nicht
-                 unterbricht. --}}
-            <p class="text-sm text-content-secondary" aria-live="polite" aria-atomic="true">
-                <span x-text="total"></span> {{ __('Dokumente', 'wp-starter') }}
-            </p>
+        {{-- Footer: pagination. Die Trefferzeile lebt jetzt ausserhalb dieses
+             x-show-Containers, siehe Kommentar unten. Nur noch ein Kind im
+             Flex-Layout -> justify-end statt justify-between, damit die
+             Pagination weiterhin rechts ausgerichtet bleibt. --}}
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-end gap-4 mt-4">
 
             <div x-show="pages > 1" class="flex items-center gap-1">
 
@@ -231,5 +223,24 @@
             </div>
         </div>
     </div>
+
+    {{-- aria-live: Suche und Kategoriefilter tauschen die Tabelle aus, ohne
+         dass die Seite neu laedt. Die Zeile stand vorher IM x-show-Container
+         der Tabelle und war bei 0 Treffern damit display:none -- der
+         Leerzustand wurde nie angesagt (WCAG 4.1.3). Deshalb hier bewusst
+         AUSSERHALB jedes x-show gezogen: sie bleibt in jedem Zustand
+         (loading/error/leer/Tabelle) im DOM und zeigt bei 0 Treffern ehrlich
+         "0 Dokumente" statt gar nichts. Einzige Live-Region fuer die
+         Trefferzahl, keine zweite Ansage an anderer Stelle.
+
+         polite statt assertive, damit die Meldung das Tippen nicht
+         unterbricht. Waehrend loading bleibt der Text leer, sonst wuerde
+         beim Hydrieren kurz "0 Dokumente" angesagt, bevor der erste fetch
+         die echte Zahl liefert. Waehrend error ebenfalls leer, sonst wuerde
+         neben der Fehlermeldung im Alert faelschlich "0 Dokumente" angesagt --
+         die Fehlermeldung selbst uebernimmt die Ansage. --}}
+    <p class="text-sm text-content-secondary mt-4" aria-live="polite" aria-atomic="true">
+        <span x-text="(loading || error) ? '' : total + ' ' + '{{ __('Dokumente', 'wp-starter') }}'"></span>
+    </p>
 
 </div>

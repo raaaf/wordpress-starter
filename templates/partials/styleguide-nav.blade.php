@@ -26,7 +26,12 @@
             $layout = get_row_layout();
             $zaehler[$layout] = ($zaehler[$layout] ?? 0) + 1;
 
-            if (isset($sprungziele[$layout]) || !isset($labels[$layout])) {
+            // Zwischentitel ueberspringen: der erste "one_column" traegt oft nur
+            // eine <h2>-Ueberschrift zwischen Layoutgruppen, kein eigenes Modul
+            // (dieselbe Erkennung wie in page-styleguide.blade.php).
+            $istZwischentitel = $layout === 'one_column' && preg_match('/^\s*<h2[\s>]/i', (string) get_sub_field('content')) === 1;
+
+            if ($istZwischentitel || isset($sprungziele[$layout]) || !isset($labels[$layout])) {
                 continue;
             }
 
@@ -54,17 +59,27 @@
         </summary>
 
         {{-- Nach dem Sprung schliessen: die Liste hat ihren Zweck erfuellt und
-             wuerde sonst als Kasten ueber dem Ziel stehen bleiben. --}}
+             wuerde sonst als Kasten ueber dem Ziel stehen bleiben.
+             Nur echte Anker-Klicks behandeln (closest('a')): sonst schliesst
+             auch ein Klick in die Luecke daneben die Liste und klaut den
+             Fokus. Der Fokus geht nach dem Sprung ans Ziel, nicht zurueck
+             zum summary (WCAG 2.4.3) - ein focus() auf summary ohne
+             preventScroll wuerde sonst zurueck zur Navigation scrollen und
+             den Ankersprung rueckgaengig machen. Das Ziel bekommt
+             tabindex="-1" per setAttribute, weil Sections normalerweise
+             nicht fokussierbar sind. Kein preventDefault: die native
+             Hash-Navigation soll laufen, focus() im setTimeout haelt danach
+             nur die Scrollposition, ohne selbst zu scrollen. --}}
         <nav
             aria-label="{{ __('Module', 'wp-starter') }}"
             x-data
-            x-on:click="$el.closest('details').open = false"
+            x-on:click="const link = $event.target.closest('a'); if (!link) return; const d = $el.closest('details'); d.open = false; const ziel = document.getElementById(link.getAttribute('href').slice(1)); if (!ziel) return; setTimeout(() => { ziel.setAttribute('tabindex', '-1'); ziel.focus(); })"
             class="p-5 mt-2 border rounded-[var(--card-radius)] border-line bg-surface shadow-[var(--shadow-card)]"
         >
             <ul class="m-0 list-none columns-2 gap-x-8 sm:columns-3 lg:columns-4">
                 @foreach(array_column($sprungziele, 'label', 'anchor') as $anchor => $label)
                     <li class="break-inside-avoid">
-                        <a href="#{{ $anchor }}" class="block py-1.5 text-sm no-underline text-content-secondary hover:text-content focus-visible:outline-none focus-visible:text-content">{{ $label }}</a>
+                        <a href="#{{ $anchor }}" class="block py-1.5 text-sm no-underline text-content-secondary hover:text-content focus-visible:outline-none focus-visible:text-content focus-visible:shadow-[var(--shadow-focus-ring)]">{{ $label }}</a>
                     </li>
                 @endforeach
             </ul>

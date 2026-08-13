@@ -1500,14 +1500,21 @@ class Options
      * Token-Backups und ein Styleguide-Lookup, der zusaetzlich schreiben kann.
      *
      * acf/init feuert vor current_screen, deshalb der Seitenparameter statt
-     * get_current_screen(). Nonce-Pruefung entfaellt bewusst: hier wird nichts
-     * verarbeitet, nur entschieden, ob teure Anzeigelogik ueberhaupt noetig ist.
+     * get_current_screen(). is_admin() ist in admin-ajax.php immer wahr, auch
+     * fuer unauthentifizierte Requests, deshalb zusaetzlich die Capability der
+     * Ziel-Unterseiten pruefen. Nonce-Pruefung entfaellt weiterhin bewusst:
+     * hier wird nichts verarbeitet, nur der Seitenparameter gelesen, um zu
+     * entscheiden, ob teure Anzeigelogik ueberhaupt noetig ist.
      *
      * @param string $slug Slug ohne Praefix, z.B. 'tools'
      */
     private static function isOnOptionsPage(string $slug): bool
     {
         if (!is_admin()) {
+            return false;
+        }
+
+        if (!current_user_can('manage_options')) {
             return false;
         }
 

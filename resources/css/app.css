@@ -467,6 +467,31 @@
   --card-bg: var(--bg-secondary);
 }
 
+/* Im Dunkelmodus ist --bg-secondary eine Stufe DUNKLER als --bg-tertiary
+   (vertieft statt erhoben) -- die Karte wuerde also in die Flaeche absinken
+   statt sich abzuheben. Eine Stufe ueber tertiary existiert nicht, daher hier
+   ein eigener Zwischenwert. Nur fuer dieses Theme gemessen, Client-Themes
+   leiten ihren eigenen Wert ab. Hellmodus unveraendert (siehe Regel oben). */
+[data-theme='dark'] {
+  --bg-tertiary-elevated: #1d1f22;
+}
+
+[data-theme='dark'] .bg-surface-tertiary {
+  --card-surface: var(--bg-tertiary-elevated);
+  --card-bg: var(--bg-tertiary-elevated);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg-tertiary-elevated: #1d1f22;
+  }
+
+  :root:not([data-theme='light']) .bg-surface-tertiary {
+    --card-surface: var(--bg-tertiary-elevated);
+    --card-bg: var(--bg-tertiary-elevated);
+  }
+}
+
 /* ============================================
    SPACING SCALE GAPS
 
@@ -753,7 +778,17 @@ html {
    Element, das selbst eine bg-surface-Klasse traegt: der weisse Button auf der
    Markenkarte hat text-content und wurde sonst dunkel auf dunkel gesetzt
    (gemessen 1.18:1, waehrend der Fix entstand). Die Brand-Regel steht nach
-   der Inverse-Regel, damit eine Markenkarte in einer dunklen Sektion gewinnt. */
+   der Inverse-Regel, damit eine Markenkarte in einer dunklen Sektion gewinnt.
+
+   Die bg-surface-Klassen stehen als exakte Liste (Quelle: section.blade.php),
+   nicht als [class*='bg-surface']-Substring: ein Substring-Selektor matcht
+   auch hover:bg-surface-*-Varianten, die keine eigene Flaeche mit eigenem
+   Text sind, sondern nur bei Hover eine bekommen -- ein latenter Fehltreffer.
+   Dieselbe Liste steht zusaetzlich im Nachfahren-Ausschluss, nicht nur im
+   Selbst-Ausschluss: sonst wird ein Kind einer eigenen Flaeche innerhalb einer
+   Karte trotzdem gezwungen -- z.B. die bg-surface-secondary Preistabelle in
+   einer inverse-Sektion oder Video-Lade-/Fehler-Overlays, beide auf ~1:1
+   gemessen, bevor dieser Zusatz stand. */
 .bg-surface-inverse
   :is(
     h1,
@@ -771,8 +806,35 @@ html {
     .text-content,
     .text-content-secondary,
     .text-content-tertiary
-  ):not(:is(.card, .alert, .badge, .button, thead, [class*='bg-surface'])):not(
-    :is(.card, .alert, .badge, .button, thead) *
+  ):not(
+    :is(
+      .card,
+      .alert,
+      .badge,
+      .button,
+      thead,
+      .bg-surface,
+      .bg-surface-secondary,
+      .bg-surface-tertiary,
+      .bg-surface-brand,
+      .bg-surface-brand-subtle,
+      .bg-surface-inverse
+    )
+  ):not(
+    :is(
+        .card,
+        .alert,
+        .badge,
+        .button,
+        thead,
+        .bg-surface,
+        .bg-surface-secondary,
+        .bg-surface-tertiary,
+        .bg-surface-brand,
+        .bg-surface-brand-subtle,
+        .bg-surface-inverse
+      )
+      *
   ) {
   color: var(--text-inverse);
 }
@@ -794,8 +856,35 @@ html {
     .text-content,
     .text-content-secondary,
     .text-content-tertiary
-  ):not(:is(.card, .alert, .badge, .button, thead, [class*='bg-surface'])):not(
-    :is(.card, .alert, .badge, .button, thead) *
+  ):not(
+    :is(
+      .card,
+      .alert,
+      .badge,
+      .button,
+      thead,
+      .bg-surface,
+      .bg-surface-secondary,
+      .bg-surface-tertiary,
+      .bg-surface-brand,
+      .bg-surface-brand-subtle,
+      .bg-surface-inverse
+    )
+  ):not(
+    :is(
+        .card,
+        .alert,
+        .badge,
+        .button,
+        thead,
+        .bg-surface,
+        .bg-surface-secondary,
+        .bg-surface-tertiary,
+        .bg-surface-brand,
+        .bg-surface-brand-subtle,
+        .bg-surface-inverse
+      )
+      *
   ) {
   color: var(--text-on-brand);
 }
@@ -2309,6 +2398,12 @@ html {
     opacity: 1 !important;
     transform: none !important;
   }
+
+  /* Hero background variant: eigenes Reveal (siehe unten), gleiche Ausnahme */
+  .hero--background[x-data] .hero-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* ============================================
@@ -2323,6 +2418,31 @@ html {
 
 /* No-JS fallback: show content immediately */
 .no-js .section[x-data] > div {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Hero background variant nutzt kein x-section (volle Viewporthoehe ohne
+   Container), daher greift die .section[x-data]-Regel oben nicht — sie traefe
+   ohnehin auch Bild und Overlay, nicht nur den Inhalt. Eigene, gleich
+   aufgebaute Regel, gescoped auf den Inhalts-Wrapper .hero-reveal. */
+.hero--background[x-data]:not(.is-visible) .hero-reveal {
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+.hero--background[x-data].is-visible .hero-reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero--background[x-data] .hero-reveal {
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out;
+}
+
+.no-js .hero--background[x-data] .hero-reveal {
   opacity: 1 !important;
   transform: none !important;
 }
@@ -2368,6 +2488,12 @@ html {
      Alpine leaves display:none / opacity:0 on the wrapper. */
   .section[x-data] > div {
     display: block !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Hero background variant: eigenes Reveal (siehe oben), gleiche Ausnahme. */
+  .hero--background[x-data] .hero-reveal {
     opacity: 1 !important;
     transform: none !important;
   }

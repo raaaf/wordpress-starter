@@ -37,6 +37,20 @@ final class TableValidationTest extends TestCase
         return $ergebnis;
     }
 
+    /**
+     * @param array<mixed> $zeile
+     */
+    private function zaehleZellen(array $zeile): int
+    {
+        $methode = new ReflectionMethod(AcfServiceProvider::class, 'countRowCells');
+        $methode->setAccessible(true);
+
+        /** @var int $ergebnis */
+        $ergebnis = $methode->invoke(null, $zeile);
+
+        return $ergebnis;
+    }
+
     public function testFindetTabelleInEinerFlexibleContentZeile(): void
     {
         $treffer = $this->finde([
@@ -120,16 +134,34 @@ final class TableValidationTest extends TestCase
         $this->assertCount(1, $treffer);
 
         $zeile = array_values($treffer[0]['rows'])[0];
-        $zellen = 0;
-
-        foreach ((array) $zeile as $wert) {
-            if (is_array($wert)) {
-                $zellen = count($wert);
-                break;
-            }
-        }
+        $zellen = $this->zaehleZellen( (array) $zeile);
 
         $this->assertSame(2, $zellen, 'Zwei Zellen bei drei Spalten muss auffallen.');
         $this->assertCount(3, $treffer[0]['headers']);
+    }
+
+    public function testZaehltZellenEinerNormalenZeile(): void
+    {
+        $this->assertSame(3, $this->zaehleZellen([
+            'field_flex_table_row_cells' => ['row-0' => [], 'row-1' => [], 'row-2' => []],
+        ]));
+    }
+
+    public function testZaehltNullZellenOhneArrayWert(): void
+    {
+        // Kein Wert der Zeile ist ein Array, z. B. nur ein Layout-Schluessel:
+        // keine Zellen zu zaehlen, kein Treffer.
+        $this->assertSame(0, $this->zaehleZellen([
+            'acf_fc_layout' => 'row',
+        ]));
+    }
+
+    public function testZaehltNurDenErstenArrayWertBeiMehreren(): void
+    {
+        // Zwei Array-Werte in derselben Zeile: nur der erste zaehlt.
+        $this->assertSame(2, $this->zaehleZellen([
+            'field_flex_table_row_cells' => ['row-0' => [], 'row-1' => []],
+            'field_flex_table_row_meta' => ['row-0' => [], 'row-1' => [], 'row-2' => []],
+        ]));
     }
 }

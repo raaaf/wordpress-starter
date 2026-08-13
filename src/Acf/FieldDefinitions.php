@@ -459,6 +459,7 @@ class FieldDefinitions
      * @param string $key Unique field key
      * @param string $label Field label
      * @param string $name Field name
+     * @param bool $required Whether the field is required
      * @param string $mimeTypes Allowed mime types
      * @param string $returnFormat Return format (array, url, id)
      * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
@@ -470,11 +471,11 @@ class FieldDefinitions
         string $key,
         string $label,
         string $name,
+        bool $required = false,
         string $mimeTypes = '',
         string $returnFormat = 'array',
         ?array $conditionalLogic = null,
         string $instructions = '',
-        bool $required = false,
     ): array {
         $field = [
             'key' => $key,
@@ -1244,7 +1245,7 @@ class FieldDefinitions
                 [
                     'instructions' => __('Wähle eine Hintergrundfarbe für den Hero-Bereich.', 'wp-starter'),
                     'conditional_logic' => $showOnCenteredOrSplit,
-                ]
+                ],
             ),
             self::sectionAnchorField($prefix),
         ];
@@ -1678,15 +1679,15 @@ class FieldDefinitions
                 "field_{$prefix}_video",
                 __('Video-Datei', 'wp-starter'),
                 'video',
-                'mp4,webm,ogg',
-                'url',
-                [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'wordpress']]],
-                __('Lade eine MP4, WebM oder OGG Datei hoch.', 'wp-starter'),
                 // Pflicht, sobald die Quelle "Mediathek" gewaehlt ist. Die beiden
                 // anderen Quellen sind es laengst; ohne diese Zeile war genau der
                 // Standardfall der einzige, der sich leer speichern liess und im
                 // Frontend als leere Sektion landete.
                 true,
+                'mp4,webm,ogg',
+                'url',
+                [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'wordpress']]],
+                __('Lade eine MP4, WebM oder OGG Datei hoch.', 'wp-starter'),
             ),
             self::urlField(
                 "field_{$prefix}_video_url",
@@ -1713,12 +1714,13 @@ class FieldDefinitions
                 false,
                 'id',
                 null,
-                __('Standbild, das vor dem Abspielen zu sehen ist. Ohne dieses Bild steht bei YouTube und Vimeo bis zur Einwilligung eine leere graue Flaeche ueber die volle Breite. Empfohlen: 16:9, mindestens 1280x720 Pixel.', 'wp-starter'),
+                __('Standbild, das vor dem Abspielen zu sehen ist. Ohne dieses Bild steht bei YouTube und Vimeo bis zur Einwilligung eine leere graue Fläche über die volle Breite. Empfohlen: 16:9, mindestens 1280x720 Pixel.', 'wp-starter'),
             ),
             self::fileField(
                 "field_{$prefix}_captions",
                 __('Untertitel (WebVTT)', 'wp-starter'),
                 'captions',
+                false,
                 'vtt',
                 'url',
                 [
@@ -3196,7 +3198,7 @@ class FieldDefinitions
                 __('Zeile hinzufügen', 'wp-starter'),
                 1,
                 'row',
-                __('Füge Datenzeilen hinzu. Jede Zeile sollte so viele Zellen haben wie es Spalten gibt: fehlende werden leer ausgegeben, überzählige nicht angezeigt.', 'wp-starter'),
+                __('Füge Datenzeilen hinzu. Jede Zeile braucht genau so viele Zellen wie Spalten definiert sind, sonst kannst du die Seite nicht speichern.', 'wp-starter'),
             ),
             [
                 'key' => "field_{$prefix}_striped",

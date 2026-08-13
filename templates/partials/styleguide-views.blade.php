@@ -26,7 +26,7 @@
             <a
                 href="{{ esc_url(add_query_arg('ansicht', $wert, get_permalink())) }}"
                 @if($aktiv) aria-current="page" @endif
-                class="px-4 py-1 text-sm font-medium no-underline rounded-full focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)] {{ $aktiv ? 'bg-surface text-content shadow-[var(--shadow-button)]' : 'text-content-secondary hover:text-content' }}"
+                class="px-3 py-1 text-sm font-medium no-underline transition-colors rounded-full focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)] {{ $aktiv ? 'bg-surface text-content shadow-[var(--shadow-button)]' : 'text-content-secondary hover:text-content' }}"
             >{{ $beschriftung }}</a>
         @endforeach
     </div>
@@ -44,11 +44,23 @@
      * Umgeleitet wird nur, wenn die URL keine Ansicht nennt. Wer eine nennt,
      * wird beim Wort genommen, und ein Tippfehler im Anker kann nicht zwischen
      * beiden Ansichten hin und her pendeln.
+     *
+     * Allowlist statt Blindflug: nur die bekannten, stabilen Anker der
+     * Design-System-Ansicht loesen eine Umleitung aus. Ein schlicht
+     * veralteter Anker (z. B. #cards-99) bleibt sonst ohne Ziel stehen,
+     * statt in eine Ansicht umgeleitet zu werden, in der er ebenfalls fehlt.
+     *
+     * Stille Kopie: 'tokens' und 'komponenten' sind identisch zu
+     * anchor="tokens" in templates/styleguide/tokens.blade.php:15 und
+     * anchor="komponenten" in templates/styleguide/components.blade.php:13.
+     * Wird einer der beiden Anker dort umbenannt, muss diese Liste hier
+     * manuell nachgezogen werden — sonst bricht die Umleitung lautlos.
      */
     document.addEventListener('DOMContentLoaded', function () {
         var ziel = window.location.hash.slice(1);
+        var designSystemAnker = ['tokens', 'komponenten'];
 
-        if (!ziel || document.getElementById(ziel)) {
+        if (!ziel || document.getElementById(ziel) || designSystemAnker.indexOf(ziel) === -1) {
             return;
         }
 

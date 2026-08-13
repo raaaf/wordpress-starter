@@ -245,6 +245,16 @@ Größen: `sm`, `md`, `lg`
 <x-link url="/mehr" variant="underline">Mehr erfahren</x-link>
 ```
 
+**Achtung Whitespace-Falle:** Ein Zeilenumbruch vor `</a>` im Komponenten-Body rendert als Leerzeichen im Link (siehe `templates/components/link.blade.php:68-78`). Steht direkt hinter `</x-link>` ein Satzzeichen, entsteht dadurch eine sichtbare Lücke davor:
+
+```blade
+{{-- Falsch: Luecke vor dem Punkt --}}
+<x-link url="https://google.com">Google</x-link>.
+
+{{-- Richtig: Satzzeichen in den Linktext ziehen --}}
+<x-link url="https://google.com">Google.</x-link>
+```
+
 ### Form-Komponenten
 
 **`<x-input>`** - Textfeld

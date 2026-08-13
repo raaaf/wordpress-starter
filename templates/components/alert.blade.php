@@ -46,7 +46,7 @@
 <div
     role="{{ $variant === 'error' ? 'alert' : 'status' }}"
     @if($dismissible) x-data="{ show: true }" x-show="show" @endif
-    class="flex items-start gap-3 p-4 rounded-lg {{ $config['wrapper'] }} {{ $class }}"
+    class="alert flex items-start gap-3 p-4 rounded-lg {{ $config['wrapper'] }} {{ $class }}"
 >
     {{-- Das Icon zentriert sich in einer Box von exakt einer Zeilenhoehe (1lh), nicht
          per fester mt-Korrektur. Der Wrapper bleibt bei mehrzeiligen Hinweisen eine

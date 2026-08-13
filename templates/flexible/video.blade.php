@@ -83,7 +83,7 @@
                         class="sr-only"
                         role="status"
                         aria-live="polite"
-                        x-text="iframeError ? '{{ __('Das Video konnte nicht geladen werden.', 'wp-starter') }}' : (loaded && !iframeLoaded ? '{{ __('Video wird geladen...', 'wp-starter') }}' : '')"
+                        x-text="iframeError ? '{{ __('Das Video konnte nicht geladen werden.', 'wp-starter') }}' : (loaded && !iframeLoaded ? '{{ __('Video wird geladen…', 'wp-starter') }}' : '')"
                     ></div>
 
                     {{-- Standbild hinter der Einwilligung. Ohne es steht hier bis zum
@@ -134,7 +134,9 @@
                             :title="__('Video laden', 'wp-starter')"
                             variant="primary"
                             size="md"
-                            x-on:click="loaded = true; $nextTick(() => { $refs.videoContainer.focus(); $refs.videoContainer.scrollIntoView({ behavior: 'smooth', block: 'center' }); })"
+                            {{-- scrollIntoView nur ohne reduced-motion-Praeferenz: sonst laeuft
+                                 nach focus() eine zweite, ungewollte Bewegung. --}}
+                            x-on:click="loaded = true; $nextTick(() => { $refs.videoContainer.focus(); if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) { $refs.videoContainer.scrollIntoView({ behavior: 'smooth', block: 'center' }) } })"
                             class="video-consent-btn"
                         />
                     </div>
@@ -145,7 +147,7 @@
                         class="absolute inset-0 flex flex-col items-center justify-center bg-surface-secondary"
                     >
                         <div class="animate-spin rounded-full h-12 w-12 border-4 border-line border-t-line-brand mb-4"></div>
-                        <span class="text-content-secondary">{{ __('Video wird geladen...', 'wp-starter') }}</span>
+                        <span class="text-content-secondary">{{ __('Video wird geladen…', 'wp-starter') }}</span>
                     </div>
 
                     {{-- Error state --}}
@@ -157,7 +159,10 @@
                         <svg class="w-16 h-16 mb-4 text-content-error" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                         </svg>
-                        <p class="mb-4 {{ $posterUrl ? 'text-white' : 'text-content-secondary' }}">{{ __('Das Video konnte nicht geladen werden.', 'wp-starter') }}</p>
+                        {{-- Kein Poster/Scrim mehr im Fehler-Zustand (x-show="!loaded" hat beides
+                             bereits ausgeblendet), deshalb hier immer die Textfarbe fuer helle
+                             Flaeche, nie den Poster-Ternary aus dem Consent-Overlay. --}}
+                        <p class="mb-4 text-content-secondary">{{ __('Das Video konnte nicht geladen werden.', 'wp-starter') }}</p>
                         <x-button
                             :title="__('Erneut versuchen', 'wp-starter')"
                             variant="secondary"

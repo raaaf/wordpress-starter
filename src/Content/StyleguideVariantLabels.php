@@ -106,8 +106,12 @@ final class StyleguideVariantLabels
      */
     private static function bauen(array $instances, array $fields, bool $mitFeldnamen): array
     {
+        if ($instances === []) {
+            return [];
+        }
+
         if (count($instances) < 2) {
-            return array_fill(0, max(count($instances), 1), __('Standard', 'wp-starter'));
+            return [__('Standard', 'wp-starter')];
         }
 
         $ohneFlaeche = $fields;
@@ -246,10 +250,10 @@ final class StyleguideVariantLabels
             static function (array $values) use ($names): string {
                 return implode(
                     '|',
-                    array_map(static fn (string $name): string => self::normalisieren($values[$name] ?? null), $names)
+                    array_map(static fn (string $name): string => self::normalisieren($values[$name] ?? null), $names),
                 );
             },
-            $instances
+            $instances,
         );
 
         return array_values(array_unique($signaturen));
@@ -264,7 +268,7 @@ final class StyleguideVariantLabels
     {
         return array_map(
             static fn (array $values): string => self::normalisieren($values[$name] ?? null),
-            $instances
+            $instances,
         );
     }
 
@@ -281,7 +285,7 @@ final class StyleguideVariantLabels
             return sprintf(
                 '%s: %s',
                 $begriff,
-                self::normalisieren($value) === '1' ? __('an', 'wp-starter') : __('aus', 'wp-starter')
+                self::normalisieren($value) === '1' ? __('an', 'wp-starter') : __('aus', 'wp-starter'),
             );
         }
 
@@ -339,6 +343,60 @@ final class StyleguideVariantLabels
         }
 
         return $labels;
+    }
+
+    /**
+     * Beschriftung, Tooltip und Zustands-Flag je Instanz eines Moduls, in einem
+     * Aufruf.
+     *
+     * Kapselt, was sonst im Template stand: Zustaende bleiben aus der
+     * Merkmalsableitung heraus (sonst hiesse jeder Schalter nach dem Feld, in
+     * dem der Randfall zufaellig abweicht, statt nach dem, was das Modul
+     * unterscheidet), die Beschriftung laeuft nur ueber die verbleibenden
+     * Varianten, und beide Ergebnislisten werden per Handzaehler wieder in die
+     * urspruengliche Instanz-Reihenfolge samt Zustaenden eingefuegt. Das ist
+     * Ableitungslogik wie der Rest der Klasse, keine Darstellung, und gehoert
+     * deshalb hierhin statt ins Blade-Template.
+     *
+     * @param array<int, array{anchor: string, html: string}> $instanzen Instanzen eines Moduls, gleiche Reihenfolge wie im DOM
+     * @param array<int, array<string, mixed>> $werte Auswahlwerte je Instanz, deckungsgleich zu $instanzen
+     * @param array<string, array{label: string, type: string, choices: array<int|string, string>, default: string}> $felder
+     *
+     * @return array{labels: array<int, string>, tooltips: array<int, string>, istZustand: array<int, bool>}
+     */
+    public static function forInstances(array $instanzen, array $werte, array $felder): array
+    {
+        $istZustand = array_map(
+            static fn (array $instanz): bool => self::isState($instanz['anchor']),
+            $instanzen,
+        );
+
+        $werteOhneZustand = array_values(array_filter(
+            $werte,
+            static fn (int $index): bool => !$istZustand[$index],
+            ARRAY_FILTER_USE_KEY,
+        ));
+
+        $variantenLabels = self::forModule($werteOhneZustand, $felder);
+        $variantenTooltips = self::tooltipsForModule($werteOhneZustand, $felder);
+
+        $labels = [];
+        $tooltips = [];
+        $zaehler = 0;
+
+        foreach ($instanzen as $index => $instanz) {
+            if ($istZustand[$index]) {
+                $labels[$index] = self::stateLabel($instanz['anchor']);
+                $tooltips[$index] = '';
+                continue;
+            }
+
+            $labels[$index] = $variantenLabels[$zaehler] ?? '';
+            $tooltips[$index] = $variantenTooltips[$zaehler] ?? '';
+            ++$zaehler;
+        }
+
+        return ['labels' => $labels, 'tooltips' => $tooltips, 'istZustand' => $istZustand];
     }
 
     /**

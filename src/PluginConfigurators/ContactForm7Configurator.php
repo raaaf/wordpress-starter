@@ -95,11 +95,6 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
 
         // Spam protection: server-side heuristics (honeypot, time-trap, links, keywords).
         add_filter('wpcf7_spam', [self::class, 'detectSpam'], 10, 2);
-
-        // Use custom validation messages in German
-        add_filter('wpcf7_default_validation_error_message', function (): string {
-            return __('Bitte korrigier die markierten Felder.', 'wp-starter');
-        });
     }
 
     /**
@@ -324,12 +319,12 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
                     '#(<span[^>]*class="[^"]*wpcf7-form-control-wrap)#i',
                     $marker . '$1',
                     $label,
-                    1
+                    1,
                 );
 
                 return is_string($replaced) ? $replaced : $label;
             },
-            $elements
+            $elements,
         );
     }
 
@@ -411,13 +406,26 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
     private static function defaultFormTemplate(): string
     {
         $privacyUrl = get_privacy_policy_url();
-        $privacyLink = $privacyUrl
-            ? sprintf(
+
+        // Ohne gesetzte Datenschutzseite verweist der Einwilligungstext auf
+        // kein Dokument, das der Besucher nicht erreichen kann: er bittet nur
+        // um die Einwilligung selbst. Sobald eine Datenschutzseite gesetzt
+        // ist, wechselt der Satz automatisch auf die verlinkte Fassung mit
+        // Verweis auf die Erklärung.
+        if ($privacyUrl) {
+            $privacyLink = sprintf(
                 '<a href="%s" target="_blank" rel="noopener">%s</a>',
                 esc_url($privacyUrl),
-                esc_html__('Datenschutzerklärung', 'wp-starter')
-            )
-            : esc_html__('Datenschutzerklärung', 'wp-starter');
+                esc_html__('Datenschutzerklärung', 'wp-starter'),
+            );
+            $consentText = sprintf(
+                /* translators: %s: link to the privacy policy */
+                esc_html__('Ich habe die %s gelesen und stimme der Verarbeitung meiner Daten zu.', 'wp-starter'),
+                $privacyLink,
+            );
+        } else {
+            $consentText = esc_html__('Ich stimme der Verarbeitung meiner Angaben zur Beantwortung der Anfrage zu.', 'wp-starter');
+        }
 
         return implode("\n", [
             '<label>' . esc_html__('Name', 'wp-starter'),
@@ -432,13 +440,7 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
             '<label>' . esc_html__('Deine Nachricht', 'wp-starter'),
             '    [textarea* your-message]</label>',
             '',
-            '[acceptance privacy-consent]'
-                . sprintf(
-                    /* translators: %s: link to the privacy policy */
-                    esc_html__('Ich habe die %s gelesen und stimme der Verarbeitung meiner Daten zu.', 'wp-starter'),
-                    $privacyLink
-                )
-                . '[/acceptance]',
+            '[acceptance privacy-consent]' . $consentText . '[/acceptance]',
             '',
             '[submit "' . esc_attr__('Nachricht senden', 'wp-starter') . '"]',
         ]);
@@ -490,12 +492,16 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
     /**
      * Meldungen auf Deutsch und in der Ansprache des Themes.
      *
+     * CF7 kennt keinen Filter fuer diese Texte (kein
+     * `wpcf7_default_validation_error_message`-Hook o.ae.) — Meldungstexte
+     * leben ausschliesslich hier, am Formular selbst.
+     *
      * @return array<string, string>
      */
     private static function defaultMessages(): array
     {
         return [
-            'mail_sent_ok' => __('Vielen Dank, Deine Nachricht ist angekommen. Wir melden uns.', 'wp-starter'),
+            'mail_sent_ok' => __('Vielen Dank, deine Nachricht ist angekommen. Wir melden uns.', 'wp-starter'),
             'mail_sent_ng' => __('Die Nachricht konnte nicht gesendet werden. Bitte versuch es später erneut.', 'wp-starter'),
             'validation_error' => __('Bitte prüf die markierten Felder.', 'wp-starter'),
             'spam' => __('Die Nachricht wurde als Spam eingestuft und nicht gesendet.', 'wp-starter'),

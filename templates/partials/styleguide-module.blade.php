@@ -35,9 +35,24 @@
     @if($umschaltbar)
         x-data="{
             aktiv: 0,
-            waehlen(index) {
+            waehlen(index, schreibeHash = false) {
                 this.aktiv = index;
-                this.$refs.chips.children[index].focus();
+                {{-- Der aria-hidden Trenner-Span zaehlt in children mit, darum
+                     ueber die role=radio-Elemente indizieren statt ueber children. --}}
+                this.$refs.chips.querySelectorAll('[role=radio]')[index].focus();
+
+                if (!schreibeHash) return;
+
+                const anker = this.$el.querySelectorAll('[data-variant]')[index]?.dataset.variant;
+                if (anker) {
+                    {{-- Safari drosselt replaceState (~100 Aufrufe je 30s) und
+                         wirft dann SecurityError. Bewusst still verschluckt:
+                         der Hash ist rein kosmetisch, ein Fehlschlag bleibt
+                         folgenlos. --}}
+                    try {
+                        history.replaceState(null, '', '#' + anker);
+                    } catch (e) {}
+                }
             },
             init() {
                 {{-- Deep-Link: der Browser springt auf einen Anker, dessen Instanz
@@ -68,6 +83,10 @@
             </p>
 
             @if($umschaltbar)
+                {{-- Pfeiltasten rufen waehlen() ohne schreibeHash auf und
+                     schreiben den Hash darum bewusst nicht: Safari drosselt
+                     History-Aufrufe, und der Deep-Link entsteht ohnehin erst
+                     beim Klick (siehe x-on:click unten). --}}
                 <div
                     x-ref="chips"
                     role="radiogroup"
@@ -77,6 +96,8 @@
                     x-on:keydown.arrow-down.prevent="waehlen((aktiv + 1) % {{ $anzahl }})"
                     x-on:keydown.arrow-left.prevent="waehlen((aktiv - 1 + {{ $anzahl }}) % {{ $anzahl }})"
                     x-on:keydown.arrow-up.prevent="waehlen((aktiv - 1 + {{ $anzahl }}) % {{ $anzahl }})"
+                    x-on:keydown.home.prevent="waehlen(0)"
+                    x-on:keydown.end.prevent="waehlen({{ $anzahl }} - 1)"
                 >
                         @foreach($modul['instanzen'] as $index => $instanz)
                         {{-- Zustaende hinter einem Trenner: sie sind Randfaelle fuer
@@ -89,14 +110,18 @@
                         <button
                             type="button"
                             role="radio"
+                            {{-- Serverseitiger Startwert vor Alpine-Boot: Instanz 0 ist
+                                 der Default, Alpine ueberschreibt danach. --}}
+                            aria-checked="{{ $index === 0 ? 'true' : 'false' }}"
+                            tabindex="{{ $index === 0 ? '0' : '-1' }}"
                             x-bind:aria-checked="aktiv === {{ $index }} ? 'true' : 'false'"
                             x-bind:tabindex="aktiv === {{ $index }} ? '0' : '-1'"
-                            x-on:click="waehlen({{ $index }})"
+                            x-on:click="waehlen({{ $index }}, true)"
                             @if(!empty($variantenTitel[$index]) && $variantenTitel[$index] !== ($varianten[$index] ?? '')) title="{{ $variantenTitel[$index] }}" @endif
                             x-bind:class="aktiv === {{ $index }}
                                 ? 'bg-surface text-content border-line shadow-[var(--shadow-button)]'
                                 : 'border-transparent text-content-secondary hover:text-content'"
-                            class="px-3 py-1 text-sm font-medium border rounded-full cursor-pointer focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
+                            class="px-3 py-1 text-sm font-medium border rounded-full cursor-pointer transition-colors focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
                         >{{ $varianten[$index] ?? '' }}</button>
                     @endforeach
                 </div>

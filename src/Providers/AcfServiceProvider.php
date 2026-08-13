@@ -579,14 +579,7 @@ class AcfServiceProvider extends ServiceProvider
             }
 
             foreach (array_values( (array) $gruppe['rows']) as $index => $zeile) {
-                $zellen = 0;
-
-                foreach ( (array) $zeile as $wert) {
-                    if (is_array($wert)) {
-                        $zellen = count($wert);
-                        break;
-                    }
-                }
+                $zellen = self::countRowCells( (array) $zeile);
 
                 if ($zellen === $spalten) {
                     continue;
@@ -596,14 +589,34 @@ class AcfServiceProvider extends ServiceProvider
                     $gruppe['feld'],
                     sprintf(
                         /* translators: 1: Zeilennummer, 2: Zahl der Zellen, 3: Zahl der Spalten */
-                        __('Tabelle: Zeile %1$d hat %2$d Zellen, die Tabelle aber %3$d Spalten.', 'wp-starter'),
+                        __('Tabelle: Zeile %1$d hat %2$d Zellen, die Tabelle aber %3$d Spalten. Ergänze oder entferne Zellen in dieser Zeile.', 'wp-starter'),
                         $index + 1,
                         $zellen,
-                        $spalten
-                    )
+                        $spalten,
+                    ),
                 );
             }
         }
+    }
+
+    /**
+     * Zellenzahl einer Tabellenzeile: die Groesse ihres ersten Array-Werts.
+     *
+     * Der Zellen-Repeater liegt unter einem Schluessel, dessen Name je nach
+     * Feldkontext variiert, deshalb wird der erste Array-Wert genommen statt
+     * ein Feld beim Namen zu suchen.
+     *
+     * @param array<mixed> $zeile
+     */
+    private static function countRowCells(array $zeile): int
+    {
+        foreach ($zeile as $wert) {
+            if (is_array($wert)) {
+                return count($wert);
+            }
+        }
+
+        return 0;
     }
 
     /**
@@ -622,7 +635,7 @@ class AcfServiceProvider extends ServiceProvider
     {
         $gefunden = [];
 
-        foreach ($baum as $schluessel => $wert) {
+        foreach ($baum as $wert) {
             if (!is_array($wert)) {
                 continue;
             }

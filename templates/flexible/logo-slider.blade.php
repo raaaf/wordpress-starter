@@ -77,11 +77,17 @@
             id="{{ $uniqueId }}"
             class="relative overflow-hidden"
             @if($autoplay)
-                x-data="{ paused: false }"
-                @mouseenter="paused = true"
-                @mouseleave="paused = false"
-                @focusin="paused = true"
-                @focusout="paused = false"
+                {{-- Zwei getrennte Zustaende: pausedByUser (Knopf, bleibt bis
+                     zum naechsten Klick bestehen) und hovered (Maus/Fokus).
+                     Ohne diese Trennung ueberschreibt mouseleave eine per
+                     Klick gesetzte Pause. Die Animation pausiert bei einem
+                     der beiden Zustaende, der Knopf selbst zeigt/toggelt nur
+                     pausedByUser. --}}
+                x-data="{ pausedByUser: false, hovered: false, get paused() { return this.pausedByUser || this.hovered } }"
+                @mouseenter="hovered = true"
+                @mouseleave="hovered = false"
+                @focusin="hovered = true"
+                @focusout="hovered = false"
             @endif
             role="region"
             aria-label="{{ __('Partner-Logos Karussell', 'wp-starter') }}"
@@ -91,15 +97,15 @@
                      nur am Zeigegeraet haengt. --}}
                 <button
                     type="button"
-                    x-on:click="paused = !paused"
-                    x-bind:aria-pressed="paused ? 'true' : 'false'"
+                    x-on:click="pausedByUser = !pausedByUser"
+                    x-bind:aria-pressed="pausedByUser ? 'true' : 'false'"
                     class="absolute z-20 p-2 transition-colors border rounded-full right-2 top-2 bg-surface border-line text-content hover:bg-surface-secondary focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
                 >
-                    <span class="sr-only" x-text="paused ? '{{ esc_js(__('Logolauf fortsetzen', 'wp-starter')) }}' : '{{ esc_js(__('Logolauf anhalten', 'wp-starter')) }}'">{{ __('Logolauf anhalten', 'wp-starter') }}</span>
+                    <span class="sr-only" x-text="pausedByUser ? '{{ esc_js(__('Logolauf fortsetzen', 'wp-starter')) }}' : '{{ esc_js(__('Logolauf anhalten', 'wp-starter')) }}'">{{ __('Logolauf anhalten', 'wp-starter') }}</span>
                     <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                        <rect x="4" y="3" width="3" height="10" rx="1" x-show="!paused"></rect>
-                        <rect x="9" y="3" width="3" height="10" rx="1" x-show="!paused"></rect>
-                        <path d="M5 3.5v9l8-4.5-8-4.5z" x-show="paused" x-cloak></path>
+                        <rect x="4" y="3" width="3" height="10" rx="1" x-show="!pausedByUser"></rect>
+                        <rect x="9" y="3" width="3" height="10" rx="1" x-show="!pausedByUser"></rect>
+                        <path d="M5 3.5v9l8-4.5-8-4.5z" x-show="pausedByUser" x-cloak></path>
                     </svg>
                 </button>
             @endif
