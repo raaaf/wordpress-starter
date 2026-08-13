@@ -431,7 +431,6 @@ class AcfServiceProvider extends ServiceProvider
      */
     private function registerValidationHooks(): void
     {
-        // Example: Validate URL fields contain valid URLs
         // Tabelle: Zellen gegen Spaltenzahl pruefen.
         //
         // Kopfzeilen und Zeilen sind zwei unabhaengige Repeater. Wer eine Spalte
@@ -446,6 +445,7 @@ class AcfServiceProvider extends ServiceProvider
         // reicht bei der Feldvalidierung keinen Pfad dorthin mit.
         add_action('acf/validate_save_post', [self::class, 'validateTableRows']);
 
+        // Example: Validate URL fields contain valid URLs
         add_filter('acf/validate_value/type=url', function ($valid, $value) {
             if (!$valid || empty($value)) {
                 return $valid;

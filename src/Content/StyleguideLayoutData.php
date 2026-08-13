@@ -43,7 +43,7 @@ class StyleguideLayoutData
 
         $layouts[] = $this->layout('one_column', [
             'label' => '',
-            'content' => '<h2>Flexible Content Layouts</h2><p>Alle 28 verfügbaren Layouts für den Seitenaufbau.</p>',
+            'content' => '<h2>Flexible Content Layouts</h2><p>Alle 32 verfügbaren Layouts für den Seitenaufbau.</p>',
             'background_color' => 'primary',
         ]);
 

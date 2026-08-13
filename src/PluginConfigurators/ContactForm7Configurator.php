@@ -398,7 +398,7 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
     /**
      * Aufbau des Formulars.
      *
-     * Gesiezt, weil der Rest des Themes siezt. Pflichtfelder sind Name, E-Mail
+     * Geduzt, weil der Rest des Themes duzt. Pflichtfelder sind Name, E-Mail
      * und Nachricht: ein Betreff laesst sich aus der Nachricht ableiten, eine
      * leere Nachricht nicht. Die Einwilligung ist ein echtes acceptance-Feld,
      * damit CF7 sie serverseitig prueft, statt sie nur anzuzeigen.

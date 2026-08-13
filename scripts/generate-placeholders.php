@@ -1,5 +1,11 @@
 <?php
 
+// Nur per CLI ausfuehrbar. Im Theme-Ordner ist die Datei sonst per HTTP
+// erreichbar und wuerde bei jedem Aufruf Bilder erzeugen und schreiben.
+if (\PHP_SAPI !== 'cli') {
+    exit(1);
+}
+
 /**
  * Platzhalterbilder erzeugen.
  *

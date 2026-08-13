@@ -72,7 +72,6 @@ tests/
 ├── e2e/              # Playwright E2E tests
 docs/                 # Documentation
 ├── ARCHITECTURE.md        # Service provider pattern
-├── BLOCK-DEVELOPMENT.md   # Adding new flexible layouts
 ├── COMPONENT-DEVELOPMENT.md # Adding new Blade components
 ├── DEPLOYMENT.md          # Production deployment
 ├── SECURITY.md            # Security practices
