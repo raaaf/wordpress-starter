@@ -63,7 +63,6 @@
                     {!! wp_get_attachment_image($imgId, 'hero-split', false, [
                         'class' => 'w-full aspect-[16/10] object-cover',
                         'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imgId, $lbl ?: strip_tags((string) $text)),
-                        'loading' => 'lazy',
                         'decoding' => 'async',
                     ]) !!}
                 @elseif($img && !empty($img['url']))

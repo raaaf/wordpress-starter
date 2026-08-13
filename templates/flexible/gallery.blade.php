@@ -38,7 +38,6 @@
                         <button type="button" class="block w-full rounded-lg focus:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]" aria-label="{{ sprintf(__('Bild vergrößern: %s', 'wp-starter'), $accessibleLabel ?: __('Galeriebild', 'wp-starter')) }}">
                         {!! wp_get_attachment_image($imageId, 'gallery-thumb', false, [
                             'class' => 'object-cover w-full transition-transform duration-200 ease-out cursor-zoom-in aspect-square gallery-zoom group-hover:scale-[1.03]',
-                            'loading' => 'lazy',
                             'sizes' => '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw',
                             'data-zoom-src' => esc_url($full[0]),
                         ]) !!}

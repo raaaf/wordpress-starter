@@ -54,7 +54,6 @@
                                 {!! get_the_post_thumbnail(get_the_ID(), 'card-video', [
                                     'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) get_post_thumbnail_id(), get_the_title()),
                                     'class' => 'object-cover w-full h-full transition-transform duration-200 ease-out group-hover:scale-105',
-                                    'loading' => 'lazy',
                                 ]) !!}
                             </div>
                         @endif

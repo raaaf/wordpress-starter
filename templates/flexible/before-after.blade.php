@@ -44,7 +44,6 @@
             {!! wp_get_attachment_image($afterId, 'content', false, [
                 'class'   => 'block w-full',
                 'alt'     => $altAfter,
-                'loading' => 'lazy',
             ]) !!}
 
             {{-- Before image (clipped) --}}
@@ -55,7 +54,6 @@
                 {!! wp_get_attachment_image($beforeId, 'content', false, [
                     'class'   => 'block w-full',
                     'alt'     => $altBefore,
-                    'loading' => 'lazy',
                 ]) !!}
             </div>
 

@@ -61,7 +61,6 @@
                             {!! wp_get_attachment_image($testimonial['image'], 'avatar', false, [
                                 'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $testimonial['image'], $testimonial['author'] ?? ''),
                                 'class' => 'object-cover w-12 h-12 rounded-full',
-                                'loading' => 'lazy',
                                 'sizes' => '48px',
                             ]) !!}
                         @endif

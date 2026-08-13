@@ -53,7 +53,6 @@
                                 @if($imageId)
                                     {!! wp_get_attachment_image($imageId, 'gallery-thumb', false, [
                                         'class' => 'mt-4 rounded-lg',
-                                        'loading' => 'lazy',
                                         'sizes' => '(max-width: 768px) 100vw, 50vw',
                                         'alt' => $eventTitle,
                                     ]) !!}

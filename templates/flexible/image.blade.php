@@ -4,6 +4,14 @@
     Uses shared components: x-section
     ACF Fields: image (ID), show_border, show_caption, background_color
 
+                {{-- Bewusst ohne 'loading': wp_get_attachment_image() ruft
+                     wp_get_loading_optimization_attributes() auf. Die zaehlt die
+                     Bilder der Hauptschleife und entscheidet selbst, welches
+                     eager laedt und welches lazy. Ein gesetztes 'lazy' liest der
+                     Kern als "nicht im Viewport" und schaltet damit genau diese
+                     Logik ab, inklusive fetchpriority="high" fuers erste Bild.
+                     Weglassen ist der Fix. Die rohen img-Tags im URL-Fallback
+                     behalten ihr lazy: dort laeuft der Kern gar nicht. --}}
     Uses wp_get_attachment_image() for automatic srcset/responsive images
 --}}
 
@@ -33,7 +41,6 @@
         {!! wp_get_attachment_image($imageId, 'content', false, [
             'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $caption),
             'class' => 'w-full rounded-[var(--card-radius)] shadow-xl ' . $borderClass,
-            'loading' => 'lazy',
             'sizes' => '(max-width: 896px) 100vw, 896px',
         ]) !!}
 

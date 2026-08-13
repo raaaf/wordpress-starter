@@ -74,7 +74,6 @@
                             {!! wp_get_attachment_image($imageId, 'team-portrait', false, [
                                 'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $name),
                                 'class' => 'object-cover w-full h-full',
-                                'loading' => 'lazy',
                                 'sizes' => '260px',
                             ]) !!}
                         </div>
