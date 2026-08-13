@@ -156,6 +156,10 @@ class StyleguideLayoutData
 
         $layouts[] = $this->getTableLayoutData();
 
+        // Pflichtabdeckung: jede Auswahlmoeglichkeit mindestens einmal.
+        $layouts = array_merge($layouts, $this->getVariantCatalog());
+        $layouts = array_merge($layouts, $this->getStateCatalog());
+
         return $layouts;
     }
 
@@ -170,7 +174,7 @@ class StyleguideLayoutData
             'variant' => 'background',
             'badge' => 'Design System',
             'title' => 'Willkommen auf unserer Website',
-            'copy' => 'Wir bieten Ihnen maßgeschneiderte Lösungen für Ihre individuellen Anforderungen. Mit langjähriger Erfahrung und einem engagierten Team stehen wir Ihnen zur Seite.',
+            'copy' => 'Wir bauen dir Lösungen, die zu deinen Anforderungen passen. Mit langjähriger Erfahrung und einem Team, das zuhört.',
             'background_image' => $this->imageId(1),
             'overlay_opacity' => 70,
             'cta_primary' => ['title' => 'Mehr erfahren', 'url' => '#features', 'target' => ''],
@@ -183,7 +187,7 @@ class StyleguideLayoutData
     {
         return $this->layout('one_column', [
             'label' => 'Über uns',
-            'content' => '<h3>Einspaltiger Inhalt</h3><p>Dies ist ein Beispiel für einen einspaltigen Textblock. Hier können Sie längere Texte, Überschriften und andere Inhalte platzieren. Der Text fließt über die gesamte verfügbare Breite.</p><p>Nutzen Sie dieses Layout für Einleitungstexte, ausführliche Beschreibungen oder wichtige Mitteilungen, die die volle Aufmerksamkeit des Lesers erfordern.</p>',
+            'content' => '<h3>Einspaltiger Inhalt</h3><p>Ein Beispiel für einen einspaltigen Textblock. Hier kannst du längere Texte, Überschriften und andere Inhalte platzieren. Der Text fließt über die gesamte verfügbare Breite.</p><p>Nutze dieses Layout für Einleitungen, ausführliche Beschreibungen oder Mitteilungen, die die volle Aufmerksamkeit brauchen.</p>',
             'background_color' => 'primary',
         ]);
     }
@@ -338,10 +342,10 @@ class StyleguideLayoutData
     {
         return $this->layout('accordion', [
             'accordion' => [
-                ['title' => 'Was bieten Sie an?', 'content' => '<p>Wir bieten ein breites Spektrum an Dienstleistungen, von der Beratung über die Umsetzung bis hin zur langfristigen Betreuung. Unser Fokus liegt auf maßgeschneiderten Lösungen für Ihre spezifischen Anforderungen.</p>'],
+                ['title' => 'Was bietet ihr an?', 'content' => '<p>Von der Beratung über die Umsetzung bis zur langfristigen Betreuung. Der Fokus liegt auf Lösungen, die zu deinem Vorhaben passen, nicht auf Bausätzen von der Stange.</p>'],
                 ['title' => 'Wie lange dauert ein typisches Projekt?', 'content' => '<p>Die Projektdauer hängt vom Umfang ab. Kleinere Projekte können innerhalb weniger Wochen abgeschlossen werden, während umfangreichere Vorhaben mehrere Monate in Anspruch nehmen können. Wir erstellen immer einen realistischen Zeitplan.</p>'],
-                ['title' => 'Wie kann ich Sie kontaktieren?', 'content' => '<p>Sie können uns telefonisch, per E-Mail oder über das Kontaktformular auf unserer Website erreichen. Wir melden uns in der Regel innerhalb von 24 Stunden bei Ihnen.</p>'],
-                ['title' => 'Gibt es eine Mindestvertragslaufzeit?', 'content' => '<p>Nein, wir bieten flexible Vertragsmodelle ohne lange Bindungszeiten. Sie können unsere Dienste auch projektbasiert in Anspruch nehmen.</p>'],
+                ['title' => 'Wie erreiche ich euch?', 'content' => '<p>Telefonisch, per E-Mail oder über das Kontaktformular. Wir melden uns in der Regel innerhalb von 24 Stunden.</p>'],
+                ['title' => 'Gibt es eine Mindestvertragslaufzeit?', 'content' => '<p>Nein. Die Vertragsmodelle sind flexibel und ohne lange Bindung, du kannst auch projektweise buchen.</p>'],
             ],
             'background_color' => 'primary',
         ]);
@@ -355,7 +359,7 @@ class StyleguideLayoutData
             'tabs' => [
                 ['title' => 'Übersicht', 'icon' => 'eye', 'content' => '<h3>Allgemeine Informationen</h3><p>Dies ist der Inhalt des ersten Tabs. Tabs eignen sich hervorragend, um zusammengehörige Informationen zu strukturieren und übersichtlich darzustellen, ohne die Seite mit zu viel Text zu überladen.</p>'],
                 ['title' => 'Funktionen', 'icon' => 'check', 'content' => '<h3>Unsere Funktionen</h3><ul><li>Automatische Anpassung an alle Geräte</li><li>Schnelle Ladezeiten</li><li>Benutzerfreundliche Oberfläche</li><li>Regelmäßige Updates</li></ul>'],
-                ['title' => 'Preise', 'icon' => 'calendar', 'content' => '<h3>Preisgestaltung</h3><p>Unsere Preise richten sich nach dem Umfang Ihrer Anforderungen. Kontaktieren Sie uns für ein individuelles Angebot.</p>'],
+                ['title' => 'Preise', 'icon' => 'calendar', 'content' => '<h3>Preisgestaltung</h3><p>Die Preise richten sich nach dem Umfang deines Vorhabens. Schreib uns für ein individuelles Angebot.</p>'],
             ],
             'background_color' => 'secondary',
         ]);
@@ -367,9 +371,9 @@ class StyleguideLayoutData
         return $this->layout('cards', [
             'title' => 'Unsere Leistungen',
             'cards' => [
-                ['icon' => 'user', 'title' => 'Beratung', 'content' => 'Professionelle Beratung für Ihre individuellen Anforderungen und Ziele.', 'link' => ['title' => 'Mehr erfahren', 'url' => '#', 'target' => '']],
-                ['icon' => 'check', 'title' => 'Umsetzung', 'content' => 'Zuverlässige Umsetzung Ihrer Projekte mit modernsten Technologien.', 'link' => ['title' => 'Details ansehen', 'url' => '#', 'target' => '']],
-                ['icon' => 'phone', 'title' => 'Support', 'content' => 'Langfristige Betreuung und schneller Support für Ihren Erfolg.', 'link' => ['title' => 'Kontakt', 'url' => '#', 'target' => '']],
+                ['icon' => 'user', 'title' => 'Beratung', 'content' => 'Beratung, die bei deinen Zielen anfängt und nicht bei unserem Baukasten.', 'link' => ['title' => 'Mehr erfahren', 'url' => '#', 'target' => '']],
+                ['icon' => 'check', 'title' => 'Umsetzung', 'content' => 'Umsetzung deiner Projekte, verlässlich und mit aktueller Technik.', 'link' => ['title' => 'Details ansehen', 'url' => '#', 'target' => '']],
+                ['icon' => 'phone', 'title' => 'Support', 'content' => 'Betreuung über den Launch hinaus, mit Support, der antwortet.', 'link' => ['title' => 'Kontakt', 'url' => '#', 'target' => '']],
             ],
             'columns' => '3',
             'background_color' => 'primary',
@@ -396,9 +400,9 @@ class StyleguideLayoutData
         return $this->layout('team', [
             'title' => 'Unser Team',
             'members' => [
-                ['image' => $this->imageId(3), 'name' => 'Anna Weber', 'position' => 'Geschäftsführerin', 'bio' => 'Seit 2015 führt Anna das Unternehmen mit Leidenschaft.', 'email' => 'anna@beispiel.de', 'linkedin' => 'https://linkedin.com/in/beispiel'],
-                ['image' => $this->imageId(4), 'name' => 'Michael Braun', 'position' => 'Technischer Leiter', 'bio' => 'Michael verantwortet alle technischen Entwicklungen.', 'email' => 'michael@beispiel.de', 'linkedin' => ''],
-                ['image' => $this->imageId(5), 'name' => 'Sarah Klein', 'position' => 'Marketing Managerin', 'bio' => 'Sarah sorgt für die Sichtbarkeit unserer Projekte.', 'email' => 'sarah@beispiel.de', 'linkedin' => 'https://linkedin.com/in/beispiel'],
+                ['image' => $this->portraitId(), 'name' => 'Anna Weber', 'position' => 'Geschäftsführerin', 'bio' => 'Seit 2015 führt Anna das Unternehmen mit Leidenschaft.', 'email' => 'anna@beispiel.de', 'linkedin' => 'https://linkedin.com/in/beispiel'],
+                ['image' => $this->portraitId(), 'name' => 'Michael Braun', 'position' => 'Technischer Leiter', 'bio' => 'Michael verantwortet alle technischen Entwicklungen.', 'email' => 'michael@beispiel.de', 'linkedin' => ''],
+                ['image' => $this->portraitId(), 'name' => 'Sarah Klein', 'position' => 'Marketing Managerin', 'bio' => 'Sarah sorgt für die Sichtbarkeit unserer Projekte.', 'email' => 'sarah@beispiel.de', 'linkedin' => 'https://linkedin.com/in/beispiel'],
             ],
             'columns' => '3',
             'background_color' => 'primary',
@@ -499,6 +503,9 @@ class StyleguideLayoutData
             'source' => 'external',
             'video' => '',
             'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            // Mit Standbild: so soll es aussehen. Eine Katalog-Instanz weiter
+            // unten laesst es bewusst weg, damit beide Zustaende sichtbar sind.
+            'poster' => $this->imageId(3),
             'background_color' => 'primary',
         ]);
     }
@@ -536,7 +543,7 @@ class StyleguideLayoutData
     {
         return $this->layout('cta', [
             'title' => 'Bereit loszulegen?',
-            'content' => 'Kontaktieren Sie uns noch heute für ein unverbindliches Beratungsgespräch. Wir freuen uns darauf, gemeinsam mit Ihnen Ihre Ziele zu erreichen.',
+            'content' => 'Schreib uns für ein unverbindliches Gespräch. Wir hören zu, bevor wir etwas vorschlagen.',
             'button' => ['title' => 'Jetzt Kontakt aufnehmen', 'url' => '#kontakt', 'target' => ''],
         ]);
     }
@@ -555,8 +562,8 @@ class StyleguideLayoutData
     private function getContactFormLayoutData(): array
     {
         return $this->layout('contact_form', [
-            'title' => 'Kontaktieren Sie uns',
-            'content' => '<p>Haben Sie Fragen oder möchten Sie mehr erfahren? Füllen Sie einfach das Formular aus und wir melden uns schnellstmöglich bei Ihnen.</p>',
+            'title' => 'Schreib uns',
+            'content' => '<p>Fragen? Schreib uns über das Formular, wir melden uns zeitnah.</p>',
             'form_id' => $this->getFirstContactForm7Id(),
             'show_contact_info' => true,
             'background_color' => 'secondary',
@@ -567,7 +574,7 @@ class StyleguideLayoutData
     private function getMapLayoutData(): array
     {
         return $this->layout('map', [
-            'title' => 'So finden Sie uns',
+            'title' => 'So findest du uns',
             'address' => 'Musterstraße 123, 12345 Berlin, Deutschland',
             'embed_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2427.924165409515!2d13.404954!3d52.520008!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47a84e373f035901%3A0x42120465b5e3b70!2sBerlin!5e0!3m2!1sde!2sde!4v1234567890',
             'height' => 400,
@@ -649,6 +656,14 @@ class StyleguideLayoutData
             return null;
         }
 
+        // Das vom Theme angelegte Formular bevorzugen: es siezt, kennzeichnet
+        // Pflichtfelder und hat die Einwilligung. Das erste beliebige Formular
+        // waere Zufall.
+        $default = \WordpressStarter\PluginConfigurators\ContactForm7Configurator::defaultFormId();
+        if ($default > 0) {
+            return $default;
+        }
+
         $forms = get_posts([
             'post_type' => 'wpcf7_contact_form',
             'posts_per_page' => 1,
@@ -658,5 +673,562 @@ class StyleguideLayoutData
         ]);
 
         return !empty($forms) ? (int) $forms[0]->ID : null;
+    }
+
+    // =========================================================================
+    // VARIANTEN-KATALOG
+    //
+    // Die Instanzen oben sind die kuratierte Galerie: je Layout eine
+    // Referenzdarstellung. Hier folgt die Pflichtabdeckung, damit jede
+    // Auswahlmoeglichkeit mindestens einmal gerendert wird.
+    //
+    // Warum das noetig ist: bis 2026-08-10 zeigte der Styleguide pro Modul genau
+    // eine Variante. Genau die beiden nie geseedeten Hintergrundfarben, brand und
+    // inverse, waren defekt. Was der Styleguide nicht zeigt, prueft niemand.
+    //
+    // Abgesichert durch tests/Unit/Content/StyleguideVariantCoverageTest.php.
+    // Neue Choice heisst neue Instanz hier, im selben Commit.
+    // =========================================================================
+
+    /**
+     * Alle Auswahlwerte, die die kuratierte Galerie nicht zeigt.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function getVariantCatalog(): array
+    {
+        $catalog = [];
+
+        $catalog[] = $this->layout('one_column', [
+            'content' => '<h2>Varianten-Katalog</h2><p>Ab hier folgt je Auswahlmöglichkeit eine Instanz. Diese Sektionen sind Prüfmaterial, kein Gestaltungsvorschlag.</p>',
+            'background_color' => 'secondary',
+        ]);
+
+        // --- Hero: die beiden Varianten, die oben fehlen ---------------------
+        $catalog[] = $this->layout('hero', [
+            'variant' => 'centered',
+            'badge' => 'Variante',
+            'title' => 'Hero, zentriert',
+            'copy' => 'Diese Variante stellt Text und Buttons mittig über einer Flächenfarbe dar.',
+            'cta_primary' => ['title' => 'Primär', 'url' => '#', 'target' => ''],
+            'cta_secondary' => ['title' => 'Sekundär', 'url' => '#', 'target' => ''],
+            'background_color' => 'secondary',
+        ]);
+
+        $catalog[] = $this->layout('hero', [
+            'variant' => 'split',
+            'badge' => 'Variante',
+            'title' => 'Hero, geteilt',
+            'copy' => 'Text links, Bild rechts. Auf kleinen Bildschirmen stapeln sich beide Hälften.',
+            'image' => $this->imageId(2),
+            'cta_primary' => ['title' => 'Primär', 'url' => '#', 'target' => ''],
+            'background_color' => 'primary',
+        ]);
+
+        // --- Sektionskopf an, Ausrichtung links -------------------------------
+        // Beide Werte fehlen in der kuratierten Galerie, weil dort der Default
+        // greift. Je Layout eine Instanz deckt beide ab.
+        $header = static fn (string $headline): array => [
+            'show_section_header' => true,
+            'section_chip' => 'Sektionskopf',
+            'section_headline' => $headline,
+            'section_description' => 'Sektionskopf eingeschaltet, linksbündig ausgerichtet.',
+            'section_alignment' => 'left',
+        ];
+
+        $catalog[] = $this->layout('one_column', array_merge($header('Eine Spalte mit Sektionskopf'), [
+            'content' => '<p>Textblock unter einem linksbündigen Sektionskopf.</p>',
+            'background_color' => 'primary',
+        ]));
+
+        $catalog[] = $this->layout('two_columns', array_merge($header('Zwei Spalten mit Sektionskopf'), [
+            'column_1' => '<p>Linke Spalte.</p>',
+            'column_2' => '<p>Rechte Spalte.</p>',
+            'background_color' => 'secondary',
+        ]));
+
+        $catalog[] = $this->layout('three_columns', array_merge($header('Drei Spalten mit Sektionskopf'), [
+            'column_1' => '<p>Erste Spalte.</p>',
+            'column_2' => '<p>Zweite Spalte.</p>',
+            'column_3' => '<p>Dritte Spalte.</p>',
+            'background_color' => 'primary',
+        ]));
+
+        $catalog[] = $this->layout('four_columns', array_merge($header('Vier Spalten mit Sektionskopf'), [
+            'column_1' => '<p>Erste Spalte.</p>',
+            'column_2' => '<p>Zweite Spalte.</p>',
+            'column_3' => '<p>Dritte Spalte.</p>',
+            'column_4' => '<p>Vierte Spalte.</p>',
+            'background_color' => 'secondary',
+        ]));
+
+        $catalog[] = $this->layout('one_third_two_thirds', array_merge($header('1/3 + 2/3 mit Sektionskopf'), [
+            'column_1' => '<p>Schmale Spalte.</p>',
+            'column_2' => '<p>Breite Spalte.</p>',
+            'background_color' => 'primary',
+        ]));
+
+        $catalog[] = $this->layout('two_thirds_one_third', array_merge($header('2/3 + 1/3 mit Sektionskopf'), [
+            'column_1' => '<p>Breite Spalte.</p>',
+            'column_2' => '<p>Schmale Spalte.</p>',
+            'background_color' => 'secondary',
+        ]));
+
+        $catalog[] = $this->layout('one_column_image', array_merge($header('Eine Spalte mit Bild und Sektionskopf'), [
+            'image' => $this->imageId(3),
+            'content' => '<p>Bild und Text unter einem linksbündigen Sektionskopf.</p>',
+            'accordion' => [],
+            'background_color' => 'primary',
+        ]));
+
+        $catalog[] = $this->layout('two_columns_images', array_merge($header('Zwei Spalten mit Bildern und Sektionskopf'), [
+            'label_1' => '',
+            'image_1' => $this->imageId(2),
+            'column_1' => '<p>Erste Karte.</p>',
+            'accordion_1' => [],
+            'label_2' => '',
+            'image_2' => $this->imageId(3),
+            'column_2' => '<p>Zweite Karte.</p>',
+            'accordion_2' => [],
+            'background_color' => 'secondary',
+        ]));
+
+        $catalog[] = $this->layout('four_columns_images', array_merge($header('Vier Spalten mit Bildern und Sektionskopf'), [
+            'label_1' => '',
+            'image_1' => $this->imageId(1),
+            'column_1' => '<p>Erste Karte.</p>',
+            'accordion_1' => [],
+            'label_2' => '',
+            'image_2' => $this->imageId(2),
+            'column_2' => '<p>Zweite Karte.</p>',
+            'accordion_2' => [],
+            'label_3' => '',
+            'image_3' => $this->imageId(3),
+            'column_3' => '<p>Dritte Karte.</p>',
+            'accordion_3' => [],
+            'label_4' => '',
+            'image_4' => $this->imageId(4),
+            'column_4' => '<p>Vierte Karte.</p>',
+            'accordion_4' => [],
+            'background_color' => 'primary',
+        ]));
+
+        // Hier fehlt der ausgeschaltete Sektionskopf, weil die kuratierte
+        // Instanz ihn einschaltet.
+        $catalog[] = $this->layout('three_columns_images', [
+            'show_section_header' => false,
+            'section_chip' => '',
+            'section_headline' => '',
+            'section_description' => '',
+            'section_alignment' => 'left',
+            'label_1' => '',
+            'image_1' => $this->imageId(2),
+            'column_1' => '<h3>Ohne Sektionskopf</h3><p>Erste Karte.</p>',
+            'accordion_1' => [],
+            'label_2' => '',
+            'image_2' => $this->imageId(3),
+            'column_2' => '<h3>Ohne Sektionskopf</h3><p>Zweite Karte.</p>',
+            'accordion_2' => [],
+            'label_3' => '',
+            'image_3' => $this->imageId(4),
+            'column_3' => '<h3>Ohne Sektionskopf</h3><p>Dritte Karte.</p>',
+            'accordion_3' => [],
+            'background_color' => 'secondary',
+        ]);
+
+        // --- Hintergrundflaechen brand und inverse ---------------------------
+        // Stufe 2 der Abdeckung: beide Flaechen mindestens einmal, auf einem
+        // textlastigen und einem kartenbasierten Modul.
+        $catalog[] = $this->layout('one_column', [
+            'content' => '<h3>Fläche: Markenfarbe</h3><p>Fließtext auf der Markenfläche. Diese Kombination war bis zum Audit vom 10.08.2026 nie im Styleguide zu sehen.</p>',
+            'background_color' => 'brand',
+        ]);
+
+        $catalog[] = $this->layout('one_column', [
+            'content' => '<h3>Fläche: Dunkel (Invers)</h3><p>Fließtext auf der dunklen Fläche. Ebenfalls nie geprüft, bis der Kontrastscan sie eingefordert hat.</p>',
+            'background_color' => 'inverse',
+        ]);
+
+        $catalog[] = $this->layout('cards', [
+            'title' => 'Karten auf dunkler Fläche',
+            'cards' => [
+                ['icon' => 'check', 'title' => 'Erste Karte', 'content' => 'Karte auf inverser Fläche.', 'link' => null],
+                ['icon' => 'star', 'title' => 'Zweite Karte', 'content' => 'Prüft die Abgrenzung der Kartenfläche.', 'link' => null],
+            ],
+            'columns' => '2',
+            'background_color' => 'inverse',
+        ]);
+
+        // --- Spaltenzahlen ---------------------------------------------------
+        $catalog[] = $this->layout('cards', [
+            'title' => 'Karten, vier Spalten',
+            'cards' => [
+                ['icon' => 'user', 'title' => 'Eins', 'content' => 'Vierspaltiges Kartenraster.', 'link' => null],
+                ['icon' => 'check', 'title' => 'Zwei', 'content' => 'Vierspaltiges Kartenraster.', 'link' => null],
+                ['icon' => 'phone', 'title' => 'Drei', 'content' => 'Vierspaltiges Kartenraster.', 'link' => null],
+                ['icon' => 'mail', 'title' => 'Vier', 'content' => 'Vierspaltiges Kartenraster.', 'link' => null],
+            ],
+            'columns' => '4',
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('testimonials', [
+            'title' => 'Kundenstimme, eine Spalte',
+            'source' => 'manual',
+            'testimonials' => [
+                ['quote' => 'Einspaltige Kundenstimme über die volle Breite.', 'author' => 'Maria Beispiel', 'role' => 'Geschäftsführerin', 'image' => $this->imageId(1)],
+            ],
+            'columns' => '1',
+            'background_color' => 'secondary',
+        ]);
+
+        $catalog[] = $this->layout('testimonials', [
+            'title' => 'Kundenstimmen aus der Verwaltung',
+            'source' => 'cpt',
+            'columns' => '3',
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('team', [
+            'title' => 'Team aus der Verwaltung',
+            'source' => 'cpt',
+            'columns' => '2',
+            'background_color' => 'secondary',
+        ]);
+
+        $catalog[] = $this->layout('team', [
+            'title' => 'Team, vier Spalten',
+            'source' => 'manual',
+            'members' => [
+                ['image' => $this->portraitId(), 'name' => 'Person A', 'position' => 'Rolle', 'bio' => '', 'email' => '', 'linkedin' => ''],
+                ['image' => $this->portraitId(), 'name' => 'Person B', 'position' => 'Rolle', 'bio' => '', 'email' => '', 'linkedin' => ''],
+                ['image' => $this->portraitId(), 'name' => 'Person C', 'position' => 'Rolle', 'bio' => '', 'email' => '', 'linkedin' => ''],
+                ['image' => $this->portraitId(), 'name' => 'Person D', 'position' => 'Rolle', 'bio' => '', 'email' => '', 'linkedin' => ''],
+            ],
+            'columns' => '4',
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('gallery', [
+            'title' => 'Galerie, zwei Spalten',
+            'images' => array_values(array_filter([$this->imageId(1), $this->imageId(2)])),
+            'columns' => '2',
+            'background_color' => 'secondary',
+        ]);
+
+        $catalog[] = $this->layout('gallery', [
+            'title' => 'Galerie, vier Spalten',
+            'images' => array_values(array_filter([$this->imageId(1), $this->imageId(2), $this->imageId(3), $this->imageId(4)])),
+            'columns' => '4',
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('gallery', [
+            'title' => 'Galerie, fünf Spalten',
+            'images' => array_values(array_filter([$this->imageId(1), $this->imageId(2), $this->imageId(3), $this->imageId(4), $this->imageId(5)])),
+            'columns' => '5',
+            'background_color' => 'secondary',
+        ]);
+
+        // --- Beitraege --------------------------------------------------------
+        $catalog[] = $this->layout('posts', [
+            'title' => 'Seiten statt Beiträge, zwei Spalten, ohne Auszug und Datum',
+            'post_type' => 'page',
+            'posts_per_page' => 2,
+            'category' => '',
+            'show_excerpt' => false,
+            'show_date' => false,
+            'show_author' => true,
+            'columns' => '2',
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('posts', [
+            'title' => 'Beiträge, vier Spalten',
+            'post_type' => 'post',
+            'posts_per_page' => 4,
+            'category' => '',
+            'columns' => '4',
+            'background_color' => 'secondary',
+        ]);
+
+        // --- Medien -----------------------------------------------------------
+        $catalog[] = $this->layout('image', [
+            'image' => $this->imageId(2),
+            'show_border' => true,
+            'show_caption' => false,
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('video', [
+            'source' => 'wordpress',
+            'video' => $this->imageIds['video_demo'] ?? null,
+            'video_url' => '',
+            'captions_language' => 'en',
+            'poster' => $this->imageId(4),
+            'background_color' => 'secondary',
+        ]);
+
+        $catalog[] = $this->layout('video', [
+            'source' => 'url',
+            'video' => '',
+            'video_url' => '',
+            'video_file_url' => $this->videoUrl(),
+            'captions_language' => 'fr',
+            'poster' => $this->imageId(5),
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('video', [
+            'source' => 'external',
+            'video' => '',
+            'video_url' => 'https://vimeo.com/76979871',
+            'captions_language' => 'es',
+            // Ohne Standbild: zeigt, wie die Einwilligungsflaeche ohne Bild
+            // aussieht, damit der Unterschied im Styleguide nebeneinander steht.
+            'poster' => null,
+            'background_color' => 'secondary',
+        ]);
+
+        $catalog[] = $this->layout('video', [
+            'source' => 'external',
+            'video' => '',
+            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            'captions_language' => 'it',
+            'background_color' => 'primary',
+        ]);
+
+        // --- Trenner ----------------------------------------------------------
+        $catalog[] = $this->layout('divider', ['style' => 'dots']);
+        $catalog[] = $this->layout('divider', ['style' => 'wave']);
+        $catalog[] = $this->layout('divider', ['style' => 'space', 'height' => 80]);
+
+        // --- Button -----------------------------------------------------------
+        $catalog[] = $this->layout('button', [
+            'button' => ['title' => 'Primär, klein, linksbündig', 'url' => '#', 'target' => ''],
+            'variant' => 'primary',
+            'size' => 'sm',
+            'alignment' => 'left',
+        ]);
+
+        $catalog[] = $this->layout('button', [
+            'button' => ['title' => 'Dezent, groß, rechtsbündig', 'url' => '#', 'target' => ''],
+            'variant' => 'ghost',
+            'size' => 'lg',
+            'alignment' => 'right',
+        ]);
+
+        $catalog[] = $this->layout('button', [
+            'button' => ['title' => 'Invertiert über volle Breite', 'url' => '#', 'target' => ''],
+            'variant' => 'inverse',
+            'full_width' => true,
+        ]);
+
+        $catalog[] = $this->layout('button', [
+            'button' => ['title' => 'Warnung', 'url' => '#', 'target' => ''],
+            'variant' => 'danger',
+        ]);
+
+        // --- Restliche Gegenzustaende ----------------------------------------
+        $catalog[] = $this->layout('table', [
+            'title' => 'Tabelle mit Rahmen, ohne Zebrastreifen',
+            'headers' => [['label' => 'Merkmal'], ['label' => 'Wert']],
+            'rows' => [
+                ['cells' => [['content' => 'Zebrastreifen'], ['content' => 'aus']]],
+                ['cells' => [['content' => 'Rahmen'], ['content' => 'an']]],
+            ],
+            'striped' => false,
+            'bordered' => true,
+            'background_color' => 'secondary',
+        ]);
+
+        $catalog[] = $this->layout('contact_form', [
+            'title' => 'Formular ohne Kontaktdaten',
+            'content' => '<p>Gleiches Modul, aber ohne die Kontaktkarte daneben.</p>',
+            'form_id' => $this->getFirstContactForm7Id(),
+            'show_contact_info' => false,
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('map', [
+            'title' => 'Karte ohne Routen-Link',
+            'address' => 'Musterstraße 123, 12345 Berlin, Deutschland',
+            'embed_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2427.924165409515!2d13.404954!3d52.520008!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47a84e373f035901%3A0x42120465b5e3b70!2sBerlin!5e0!3m2!1sde!2sde!4v1234567890',
+            'height' => 300,
+            'show_directions_link' => false,
+            'background_color' => 'secondary',
+        ]);
+
+        $logos = [];
+        for ($i = 1; $i <= 4; $i++) {
+            $logoId = $this->logoId($i) ?? $this->imageId($i);
+            if ($logoId) {
+                $logos[] = ['logo' => $logoId, 'name' => "Partner {$i}", 'link' => ''];
+            }
+        }
+
+        $catalog[] = $this->layout('logo_slider', [
+            'title' => 'Logos ohne Autoplay',
+            'logos' => $logos,
+            'autoplay' => false,
+            'background_color' => 'primary',
+        ]);
+
+        return $catalog;
+    }
+
+    /**
+     * URL des importierten Demo-Videos, leer wenn keins vorhanden ist.
+     */
+    private function videoUrl(): string
+    {
+        $id = $this->imageIds['video_demo'] ?? null;
+
+        return $id ? (string) wp_get_attachment_url( (int) $id) : '';
+    }
+
+    /**
+     * ID des Hochformat-Platzhalters, faellt auf ein Querformat zurueck.
+     */
+    private function portraitId(): ?int
+    {
+        return $this->imageIds['portrait'] ?? $this->imageId(1);
+    }
+
+    // =========================================================================
+    // ZUSTAENDE
+    //
+    // Die Instanzen oben zeigen, wie ein Layout aussieht, wenn alles ausgefuellt
+    // ist. Kaputt geht es aber woanders: beim fehlenden Bild, beim Text, der
+    // dreimal so lang ist wie gedacht, beim Repeater mit genau einem Eintrag.
+    // Diese Faelle entstehen auf jeder Kundenseite und wurden nie geprueft.
+    //
+    // Erkennbar am Anker `<layout>-zustand-<name>`: der Umschalter gruppiert sie
+    // dadurch getrennt von den Varianten. Ein eigenes ACF-Feld dafuer waere im
+    // Editor jeder Kundenseite sichtbar, ohne dort je einen Zweck zu haben.
+    // =========================================================================
+
+    /**
+     * Randfaelle je Modul.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function getStateCatalog(): array
+    {
+        $langerText = 'Ein absichtlich sehr langer Text, der prüfen soll, was passiert, wenn '
+            . 'jemand die vorgesehene Länge deutlich überschreitet. Er läuft über mehrere '
+            . 'Zeilen, sprengt Kartenhöhen, schiebt Schaltflächen nach unten und zeigt, ob '
+            . 'die Nachbarn in derselben Zeile mitwachsen oder auseinanderfallen.';
+
+        return [
+            $this->layout('one_column', [
+                'content' => '<h2>Zustände</h2><p>Ab hier folgen Randfaelle: fehlende Bilder, '
+                    . 'überlange Texte, Wiederholungsfelder mit einem einzigen Eintrag. Sie '
+                    . 'gehören zur Abnahme, nicht in den Gestaltungsvorschlag.</p>',
+                'background_color' => 'secondary',
+            ]),
+
+            // Karten ohne Bild und ohne Icon: bleibt die Hoehe stabil?
+            $this->layout('cards', [
+                'section_headline' => 'Karten ohne Bild',
+                'show_section_header' => true,
+                'columns' => '3',
+                'cards' => [
+                    ['title' => 'Ohne Icon', 'content' => 'Diese Karte hat weder Icon noch Bild.', 'icon' => '', 'link' => null],
+                    ['title' => 'Ohne Icon', 'content' => 'Auch hier fehlt beides.', 'icon' => '', 'link' => null],
+                    ['title' => 'Mit langem Text', 'content' => $langerText, 'icon' => '', 'link' => null],
+                ],
+                'background_color' => 'primary',
+                'section_anchor' => 'cards-zustand-ohne-bild',
+            ]),
+
+            // Genau ein Eintrag in einem Raster fuer drei.
+            $this->layout('cards', [
+                'section_headline' => 'Karten, ein Eintrag',
+                'show_section_header' => true,
+                'columns' => '3',
+                'cards' => [
+                    ['title' => 'Allein', 'content' => 'Ein einzelner Eintrag in einem Raster für drei.', 'icon' => 'check', 'link' => null],
+                ],
+                'background_color' => 'secondary',
+                'section_anchor' => 'cards-zustand-ein-eintrag',
+            ]),
+
+            // Fuenf Kennzahlen: die letzte Zeile ist unvollstaendig.
+            $this->layout('stats', [
+                'title' => 'Fünf Kennzahlen',
+                'stats' => [
+                    ['number' => 12, 'suffix' => '', 'label' => 'Jahre', 'icon' => ''],
+                    ['number' => 340, 'suffix' => '+', 'label' => 'Projekte', 'icon' => ''],
+                    ['number' => 98, 'suffix' => '%', 'label' => 'Zufriedenheit', 'icon' => ''],
+                    ['number' => 25, 'suffix' => '', 'label' => 'Mitarbeitende', 'icon' => ''],
+                    ['number' => 7, 'suffix' => '', 'label' => 'Standorte', 'icon' => ''],
+                ],
+                'background_color' => 'primary',
+                'section_anchor' => 'stats-zustand-letzte-zeile',
+            ]),
+
+            // Vier Preisplaene: dieselbe Frage bei drei Spalten.
+            $this->layout('pricing_table', [
+                'title' => 'Vier Preispläne',
+                'plans' => [
+                    ['name' => 'Basis', 'price' => '19', 'period' => 'Monat', 'features' => "Eine Position\nZweite Position", 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                    ['name' => 'Plus', 'price' => '39', 'period' => 'Monat', 'features' => "Eine Position\nZweite Position", 'is_featured' => true, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                    ['name' => 'Pro', 'price' => '79', 'period' => 'Monat', 'features' => "Eine Position\nZweite Position", 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                    ['name' => 'Maximal', 'price' => '149', 'period' => 'Monat', 'features' => "Eine Position\nZweite Position", 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                ],
+                'background_color' => 'secondary',
+                'section_anchor' => 'pricing-table-zustand-letzte-zeile',
+            ]),
+
+            // Team ohne Portraits und mit leeren Kontaktfeldern.
+            $this->layout('team', [
+                'section_headline' => 'Team ohne Porträts',
+                'show_section_header' => true,
+                'source' => 'manual',
+                'columns' => '3',
+                'members' => [
+                    ['name' => 'Ohne Bild', 'position' => 'Rolle', 'bio' => 'Kein Portrait hinterlegt.', 'image' => null, 'email' => '', 'linkedin' => ''],
+                    ['name' => 'Ohne Bild und ohne Rolle', 'position' => '', 'bio' => '', 'image' => null, 'email' => '', 'linkedin' => ''],
+                    ['name' => 'Mit langer Biografie', 'position' => 'Rolle', 'bio' => $langerText, 'image' => null, 'email' => '', 'linkedin' => ''],
+                ],
+                'background_color' => 'primary',
+                'section_anchor' => 'team-zustand-ohne-bild',
+            ]),
+
+            // Eine einzelne Kundenstimme in voller Breite.
+            $this->layout('testimonials', [
+                'section_headline' => 'Kundenstimme ohne Foto',
+                'show_section_header' => true,
+                'source' => 'manual',
+                'columns' => '1',
+                'testimonials' => [
+                    ['quote' => $langerText, 'author' => 'Ohne Foto', 'role' => '', 'image' => null, 'rating' => 0],
+                ],
+                'background_color' => 'secondary',
+                'section_anchor' => 'testimonials-zustand-ohne-foto',
+            ]),
+
+            // Akkordeon mit einem einzigen Eintrag.
+            $this->layout('accordion', [
+                'section_headline' => 'Akkordeon, ein Eintrag',
+                'show_section_header' => true,
+                'items' => [
+                    ['title' => 'Einziger Eintrag', 'content' => '<p>Ein Akkordeon mit genau einem Eintrag.</p>'],
+                ],
+                'background_color' => 'primary',
+                'section_anchor' => 'accordion-zustand-ein-eintrag',
+            ]),
+
+            // Galerie mit einem Bild in einem Raster fuer drei.
+            $this->layout('gallery', [
+                'section_headline' => 'Galerie, ein Bild',
+                'show_section_header' => true,
+                'columns' => '3',
+                'images' => array_filter([$this->imageId(1)]),
+                'background_color' => 'secondary',
+                'section_anchor' => 'gallery-zustand-ein-bild',
+            ]),
+        ];
     }
 }

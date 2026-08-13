@@ -31,7 +31,8 @@
     "format": "prettier --write \"resources/**/*.{js,ts,css,json}\"",
     "prepare": "husky",
     "package": "npm run build && node scripts/package-theme.js",
-    "icons": "node scripts/sync-icons.js"
+    "icons": "node scripts/sync-icons.js",
+    "test:styleguide": "playwright test tests/e2e/styleguide.spec.ts --project=chromium"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",

@@ -60,7 +60,7 @@
     <div class="mb-16 space-y-4">
         <x-alert variant="info" message="Ein Hinweis mit neutraler Information." />
         <x-alert variant="success" message="Die Aktion war erfolgreich." />
-        <x-alert variant="warning" message="Bitte prüfen Sie diese Angabe." />
+        <x-alert variant="warning" message="Bitte prüf diese Angabe." />
         <x-alert variant="error" message="Etwas ist schiefgelaufen." :dismissible="true" />
     </div>
 
@@ -71,7 +71,7 @@
             <div class="space-y-6">
                 <x-input name="sg_text" label="Textfeld" placeholder="Beispieltext" hint="Ein Hinweis unter dem Feld." />
                 <x-input name="sg_search" label="Mit Icon" placeholder="Suchen" iconLeft="search" />
-                <x-input name="sg_error" label="Fehlerzustand" value="Ungültig" :error="true" errorMessage="Bitte korrigieren Sie diese Eingabe." />
+                <x-input name="sg_error" label="Fehlerzustand" value="Ungültig" :error="true" errorMessage="Bitte korrigier diese Eingabe." />
                 <x-textarea name="sg_textarea" label="Mehrzeilig" placeholder="Mehrzeiliger Text..." :rows="3" />
             </div>
             <div class="space-y-6">
