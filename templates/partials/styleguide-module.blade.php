@@ -126,6 +126,8 @@
                     @endforeach
                 </div>
             @endif
+
+            @include('partials.styleguide-fields', ['layout' => $layout, 'offen' => $alleVarianten])
         </div>
     </div>
 

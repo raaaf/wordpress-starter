@@ -21,6 +21,13 @@ use WordpressStarter\Services\StyleguidePage;
 class FlexibleContent
 {
     /**
+     * Cache for {@see getLayouts()} so repeated calls in one request are free.
+     *
+     * @var array<int, array<string, mixed>>|null
+     */
+    private static ?array $layoutCache = null;
+
+    /**
      * Get layout categories for ACF Extended modal organization
      *
      * @return array<string, string>
@@ -197,6 +204,24 @@ class FlexibleContent
             'active' => true,
             'description' => '',
         ]);
+    }
+
+    /**
+     * Public accessor for the registered layout definitions.
+     *
+     * The styleguide field reference reads the definitions this class
+     * registers with ACF, so it needs a way in without duplicating
+     * getLayouts() or making it public outright.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function layouts(): array
+    {
+        if (self::$layoutCache === null) {
+            self::$layoutCache = self::getLayouts();
+        }
+
+        return self::$layoutCache;
     }
 
     /**
