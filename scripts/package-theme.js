@@ -1,4 +1,4 @@
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
 import { createWriteStream, existsSync, mkdirSync } from 'fs';
 import { readFile } from 'fs/promises';
 import { join, dirname } from 'path';
@@ -25,7 +25,7 @@ async function packageTheme() {
 
   const zipPath = join(outputDir, `${themeName}-${version}.zip`);
   const output = createWriteStream(zipPath);
-  const archive = archiver('zip', { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
 
   return new Promise((resolve, reject) => {
     output.on('close', () => {
