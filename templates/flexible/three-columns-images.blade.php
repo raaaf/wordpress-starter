@@ -6,11 +6,8 @@
 --}}
 
 @php
-    $showHeader = get_sub_field('show_section_header');
-    $chip = $showHeader ? get_sub_field('section_chip') : null;
-    $headline = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_headline')) : null;
-    $description = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_description')) : null;
-    $alignment = $showHeader ? (get_sub_field('section_alignment') ?: 'center') : 'center';
+    ['chip' => $chip, 'headline' => $headline, 'description' => $description, 'alignment' => $alignment]
+        = \WordpressStarter\Helpers\SectionHeader::fields();
     $label_1 = get_sub_field('label_1');
     $image_1 = get_sub_field('image_1');
     $column_1 = get_sub_field('column_1');

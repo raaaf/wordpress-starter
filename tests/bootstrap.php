@@ -485,6 +485,24 @@ if (!function_exists('wp_add_inline_script')) {
 }
 
 // Sanitization functions
+if (!function_exists('wp_kses')) {
+    /**
+     * @param array<string, array<string, mixed>> $allowedTags
+     */
+    function wp_kses(?string $content, array $allowedTags = []): string
+    {
+        if ($content === null) {
+            return '';
+        }
+
+        $erlaubt = array_keys($allowedTags);
+
+        return $erlaubt === []
+            ? strip_tags($content)
+            : strip_tags($content, '<' . implode('><', $erlaubt) . '>');
+    }
+}
+
 if (!function_exists('wp_kses_post')) {
     function wp_kses_post(?string $content): string
     {
