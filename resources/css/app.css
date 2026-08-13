@@ -2466,14 +2466,23 @@ html {
 @layer components {
   /* In an equal-column layout the body copy starts one line lower in any
      column whose headline wraps, because each column is its own text flow.
-     Reserving a fixed number of lines for the leading headline lines the
-     columns back up. This replaces the editorial workaround of padding the
-     short headlines with a second line in white.
+     Setting --column-heading-lines on a section reserves that many lines for
+     the leading headline and lines the columns back up.
 
-     Two lines cover the common case. Where a headline genuinely needs three,
-     raise --column-heading-lines on that section instead of editing content.
-     Single-column and mobile layouts are untouched, so no space is wasted
-     where there is nothing to align. */
+     Reserving two lines used to be the DEFAULT, and that was wrong: it also
+     fired when every headline in the row was a single line, which is the
+     common case. Both columns then carried a full empty line under the
+     headline (measured 2026-08-13: 71.97px of box for 36px of text) for an
+     alignment that had nothing to align. The default is now auto, so nothing
+     is reserved unless a section asks for it.
+
+     The reservation counts in lh, which resolves against the headline's own
+     line-height. Inside .prose that is the typography plugin's 1.5, not the
+     theme's heading token: the plugin's rule sits in @layer utilities and
+     beats the token rule in @layer base. Worth knowing before picking a
+     value.
+
+     Single-column and mobile layouts are untouched. */
   @media (min-width: 768px) {
     :is(
         .two-columns,
@@ -2485,7 +2494,7 @@ html {
       )
       .prose
       > :is(h2, h3, h4, h5):first-of-type {
-      min-height: var(--column-heading-lines, 2lh);
+      min-height: var(--column-heading-lines, auto);
     }
   }
 }
