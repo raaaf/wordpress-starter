@@ -47,8 +47,10 @@ class ImageServiceProvider extends ServiceProvider
             // Gallery thumbnail - square grid display (2x retina)
             add_image_size('gallery-thumb', 800, 800, true);
 
-            // Team portrait - square (2x retina)
-            add_image_size('team-portrait', 768, 768, true);
+            // Team portrait - 4:5 hochkant, Zuschnitt von oben (2x retina).
+            // Vorher 768x768 mittig: bei echten Portraits fehlten oben der Kopf
+            // und unten die Schultern. Das Array-Argument setzt den Ankerpunkt.
+            add_image_size('team-portrait', 640, 800, ['center', 'top']);
 
             // Avatar - small square for testimonials (2x retina)
             add_image_size('avatar', 96, 96, true);

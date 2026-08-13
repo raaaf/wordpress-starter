@@ -136,7 +136,7 @@ class Acf
                     'member_login_description',
                     3,
                     '',
-                    __('Bitte melden Sie sich an, um auf den internen Bereich zuzugreifen.', 'wp-starter'),
+                    __('Bitte melde dich an, um auf den internen Bereich zuzugreifen.', 'wp-starter'),
                 ),
 
                 FieldDefinitions::textareaField(
@@ -145,7 +145,7 @@ class Acf
                     'member_area_intro',
                     3,
                     __('Wird nach dem Login unterhalb der Überschrift angezeigt.', 'wp-starter'),
-                    __('Willkommen im internen Bereich. Hier finden Sie alle Dokumente…', 'wp-starter'),
+                    __('Willkommen im internen Bereich. Hier findest du alle Dokumente…', 'wp-starter'),
                 ),
 
 

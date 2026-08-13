@@ -48,9 +48,13 @@ class Options
         if (config('member_area.enabled', false)) {
             self::addSubPage(__('Interner Bereich', 'wp-starter'), 'member-area', 'dashicons-lock');
         }
-        self::addSubPage(__('Analytics', 'wp-starter'), 'analytics', 'dashicons-chart-bar');
-        self::addSubPage(__('Werkzeuge', 'wp-starter'), 'tools', 'dashicons-admin-tools');
-        self::addSubPage(__('Design Tokens', 'wp-starter'), 'tokens', 'dashicons-art');
+        self::addSubPage(__('Analytics', 'wp-starter'), 'analytics', 'dashicons-chart-bar', 'manage_options');
+
+        // Werkzeuge und Design Tokens wirken global: die eine Seite loescht und
+        // erzeugt Inhalte, die andere aendert Markenfarben fuer die ganze Site.
+        // Ohne eigene capability erbten beide edit_posts, jeder Redakteur kam ran.
+        self::addSubPage(__('Werkzeuge', 'wp-starter'), 'tools', 'dashicons-admin-tools', 'manage_options');
+        self::addSubPage(__('Design Tokens', 'wp-starter'), 'tokens', 'dashicons-art', 'manage_options');
 
         // Register field groups directly (we're already in acf/init)
         self::registerFieldGroups();
@@ -80,13 +84,18 @@ class Options
     /**
      * Add options sub page with optional icon
      */
-    private static function addSubPage(string $title, string $slug, string $icon = ''): void
-    {
+    private static function addSubPage(
+        string $title,
+        string $slug,
+        string $icon = '',
+        string $capability = 'edit_posts',
+    ): void {
         $config = [
             'page_title' => $title,
             'menu_title' => $icon ? '<span class="dashicons ' . $icon . '" style="font-size: 16px; width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></span>' . $title : $title,
             'parent_slug' => 'theme-options',
             'menu_slug' => 'theme-options-' . $slug,
+            'capability' => $capability,
         ];
 
         acf_add_options_sub_page($config);
@@ -746,7 +755,7 @@ class Options
         // acf/init fires on every page view, and StyleguidePage::find() below
         // writes (adopt()) and runs get_posts() — skip all of it on frontend
         // requests, same reasoning as the guards elsewhere in this file.
-        if (!is_admin()) {
+        if (!self::isOnOptionsPage('tools')) {
             return;
         }
 
@@ -969,7 +978,7 @@ class Options
         // This message field is admin-UI only; skip the query entirely on
         // frontend requests, since acf/init (and therefore Options::register())
         // fires on every page view, not just in wp-admin.
-        if (!is_admin()) {
+        if (!self::isOnOptionsPage('tools')) {
             return '';
         }
 
@@ -1383,7 +1392,7 @@ class Options
 
         // This message field is admin-UI only; skip the backup directory
         // scan on frontend requests (acf/init fires on every page view).
-        if (!is_admin()) {
+        if (!self::isOnOptionsPage('tokens')) {
             return '';
         }
 
@@ -1453,9 +1462,7 @@ class Options
             return $guard;
         }
 
-        // This message field is admin-UI only; skip the backup directory
-        // scan on frontend requests (acf/init fires on every page view).
-        if (!is_admin()) {
+        if (!self::isOnOptionsPage('tokens')) {
             return '';
         }
 
@@ -1481,5 +1488,39 @@ class Options
             esc_url($regenerateUrl),
             esc_html__('CSS neu generieren', 'wp-starter'),
         );
+    }
+
+    /**
+     * Laeuft der aktuelle Request auf einer bestimmten Options-Unterseite?
+     *
+     * Die Feldgruppen dieser Datei werden auf acf/init gebaut, und acf/init
+     * laeuft bei JEDEM Adminaufruf. Die bisherigen Guards pruefen nur is_admin()
+     * und lassen die teuren Teile damit auf jeder wp-admin-Seite laufen: eine
+     * get_posts()-Abfrage fuer die Demo-Beitraege, ein Verzeichnis-Scan fuer die
+     * Token-Backups und ein Styleguide-Lookup, der zusaetzlich schreiben kann.
+     *
+     * acf/init feuert vor current_screen, deshalb der Seitenparameter statt
+     * get_current_screen(). Nonce-Pruefung entfaellt bewusst: hier wird nichts
+     * verarbeitet, nur entschieden, ob teure Anzeigelogik ueberhaupt noetig ist.
+     *
+     * @param string $slug Slug ohne Praefix, z.B. 'tools'
+     */
+    private static function isOnOptionsPage(string $slug): bool
+    {
+        if (!is_admin()) {
+            return false;
+        }
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
+
+        // Beim Speichern einer Options-Seite postet ACF zurueck auf dieselbe URL,
+        // der Parameter steht dann ebenfalls im Request.
+        if ($page === '') {
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing
+            $page = isset($_POST['_acf_screen']) ? sanitize_key(wp_unslash($_POST['_acf_screen'])) : '';
+        }
+
+        return $page === 'theme-options-' . $slug;
     }
 }

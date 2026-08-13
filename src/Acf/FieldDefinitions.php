@@ -126,6 +126,13 @@ class FieldDefinitions
             'tabs' => 'all',
             'toolbar' => 'full',
             'media_upload' => 1,
+            // TinyMCE erst starten, wenn das Feld angeklickt wird.
+            //
+            // Der Editier-Screen einer Seite mit vielen Sektionen enthaelt jedes
+            // Feld jedes Layouts. Gemessen auf der Styleguide-Seite: 962 ACF-Felder
+            // und 110 Editor-Instanzen, die beim Laden alle initialisiert wurden,
+            // obwohl der Redakteur hoechstens eine davon anfasst.
+            'delay' => 1,
         ];
 
         if ($width !== null) {
@@ -284,6 +291,7 @@ class FieldDefinitions
         string $instructions = '',
         ?array $conditionalLogic = null,
         string $placeholder = '',
+        bool $required = false,
     ): array {
         $field = [
             'key' => $key,
@@ -291,6 +299,7 @@ class FieldDefinitions
             'name' => $name,
             'type' => 'url',
             'instructions' => $instructions,
+            'required' => $required ? 1 : 0,
         ];
 
         if ($placeholder !== '') {
@@ -465,12 +474,14 @@ class FieldDefinitions
         string $returnFormat = 'array',
         ?array $conditionalLogic = null,
         string $instructions = '',
+        bool $required = false,
     ): array {
         $field = [
             'key' => $key,
             'label' => $label,
             'name' => $name,
             'type' => 'file',
+            'required' => $required ? 1 : 0,
             'instructions' => $instructions,
             'return_format' => $returnFormat,
             'library' => 'all',
@@ -994,6 +1005,15 @@ class FieldDefinitions
             'sub_fields' => $subFields,
         ];
 
+        // Eingeklappte Zeilen zeigten bis 2026-08-10 nur "Zeile 1", "Zeile 2".
+        // Bei Preistabelle, Team, Zeitstrahl und Tabs ist Sortieren damit Raten.
+        // ACF kann eine Zeile mit dem Wert eines Unterfeldes beschriften, hier
+        // automatisch das erste Text-, Textarea- oder Link-Feld der Zeile.
+        $summaryKey = self::firstSummaryFieldKey($subFields);
+        if ($summaryKey !== null) {
+            $field['collapsed'] = $summaryKey;
+        }
+
         if ($width !== null) {
             $field['wrapper'] = ['width' => $width];
         }
@@ -1153,7 +1173,7 @@ class FieldDefinitions
                 'copy',
                 3,
                 __('Kurzer Beschreibungstext unter der Überschrift.', 'wp-starter'),
-                __('z.B. Wir helfen Ihnen...', 'wp-starter'),
+                __('z.B. Wir helfen dir...', 'wp-starter'),
             ),
 
             // Buttons (nebeneinander)
@@ -1200,32 +1220,32 @@ class FieldDefinitions
                 __('Empfohlene Größe: mindestens 1920×1080 Pixel (16:9).', 'wp-starter'),
             ),
 
-            // Overlay-Transparenz (nur bei Background-Variante)
+            // Overlay-Deckkraft (nur bei Background-Variante)
             self::rangeField(
                 "field_{$prefix}_overlay_opacity",
-                __('Overlay-Transparenz', 'wp-starter'),
+                __('Overlay-Deckkraft', 'wp-starter'),
                 'overlay_opacity',
-                0,
+                20,
                 100,
                 5,
                 80,
-                __('0% = transparent, 100% = vollständig deckend.', 'wp-starter'),
+                __('Wie stark die Fläche über dem Bild deckt. 20% = Bild dominiert, 100% = Bild kaum sichtbar. Unter 20% wird der Text auf hellen Bildern unlesbar.', 'wp-starter'),
                 '%',
                 $showOnBackground,
             ),
 
-            // Hintergrundfarbe (nur bei Centered und Split)
-            [
-                'key' => "field_{$prefix}_background_color",
-                'label' => __('Hintergrundfarbe', 'wp-starter'),
-                'name' => 'background_color',
-                'type' => 'select',
-                'instructions' => __('Wähle eine Hintergrundfarbe für den Hero-Bereich.', 'wp-starter'),
-                'choices' => self::getBackgroundColors(),
-                'default_value' => 'primary',
-                'ui' => 1,
-                'conditional_logic' => $showOnCenteredOrSplit,
-            ],
+            // Hintergrundfarbe (nur bei Centered und Split).
+            //
+            // Ueber den Helper statt von Hand nachgebaut: die eigene Fassung war
+            // bereits abgedriftet, ihr fehlte allow_null. Ein neuer Wert in der
+            // Farbliste haette hier ausserdem nachgezogen werden muessen.
+            array_merge(
+                self::backgroundColorField($prefix),
+                [
+                    'instructions' => __('Wähle eine Hintergrundfarbe für den Hero-Bereich.', 'wp-starter'),
+                    'conditional_logic' => $showOnCenteredOrSplit,
+                ]
+            ),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1431,7 +1451,7 @@ class FieldDefinitions
         return [
             self::repeaterField(
                 "field_{$prefix}_accordion",
-                __('Accordion-Einträge', 'wp-starter'),
+                __('Akkordeon-Einträge', 'wp-starter'),
                 'accordion',
                 [
                     self::iconRadioField(
@@ -1445,7 +1465,7 @@ class FieldDefinitions
                         __('Titel', 'wp-starter'),
                         'title',
                         true,
-                        __('Der klickbare Titel des Accordion-Elements.', 'wp-starter'),
+                        __('Der klickbare Titel des Akkordeon-Eintrags.', 'wp-starter'),
                         __('z.B. Wie funktioniert...?', 'wp-starter'),
                     ),
                     self::wysiwygField(
@@ -1454,7 +1474,7 @@ class FieldDefinitions
                         'content',
                         true,
                         null,
-                        __('Der ausgeklappte Inhalt des Accordion-Elements.', 'wp-starter'),
+                        __('Der ausgeklappte Inhalt des Akkordeon-Eintrags.', 'wp-starter'),
                     ),
                 ],
                 __('Eintrag hinzufügen', 'wp-starter'),
@@ -1491,7 +1511,7 @@ class FieldDefinitions
                 'content',
                 3,
                 __('Kurzer Text, der zum Handeln auffordert.', 'wp-starter'),
-                __('z.B. Kontaktieren Sie uns für ein unverbindliches Angebot.', 'wp-starter'),
+                __('z.B. Schreib uns für ein unverbindliches Angebot.', 'wp-starter'),
             ),
             self::linkField(
                 "field_{$prefix}_button",
@@ -1500,6 +1520,7 @@ class FieldDefinitions
                 true,
                 __('Der Call-to-Action Button mit Link und Text.', 'wp-starter'),
             ),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1561,7 +1582,10 @@ class FieldDefinitions
                 true,
                 __('Der Button mit Link und Text.', 'wp-starter'),
             ),
-            self::selectField(
+            // Schaltergruppe statt Dropdown, wie bei Hero, Trenner und Karten.
+            // Fuenf kurze Beschriftungen passen nebeneinander, und die Auswahl
+            // kostet einen Klick statt zwei.
+            self::buttonGroupField(
                 "field_{$prefix}_variant",
                 __('Variante', 'wp-starter'),
                 'variant',
@@ -1573,10 +1597,9 @@ class FieldDefinitions
                     'danger' => __('Warnung', 'wp-starter'),
                 ],
                 'primary',
-                false,
                 __('Optischer Stil des Buttons.', 'wp-starter'),
             ),
-            self::selectField(
+            self::buttonGroupField(
                 "field_{$prefix}_size",
                 __('Größe', 'wp-starter'),
                 'size',
@@ -1586,7 +1609,6 @@ class FieldDefinitions
                     'lg' => __('Groß', 'wp-starter'),
                 ],
                 'md',
-                false,
                 __('Größe des Buttons.', 'wp-starter'),
             ),
             self::trueFalseField(
@@ -1596,7 +1618,9 @@ class FieldDefinitions
                 false,
                 __('Button nimmt die volle verfügbare Breite ein.', 'wp-starter'),
             ),
-            self::selectField(
+            // Ausrichtung hat bei voller Breite keine Wirkung, deshalb nur dann
+            // sichtbar, wenn full_width aus ist.
+            array_merge(self::buttonGroupField(
                 "field_{$prefix}_alignment",
                 __('Ausrichtung', 'wp-starter'),
                 'alignment',
@@ -1606,9 +1630,25 @@ class FieldDefinitions
                     'right' => __('Rechtsbündig', 'wp-starter'),
                 ],
                 'left',
-                false,
                 __('Ausrichtung des Buttons innerhalb der Sektion.', 'wp-starter'),
-            ),
+            ), [
+                'conditional_logic' => [
+                    [
+                        [
+                            'field' => "field_{$prefix}_full_width",
+                            'operator' => '!=',
+                            'value' => '1',
+                        ],
+                    ],
+                ],
+            ]),
+
+            // Als einziges Layout ausser dem Trenner hatte der Button keine
+            // Hintergrundfarbe. Damit liess sich eine Handlungsaufforderung nicht
+            // absetzen, und eine Seite, die zwischen zwei Flaechen wechselt,
+            // bekam an dieser Stelle unvermeidlich einen Bruch.
+            self::backgroundColorField($prefix),
+            self::sectionAnchorField($prefix),
         ];
     }
 
@@ -1642,6 +1682,11 @@ class FieldDefinitions
                 'url',
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'wordpress']]],
                 __('Lade eine MP4, WebM oder OGG Datei hoch.', 'wp-starter'),
+                // Pflicht, sobald die Quelle "Mediathek" gewaehlt ist. Die beiden
+                // anderen Quellen sind es laengst; ohne diese Zeile war genau der
+                // Standardfall der einzige, der sich leer speichern liess und im
+                // Frontend als leere Sektion landete.
+                true,
             ),
             self::urlField(
                 "field_{$prefix}_video_url",
@@ -1650,6 +1695,7 @@ class FieldDefinitions
                 __('Füge die YouTube oder Vimeo URL ein.', 'wp-starter'),
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'external']]],
                 'https://www.youtube.com/watch?v=...',
+                true,
             ),
             self::urlField(
                 "field_{$prefix}_video_file_url",
@@ -1658,6 +1704,16 @@ class FieldDefinitions
                 __('Direkter Link zu einer Videodatei (MP4, WebM, OGG).', 'wp-starter'),
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'url']]],
                 'https://cdn.example.com/video.mp4',
+                true,
+            ),
+            self::imageField(
+                "field_{$prefix}_poster",
+                __('Vorschaubild', 'wp-starter'),
+                'poster',
+                false,
+                'id',
+                null,
+                __('Standbild, das vor dem Abspielen zu sehen ist. Ohne dieses Bild steht bei YouTube und Vimeo bis zur Einwilligung eine leere graue Flaeche ueber die volle Breite. Empfohlen: 16:9, mindestens 1280x720 Pixel.', 'wp-starter'),
             ),
             self::fileField(
                 "field_{$prefix}_captions",
@@ -1770,8 +1826,9 @@ class FieldDefinitions
                     'space' => __('Abstand', 'wp-starter'),
                 ],
                 'line',
-                __('Wähle das Aussehen des Trenners.', 'wp-starter'),
+                __('Linie: dünne Trennlinie. Punkte: drei zentrierte Punkte. Welle: geschwungene Kante zwischen zwei Flächen. Abstand: nur Leerraum, ohne sichtbares Element.', 'wp-starter'),
             ),
+            self::backgroundColorField($prefix),
             [
                 'key' => "field_{$prefix}_height",
                 'label' => __('Höhe', 'wp-starter'),
@@ -2084,10 +2141,10 @@ class FieldDefinitions
                 'source',
                 [
                     'manual' => __('Manuell eingeben', 'wp-starter'),
-                    'cpt' => __('Aus Testimonials-Verwaltung', 'wp-starter'),
+                    'cpt' => __('Aus Kundenstimmen-Verwaltung', 'wp-starter'),
                 ],
                 'manual',
-                __('Wähle, woher die Testimonials kommen sollen.', 'wp-starter'),
+                __('Manuell: du pflegst die Stimmen hier im Layout. Aus der Verwaltung: es werden automatisch alle veröffentlichten Einträge unter Testimonials gezeigt, neueste zuerst.', 'wp-starter'),
             ),
             [
                 'key' => "field_{$prefix}_testimonials",
@@ -2098,6 +2155,7 @@ class FieldDefinitions
                 'min' => 1,
                 'layout' => 'block',
                 'button_label' => __('Kundenstimme hinzufügen', 'wp-starter'),
+                'collapsed' => "field_{$prefix}_testimonial_author",
                 'conditional_logic' => $showOnManual,
                 'sub_fields' => [
                     self::textareaField(
@@ -2131,7 +2189,7 @@ class FieldDefinitions
                         false,
                         'id',
                         null,
-                        __('Optionales Foto der Person.', 'wp-starter'),
+                        __('Optionales Foto der Person. Wird als kleiner Kreis dargestellt, quadratische Bilder empfohlen.', 'wp-starter'),
                     ),
                 ],
             ],
@@ -2195,7 +2253,7 @@ class FieldDefinitions
                         'content',
                         3,
                         __('Kurze Beschreibung.', 'wp-starter'),
-                        __('z.B. Wir beraten Sie umfassend...', 'wp-starter'),
+                        __('z.B. Wir beraten dich umfassend...', 'wp-starter'),
                     ),
                     self::linkField(
                         "field_{$prefix}_card_link",
@@ -2361,9 +2419,14 @@ class FieldDefinitions
                 'key' => "field_{$prefix}_form_id",
                 'label' => __('Formular-ID', 'wp-starter'),
                 'name' => 'form_id',
-                'type' => 'text',
-                'instructions' => __('Trage nur die Zahl ein.', 'wp-starter'),
+                // Zahlenfeld statt Freitext: ein Leerzeichen oder Buchstabe hat
+                // den Shortcode zerlegt, ohne dass im Backend etwas auffiel.
+                'type' => 'number',
+                'instructions' => __('Nur die Zahl aus der URL des Formulars. Vorbelegt ist das Formular, das das Theme beim Aktivieren von Contact Form 7 angelegt hat.', 'wp-starter'),
                 'placeholder' => __('z.B. 123', 'wp-starter'),
+                'default_value' => \WordpressStarter\PluginConfigurators\ContactForm7Configurator::defaultFormId() ?: '',
+                'min' => 1,
+                'step' => 1,
                 'required' => 1,
             ],
 
@@ -2375,7 +2438,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Überschrift für den Kontaktbereich.', 'wp-starter'),
-                __('z.B. Kontaktieren Sie uns', 'wp-starter'),
+                __('z.B. Schreib uns', 'wp-starter'),
             ),
             self::wysiwygField(
                 "field_{$prefix}_content",
@@ -2420,9 +2483,10 @@ class FieldDefinitions
                 "field_{$prefix}_embed_url",
                 __('Google Maps Einbettungs-URL', 'wp-starter'),
                 'embed_url',
-                __('Der Block zeigt automatisch einen DSGVO-Hinweis.', 'wp-starter'),
+                __('Pflichtangabe, ohne sie kann die Karte nichts anzeigen. Der Block blendet automatisch einen DSGVO-Hinweis vor.', 'wp-starter'),
                 null,
                 'https://www.google.com/maps/embed?pb=...',
+                true,
             ),
             self::numberField(
                 "field_{$prefix}_height",
@@ -2444,7 +2508,7 @@ class FieldDefinitions
                 'title',
                 false,
                 __('Optionale Überschrift über der Karte.', 'wp-starter'),
-                __('z.B. So finden Sie uns', 'wp-starter'),
+                __('z.B. So findest du uns', 'wp-starter'),
             ),
             self::textareaField(
                 "field_{$prefix}_address",
@@ -2652,7 +2716,7 @@ class FieldDefinitions
                     'cpt' => __('Aus Team-Verwaltung', 'wp-starter'),
                 ],
                 'manual',
-                __('Wähle, woher die Teammitglieder kommen sollen.', 'wp-starter'),
+                __('Manuell: du pflegst die Personen hier im Layout. Aus der Verwaltung: es werden automatisch alle veröffentlichten Einträge unter Team gezeigt, sortiert nach dem Feld Reihenfolge.', 'wp-starter'),
             ),
             [
                 'key' => "field_{$prefix}_members",
@@ -2663,6 +2727,7 @@ class FieldDefinitions
                 'min' => 1,
                 'layout' => 'block',
                 'button_label' => __('Mitglied hinzufügen', 'wp-starter'),
+                'collapsed' => "field_{$prefix}_member_name",
                 'conditional_logic' => $showOnManual,
                 'sub_fields' => [
                     // Accordion: Person (offen)
@@ -2674,7 +2739,7 @@ class FieldDefinitions
                         false,
                         'id',
                         null,
-                        __('Portraitfoto (quadratisch empfohlen).', 'wp-starter'),
+                        __('Portraitfoto im Hochformat, empfohlen 4:5 (z.B. 640x800 Pixel). Der Zuschnitt erfolgt von oben, damit das Gesicht im Bild bleibt.', 'wp-starter'),
                     ),
                     self::textField(
                         "field_{$prefix}_member_name",
@@ -3131,7 +3196,7 @@ class FieldDefinitions
                 __('Zeile hinzufügen', 'wp-starter'),
                 1,
                 'row',
-                __('Füge Datenzeilen hinzu.', 'wp-starter'),
+                __('Füge Datenzeilen hinzu. Jede Zeile sollte so viele Zellen haben wie es Spalten gibt: fehlende werden leer ausgegeben, überzählige nicht angezeigt.', 'wp-starter'),
             ),
             [
                 'key' => "field_{$prefix}_striped",
@@ -3191,5 +3256,40 @@ class FieldDefinitions
             __('Optionale ID für Anker-Links (z.B. "kontakt"). Wird automatisch generiert wenn leer.', 'wp-starter'),
             'z.B. kontakt',
         );
+    }
+
+    /**
+     * Schluessel des Feldes, das eine eingeklappte Repeaterzeile beschriftet.
+     *
+     * Bevorzugt ein Feld namens title, name, label, headline, year oder question,
+     * sonst das erste Textfeld der Zeile. Gibt null zurueck, wenn die Zeile kein
+     * sinnvolles Textfeld hat, dann bleibt es bei der Nummerierung.
+     *
+     * @param array<int, array<string, mixed>> $subFields
+     */
+    private static function firstSummaryFieldKey(array $subFields): ?string
+    {
+        $preferred = ['title', 'name', 'author', 'label', 'headline', 'question', 'year', 'quote', 'content'];
+        $textTypes = ['text', 'textarea'];
+
+        foreach ($preferred as $wanted) {
+            foreach ($subFields as $sub) {
+                if (!is_array($sub) || !isset($sub['key'], $sub['name'], $sub['type'])) {
+                    continue;
+                }
+
+                if ($sub['name'] === $wanted && in_array($sub['type'], $textTypes, true)) {
+                    return (string) $sub['key'];
+                }
+            }
+        }
+
+        foreach ($subFields as $sub) {
+            if (is_array($sub) && isset($sub['key'], $sub['type']) && $sub['type'] === 'text') {
+                return (string) $sub['key'];
+            }
+        }
+
+        return null;
     }
 }

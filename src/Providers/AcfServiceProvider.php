@@ -432,13 +432,27 @@ class AcfServiceProvider extends ServiceProvider
     private function registerValidationHooks(): void
     {
         // Example: Validate URL fields contain valid URLs
+        // Tabelle: Zellen gegen Spaltenzahl pruefen.
+        //
+        // Kopfzeilen und Zeilen sind zwei unabhaengige Repeater. Wer eine Spalte
+        // ergaenzt und die Zeilen vergisst, bekam bisher keinerlei Rueckmeldung.
+        // Das Template gleicht die Zahl inzwischen an, aber ueberzaehlige Zellen
+        // fallen dabei weg: stiller Datenverlust beim Anschauen, nicht beim
+        // Speichern. Deshalb hier, wo es noch zu retten ist.
+        //
+        // Geprueft wird auf dem gesamten geposteten Baum statt per
+        // acf/validate_value, weil eine Zelle ihre Schwesterspalten nicht kennt:
+        // beide Repeater liegen unter derselben Flexible-Content-Zeile, und ACF
+        // reicht bei der Feldvalidierung keinen Pfad dorthin mit.
+        add_action('acf/validate_save_post', [self::class, 'validateTableRows']);
+
         add_filter('acf/validate_value/type=url', function ($valid, $value) {
             if (!$valid || empty($value)) {
                 return $valid;
             }
 
             if (!filter_var($value, FILTER_VALIDATE_URL)) {
-                return __('Bitte geben Sie eine gültige URL ein.', 'wp-starter');
+                return __('Bitte gib eine gültige URL ein.', 'wp-starter');
             }
 
             return $valid;
@@ -451,7 +465,7 @@ class AcfServiceProvider extends ServiceProvider
             }
 
             if (!is_email($value)) {
-                return __('Bitte geben Sie eine gültige E-Mail-Adresse ein.', 'wp-starter');
+                return __('Bitte gib eine gültige E-Mail-Adresse ein.', 'wp-starter');
             }
 
             return $valid;
@@ -475,7 +489,7 @@ class AcfServiceProvider extends ServiceProvider
 
             // Skip fields that don't benefit from line breaks
             $excludeNames = ['email', 'phone', 'url', 'website', 'section_anchor'];
-            if (in_array($field['name'] ?? '', $excludeNames, true)) {
+            if (in_array($field['_name'] ?? '', $excludeNames, true)) {
                 return $field;
             }
 
@@ -535,5 +549,113 @@ class AcfServiceProvider extends ServiceProvider
             }
         };
         add_action('acf/save_post', $callback, 20);
+    }
+
+    /**
+     * Zellenzahl jeder Tabellenzeile gegen die Zahl der Spaltenueberschriften.
+     *
+     * Laeuft ueber den geposteten ACF-Baum, weil Kopfzeilen und Zeilen
+     * Geschwister-Repeater sind und eine Feldvalidierung den Weg zum
+     * Geschwisterfeld nicht kennt.
+     */
+    public static function validateTableRows(): void
+    {
+        // Nonce: ACF prueft sie vor diesem Hook. Sanitisierung: hier wird nichts
+        // gespeichert und nichts ausgegeben, es werden ausschliesslich
+        // Array-Groessen gezaehlt. Die Werte selbst fasst diese Pruefung nie an.
+        // phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
+        $posted = isset($_POST['acf']) && is_array($_POST['acf']) ? wp_unslash($_POST['acf']) : null;
+        // phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
+
+        if (!is_array($posted)) {
+            return;
+        }
+
+        foreach (self::findTableGroups($posted) as $gruppe) {
+            $spalten = count($gruppe['headers']);
+
+            if ($spalten === 0) {
+                continue;
+            }
+
+            foreach (array_values( (array) $gruppe['rows']) as $index => $zeile) {
+                $zellen = 0;
+
+                foreach ( (array) $zeile as $wert) {
+                    if (is_array($wert)) {
+                        $zellen = count($wert);
+                        break;
+                    }
+                }
+
+                if ($zellen === $spalten) {
+                    continue;
+                }
+
+                acf_add_validation_error(
+                    $gruppe['feld'],
+                    sprintf(
+                        /* translators: 1: Zeilennummer, 2: Zahl der Zellen, 3: Zahl der Spalten */
+                        __('Tabelle: Zeile %1$d hat %2$d Zellen, die Tabelle aber %3$d Spalten.', 'wp-starter'),
+                        $index + 1,
+                        $zellen,
+                        $spalten
+                    )
+                );
+            }
+        }
+    }
+
+    /**
+     * Alle Tabellen-Layouts im geposteten Baum finden.
+     *
+     * Erkannt wird an den Feldschluesseln: ein Knoten, der sowohl einen
+     * Schluessel auf `_headers` als auch einen auf `_rows` traegt, ist eine
+     * Tabelle. Das ueberlebt eine Umbenennung des Layouts und findet auch
+     * Tabellen in verschachtelten Feldgruppen.
+     *
+     * @param array<mixed> $baum
+     *
+     * @return array<int, array{feld: string, headers: array<mixed>, rows: array<mixed>}>
+     */
+    private static function findTableGroups(array $baum): array
+    {
+        $gefunden = [];
+
+        foreach ($baum as $schluessel => $wert) {
+            if (!is_array($wert)) {
+                continue;
+            }
+
+            $gefunden = array_merge($gefunden, self::findTableGroups($wert));
+        }
+
+        $headerFeld = null;
+        $rowFeld = null;
+
+        foreach (array_keys($baum) as $schluessel) {
+            if (!is_string($schluessel)) {
+                continue;
+            }
+
+            if (str_ends_with($schluessel, '_headers')) {
+                $headerFeld = $schluessel;
+            }
+
+            if (str_ends_with($schluessel, '_rows')) {
+                $rowFeld = $schluessel;
+            }
+        }
+
+        if ($headerFeld !== null && $rowFeld !== null
+            && is_array($baum[$headerFeld]) && is_array($baum[$rowFeld])) {
+            $gefunden[] = [
+                'feld' => $rowFeld,
+                'headers' => $baum[$headerFeld],
+                'rows' => $baum[$rowFeld],
+            ];
+        }
+
+        return $gefunden;
     }
 }

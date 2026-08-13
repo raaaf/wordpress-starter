@@ -19,6 +19,12 @@ use WordpressStarter\ThemeContext;
  */
 class ContactForm7Configurator extends AbstractPluginConfigurator
 {
+    /** Option, in der die ID des vom Theme angelegten Formulars steht. */
+    private const DEFAULT_FORM_OPTION = 'wp_starter_default_contact_form';
+
+    /** Marker am Formular, damit das Theme sein eigenes wiedererkennt. */
+    private const DEFAULT_FORM_META = '_wp_starter_default_form';
+
     /** Hidden honeypot field name injected into every CF7 form. */
     private const HONEYPOT_FIELD = 'your-website';
 
@@ -78,15 +84,21 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
         // Disable auto-p in forms (produces cleaner HTML)
         add_filter('wpcf7_autop_or_not', '__return_false');
 
+        // Ein fertiges Formular anlegen, sobald das Plugin aktiv ist.
+        add_action('admin_init', [self::class, 'ensureDefaultForm']);
+
         // Spam protection: inject honeypot + signed timestamp into every form.
         add_filter('wpcf7_form_elements', [self::class, 'injectSpamTraps']);
+
+        // Pflichtfelder sichtbar kennzeichnen.
+        add_filter('wpcf7_form_elements', [self::class, 'markRequiredFields']);
 
         // Spam protection: server-side heuristics (honeypot, time-trap, links, keywords).
         add_filter('wpcf7_spam', [self::class, 'detectSpam'], 10, 2);
 
         // Use custom validation messages in German
         add_filter('wpcf7_default_validation_error_message', function (): string {
-            return __('Bitte korrigieren Sie die markierten Felder.', 'wp-starter');
+            return __('Bitte korrigier die markierten Felder.', 'wp-starter');
         });
     }
 
@@ -271,5 +283,225 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
     public static function getConfigurationSummary(): string
     {
         return __('Contact Form 7: Auto-Formatierung deaktiviert, Assets-Laden optimiert', 'wp-starter');
+    }
+
+    /**
+     * Pflichtfelder im Formular sichtbar kennzeichnen.
+     *
+     * CF7 setzt am Eingabefeld aria-required, sichtbar war das aber nirgends:
+     * ein Besucher erfuhr erst nach dem Absenden, welches Feld fehlte.
+     *
+     * Warum serverseitig und nicht per CSS: CF7 legt das Eingabefeld in das
+     * Label. Ein ::after am Label landet dadurch unter dem Feld statt hinter
+     * dem Beschriftungstext. Der Marker muss also zwischen Text und Feld, und
+     * dorthin kommt nur, wer das Markup anfasst.
+     *
+     * Das Sternchen traegt aria-hidden, weil aria-required dieselbe Information
+     * bereits ansagt.
+     *
+     * @param string $elements Das gerenderte Formular-HTML.
+     */
+    public static function markRequiredFields(string $elements): string
+    {
+        return (string) preg_replace_callback(
+            '#<label\b[^>]*>.*?</label>#is',
+            static function (array $match): string {
+                $label = $match[0];
+
+                if (!str_contains($label, 'wpcf7-validates-as-required')) {
+                    return $label;
+                }
+
+                if (str_contains($label, 'required-marker')) {
+                    return $label;
+                }
+
+                $marker = '<span class="required-marker" aria-hidden="true">*</span>';
+
+                // Vor das erste Feld-Wrapper-Element, also direkt hinter den
+                // Beschriftungstext.
+                $replaced = preg_replace(
+                    '#(<span[^>]*class="[^"]*wpcf7-form-control-wrap)#i',
+                    $marker . '$1',
+                    $label,
+                    1
+                );
+
+                return is_string($replaced) ? $replaced : $label;
+            },
+            $elements
+        );
+    }
+
+    /**
+     * ID des vom Theme angelegten Formulars, oder 0.
+     */
+    public static function defaultFormId(): int
+    {
+        $id = (int) get_option(self::DEFAULT_FORM_OPTION, 0);
+
+        return ( $id > 0 && get_post_status($id) !== false ) ? $id : 0;
+    }
+
+    /**
+     * Einmalig ein fertiges Kontaktformular anlegen.
+     *
+     * Warum das Theme das uebernimmt: das Standardformular von Contact Form 7
+     * duzt, kennzeichnet keine Pflichtfelder, hat keine Einwilligung und traegt
+     * im Absender die Adresse des Absenders, was bei den meisten Hostern im
+     * SPF-Check haengenbleibt. Jede Kundenseite fing damit bei null an.
+     *
+     * Angelegt wird genau einmal. Der Marker am Beitrag und die Option
+     * verhindern Duplikate, und ein manuell geaendertes Formular wird nie
+     * ueberschrieben.
+     */
+    public static function ensureDefaultForm(): void
+    {
+        if (!ThemeContext::isActiveOnCurrentSite() || !self::isPluginActive()) {
+            return;
+        }
+
+        if (self::defaultFormId() > 0) {
+            return;
+        }
+
+        if (!class_exists('WPCF7_ContactForm')) {
+            return;
+        }
+
+        $existing = get_posts([
+            'post_type' => 'wpcf7_contact_form',
+            'post_status' => 'any',
+            'posts_per_page' => 1,
+            'fields' => 'ids',
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+            'meta_key' => self::DEFAULT_FORM_META,
+        ]);
+
+        if (!empty($existing)) {
+            update_option(self::DEFAULT_FORM_OPTION, (int) $existing[0]);
+
+            return;
+        }
+
+        $form = \WPCF7_ContactForm::get_template(['title' => __('Kontaktformular', 'wp-starter')]);
+        $form->set_properties([
+            'form' => self::defaultFormTemplate(),
+            'mail' => self::defaultMailTemplate(),
+            'messages' => self::defaultMessages(),
+        ]);
+
+        $id = $form->save();
+        if (!$id) {
+            return;
+        }
+
+        update_post_meta($id, self::DEFAULT_FORM_META, 1);
+        update_option(self::DEFAULT_FORM_OPTION, (int) $id);
+    }
+
+    /**
+     * Aufbau des Formulars.
+     *
+     * Gesiezt, weil der Rest des Themes siezt. Pflichtfelder sind Name, E-Mail
+     * und Nachricht: ein Betreff laesst sich aus der Nachricht ableiten, eine
+     * leere Nachricht nicht. Die Einwilligung ist ein echtes acceptance-Feld,
+     * damit CF7 sie serverseitig prueft, statt sie nur anzuzeigen.
+     */
+    private static function defaultFormTemplate(): string
+    {
+        $privacyUrl = get_privacy_policy_url();
+        $privacyLink = $privacyUrl
+            ? sprintf(
+                '<a href="%s" target="_blank" rel="noopener">%s</a>',
+                esc_url($privacyUrl),
+                esc_html__('Datenschutzerklärung', 'wp-starter')
+            )
+            : esc_html__('Datenschutzerklärung', 'wp-starter');
+
+        return implode("\n", [
+            '<label>' . esc_html__('Name', 'wp-starter'),
+            '    [text* your-name autocomplete:name]</label>',
+            '',
+            '<label>' . esc_html__('E-Mail-Adresse', 'wp-starter'),
+            '    [email* your-email autocomplete:email]</label>',
+            '',
+            '<label>' . esc_html__('Betreff', 'wp-starter'),
+            '    [text your-subject]</label>',
+            '',
+            '<label>' . esc_html__('Deine Nachricht', 'wp-starter'),
+            '    [textarea* your-message]</label>',
+            '',
+            '[acceptance privacy-consent]'
+                . sprintf(
+                    /* translators: %s: link to the privacy policy */
+                    esc_html__('Ich habe die %s gelesen und stimme der Verarbeitung meiner Daten zu.', 'wp-starter'),
+                    $privacyLink
+                )
+                . '[/acceptance]',
+            '',
+            '[submit "' . esc_attr__('Nachricht senden', 'wp-starter') . '"]',
+        ]);
+    }
+
+    /**
+     * Mailvorlage.
+     *
+     * Absender ist die Seite selbst, nicht der Einsender: sonst verschickt der
+     * Server Mail im Namen einer fremden Domain und faellt bei SPF und DMARC
+     * durch. Die Adresse des Einsenders steht im Reply-To, damit die Antwort
+     * trotzdem direkt bei ihm landet.
+     *
+     * @return array<string, mixed>
+     */
+    private static function defaultMailTemplate(): array
+    {
+        $siteName = get_bloginfo('name');
+        $siteDomain = wp_parse_url(home_url(), PHP_URL_HOST) ?: 'example.com';
+        $siteDomain = preg_replace('/^www\./', '', (string) $siteDomain);
+
+        $body = implode("\n", [
+            esc_html__('Neue Nachricht über das Kontaktformular:', 'wp-starter'),
+            '',
+            esc_html__('Name:', 'wp-starter') . ' [your-name]',
+            esc_html__('E-Mail:', 'wp-starter') . ' [your-email]',
+            esc_html__('Betreff:', 'wp-starter') . ' [your-subject]',
+            '',
+            esc_html__('Nachricht:', 'wp-starter'),
+            '[your-message]',
+            '',
+            '--',
+            esc_html__('Gesendet am [_date] um [_time] von [_site_title] ([_site_url])', 'wp-starter'),
+            esc_html__('Einwilligung Datenschutz:', 'wp-starter') . ' [privacy-consent]',
+        ]);
+
+        return [
+            'subject' => sprintf('[%s] [your-subject]', $siteName),
+            'sender' => sprintf('%s <noreply@%s>', $siteName, $siteDomain),
+            'recipient' => get_option('admin_email'),
+            'body' => $body,
+            'additional_headers' => 'Reply-To: [your-email]',
+            'attachments' => '',
+            'use_html' => false,
+            'exclude_blank' => true,
+        ];
+    }
+
+    /**
+     * Meldungen auf Deutsch und in der Ansprache des Themes.
+     *
+     * @return array<string, string>
+     */
+    private static function defaultMessages(): array
+    {
+        return [
+            'mail_sent_ok' => __('Vielen Dank, Deine Nachricht ist angekommen. Wir melden uns.', 'wp-starter'),
+            'mail_sent_ng' => __('Die Nachricht konnte nicht gesendet werden. Bitte versuch es später erneut.', 'wp-starter'),
+            'validation_error' => __('Bitte prüf die markierten Felder.', 'wp-starter'),
+            'spam' => __('Die Nachricht wurde als Spam eingestuft und nicht gesendet.', 'wp-starter'),
+            'accept_terms' => __('Bitte stimm der Verarbeitung deiner Daten zu.', 'wp-starter'),
+            'invalid_required' => __('Dieses Feld ist ein Pflichtfeld.', 'wp-starter'),
+            'invalid_email' => __('Diese E-Mail-Adresse sieht nicht richtig aus.', 'wp-starter'),
+        ];
     }
 }

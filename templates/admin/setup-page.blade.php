@@ -17,7 +17,7 @@
 
     <div class="wp-starter-setup-header" style="background: #fff; padding: 20px; margin: 20px 0; border-left: 4px solid #2271b1; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
         <h2 style="margin-top: 0;"><?php esc_html_e('Willkommen beim WP-Starter Theme!', 'wp-starter'); ?></h2>
-        <p><?php esc_html_e('Plugins werden über Composer verwaltet. Führen Sie "composer install" aus, um die konfigurierten Plugins zu installieren.', 'wp-starter'); ?></p>
+        <p><?php esc_html_e('Plugins werden über Composer verwaltet. Führ "composer install" aus, um die konfigurierten Plugins zu installieren.', 'wp-starter'); ?></p>
         <p style="color: #50575e; font-size: 13px;">
             <span class="dashicons dashicons-info-outline"></span>
             <?php esc_html_e('ACF PRO muss manuell installiert werden (Premium-Plugin).', 'wp-starter'); ?>
@@ -185,9 +185,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     button.textContent = '<?php esc_html_e('Fehler - Erneut versuchen', 'wp-starter'); ?>';
                     console.error('Plugin install fetch error:', status, err);
                     if (status === 'timeout') {
-                        alert('<?php esc_html_e('Die Installation hat zu lange gedauert. Bitte versuchen Sie es erneut.', 'wp-starter'); ?>');
+                        alert('<?php esc_html_e('Die Installation hat zu lange gedauert. Bitte versuch es erneut.', 'wp-starter'); ?>');
                     } else {
-                        alert('<?php esc_html_e('Netzwerkfehler bei der Installation. Bitte versuchen Sie es erneut.', 'wp-starter'); ?>');
+                        alert('<?php esc_html_e('Netzwerkfehler bei der Installation. Bitte versuch es erneut.', 'wp-starter'); ?>');
                     }
                 }
             );

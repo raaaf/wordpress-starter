@@ -221,18 +221,18 @@ class PluginServiceProvider extends ServiceProvider
         $samplePosts = [
             [
                 'title' => 'Willkommen auf unserem neuen Blog',
-                'content' => '<p>Wir freuen uns, Sie auf unserem neuen Blog begrüßen zu dürfen! Hier werden wir regelmäßig spannende Einblicke, hilfreiche Tipps und aktuelle Neuigkeiten aus unserer Branche teilen.</p><p>Bleiben Sie dran für interessante Artikel und lassen Sie uns wissen, welche Themen Sie besonders interessieren.</p>',
-                'excerpt' => 'Wir freuen uns, Sie auf unserem neuen Blog begrüßen zu dürfen! Hier finden Sie regelmäßig spannende Einblicke und hilfreiche Tipps.',
+                'content' => '<p>Schön, dass du hier bist. In diesem Blog teilen wir regelmäßig Einblicke, Tipps und Neuigkeiten aus unserer Arbeit.</p><p>Schau wieder vorbei und sag uns, welche Themen dich interessieren.</p>',
+                'excerpt' => 'Schön, dass du hier bist. Hier findest du regelmäßig Einblicke und Tipps aus unserer Arbeit.',
             ],
             [
                 'title' => '5 Tipps für mehr Produktivität im Arbeitsalltag',
-                'content' => '<p>In der heutigen schnelllebigen Arbeitswelt ist es wichtiger denn je, produktiv zu bleiben. Hier sind fünf bewährte Tipps:</p><ol><li><strong>Priorisieren Sie Ihre Aufgaben</strong> - Beginnen Sie jeden Tag mit einer klaren To-Do-Liste.</li><li><strong>Minimieren Sie Ablenkungen</strong> - Schalten Sie unnötige Benachrichtigungen aus.</li><li><strong>Nutzen Sie die Pomodoro-Technik</strong> - Arbeiten Sie in fokussierten 25-Minuten-Blöcken.</li><li><strong>Machen Sie regelmäßig Pausen</strong> - Kurze Pausen steigern die Konzentration.</li><li><strong>Reflektieren Sie am Ende des Tages</strong> - Was hat gut funktioniert, was nicht?</li></ol>',
-                'excerpt' => 'Entdecken Sie fünf bewährte Strategien, die Ihnen helfen, im Arbeitsalltag produktiver zu sein.',
+                'content' => '<p>Produktiv bleiben ist leichter gesagt als getan. Fünf Dinge, die wirklich helfen:</p><ol><li><strong>Priorisiere deine Aufgaben</strong> - Beginn den Tag mit einer klaren Liste.</li><li><strong>Minimier Ablenkungen</strong> - Schalt unnötige Benachrichtigungen aus.</li><li><strong>Arbeite in Blöcken</strong> - 25 Minuten fokussiert, dann Pause.</li><li><strong>Mach regelmäßig Pausen</strong> - Kurze Pausen steigern die Konzentration.</li><li><strong>Schau abends zurück</strong> - Was lief gut, was nicht?</li></ol>',
+                'excerpt' => 'Fünf Strategien, die dir im Arbeitsalltag wirklich helfen.',
             ],
             [
                 'title' => 'Die Zukunft der digitalen Transformation',
                 'content' => '<p>Die digitale Transformation verändert grundlegend, wie Unternehmen arbeiten und mit ihren Kunden interagieren. Von künstlicher Intelligenz bis hin zu Cloud-Computing – die technologischen Möglichkeiten scheinen grenzenlos.</p><p>Unternehmen, die heute in innovative Technologien investieren, werden morgen die Nase vorn haben. Dabei geht es nicht nur um die Einführung neuer Tools, sondern um einen kulturellen Wandel in der gesamten Organisation.</p>',
-                'excerpt' => 'Erfahren Sie, wie die digitale Transformation die Geschäftswelt verändert und was das für Ihr Unternehmen bedeutet.',
+                'excerpt' => 'Wie die digitale Transformation die Geschäftswelt verändert und was das für dein Unternehmen bedeutet.',
             ],
             [
                 'title' => 'Nachhaltigkeit im Unternehmen: Mehr als nur ein Trend',
@@ -273,8 +273,8 @@ class PluginServiceProvider extends ServiceProvider
 
             if ($postId && !is_wp_error($postId)) {
                 ++$imageIndex;
-                $imageId = $this->downloadAndAttachImage(
-                    "https://picsum.photos/seed/blog{$imageIndex}/1200/800",
+                $imageId = $this->attachPlaceholderImage(
+                    $imageIndex,
                     "Blog Beitragsbild {$imageIndex}",
                     $postId,
                 );
@@ -760,55 +760,60 @@ class PluginServiceProvider extends ServiceProvider
 
         return is_plugin_active($plugin);
     }
-
     /**
-     * Download an image from URL and attach it to a post
+     * Ein mitgeliefertes Platzhalterbild an einen Demo-Beitrag haengen.
      *
-     * @param string $url Image URL to download
-     * @param string $title Title for the attachment
-     * @param int $postId Post ID to attach the image to
+     * Vorher lud der Aufruf die Bilder zur Laufzeit von picsum.photos. Das hatte
+     * drei Nachteile: die Einrichtung braucht Internet und laeuft sonst in einen
+     * Timeout, fremde Fotos landen in der Mediathek des Kunden, und jede
+     * Installation sah anders aus. Die Bilder im Theme sind generiert, gleich
+     * gross und zeigen an, wenn ein Zuschnitt zuschlaegt.
      *
-     * @return int|false Attachment ID or false on failure
+     * @param int    $index  Laufende Nummer des Demo-Beitrags
+     * @param string $title  Titel des Anhangs
+     * @param int    $postId Beitrag, an den das Bild gehaengt wird
+     *
+     * @return int|false Anhang-ID oder false
      */
-    private function downloadAndAttachImage(string $url, string $title, int $postId): int|false
+    private function attachPlaceholderImage(int $index, string $title, int $postId): int|false
     {
-        $response = wp_remote_get($url, [
-            'timeout' => 30,
-            'redirection' => 5,
-        ]);
-
-        if (is_wp_error($response)) {
+        $file = get_stylesheet_directory() . '/assets/images/placeholder-' . ( ( ( $index - 1 ) % 6 ) + 1 ) . '.jpg';
+        if (!file_exists($file)) {
             return false;
         }
 
-        $imageData = wp_remote_retrieve_body($response);
-        if (empty($imageData)) {
-            return false;
-        }
-
-        $filename = sanitize_file_name($title) . '-' . time() . '.jpg';
-        $upload = wp_upload_bits($filename, null, $imageData);
+        $upload = wp_upload_bits(
+            sanitize_file_name($title) . '.jpg',
+            null,
+            (string) file_get_contents($file)
+        );
 
         if (!empty($upload['error'])) {
             return false;
         }
 
-        $attachment = [
+        $attachmentId = wp_insert_attachment([
             'post_mime_type' => 'image/jpeg',
             'post_title' => $title,
             'post_content' => '',
             'post_status' => 'inherit',
             'post_parent' => $postId,
-        ];
+            'meta_input' => [
+                self::DEMO_POST_META_KEY => 1,
+                // Siehe importImage(): ein Platzhalter ohne Alt-Text ist fuer
+                // Screenreader ein stummes Loch im Text.
+                '_wp_attachment_image_alt' => $title,
+            ],
+        ], $upload['file'], $postId);
 
-        $attachmentId = wp_insert_attachment($attachment, $upload['file'], $postId);
-
-        if (is_wp_error($attachmentId)) {
+        if (is_wp_error($attachmentId) || !$attachmentId) {
             return false;
         }
 
-        $attachmentData = wp_generate_attachment_metadata($attachmentId, $upload['file']);
-        wp_update_attachment_metadata($attachmentId, $attachmentData);
+        wp_update_attachment_metadata(
+            $attachmentId,
+            wp_generate_attachment_metadata($attachmentId, $upload['file'])
+        );
 
         return $attachmentId;
     }

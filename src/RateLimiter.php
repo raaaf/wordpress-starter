@@ -212,7 +212,7 @@ class RateLimiter
         if (!$limiter->attempt()) {
             wp_send_json_error(
                 [
-                    'message' => __('Zu viele Anfragen. Bitte versuchen Sie es später erneut.', 'wp-starter'),
+                    'message' => __('Zu viele Anfragen. Bitte versuche es später erneut.', 'wp-starter'),
                     'retry_after' => $limiter->retryAfter(),
                 ],
                 429,

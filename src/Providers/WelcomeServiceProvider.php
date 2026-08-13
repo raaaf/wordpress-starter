@@ -26,6 +26,17 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     public const STYLEGUIDE_IMAGE_META_KEY = '_wp_starter_styleguide_image';
 
+    /**
+     * Marker fuer Demo-Eintraege in den Custom Post Types.
+     *
+     * Die Layouts "Team" und "Kundenstimmen" koennen ihre Daten aus der
+     * jeweiligen Verwaltung ziehen. Ohne Eintraege dort rendert dieser Pfad
+     * nichts, er blieb deshalb in jeder visuellen Abnahme ungeprueft. Der Marker
+     * grenzt die vom Styleguide erzeugten Eintraege ab, damit das Regenerieren
+     * genau sie wieder entfernt und keine echten Inhalte anfasst.
+     */
+    public const STYLEGUIDE_DEMO_POST_META_KEY = '_wp_starter_styleguide_demo';
+
     private static function optActivated(): string
     {
         return ThemeContext::optionKey('theme_activated');
@@ -310,7 +321,7 @@ class WelcomeServiceProvider extends ServiceProvider
                 </p>
             </div>',
             esc_html__('Willkommen beim WP-Starter Theme!', 'wp-starter'),
-            esc_html__('Möchten Sie eine Styleguide-Seite erstellen? Diese enthält alle verfügbaren Farben, Typografie, Abstände und Block-Beispiele als visuelle Referenz.', 'wp-starter'),
+            esc_html__('Möchtest du eine Styleguide-Seite erstellen? Sie enthält alle verfügbaren Farben, Typografie, Abstände und Block-Beispiele als visuelle Referenz.', 'wp-starter'),
             esc_url($createUrl),
             esc_html__('Styleguide-Seite erstellen', 'wp-starter'),
             esc_url($dismissUrl),
@@ -348,7 +359,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Sie haben keine Berechtigung für diese Aktion.', 'wp-starter'));
+            wp_die(esc_html__('Du hast keine Berechtigung für diese Aktion.', 'wp-starter'));
         }
 
         update_option(self::optAcfPrefillPending(), true);
@@ -436,7 +447,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         if (!current_user_can('publish_pages')) {
-            wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu erstellen.', 'wp-starter'));
+            wp_die(esc_html__('Du hast keine Berechtigung, Seiten zu erstellen.', 'wp-starter'));
         }
 
         $pageId = $this->createStyleguidePage();
@@ -492,13 +503,15 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         if (!current_user_can('publish_pages')) {
-            wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu erstellen.', 'wp-starter'));
+            wp_die(esc_html__('Du hast keine Berechtigung, Seiten zu erstellen.', 'wp-starter'));
         }
 
         $existingPageId = self::resolveStyleguidePageId();
         if ($existingPageId > 0) {
             wp_delete_post($existingPageId, true);
         }
+
+        $this->deleteDemoMedia();
 
         $pageId = $this->createStyleguidePage();
 
@@ -532,7 +545,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         if (!current_user_can('publish_pages')) {
-            wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu bearbeiten.', 'wp-starter'));
+            wp_die(esc_html__('Du hast keine Berechtigung, Seiten zu bearbeiten.', 'wp-starter'));
         }
 
         $existingPageId = self::resolveStyleguidePageId();
@@ -566,7 +579,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         if (!current_user_can('delete_pages')) {
-            wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu löschen.', 'wp-starter'));
+            wp_die(esc_html__('Du hast keine Berechtigung, Seiten zu löschen.', 'wp-starter'));
         }
 
         $existingPageId = self::resolveStyleguidePageId();
@@ -655,7 +668,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         if (!current_user_can('publish_pages')) {
-            wp_die(esc_html__('Sie haben keine Berechtigung fuer diese Aktion.', 'wp-starter'));
+            wp_die(esc_html__('Du hast keine Berechtigung fuer diese Aktion.', 'wp-starter'));
         }
 
         if (!function_exists('update_field')) {
@@ -687,6 +700,8 @@ class WelcomeServiceProvider extends ServiceProvider
     private function createStyleguidePage(): int
     {
         $this->importPlaceholderImages();
+        $this->importDemoVideo();
+        $this->createDemoCptEntries();
 
         $pageId = wp_insert_post([
             'post_title' => __('Styleguide', 'wp-starter'),
@@ -751,6 +766,16 @@ class WelcomeServiceProvider extends ServiceProvider
             }
         }
 
+        // Ein echtes Hochformat, damit die Teamportraits zeigen, was sie auf
+        // Kundenseiten zeigen: 4:5 statt eines quer beschnittenen Querformats.
+        $portrait = $assetsDir . 'placeholder-portrait.jpg';
+        if (file_exists($portrait)) {
+            $portraitId = $this->importImage($portrait, __('Styleguide Portrait', 'wp-starter'));
+            if ($portraitId) {
+                $this->imageIds['portrait'] = $portraitId;
+            }
+        }
+
         for ($i = 1; $i <= 6; $i++) {
             $file = $assetsDir . "logo-placeholder-{$i}.svg";
             if (file_exists($file)) {
@@ -801,6 +826,11 @@ class WelcomeServiceProvider extends ServiceProvider
             'post_status' => 'inherit',
             'meta_input' => [
                 self::STYLEGUIDE_IMAGE_META_KEY => 1,
+                // Ohne Alt-Text meldet Text::imageAlt bei jedem Aufruf eine
+                // Luecke, und zwar zu Recht: 44 Bilder der Styleguide-Seite
+                // waren fuer Screenreader stumm. Der Text benennt, was das Bild
+                // ist, statt so zu tun, als zeige es etwas.
+                '_wp_attachment_image_alt' => $title,
             ],
         ];
 
@@ -815,5 +845,171 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         return $attachmentId;
+    }
+
+    /**
+     * Demo-Eintraege fuer die Custom Post Types anlegen.
+     *
+     * Die Layouts "Team" und "Kundenstimmen" bieten die Quelle "aus der
+     * Verwaltung" an. Ohne Eintraege dort rendert das Layout nur seine
+     * Ueberschrift, weshalb dieser Renderpfad nie visuell abgenommen wurde.
+     *
+     * Bestehende Demo-Eintraege werden vorher entfernt, damit ein erneutes
+     * Generieren keine Duplikate hinterlaesst. Eintraege ohne Marker bleiben
+     * unangetastet, echte Inhalte sind also sicher.
+     */
+    private function createDemoCptEntries(): void
+    {
+        $this->deleteDemoCptEntries();
+
+        $testimonials = [
+            ['Sabine Vogel', 'Bereichsleiterin, Nordwind AG', 'Die Zusammenarbeit war strukturiert und termintreu. Wir haben jede Woche gesehen, woran gearbeitet wurde.'],
+            ['Jonas Hartmann', 'Inhaber, Hartmann Werkstoffe', 'Aus einer alten Seite wurde ein Werkzeug, mit dem unser Team selbst arbeiten kann.'],
+            ['Elif Demir', 'Marketing, Stadtwerke Süd', 'Besonders geholfen hat die klare Struktur der Inhalte. Pflege dauert heute Minuten statt Stunden.'],
+        ];
+
+        foreach ($testimonials as $index => [$name, $role, $quote]) {
+            $postId = wp_insert_post([
+                'post_title' => $name,
+                'post_type' => 'testimonial',
+                'post_status' => 'publish',
+                'meta_input' => [self::STYLEGUIDE_DEMO_POST_META_KEY => 1],
+            ]);
+
+            if (!$postId || is_wp_error($postId)) {
+                continue;
+            }
+
+            if (function_exists('update_field')) {
+                update_field('author_name', $name, $postId);
+                update_field('author_position', $role, $postId);
+                update_field('content', $quote, $postId);
+            }
+
+            $imageId = $this->imageIds['placeholder_' . ( ( $index % 6 ) + 1 )] ?? null;
+            if ($imageId) {
+                set_post_thumbnail($postId, (int) $imageId);
+            }
+        }
+
+        $members = [
+            ['Anna Weber', 'Geschäftsführerin', 'Seit 2015 verantwortet Anna Strategie und Kundenbeziehungen.', 'anna@beispiel.de', 'https://www.linkedin.com/in/beispiel-weber'],
+            ['Michael Braun', 'Technischer Leiter', 'Michael verantwortet Architektur und Entwicklung.', 'michael@beispiel.de', ''],
+            ['Sarah Klein', 'Marketing Managerin', 'Sarah bringt die Projekte zu ihrer Zielgruppe.', '', 'https://www.linkedin.com/in/beispiel-klein'],
+        ];
+
+        foreach ($members as $index => [$name, $position, $bio, $email, $linkedin]) {
+            $postId = wp_insert_post([
+                'post_title' => $name,
+                'post_type' => 'team_member',
+                'post_status' => 'publish',
+                'meta_input' => [self::STYLEGUIDE_DEMO_POST_META_KEY => 1],
+            ]);
+
+            if (!$postId || is_wp_error($postId)) {
+                continue;
+            }
+
+            if (function_exists('update_field')) {
+                update_field('position', $position, $postId);
+                update_field('bio', $bio, $postId);
+                update_field('display_order', $index + 1, $postId);
+                // Bewusst unterschiedlich befuellt: eine Person mit beiden
+                // Kontaktwegen, eine mit einem, eine ohne. So zeigt der
+                // Styleguide auch die Faelle, in denen Icons fehlen.
+                update_field('email', $email, $postId);
+                update_field('linkedin', $linkedin, $postId);
+                update_field('phone', '', $postId);
+                update_field('xing', '', $postId);
+            }
+
+            // Teamportraits nutzen das Hochformat, sonst zeigt der Styleguide
+            // einen quer beschnittenen Schnappschuss statt eines Portraits.
+            $imageId = $this->imageIds['portrait'] ?? ( $this->imageIds['placeholder_' . ( ( $index % 6 ) + 1 )] ?? null );
+            if ($imageId) {
+                set_post_thumbnail($postId, (int) $imageId);
+            }
+        }
+    }
+
+    /**
+     * Vom Styleguide erzeugte Demo-Eintraege wieder entfernen.
+     */
+    private function deleteDemoCptEntries(): void
+    {
+        $posts = get_posts([
+            'post_type' => ['testimonial', 'team_member'],
+            'post_status' => 'any',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+            'meta_key' => self::STYLEGUIDE_DEMO_POST_META_KEY,
+        ]);
+
+        foreach ($posts as $postId) {
+            wp_delete_post( (int) $postId, true);
+        }
+    }
+
+    /**
+     * Demo-Video in die Mediathek importieren.
+     *
+     * Eigener Schritt und nicht Teil von importPlaceholderImages(): jene Methode
+     * kehrt frueh zurueck, sobald die Bilder schon im Option-Cache stehen, und
+     * haette das Video auf jeder bereits eingerichteten Site uebersprungen.
+     *
+     * Ohne diese Datei zeigten die Video-Varianten "Mediathek" und "Externer
+     * Link" nur den Redakteurshinweis, ihr Renderpfad blieb ungeprueft.
+     */
+    private function importDemoVideo(): void
+    {
+        $existing = $this->imageIds['video_demo'] ?? null;
+        if ($existing && wp_get_attachment_url( (int) $existing)) {
+            return;
+        }
+
+        $file = get_stylesheet_directory() . '/assets/videos/styleguide-demo.mp4';
+        if (!file_exists($file)) {
+            return;
+        }
+
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/media.php';
+        require_once ABSPATH . 'wp-admin/includes/image.php';
+
+        $attachmentId = $this->importImage($file, __('Styleguide Demo-Video', 'wp-starter'));
+        if (!$attachmentId) {
+            return;
+        }
+
+        $this->imageIds['video_demo'] = $attachmentId;
+        update_option(self::optImages(), $this->imageIds);
+    }
+
+    /**
+     * Vom Styleguide importierte Medien entfernen.
+     *
+     * Ohne diesen Schritt bleiben einmal importierte Platzhalter fuer immer
+     * liegen: importPlaceholderImages() kehrt frueh zurueck, sobald die IDs im
+     * Option-Cache stehen. Wer die Dateien im Theme austauscht, bekommt sonst
+     * weiter die alten, samt der Zuschnitte, die es damals gab.
+     */
+    private function deleteDemoMedia(): void
+    {
+        $attachments = get_posts([
+            'post_type' => 'attachment',
+            'post_status' => 'any',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+            'meta_key' => self::STYLEGUIDE_IMAGE_META_KEY,
+        ]);
+
+        foreach ($attachments as $id) {
+            wp_delete_attachment( (int) $id, true);
+        }
+
+        delete_option(self::optImages());
+        $this->imageIds = [];
     }
 }
