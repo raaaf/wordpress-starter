@@ -19,9 +19,25 @@ npm run lint       # JS/TS linting
 npm run icons      # Sync resources/icons/ from config/icons.json
 npm run test:e2e   # Playwright E2E tests
 npm run test:a11y  # Accessibility tests
+npm run test:styleguide  # Styleguide-Seite (braucht WP_USER + WP_PASSWORD, siehe unten)
 composer lint      # PHP linting (phpcs + phpstan)
 composer test      # PHPUnit tests
 ```
+
+### E2E gegen die Styleguide-Seite
+
+Die Styleguide-Seite ist `private` und damit nur eingeloggt erreichbar. Der Spec
+`tests/e2e/styleguide.spec.ts` prueft dort Sprungnavigation, Anker-Eindeutigkeit,
+Farbschema-Umschalter und axe-Verstoesse. Ohne Zugangsdaten ueberspringt er sich
+selbst, statt rot zu werden.
+
+```bash
+PLAYWRIGHT_BASE_URL=https://wordpress.local \
+WP_USER=<login> WP_PASSWORD=<passwort> \
+npm run test:styleguide
+```
+
+Optional: `WP_STYLEGUIDE_PATH` (Standard `/styleguide/`).
 
 ## Architecture
 
