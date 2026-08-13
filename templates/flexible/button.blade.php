@@ -11,6 +11,7 @@
     $size = get_sub_field('size') ?: 'md';
     $fullWidth = get_sub_field('full_width') ?? false;
     $alignment = get_sub_field('alignment') ?: 'left';
+    $background = get_sub_field('background_color') ?: 'primary';
 
     // Alignment classes
     $alignmentClasses = match($alignment) {
@@ -22,7 +23,7 @@
 @endphp
 
 @if($button && !empty($button['url']))
-    <x-section :anchor="$sectionAnchor" padding="sm" class="button-block-section">
+    <x-section :anchor="$sectionAnchor" :background="$background" padding="sm" class="button-block-section">
         <div class="button-block {{ $alignmentClasses }}">
             <x-button
                 :url="$button['url']"

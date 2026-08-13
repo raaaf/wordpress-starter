@@ -12,7 +12,7 @@
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-@if($title || !empty($cards))
+@if(!empty($cards) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" class="cards">
     <x-section-header :headline="$title" />
 
@@ -54,6 +54,10 @@
                 </x-card>
             @endforeach
         </x-grid>
+    @elseif(current_user_can('edit_posts'))
+        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+            <p class="text-content-secondary">{{ __('Bitte füge mindestens eine Karte hinzu.', 'wp-starter') }}</p>
+        </div>
     @endif
 </x-section>
 @endif

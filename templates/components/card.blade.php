@@ -49,10 +49,12 @@
         'default' => 'bg-[var(--card-bg,var(--bg-primary))] border border-[var(--card-border,var(--border-default))] shadow-[var(--shadow-card)]',
         'elevated' => 'bg-[var(--card-bg,var(--bg-primary))] shadow-lg',
         'outlined' => 'bg-[var(--card-bg,var(--bg-primary))] border border-line',
-        // Mit Rand, sonst verschwindet die Karte auf einer Sektion, die selbst
-        // bg-surface-secondary traegt — dann liest sie sich als eingerueckter Text
-        // statt als Kasten. Genau das passierte im Kontaktformular.
-        'filled' => 'bg-surface-secondary border border-line',
+        // Gefuellt heisst: eine Stufe ueber der Sektion, nicht fix
+        // bg-surface-secondary. Der feste Wert liess die Karte auf jeder Sektion
+        // verschwinden, die selbst diese Flaeche traegt, im Dunkelmodus gemessen
+        // 1.00 Abhebung bei Beitraegen und Preistabelle. --card-surface wird von
+        // der Sektion gesetzt, der Rand bleibt als Feinschliff.
+        'filled' => 'bg-[var(--card-surface,var(--bg-secondary))] border border-line',
     ];
 
     $sizes = [

@@ -1,6 +1,11 @@
 {{-- Member Area Downloads --}}
 @php
     $perPageOptions = ['20' => '20', '50' => '50', '100' => '100'];
+
+    // Suchfeld und Auswahl bekamen ihre id aus dem name-Attribut, also "search"
+    // und "per_page" ohne Instanzpraefix. Zwei Downloadtabellen auf einer Seite
+    // erzeugten damit doppelte IDs; alle anderen Layouts praefixen mit uniqid().
+    $instanceId = uniqid('downloads-');
 @endphp
 
 <div x-data="downloadTable" x-init="init()">
@@ -12,6 +17,7 @@
         <div class="sm:max-w-xs w-full">
             <x-input
                 name="search"
+                :id="$instanceId . '-search'"
                 type="search"
                 placeholder="{{ __('Suchen…', 'wp-starter') }}"
                 aria-label="{{ __('Downloads durchsuchen', 'wp-starter') }}"
@@ -56,6 +62,7 @@
         <div class="sm:w-24 sm:ml-auto">
             <x-select
                 name="per_page"
+                :id="$instanceId . '-per-page'"
                 :options="$perPageOptions"
                 :aria-label="__('Einträge pro Seite', 'wp-starter')"
                 x-model="perPage"
@@ -167,7 +174,14 @@
         {{-- Footer: total + pagination --}}
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4">
 
-            <p class="text-sm text-content-secondary">
+            {{-- aria-live: Suche und Kategoriefilter tauschen die Tabelle aus,
+                 ohne dass die Seite neu laedt. Ohne Ansage erfaehrt niemand mit
+                 Screenreader, ob die Eingabe ueberhaupt etwas bewirkt hat oder
+                 wie viele Treffer geblieben sind (WCAG 4.1.3).
+
+                 polite statt assertive, damit die Meldung das Tippen nicht
+                 unterbricht. --}}
+            <p class="text-sm text-content-secondary" aria-live="polite" aria-atomic="true">
                 <span x-text="total"></span> {{ __('Dokumente', 'wp-starter') }}
             </p>
 

@@ -31,6 +31,7 @@
 <x-section :anchor="$sectionAnchor" :background="$background" padding="md" class="image">
     <figure class="mx-auto max-w-4xl">
         {!! wp_get_attachment_image($imageId, 'content', false, [
+            'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $caption),
             'class' => 'w-full rounded-[var(--card-radius)] shadow-xl ' . $borderClass,
             'loading' => 'lazy',
             'sizes' => '(max-width: 896px) 100vw, 896px',

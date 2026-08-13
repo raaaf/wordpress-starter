@@ -12,13 +12,20 @@
     $background = get_sub_field('background_color') ?: 'primary';
     $statsId = uniqid();
 
-    // Use explicit grid classes to ensure Tailwind includes them
+    // Flex statt Grid, damit eine unvollstaendige letzte Zeile mittig steht.
+    //
+    // Vorher: ab vier Kennzahlen immer vier Spalten. Bei fuenf sass die fuenfte
+    // allein und linksbuendig unter vier Nachbarn, mit drei leeren Zellen
+    // daneben. Ein Raster kann seine letzte Zeile nicht zentrieren, ein
+    // umbrechender Flexcontainer schon.
+    //
+    // Die Breitenklassen bleiben fest notiert, damit Tailwind sie findet.
     $statsCount = count($stats);
-    $gridClass = match(true) {
-        $statsCount >= 4 => 'md:grid-cols-4',
-        $statsCount === 3 => 'md:grid-cols-3',
-        $statsCount === 2 => 'md:grid-cols-2',
-        default => 'md:grid-cols-1',
+    $itemClass = match(true) {
+        $statsCount >= 4 => 'md:w-[calc(25%-1.5rem)]',
+        $statsCount === 3 => 'md:w-[calc(33.333%-1.334rem)]',
+        $statsCount === 2 => 'md:w-[calc(50%-1rem)]',
+        default => 'md:w-full',
     };
 @endphp
 
@@ -27,7 +34,7 @@
     <x-section-header :headline="$title" />
 
     @if(!empty($stats))
-        <div class="grid gap-8 text-center {{ $gridClass }}">
+        <div class="flex flex-wrap justify-center gap-8 text-center">
             @foreach($stats as $stat)
                 @php
                     $number = floatval($stat['number'] ?? 0);
@@ -37,7 +44,7 @@
                 @endphp
                 <div
                     x-data="statsCounter({{ $number }})"
-                    class="p-6"
+                    class="w-full p-6 {{ $itemClass }}"
                     role="group"
                     @if($label)
                         aria-labelledby="stat-label-{{ $statsId }}-{{ $loop->index }}"
@@ -52,7 +59,7 @@
                     @endif
 
                     <div class="text-display tabular-nums mb-2 text-content" aria-hidden="true">
-                        <span x-text="current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })">0</span>@if($suffix)<span> {{ $suffix }}</span>@endif
+                        <span x-text="current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })">0</span>@if($suffix)<span>{{ in_array($suffix, ['%', '‰', '°C', '°F'], true) ? ' ' : '' }}{{ $suffix }}</span>@endif
                     </div>
                     <span class="sr-only">{{ $number }}{{ $suffix ? ' ' . $suffix : '' }}</span>
 

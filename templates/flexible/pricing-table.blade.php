@@ -10,20 +10,26 @@
     $plans = get_sub_field('plans') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
 
-    // Use explicit grid classes to ensure Tailwind includes them
+    // Flex statt Grid, damit eine unvollstaendige letzte Zeile mittig steht.
+    // Ab drei Plaenen standen immer drei nebeneinander; bei vieren sass der
+    // vierte allein und linksbuendig unter den anderen. Siehe stats.blade.php,
+    // dasselbe Muster.
+    //
+    // Die Breitenklassen bleiben fest notiert, damit Tailwind sie findet.
     $planCount = count($plans);
-    $gridClass = match(true) {
-        $planCount >= 3 => 'md:grid-cols-3',
-        $planCount === 2 => 'md:grid-cols-2',
-        default => 'md:grid-cols-1',
+    $itemClass = match(true) {
+        $planCount >= 3 => 'md:w-[calc(33.333%-1.334rem)]',
+        $planCount === 2 => 'md:w-[calc(50%-1rem)]',
+        default => 'md:w-full',
     };
 @endphp
 
+@if($title || !empty($plans) || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" class="pricing-table">
     <x-section-header :headline="$title" />
 
     @if(!empty($plans))
-        <div class="grid gap-8 {{ $gridClass }}">
+        <div class="flex flex-wrap justify-center gap-8">
             @foreach($plans as $plan)
                 @php
                     $isFeatured = $plan['is_featured'] ?? false;
@@ -33,7 +39,7 @@
                     $features = $plan['features'] ?? '';
                     $cta = $plan['cta'] ?? null;
                 @endphp
-                <div class="relative flex flex-col p-8 rounded-[var(--card-radius)] border {{ $isFeatured ? 'bg-surface-brand text-content-on-brand border-line-brand shadow-[var(--shadow-card-hover)]' : 'bg-surface-secondary border-line shadow-[var(--shadow-card)]' }}">
+                <div class="relative flex flex-col w-full p-8 rounded-[var(--card-radius)] border {{ $itemClass }} {{ $isFeatured ? 'bg-surface-brand text-content-on-brand border-line-brand shadow-[var(--shadow-card-hover)]' : 'bg-surface-secondary border-line shadow-[var(--shadow-card)]' }}">
                     @if($isFeatured)
                         <x-badge variant="accent" size="md" class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
                             {{ __('Empfohlen', 'wp-starter') }}
@@ -72,9 +78,10 @@
                 </div>
             @endforeach
         </div>
-    @else
+    @elseif(current_user_can('edit_posts'))
         <div class="p-8 text-center rounded-[var(--card-radius)] bg-surface-secondary">
             <p class="text-content-secondary">{{ __('Bitte füge mindestens ein Preispaket hinzu.', 'wp-starter') }}</p>
         </div>
     @endif
 </x-section>
+@endif

@@ -25,7 +25,7 @@
                         </div>
                         <h1 class="text-h3 mb-2">{{ get_the_title() }}</h1>
                         <p class="text-content-secondary">
-                            {{ __('Diese Seite ist passwortgeschützt. Bitte geben Sie das Passwort ein.', 'wp-starter') }}
+                            {{ __('Diese Seite ist passwortgeschützt. Bitte gib das Passwort ein.', 'wp-starter') }}
                         </p>
                     </div>
 

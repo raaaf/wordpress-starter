@@ -30,6 +30,7 @@
     $altAfter  = $afterId  ? (get_post_meta($afterId,  '_wp_attachment_image_alt', true) ?: $labelAfter)  : $labelAfter;
 @endphp
 
+@if(($hasImageBefore && $hasImageAfter) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" class="before-after">
     <x-section-header :headline="$title" />
 
@@ -65,7 +66,7 @@
                 :aria-valuenow="Math.round(position)"
                 aria-valuemin="0"
                 aria-valuemax="100"
-                aria-label="{{ __('Bildvergleich: Verwenden Sie die Pfeiltasten, um zwischen Vorher und Nachher zu wechseln', 'wp-starter') }}"
+                aria-label="{{ __('Bildvergleich: Nutze die Pfeiltasten, um zwischen Vorher und Nachher zu wechseln', 'wp-starter') }}"
                 class="absolute inset-y-0 w-12 -translate-x-1/2 cursor-ew-resize before-after-handle focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)] rounded-full"
                 :style="'left: ' + position + '%'"
                 @mousedown="handleMouseDown($event)"
@@ -101,9 +102,10 @@
                 <x-badge variant="brand" size="sm">{{ $labelAfter }}</x-badge>
             </div>
         </div>
-    @else
+    @elseif(current_user_can('edit_posts'))
         <div class="p-8 text-center rounded-lg bg-surface-secondary">
             <p class="text-content-secondary">{{ __('Bitte füge ein Vorher- und Nachher-Bild hinzu.', 'wp-starter') }}</p>
         </div>
     @endif
 </x-section>
+@endif

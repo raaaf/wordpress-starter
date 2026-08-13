@@ -44,7 +44,7 @@
             @if($imageId)
                 {!! wp_get_attachment_image($imageId, 'hero-split', false, [
                     'class' => 'w-full object-cover',
-                    'alt' => $image['alt'] ?? '',
+                    'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $label ?: strip_tags((string) $content)),
                     'loading' => 'lazy',
                     'decoding' => 'async',
                 ]) !!}

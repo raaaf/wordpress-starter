@@ -86,12 +86,29 @@
             role="region"
             aria-label="{{ __('Partner-Logos Karussell', 'wp-starter') }}"
         >
+            @if($autoplay)
+                {{-- WCAG 2.2.2: laufende Inhalte brauchen eine Pause, die nicht
+                     nur am Zeigegeraet haengt. --}}
+                <button
+                    type="button"
+                    x-on:click="paused = !paused"
+                    x-bind:aria-pressed="paused ? 'true' : 'false'"
+                    class="absolute z-20 p-2 transition-colors border rounded-full right-2 top-2 bg-surface border-line text-content hover:bg-surface-secondary focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
+                >
+                    <span class="sr-only" x-text="paused ? '{{ esc_js(__('Logolauf fortsetzen', 'wp-starter')) }}' : '{{ esc_js(__('Logolauf anhalten', 'wp-starter')) }}'">{{ __('Logolauf anhalten', 'wp-starter') }}</span>
+                    <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                        <rect x="4" y="3" width="3" height="10" rx="1" x-show="!paused"></rect>
+                        <rect x="9" y="3" width="3" height="10" rx="1" x-show="!paused"></rect>
+                        <path d="M5 3.5v9l8-4.5-8-4.5z" x-show="paused" x-cloak></path>
+                    </svg>
+                </button>
+            @endif
             {{-- Gradient overlays for seamless edges --}}
             <div class="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r {{ $gradientFrom }} to-transparent z-10 pointer-events-none"></div>
             <div class="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l {{ $gradientFrom }} to-transparent z-10 pointer-events-none"></div>
 
             <div
-                class="flex gap-12 {{ $autoplay ? 'logo-scroll' : '' }}"
+                class="flex gap-12 {{ $autoplay ? 'logo-scroll' : 'flex-wrap justify-center' }}"
                 @if($autoplay) :class="{ 'animation-paused': paused }" @endif
             >
                 {{-- The list repeats $copies times so the track still has material

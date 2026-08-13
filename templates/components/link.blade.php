@@ -65,6 +65,17 @@
         <x-icon name="{{ $iconLeft }}" class="{{ $iconSize }}" />
     @endif
 
+    {{--
+        Achtung bei der Verwendung: der Zeilenumbruch vor </a> landet als
+        Leerzeichen im Link. Steht direkt hinter <x-link> ein Satzzeichen,
+        rendert der Browser "(Google) ." mit Luecke davor.
+
+        Hier ist das nicht zu beheben: Blade bricht sowohl beim einzeiligen
+        @if mit Komponenten-Tag als auch beim Kommentar direkt nach @endif
+        (beides ausprobiert, beides ergibt "unexpected token endif").
+        Deshalb an der Verwendungsstelle loesen: Satzzeichen in den Linktext
+        ziehen oder den Satz so bauen, dass keines folgt.
+    --}}
     {{ $slot }}
 
     @if($iconRight)

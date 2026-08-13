@@ -55,11 +55,22 @@ function truncate(text: string, maxLength: number): string {
 
 /**
  * Strip HTML tags from string
+ *
+ * Blockelemente werden vorher zu einem Leerzeichen. `textContent` kennt keine
+ * Wortgrenzen und macht aus `<h2>Layout & Text</h2><p>Verschiedene Spalten...`
+ * ein zusammengeklebtes `Layout & TextVerschiedene Spalten...`, das in der
+ * Zeilenvorschau des Editors als ein Wort erscheint.
  */
-function stripTags(html: string): string {
+export function stripTags(html: string): string {
+  const withBreaks = html.replace(
+    /<\/(p|div|h[1-6]|li|tr|blockquote|figcaption)\s*>|<br\s*\/?>/gi,
+    ' '
+  );
+
   const tmp = document.createElement('div');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
+  tmp.innerHTML = withBreaks;
+
+  return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
 }
 
 /**

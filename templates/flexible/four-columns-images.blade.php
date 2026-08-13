@@ -53,7 +53,7 @@
     || $label_4 || ($image_4 && !empty($image_4['url'])) || $column_4 || !empty($accordion_4))
 <x-section :anchor="$sectionAnchor" :background="$background" class="four-columns-images">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
-    <x-grid cols="4" gap="xl" align="items-stretch">
+    <x-grid cols="4" gap="md" align="items-stretch">
         @foreach([1, 2, 3, 4] as $col)
             @php
                 $lbl = ${'label_' . $col};
@@ -67,7 +67,7 @@
                 @if($imgId)
                     {!! wp_get_attachment_image($imgId, 'hero-split', false, [
                         'class' => 'w-full aspect-[16/10] object-cover',
-                        'alt' => $img['alt'] ?? '',
+                        'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imgId, $lbl ?: strip_tags((string) $text)),
                         'loading' => 'lazy',
                         'decoding' => 'async',
                     ]) !!}

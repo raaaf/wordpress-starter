@@ -39,7 +39,7 @@
     }
 @endphp
 
-@if($title || !empty($members))
+@if(!empty($members) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" class="team">
     <x-section-header :headline="$title" />
 
@@ -62,20 +62,24 @@
                     $email = $member['email'] ?? '';
                     $linkedin = $member['linkedin'] ?? '';
                 @endphp
-                <div class="text-center">
+                <div class="flex flex-col h-full text-center">
                     @if($imageId)
                         {{-- No hover effect: the portrait is not a link and nothing
                              else on the card is interactive, so a hover reveal
                              would promise an interaction that isn't there. --}}
-                        <div class="relative mb-6 overflow-hidden rounded-[var(--card-radius)] aspect-square">
+                        {{-- Schmaler als die Spalte und im Hochformat: bei drei
+                             Spalten rendert das Bild sonst 384x384 und die Sektion
+                             wird zur Wand aus Gesichtern. --}}
+                        <div class="relative mx-auto mb-6 overflow-hidden rounded-[var(--card-radius)] aspect-[4/5] max-w-[260px]">
                             {!! wp_get_attachment_image($imageId, 'team-portrait', false, [
+                                'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $name),
                                 'class' => 'object-cover w-full h-full',
                                 'loading' => 'lazy',
-                                'sizes' => '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
+                                'sizes' => '260px',
                             ]) !!}
                         </div>
                     @else
-                        <div class="flex items-center justify-center mb-6 rounded-[var(--card-radius)] aspect-square bg-surface-secondary">
+                        <div class="flex items-center justify-center mx-auto mb-6 rounded-[var(--card-radius)] aspect-[4/5] max-w-[260px] bg-surface-secondary">
                             <x-icon name="user" class="w-24 h-24 text-content-tertiary" />
                         </div>
                     @endif
@@ -95,7 +99,7 @@
                     @endif
 
                     @if($email || $linkedin)
-                        <div class="flex justify-center gap-3">
+                        <div class="flex justify-center gap-3 mt-auto pt-2">
                             @if($email)
                                 <x-button
                                     url="mailto:{{ $email }}"
@@ -103,7 +107,7 @@
                                     :aria-label="__('E-Mail senden', 'wp-starter') . ': ' . $name"
                                     variant="secondary"
                                     size="sm"
-                                    class="p-2! min-h-0! hover:bg-surface-brand! hover:text-content-on-brand!"
+                                    class="p-2.5! min-h-11! min-w-11! hover:bg-surface-brand! hover:text-content-on-brand!"
                                 >
                                     <x-icon name="mail" size="lg" />
                                     <span class="sr-only">{{ __('E-Mail', 'wp-starter') }}</span>
@@ -117,7 +121,7 @@
                                     target="_blank"
                                     variant="secondary"
                                     size="sm"
-                                    class="p-2! min-h-0! hover:bg-surface-brand! hover:text-content-on-brand!"
+                                    class="p-2.5! min-h-11! min-w-11! hover:bg-surface-brand! hover:text-content-on-brand!"
                                 >
                                     <x-icon name="linkedin" size="lg" />
                                     <span class="sr-only">{{ __('LinkedIn', 'wp-starter') }}</span>
@@ -127,6 +131,10 @@
                     @endif
                 </div>
             @endforeach
+        </div>
+    @elseif(current_user_can('edit_posts'))
+        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+            <p class="text-content-secondary">{{ __('Bitte füge Teammitglieder hinzu oder wähle eine Quelle mit Einträgen.', 'wp-starter') }}</p>
         </div>
     @endif
 </x-section>

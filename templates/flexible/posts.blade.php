@@ -52,6 +52,7 @@
                         @if(has_post_thumbnail())
                             <div class="block overflow-hidden aspect-video">
                                 {!! get_the_post_thumbnail(get_the_ID(), 'card-video', [
+                                    'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) get_post_thumbnail_id(), get_the_title()),
                                     'class' => 'object-cover w-full h-full transition-transform duration-200 ease-out group-hover:scale-105',
                                     'loading' => 'lazy',
                                 ]) !!}
@@ -68,7 +69,7 @@
                                             </time>
                                         </x-badge>
                                     @endif
-                                    @if($showAuthor)
+                                    @if($showAuthor && get_the_author())
                                         <span class="text-body-small text-content-secondary">{{ __('von', 'wp-starter') }} {{ get_the_author() }}</span>
                                     @endif
                                 </div>
@@ -80,7 +81,10 @@
 
                             @if($showExcerpt)
                                 <p class="mb-4 text-content-secondary line-clamp-3">
-                                    {{ wp_trim_words(get_the_excerpt(), 20) }}
+                                    {{-- Das dritte Argument ist das echte Zeichen, nicht der Standard
+                                         &hellip;: wp_trim_words liefert die Entity, und Blades {{ }}
+                                         escapet sie zu sichtbarem "&hellip;" im Text. --}}
+                                    {{ wp_trim_words(get_the_excerpt(), 20, '…') }}
                                 </p>
                             @endif
 

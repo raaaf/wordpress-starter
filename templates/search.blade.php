@@ -115,7 +115,7 @@
                     {{ __('Keine Ergebnisse gefunden', 'wp-starter') }}
                 </h2>
                 <p class="text-content-secondary mb-8 max-w-md mx-auto">
-                    {{ __('Für Ihre Suche konnten leider keine passenden Inhalte gefunden werden. Versuchen Sie es mit anderen Suchbegriffen.', 'wp-starter') }}
+                    {{ __('Für deine Suche konnten leider keine passenden Inhalte gefunden werden. Versuch es mit anderen Suchbegriffen.', 'wp-starter') }}
                 </p>
                 <x-button :url="home_url('/')" variant="primary" size="lg" iconLeft="home" :title="__('Zur Startseite', 'wp-starter')" />
             </div>

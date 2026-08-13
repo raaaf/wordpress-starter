@@ -109,7 +109,11 @@ function blocksFor(css: string, mode: Mode): string {
 function declarations(css: string): Map<string, string> {
   const map = new Map<string, string>();
   for (const match of css.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;]+);/g)) {
-    map.set(match[1], match[2].trim());
+    // Zeilenumbrueche und Einrueckung raus, bevor verglichen wird. Prettier
+    // bricht denselben Wert je nach Einrucktiefe unterschiedlich um, und die
+    // beiden Dunkelbloecke liegen auf verschiedenen Ebenen: der Vergleich
+    // meldete vier Schattentoken als abweichend, die zeichenweise gleich waren.
+    map.set(match[1], match[2].replace(/\s+/g, ' ').trim());
   }
   return map;
 }

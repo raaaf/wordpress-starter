@@ -10,7 +10,12 @@
                     @include('partials.password-form')
                 @else
                 {{-- Only show page header if no ACF sections (title is in Hero block) --}}
-                @unless(is_front_page() || have_rows('page_sections'))
+                {{-- Der Seitenkopf entfiel, sobald es Sektionen gab, weil die h1 im
+                     Hero steckt. Eine Seite ohne Hero-Layout hatte damit gar keine h1.
+                     Die rohe Meta-Zeile listet die Layoutnamen, das kostet keinen
+                     zweiten Durchlauf. --}}
+                @php($sectionLayouts = (array) get_post_meta(get_the_ID(), 'page_sections', true))
+                @unless(is_front_page() || in_array('hero', $sectionLayouts, true))
                     <header class="page-header max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                         <h1>{{ get_the_title() }}</h1>
                     </header>

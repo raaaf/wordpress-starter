@@ -123,7 +123,10 @@
                                 <a href="{{ esc_url($social['url']) }}"
                                    target="_blank"
                                    rel="noopener noreferrer"
-                                   class="text-content-secondary hover:text-content transition-colors"
+                                   {{-- 44px Klickflaeche wie bei den Team-Icons. Das sichtbare Symbol bleibt
+                                        24px, nur der anklickbare Bereich waechst; der negative Rand
+                                        haelt den optischen Abstand. --}}
+                                   class="inline-flex items-center justify-center w-11 h-11 -m-2 text-content-secondary hover:text-content transition-colors rounded-full focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
                                    aria-label="{{ ($social['platform'] ?? 'Social Media') . ' ' . __('(öffnet in neuem Tab)', 'wp-starter') }}">
                                     @switch($social['platform'] ?? '')
                                         @case('facebook')

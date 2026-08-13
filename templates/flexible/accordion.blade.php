@@ -41,7 +41,7 @@
     }
 @endphp
 
-@if(!empty($items))
+@if(!empty($items) || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" padding="md" class="accordion">
     <div class="max-w-2xl mx-auto">
         @php $itemCount = count($items); @endphp
@@ -86,7 +86,7 @@
                     <div x-show="active === {{ $index }}"
                          x-collapse
                          id="accordion-content-{{ $accordionId }}-{{ $index }}"
-                         role="region"
+                         @if(count($items) < 7) role="region" @endif
                          :aria-labelledby="'accordion-header-{{ $accordionId }}-{{ $index }}'"
                          class="mb-8">
                         <x-prose>@kses($item['content'])</x-prose>
@@ -94,6 +94,12 @@
                 </div>
             @endforeach
         </div>
+
+        @if(empty($items) && current_user_can('edit_posts'))
+            <div class="p-8 text-center rounded-lg bg-surface-secondary">
+                <p class="text-content-secondary">{{ __('Bitte füge mindestens einen Akkordeon-Eintrag hinzu.', 'wp-starter') }}</p>
+            </div>
+        @endif
     </div>
 </x-section>
 @endif

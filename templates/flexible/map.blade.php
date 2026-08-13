@@ -17,6 +17,7 @@
     $directionsUrl = $address ? 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode($address) : '';
 @endphp
 
+@if($embedUrl || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" class="map">
     <x-section-header :headline="$title" />
 
@@ -24,6 +25,8 @@
         <div
             class="relative overflow-hidden rounded-lg"
             x-data="{ loaded: false, iframeLoaded: false, iframeError: false }"
+            x-ref="mapContainer"
+            tabindex="-1"
             style="min-height: {{ esc_attr($height) }}px;"
         >
             {{-- Live region: always present in the DOM so screen readers pick up the text change (loading/error), never toggled with x-show/hidden --}}
@@ -52,7 +55,7 @@
                     :title="__('Karte laden', 'wp-starter')"
                     variant="primary"
                     size="md"
-                    x-on:click="loaded = true"
+                    x-on:click="loaded = true; $nextTick(() => $refs.mapContainer.focus())"
                     class="map-consent-btn"
                 />
             </div>
@@ -104,6 +107,10 @@
             </template>
         </div>
 
+        @if($address)
+            <address class="mt-4 not-italic text-center text-content-secondary">{{ $address }}</address>
+        @endif
+
         @if($showDirections && $directionsUrl)
             <div class="mt-4 text-center">
                 <x-link url="{{ $directionsUrl }}" target="_blank" variant="accent" size="md">
@@ -114,9 +121,10 @@
                 </x-link>
             </div>
         @endif
-    @else
+    @elseif(current_user_can('edit_posts'))
         <div class="p-8 text-center rounded-lg bg-surface-secondary">
             <p class="text-content-secondary">{{ __('Bitte füge eine Google Maps Embed-URL ein.', 'wp-starter') }}</p>
         </div>
     @endif
 </x-section>
+@endif

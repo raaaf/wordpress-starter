@@ -14,7 +14,7 @@
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-@if($title || !empty($images))
+@if(!empty($images) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" class="gallery">
     <x-section-header :headline="$title" />
 
@@ -60,6 +60,10 @@
                 @endif
             @endforeach
         </x-grid>
+    @elseif(current_user_can('edit_posts'))
+        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+            <p class="text-content-secondary">{{ __('Bitte füge mindestens ein Bild hinzu.', 'wp-starter') }}</p>
+        </div>
     @endif
 </x-section>
 @endif

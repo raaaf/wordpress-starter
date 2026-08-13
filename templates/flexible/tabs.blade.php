@@ -13,7 +13,7 @@
     $uniqueId = 'tabs-' . uniqid();
 @endphp
 
-@if($title || !empty($tabs))
+@if(!empty($tabs) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" class="tabs">
     <x-section-header :headline="$title" />
 
@@ -87,6 +87,10 @@
                     </div>
                 @endforeach
             </div>
+        </div>
+    @elseif(current_user_can('edit_posts'))
+        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+            <p class="text-content-secondary">{{ __('Bitte füge mindestens einen Tab hinzu.', 'wp-starter') }}</p>
         </div>
     @endif
 </x-section>

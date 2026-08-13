@@ -172,6 +172,41 @@
 
 [data-theme='dark'] {
   --border-control: var(--color-gray-500);
+
+  /* ------------------------------------------------------------------
+     Dunkelmodus-Flaechen, Vorbild Linear.
+
+     Vorher: Grundton #171717, naechste Stufe #262626, dann #404040. Die
+     Spruenge waren ungleich, die Flaechen neutral grau, und Karten trugen
+     dieselbe Farbe wie ihre Sektion. Getragen wurde die Abgrenzung allein von
+     Raendern, gemessen 1.6:1 gegen den Untergrund. Das Ergebnis wirkte flach
+     und hart zugleich.
+
+     Jetzt: sehr dunkler, leicht kuehler Grundton und kleine, gleichmaessige
+     Stufen. Elevation entsteht ueber Helligkeit, nicht ueber Linien, deshalb
+     duerfen die Raender wieder dezent sein. Die Werte sind bewusst als Hex
+     notiert und nicht aus der Grau-Rampe abgeleitet: die Rampe ist neutral,
+     dieser Modus braucht den leichten Blaustich, der dunkle Flaechen ruhig
+     wirken laesst.
+
+     Nur fuer dieses Theme gemessen. Nicht in die Kundenthemes kopieren, deren
+     Akzentrampen laufen gegenlaeufig. --------------------------------- */
+  --bg-primary: #08090a;
+  --bg-secondary: #0f1011;
+  --bg-tertiary: #16181a;
+  --bg-inverse: #f7f8f8;
+  --bg-brand-subtle: #1d1210;
+
+  --text-primary: #f7f8f8;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #7a828d;
+  --text-inverse: #08090a;
+
+  --border-default: #202225;
+  --border-strong: #2c2f34;
+
+  --card-bg: var(--bg-secondary);
+  --card-border: var(--border-default);
   --text-success: var(--color-success-light);
   --text-warning: var(--color-warning-light);
   --text-error: var(--color-error-light);
@@ -289,9 +324,50 @@
   border: 1px solid var(--border-default);
 }
 
+/* Karten heben sich im Dunkelmodus ueber ihre Flaeche ab, siehe den
+   Token-Block oben. Der Rand ist nur noch Feinschliff. */
+[data-theme='dark'] .card {
+  border-color: var(--border-default);
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --border-control: var(--color-gray-500);
+
+    /* ------------------------------------------------------------------
+       Dunkelmodus-Flaechen, Vorbild Linear.
+  
+       Vorher: Grundton #171717, naechste Stufe #262626, dann #404040. Die
+       Spruenge waren ungleich, die Flaechen neutral grau, und Karten trugen
+       dieselbe Farbe wie ihre Sektion. Getragen wurde die Abgrenzung allein von
+       Raendern, gemessen 1.6:1 gegen den Untergrund. Das Ergebnis wirkte flach
+       und hart zugleich.
+  
+       Jetzt: sehr dunkler, leicht kuehler Grundton und kleine, gleichmaessige
+       Stufen. Elevation entsteht ueber Helligkeit, nicht ueber Linien, deshalb
+       duerfen die Raender wieder dezent sein. Die Werte sind bewusst als Hex
+       notiert und nicht aus der Grau-Rampe abgeleitet: die Rampe ist neutral,
+       dieser Modus braucht den leichten Blaustich, der dunkle Flaechen ruhig
+       wirken laesst.
+  
+       Nur fuer dieses Theme gemessen. Nicht in die Kundenthemes kopieren, deren
+       Akzentrampen laufen gegenlaeufig. --------------------------------- */
+    --bg-primary: #08090a;
+    --bg-secondary: #0f1011;
+    --bg-tertiary: #16181a;
+    --bg-inverse: #f7f8f8;
+    --bg-brand-subtle: #1d1210;
+
+    --text-primary: #f7f8f8;
+    --text-secondary: #9ca3af;
+    --text-tertiary: #7a828d;
+    --text-inverse: #08090a;
+
+    --border-default: #202225;
+    --border-strong: #2c2f34;
+
+    --card-bg: var(--bg-secondary);
+    --card-border: var(--border-default);
     --text-success: var(--color-success-light);
     --text-warning: var(--color-warning-light);
     --text-error: var(--color-error-light);
@@ -366,6 +442,29 @@
   :root:not([data-theme='light']) .card.shadow-lg {
     border: 1px solid var(--border-default);
   }
+
+  /* Siehe den [data-theme='dark'] Block oben. */
+  :root:not([data-theme='light']) .card {
+    border-color: var(--border-default);
+  }
+}
+
+/* Eine Karte liegt immer genau eine Stufe ueber ihrer Sektion. Ohne diese
+   Zuordnung nimmt sie einen festen Wert und verschwindet auf jeder Sektion,
+   die zufaellig dieselbe Flaeche traegt. Gilt in beiden Modi, im Dunkeln faellt
+   es nur staerker auf, weil dort kein Schatten traegt. */
+.bg-surface {
+  --card-surface: var(--bg-secondary);
+}
+
+.bg-surface-secondary {
+  --card-surface: var(--bg-tertiary);
+  --card-bg: var(--bg-tertiary);
+}
+
+.bg-surface-tertiary {
+  --card-surface: var(--bg-secondary);
+  --card-bg: var(--bg-secondary);
 }
 
 /* ============================================
@@ -478,7 +577,23 @@
 }
 
 /* Dark mode via data-theme attribute (matches tokens.css selector) */
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+/* Die dark-Variante hoerte bis 2026-08-10 nur auf [data-theme=dark]. Steht die
+   Theme-Option auf "Systemeinstellung folgen", setzt der Header gar kein
+   data-theme (templates/partials/header.blade.php:5). Die Farbtoken schalten in
+   dem Fall ueber prefers-color-scheme um, die dark:-Utilities aber nicht: die
+   Logo-Invertierung im Logo-Slider und die Badge-Farben liefen dadurch
+   gegenlaeufig zu Flaeche und Text. Zweiter Zweig deckt genau diesen Fall ab. */
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme='light']), :root:not([data-theme='light']) *) {
+      @slot;
+    }
+  }
+}
 
 html {
   scroll-behavior: smooth;
@@ -612,9 +727,81 @@ html {
   }
 }
 
-/* Auto-inherit for prose inside inverse/brand sections */
+/* Auto-inherit for prose inside inverse/brand sections.
+   Der Selektor hiess bis 2026-08-10 .text-content-on-color; diese Klasse gibt
+   das Theme nirgends aus. templates/components/section.blade.php emittiert
+   text-content-on-brand, deshalb griff die Regel auf Markenflaechen nie und
+   der Fliesstext blieb bei --text-secondary (gemessen 2.76:1 auf #FF6B35). */
+/* Ueberschriften und sekundaerer Text auf eingefaerbten Flaechen.
+
+   Warum ungelayert und warum nicht der Fix in @layer base weiter unten reicht:
+   die Layer-Ordnung in Zeile 9 ist critical < theme < base < components <
+   utilities. Die Typo-Regeln des Prose-Blocks liegen in @layer utilities und
+   setzen eine feste Farbe, der Brand-Fix in @layer base verliert dagegen.
+   Ungelayerte Regeln schlagen jede Layer-Regel, deshalb steht das hier.
+
+   Zweiter Grund: Utilities wie text-content-secondary bringen ihre eigene Farbe
+   mit, Vererbung erreicht sie nie. Der Sektionskopf setzt seine Beschreibung
+   hart auf text-content-secondary.
+
+   Gemessen am 2026-08-10 vor dem Fix: 24 Elemente in 8 Modulen bei 1.00:1 auf
+   bg-surface-inverse, in hell und dunkel identisch.
+
+   Ausgenommen sind Elemente, die auf einer eigenen Flaeche sitzen: Karten,
+   Alerts, Badges, Buttons und Tabellenkoepfe bringen ihren Hintergrund selbst
+   mit und behalten deshalb ihren eigenen Textton. Ausgenommen ist auch jedes
+   Element, das selbst eine bg-surface-Klasse traegt: der weisse Button auf der
+   Markenkarte hat text-content und wurde sonst dunkel auf dunkel gesetzt
+   (gemessen 1.18:1, waehrend der Fix entstand). Die Brand-Regel steht nach
+   der Inverse-Regel, damit eine Markenkarte in einer dunklen Sektion gewinnt. */
+.bg-surface-inverse
+  :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    .text-display,
+    .text-h1,
+    .text-h2,
+    .text-h3,
+    .text-h4,
+    .text-h5,
+    .text-content,
+    .text-content-secondary,
+    .text-content-tertiary
+  ):not(:is(.card, .alert, .badge, .button, thead, [class*='bg-surface'])):not(
+    :is(.card, .alert, .badge, .button, thead) *
+  ) {
+  color: var(--text-inverse);
+}
+
+.bg-surface-brand
+  :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    .text-display,
+    .text-h1,
+    .text-h2,
+    .text-h3,
+    .text-h4,
+    .text-h5,
+    .text-content,
+    .text-content-secondary,
+    .text-content-tertiary
+  ):not(:is(.card, .alert, .badge, .button, thead, [class*='bg-surface'])):not(
+    :is(.card, .alert, .badge, .button, thead) *
+  ) {
+  color: var(--text-on-brand);
+}
+
 .text-content-inverse .prose,
-.text-content-on-color .prose {
+.text-content-on-brand .prose {
   --tw-prose-body: inherit;
   --tw-prose-headings: inherit;
   --tw-prose-lead: inherit;
@@ -1123,8 +1310,18 @@ html {
     margin-top: 1.25rem;
   }
 
-  /* No spacing between label and its following control wrap (they belong together) */
-  .wpcf7-form > label + .wpcf7-form-control-wrap {
+  /* Beschriftung und Feld gehoeren zusammen.
+
+     Zwei Faelle, weil CF7 beides erzeugt: das Feld steht im Label (unser
+     Standardformular) oder als Geschwister dahinter (aeltere Formulare).
+     Gemessen war der erste Fall bei 2px, waehrend die theme-eigene
+     Feldkomponente 6px nutzt. Die Einwilligung ist ausgenommen, sie ist ein
+     eigener Block und braucht den vollen Abstand. */
+  .wpcf7-form > label + .wpcf7-form-control-wrap:not(:has(.wpcf7-acceptance)) {
+    margin-top: 0.375rem;
+  }
+
+  .wpcf7-form label > .wpcf7-form-control-wrap {
     margin-top: 0.375rem;
   }
 
@@ -1144,11 +1341,40 @@ html {
     font-size: var(--typography-body-small-size);
     font-weight: 500;
     color: var(--text-primary);
+  }
+
+  /* Nur wenn das Feld NICHT im Label steckt, gehoert der Abstand ans Label.
+     Steckt es drin, wuerde er unter dem Feld landen. */
+  .wpcf7-form > label:not(:has(.wpcf7-form-control-wrap)) {
     margin-bottom: 0.375rem;
   }
 
   .wpcf7-form .wpcf7-form-control-wrap {
     display: block;
+  }
+
+  /* Pflichtfeld-Sternchen.
+
+     Gesetzt wird es serverseitig in ContactForm7Configurator::markRequiredFields(),
+     nicht per Pseudoelement: CF7 legt das Eingabefeld in das Label, ein ::after
+     am Label landet deshalb unter dem Feld statt hinter dem Text.
+
+     Es traegt aria-hidden, weil die Information fuer Screenreader schon in
+     aria-required am Feld steht. Zweimal vorgelesen waere sie Laerm. */
+  .wpcf7-form .required-marker {
+    color: var(--text-error);
+    margin-left: 0.15em;
+  }
+
+  /* Statusmeldung: CF7 blendet sie mit aria-hidden aus, solange nichts
+     passiert ist, und setzt beim Absenden role="alert". Sie braucht nur den
+     Abstand und die Farbe des Themes. */
+  .wpcf7-form .wpcf7-response-output {
+    margin: 1rem 0 0;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md, 0.5rem);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
   }
 
   /* --- Text Inputs --- */
@@ -2273,9 +2499,39 @@ html {
   }
 }
 
+/* Der Block hob vorher seine eigene Absicht auf: er setzte im
+   reduced-motion-Fall wieder eine Endlosanimation. Jetzt bleibt der Spinner
+   sichtbar, aber still. */
 @media (prefers-reduced-motion: reduce) {
   .wpcf7 form.wpcf7-form .wpcf7-spinner {
-    animation: wpcf7-pulse 1.6s ease-in-out infinite;
+    animation: none;
     border-top-color: var(--border-accent);
   }
+}
+
+/* Einwilligung (acceptance), bewusst ausserhalb jeder @layer.
+
+   Contact Form 7 liefert ein eigenes, ungelayertes Stylesheet aus. Ungelayerte
+   Regeln schlagen jede Layer-Regel, egal wie spezifisch die ist. Alles, was
+   CF7-Defaults korrigieren soll, muss deshalb ebenfalls ungelayert stehen.
+
+   Gemessen vor dem Fix: 16px Einzug am Listeneintrag aus CF7s eigenem
+   margin-left, und die Checkbox in der vertikalen Mitte eines zweizeiligen
+   Textes statt an der ersten Zeile. */
+.wpcf7-form .wpcf7-acceptance .wpcf7-list-item {
+  margin: 0;
+}
+
+.wpcf7-form .wpcf7-acceptance label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.wpcf7-form .wpcf7-acceptance input[type='checkbox'] {
+  flex: none;
+  margin-top: 0.15rem;
 }
