@@ -1,3 +1,9 @@
+# [2.27.0](https://github.com/raaaf/wordpress-starter/compare/v2.26.6...v2.27.0) (2026-08-14)
+
+### Features
+
+- component-rendered styleguide, one icon set, corrected token contrast ([#24](https://github.com/raaaf/wordpress-starter/issues/24)) ([b929a1b](https://github.com/raaaf/wordpress-starter/commit/b929a1be80df5677aaca74e233f07092360f34bd)), closes [#171717](https://github.com/raaaf/wordpress-starter/issues/171717) [#1717170d](https://github.com/raaaf/wordpress-starter/issues/1717170d) [#08090a](https://github.com/raaaf/wordpress-starter/issues/08090a)
+
 ## [2.26.6](https://github.com/raaaf/wordpress-starter/compare/v2.26.5...v2.26.6) (2026-08-07)
 
 ### Bug Fixes
