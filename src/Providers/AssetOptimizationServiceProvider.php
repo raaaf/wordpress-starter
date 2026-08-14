@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WP_Post;
+
 /**
  * Asset Optimization Service Provider
  *
@@ -109,7 +111,7 @@ class AssetOptimizationServiceProvider extends ServiceProvider
         }
 
         $post = get_post($postId);
-        if ($post instanceof \WP_Post) {
+        if ($post instanceof WP_Post) {
             $content = strval($post->post_content);
             if (has_shortcode($content, 'contact-form-7')) {
                 $cache[$postId] = true;
@@ -205,7 +207,7 @@ class AssetOptimizationServiceProvider extends ServiceProvider
             // a weight that is not used above the fold delays the ones that are,
             // which showed up as a 0.765 CLS on gold-investment.
             $criticalFonts = [
-                'colabthi-webfont.woff2',        // ColaborateLight (headlines)
+                'space-grotesk-variable.woff2',  // Space Grotesk Variable (headlines)
                 'inter-v20-latin-regular.woff2', // Inter Regular (body)
                 'inter-v20-latin-500.woff2',     // Inter Medium (navigation)
                 'inter-v20-latin-600.woff2',     // Inter SemiBold (header CTA, h2-h4)

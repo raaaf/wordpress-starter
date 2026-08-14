@@ -37,9 +37,13 @@ class AcfExtended
         // Enable Developer Mode only in debug environment
         add_filter('acfe/modules/dev_mode', [self::class, 'shouldEnableDevMode']);
 
-        // Configure thumbnail paths for layout previews
-        add_filter('acfe/flexible/thumbnail/path', [self::class, 'getThumbnailPath']);
-        add_filter('acfe/flexible/thumbnail/url', [self::class, 'getThumbnailUrl']);
+        // Vorschaubild je Layout aufloesen.
+        //
+        // Vorher hingen hier zwei Filter, die es in ACF Extended nicht gibt:
+        // acfe/flexible/thumbnail/path und .../url. Sie liefen ins Leere, und im
+        // Auswahldialog blieb es bei Textkacheln. Der echte Hook heisst
+        // acfe/flexible/thumbnail und erwartet eine Anhang-ID oder eine URL.
+        add_filter('acfe/flexible/thumbnail', [self::class, 'resolveThumbnail'], 10, 3);
 
         // Disable modules we don't need
         add_filter('acfe/modules/block_types', '__return_false'); // Using Flexible Content, not blocks
@@ -54,6 +58,13 @@ class AcfExtended
      */
     public static function flexibleDefaults(array $defaults): array
     {
+        // Achtung, doppelte Quelle: die Page-Builder-Gruppe in FlexibleContent.php
+        // setzt dieselben acfe_flexible_*-Schluessel noch einmal direkt am Feld,
+        // und Feldwerte schlagen diese Defaults. Wer hier etwas aendert und sich
+        // wundert, warum nichts passiert, schaut dort nach.
+        //
+        // Dieser Filter bleibt, weil er fuer jedes weitere Flexible-Content-Feld
+        // gilt, das ein Kundentheme anlegt, ohne alles zu wiederholen.
         return array_merge($defaults, [
             // Modal for adding layouts (visual grid selection)
             'acfe_flexible_modal' => [
@@ -86,8 +97,13 @@ class AcfExtended
             // Show layout count in admin
             'acfe_flexible_layouts_templates' => false,
 
-            // Disable preview render (we use edit-only mode)
+            // Serverseitige Layout-Vorschau bleibt aus: sie rendert jedes Layout
+            // im Editor nach und kostet entsprechend.
             'acfe_flexible_layouts_previews' => false,
+
+            // Vorschaubilder im Auswahldialog. Ohne diese Einstellung ignoriert
+            // ACFE acfe_flexible_thumbnail vollstaendig.
+            'acfe_flexible_layouts_thumbnails' => true,
 
             // Empty message when no layouts
             'acfe_flexible_empty_message' => '',
@@ -106,18 +122,27 @@ class AcfExtended
     }
 
     /**
-     * Get filesystem path for layout thumbnails
+     * Dateinamen eines Layout-Vorschaubildes zu einer URL aufloesen.
+     *
+     * Die Layouts tragen nur den Dateinamen, etwa "hero.png". Das haelt
+     * FlexibleContent.php lesbar und die Bilder austauschbar. Existiert die
+     * Datei nicht, bleibt es bei der Textkachel statt eines toten Bildes.
+     *
+     * @param mixed                $thumbnail Wert aus acfe_flexible_thumbnail
+     * @param array<string, mixed> $field     Das Flexible-Content-Feld
+     * @param array<string, mixed> $layout    Das Layout
      */
-    public static function getThumbnailPath(): string
+    public static function resolveThumbnail(mixed $thumbnail, array $field, array $layout): mixed
     {
-        return get_template_directory() . '/resources/images/layouts/';
-    }
+        if (!is_string($thumbnail) || $thumbnail === '' || str_contains($thumbnail, '://')) {
+            return $thumbnail;
+        }
 
-    /**
-     * Get URL for layout thumbnails
-     */
-    public static function getThumbnailUrl(): string
-    {
-        return get_template_directory_uri() . '/resources/images/layouts/';
+        $datei = basename($thumbnail);
+        if (!file_exists(get_template_directory() . '/resources/images/layouts/' . $datei)) {
+            return false;
+        }
+
+        return get_template_directory_uri() . '/resources/images/layouts/' . $datei;
     }
 }

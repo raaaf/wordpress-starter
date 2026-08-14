@@ -281,17 +281,36 @@ export async function initGalleryZoom(): Promise<void> {
     }
   });
 
-  // Escape key is handled by medium-zoom by default
-  // Add keyboard instruction for screen readers
+  // Escape wird von medium-zoom selbst behandelt.
+  //
+  // Das Bild bekommt bewusst KEIN role/tabindex mehr. Es liegt in einem
+  // <button> aus templates/flexible/gallery.blade.php; ein zweites
+  // fokussierbares Element darin ergab pro Bild zwei Tab-Stopps (gemessen: 12
+  // bei 6 Bildern), und interaktiver Inhalt in einem <button> ist ungueltiges
+  // HTML. Der Button war zugleich ohne Funktion, weil medium-zoom nur auf dem
+  // Bild lauscht: mit der Maus aufs Bild klappte, per Tastatur landete man auf
+  // dem Button und Enter tat nichts.
   zoomElements.forEach((el) => {
+    el.removeAttribute('role');
+    el.removeAttribute('tabindex');
+    el.removeAttribute('aria-label');
+
+    const trigger = el.closest('button');
+    if (trigger) {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        zoom.open({ target: el as HTMLImageElement });
+      });
+      return;
+    }
+
+    // Bild ohne umgebenden Button: dann traegt es die Rolle selbst.
     el.setAttribute('role', 'button');
     el.setAttribute('tabindex', '0');
     el.setAttribute(
       'aria-label',
       (el.getAttribute('alt') || themeStrings.image) + ' - ' + themeStrings.imageZoomInstruction
     );
-
-    // Allow Enter key to trigger zoom
     el.addEventListener('keydown', (e) => {
       if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') {
         e.preventDefault();

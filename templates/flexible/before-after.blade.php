@@ -1,7 +1,7 @@
 {{--
     Before/After Slider Flexible Content Layout
 
-    Uses shared components: x-section
+    Uses shared components: x-section, x-section-header
     Uses Alpine.js beforeAfterSlider component for slider functionality
     Fields: title, image_before, image_after, label_before, label_after, background_color
 --}}
@@ -30,10 +30,9 @@
     $altAfter  = $afterId  ? (get_post_meta($afterId,  '_wp_attachment_image_alt', true) ?: $labelAfter)  : $labelAfter;
 @endphp
 
+@if(($hasImageBefore && $hasImageAfter) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" class="before-after">
-    @if($title)
-        <h2 class="mb-8 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if($hasImageBefore && $hasImageAfter)
         <div
@@ -45,7 +44,6 @@
             {!! wp_get_attachment_image($afterId, 'content', false, [
                 'class'   => 'block w-full',
                 'alt'     => $altAfter,
-                'loading' => 'lazy',
             ]) !!}
 
             {{-- Before image (clipped) --}}
@@ -56,7 +54,6 @@
                 {!! wp_get_attachment_image($beforeId, 'content', false, [
                     'class'   => 'block w-full',
                     'alt'     => $altBefore,
-                    'loading' => 'lazy',
                 ]) !!}
             </div>
 
@@ -67,7 +64,7 @@
                 :aria-valuenow="Math.round(position)"
                 aria-valuemin="0"
                 aria-valuemax="100"
-                aria-label="{{ __('Bildvergleich: Verwenden Sie die Pfeiltasten, um zwischen Vorher und Nachher zu wechseln', 'wp-starter') }}"
+                aria-label="{{ __('Bildvergleich: Nutze die Pfeiltasten, um zwischen Vorher und Nachher zu wechseln', 'wp-starter') }}"
                 class="absolute inset-y-0 w-12 -translate-x-1/2 cursor-ew-resize before-after-handle focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)] rounded-full"
                 :style="'left: ' + position + '%'"
                 @mousedown="handleMouseDown($event)"
@@ -103,9 +100,10 @@
                 <x-badge variant="brand" size="sm">{{ $labelAfter }}</x-badge>
             </div>
         </div>
-    @else
+    @elseif(current_user_can('edit_posts'))
         <div class="p-8 text-center rounded-lg bg-surface-secondary">
             <p class="text-content-secondary">{{ __('Bitte füge ein Vorher- und Nachher-Bild hinzu.', 'wp-starter') }}</p>
         </div>
     @endif
 </x-section>
+@endif

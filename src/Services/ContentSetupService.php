@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Services;
 
+use WordpressStarter\Providers\LogServiceProvider;
 use WordpressStarter\Providers\WelcomeServiceProvider;
+use WordpressStarter\Services\StyleguidePage;
 use WordpressStarter\ThemeContext;
 use WP_Query;
 
@@ -198,10 +200,23 @@ class ContentSetupService
         foreach ($pages as $slug => $pageData) {
             $existing = get_page_by_path($slug);
             if ($existing) {
+                // Another one of these themes may already have claimed this page —
+                // do not steal it out from under it, and do not report it as our
+                // page either: adding a rejected slug to $createdPages left the
+                // Tools panel unable to find "its" styleguide (option/marker were
+                // never written) while the page still ended up in the menu, so a
+                // "create" click there would spawn a second styleguide page.
+                if ($slug === 'styleguide' && StyleguidePage::isClaimedByOtherTheme($existing->ID)) {
+                    LogServiceProvider::info('Content setup: styleguide page already claimed by another theme, skipping adoption', [
+                        'page_id' => $existing->ID,
+                    ]);
+                    continue;
+                }
+
                 $createdPages[$slug] = $existing->ID;
 
                 if ($slug === 'styleguide') {
-                    update_option(ThemeContext::optionKey('styleguide_page_id'), $existing->ID);
+                    StyleguidePage::adopt($existing->ID);
                 }
                 continue;
             }
@@ -242,7 +257,7 @@ class ContentSetupService
                 }
 
                 if ($slug === 'styleguide') {
-                    update_option(ThemeContext::optionKey('styleguide_page_id'), $pageId);
+                    StyleguidePage::adopt($pageId);
                     update_option(ThemeContext::optionKey('welcome_dismissed'), true);
                 }
 

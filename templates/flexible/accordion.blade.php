@@ -4,7 +4,13 @@
     Uses shared components: x-section, x-prose
     Fields: accordion (repeater with icon, title, content), background_color
 
-    Includes FAQPage JSON-LD schema for SEO rich snippets
+    Includes FAQPage JSON-LD schema for SEO rich snippets, gated to singular,
+    published, non-password-protected pages (see $canPublishFaqSchema below).
+    The primary guard against leaking a password-protected preview's Q&A is
+    that all three callers (page.blade.php, page-styleguide.blade.php,
+    page-member-area.blade.php) already gate the whole page_sections loop
+    behind post_password_required() before this template ever runs;
+    $canPublishFaqSchema repeats that check here as defence in depth.
 --}}
 
 @php
@@ -12,9 +18,14 @@
     $background = get_sub_field('background_color') ?: 'primary';
     $accordionId = uniqid();
 
+    // Checks that this is a singular, published, non-password-protected
+    // page — schema is only emitted for content the public can actually
+    // reach.
+    $canPublishFaqSchema = is_singular() && get_post_status() === 'publish' && !post_password_required();
+
     // Build FAQPage schema for SEO
     $faqQuestions = [];
-    if (!empty($items)) {
+    if ($canPublishFaqSchema && !empty($items)) {
         foreach ($items as $item) {
             if (!empty($item['title']) && !empty($item['content'])) {
                 $faqQuestions[] = [
@@ -30,12 +41,12 @@
     }
 @endphp
 
-@if(!empty($items))
+@if(!empty($items) || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" padding="md" class="accordion">
     <div class="max-w-2xl mx-auto">
         @php $itemCount = count($items); @endphp
         <div
-            class="flex flex-col overflow-hidden"
+            class="flex flex-col"
             x-data="{
                 active: null,
                 itemCount: {{ $itemCount }},
@@ -47,7 +58,13 @@
             }"
         >
             @foreach($items as $index => $item)
-                <div class="w-full overflow-hidden border-b border-line last:border-b-0">
+                {{-- Bewusst ohne overflow-hidden: weder an diesem Item-Wrapper noch am
+                     aeusseren x-data-Container zwei Ebenen hoeher. Der Kopf ist w-full und
+                     sitzt buendig an der Aussenkante, ein Zuschnitt haette den 2px-Fokusring
+                     links/rechts bei jedem Eintrag und oben beim ersten Eintrag
+                     weggeschnitten. x-collapse setzt overflow ohnehin selbst am Panel, nicht
+                     an diesen Containern. --}}
+                <div class="w-full border-b border-line last:border-b-0">
                     <button x-ref="accordion{{ $index }}"
                             id="accordion-header-{{ $accordionId }}-{{ $index }}"
                             @click="active = active === {{ $index }} ? null : {{ $index }}"
@@ -65,7 +82,7 @@
                             @endif
                             {{ $item['title'] }}
                         </span>
-                        <svg class="w-5 h-5 transition-all duration-200"
+                        <svg class="w-5 h-5 transition-transform duration-200"
                              :class="{ 'rotate-180': active === {{ $index }} }"
                              fill="none" stroke="currentColor" viewBox="0 0 24 24"
                              aria-hidden="true">
@@ -75,14 +92,20 @@
                     <div x-show="active === {{ $index }}"
                          x-collapse
                          id="accordion-content-{{ $accordionId }}-{{ $index }}"
-                         role="region"
+                         @if(count($items) < 7) role="region" @endif
                          :aria-labelledby="'accordion-header-{{ $accordionId }}-{{ $index }}'"
-                         class="mb-8">
+                         class="px-3 pt-1 mb-6">
                         <x-prose>@kses($item['content'])</x-prose>
                     </div>
                 </div>
             @endforeach
         </div>
+
+        @if(empty($items) && current_user_can('edit_posts'))
+            <div class="p-8 text-center rounded-lg bg-surface-secondary">
+                <p class="text-content-secondary">{{ __('Bitte füge mindestens einen Akkordeon-Eintrag hinzu.', 'wp-starter') }}</p>
+            </div>
+        @endif
     </div>
 </x-section>
 @endif
@@ -93,7 +116,11 @@
         $faqSchema = ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => $faqQuestions];
         $nonce = $GLOBALS['csp_nonce'] ?? '';
     @endphp
+    {{-- JSON_HEX_TAG als zweite Verteidigungslinie: escaped < und > in JSON-Strings
+         (unsichtbar nach dem Parsen), damit eine spaetere Lockerung von
+         wp_strip_all_tags oben nicht stillschweigend zu gespeichertem XSS ueber einen
+         </script>-Ausbruch wird. --}}
     <script type="application/ld+json" @if($nonce) nonce="{{ $nonce }}" @endif>
-        {!! wp_json_encode($faqSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+        {!! wp_json_encode($faqSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_HEX_TAG) !!}
     </script>
 @endif

@@ -92,6 +92,7 @@ tests/fixtures/compiled/
 !.husky/
 !.phpcs.xml.dist
 !.prettierrc
+!.prettierignore
 !.env.example
 !.releaserc.json
 

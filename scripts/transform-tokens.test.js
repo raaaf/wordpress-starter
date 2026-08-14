@@ -3,6 +3,7 @@ import {
   fluidClamp,
   fluidLineHeight,
   FLUID_SIZES,
+  HEADING_LINE_HEIGHTS,
   VIEWPORT_MIN,
   VIEWPORT_MAX,
   ROOT_PX,
@@ -140,31 +141,115 @@ describe('fluidClamp', () => {
 });
 
 describe('fluidLineHeight', () => {
-  it('returns a plain number when mobile equals desktop', () => {
-    expect(fluidLineHeight(1.4, 1.4)).toBe('1.4');
+  /**
+   * The predecessor of this function emitted `clamp(1.2, calc(1.44 - 0.0125vw), 1.4)`,
+   * which subtracts a length from a plain number. CSS drops the whole declaration, so
+   * every large heading silently inherited the body line-height of 1.5. The old tests
+   * did not catch it because they evaluated the arithmetic themselves instead of
+   * checking that the expression is something a browser will accept.
+   */
+  it('never mixes a unitless term with a length inside calc()', () => {
+    for (const [key, mobile, desktop] of [
+      ['6xl', 1.5, 1.1],
+      ['4xl', 1.4, 1.2],
+      ['3xl', 1.35, 1.25],
+      ['2xl', 1.4, 1.3],
+    ]) {
+      const result = fluidLineHeight(key, mobile, desktop);
+      const calc = result.match(/calc\(([^)]*)\)/);
+      expect(calc, `${key}: no calc() in ${result}`).not.toBeNull();
+      for (const term of calc[1].split(/\s*[+-]\s*/).filter(Boolean)) {
+        expect(term, `${key}: unitless term "${term}" in ${result}`).toMatch(
+          /^-?\d+(\.\d+)?(rem|px|em|vw|vh)$/
+        );
+      }
+      for (const bound of [
+        result.match(/^clamp\(([^,]+),/)[1],
+        result.match(/,\s*([^,]+)\)$/)[1],
+      ]) {
+        expect(bound.trim(), `${key}: unitless clamp bound in ${result}`).toMatch(/(rem|px|em)$/);
+      }
+    }
   });
 
-  it('produces a clamp() expression for fluid line-heights', () => {
-    const result = fluidLineHeight(1.5, 1.1);
-    expect(result).toMatch(/^clamp\(/);
+  it('hits the intended ratio at VIEWPORT_MIN', () => {
+    // 6xl is FLUID_SIZES['6xl'].min px at VIEWPORT_MIN, so a ratio of 1.5 means
+    // that many px of leading.
+    const lh = evaluate(fluidLineHeight('6xl', 1.5, 1.1), VIEWPORT_MIN);
+    expect(lh / FLUID_SIZES['6xl'].min).toBeCloseTo(1.5, 2);
   });
 
-  it('evaluates to mobile value at VIEWPORT_MIN', () => {
-    const result = fluidLineHeight(1.5, 1.1);
-    const lh = evaluate(result, VIEWPORT_MIN);
-    expect(lh).toBeCloseTo(1.5, 3);
+  it('hits the intended ratio at VIEWPORT_MAX', () => {
+    // 6xl is FLUID_SIZES['6xl'].max px at VIEWPORT_MAX, so a ratio of 1.1 means
+    // that many px of leading.
+    const lh = evaluate(fluidLineHeight('6xl', 1.5, 1.1), VIEWPORT_MAX);
+    expect(lh / FLUID_SIZES['6xl'].max).toBeCloseTo(1.1, 2);
   });
 
-  it('evaluates to desktop value at VIEWPORT_MAX', () => {
-    const result = fluidLineHeight(1.5, 1.1);
-    const lh = evaluate(result, VIEWPORT_MAX);
-    expect(lh).toBeCloseTo(1.1, 3);
+  it('keeps the ratio between the two endpoints across the range', () => {
+    const expr = fluidLineHeight('4xl', 1.4, 1.2);
+    const sizeExpr = fluidClamp(28, 36);
+    for (const vw of [320, 640, 960, 1280, 1600, 1920]) {
+      const ratio = evaluate(expr, vw) / evaluate(sizeExpr, vw);
+      expect(ratio, `ratio ${ratio} out of range at ${vw}px`).toBeGreaterThanOrEqual(1.2 - 0.001);
+      expect(ratio, `ratio ${ratio} out of range at ${vw}px`).toBeLessThanOrEqual(1.4 + 0.001);
+    }
   });
 
-  it('produces clean "- Xvw" syntax when desktop < mobile', () => {
-    const result = fluidLineHeight(1.5, 1.1);
-    expect(result).toMatch(/- \d/);
-    expect(result).not.toContain('+ -');
+  it('rejects an unknown size key instead of emitting nonsense', () => {
+    expect(() => fluidLineHeight('nope', 1.4, 1.2)).toThrow(/unknown size key/);
+  });
+
+  /**
+   * Measured from the shipped headline face via canvas TextMetrics: 1.022em from the
+   * top of A-umlaut to the bottom of a descender. Below that, consecutive lines touch;
+   * this floor keeps roughly a tenth of an em of air. Re-measure when the face changes.
+   */
+  const MIN_HEADING_LINE_HEIGHT = 1.1;
+
+  // Only display/h1/h2/h3 are fluid (mobile/desktop ratio endpoints tied to a
+  // FLUID_SIZES key). h4/h5/body are static ratios (see HEADING_LINE_HEIGHTS in
+  // transform-tokens.js) and are checked separately below.
+  const FLUID_HEADING_ENTRIES = Object.values(HEADING_LINE_HEIGHTS).filter((v) => 'key' in v);
+
+  it('keeps every heading above the ink height of the headline face', () => {
+    for (const { key, mobile, desktop } of FLUID_HEADING_ENTRIES) {
+      const { min: minPx, max: maxPx } = FLUID_SIZES[key];
+      const lhExpr = fluidLineHeight(key, mobile, desktop);
+      const sizeExpr = fluidClamp(minPx, maxPx);
+      for (const vw of [320, 768, 1280, 1920]) {
+        const ratio = evaluate(lhExpr, vw) / evaluate(sizeExpr, vw);
+        expect(ratio, `${key} at ${vw}px is ${ratio.toFixed(3)}`).toBeGreaterThanOrEqual(
+          MIN_HEADING_LINE_HEIGHT
+        );
+      }
+    }
+  });
+
+  it('keeps the ratio falling as the level rises, at both ends of the range', () => {
+    // Read straight from the single source of truth so a change to h4/h5/body in
+    // transform-tokens.js is caught here instead of being checked against a copy
+    // of itself.
+    const { static: h4 } = HEADING_LINE_HEIGHTS.h4;
+    const { static: h5 } = HEADING_LINE_HEIGHTS.h5;
+    const { static: body } = HEADING_LINE_HEIGHTS.body;
+
+    for (const vw of [320, 1920]) {
+      let previous = 0;
+      for (const { key, mobile, desktop } of FLUID_HEADING_ENTRIES) {
+        const { min: minPx, max: maxPx } = FLUID_SIZES[key];
+        const ratio =
+          evaluate(fluidLineHeight(key, mobile, desktop), vw) /
+          evaluate(fluidClamp(minPx, maxPx), vw);
+        expect(ratio, `${key} at ${vw}px breaks the descending curve`).toBeGreaterThan(previous);
+        previous = ratio;
+      }
+      // h4 and h5 are static and sit at the loose end of the curve.
+      expect(h4, `h4 at ${vw}px breaks the curve`).toBeGreaterThan(previous);
+      expect(h5).toBeGreaterThan(h4);
+      // Body stays clearly looser than every heading.
+      expect(body).toBeGreaterThan(h5);
+    }
   });
 });
 

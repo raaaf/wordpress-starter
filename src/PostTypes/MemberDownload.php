@@ -240,6 +240,7 @@ class MemberDownload extends AbstractPostType
                     'field_mdl_file',
                     __('Datei', 'wp-starter'),
                     'download_file',
+                    false,
                     'pdf,doc,docx,xls,xlsx,zip',
                     'array',
                     [

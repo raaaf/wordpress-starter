@@ -38,7 +38,7 @@
 @endphp
 
 <div class="inline-flex flex-col gap-1.5">
-    <label class="radio inline-flex items-center gap-2 cursor-pointer {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }} {{ $class }}">
+    <label class="radio inline-flex items-center gap-3 cursor-pointer {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }} {{ $class }}">
         <span class="relative flex items-center justify-center">
             <input
                 type="radio"
@@ -63,10 +63,14 @@
                     )
                 }}
                 peer-checked:border-surface-accent
+                peer-checked:*:scale-100
                 {{ $disabled ? 'peer-checked:border-line-disabled' : '' }}
             ">
-                {{-- Inner dot --}}
-                <span class="w-2.5 h-2.5 rounded-full transition-[transform,background-color] duration-200 scale-0 peer-checked:scale-100
+                {{-- Inner dot. Die Skalierung wird vom Ring aus gesteuert (peer-checked:*:),
+                     weil der Punkt ein Kind des Rings ist und nicht sein Geschwister — ein
+                     peer-checked: direkt am Punkt erzeugt `.peer:checked ~ .punkt` und das
+                     kann strukturell nie matchen. Der markierte Radio blieb dadurch hohl. --}}
+                <span class="w-2.5 h-2.5 rounded-full transition-[scale,background-color] duration-200 scale-0
                     {{ $disabled ? 'bg-content-disabled' : 'bg-surface-accent' }}
                 "></span>
             </span>

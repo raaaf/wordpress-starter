@@ -9,7 +9,7 @@
 @if (!empty($pagination))
     @php
         $baseClasses = 'px-4 py-2 rounded-lg border border-line text-content hover:bg-surface-secondary transition-colors';
-        $currentClasses = 'bg-surface-brand text-content-inverse border-surface-brand hover:bg-surface-brand';
+        $currentClasses = 'bg-surface-brand text-content-on-brand border-surface-brand hover:bg-surface-brand';
         $pageLabel = __('Seite ', 'wp-starter');
     @endphp
     <nav class="{{ $navClass ?? 'mt-16' }}" aria-label="{{ $ariaLabel ?? __('Navigation', 'wp-starter') }}">

@@ -2,7 +2,7 @@
 @php
     $authMode = function_exists('get_field') ? (get_field('member_auth_mode', 'option') ?: 'password') : 'password';
     $loginTitle = function_exists('get_field') ? (get_field('member_login_title', 'option') ?: __('Interner Bereich', 'wp-starter')) : __('Interner Bereich', 'wp-starter');
-    $loginDescription = function_exists('get_field') ? (get_field('member_login_description', 'option') ?: __('Bitte melden Sie sich an, um auf den internen Bereich zuzugreifen.', 'wp-starter')) : __('Bitte melden Sie sich an, um auf den internen Bereich zuzugreifen.', 'wp-starter');
+    $loginDescription = function_exists('get_field') ? (get_field('member_login_description', 'option') ?: __('Bitte melde dich an, um auf den internen Bereich zuzugreifen.', 'wp-starter')) : __('Bitte melde dich an, um auf den internen Bereich zuzugreifen.', 'wp-starter');
 @endphp
 
 <x-section background="primary" padding="xl">

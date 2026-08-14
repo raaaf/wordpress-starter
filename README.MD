@@ -4,15 +4,15 @@ My own WordPress theme framework as the basis for every client project. No page 
 
 ## Stack
 
-| Technology                    | Version        | Purpose                            |
-| ----------------------------- | -------------- | ---------------------------------- |
-| PHP                           | 8.3+           | Strict types, modern features      |
-| Laravel Blade                 | Illuminate v13 | Templating                         |
-| TailwindCSS                   | v4.1           | Utility CSS, design tokens         |
-| Alpine.js                     | v3.15          | Interactive components, bundled    |
-| Vite                          | 7.3            | Build tool with HMR                |
-| ACF Pro + ACF Extended (FREE) | -              | Flexible Content page builder      |
-| TypeScript                    | -              | Type-safe JS                       |
+| Technology                    | Version        | Purpose                         |
+| ----------------------------- | -------------- | ------------------------------- |
+| PHP                           | 8.3+           | Strict types, modern features   |
+| Laravel Blade                 | Illuminate v13 | Templating                      |
+| TailwindCSS                   | v4.1           | Utility CSS, design tokens      |
+| Alpine.js                     | v3.15          | Interactive components, bundled |
+| Vite                          | 7.3            | Build tool with HMR             |
+| ACF Pro + ACF Extended (FREE) | -              | Flexible Content page builder   |
+| TypeScript                    | -              | Type-safe JS                    |
 
 Gutenberg is disabled. Content model: Classic Editor + ACF Flexible Content.
 
@@ -98,42 +98,46 @@ npm run dev
 ```bash
 npm run dev          # Vite dev server with HMR (localhost:5180)
 npm run build        # Production build
+npm run tokens       # Generate resources/css/tokens.css from Figma export
+npm run tokens:watch # Watch Figma export and regenerate tokens.css
 npm run lint         # ESLint
 composer lint        # PHPCS + PHPStan
 composer test        # PHPUnit
 npm run test:e2e     # Playwright E2E tests
 npm run test:a11y    # Accessibility tests
+npm run test:styleguide # Styleguide page E2E test
+npm run icons         # Sync resources/icons/ from config/icons.json
 ```
 
 ## Service providers
 
 All providers in `src/Providers/` are registered automatically via `Application::boot()`.
 
-| Provider                            | Responsibility                                     |
-| ----------------------------------- | -------------------------------------------------- |
-| `ThemeServiceProvider`              | Theme support, theme version, template routing     |
-| `BladeServiceProvider`              | Blade engine, cache directory                      |
-| `AcfServiceProvider`                | ACF fields, Blade directives, REST API             |
-| `MenuServiceProvider`               | Register nav menus                                 |
-| `SecurityServiceProvider`           | CSP headers, nonces, HSTS                          |
-| `ImageServiceProvider`              | Custom image sizes                                 |
-| `PostTypeServiceProvider`           | CPTs and taxonomies                                |
-| `MemberAreaServiceProvider`         | Member area (login, downloads, SFTP sync)          |
-| `PluginServiceProvider`             | Plugin recommendations, setup wizard, content scaffolding |
-| `PluginConfiguratorServiceProvider` | Auto-configuration of plugins on activation         |
-| `WelcomeServiceProvider`            | Welcome notice, styleguide page, ACF options prefill |
-| `SeoServiceProvider`                | JSON-LD, OG tags, canonical URLs, robots meta      |
-| `DesignTokenServiceProvider`        | Token file upload/download/validation, CSS regeneration |
-| `CronServiceProvider`               | Transient and revision cleanup                     |
-| `LogServiceProvider`                | Structured logging to debug.log                    |
-| `ThemeUpdateProvider`               | GitHub-based theme updates                         |
+| Provider                            | Responsibility                                                                 |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| `ThemeServiceProvider`              | Theme support, theme version, template routing                                 |
+| `BladeServiceProvider`              | Blade engine, cache directory                                                  |
+| `AcfServiceProvider`                | ACF fields, Blade directives, REST API                                         |
+| `MenuServiceProvider`               | Register nav menus                                                             |
+| `SecurityServiceProvider`           | CSP headers, nonces, HSTS                                                      |
+| `ImageServiceProvider`              | Custom image sizes                                                             |
+| `PostTypeServiceProvider`           | CPTs and taxonomies                                                            |
+| `MemberAreaServiceProvider`         | Member area (login, downloads, SFTP sync)                                      |
+| `PluginServiceProvider`             | Plugin recommendations, setup wizard, content scaffolding                      |
+| `PluginConfiguratorServiceProvider` | Auto-configuration of plugins on activation                                    |
+| `WelcomeServiceProvider`            | Welcome notice, styleguide page, ACF options prefill                           |
+| `SeoServiceProvider`                | JSON-LD, OG tags, canonical URLs, robots meta                                  |
+| `DesignTokenServiceProvider`        | Token file upload/download/validation, CSS regeneration                        |
+| `CronServiceProvider`               | Transient and revision cleanup                                                 |
+| `LogServiceProvider`                | Structured logging to debug.log                                                |
+| `ThemeUpdateProvider`               | GitHub-based theme updates                                                     |
 | `AssetOptimizationServiceProvider`  | Defers non-critical scripts, preloads fonts/styles, inlines above-the-fold CSS |
-| `BrandingServiceProvider`           | Favicon, login logo, syncs ACF branding with WP core custom_logo/site_icon |
-| `EditorIntegrationServiceProvider`  | Disables Gutenberg and unused editor features, removes Global Styles output |
-| `EditorStylesServiceProvider`       | Editor stylesheet, style-select toolbar, custom formats, icon picker |
-| `IconShortcodeServiceProvider`      | Renders inline SVG icons via `[icon name="..."]` shortcode |
-| `LlmsTxtProvider`                   | Serves `/llms.txt` and `/llms-full.txt` for AI crawlers |
-| `MediaServiceProvider`              | SVG upload permissions, sanitization, dimension resolution |
+| `BrandingServiceProvider`           | Favicon, login logo, syncs ACF branding with WP core custom_logo/site_icon     |
+| `EditorIntegrationServiceProvider`  | Disables Gutenberg and unused editor features, removes Global Styles output    |
+| `EditorStylesServiceProvider`       | Editor stylesheet, style-select toolbar, custom formats, icon picker           |
+| `IconShortcodeServiceProvider`      | Renders inline SVG icons via `[icon name="..."]` shortcode                     |
+| `LlmsTxtProvider`                   | Serves `/llms.txt` and `/llms-full.txt` for AI crawlers                        |
+| `MediaServiceProvider`              | SVG upload permissions, sanitization, dimension resolution                     |
 
 ## Blade directives
 
@@ -153,7 +157,9 @@ All providers in `src/Providers/` are registered automatically via `Application:
 
 32 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
 
-**Structure:** one-column, two-columns, three-columns, four-columns, one-third-two-thirds, two-thirds-one-third, two-columns-images
+Grouped by function; the editor modal uses the ACF categories, see CLAUDE.md.
+
+**Structure:** one-column, one-column-image, two-columns, two-columns-images, three-columns, three-columns-images, four-columns, four-columns-images, one-third-two-thirds, two-thirds-one-third
 
 **Content:** hero, accordion, cta, button, image, video, divider
 
@@ -162,6 +168,8 @@ All providers in `src/Providers/` are registered automatically via `Application:
 **Forms:** contact-form, map
 
 **Posts:** posts, table
+
+**Internal area:** member-downloads
 
 ### Add a new layout
 
@@ -176,7 +184,7 @@ private static function myLayout(): array
         'label'                  => 'Mein Layout',
         'display'                => 'block',
         'sub_fields'             => FieldDefinitions::myFields('flex_my'),
-        'acfe_flexible_category' => self::CATEGORIES['content'],
+        'acfe_flexible_category' => self::getCategories()['content'],
     ];
 }
 ```

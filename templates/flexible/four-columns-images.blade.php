@@ -6,11 +6,8 @@
 --}}
 
 @php
-    $showHeader = get_sub_field('show_section_header');
-    $chip = $showHeader ? get_sub_field('section_chip') : null;
-    $headline = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_headline')) : null;
-    $description = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_description')) : null;
-    $alignment = $showHeader ? (get_sub_field('section_alignment') ?: 'center') : 'center';
+    ['chip' => $chip, 'headline' => $headline, 'description' => $description, 'alignment' => $alignment]
+        = \WordpressStarter\Helpers\SectionHeader::fields();
     $label_1 = get_sub_field('label_1');
     $image_1 = get_sub_field('image_1');
     $column_1 = get_sub_field('column_1');
@@ -53,7 +50,7 @@
     || $label_4 || ($image_4 && !empty($image_4['url'])) || $column_4 || !empty($accordion_4))
 <x-section :anchor="$sectionAnchor" :background="$background" class="four-columns-images">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
-    <x-grid cols="4" gap="xl" align="items-stretch">
+    <x-grid cols="4" gap="md" align="items-stretch">
         @foreach([1, 2, 3, 4] as $col)
             @php
                 $lbl = ${'label_' . $col};
@@ -64,28 +61,27 @@
             @endphp
             @if($lbl || ($img && !empty($img['url'])) || $text || !empty($acc))
             <x-card variant="outlined" padding="none" class="overflow-hidden">
-                @if($lbl)
-                    <div class="p-6 lg:p-8 pb-0 lg:pb-0">
-                        <p class="text-sm font-bold uppercase tracking-wider text-content-secondary mb-4">{{ $lbl }}</p>
-                    </div>
-                @endif
                 @if($imgId)
                     {!! wp_get_attachment_image($imgId, 'hero-split', false, [
-                        'class' => 'w-full object-cover',
-                        'alt' => $img['alt'] ?? '',
-                        'loading' => 'lazy',
+                        'class' => 'w-full aspect-[16/10] object-cover',
+                        'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imgId, $lbl ?: strip_tags((string) $text)),
                         'decoding' => 'async',
                     ]) !!}
                 @elseif($img && !empty($img['url']))
                     <img src="{{ $img['url'] }}"
                          alt="{{ $img['alt'] ?? '' }}"
                          @if(!empty($img['width']) && !empty($img['height']))width="{{ $img['width'] }}" height="{{ $img['height'] }}"@endif
-                         class="w-full object-cover"
+                         class="w-full aspect-[16/10] object-cover"
                          loading="lazy">
                 @endif
-                @if($text)
+                @if($lbl || $text)
                     <div class="p-6 lg:p-8">
-                        <x-prose>@kses($text)</x-prose>
+                        @if($lbl)
+                            <p class="text-sm font-bold uppercase tracking-wider text-content-secondary mb-2">{{ $lbl }}</p>
+                        @endif
+                        @if($text)
+                            <x-prose>@kses($text)</x-prose>
+                        @endif
                     </div>
                 @endif
                 @if(!empty($acc))

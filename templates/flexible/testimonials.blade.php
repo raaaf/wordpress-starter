@@ -5,7 +5,7 @@
     - 'manual': Uses repeater field for page-specific testimonials
     - 'cpt': Uses Testimonial CPT for centrally managed testimonials
 
-    Uses shared components: x-section, x-grid, x-card
+    Uses shared components: x-section, x-section-header, x-grid, x-card
     Fields: title, source, testimonials (repeater), columns, background_color
 --}}
 
@@ -37,11 +37,9 @@
     }
 @endphp
 
-@if($title || !empty($testimonials))
+@if(!empty($testimonials) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" class="testimonials">
-    @if($title)
-        <h2 class="mb-12 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($testimonials))
         <x-grid :cols="$columns" gap="lg">
@@ -61,10 +59,9 @@
                     <div class="flex items-center gap-4 mt-auto">
                         @if(!empty($testimonial['image']))
                             {!! wp_get_attachment_image($testimonial['image'], 'avatar', false, [
+                                'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $testimonial['image'], $testimonial['author'] ?? ''),
                                 'class' => 'object-cover w-12 h-12 rounded-full',
-                                'loading' => 'lazy',
                                 'sizes' => '48px',
-                                'alt' => '',
                             ]) !!}
                         @endif
                         <div>
@@ -77,6 +74,10 @@
                 </x-card>
             @endforeach
         </x-grid>
+    @elseif(current_user_can('edit_posts'))
+        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+            <p class="text-content-secondary">{{ __('Bitte füge Kundenstimmen hinzu oder wähle eine Quelle mit Einträgen.', 'wp-starter') }}</p>
+        </div>
     @endif
 </x-section>
 @endif

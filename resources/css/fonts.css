@@ -1,26 +1,19 @@
-/* Colaborate - Headline Font */
+/*
+ * Space Grotesk Variable - Headline Font
+ * Ersetzt die vorherige Headline-Font: nur ihr 300er Schnitt war je referenziert,
+ * alle Ueberschriften (Gewichte 500-700) wurden dadurch von Chrome synthetisch
+ * gefettet. Space Grotesk Variable deckt die Achse 300-700 in einer Datei ab
+ * statt sechs statischen Schnitten.
+ */
 @font-face {
-  font-display: swap;
-  font-family: 'ColaborateLight';
+  font-family: 'Space Grotesk Variable';
   font-style: normal;
-  font-weight: 300;
-  src: url('../fonts/colabthi-webfont.woff2') format('woff2');
-}
-
-@font-face {
   font-display: swap;
-  font-family: 'Colaborate';
-  font-style: normal;
-  font-weight: 400;
-  src: url('../fonts/ColabReg-webfont.woff2') format('woff2');
-}
-
-@font-face {
-  font-display: swap;
-  font-family: 'Colaborate';
-  font-style: normal;
-  font-weight: 700;
-  src: url('../fonts/colabbol-webfont.woff2') format('woff2');
+  font-weight: 300 700;
+  src: url('../fonts/space-grotesk-variable.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 /* Inter - Body Font */

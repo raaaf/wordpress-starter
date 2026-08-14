@@ -34,13 +34,16 @@
 @php
     // Base classes - common to all buttons
     // 'button' class is used for editor CSS overrides (prevents WordPress link styling)
-    $baseClasses = 'button inline-flex items-center justify-center font-semibold transition-[color,background,border-color,box-shadow,transform] duration-200 no-underline cursor-pointer select-none focus-visible:outline-none active:scale-[0.98]';
+    // active:scale-[0.98] is a Tailwind v4 `scale` utility, not `transform` --
+    // the transition list has to name the property that actually animates.
+    $baseClasses = 'button inline-flex items-center justify-center font-semibold transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-none active:scale-[0.98]';
 
     // Variants matching Figma design with gradients and shadows
     $variants = [
         'primary' => implode(' ', [
             'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)]',
-            'text-content-inverse',
+            // Follows the fill, not the page: see --text-on-accent in app.css.
+            'text-content-on-accent',
             'border border-line',
             'shadow-[var(--shadow-button)]',
             'hover:from-[var(--gradient-primary-hover-start)] hover:to-[var(--gradient-primary-hover-end)]',
@@ -71,10 +74,16 @@
         ]),
         'danger' => implode(' ', [
             'bg-surface-error-strong',
-            'text-content-on-color',
+            // Flips with the scheme, like the content on every other fill.
+            'text-content-inverse',
             'border border-transparent',
             'shadow-[var(--shadow-button)]',
-            'hover:bg-error-dark',
+            // The status ramp has only light/base/dark and --bg-error-strong
+            // already takes the end of it, so there is no token to step to.
+            // --bg-error-strong-hover (app.css) mixes towards black in light
+            // mode and towards white in dark mode, i.e. away from whichever
+            // text colour sits on top, same rule the primary gradient follows.
+            'hover:bg-[var(--bg-error-strong-hover)]',
             'hover:shadow-[var(--shadow-button-hover)]',
             'active:shadow-[var(--shadow-inner)]',
             'focus-visible:shadow-[var(--shadow-focus-ring)]',

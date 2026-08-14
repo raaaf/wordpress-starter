@@ -21,7 +21,9 @@
     $background_image = get_sub_field('background_image');
     $background_color = get_sub_field('background_color') ?: 'primary';
     $overlay_opacity = get_sub_field('overlay_opacity');
-    $overlay_opacity = is_numeric($overlay_opacity) ? (int) $overlay_opacity : 70;
+    // Fallback gleich dem ACF-Default, sonst weicht ein frisch angelegter Hero
+    // vor dem ersten Speichern von der Einstellung ab.
+    $overlay_opacity = is_numeric($overlay_opacity) ? (int) $overlay_opacity : 80;
 
     // Convert 0-100 to 0-1 for CSS opacity
     $overlay_opacity_css = $overlay_opacity / 100;
@@ -66,7 +68,26 @@
 @if($variant === 'background')
     @if($hasText || $hasBackgroundImage)
     {{-- BACKGROUND VARIANT: Full-width image with overlay --}}
-    <section class="hero hero--background relative overflow-hidden flex items-center" style="min-height: calc(100vh - var(--header-height, 80px)); min-height: calc(100dvh - var(--header-height, 80px));">
+    {{-- id nicht vergessen: die Varianten centered und split reichen den Anker
+         ueber x-section durch, diese hier rendert ein rohes section-Tag. Ohne id
+         lief jeder Anker-Link auf einen Hero mit Hintergrundbild ins Leere. --}}
+    @php($shouldAnimate = \WordpressStarter\Acf\Fields::option('animations_enabled', false))
+    {{-- Die Reveal-Attribute stehen hier von Hand, weil diese Variante als
+         einzige kein x-section nutzt: sie braucht die volle Viewporthoehe ohne
+         Container. Ohne sie war sie die einzige Sektion der ganzen Seite ohne
+         Einblendung, waehrend centered und split sie ueber x-section bekamen. --}}
+    <section
+        @if($sectionAnchor) id="{{ esc_attr($sectionAnchor) }}" @endif
+        @if($shouldAnimate)
+            x-data="{ shown: false }"
+            x-init="if (location.hash) shown = true"
+            x-on:hashchange.window="shown = true"
+            x-intersect.once.threshold.10="shown = true"
+            :class="{ 'is-visible': shown }"
+        @endif
+        class="hero hero--background relative overflow-hidden flex items-center"
+        style="min-height: calc(100vh - var(--header-height, 80px)); min-height: calc(100dvh - var(--header-height, 80px));"
+    >
         @if($background_image && (!empty($background_image['ID']) || !empty($background_image['url'])))
             <div class="absolute inset-0">
                 @if(!empty($background_image['ID']))
@@ -92,14 +113,14 @@
             <div class="absolute inset-0 bg-surface-brand"></div>
         @endif
 
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center text-center w-full">
+        <div class="hero-reveal relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center text-center w-full">
             <div class="max-w-3xl">
                 @if($badge)
-                    <x-badge variant="brand" style="outline" size="md" class="mb-4">{{ $badge }}</x-badge>
+                    <x-badge variant="brand" style="outline" size="md" class="mb-8">{{ $badge }}</x-badge>
                 @endif
 
                 @if($title)
-                    <{{ $heroHeadingTag }} class="text-display mb-6">
+                    <{{ $heroHeadingTag }} class="text-display mt-0! mb-6">
                         {!! $title !!}
                     </{{ $heroHeadingTag }}>
                 @endif
@@ -142,11 +163,11 @@
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
                 @if($badge)
-                    <x-badge variant="accent" size="md" class="mb-4">{{ $badge }}</x-badge>
+                    <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
                 @endif
 
                 @if($title)
-                    <{{ $heroHeadingTag }} class="mb-6">
+                    <{{ $heroHeadingTag }} class="mt-0! mb-6">
                         {!! $title !!}
                     </{{ $heroHeadingTag }}>
                 @endif
@@ -182,7 +203,7 @@
             @if($imageId)
                 <div class="relative">
                     {!! wp_get_attachment_image($imageId, 'hero-split', false, [
-                        'class' => 'w-full h-auto rounded-2xl shadow-xl',
+                        'class' => 'w-full h-auto rounded-[var(--card-radius)] shadow-xl',
                         'loading' => 'eager',
                         'fetchpriority' => 'high',
                         'sizes' => '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px',
@@ -194,7 +215,7 @@
                     <img src="{{ $image['url'] }}"
                          alt="{{ $image['alt'] ?? '' }}"
                          @if(!empty($image['width']) && !empty($image['height']))width="{{ $image['width'] }}" height="{{ $image['height'] }}"@endif
-                         class="w-full h-auto rounded-2xl shadow-xl"
+                         class="w-full h-auto rounded-[var(--card-radius)] shadow-xl"
                          loading="eager"
                          fetchpriority="high">
                 </div>
@@ -209,11 +230,11 @@
     <x-section :anchor="$sectionAnchor" :background="$background_color" padding="xl" class="hero hero--centered">
         <div class="max-w-3xl mx-auto text-center">
             @if($badge)
-                <x-badge variant="accent" size="md" class="mb-4">{{ $badge }}</x-badge>
+                <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
             @endif
 
             @if($title)
-                <{{ $heroHeadingTag }} class="mb-6">
+                <{{ $heroHeadingTag }} class="mt-0! mb-6">
                     {!! $title !!}
                 </{{ $heroHeadingTag }}>
             @endif

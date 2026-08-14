@@ -53,7 +53,7 @@ class MemberAreaServiceProvider extends ServiceProvider
             $user = wp_get_current_user();
             if (in_array('member_area_access', (array) $user->roles, true)) {
                 wp_die(
-                    esc_html__('Sie haben keinen Zugriff auf den Administrationsbereich.', 'wp-starter'),
+                    esc_html__('Du hast keinen Zugriff auf den Administrationsbereich.', 'wp-starter'),
                     403,
                 );
             }

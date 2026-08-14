@@ -1,7 +1,7 @@
 {{--
     Gallery - Flexible Content Layout
 
-    Uses shared components: x-section, x-grid
+    Uses shared components: x-section, x-section-header, x-grid
     Uses medium-zoom for lightbox functionality
     Uses wp_get_attachment_image() for automatic srcset/responsive images
     Fields: title, images (gallery), columns, background_color
@@ -14,11 +14,9 @@
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-@if($title || !empty($images))
+@if(!empty($images) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" class="gallery">
-    @if($title)
-        <h2 class="mb-12 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($images))
         <x-grid :cols="$columns" gap="md">
@@ -40,11 +38,18 @@
                         <button type="button" class="block w-full rounded-lg focus:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]" aria-label="{{ sprintf(__('Bild vergrößern: %s', 'wp-starter'), $accessibleLabel ?: __('Galeriebild', 'wp-starter')) }}">
                         {!! wp_get_attachment_image($imageId, 'gallery-thumb', false, [
                             'class' => 'object-cover w-full transition-transform duration-200 ease-out cursor-zoom-in aspect-square gallery-zoom group-hover:scale-[1.03]',
-                            'loading' => 'lazy',
                             'sizes' => '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw',
                             'data-zoom-src' => esc_url($full[0]),
                         ]) !!}
                         </button>
+                        {{-- Permanent zoom cue. The cursor change and the hover scale only
+                             exist for pointer devices, so touch had no signal at all. --}}
+                        <span
+                            class="absolute z-10 flex items-center justify-center w-8 h-8 rounded-full pointer-events-none top-2 right-2 bg-surface text-content shadow-[var(--shadow-card)]"
+                            aria-hidden="true"
+                        >
+                            <x-icon name="search" size="lg" />
+                        </span>
                         @if($caption)
                             <figcaption class="absolute inset-x-0 bottom-0 p-3 text-body-small text-content-inverse transition-opacity duration-200 ease-out opacity-0 bg-gradient-to-t from-surface-inverse/70 to-transparent group-hover:opacity-100 group-focus-within:opacity-100">
                                 {{ $caption }}
@@ -54,6 +59,10 @@
                 @endif
             @endforeach
         </x-grid>
+    @elseif(current_user_can('edit_posts'))
+        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+            <p class="text-content-secondary">{{ __('Bitte füge mindestens ein Bild hinzu.', 'wp-starter') }}</p>
+        </div>
     @endif
 </x-section>
 @endif

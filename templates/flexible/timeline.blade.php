@@ -1,7 +1,7 @@
 {{--
     Timeline Flexible Content Layout
 
-    Uses shared components: x-section, x-badge, x-card
+    Uses shared components: x-section, x-section-header, x-badge, x-card
     Fields: title, events (repeater: year, title, content, image), background_color
 --}}
 
@@ -11,18 +11,16 @@
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-@if($title || !empty($events))
+@if(!empty($events) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" class="timeline">
-    @if($title)
-        <h2 class="mb-12 text-center">@kses($title)</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($events))
         <div class="relative">
             {{-- Vertical line (decorative) --}}
             <div class="absolute hidden w-0.5 h-full transform -translate-x-1/2 md:block bg-line left-1/2" aria-hidden="true"></div>
 
-            <div class="space-y-12">
+            <ol class="space-y-12 list-none p-0 m-0">
                 @foreach($events as $index => $event)
                     @php
                         $year = $event['year'] ?? '';
@@ -31,12 +29,12 @@
                         $imageId = $event['image'] ?? null;
                         $isEven = $index % 2 === 0;
                     @endphp
-                    <div class="relative flex flex-col md:flex-row {{ $isEven ? '' : 'md:flex-row-reverse' }} items-center gap-8">
+                    <li class="relative flex flex-col md:flex-row {{ $isEven ? '' : 'md:flex-row-reverse' }} items-center gap-8">
                         {{-- Timeline dot (decorative) --}}
                         <div class="absolute z-10 hidden w-4 h-4 transform -translate-x-1/2 rounded-full md:block bg-surface-brand left-1/2" aria-hidden="true"></div>
 
                         {{-- Content card --}}
-                        <div class="w-full md:w-[calc(50%-2rem)] {{ $isEven ? 'md:text-right' : 'md:text-left' }}">
+                        <div class="w-full md:w-[calc(50%-2rem)] md:text-left">
                             <x-card variant="filled" padding="lg">
                                 @if($year)
                                     <x-badge variant="accent" size="md" class="mb-3">{{ $year }}</x-badge>
@@ -55,7 +53,6 @@
                                 @if($imageId)
                                     {!! wp_get_attachment_image($imageId, 'gallery-thumb', false, [
                                         'class' => 'mt-4 rounded-lg',
-                                        'loading' => 'lazy',
                                         'sizes' => '(max-width: 768px) 100vw, 50vw',
                                         'alt' => $eventTitle,
                                     ]) !!}
@@ -65,9 +62,13 @@
 
                         {{-- Spacer for other side --}}
                         <div class="hidden md:block md:w-[calc(50%-2rem)]"></div>
-                    </div>
+                    </li>
                 @endforeach
-            </div>
+            </ol>
+        </div>
+    @elseif(current_user_can('edit_posts'))
+        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+            <p class="text-content-secondary">{{ __('Bitte füge mindestens ein Ereignis hinzu.', 'wp-starter') }}</p>
         </div>
     @endif
 </x-section>

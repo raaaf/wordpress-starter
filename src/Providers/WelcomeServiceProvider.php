@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WordpressStarter\Providers;
 
 use WordpressStarter\Content\StyleguideLayoutData;
+use WordpressStarter\Services\StyleguidePage;
 use WordpressStarter\ThemeContext;
 
 /**
@@ -25,6 +26,17 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     public const STYLEGUIDE_IMAGE_META_KEY = '_wp_starter_styleguide_image';
 
+    /**
+     * Marker fuer Demo-Eintraege in den Custom Post Types.
+     *
+     * Die Layouts "Team" und "Kundenstimmen" koennen ihre Daten aus der
+     * jeweiligen Verwaltung ziehen. Ohne Eintraege dort rendert dieser Pfad
+     * nichts, er blieb deshalb in jeder visuellen Abnahme ungeprueft. Der Marker
+     * grenzt die vom Styleguide erzeugten Eintraege ab, damit das Regenerieren
+     * genau sie wieder entfernt und keine echten Inhalte anfasst.
+     */
+    public const STYLEGUIDE_DEMO_POST_META_KEY = '_wp_starter_styleguide_demo';
+
     private static function optActivated(): string
     {
         return ThemeContext::optionKey('theme_activated');
@@ -33,11 +45,6 @@ class WelcomeServiceProvider extends ServiceProvider
     private static function optDismissed(): string
     {
         return ThemeContext::optionKey('welcome_dismissed');
-    }
-
-    private static function optPageId(): string
-    {
-        return ThemeContext::optionKey('styleguide_page_id');
     }
 
     /**
@@ -51,19 +58,11 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private static function resolveStyleguidePageId(): int
     {
-        $pageId = (int) get_option(self::optPageId());
+        $pageId = StyleguidePage::find();
 
-        if ($pageId <= 0) {
-            return 0;
-        }
-
-        $post = get_post($pageId);
-
-        if (!$post || $post->post_type !== 'page') {
-            return 0;
-        }
-
-        return $pageId;
+        // AMBIGUOUS means several pages could be it. Treat that as "none" here:
+        // every caller of this method either deletes or overwrites the result.
+        return $pageId > 0 ? $pageId : 0;
     }
 
     private static function optImages(): string
@@ -104,6 +103,16 @@ class WelcomeServiceProvider extends ServiceProvider
     private static function nonceDeleteStyleguide(): string
     {
         return ThemeContext::kebabPrefix() . '-delete-styleguide';
+    }
+
+    private static function nonceMigrateStyleguide(): string
+    {
+        return ThemeContext::kebabPrefix() . '-migrate-styleguide';
+    }
+
+    private static function paramMigrateStyleguide(): string
+    {
+        return ThemeContext::kebabPrefix() . '-migrate-styleguide';
     }
 
     private static function paramCreateStyleguide(): string
@@ -151,6 +160,7 @@ class WelcomeServiceProvider extends ServiceProvider
     {
         add_action('admin_notices', [$this, 'displayWelcomeNotice']);
         add_action('admin_notices', [$this, 'displayImportOptionsNotice']);
+        add_action('admin_notices', [$this, 'displayStyleguideMigrationNotice']);
         add_action('admin_init', [$this, 'handleNoticeActions']);
     }
 
@@ -311,7 +321,7 @@ class WelcomeServiceProvider extends ServiceProvider
                 </p>
             </div>',
             esc_html__('Willkommen beim WP-Starter Theme!', 'wp-starter'),
-            esc_html__('Möchten Sie eine Styleguide-Seite erstellen? Diese enthält alle verfügbaren Farben, Typografie, Abstände und Block-Beispiele als visuelle Referenz.', 'wp-starter'),
+            esc_html__('Möchtest du eine Styleguide-Seite erstellen? Sie enthält alle verfügbaren Farben, Typografie, Abstände und Block-Beispiele als visuelle Referenz.', 'wp-starter'),
             esc_url($createUrl),
             esc_html__('Styleguide-Seite erstellen', 'wp-starter'),
             esc_url($dismissUrl),
@@ -328,6 +338,7 @@ class WelcomeServiceProvider extends ServiceProvider
         $this->handleRegenerateStyleguide();
         $this->handleRestoreStyleguide();
         $this->handleDeleteStyleguide();
+        $this->handleMigrateStyleguide();
         $this->handleDismiss();
         $this->handleImportOptions();
     }
@@ -348,7 +359,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Sie haben keine Berechtigung für diese Aktion.', 'wp-starter'));
+            wp_die(esc_html__('Du hast keine Berechtigung für diese Aktion.', 'wp-starter'));
         }
 
         update_option(self::optAcfPrefillPending(), true);
@@ -436,13 +447,12 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         if (!current_user_can('publish_pages')) {
-            wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu erstellen.', 'wp-starter'));
+            wp_die(esc_html__('Du hast keine Berechtigung, Seiten zu erstellen.', 'wp-starter'));
         }
 
         $pageId = $this->createStyleguidePage();
 
         if ($pageId) {
-            update_option(self::optPageId(), $pageId);
             update_option(self::optDismissed(), true);
 
             $editUrl = get_edit_post_link($pageId, 'url');
@@ -493,7 +503,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         if (!current_user_can('publish_pages')) {
-            wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu erstellen.', 'wp-starter'));
+            wp_die(esc_html__('Du hast keine Berechtigung, Seiten zu erstellen.', 'wp-starter'));
         }
 
         $existingPageId = self::resolveStyleguidePageId();
@@ -501,10 +511,11 @@ class WelcomeServiceProvider extends ServiceProvider
             wp_delete_post($existingPageId, true);
         }
 
+        $this->deleteDemoMedia();
+
         $pageId = $this->createStyleguidePage();
 
         if ($pageId) {
-            update_option(self::optPageId(), $pageId);
             update_option(self::optDismissed(), true);
 
             $editUrl = get_edit_post_link($pageId, 'url');
@@ -534,7 +545,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         if (!current_user_can('publish_pages')) {
-            wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu bearbeiten.', 'wp-starter'));
+            wp_die(esc_html__('Du hast keine Berechtigung, Seiten zu bearbeiten.', 'wp-starter'));
         }
 
         $existingPageId = self::resolveStyleguidePageId();
@@ -568,14 +579,14 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         if (!current_user_can('delete_pages')) {
-            wp_die(esc_html__('Sie haben keine Berechtigung, Seiten zu löschen.', 'wp-starter'));
+            wp_die(esc_html__('Du hast keine Berechtigung, Seiten zu löschen.', 'wp-starter'));
         }
 
         $existingPageId = self::resolveStyleguidePageId();
         if ($existingPageId > 0) {
             wp_delete_post($existingPageId, true);
         }
-        delete_option(self::optPageId());
+        StyleguidePage::forget();
 
         wp_safe_redirect(admin_url('admin.php?page=theme-options-tools'));
         exit;
@@ -586,9 +597,111 @@ class WelcomeServiceProvider extends ServiceProvider
      *
      * @return int Post ID on success, 0 on failure
      */
+    /**
+     * Offer the switch to the component-rendered styleguide.
+     *
+     * Deliberately a notice and not an automatic migration: this writes over a page
+     * on a site we know nothing about. The user clicks, or nothing happens.
+     *
+     * When several pages could be the styleguide, say so instead of picking one.
+     */
+    public function displayStyleguideMigrationNotice(): void
+    {
+        if (!current_user_can('publish_pages') || !ThemeContext::isActiveOnCurrentSite()) {
+            return;
+        }
+
+        $pageId = StyleguidePage::find();
+
+        if ($pageId === StyleguidePage::AMBIGUOUS) {
+            printf(
+                '<div class="notice notice-warning"><p>%s</p></div>',
+                esc_html__(
+                    'Mehrere Seiten kommen als Styleguide in Frage. Öffne die richtige Seite und wähle dort das Template "Styleguide" aus; automatisch wird hier nichts geändert.',
+                    'wp-starter'
+                )
+            );
+
+            return;
+        }
+
+        if ($pageId <= 0 || !StyleguidePage::needsMigration($pageId)) {
+            return;
+        }
+
+        $url = wp_nonce_url(
+            add_query_arg(self::paramMigrateStyleguide(), '1', admin_url()),
+            self::nonceMigrateStyleguide()
+        );
+
+        printf(
+            '<div class="notice notice-info"><p>%s</p><p><a href="%s" class="button button-primary">%s</a> <a href="%s">%s</a></p></div>',
+            esc_html__(
+                'Der Styleguide zeigt die Design-System-Referenz noch als kopiertes HTML. Die neue Fassung rendert sie aus den echten Komponenten, bleibt damit automatisch aktuell und behaelt die Layout-Galerie.',
+                'wp-starter'
+            ),
+            esc_url($url),
+            esc_html__('Styleguide umstellen', 'wp-starter'),
+            esc_url( (string) get_edit_post_link($pageId, 'url') ),
+            esc_html__('Seite vorher ansehen', 'wp-starter')
+        );
+    }
+
+    /**
+     * Switch the styleguide page over: new template, layout gallery rebuilt.
+     *
+     * The gallery is regenerated rather than filtered, because the old content mixed
+     * reference sections and gallery sections in one flat list with no marker to tell
+     * them apart. Regenerating is safe here and only here: the page is generated
+     * content that nobody edits by hand, and it is identified by its own marker.
+     */
+    private function handleMigrateStyleguide(): void
+    {
+        if (!isset($_GET[self::paramMigrateStyleguide()])) {
+            return;
+        }
+
+        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
+
+        if (!wp_verify_nonce($nonce, self::nonceMigrateStyleguide())) {
+            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
+        }
+
+        if (!current_user_can('publish_pages')) {
+            wp_die(esc_html__('Du hast keine Berechtigung für diese Aktion.', 'wp-starter'));
+        }
+
+        if (!function_exists('update_field')) {
+            wp_die(esc_html__('ACF Pro ist nicht aktiv. Ohne ACF kann der Styleguide nicht umgestellt werden.', 'wp-starter'));
+        }
+
+        $pageId = StyleguidePage::find();
+
+        if ($pageId <= 0) {
+            wp_die(esc_html__('Es wurde keine eindeutige Styleguide-Seite gefunden.', 'wp-starter'));
+        }
+
+        $this->importPlaceholderImages();
+
+        update_post_meta($pageId, '_wp_page_template', StyleguidePage::TEMPLATE);
+        StyleguidePage::adopt($pageId);
+
+        $factory = new StyleguideLayoutData($this->imageIds);
+        update_field('page_sections', $factory->build(), $pageId);
+
+        $viewUrl = get_permalink($pageId);
+
+        if ($viewUrl) {
+            wp_safe_redirect($viewUrl);
+            exit;
+        }
+    }
+
     private function createStyleguidePage(): int
     {
         $this->importPlaceholderImages();
+        $this->importDemoVideo();
+        $this->createDemoCptEntries();
 
         $pageId = wp_insert_post([
             'post_title' => __('Styleguide', 'wp-starter'),
@@ -602,7 +715,8 @@ class WelcomeServiceProvider extends ServiceProvider
             return 0;
         }
 
-        update_post_meta($pageId, '_wp_page_template', 'page-flexible.blade.php');
+        update_post_meta($pageId, '_wp_page_template', StyleguidePage::TEMPLATE);
+        StyleguidePage::adopt($pageId);
 
         $factory = new StyleguideLayoutData($this->imageIds);
         $layouts = $factory->build();
@@ -649,6 +763,16 @@ class WelcomeServiceProvider extends ServiceProvider
                 if ($attachmentId) {
                     $this->imageIds["placeholder_{$i}"] = $attachmentId;
                 }
+            }
+        }
+
+        // Ein echtes Hochformat, damit die Teamportraits zeigen, was sie auf
+        // Kundenseiten zeigen: 4:5 statt eines quer beschnittenen Querformats.
+        $portrait = $assetsDir . 'placeholder-portrait.jpg';
+        if (file_exists($portrait)) {
+            $portraitId = $this->importImage($portrait, __('Styleguide Portrait', 'wp-starter'));
+            if ($portraitId) {
+                $this->imageIds['portrait'] = $portraitId;
             }
         }
 
@@ -702,6 +826,11 @@ class WelcomeServiceProvider extends ServiceProvider
             'post_status' => 'inherit',
             'meta_input' => [
                 self::STYLEGUIDE_IMAGE_META_KEY => 1,
+                // Ohne Alt-Text meldet Text::imageAlt bei jedem Aufruf eine
+                // Luecke, und zwar zu Recht: 44 Bilder der Styleguide-Seite
+                // waren fuer Screenreader stumm. Der Text benennt, was das Bild
+                // ist, statt so zu tun, als zeige es etwas.
+                '_wp_attachment_image_alt' => $title,
             ],
         ];
 
@@ -716,5 +845,171 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         return $attachmentId;
+    }
+
+    /**
+     * Demo-Eintraege fuer die Custom Post Types anlegen.
+     *
+     * Die Layouts "Team" und "Kundenstimmen" bieten die Quelle "aus der
+     * Verwaltung" an. Ohne Eintraege dort rendert das Layout nur seine
+     * Ueberschrift, weshalb dieser Renderpfad nie visuell abgenommen wurde.
+     *
+     * Bestehende Demo-Eintraege werden vorher entfernt, damit ein erneutes
+     * Generieren keine Duplikate hinterlaesst. Eintraege ohne Marker bleiben
+     * unangetastet, echte Inhalte sind also sicher.
+     */
+    private function createDemoCptEntries(): void
+    {
+        $this->deleteDemoCptEntries();
+
+        $testimonials = [
+            ['Sabine Vogel', 'Bereichsleiterin, Nordwind AG', 'Die Zusammenarbeit war strukturiert und termintreu. Wir haben jede Woche gesehen, woran gearbeitet wurde.'],
+            ['Jonas Hartmann', 'Inhaber, Hartmann Werkstoffe', 'Aus einer alten Seite wurde ein Werkzeug, mit dem unser Team selbst arbeiten kann.'],
+            ['Elif Demir', 'Marketing, Stadtwerke Süd', 'Besonders geholfen hat die klare Struktur der Inhalte. Pflege dauert heute Minuten statt Stunden.'],
+        ];
+
+        foreach ($testimonials as $index => [$name, $role, $quote]) {
+            $postId = wp_insert_post([
+                'post_title' => $name,
+                'post_type' => 'testimonial',
+                'post_status' => 'publish',
+                'meta_input' => [self::STYLEGUIDE_DEMO_POST_META_KEY => 1],
+            ]);
+
+            if (!$postId || is_wp_error($postId)) {
+                continue;
+            }
+
+            if (function_exists('update_field')) {
+                update_field('author_name', $name, $postId);
+                update_field('author_position', $role, $postId);
+                update_field('content', $quote, $postId);
+            }
+
+            $imageId = $this->imageIds['placeholder_' . ( ( $index % 6 ) + 1 )] ?? null;
+            if ($imageId) {
+                set_post_thumbnail($postId, (int) $imageId);
+            }
+        }
+
+        $members = [
+            ['Anna Weber', 'Geschäftsführerin', 'Seit 2015 verantwortet Anna Strategie und Kundenbeziehungen.', 'anna@beispiel.de', 'https://www.linkedin.com/in/beispiel-weber'],
+            ['Michael Braun', 'Technischer Leiter', 'Michael verantwortet Architektur und Entwicklung.', 'michael@beispiel.de', ''],
+            ['Sarah Klein', 'Marketing Managerin', 'Sarah bringt die Projekte zu ihrer Zielgruppe.', '', 'https://www.linkedin.com/in/beispiel-klein'],
+        ];
+
+        foreach ($members as $index => [$name, $position, $bio, $email, $linkedin]) {
+            $postId = wp_insert_post([
+                'post_title' => $name,
+                'post_type' => 'team_member',
+                'post_status' => 'publish',
+                'meta_input' => [self::STYLEGUIDE_DEMO_POST_META_KEY => 1],
+            ]);
+
+            if (!$postId || is_wp_error($postId)) {
+                continue;
+            }
+
+            if (function_exists('update_field')) {
+                update_field('position', $position, $postId);
+                update_field('bio', $bio, $postId);
+                update_field('display_order', $index + 1, $postId);
+                // Bewusst unterschiedlich befuellt: eine Person mit beiden
+                // Kontaktwegen, eine mit einem, eine ohne. So zeigt der
+                // Styleguide auch die Faelle, in denen Icons fehlen.
+                update_field('email', $email, $postId);
+                update_field('linkedin', $linkedin, $postId);
+                update_field('phone', '', $postId);
+                update_field('xing', '', $postId);
+            }
+
+            // Teamportraits nutzen das Hochformat, sonst zeigt der Styleguide
+            // einen quer beschnittenen Schnappschuss statt eines Portraits.
+            $imageId = $this->imageIds['portrait'] ?? ( $this->imageIds['placeholder_' . ( ( $index % 6 ) + 1 )] ?? null );
+            if ($imageId) {
+                set_post_thumbnail($postId, (int) $imageId);
+            }
+        }
+    }
+
+    /**
+     * Vom Styleguide erzeugte Demo-Eintraege wieder entfernen.
+     */
+    private function deleteDemoCptEntries(): void
+    {
+        $posts = get_posts([
+            'post_type' => ['testimonial', 'team_member'],
+            'post_status' => 'any',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+            'meta_key' => self::STYLEGUIDE_DEMO_POST_META_KEY,
+        ]);
+
+        foreach ($posts as $postId) {
+            wp_delete_post( (int) $postId, true);
+        }
+    }
+
+    /**
+     * Demo-Video in die Mediathek importieren.
+     *
+     * Eigener Schritt und nicht Teil von importPlaceholderImages(): jene Methode
+     * kehrt frueh zurueck, sobald die Bilder schon im Option-Cache stehen, und
+     * haette das Video auf jeder bereits eingerichteten Site uebersprungen.
+     *
+     * Ohne diese Datei zeigten die Video-Varianten "Mediathek" und "Externer
+     * Link" nur den Redakteurshinweis, ihr Renderpfad blieb ungeprueft.
+     */
+    private function importDemoVideo(): void
+    {
+        $existing = $this->imageIds['video_demo'] ?? null;
+        if ($existing && wp_get_attachment_url( (int) $existing)) {
+            return;
+        }
+
+        $file = get_stylesheet_directory() . '/assets/videos/styleguide-demo.mp4';
+        if (!file_exists($file)) {
+            return;
+        }
+
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/media.php';
+        require_once ABSPATH . 'wp-admin/includes/image.php';
+
+        $attachmentId = $this->importImage($file, __('Styleguide Demo-Video', 'wp-starter'));
+        if (!$attachmentId) {
+            return;
+        }
+
+        $this->imageIds['video_demo'] = $attachmentId;
+        update_option(self::optImages(), $this->imageIds);
+    }
+
+    /**
+     * Vom Styleguide importierte Medien entfernen.
+     *
+     * Ohne diesen Schritt bleiben einmal importierte Platzhalter fuer immer
+     * liegen: importPlaceholderImages() kehrt frueh zurueck, sobald die IDs im
+     * Option-Cache stehen. Wer die Dateien im Theme austauscht, bekommt sonst
+     * weiter die alten, samt der Zuschnitte, die es damals gab.
+     */
+    private function deleteDemoMedia(): void
+    {
+        $attachments = get_posts([
+            'post_type' => 'attachment',
+            'post_status' => 'any',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+            'meta_key' => self::STYLEGUIDE_IMAGE_META_KEY,
+        ]);
+
+        foreach ($attachments as $id) {
+            wp_delete_attachment( (int) $id, true);
+        }
+
+        delete_option(self::optImages());
+        $this->imageIds = [];
     }
 }

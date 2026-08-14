@@ -23,7 +23,7 @@ class PluginInstaller
         if (!current_user_can('install_plugins')) {
             return [
                 'success' => false,
-                'message' => __('Sie haben keine Berechtigung, Plugins zu installieren.', 'wp-starter'),
+                'message' => __('Du hast keine Berechtigung, Plugins zu installieren.', 'wp-starter'),
             ];
         }
 
@@ -141,7 +141,7 @@ class PluginInstaller
         if (!current_user_can('activate_plugins')) {
             return [
                 'success' => false,
-                'message' => __('Sie haben keine Berechtigung, Plugins zu aktivieren.', 'wp-starter'),
+                'message' => __('Du hast keine Berechtigung, Plugins zu aktivieren.', 'wp-starter'),
             ];
         }
 

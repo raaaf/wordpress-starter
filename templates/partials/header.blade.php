@@ -6,6 +6,20 @@
 
 <head>
     <meta charset="{{ get_bloginfo('charset') }}">
+    @if($colorScheme === 'system')
+        {{-- Gespeicherte Auswahl setzen, bevor das erste Pixel gemalt wird. Ohne
+             das blitzt bei jedem Laden kurz der andere Modus auf. --}}
+        <script>
+            (function () {
+                try {
+                    var m = localStorage.getItem('wp-starter-theme');
+                    if (m === 'light' || m === 'dark') {
+                        document.documentElement.setAttribute('data-theme', m);
+                    }
+                } catch (e) {}
+            })();
+        </script>
+    @endif
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="pingback" href="{{ esc_url(get_bloginfo('pingback_url')) }}">
 

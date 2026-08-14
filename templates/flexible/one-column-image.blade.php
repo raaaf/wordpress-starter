@@ -6,11 +6,8 @@
 --}}
 
 @php
-    $showHeader = get_sub_field('show_section_header');
-    $chip = $showHeader ? get_sub_field('section_chip') : null;
-    $headline = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_headline')) : null;
-    $description = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_description')) : null;
-    $alignment = $showHeader ? (get_sub_field('section_alignment') ?: 'center') : 'center';
+    ['chip' => $chip, 'headline' => $headline, 'description' => $description, 'alignment' => $alignment]
+        = \WordpressStarter\Helpers\SectionHeader::fields();
     $label = get_sub_field('label');
     $image = get_sub_field('image');
     $content = get_sub_field('content');
@@ -44,8 +41,7 @@
             @if($imageId)
                 {!! wp_get_attachment_image($imageId, 'hero-split', false, [
                     'class' => 'w-full object-cover',
-                    'alt' => $image['alt'] ?? '',
-                    'loading' => 'lazy',
+                    'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $label ?: strip_tags((string) $content)),
                     'decoding' => 'async',
                 ]) !!}
             @elseif($image && !empty($image['url']))

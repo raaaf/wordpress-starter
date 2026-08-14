@@ -1,7 +1,7 @@
 {{--
     Cards / Features - Flexible Content Layout
 
-    Uses shared components: x-section, x-grid, x-card, x-link
+    Uses shared components: x-section, x-section-header, x-grid, x-card, x-link
     Fields: title, cards (repeater: icon, title, content, link), columns, background_color
 --}}
 
@@ -12,11 +12,9 @@
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-@if($title || !empty($cards))
+@if(!empty($cards) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :background="$background" class="cards">
-    @if($title)
-        <h2 class="mb-12 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :headline="$title" />
 
     @if(!empty($cards))
         <x-grid :cols="$columns" gap="lg">
@@ -56,6 +54,10 @@
                 </x-card>
             @endforeach
         </x-grid>
+    @elseif(current_user_can('edit_posts'))
+        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+            <p class="text-content-secondary">{{ __('Bitte füge mindestens eine Karte hinzu.', 'wp-starter') }}</p>
+        </div>
     @endif
 </x-section>
 @endif

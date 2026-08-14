@@ -5,9 +5,10 @@
     $footerText = \WordpressStarter\Acf\Fields::option('footer_text', '');
 
     // Navigation column
-    $showNav = \WordpressStarter\Acf\Fields::option('footer_show_nav', true);
-    $navTitle = \WordpressStarter\Acf\Fields::option('footer_nav_title') ?: __('Navigation', 'wp-starter');
     $navMenu = \WordpressStarter\Acf\Fields::option('footer_nav_menu', 'footer-menu');
+    // Ohne zugewiesenes Menü blieben sonst eine leere Überschrift und ein leeres nav-Landmark stehen.
+    $showNav = \WordpressStarter\Acf\Fields::option('footer_show_nav', true) && has_nav_menu($navMenu);
+    $navTitle = \WordpressStarter\Acf\Fields::option('footer_nav_title') ?: __('Navigation', 'wp-starter');
 
     // Contact column
     $showContact = \WordpressStarter\Acf\Fields::option('footer_show_contact', true);
@@ -20,7 +21,8 @@
     // Bottom bar
     $defaultCopyright = __('© {year} Firmenname. Alle Rechte vorbehalten.', 'wp-starter');
     $copyrightText = \WordpressStarter\Acf\Fields::option('copyright_text') ?: $defaultCopyright;
-    $showLegal = \WordpressStarter\Acf\Fields::option('footer_show_legal', true);
+    // Ohne zugewiesenes Menü blieben sonst eine leere Überschrift und ein leeres nav-Landmark stehen.
+    $showLegal = \WordpressStarter\Acf\Fields::option('footer_show_legal', true) && has_nav_menu('legal-menu');
 
     // Get contact info from general settings
     $company = \WordpressStarter\Acf\Fields::option('company_name', '');
@@ -123,7 +125,10 @@
                                 <a href="{{ esc_url($social['url']) }}"
                                    target="_blank"
                                    rel="noopener noreferrer"
-                                   class="text-content-secondary hover:text-content transition-colors"
+                                   {{-- 44px Klickflaeche wie bei den Team-Icons. Das sichtbare Symbol bleibt
+                                        24px, nur der anklickbare Bereich waechst; der negative Rand
+                                        haelt den optischen Abstand. --}}
+                                   class="inline-flex items-center justify-center w-11 h-11 -m-2 text-content-secondary hover:text-content transition-colors rounded-full focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
                                    aria-label="{{ ($social['platform'] ?? 'Social Media') . ' ' . __('(öffnet in neuem Tab)', 'wp-starter') }}">
                                     @switch($social['platform'] ?? '')
                                         @case('facebook')

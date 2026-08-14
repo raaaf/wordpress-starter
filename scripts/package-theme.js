@@ -1,4 +1,4 @@
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
 import { createWriteStream, existsSync, mkdirSync } from 'fs';
 import { readFile } from 'fs/promises';
 import { join, dirname } from 'path';
@@ -25,7 +25,7 @@ async function packageTheme() {
 
   const zipPath = join(outputDir, `${themeName}-${version}.zip`);
   const output = createWriteStream(zipPath);
-  const archive = archiver('zip', { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
 
   return new Promise((resolve, reject) => {
     output.on('close', () => {
@@ -73,10 +73,28 @@ async function packageTheme() {
       'languages',
     ];
 
+    // Generated per-site by bin/setup.php; acf-options.php also carries real client
+    // contact data (company name, address, phone, email). Never ship these in the zip.
+    const generatedConfigFiles = [
+      'setup-options.php',
+      'plugins-to-install.php',
+      'acf-options.php',
+      'acf-options.php.processed',
+    ];
+
     for (const dir of directories) {
       const dirPath = join(rootDir, dir);
       if (existsSync(dirPath)) {
-        archive.directory(dirPath, `${themeName}/${dir}`);
+        archive.directory(dirPath, `${themeName}/${dir}`, (entryData) => {
+          // macOS-Muell gehoert in kein ausgeliefertes Zip.
+          if (entryData.name.split('/').pop() === '.DS_Store') {
+            return false;
+          }
+
+          return dir === 'config' && generatedConfigFiles.includes(entryData.name)
+            ? false
+            : entryData;
+        });
       }
     }
 

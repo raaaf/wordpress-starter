@@ -1279,6 +1279,14 @@ class DesignTokenServiceProvider extends ServiceProvider
     /**
      * Run the Node.js token transform script and Vite build
      *
+     * Runs synchronously and blocks the PHP worker for the whole build. That is
+     * deliberate: the only callers are admin actions (token upload, regenerate,
+     * restore), so this is a handful of requests by a handful of people, and the
+     * thing a background job would take away is exactly the thing worth having
+     * here — the admin learns immediately whether the build succeeded. Moving it
+     * to WP-Cron or Action Scheduler would trade that certainty for job status,
+     * polling and a stuck-job story. Decided and closed as issue #10.
+     *
      * @return array{success: bool, message: string, details?: string, duration?: float}
      */
     private function runTokenTransform(): array

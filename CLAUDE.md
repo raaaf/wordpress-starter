@@ -16,11 +16,28 @@ Guidance for Claude Code when working with this WordPress starter theme.
 npm run dev        # Development with HMR
 npm run build      # Production build
 npm run lint       # JS/TS linting
+npm run icons      # Sync resources/icons/ from config/icons.json
 npm run test:e2e   # Playwright E2E tests
 npm run test:a11y  # Accessibility tests
+npm run test:styleguide  # Styleguide-Seite (braucht WP_USER + WP_PASSWORD, siehe unten)
 composer lint      # PHP linting (phpcs + phpstan)
 composer test      # PHPUnit tests
 ```
+
+### E2E gegen die Styleguide-Seite
+
+Die Styleguide-Seite ist `private` und damit nur eingeloggt erreichbar. Der Spec
+`tests/e2e/styleguide.spec.ts` prueft dort Sprungnavigation, Anker-Eindeutigkeit,
+Farbschema-Umschalter und axe-Verstoesse. Ohne Zugangsdaten ueberspringt er sich
+selbst, statt rot zu werden.
+
+```bash
+PLAYWRIGHT_BASE_URL=https://wordpress.local \
+WP_USER=<login> WP_PASSWORD=<passwort> \
+npm run test:styleguide
+```
+
+Optional: `WP_STYLEGUIDE_PATH` (Standard `/styleguide/`).
 
 ## Architecture
 
@@ -32,22 +49,30 @@ src/                    # PHP source code
 ├── PostTypes/         # Custom Post Types (AbstractPostType, Testimonial)
 ├── Taxonomies/        # Custom Taxonomies (AbstractTaxonomy)
 ├── Providers/         # Service providers
+├── Services/          # StyleguidePage.php
+├── Content/           # Styleguide reference/data classes
+├── Helpers/           # Text.php, SectionHeader.php (used across templates/flexible/)
 ├── RateLimiter.php    # AJAX rate limiting
 templates/             # Blade templates
 ├── layouts/          # Base layouts
 ├── partials/         # Reusable partials
 ├── components/       # Blade components
 ├── flexible/         # Flexible Content layouts (32 layouts)
+├── styleguide/        # Styleguide page sections (components, tokens)
+├── page-styleguide.blade.php # Styleguide page template
 resources/
 ├── css/              # TailwindCSS + tokens.css
 ├── js/               # TypeScript + Alpine.js
+config/
+├── icons.json         # Single source of truth for theme icons
+scripts/
+├── sync-icons.js      # Generates resources/icons/ from config/icons.json
 tests/
 ├── Unit/             # PHPUnit tests
 ├── js/               # Vitest tests
 ├── e2e/              # Playwright E2E tests
 docs/                 # Documentation
 ├── ARCHITECTURE.md        # Service provider pattern
-├── BLOCK-DEVELOPMENT.md   # Adding new flexible layouts
 ├── COMPONENT-DEVELOPMENT.md # Adding new Blade components
 ├── DEPLOYMENT.md          # Production deployment
 ├── SECURITY.md            # Security practices
@@ -110,16 +135,17 @@ All pages use Flexible Content as the primary content builder. 32 layouts in `te
 
 ### Layout Categories (ACF Extended)
 
-| Category   | Layouts                                                                                                                                                         |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Header     | hero                                                                                                                                                            |
-| Layout     | one-column, two-columns, three-columns, four-columns, one-third-two-thirds, two-thirds-one-third, two-columns-images, three-columns-images, four-columns-images |
-| Inhalte    | accordion, tabs, cta, button                                                                                                                                    |
-| Medien     | image, video, gallery, before-after                                                                                                                             |
-| Interaktiv | testimonials, cards, stats, timeline, team, pricing-table, member-downloads                                                                                     |
-| Formulare  | contact-form, map                                                                                                                                               |
-| Beiträge   | posts, table                                                                                                                                                    |
-| Sonstiges  | divider, logo-slider                                                                                                                                            |
+| Category         | Layouts                                                                                                                                                                           |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Header           | hero                                                                                                                                                                              |
+| Layout           | one-column, one-column-image, two-columns, three-columns, four-columns, one-third-two-thirds, two-thirds-one-third, two-columns-images, three-columns-images, four-columns-images |
+| Inhalte          | accordion, tabs, cta, button                                                                                                                                                      |
+| Medien           | image, video, gallery, before-after                                                                                                                                               |
+| Interaktiv       | testimonials, cards, stats, timeline, team, pricing-table                                                                                                                         |
+| Formulare        | contact-form, map                                                                                                                                                                 |
+| Beiträge         | posts, table                                                                                                                                                                      |
+| Interner Bereich | member-downloads                                                                                                                                                                  |
+| Sonstiges        | divider, logo-slider                                                                                                                                                              |
 
 ### Flexible Template Pattern
 
@@ -149,7 +175,7 @@ ACF Extended (FREE) enhances the editing experience:
 - **Modal Edit** - Edit layouts in large modal
 - **Copy/Paste** - Copy layouts between pages
 - **Layout Categories** - Organized layout picker
-- **Layout Thumbnails** - Optional visual previews in `resources/images/layouts/`
+- **Layout Thumbnails** - Visual previews in `resources/images/layouts/` (all 32 layouts), wired via `acfe_flexible_thumbnail`, generated by `scripts/generate-layout-thumbnails.php`
 
 Configuration in `src/Acf/AcfExtended.php`.
 
@@ -230,7 +256,7 @@ private static function myNewLayout(): array
         'label' => 'Mein neues Layout',
         'display' => 'block',
         'sub_fields' => FieldDefinitions::myNewFields('flex_my_new'),
-        'acfe_flexible_category' => self::CATEGORIES['content'],
+        'acfe_flexible_category' => self::getCategories()['content'],
     ];
 }
 ```

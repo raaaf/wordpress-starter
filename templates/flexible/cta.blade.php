@@ -3,7 +3,7 @@
 
     Uses shared components: x-section, x-button
     Fields: title, content, button
-    Note: Always uses brand background with inverse text
+    Note: Always uses brand background with on-brand text (see --text-on-brand in app.css)
 --}}
 
 @php
@@ -14,13 +14,13 @@
 
 @if($title || $content || $button)
 <x-section :anchor="$sectionAnchor" background="primary" padding="lg" class="cta">
-    <div class="max-w-3xl mx-auto bg-surface-brand rounded-2xl p-8 md:p-12 text-center">
+    <div class="max-w-3xl mx-auto bg-surface-brand rounded-[var(--card-radius)] p-8 md:p-12 text-center">
         @if($title)
-            <h2 class="mb-4 text-content-inverse">{!! $title !!}</h2>
+            <h2 class="mb-4 text-content-on-brand">{!! $title !!}</h2>
         @endif
 
         @if($content)
-            <div class="mb-8 text-content-inverse prose-headings:text-content-inverse prose-p:text-content-inverse prose-a:text-content-inverse prose-strong:text-content-inverse">
+            <div class="mb-8 text-content-on-brand prose-headings:text-content-on-brand prose-p:text-content-on-brand prose-a:text-content-on-brand prose-strong:text-content-on-brand">
                 @kses($content)
             </div>
         @endif

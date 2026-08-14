@@ -69,18 +69,29 @@ function fluidClamp(minPx, maxPx, minVw = VIEWPORT_MIN, maxVw = VIEWPORT_MAX, ro
 }
 
 /**
- * Generate a fluid unitless line-height that shrinks as viewport grows.
- * mobileLh is used at minVw (typically larger for breathing room on small screens),
- * desktopLh is used at maxVw (typically tighter for visual density).
+ * Generate a fluid line-height that shrinks (as a ratio) while the viewport grows.
+ *
+ * Emitted as a LENGTH, not as a unitless number. A unitless line-height cannot be
+ * made fluid: `calc(1.44 - 0.0125vw)` subtracts a length from a plain number, which
+ * is invalid, so the whole declaration is dropped and the element silently inherits
+ * the body line-height. That is what shipped between 2026-04-16 and this fix — every
+ * display/h1/h2/h3 rendered at 1.5 instead of the intended 1.1 to 1.35.
+ *
+ * Because the level's font-size is itself a known clamp, the ratio can be pinned at
+ * both ends by scaling the size endpoints: mobileLh applies at VIEWPORT_MIN,
+ * desktopLh at VIEWPORT_MAX. In between, size and line-height are both linear in vw,
+ * so the ratio moves monotonically between the two, which is the intent.
+ *
+ * @param {string} sizeKey  key into FLUID_SIZES, e.g. '6xl'
+ * @param {number} mobileLh ratio at VIEWPORT_MIN
+ * @param {number} desktopLh ratio at VIEWPORT_MAX
  */
-function fluidLineHeight(mobileLh, desktopLh, minVw = VIEWPORT_MIN, maxVw = VIEWPORT_MAX) {
-  if (mobileLh === desktopLh) return String(mobileLh);
-  const vwCoef = (100 * (desktopLh - mobileLh)) / (maxVw - minVw);
-  const intercept = mobileLh - (vwCoef / 100) * minVw;
-  const clampMin = Math.min(mobileLh, desktopLh);
-  const clampMax = Math.max(mobileLh, desktopLh);
-  const op = vwCoef < 0 ? '-' : '+';
-  return `clamp(${clampMin}, calc(${fmt(intercept)} ${op} ${fmt(Math.abs(vwCoef))}vw), ${clampMax})`;
+function fluidLineHeight(sizeKey, mobileLh, desktopLh, minVw = VIEWPORT_MIN, maxVw = VIEWPORT_MAX) {
+  const size = FLUID_SIZES[sizeKey];
+  if (!size) throw new Error(`fluidLineHeight: unknown size key "${sizeKey}"`);
+  const minPx = size.min * mobileLh;
+  const maxPx = size.max * desktopLh;
+  return fluidClamp(minPx, maxPx, minVw, maxVw);
 }
 
 /**
@@ -246,14 +257,70 @@ function generateCssImportant(tokens, prefix = '') {
 
 /**
  * Standard typography tokens (not from Figma, but needed for consistency).
- * Large headlines get fluid line-heights to preserve breathing room on mobile
- * where long German compound words need more vertical space.
+ *
+ * FLOOR: the headline face (ColaborateLight) measures 1.022em from the top of A-umlaut
+ * to the bottom of a descender, and its font bounding box is 1.05em. A line-height
+ * below roughly 1.10 therefore crowds umlauts against the line above — which German
+ * headlines hit constantly. 1.12 is the tightest value used here, leaving about a
+ * tenth of an em of air. A client theme that swaps the headline face has to re-measure
+ * this; see MIN_HEADING_LINE_HEIGHT in transform-tokens.test.js.
+ *
+ * Leading is optical, not proportional: the bigger the type, the smaller the ratio
+ * has to be to look the same. So the ratio falls as the level rises, and it falls
+ * again as the viewport grows, because the type grows with it. Both ends of the
+ * range are monotonic across levels — the previous table was not, h2 sat tighter
+ * than both h1 and h3.
+ *
+ * Body stays at 1.5. Every heading is meaningfully tighter than that, which is what
+ * makes a wrapped headline read as one block instead of as a short paragraph.
+ *
+ * The mobile -> desktop ratio curve is HEADING_LINE_HEIGHTS below (single source of
+ * truth, also imported by transform-tokens.test.js so a curve change cannot drift
+ * silently past the regression suite). h4 stays static at 1.38 and h5 at 1.42, the
+ * size barely scales at those levels, so no fluid ratio is needed. There is no h6
+ * entry: no --typography-h6-* token exists, h6 reuses the h5 token in CSS (see
+ * resources/css/app.css).
+ *
+ * display/h1/h2/h3 are fluid: font-size scales meaningfully, so mobile/desktop
+ * ratio endpoints are given and interpolated via fluidLineHeight(). h4/h5/body are
+ * static: a single `static` ratio, applied as-is regardless of viewport. Forcing
+ * the static ones into the fluid shape would need a fake key/mobile/desktop that
+ * always resolves to the same number, which is more confusing than a second shape.
  */
+const HEADING_LINE_HEIGHTS = {
+  display: { key: '6xl', mobile: 1.2, desktop: 1.12 },
+  h1: { key: '4xl', mobile: 1.25, desktop: 1.15 },
+  h2: { key: '3xl', mobile: 1.3, desktop: 1.2 },
+  h3: { key: '2xl', mobile: 1.35, desktop: 1.28 },
+  h4: { static: 1.38 },
+  h5: { static: 1.42 },
+  body: { static: 1.5 },
+};
+
 function buildTypographyTokens() {
-  const displayLh = fluidLineHeight(1.5, 1.1);
-  const h1Lh = fluidLineHeight(1.4, 1.2);
-  const h2Lh = fluidLineHeight(1.35, 1.25);
-  const h3Lh = fluidLineHeight(1.4, 1.3);
+  const displayLh = fluidLineHeight(
+    HEADING_LINE_HEIGHTS.display.key,
+    HEADING_LINE_HEIGHTS.display.mobile,
+    HEADING_LINE_HEIGHTS.display.desktop
+  );
+  const h1Lh = fluidLineHeight(
+    HEADING_LINE_HEIGHTS.h1.key,
+    HEADING_LINE_HEIGHTS.h1.mobile,
+    HEADING_LINE_HEIGHTS.h1.desktop
+  );
+  const h2Lh = fluidLineHeight(
+    HEADING_LINE_HEIGHTS.h2.key,
+    HEADING_LINE_HEIGHTS.h2.mobile,
+    HEADING_LINE_HEIGHTS.h2.desktop
+  );
+  const h3Lh = fluidLineHeight(
+    HEADING_LINE_HEIGHTS.h3.key,
+    HEADING_LINE_HEIGHTS.h3.mobile,
+    HEADING_LINE_HEIGHTS.h3.desktop
+  );
+  const h4Lh = HEADING_LINE_HEIGHTS.h4.static;
+  const h5Lh = HEADING_LINE_HEIGHTS.h5.static;
+  const bodyLh = HEADING_LINE_HEIGHTS.body.static;
 
   return `
   /* ============================================
@@ -288,13 +355,13 @@ function buildTypographyTokens() {
   /* Heading 4 - xl / Semibold */
   --typography-h4-size: var(--font-size-xl);
   --typography-h4-weight: var(--font-weight-semibold);
-  --typography-h4-line-height: 1.4;
+  --typography-h4-line-height: ${h4Lh};
   --typography-h4-letter-spacing: 0;
 
   /* Heading 5 - lg / Medium */
   --typography-h5-size: var(--font-size-lg);
   --typography-h5-weight: var(--font-weight-medium);
-  --typography-h5-line-height: 1.4;
+  --typography-h5-line-height: ${h5Lh};
   --typography-h5-letter-spacing: 0;
 
   /* Body Large - lg / Regular */
@@ -306,7 +373,7 @@ function buildTypographyTokens() {
   /* Body - base / Regular */
   --typography-body-size: var(--font-size-base);
   --typography-body-weight: var(--font-weight-regular);
-  --typography-body-line-height: 1.5;
+  --typography-body-line-height: ${bodyLh};
   --typography-body-letter-spacing: 0;
 
   /* Body Small - sm / Regular */
@@ -901,4 +968,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   transform();
 }
 
-export { fluidClamp, fluidLineHeight, FLUID_SIZES, VIEWPORT_MIN, VIEWPORT_MAX, ROOT_PX };
+export {
+  fluidClamp,
+  fluidLineHeight,
+  FLUID_SIZES,
+  HEADING_LINE_HEIGHTS,
+  VIEWPORT_MIN,
+  VIEWPORT_MAX,
+  ROOT_PX,
+};

@@ -69,6 +69,12 @@ final class ThemeUpdateProvider extends ServiceProvider
             $api->setAuthentication(GITHUB_ACCESS_TOKEN);
         }
 
-        $api->enableReleaseAssets();
+        // enableReleaseAssets() liegt seit plugin-update-checker 5.7 in einem
+        // Trait, das nur konkrete VCS-Klassen einbinden. getVcsApi() gibt aber
+        // die abstrakte Basis zurueck, also kennt weder PHPStan noch die
+        // Laufzeit die Methode bei einem anderen Backend als GitHub.
+        if (method_exists($api, 'enableReleaseAssets')) {
+            $api->enableReleaseAssets();
+        }
     }
 }

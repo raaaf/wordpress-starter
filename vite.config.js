@@ -63,8 +63,13 @@ export default defineConfig({
         'admin-flexible-titles': resolve(__dirname, 'resources/js/admin/flexible-titles.ts'),
       },
       output: {
-        manualChunks: {
-          vendor: ['alpinejs', '@alpinejs/collapse'],
+        manualChunks(id) {
+          if (
+            id.includes('node_modules/alpinejs') ||
+            id.includes('node_modules/@alpinejs/collapse')
+          ) {
+            return 'vendor';
+          }
         },
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',

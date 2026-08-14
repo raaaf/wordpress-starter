@@ -312,9 +312,9 @@ class Testimonial extends AbstractPostType
                 'author_name'     => $fields['author_name'] ?? '',
                 'author_position' => $fields['author_position'] ?? '',
                 'content'         => $fields['content'] ?? '',
-                'rating'          => $fields['rating'] ?: null,
+                'rating'          => ( $fields['rating'] ?? '' ) ?: null,
                 'image'           => get_post_thumbnail_id($post->ID) ?: null,
-                'source_url'      => $fields['source_url'] ?: null,
+                'source_url'      => ( $fields['source_url'] ?? '' ) ?: null,
             ];
         }
 

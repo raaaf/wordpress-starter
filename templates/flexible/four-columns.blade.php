@@ -6,11 +6,8 @@
 --}}
 
 @php
-    $showHeader = get_sub_field('show_section_header');
-    $chip = $showHeader ? get_sub_field('section_chip') : null;
-    $headline = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_headline')) : null;
-    $description = $showHeader ? \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('section_description')) : null;
-    $alignment = $showHeader ? (get_sub_field('section_alignment') ?: 'center') : 'center';
+    ['chip' => $chip, 'headline' => $headline, 'description' => $description, 'alignment' => $alignment]
+        = \WordpressStarter\Helpers\SectionHeader::fields();
     $column_1 = get_sub_field('column_1');
     $column_2 = get_sub_field('column_2');
     $column_3 = get_sub_field('column_3');
@@ -21,7 +18,7 @@
 @if($chip || $headline || $description || $column_1 || $column_2 || $column_3 || $column_4)
 <x-section :anchor="$sectionAnchor" :background="$background" class="four-columns">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
-    <x-grid cols="4" gap="lg">
+    <x-grid cols="4" gap="md">
         <x-prose>@kses($column_1)</x-prose>
         <x-prose>@kses($column_2)</x-prose>
         <x-prose>@kses($column_3)</x-prose>

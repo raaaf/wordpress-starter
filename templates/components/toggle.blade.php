@@ -52,18 +52,22 @@
             />
 
             {{-- Track --}}
-            <span class="block w-11 h-6 rounded-full transition-[background-color,box-shadow] duration-200
+            {{-- The border is always present and transparent by default, so the error
+                 state recolours an existing boundary instead of growing a new ring.
+                 That is the mechanism input, select, textarea, checkbox and radio all
+                 use; a ring would also make the track read 4px larger when invalid. --}}
+            <span class="block w-11 h-6 rounded-full border-2 border-transparent transition-[background-color,border-color,box-shadow] duration-200
                 {{ $disabled
                     ? 'bg-surface-disabled'
                     : ($hasError
-                        ? 'bg-surface-tertiary peer-checked:bg-surface-accent peer-focus-visible:shadow-[var(--shadow-focus-ring)] ring-2 ring-line-error'
+                        ? 'bg-surface-tertiary peer-checked:bg-surface-accent peer-focus-visible:shadow-[var(--shadow-focus-ring)] border-line-error'
                         : 'bg-surface-tertiary peer-checked:bg-surface-accent peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
                     )
                 }}
             "></span>
 
             {{-- Knob --}}
-            <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface-on-color shadow-md transition-[transform,background-color] duration-200
+            <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface shadow-md transition-[translate,background-color] duration-200
                 peer-checked:translate-x-5
                 {{ $disabled ? 'bg-surface-secondary' : '' }}
             "></span>

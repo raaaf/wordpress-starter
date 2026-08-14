@@ -20,6 +20,15 @@ use RuntimeException;
  * public IP during this check and to a private IP at connect time. Closing that
  * gap requires pinning the connection to the IP validated here, which this class
  * does not do.
+ *
+ * That gap is knowingly left open. Two facts bound it. First, the host is not
+ * attacker-supplied from the outside: it comes from `download_sftp_host` post
+ * meta on a download entry (FileHandler::129, FolderSync::155), so exploiting
+ * this needs editor capability already — it is an escalation from editor to
+ * internal-network access, not an anonymous request. Second, pinning the
+ * connection to the validated IP would break SFTP host-key verification and
+ * virtual-hosted endpoints, so the fix would weaken one security check to close
+ * another. Tracked as issue #9; revisit if either fact changes.
  */
 final class SsrfGuard
 {

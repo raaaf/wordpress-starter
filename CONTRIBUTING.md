@@ -115,7 +115,7 @@ git push -u origin feature/team-block
 
 ## Neue Blöcke hinzufügen
 
-Siehe [docs/BLOCK-DEVELOPMENT.md](docs/BLOCK-DEVELOPMENT.md) für eine vollständige Anleitung.
+Siehe [CLAUDE.md](CLAUDE.md#adding-new-layouts) für eine vollständige Anleitung.
 
 Checkliste:
 

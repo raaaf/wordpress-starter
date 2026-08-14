@@ -20,7 +20,7 @@
 @endphp
 
 <x-section :anchor="$sectionAnchor" :background="$background" class="contact-form">
-    <x-grid cols="2" gap="xl" class="items-start">
+    <x-grid cols="2" gap="xl" class="items-stretch">
         {{-- Left: Title, Content, Contact Info --}}
         <div>
             @if($title)
@@ -63,7 +63,11 @@
         </div>
 
         {{-- Right: Contact Form 7 --}}
-        <div class="p-8 rounded-lg bg-surface-secondary" aria-live="polite" aria-atomic="true">
+        {{-- Kein aria-live auf diesem Container: es lag frueher hier und liess
+             Screenreader bei jeder Aenderung das ganze Formular vorlesen. Die
+             Statusmeldung bringt CF7 als eigene Region mit, siehe die Regel fuer
+             .wpcf7-response-output in app.css. --}}
+        <div class="p-8 rounded-lg bg-surface-secondary">
             @if($formId && shortcode_exists('contact-form-7'))
                 {!! do_shortcode('[contact-form-7 id="' . esc_attr($formId) . '"]') !!}
             @else

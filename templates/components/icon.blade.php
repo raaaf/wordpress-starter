@@ -35,7 +35,10 @@
         'xl' => 'w-6 h-6',
     ];
 
-    $sizeClass = $sizes[$size] ?? $size;
+    // Wenn der Aufrufer die Groesse ueber class mitgibt, faellt die Standardgroesse weg.
+    // Sonst standen beide im Markup ("w-4 h-4 w-5 h-5") und welche gewann, entschied
+    // die Reihenfolge im generierten CSS, nicht der Aufrufer.
+    $sizeClass = preg_match('/(^|\s)[wh]-/', $class) ? '' : ($sizes[$size] ?? $size);
     $safeName = basename($name);
     $iconPath = get_template_directory() . '/resources/icons/' . $safeName . '.svg';
 

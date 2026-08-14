@@ -350,10 +350,10 @@ class Team extends AbstractPostType
             'name' => $post->post_title,
             'position' => $fields['position'] ?? '',
             'bio' => $fields['bio'] ?? '',
-            'email' => $fields['email'] ?: null,
-            'phone' => $fields['phone'] ?: null,
-            'linkedin' => $fields['linkedin'] ?: null,
-            'xing' => $fields['xing'] ?: null,
+            'email' => ( $fields['email'] ?? '' ) ?: null,
+            'phone' => ( $fields['phone'] ?? '' ) ?: null,
+            'linkedin' => ( $fields['linkedin'] ?? '' ) ?: null,
+            'xing' => ( $fields['xing'] ?? '' ) ?: null,
             'image' => get_post_thumbnail_id($post->ID) ?: null,
         ];
     }

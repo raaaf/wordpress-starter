@@ -49,7 +49,12 @@
         'default' => 'bg-[var(--card-bg,var(--bg-primary))] border border-[var(--card-border,var(--border-default))] shadow-[var(--shadow-card)]',
         'elevated' => 'bg-[var(--card-bg,var(--bg-primary))] shadow-lg',
         'outlined' => 'bg-[var(--card-bg,var(--bg-primary))] border border-line',
-        'filled' => 'bg-surface-secondary',
+        // Gefuellt heisst: eine Stufe ueber der Sektion, nicht fix
+        // bg-surface-secondary. Der feste Wert liess die Karte auf jeder Sektion
+        // verschwinden, die selbst diese Flaeche traegt, im Dunkelmodus gemessen
+        // 1.00 Abhebung bei Beitraegen und Preistabelle. --card-surface wird von
+        // der Sektion gesetzt, der Rand bleibt als Feinschliff.
+        'filled' => 'bg-[var(--card-surface,var(--bg-secondary))] border border-line',
     ];
 
     $sizes = [
@@ -77,7 +82,8 @@
     $isInteractive = $hoverable || $url;
     $interactiveClasses = $isInteractive && !$disabled
         ? implode(' ', [
-            'transition-[color,background,border-color,box-shadow,transform] duration-200 cursor-pointer',
+            // active:scale-[0.99] is a Tailwind v4 `scale` utility, not `transform`.
+            'transition-[color,background,border-color,box-shadow,scale] duration-200 cursor-pointer',
             'hover:border-line-brand hover:shadow-[var(--shadow-card-hover)]',
             'active:shadow-[var(--shadow-inner)] active:scale-[0.99]',
             'focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]',

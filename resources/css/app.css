@@ -14,10 +14,17 @@
 @import 'tailwindcss';
 
 /* ============================================
-   CONTROL BORDER, FOCUS RING, DARK STATUS COLOURS
+   TOKEN CORRECTIONS
 
-   Three corrections to tokens.css that cannot live there, because that file
-   is regenerated from Figma.
+   Corrections to tokens.css that cannot live there, because that file is
+   regenerated from Figma.
+
+   One rule runs through most of them: every fill flips with the colour scheme,
+   and whatever sits on a fill uses --text-inverse, which flips with it. The
+   export broke that rule in one place only, the primary button gradient, which
+   is declared once and never flips. That is why the button got worse the more
+   you interacted with it in dark mode: the fill darkened while the text was
+   already dark.
 
    1. --border-control: the boundary of a form control is the only thing that
       shows where the field is, and WCAG 1.4.11 asks for 3:1. --border-default
@@ -30,7 +37,57 @@
       clears 3:1 against the dark background, where a near-black accent would
       otherwise be invisible.
 
-   3. Dark status text: dark mode set --bg-* to the dark tone but left --text-*
+   3. --shadow-color-*: the Tailwind theme block below builds --shadow-sm through
+      --shadow-2xl out of these, and the export never delivered them. An
+      unresolvable var() makes the whole box-shadow invalid at computed-value
+      time, so every plain shadow-sm/md/lg/xl/2xl utility rendered nothing at
+      all. The values follow the same rgba(23, 23, 23, a) vocabulary the
+      component shadows in tokens.css already use.
+
+   4. --text-on-brand: --bg-brand is accent-500. White on it measures 2.84:1,
+      under the 3:1 floor for large text; the inherited near-black measures
+      6.32:1 on the same orange. --text-inverse is the wrong role here, it
+      follows the page, not the brand surface.
+
+   5. Accent text roles: --text-link, --text-brand and --text-accent all point
+      at accent-600, which measures 3.74:1 on white, 3.58:1 on the secondary
+      surface and 3.46:1 inside a filled accent badge. All under 4.5:1. The
+      resting state was also weaker than its own hover, which already used
+      accent-700. One step down the same ramp clears the bar everywhere
+      (5.23 / 5.01 / 4.84:1), and hover moves to accent-800 to stay darker
+      than rest. Dark mode is untouched: accent-400 on gray-900 is 7.74:1.
+
+   6. Primary button gradient: the only fill in the theme that does not flip
+      with the scheme. Light gets the dark end of the ramp under white text
+      (5.23:1 at rest, improving to 7.39 and 10.36 as it is pressed), dark gets
+      the light end under near-black text (4.80:1 at rest, improving to 6.32
+      and 7.74). Both ladders now move away from the text, not towards it.
+
+   7. Filled controls: --bg-accent is the checked fill of checkbox, radio and
+      toggle. At accent-500 it measured 2.84:1 against a white page, so the
+      checked state itself was barely visible, and the white mark on it also
+      2.84:1. Light moves to accent-700 (5.23:1 both ways); dark keeps
+      accent-500, which is 6.32:1 against the dark page.
+
+   8. The --bg-*-strong fills are the ones meant to carry content on top of
+      them: the danger button, the solid status badges. All three pointed at
+      the mid tone of their ramp, which under white text gives 3.76:1 for
+      error, 2.28:1 for success and 2.15:1 for warning. Light takes the dark
+      tone (5.02 to 6.47:1); dark keeps the mid tone, where --text-inverse is
+      near-black and reaches 4.76 to 8.35:1.
+
+   9. Icon roles: --icon-secondary was gray-400 (2.52:1 on white) although it
+      carries the select chevron and the input clear control. The status icons
+      pointed at the mid tone of their ramp while sitting on the light tone of
+      the same ramp (2.07 to 3.08:1); they now take the tone their own
+      --text-* role already uses. --icon-brand and --icon-accent, and the
+      brand borders that draw the loading spinner and the card hover edge,
+      follow the accent text roles down to accent-700.
+
+  10. --border-focus is what focus:border-line-focus and ring-line-focus draw.
+      It stayed on accent-400 (2.32:1) after --ring-focus was corrected.
+
+  11. Dark status text: dark mode set --bg-* to the dark tone but left --text-*
       on the mid tone, leaving two similar lightnesses on top of each other
       (1.7 to 3.0:1). The text moves to the light tone of the same ramp.
    ============================================ */
@@ -44,21 +101,394 @@
      so it fell back to an inline 50 percent alpha with the same washed-out
      result the accent ring had. Solid, like the others. */
   --shadow-focus-ring-error: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-error);
+
+  /* Shadow colours the Figma export never delivered. Same ink and the same
+     alpha steps the component shadows in tokens.css use, so a plain
+     shadow-lg and --shadow-card-hover now read as one family. */
+  --shadow-color-sm: rgba(23, 23, 23, 0.05);
+  --shadow-color-default: rgba(23, 23, 23, 0.1);
+  --shadow-color-md: rgba(23, 23, 23, 0.1);
+  --shadow-color-lg: rgba(23, 23, 23, 0.1);
+  --shadow-color-xl: rgba(23, 23, 23, 0.1);
+  --shadow-color-2xl: rgba(23, 23, 23, 0.25);
+
+  /* Text that sits on --bg-brand. Deliberately the same value in both colour
+     schemes: the brand orange does not change with the scheme, so the text on
+     it must not either. */
+  --text-on-brand: var(--color-gray-900);
+
+  /* Text that sits on the ACCENT fill: the checkbox mark, the primary button
+     label. It defaults to --text-inverse, which is right whenever the accent
+     fill flips with the scheme the way the page does. It exists as its own role
+     because that assumption does not hold everywhere: a theme whose accent is
+     light in BOTH schemes needs a dark mark in both, and one whose accent is
+     deep in both needs a light label in both. --text-inverse follows the page,
+     this follows the fill. Themes that need the distinction override it. */
+  --text-on-accent: var(--text-inverse);
+
+  /* Accent text one step down the ramp, see 5. above. Light scheme only:
+     the dark scheme reads accent from the light end and already passes. */
+  --text-link: var(--color-accent-700);
+  --text-link-hover: var(--color-accent-800);
+  --text-brand: var(--color-accent-700);
+  --text-accent: var(--color-accent-700);
+
+  /* Fills, light scheme: dark end of the ramp, white content on top. */
+  --gradient-primary-start: var(--color-accent-700);
+  --gradient-primary-end: var(--color-accent-800);
+  --gradient-primary-hover-start: var(--color-accent-800);
+  --gradient-primary-hover-end: var(--color-accent-900);
+  --gradient-primary-active-start: var(--color-accent-900);
+  --gradient-primary-active-end: var(--color-accent-900);
+  --bg-accent: var(--color-accent-700);
+  --bg-error-strong: var(--color-error-dark);
+  --bg-success-strong: var(--color-success-dark);
+  --bg-warning-strong: var(--color-warning-dark);
+
+  /* Danger button hover: --bg-error-strong is already the darkest of the
+     three-step error ramp, so there is no further token to step to. Mixed
+     towards black instead, same direction the text-on-white fill needs to
+     move to gain contrast (6.47:1 at rest -> 8.15:1 on hover). */
+  --bg-error-strong-hover: color-mix(in srgb, var(--color-error-dark) 85%, black);
+
+  /* Borders and icons follow the same step down the ramp. */
+  --border-focus: var(--ring-focus);
+  --border-brand: var(--color-accent-700);
+  --border-accent: var(--color-accent-700);
+  --icon-secondary: var(--color-gray-500);
+  --icon-brand: var(--color-accent-700);
+  --icon-accent: var(--color-accent-700);
+  --icon-success: var(--color-success-dark);
+  --icon-warning: var(--color-warning-dark);
+  --icon-error: var(--color-error-dark);
+
+  /* Native widgets the theme does not draw itself: checkboxes and radios in
+     WYSIWYG content, date pickers, scrollbars, form autofill. Without a
+     color-scheme they stay light in dark mode, which is why a raw
+     <input type="checkbox"> rendered as a white block on the dark page. */
+  color-scheme: light;
+  accent-color: var(--bg-accent);
 }
 
 [data-theme='dark'] {
   --border-control: var(--color-gray-500);
+
+  /* ------------------------------------------------------------------
+     Dunkelmodus-Flaechen, Vorbild Linear.
+
+     Vorher: Grundton #171717, naechste Stufe #262626, dann #404040. Die
+     Spruenge waren ungleich, die Flaechen neutral grau, und Karten trugen
+     dieselbe Farbe wie ihre Sektion. Getragen wurde die Abgrenzung allein von
+     Raendern, gemessen 1.6:1 gegen den Untergrund. Das Ergebnis wirkte flach
+     und hart zugleich.
+
+     Jetzt: sehr dunkler, leicht kuehler Grundton und kleine, gleichmaessige
+     Stufen. Elevation entsteht ueber Helligkeit, nicht ueber Linien, deshalb
+     duerfen die Raender wieder dezent sein. Die Werte sind bewusst als Hex
+     notiert und nicht aus der Grau-Rampe abgeleitet: die Rampe ist neutral,
+     dieser Modus braucht den leichten Blaustich, der dunkle Flaechen ruhig
+     wirken laesst.
+
+     Nur fuer dieses Theme gemessen. Nicht in die Kundenthemes kopieren, deren
+     Akzentrampen laufen gegenlaeufig. --------------------------------- */
+  --bg-primary: #08090a;
+  --bg-secondary: #0f1011;
+  --bg-tertiary: #16181a;
+  --bg-inverse: #f7f8f8;
+  --bg-brand-subtle: #1d1210;
+
+  --text-primary: #f7f8f8;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #7a828d;
+  --text-inverse: #08090a;
+
+  --border-default: #202225;
+  --border-strong: #2c2f34;
+
+  --card-bg: var(--bg-secondary);
+  --card-border: var(--border-default);
   --text-success: var(--color-success-light);
   --text-warning: var(--color-warning-light);
   --text-error: var(--color-error-light);
+
+  /* Fills, dark scheme: light end of the ramp, near-black content on top.
+     The ladder runs the other way, so pressing still moves away from the text. */
+  --gradient-primary-start: var(--color-accent-500);
+  --gradient-primary-end: var(--color-accent-600);
+  --gradient-primary-hover-start: var(--color-accent-400);
+  --gradient-primary-hover-end: var(--color-accent-500);
+  --gradient-primary-active-start: var(--color-accent-300);
+  --gradient-primary-active-end: var(--color-accent-400);
+
+  /* The export already says gray-500 here; repeating it keeps the unscoped
+     :root correction above from burying that declaration on the next sync. */
+  --icon-secondary: var(--color-gray-500);
+  --icon-success: var(--color-success-light);
+  --icon-warning: var(--color-warning-light);
+  --icon-error: var(--color-error-light);
+
+  /* The export flipped these the wrong way: dark took the dark tone of the ramp
+     while --text-inverse is near-black there, giving 3.57:1. Error already used
+     the mid tone; success and warning now match it. */
+  --bg-success-strong: var(--color-success);
+  --bg-warning-strong: var(--color-warning);
+
+  /* The unlayered :root correction above (see the TOKEN CORRECTIONS comment
+     block at the top of this file) pins each of these to a step of the accent
+     ramp for light-mode contrast, but is not scoped to [data-theme='light'] --
+     so it also reaches dark mode through the cascade unless undone here. These
+     put dark back on the value the comment block above already documents as
+     correct for it (see points 5, 7, 8 and 9). */
+  --bg-accent: var(--color-accent-500);
+  --bg-error-strong: var(--color-error);
+  /* Here --bg-error-strong is the mid tone under near-black text (4.76:1 at
+     rest, see point 8 above): darkening it the way light mode does would
+     push it towards the text instead of away, the same trap point 6 already
+     documents for the primary gradient. Mixed towards white instead
+     (4.76:1 -> 5.99:1). */
+  --bg-error-strong-hover: color-mix(in srgb, var(--color-error) 80%, white);
+  --text-link: var(--color-accent-400);
+  --text-link-hover: var(--color-accent-300);
+  --text-brand: var(--color-accent-400);
+  --text-accent: var(--color-accent-400);
+  --border-brand: var(--color-accent-500);
+  --border-accent: var(--color-accent-500);
+  --icon-brand: var(--color-accent-500);
+  --icon-accent: var(--color-accent-400);
+
+  /* The plain Tailwind shadow-sm..shadow-2xl scale (see the TOKEN CORRECTIONS
+     block above, point 3) is built from these --shadow-color-* custom
+     properties. The :root correction only ever set the light-mode ink,
+     rgba(23, 23, 23, ...), which is --bg-primary's own colour in dark mode --
+     every shadow-sm/md/lg/xl/2xl utility was invisible here for the same
+     reason the named component shadows below were. Same ink and alpha band
+     as those. */
+  --shadow-color-sm: rgba(4, 6, 20, 0.3);
+  --shadow-color-default: rgba(4, 6, 20, 0.35);
+  --shadow-color-md: rgba(4, 6, 20, 0.4);
+  --shadow-color-lg: rgba(4, 6, 20, 0.45);
+  --shadow-color-xl: rgba(4, 6, 20, 0.5);
+  --shadow-color-2xl: rgba(4, 6, 20, 0.55);
+
+  /* Structural shadows: button, card, input, modal and dropdown, plus their
+     hover steps. The export defines these once (see COMPONENT_TOKENS in
+     scripts/transform-tokens.js) and dark mode inherits them unchanged. Their
+     ink is rgba(23, 23, 23, ...), i.e. --color-gray-900, and dark mode's own
+     --bg-primary is that exact colour, so on the styleguide every card, button
+     and dropdown measured with an invisible shadow: same value on both sides
+     of the edge.
+
+     Redefined here, not by darkening the same recipe further:
+     - Ink shifts to rgb(4, 6, 20), a near-black with a slight cool tint. Pure
+       black (0,0,0) read as pasted on in a side-by-side comparison; a tint
+       close to the page's own near-black reads as part of the surface.
+     - Opacity moves to the 0.3-0.55 band instead of 0.05-0.25. A shadow this
+       dark needs far more alpha than the light-mode version to still register
+       against a dark ground: the same alpha would be even less visible than
+       the light-mode original was against gray-900.
+     - Card, card-hover, modal and dropdown get three layers (tight near
+       + medium + soft wide) instead of one or two: elevation has to read from
+       silhouette alone here, since a single soft blur at low alpha just
+       smears into the background. Button and input stay at two layers, they
+       sit close to the surface and don't need the third. */
+  --shadow-button: 0px 1px 2px 0px rgba(4, 6, 20, 0.45), 0px 1px 3px 0px rgba(4, 6, 20, 0.3);
+  --shadow-button-hover:
+    0px 2px 4px -1px rgba(4, 6, 20, 0.5), 0px 4px 6px -2px rgba(4, 6, 20, 0.35);
+  --shadow-input: 0px 1px 2px 0px rgba(4, 6, 20, 0.4), 0px 1px 1px 0px rgba(4, 6, 20, 0.3);
+  --shadow-input-hover: 0px 1px 3px 0px rgba(4, 6, 20, 0.45), 0px 1px 2px -1px rgba(4, 6, 20, 0.35);
+  --shadow-card:
+    0px 1px 2px 0px rgba(4, 6, 20, 0.5), 0px 4px 8px 0px rgba(4, 6, 20, 0.35),
+    0px 12px 24px -4px rgba(4, 6, 20, 0.3);
+  --shadow-card-hover:
+    0px 2px 4px 0px rgba(4, 6, 20, 0.55), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
+    0px 20px 40px -8px rgba(4, 6, 20, 0.3);
+  --shadow-modal:
+    0px 4px 8px 0px rgba(4, 6, 20, 0.5), 0px 16px 32px 0px rgba(4, 6, 20, 0.4),
+    0px 40px 80px -16px rgba(4, 6, 20, 0.35);
+  --shadow-dropdown:
+    0px 2px 4px 0px rgba(4, 6, 20, 0.5), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
+    0px 20px 40px -8px rgba(4, 6, 20, 0.3);
+
+  color-scheme: dark;
+}
+
+/* Elevated cards (`x-card variant="elevated"`, e.g. the "cards" flexible
+   layout) carry no border in any colour scheme and rely on `shadow-lg` alone
+   for their silhouette. `shadow-lg` is Tailwind's own utility, built from
+   --shadow-color-lg above, which is not part of the --shadow-card family and
+   stays at the light-mode ink even in dark mode, so this variant's edge
+   vanished the same way the --shadow-card ones did. A 1px line in the same
+   colour the default/filled/outlined variants already carry as a real border
+   fixes it without touching the shadow. */
+[data-theme='dark'] .card.shadow-lg {
+  border: 1px solid var(--border-default);
+}
+
+/* Karten heben sich im Dunkelmodus ueber ihre Flaeche ab, siehe den
+   Token-Block oben. Der Rand ist nur noch Feinschliff. */
+[data-theme='dark'] .card {
+  border-color: var(--border-default);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --border-control: var(--color-gray-500);
+
+    /* ------------------------------------------------------------------
+       Dunkelmodus-Flaechen, Vorbild Linear.
+  
+       Vorher: Grundton #171717, naechste Stufe #262626, dann #404040. Die
+       Spruenge waren ungleich, die Flaechen neutral grau, und Karten trugen
+       dieselbe Farbe wie ihre Sektion. Getragen wurde die Abgrenzung allein von
+       Raendern, gemessen 1.6:1 gegen den Untergrund. Das Ergebnis wirkte flach
+       und hart zugleich.
+  
+       Jetzt: sehr dunkler, leicht kuehler Grundton und kleine, gleichmaessige
+       Stufen. Elevation entsteht ueber Helligkeit, nicht ueber Linien, deshalb
+       duerfen die Raender wieder dezent sein. Die Werte sind bewusst als Hex
+       notiert und nicht aus der Grau-Rampe abgeleitet: die Rampe ist neutral,
+       dieser Modus braucht den leichten Blaustich, der dunkle Flaechen ruhig
+       wirken laesst.
+  
+       Nur fuer dieses Theme gemessen. Nicht in die Kundenthemes kopieren, deren
+       Akzentrampen laufen gegenlaeufig. --------------------------------- */
+    --bg-primary: #08090a;
+    --bg-secondary: #0f1011;
+    --bg-tertiary: #16181a;
+    --bg-inverse: #f7f8f8;
+    --bg-brand-subtle: #1d1210;
+
+    --text-primary: #f7f8f8;
+    --text-secondary: #9ca3af;
+    --text-tertiary: #7a828d;
+    --text-inverse: #08090a;
+
+    --border-default: #202225;
+    --border-strong: #2c2f34;
+
+    --card-bg: var(--bg-secondary);
+    --card-border: var(--border-default);
     --text-success: var(--color-success-light);
     --text-warning: var(--color-warning-light);
     --text-error: var(--color-error-light);
+
+    /* Fills, dark scheme: light end of the ramp, near-black content on top.
+       The ladder runs the other way, so pressing still moves away from the text. */
+    --gradient-primary-start: var(--color-accent-500);
+    --gradient-primary-end: var(--color-accent-600);
+    --gradient-primary-hover-start: var(--color-accent-400);
+    --gradient-primary-hover-end: var(--color-accent-500);
+    --gradient-primary-active-start: var(--color-accent-300);
+    --gradient-primary-active-end: var(--color-accent-400);
+
+    /* See the [data-theme='dark'] block above. */
+    --icon-secondary: var(--color-gray-500);
+    --icon-success: var(--color-success-light);
+    --icon-warning: var(--color-warning-light);
+    --icon-error: var(--color-error-light);
+
+    /* See the [data-theme='dark'] block above. */
+    --bg-success-strong: var(--color-success);
+    --bg-warning-strong: var(--color-warning);
+
+    /* See the [data-theme='dark'] block above -- same unscoped :root
+       correction, same fix. */
+    --bg-accent: var(--color-accent-500);
+    --bg-error-strong: var(--color-error);
+    /* See the [data-theme='dark'] block above: same trap, same fix. */
+    --bg-error-strong-hover: color-mix(in srgb, var(--color-error) 80%, white);
+    --text-link: var(--color-accent-400);
+    --text-link-hover: var(--color-accent-300);
+    --text-brand: var(--color-accent-400);
+    --text-accent: var(--color-accent-400);
+    --border-brand: var(--color-accent-500);
+    --border-accent: var(--color-accent-500);
+    --icon-brand: var(--color-accent-500);
+    --icon-accent: var(--color-accent-400);
+
+    /* See the [data-theme='dark'] block above: the plain shadow-sm..shadow-2xl
+       scale needs its own dark ink too, not just the named component shadows. */
+    --shadow-color-sm: rgba(4, 6, 20, 0.3);
+    --shadow-color-default: rgba(4, 6, 20, 0.35);
+    --shadow-color-md: rgba(4, 6, 20, 0.4);
+    --shadow-color-lg: rgba(4, 6, 20, 0.45);
+    --shadow-color-xl: rgba(4, 6, 20, 0.5);
+    --shadow-color-2xl: rgba(4, 6, 20, 0.55);
+
+    /* See the [data-theme='dark'] block above for the measurement and the
+       reasoning behind the ink and opacity change. */
+    --shadow-button: 0px 1px 2px 0px rgba(4, 6, 20, 0.45), 0px 1px 3px 0px rgba(4, 6, 20, 0.3);
+    --shadow-button-hover:
+      0px 2px 4px -1px rgba(4, 6, 20, 0.5), 0px 4px 6px -2px rgba(4, 6, 20, 0.35);
+    --shadow-input: 0px 1px 2px 0px rgba(4, 6, 20, 0.4), 0px 1px 1px 0px rgba(4, 6, 20, 0.3);
+    --shadow-input-hover:
+      0px 1px 3px 0px rgba(4, 6, 20, 0.45), 0px 1px 2px -1px rgba(4, 6, 20, 0.35);
+    --shadow-card:
+      0px 1px 2px 0px rgba(4, 6, 20, 0.5), 0px 4px 8px 0px rgba(4, 6, 20, 0.35),
+      0px 12px 24px -4px rgba(4, 6, 20, 0.3);
+    --shadow-card-hover:
+      0px 2px 4px 0px rgba(4, 6, 20, 0.55), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
+      0px 20px 40px -8px rgba(4, 6, 20, 0.3);
+    --shadow-modal:
+      0px 4px 8px 0px rgba(4, 6, 20, 0.5), 0px 16px 32px 0px rgba(4, 6, 20, 0.4),
+      0px 40px 80px -16px rgba(4, 6, 20, 0.35);
+    --shadow-dropdown:
+      0px 2px 4px 0px rgba(4, 6, 20, 0.5), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
+      0px 20px 40px -8px rgba(4, 6, 20, 0.3);
+
+    color-scheme: dark;
+  }
+
+  :root:not([data-theme='light']) .card.shadow-lg {
+    border: 1px solid var(--border-default);
+  }
+
+  /* Siehe den [data-theme='dark'] Block oben. */
+  :root:not([data-theme='light']) .card {
+    border-color: var(--border-default);
+  }
+}
+
+/* Eine Karte liegt immer genau eine Stufe ueber ihrer Sektion. Ohne diese
+   Zuordnung nimmt sie einen festen Wert und verschwindet auf jeder Sektion,
+   die zufaellig dieselbe Flaeche traegt. Gilt in beiden Modi, im Dunkeln faellt
+   es nur staerker auf, weil dort kein Schatten traegt. */
+.bg-surface {
+  --card-surface: var(--bg-secondary);
+}
+
+.bg-surface-secondary {
+  --card-surface: var(--bg-tertiary);
+  --card-bg: var(--bg-tertiary);
+}
+
+.bg-surface-tertiary {
+  --card-surface: var(--bg-secondary);
+  --card-bg: var(--bg-secondary);
+}
+
+/* Im Dunkelmodus ist --bg-secondary eine Stufe DUNKLER als --bg-tertiary
+   (vertieft statt erhoben) -- die Karte wuerde also in die Flaeche absinken
+   statt sich abzuheben. Eine Stufe ueber tertiary existiert nicht, daher hier
+   ein eigener Zwischenwert. Nur fuer dieses Theme gemessen, Client-Themes
+   leiten ihren eigenen Wert ab. Hellmodus unveraendert (siehe Regel oben). */
+[data-theme='dark'] {
+  --bg-tertiary-elevated: #1d1f22;
+}
+
+[data-theme='dark'] .bg-surface-tertiary {
+  --card-surface: var(--bg-tertiary-elevated);
+  --card-bg: var(--bg-tertiary-elevated);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg-tertiary-elevated: #1d1f22;
+  }
+
+  :root:not([data-theme='light']) .bg-surface-tertiary {
+    --card-surface: var(--bg-tertiary-elevated);
+    --card-bg: var(--bg-tertiary-elevated);
   }
 }
 
@@ -153,10 +583,42 @@
   ):focus {
     --tw-ring-shadow: 0 0 #0000;
   }
+
+  /* The same plugin hard-codes a white fill and a fixed grey border on
+     checkboxes and radios, and switches off appearance, so color-scheme cannot
+     reach them. In dark mode that left a white block on the dark page. Bound to
+     the theme's own roles instead; the plugin paints the checked state with
+     currentColor, so --bg-accent drives the mark. */
+  :is([type='checkbox'], [type='radio']) {
+    background-color: var(--bg-primary);
+    border-color: var(--border-control);
+    color: var(--bg-accent);
+  }
+
+  :is([type='checkbox'], [type='radio']):disabled {
+    background-color: var(--bg-disabled);
+    border-color: var(--border-disabled);
+  }
 }
 
 /* Dark mode via data-theme attribute (matches tokens.css selector) */
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+/* Die dark-Variante hoerte bis 2026-08-10 nur auf [data-theme=dark]. Steht die
+   Theme-Option auf "Systemeinstellung folgen", setzt der Header gar kein
+   data-theme (templates/partials/header.blade.php:5). Die Farbtoken schalten in
+   dem Fall ueber prefers-color-scheme um, die dark:-Utilities aber nicht: die
+   Logo-Invertierung im Logo-Slider und die Badge-Farben liefen dadurch
+   gegenlaeufig zu Flaeche und Text. Zweiter Zweig deckt genau diesen Fall ab. */
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme='light']), :root:not([data-theme='light']) *) {
+      @slot;
+    }
+  }
+}
 
 html {
   scroll-behavior: smooth;
@@ -216,9 +678,231 @@ html {
   --tw-prose-td-borders: var(--border-default);
 }
 
-/* Auto-inherit for prose inside inverse/brand sections */
+/* ============================================
+   ONE TYPE SCALE, ALSO INSIDE PROSE
+
+   Tailwind Typography ships its own heading scale and its own leading, and it
+   lands in @layer components — after the theme's own heading rules in @layer
+   base. Layer order beats specificity, so every heading written in a WYSIWYG
+   field came out at a different size and a different line-height than the same
+   level rendered as a section title. Measured on the styleguide: 50 headings
+   inside .prose still sat at 1.5 while the theme's scale had moved to 1.13-1.42.
+
+   These rules bind prose headings back to the same tokens. Margins stay with
+   the plugin, whose vertical rhythm for running text is good — except for the
+   heading-pair case below, which the plugin does not handle at all.
+
+   Declared in @layer utilities, not components: the plugin's size variants
+   (.prose-lg and friends) land in utilities, and layer order beats specificity.
+   Within utilities these selectors outrank the plugin's :where()-based ones, so
+   source order does not matter.
+   ============================================ */
+
+@layer utilities {
+  .prose :is(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    color: var(--text-primary);
+    text-wrap: balance;
+  }
+
+  .prose :is(h1) {
+    font-size: var(--typography-h1-size);
+    font-weight: var(--typography-h1-weight);
+    line-height: var(--typography-h1-line-height);
+    letter-spacing: var(--typography-h1-letter-spacing);
+  }
+
+  .prose :is(h2) {
+    font-size: var(--typography-h2-size);
+    font-weight: var(--typography-h2-weight);
+    line-height: var(--typography-h2-line-height);
+    letter-spacing: var(--typography-h2-letter-spacing);
+  }
+
+  .prose :is(h3) {
+    font-size: var(--typography-h3-size);
+    font-weight: var(--typography-h3-weight);
+    line-height: var(--typography-h3-line-height);
+    letter-spacing: var(--typography-h3-letter-spacing);
+  }
+
+  .prose :is(h4) {
+    font-size: var(--typography-h4-size);
+    font-weight: var(--typography-h4-weight);
+    line-height: var(--typography-h4-line-height);
+    letter-spacing: var(--typography-h4-letter-spacing);
+  }
+
+  .prose :is(h5, h6) {
+    font-size: var(--typography-h5-size);
+    font-weight: var(--typography-h5-weight);
+    line-height: var(--typography-h5-line-height);
+    letter-spacing: var(--typography-h5-letter-spacing);
+  }
+
+  /* The heading-pair rule from @layer base, repeated where the plugin can no
+     longer outrank it. WYSIWYG content is exactly where a title followed by a
+     subtitle actually occurs. */
+  .prose :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
+    margin-top: 0;
+  }
+
+  .prose :is(h1, h2, h3, h4, h5, h6):has(+ :is(h1, h2, h3, h4, h5, h6)) {
+    margin-bottom: 0.3em;
+  }
+}
+
+/* Auto-inherit for prose inside inverse/brand sections.
+   Der Selektor hiess bis 2026-08-10 .text-content-on-color; diese Klasse gibt
+   das Theme nirgends aus. templates/components/section.blade.php emittiert
+   text-content-on-brand, deshalb griff die Regel auf Markenflaechen nie und
+   der Fliesstext blieb bei --text-secondary (gemessen 2.76:1 auf #FF6B35). */
+/* Ueberschriften und sekundaerer Text auf eingefaerbten Flaechen.
+
+   Warum ungelayert und warum nicht der Fix in @layer base weiter unten reicht:
+   die Layer-Ordnung in Zeile 9 ist critical < theme < base < components <
+   utilities. Die Typo-Regeln des Prose-Blocks liegen in @layer utilities und
+   setzen eine feste Farbe, der Brand-Fix in @layer base verliert dagegen.
+   Ungelayerte Regeln schlagen jede Layer-Regel, deshalb steht das hier.
+
+   Zweiter Grund: Utilities wie text-content-secondary bringen ihre eigene Farbe
+   mit, Vererbung erreicht sie nie. Der Sektionskopf setzt seine Beschreibung
+   hart auf text-content-secondary.
+
+   Gemessen am 2026-08-10 vor dem Fix: 24 Elemente in 8 Modulen bei 1.00:1 auf
+   bg-surface-inverse, in hell und dunkel identisch.
+
+   Ausgenommen sind Elemente, die auf einer eigenen Flaeche sitzen: Karten,
+   Alerts, Badges, Buttons und Tabellenkoepfe bringen ihren Hintergrund selbst
+   mit und behalten deshalb ihren eigenen Textton. Ausgenommen ist auch jedes
+   Element, das selbst eine bg-surface-Klasse traegt: der weisse Button auf der
+   Markenkarte hat text-content und wurde sonst dunkel auf dunkel gesetzt
+   (gemessen 1.18:1, waehrend der Fix entstand). Die Brand-Regel steht nach
+   der Inverse-Regel, damit eine Markenkarte in einer dunklen Sektion gewinnt.
+
+   Die bg-surface-Klassen stehen als exakte Liste (Quelle: section.blade.php),
+   nicht als [class*='bg-surface']-Substring: ein Substring-Selektor matcht
+   auch hover:bg-surface-*-Varianten, die keine eigene Flaeche mit eigenem
+   Text sind, sondern nur bei Hover eine bekommen -- ein latenter Fehltreffer.
+   Dieselbe Liste steht zusaetzlich im Nachfahren-Ausschluss, nicht nur im
+   Selbst-Ausschluss: sonst wird ein Kind einer eigenen Flaeche innerhalb einer
+   Karte trotzdem gezwungen -- z.B. die bg-surface-secondary Preistabelle in
+   einer inverse-Sektion oder Video-Lade-/Fehler-Overlays, beide auf ~1:1
+   gemessen, bevor dieser Zusatz stand.
+
+   Der Nachfahren-Ausschluss beginnt zwingend AN der Ausloeserklasse
+   (`:not(.bg-surface-inverse :is(...) *)`, nicht `:not(:is(...) *)`). Grund:
+   layouts/app.blade.php setzt bg-surface auf den body. Ein unverankerter
+   Ausschluss trifft damit ueber den body jedes Element der Seite und loescht
+   die Regel vollstaendig aus. Am 2026-08-13 im Dunkelmodus gemessen: weisse
+   Ueberschrift auf der hellen inverse-Flaeche, 1.06:1. Im Hellmodus fiel es
+   nicht auf, weil die Ueberschrift dort mit 3.25:1 knapp ueber der Schwelle
+   fuer grossen Text lag. Die Verankerung begrenzt den Ausschluss auf die
+   Sektion, wo er hingehoert. */
+.bg-surface-inverse
+  :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    .text-display,
+    .text-h1,
+    .text-h2,
+    .text-h3,
+    .text-h4,
+    .text-h5,
+    .text-content,
+    .text-content-secondary,
+    .text-content-tertiary
+  ):not(
+    :is(
+      .card,
+      .alert,
+      .badge,
+      .button,
+      thead,
+      .bg-surface,
+      .bg-surface-secondary,
+      .bg-surface-tertiary,
+      .bg-surface-brand,
+      .bg-surface-brand-subtle,
+      .bg-surface-inverse
+    )
+  ):not(
+    .bg-surface-inverse
+      :is(
+        .card,
+        .alert,
+        .badge,
+        .button,
+        thead,
+        .bg-surface,
+        .bg-surface-secondary,
+        .bg-surface-tertiary,
+        .bg-surface-brand,
+        .bg-surface-brand-subtle,
+        .bg-surface-inverse
+      )
+      *
+  ) {
+  color: var(--text-inverse);
+}
+
+.bg-surface-brand
+  :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    .text-display,
+    .text-h1,
+    .text-h2,
+    .text-h3,
+    .text-h4,
+    .text-h5,
+    .text-content,
+    .text-content-secondary,
+    .text-content-tertiary
+  ):not(
+    :is(
+      .card,
+      .alert,
+      .badge,
+      .button,
+      thead,
+      .bg-surface,
+      .bg-surface-secondary,
+      .bg-surface-tertiary,
+      .bg-surface-brand,
+      .bg-surface-brand-subtle,
+      .bg-surface-inverse
+    )
+  ):not(
+    .bg-surface-brand
+      :is(
+        .card,
+        .alert,
+        .badge,
+        .button,
+        thead,
+        .bg-surface,
+        .bg-surface-secondary,
+        .bg-surface-tertiary,
+        .bg-surface-brand,
+        .bg-surface-brand-subtle,
+        .bg-surface-inverse
+      )
+      *
+  ) {
+  color: var(--text-on-brand);
+}
+
 .text-content-inverse .prose,
-.text-content-on-color .prose {
+.text-content-on-brand .prose {
   --tw-prose-body: inherit;
   --tw-prose-headings: inherit;
   --tw-prose-lead: inherit;
@@ -312,6 +996,8 @@ html {
   --color-content-placeholder: var(--text-placeholder);
   --color-line-control: var(--border-control);
   --color-content-inverse: var(--text-inverse);
+  --color-content-on-brand: var(--text-on-brand);
+  --color-content-on-accent: var(--text-on-accent);
   --color-content-brand: var(--text-brand);
   --color-content-accent: var(--text-accent);
   --color-content-link: var(--text-link);
@@ -486,8 +1172,22 @@ html {
      sit on that surface and keep the brand color.
      bg-surface-inverse is deliberately not covered: those headings already
      contrast (8.64:1 measured) and --text-inverse would break them. */
-  .bg-surface-brand :is(h1, h2, h3, h4, h5, h6):not(:is(.card, .alert) *) {
-    color: var(--text-inverse);
+  .bg-surface-brand
+    :is(
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      .text-display,
+      .text-h1,
+      .text-h2,
+      .text-h3,
+      .text-h4,
+      .text-h5
+    ):not(:is(.card, .alert) *) {
+    color: var(--text-on-brand);
   }
 
   /* Paragraph spacing */
@@ -504,6 +1204,23 @@ html {
   h5:first-child,
   h6:first-child {
     margin-top: 0;
+  }
+
+  /* A heading directly after another heading is a subtitle: it belongs to the line
+     above it, not to the section that ended before it. The top margins here are
+     section breaks (h2 carries 1.5em), and margin collapsing hands the pair the
+     larger of the two — so an h1 followed by its own h2 was pushed 37px apart and
+     read as two unrelated blocks. The pair now sits at 0.3em of the upper heading,
+     which keeps it proportional: a bigger heading gets a slightly bigger gap.
+
+     Scoped to real heading tags on purpose. The .text-h* utilities are decoration
+     and get applied to spans and divs whose adjacency means nothing. */
+  :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
+    margin-top: 0;
+  }
+
+  :is(h1, h2, h3, h4, h5, h6):has(+ :is(h1, h2, h3, h4, h5, h6)) {
+    margin-bottom: 0.3em;
   }
 
   /* Remove bottom margin on last elements */
@@ -537,9 +1254,12 @@ html {
     text-underline-offset: 4px;
   }
 
-  /* Focus-visible styles - WCAG 2.1 SC 2.4.7: Visible focus indicator */
+  /* Focus-visible styles - WCAG 2.1 SC 2.4.7 and 2.4.13: Visible focus indicator.
+     --border-focus is accent-400 and measures 2.32:1 on the page; --ring-focus
+     is the corrected token from the block at the top of this file (3.74:1) and
+     is what every component ring already uses. */
   :focus-visible {
-    outline: 2px solid var(--border-focus);
+    outline: 2px solid var(--ring-focus);
     outline-offset: 2px;
   }
 
@@ -691,8 +1411,18 @@ html {
     margin-top: 1.25rem;
   }
 
-  /* No spacing between label and its following control wrap (they belong together) */
-  .wpcf7-form > label + .wpcf7-form-control-wrap {
+  /* Beschriftung und Feld gehoeren zusammen.
+
+     Zwei Faelle, weil CF7 beides erzeugt: das Feld steht im Label (unser
+     Standardformular) oder als Geschwister dahinter (aeltere Formulare).
+     Gemessen war der erste Fall bei 2px, waehrend die theme-eigene
+     Feldkomponente 6px nutzt. Die Einwilligung ist ausgenommen, sie ist ein
+     eigener Block und braucht den vollen Abstand. */
+  .wpcf7-form > label + .wpcf7-form-control-wrap:not(:has(.wpcf7-acceptance)) {
+    margin-top: 0.375rem;
+  }
+
+  .wpcf7-form label > .wpcf7-form-control-wrap {
     margin-top: 0.375rem;
   }
 
@@ -712,11 +1442,40 @@ html {
     font-size: var(--typography-body-small-size);
     font-weight: 500;
     color: var(--text-primary);
+  }
+
+  /* Nur wenn das Feld NICHT im Label steckt, gehoert der Abstand ans Label.
+     Steckt es drin, wuerde er unter dem Feld landen. */
+  .wpcf7-form > label:not(:has(.wpcf7-form-control-wrap)) {
     margin-bottom: 0.375rem;
   }
 
   .wpcf7-form .wpcf7-form-control-wrap {
     display: block;
+  }
+
+  /* Pflichtfeld-Sternchen.
+
+     Gesetzt wird es serverseitig in ContactForm7Configurator::markRequiredFields(),
+     nicht per Pseudoelement: CF7 legt das Eingabefeld in das Label, ein ::after
+     am Label landet deshalb unter dem Feld statt hinter dem Text.
+
+     Es traegt aria-hidden, weil die Information fuer Screenreader schon in
+     aria-required am Feld steht. Zweimal vorgelesen waere sie Laerm. */
+  .wpcf7-form .required-marker {
+    color: var(--text-error);
+    margin-left: 0.15em;
+  }
+
+  /* Statusmeldung: CF7 blendet sie mit aria-hidden aus, solange nichts
+     passiert ist, und setzt beim Absenden role="alert". Sie braucht nur den
+     Abstand und die Farbe des Themes. */
+  .wpcf7-form .wpcf7-response-output {
+    margin: 1rem 0 0;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md, 0.5rem);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
   }
 
   /* --- Text Inputs --- */
@@ -954,7 +1713,9 @@ html {
     min-height: var(--button-md-min-height);
     font-size: var(--typography-body-small-size);
     font-weight: 600;
-    color: var(--text-on-color);
+    /* Mirrors button.blade.php primary: content on a fill uses --text-inverse,
+       which flips with the scheme exactly as the gradient now does. */
+    color: var(--text-inverse);
     background: linear-gradient(
       to bottom,
       var(--gradient-primary-start),
@@ -1179,12 +1940,14 @@ html {
 
   .button-danger {
     background-color: var(--color-surface-error-strong);
-    color: var(--text-on-color);
+    /* Mirrors button.blade.php danger. */
+    color: var(--text-inverse);
     border: 1px solid transparent;
     box-shadow: var(--shadow-button);
   }
 
   .button-danger:hover {
+    background-color: var(--bg-error-strong-hover);
     box-shadow: var(--shadow-button-hover);
   }
 
@@ -1647,6 +2410,12 @@ html {
     opacity: 1 !important;
     transform: none !important;
   }
+
+  /* Hero background variant: eigenes Reveal (siehe unten), gleiche Ausnahme */
+  .hero--background[x-data] .hero-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* ============================================
@@ -1665,6 +2434,31 @@ html {
   transform: none !important;
 }
 
+/* Hero background variant nutzt kein x-section (volle Viewporthoehe ohne
+   Container), daher greift die .section[x-data]-Regel oben nicht — sie traefe
+   ohnehin auch Bild und Overlay, nicht nur den Inhalt. Eigene, gleich
+   aufgebaute Regel, gescoped auf den Inhalts-Wrapper .hero-reveal. */
+.hero--background[x-data]:not(.is-visible) .hero-reveal {
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+.hero--background[x-data].is-visible .hero-reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero--background[x-data] .hero-reveal {
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out;
+}
+
+.no-js .hero--background[x-data] .hero-reveal {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 /* ============================================
    MULTI-COLUMN TEXT ALIGNMENT
    ============================================ */
@@ -1672,14 +2466,23 @@ html {
 @layer components {
   /* In an equal-column layout the body copy starts one line lower in any
      column whose headline wraps, because each column is its own text flow.
-     Reserving a fixed number of lines for the leading headline lines the
-     columns back up. This replaces the editorial workaround of padding the
-     short headlines with a second line in white.
+     Setting --column-heading-lines on a section reserves that many lines for
+     the leading headline and lines the columns back up.
 
-     Two lines cover the common case. Where a headline genuinely needs three,
-     raise --column-heading-lines on that section instead of editing content.
-     Single-column and mobile layouts are untouched, so no space is wasted
-     where there is nothing to align. */
+     Reserving two lines used to be the DEFAULT, and that was wrong: it also
+     fired when every headline in the row was a single line, which is the
+     common case. Both columns then carried a full empty line under the
+     headline (measured 2026-08-13: 71.97px of box for 36px of text) for an
+     alignment that had nothing to align. The default is now auto, so nothing
+     is reserved unless a section asks for it.
+
+     The reservation counts in lh, which resolves against the headline's own
+     line-height. Inside .prose that is the typography plugin's 1.5, not the
+     theme's heading token: the plugin's rule sits in @layer utilities and
+     beats the token rule in @layer base. Worth knowing before picking a
+     value.
+
+     Single-column and mobile layouts are untouched. */
   @media (min-width: 768px) {
     :is(
         .two-columns,
@@ -1691,7 +2494,7 @@ html {
       )
       .prose
       > :is(h2, h3, h4, h5):first-of-type {
-      min-height: var(--column-heading-lines, 2lh);
+      min-height: var(--column-heading-lines, auto);
     }
   }
 }
@@ -1706,6 +2509,12 @@ html {
      Alpine leaves display:none / opacity:0 on the wrapper. */
   .section[x-data] > div {
     display: block !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Hero background variant: eigenes Reveal (siehe oben), gleiche Ausnahme. */
+  .hero--background[x-data] .hero-reveal {
     opacity: 1 !important;
     transform: none !important;
   }
@@ -1837,9 +2646,39 @@ html {
   }
 }
 
+/* Der Block hob vorher seine eigene Absicht auf: er setzte im
+   reduced-motion-Fall wieder eine Endlosanimation. Jetzt bleibt der Spinner
+   sichtbar, aber still. */
 @media (prefers-reduced-motion: reduce) {
   .wpcf7 form.wpcf7-form .wpcf7-spinner {
-    animation: wpcf7-pulse 1.6s ease-in-out infinite;
+    animation: none;
     border-top-color: var(--border-accent);
   }
+}
+
+/* Einwilligung (acceptance), bewusst ausserhalb jeder @layer.
+
+   Contact Form 7 liefert ein eigenes, ungelayertes Stylesheet aus. Ungelayerte
+   Regeln schlagen jede Layer-Regel, egal wie spezifisch die ist. Alles, was
+   CF7-Defaults korrigieren soll, muss deshalb ebenfalls ungelayert stehen.
+
+   Gemessen vor dem Fix: 16px Einzug am Listeneintrag aus CF7s eigenem
+   margin-left, und die Checkbox in der vertikalen Mitte eines zweizeiligen
+   Textes statt an der ersten Zeile. */
+.wpcf7-form .wpcf7-acceptance .wpcf7-list-item {
+  margin: 0;
+}
+
+.wpcf7-form .wpcf7-acceptance label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.wpcf7-form .wpcf7-acceptance input[type='checkbox'] {
+  flex: none;
+  margin-top: 0.15rem;
 }
