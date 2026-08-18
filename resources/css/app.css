@@ -462,7 +462,8 @@
 
 :root {
   /* One vocabulary for the whole theme. Entrances may take their time,
-     exits should get out of the way, so they are shorter and ease in. */
+     exits should get out of the way, so they are shorter and ease in.
+     Einzige Quelle für Komponenten-Transitions, nicht mehr pro Regel hart codieren. */
   --motion-enter-duration: 200ms;
   --motion-exit-duration: 150ms;
   --motion-enter-ease: cubic-bezier(0, 0, 0.2, 1);
@@ -640,6 +641,17 @@ html {
    ============================================ */
 
 @layer utilities {
+  /* Der Block hiess bisher "auch im Fliesstext", band aber nur die Ueberschriften
+     zurueck. Absatz, Liste und Zitat liefen weiter auf der Skala des Plugins:
+     gemessen 18px/32px, waehrend das Body-Token 16px/24px sagt. Das ist die
+     Mehrheit des WYSIWYG-Inhalts, also genau der Teil, den der Blocktitel
+     behauptet abzudecken. Margins bleiben beim Plugin, dessen vertikaler
+     Rhythmus fuer Fliesstext gut ist. */
+  .prose :is(p, li, blockquote) {
+    font-size: var(--typography-body-size);
+    line-height: var(--typography-body-line-height);
+  }
+
   .prose :is(h1, h2, h3, h4, h5, h6) {
     font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
     color: var(--text-primary);
@@ -1440,9 +1452,9 @@ html {
     border-radius: var(--input-md-radius);
     box-shadow: var(--shadow-input);
     transition:
-      color 0.2s ease,
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
+      color var(--motion-enter-duration) var(--motion-enter-ease),
+      border-color var(--motion-enter-duration) var(--motion-enter-ease),
+      box-shadow var(--motion-enter-duration) var(--motion-enter-ease);
   }
 
   .wpcf7-form input[type='text']::placeholder,
@@ -1495,9 +1507,9 @@ html {
     box-shadow: var(--shadow-input);
     resize: vertical;
     transition:
-      color 0.2s ease,
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
+      color var(--motion-enter-duration) var(--motion-enter-ease),
+      border-color var(--motion-enter-duration) var(--motion-enter-ease),
+      box-shadow var(--motion-enter-duration) var(--motion-enter-ease);
   }
 
   .wpcf7-form textarea::placeholder {
@@ -1536,9 +1548,9 @@ html {
     appearance: none;
     cursor: pointer;
     transition:
-      color 0.2s ease,
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
+      color var(--motion-enter-duration) var(--motion-enter-ease),
+      border-color var(--motion-enter-duration) var(--motion-enter-ease),
+      box-shadow var(--motion-enter-duration) var(--motion-enter-ease);
   }
 
   .wpcf7-form select:hover {
@@ -1610,8 +1622,8 @@ html {
     border-radius: var(--input-md-radius);
     cursor: pointer;
     transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
+      border-color var(--motion-enter-duration) var(--motion-enter-ease),
+      box-shadow var(--motion-enter-duration) var(--motion-enter-ease);
   }
 
   .wpcf7-form input[type='file']:hover {
@@ -1635,8 +1647,8 @@ html {
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition:
-      background-color 0.2s ease,
-      border-color 0.2s ease;
+      background-color var(--motion-enter-duration) var(--motion-enter-ease),
+      border-color var(--motion-enter-duration) var(--motion-enter-ease);
   }
 
   .wpcf7-form input[type='file']::file-selector-button:hover {
@@ -1667,11 +1679,11 @@ html {
     box-shadow: var(--shadow-button);
     cursor: pointer;
     transition:
-      color 0.2s ease,
-      background 0.2s ease,
-      border-color 0.2s ease,
-      box-shadow 0.2s ease,
-      transform 0.2s ease;
+      color var(--motion-enter-duration) var(--motion-enter-ease),
+      background var(--motion-enter-duration) var(--motion-enter-ease),
+      border-color var(--motion-enter-duration) var(--motion-enter-ease),
+      box-shadow var(--motion-enter-duration) var(--motion-enter-ease),
+      transform var(--motion-enter-duration) var(--motion-enter-ease);
     appearance: none;
   }
 
@@ -1764,10 +1776,10 @@ html {
     text-decoration: none;
     cursor: pointer;
     transition:
-      color 0.2s ease,
-      border-color 0.2s ease,
-      box-shadow 0.2s ease,
-      transform 0.2s ease;
+      color var(--motion-enter-duration) var(--motion-enter-ease),
+      border-color var(--motion-enter-duration) var(--motion-enter-ease),
+      box-shadow var(--motion-enter-duration) var(--motion-enter-ease),
+      transform var(--motion-enter-duration) var(--motion-enter-ease);
   }
 
   /* button-primary uses an ::after cross-fade for the hover gradient so that only
@@ -1801,7 +1813,7 @@ html {
       var(--gradient-primary-hover-end)
     );
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity var(--motion-enter-duration) var(--motion-enter-ease);
     pointer-events: none;
     z-index: -1;
   }
@@ -1959,7 +1971,7 @@ html {
 
 /* Gallery hover effect - ensure transition works */
 .gallery figure img {
-  transition: transform 200ms ease-out;
+  transition: transform var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -2028,7 +2040,7 @@ html {
     padding: 0.5rem 0;
     color: var(--text-secondary);
     font-weight: 500;
-    transition: color 0.15s ease;
+    transition: color var(--motion-enter-duration) var(--motion-enter-ease);
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -2111,8 +2123,8 @@ html {
     color: var(--text-secondary);
     white-space: nowrap;
     transition:
-      color 0.15s ease,
-      background-color 0.15s ease;
+      color var(--motion-enter-duration) var(--motion-enter-ease),
+      background-color var(--motion-enter-duration) var(--motion-enter-ease);
   }
 
   .desktop-nav .sub-menu a:hover {
@@ -2156,7 +2168,7 @@ html {
   padding-right: 3rem;
   color: var(--text-secondary);
   font-weight: 500;
-  transition: color 0.15s ease;
+  transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -2190,7 +2202,7 @@ html {
   background: transparent;
   border: none;
   color: var(--text-tertiary);
-  transition: color 0.15s ease;
+  transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
 .mobile-nav .submenu-toggle:hover {
@@ -2200,7 +2212,7 @@ html {
 .mobile-nav .submenu-toggle svg {
   width: 1rem;
   height: 1rem;
-  transition: transform 0.2s ease;
+  transition: transform var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
 .mobile-nav .submenu-toggle[aria-expanded='true'] svg {
@@ -2223,7 +2235,7 @@ html {
   padding: 0.5rem 1rem;
   color: var(--text-secondary);
   font-size: 0.875rem;
-  transition: color 0.15s ease;
+  transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -2249,7 +2261,7 @@ html {
 /* Footer nav link styles */
 .footer-nav a {
   color: var(--text-secondary);
-  transition: color 0.15s ease;
+  transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
 .footer-nav a:hover {
@@ -2273,7 +2285,7 @@ html {
 /* Legal nav link styles */
 .legal-nav a {
   color: var(--text-secondary);
-  transition: color 0.15s ease;
+  transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
 .legal-nav a:hover {
@@ -2301,7 +2313,7 @@ html {
 
 .breadcrumbs a {
   color: var(--text-secondary);
-  transition: color 0.15s ease;
+  transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
 .breadcrumbs a:hover {
@@ -2391,8 +2403,8 @@ html {
 
 .hero--background[x-data] .hero-reveal {
   transition:
-    opacity 200ms ease-out,
-    transform 200ms ease-out;
+    opacity var(--motion-enter-duration) var(--motion-enter-ease),
+    transform var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
 .no-js .hero--background[x-data] .hero-reveal {

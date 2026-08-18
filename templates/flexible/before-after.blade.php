@@ -38,23 +38,30 @@
         <div
             id="{{ $uniqueId }}"
             x-data="beforeAfterSlider()"
-            class="relative max-w-4xl mx-auto overflow-hidden rounded-[var(--card-radius)] select-none"
+            class="relative max-w-4xl mx-auto select-none"
         >
-            {{-- After image (background) --}}
-            {!! wp_get_attachment_image($afterId, 'content', false, [
-                'class'   => 'block w-full',
-                'alt'     => $altAfter,
-            ]) !!}
-
-            {{-- Before image (clipped) --}}
-            <div
-                class="absolute inset-0 overflow-hidden"
-                :style="'clip-path: inset(0 ' + (100 - position) + '% 0 0)'"
-            >
-                {!! wp_get_attachment_image($beforeId, 'content', false, [
+            {{-- Bildbereich traegt das overflow-hidden jetzt selbst, nicht mehr der
+                 aeussere Container: der Slider-Griff ist per inset-y-0 randbuendig
+                 mit dessen Kanten, sein Fokusring waere dort auf voller Hoehe und
+                 zusaetzlich bei Position 0/100 auch seitlich abgeschnitten worden
+                 (gleiche Falle wie im Akkordeon geloest). --}}
+            <div class="relative overflow-hidden rounded-[var(--card-radius)]">
+                {{-- After image (background) --}}
+                {!! wp_get_attachment_image($afterId, 'content', false, [
                     'class'   => 'block w-full',
-                    'alt'     => $altBefore,
+                    'alt'     => $altAfter,
                 ]) !!}
+
+                {{-- Before image (clipped) --}}
+                <div
+                    class="absolute inset-0 overflow-hidden"
+                    :style="'clip-path: inset(0 ' + (100 - position) + '% 0 0)'"
+                >
+                    {!! wp_get_attachment_image($beforeId, 'content', false, [
+                        'class'   => 'block w-full',
+                        'alt'     => $altBefore,
+                    ]) !!}
+                </div>
             </div>
 
             {{-- Slider handle (48px hit area with 1px visual bar) --}}

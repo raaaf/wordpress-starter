@@ -17,14 +17,19 @@
                     class="group flex items-center justify-between w-full py-3 font-bold text-left cursor-pointer transition-colors hover:text-content-brand focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
                     :class="{ 'text-content-brand': active === {{ $aIdx }} }">
                 {{ $aItem['title'] }}
-                <svg class="w-4 h-4 shrink-0 transition-transform duration-200"
-                     :class="{ 'rotate-180': active === {{ $aIdx }} }"
-                     fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
+                {{-- Icon-Komponente rendert flaechig, nicht als Outline; Rotation deshalb
+                     auf einem Wrapper-Span, weil x-icon keine :class-Bindung annimmt. --}}
+                <span class="inline-block shrink-0 transition-transform duration-200"
+                      :class="{ 'rotate-180': active === {{ $aIdx }} }">
+                    <x-icon name="chevron-down" class="w-4 h-4" />
+                </span>
             </button>
+            {{-- Dauer auf 200ms gesetzt statt des unkonfigurierten 250ms-Standards
+                 des Collapse-Plugins: so läuft das Panel synchron mit dem Chevron
+                 (transition-transform duration-200 oben), passend zum Enter-Token
+                 --motion-enter-duration der Motion-Skala. --}}
             <div x-show="active === {{ $aIdx }}"
-                 x-collapse
+                 x-collapse.duration.200ms
                  id="{{ $idPrefix }}-{{ $aIdx }}"
                  role="region"
                  aria-labelledby="{{ $idPrefix }}-btn-{{ $aIdx }}"

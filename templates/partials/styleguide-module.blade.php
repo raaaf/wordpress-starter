@@ -72,7 +72,13 @@
         }"
     @endif
 >
-    <div class="border-b bg-surface-secondary border-line">
+    {{-- Die Leiste trug dieselbe Fläche, die ein Modul mit Hintergrund
+         "secondary" selbst rendert. Wo das zusammentraf, trennte nur eine
+         1px-Linie das Werkzeug von dem, was es zeigen soll, und der Rahmen
+         verschmolz mit seinem Inhalt. Eine kräftigere untere Kante und ein
+         Streifen in der Akzentfarbe am linken Rand markieren die Leiste jetzt
+         als Rahmen, unabhängig davon, welche Fläche das Modul darunter wählt. --}}
+    <div class="border-b-2 border-l-4 bg-surface-secondary border-line border-l-line-brand">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <p class="flex flex-wrap items-baseline gap-2 m-0 text-body-small text-content-secondary">
                 <span class="font-medium text-content">{{ $modul['label'] }}</span>

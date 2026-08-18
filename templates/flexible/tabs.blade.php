@@ -75,6 +75,12 @@
                         x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0 translate-y-2"
                         x-transition:enter-end="opacity-100 translate-y-0"
+                        {{-- Ohne Leave-Transition poppt das alte Panel sofort weg,
+                             während das neue einblendet. Symmetrisch zur
+                             Enter-Transition, mit dem Exit-Token der Motion-Skala. --}}
+                        x-transition:leave="transition duration-[var(--motion-exit-duration)] ease-[var(--motion-exit-ease)]"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 translate-y-2"
                         x-cloak
                         :aria-hidden="activeTab !== {{ $index }}"
                         :tabindex="activeTab === {{ $index }} ? 0 : -1"

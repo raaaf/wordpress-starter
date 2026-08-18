@@ -82,12 +82,12 @@
                             @endif
                             {{ $item['title'] }}
                         </span>
-                        <svg class="w-5 h-5 transition-transform duration-200"
-                             :class="{ 'rotate-180': active === {{ $index }} }"
-                             fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                             aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
+                        {{-- Icon-Komponente rendert flaechig, nicht als Outline; Rotation deshalb
+                             auf einem Wrapper-Span, weil x-icon keine :class-Bindung annimmt. --}}
+                        <span class="inline-block transition-transform duration-200"
+                              :class="{ 'rotate-180': active === {{ $index }} }">
+                            <x-icon name="chevron-down" class="w-5 h-5" />
+                        </span>
                     </button>
                     <div x-show="active === {{ $index }}"
                          x-collapse

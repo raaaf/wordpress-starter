@@ -35,7 +35,10 @@
                         }
                     @endphp
                     <figure class="relative overflow-hidden rounded-lg group">
-                        <button type="button" class="block w-full rounded-lg focus:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]" aria-label="{{ sprintf(__('Bild vergrößern: %s', 'wp-starter'), $accessibleLabel ?: __('Galeriebild', 'wp-starter')) }}">
+                        {{-- Ring nach innen: die Figure traegt overflow-hidden fuer den
+                             Bildzuschnitt, der Button fuellt sie randbuendig, ein nach
+                             aussen gemalter Ring waere an allen Kanten abgeschnitten. --}}
+                        <button type="button" class="block w-full rounded-lg focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--ring-focus)]" aria-label="{{ sprintf(__('Bild vergrößern: %s', 'wp-starter'), $accessibleLabel ?: __('Galeriebild', 'wp-starter')) }}">
                         {!! wp_get_attachment_image($imageId, 'gallery-thumb', false, [
                             'class' => 'object-cover w-full transition-transform duration-200 ease-out cursor-zoom-in aspect-square gallery-zoom group-hover:scale-[1.03]',
                             'sizes' => '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw',
