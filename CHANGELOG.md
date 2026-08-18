@@ -1,3 +1,10 @@
+## [2.27.2](https://github.com/raaaf/wordpress-starter/compare/v2.27.1...v2.27.2) (2026-08-18)
+
+### Bug Fixes
+
+- **hero:** Reveal-Schwelle entfernt ([760cd0a](https://github.com/raaaf/wordpress-starter/commit/760cd0ab41b9e320b71b0d910a4a4f424b55c5cf))
+- **sections:** Reveal-Schwelle blockierte sehr lange Sektionen ([36874dd](https://github.com/raaaf/wordpress-starter/commit/36874dd463a9a7cb55ebcb46331b9f5e6f1c2a9e))
+
 ## [2.27.1](https://github.com/raaaf/wordpress-starter/compare/v2.27.0...v2.27.1) (2026-08-18)
 
 # [2.27.0](https://github.com/raaaf/wordpress-starter/compare/v2.26.6...v2.27.0) (2026-08-14)
