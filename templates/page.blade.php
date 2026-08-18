@@ -43,9 +43,18 @@
                 @php($hasTitledHero = !empty($firstHeroTitle))
                 {{-- Die Startseite bleibt ausgenommen: ihr Seitentitel ist ein
                      Verwaltungsname ("Startseite") und gehoert nicht auf die Seite. --}}
+                {{-- Der Kopf uebernimmt das Mass der ersten Sektion. one_column setzt
+                     seinen Inhalt in max-w-2xl mittig; eine h1 ueber die volle
+                     Containerbreite stand dann weit links neben ihrem eigenen Text.
+                     Alle anderen Layouts nutzen die volle Breite und bekommen den Kopf
+                     wie bisher. --}}
+                @php($firstLayout = $sectionLayouts[0] ?? null)
+                @php($headerMeasure = $firstLayout === 'one_column' ? 'max-w-2xl mx-auto' : '')
                 @unless(is_front_page() || $hasTitledHero)
                     <header class="page-header max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        <h1>{{ get_the_title() }}</h1>
+                        <div class="{{ $headerMeasure }}">
+                            <h1>{{ get_the_title() }}</h1>
+                        </div>
                     </header>
                 @endunless
 
