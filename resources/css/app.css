@@ -2046,7 +2046,11 @@ html {
     top: 100%;
     left: 0;
     min-width: 200px;
-    padding: 0.5rem 0;
+    /* Polster auf allen vier Seiten: die Eintraege tragen eine eigene
+       Hoverflaeche, und die soll ringsum denselben Rahmen behalten. Mit
+       `0.5rem 0` lief sie links und rechts bis an den Rand, oben und unten
+       aber nicht, was den Abstand ungleich aussehen liess. */
+    padding: 0.5rem;
     background: var(--bg-primary);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md, 0.5rem);
@@ -2080,7 +2084,8 @@ html {
 
   .desktop-nav .sub-menu a {
     display: block;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm, 0.25rem);
     color: var(--text-secondary);
     white-space: nowrap;
     transition:
