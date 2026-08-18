@@ -1,3 +1,9 @@
+## [2.27.5](https://github.com/raaaf/wordpress-starter/compare/v2.27.4...v2.27.5) (2026-08-18)
+
+### Bug Fixes
+
+- **nav:** Untermenue umrandet seine Hoverflaeche gleichmaessig ([2322997](https://github.com/raaaf/wordpress-starter/commit/2322997ec919dd049e172d06c4850562637beb0f))
+
 ## [2.27.4](https://github.com/raaaf/wordpress-starter/compare/v2.27.3...v2.27.4) (2026-08-18)
 
 ### Bug Fixes
