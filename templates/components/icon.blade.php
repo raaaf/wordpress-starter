@@ -8,10 +8,8 @@
     @param string $size - xs, sm, md, lg, xl or custom Tailwind class (default: md)
     @param string $class - Additional CSS classes
 
-    Available icons:
-    UI: calendar, check, chevron, chevron-up, chevron-down, chevron-left, chevron-right,
-        close, eye, lock, mail, minus, phone, plus, search, user, warning
-    Social: facebook, instagram, linkedin, x, xing, youtube
+    Available icons: einzige Quelle der Wahrheit ist config/icons.json, nicht
+    diese Liste. Sie driftete zuvor bereits ab, siehe scripts/sync-icons.js.
 
     Usage:
     <x-icon name="search" />
