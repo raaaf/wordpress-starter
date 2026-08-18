@@ -12,7 +12,7 @@
  * than dark mode rules in app.css
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-08-14T10:14:18.553Z
+ * Generated: 2026-08-18T19:35:25.957Z
  */
 
 /* ============================================
@@ -49,6 +49,15 @@
   --color-gray-800: #262626;
   --color-gray-900: #171717;
   --color-gray-950: #0A0A0A;
+  --color-ink-50: #F7F8F8;
+  --color-ink-300: #9CA3AF;
+  --color-ink-400: #7A828D;
+  --color-ink-700: #2C2F34;
+  --color-ink-800: #202225;
+  --color-ink-825: #1D1F22;
+  --color-ink-850: #16181A;
+  --color-ink-900: #0F1011;
+  --color-ink-950: #08090A;
   --color-primary-50: #F5F5F5;
   --color-primary-100: #E5E5E5;
   --color-primary-200: #D4D4D4;
@@ -372,6 +381,9 @@
   --text-link-hover: var(--color-accent-800);
   --text-disabled: var(--color-gray-400);
   --text-on-color: var(--color-white);
+  --text-on-brand: var(--color-gray-900);
+  --text-on-accent: var(--color-white);
+  --text-placeholder: var(--color-gray-500);
 
   /* Border */
   --border-default: var(--color-gray-200);
@@ -385,6 +397,7 @@
   --border-brand-secondary: var(--color-primary-800);
   --border-accent: var(--color-accent-700);
   --border-disabled: var(--color-gray-200);
+  --border-control: var(--color-gray-500);
 
   /* Icon */
   --icon-primary: var(--color-gray-700);
@@ -398,6 +411,9 @@
   --icon-warning: var(--color-warning-dark);
   --icon-error: var(--color-error-dark);
   --icon-on-color: var(--color-white);
+
+  /* Ring */
+  --ring-focus: var(--color-accent-600);
 }
 
 /* ============================================
@@ -453,6 +469,9 @@
     --text-link-hover: var(--color-accent-800) !important;
     --text-disabled: var(--color-gray-400) !important;
     --text-on-color: var(--color-white) !important;
+    --text-on-brand: var(--color-gray-900) !important;
+    --text-on-accent: var(--color-white) !important;
+    --text-placeholder: var(--color-gray-500) !important;
 
   /* Border - Light Mode (forced) */
     --border-default: var(--color-gray-200) !important;
@@ -466,6 +485,7 @@
     --border-brand-secondary: var(--color-primary-800) !important;
     --border-accent: var(--color-accent-700) !important;
     --border-disabled: var(--color-gray-200) !important;
+    --border-control: var(--color-gray-500) !important;
 
   /* Icon - Light Mode (forced) */
     --icon-primary: var(--color-gray-700) !important;

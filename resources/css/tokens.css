@@ -5,7 +5,7 @@
  * Run: node scripts/transform-tokens.js
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-08-14T10:14:18.551Z
+ * Generated: 2026-08-18T19:35:25.955Z
  */
 
 /* ============================================
@@ -42,6 +42,15 @@
   --color-gray-800: #262626;
   --color-gray-900: #171717;
   --color-gray-950: #0A0A0A;
+  --color-ink-50: #F7F8F8;
+  --color-ink-300: #9CA3AF;
+  --color-ink-400: #7A828D;
+  --color-ink-700: #2C2F34;
+  --color-ink-800: #202225;
+  --color-ink-825: #1D1F22;
+  --color-ink-850: #16181A;
+  --color-ink-900: #0F1011;
+  --color-ink-950: #08090A;
   --color-primary-50: #F5F5F5;
   --color-primary-100: #E5E5E5;
   --color-primary-200: #D4D4D4;
@@ -366,6 +375,9 @@
   --text-link-hover: var(--color-accent-800);
   --text-disabled: var(--color-gray-400);
   --text-on-color: var(--color-white);
+  --text-on-brand: var(--color-gray-900);
+  --text-on-accent: var(--color-white);
+  --text-placeholder: var(--color-gray-500);
 
   /* Border */
   --border-default: var(--color-gray-200);
@@ -379,6 +391,7 @@
   --border-brand-secondary: var(--color-primary-800);
   --border-accent: var(--color-accent-700);
   --border-disabled: var(--color-gray-200);
+  --border-control: var(--color-gray-500);
 
   /* Icon */
   --icon-primary: var(--color-gray-700);
@@ -392,6 +405,9 @@
   --icon-warning: var(--color-warning-dark);
   --icon-error: var(--color-error-dark);
   --icon-on-color: var(--color-white);
+
+  /* Ring */
+  --ring-focus: var(--color-accent-600);
 }
 
 /* ============================================
@@ -401,10 +417,10 @@
 
 [data-theme="dark"] {
   /* Background */
-  --bg-primary: var(--color-gray-900);
-  --bg-secondary: var(--color-gray-800);
-  --bg-tertiary: var(--color-gray-700);
-  --bg-inverse: var(--color-white);
+  --bg-primary: var(--color-ink-950);
+  --bg-secondary: var(--color-ink-900);
+  --bg-tertiary: var(--color-ink-850);
+  --bg-inverse: var(--color-ink-50);
   --bg-brand: var(--color-accent-500);
   --bg-brand-subtle: var(--color-accent-900);
   --bg-brand-hover: var(--color-accent-400);
@@ -424,12 +440,13 @@
   --bg-disabled: var(--color-gray-800);
   --bg-on-color: var(--color-white);
   --bg-overlay: rgba(0, 0, 0, 0.70);
+  --bg-tertiary-elevated: var(--color-ink-825);
 
   /* Text */
-  --text-primary: var(--color-white);
-  --text-secondary: var(--color-gray-300);
-  --text-tertiary: var(--color-gray-400);
-  --text-inverse: var(--color-gray-900);
+  --text-primary: var(--color-ink-50);
+  --text-secondary: var(--color-ink-300);
+  --text-tertiary: var(--color-ink-400);
+  --text-inverse: var(--color-ink-950);
   --text-brand: var(--color-accent-400);
   --text-link: var(--color-accent-400);
   --text-success: var(--color-success-light);
@@ -440,10 +457,13 @@
   --text-link-hover: var(--color-accent-300);
   --text-disabled: var(--color-gray-600);
   --text-on-color: var(--color-white);
+  --text-on-brand: var(--color-gray-900);
+  --text-on-accent: var(--color-ink-950);
+  --text-placeholder: var(--color-gray-400);
 
   /* Border */
-  --border-default: var(--color-gray-700);
-  --border-strong: var(--color-gray-600);
+  --border-default: var(--color-ink-800);
+  --border-strong: var(--color-ink-700);
   --border-subtle: var(--color-gray-800);
   --border-brand: var(--color-accent-500);
   --border-focus: var(--color-accent-600);
@@ -453,6 +473,7 @@
   --border-brand-secondary: var(--color-secondary-500);
   --border-accent: var(--color-accent-500);
   --border-disabled: var(--color-gray-700);
+  --border-control: var(--color-gray-500);
 
   /* Icon */
   --icon-primary: var(--color-gray-200);
@@ -466,15 +487,18 @@
   --icon-warning: var(--color-warning-light);
   --icon-error: var(--color-error-light);
   --icon-on-color: var(--color-white);
+
+  /* Ring */
+  --ring-focus: var(--color-accent-600);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     /* Background */
-  --bg-primary: var(--color-gray-900);
-  --bg-secondary: var(--color-gray-800);
-  --bg-tertiary: var(--color-gray-700);
-  --bg-inverse: var(--color-white);
+  --bg-primary: var(--color-ink-950);
+  --bg-secondary: var(--color-ink-900);
+  --bg-tertiary: var(--color-ink-850);
+  --bg-inverse: var(--color-ink-50);
   --bg-brand: var(--color-accent-500);
   --bg-brand-subtle: var(--color-accent-900);
   --bg-brand-hover: var(--color-accent-400);
@@ -494,12 +518,13 @@
   --bg-disabled: var(--color-gray-800);
   --bg-on-color: var(--color-white);
   --bg-overlay: rgba(0, 0, 0, 0.70);
+  --bg-tertiary-elevated: var(--color-ink-825);
 
     /* Text */
-  --text-primary: var(--color-white);
-  --text-secondary: var(--color-gray-300);
-  --text-tertiary: var(--color-gray-400);
-  --text-inverse: var(--color-gray-900);
+  --text-primary: var(--color-ink-50);
+  --text-secondary: var(--color-ink-300);
+  --text-tertiary: var(--color-ink-400);
+  --text-inverse: var(--color-ink-950);
   --text-brand: var(--color-accent-400);
   --text-link: var(--color-accent-400);
   --text-success: var(--color-success-light);
@@ -510,10 +535,13 @@
   --text-link-hover: var(--color-accent-300);
   --text-disabled: var(--color-gray-600);
   --text-on-color: var(--color-white);
+  --text-on-brand: var(--color-gray-900);
+  --text-on-accent: var(--color-ink-950);
+  --text-placeholder: var(--color-gray-400);
 
     /* Border */
-  --border-default: var(--color-gray-700);
-  --border-strong: var(--color-gray-600);
+  --border-default: var(--color-ink-800);
+  --border-strong: var(--color-ink-700);
   --border-subtle: var(--color-gray-800);
   --border-brand: var(--color-accent-500);
   --border-focus: var(--color-accent-600);
@@ -523,6 +551,7 @@
   --border-brand-secondary: var(--color-secondary-500);
   --border-accent: var(--color-accent-500);
   --border-disabled: var(--color-gray-700);
+  --border-control: var(--color-gray-500);
 
     /* Icon */
   --icon-primary: var(--color-gray-200);
@@ -536,5 +565,8 @@
   --icon-warning: var(--color-warning-light);
   --icon-error: var(--color-error-light);
   --icon-on-color: var(--color-white);
+
+    /* Ring */
+  --ring-focus: var(--color-accent-600);
   }
 }
