@@ -153,7 +153,8 @@ class Security
         $directives[] = "style-src {$styleSrc}";
 
         // Connect sources (API calls, WebSockets)
-        $connectSrc = "'self'" . $localSources;
+        // Rybbit analytics posts events to the tracking host via fetch().
+        $connectSrc = "'self' https://tracking.maki-it.de" . $localSources;
         $directives[] = "connect-src {$connectSrc}";
 
         // Worker sources (for WordPress emoji loader and other web workers)
