@@ -1,3 +1,5 @@
+## [2.27.1](https://github.com/raaaf/wordpress-starter/compare/v2.27.0...v2.27.1) (2026-08-18)
+
 # [2.27.0](https://github.com/raaaf/wordpress-starter/compare/v2.26.6...v2.27.0) (2026-08-14)
 
 ### Features
