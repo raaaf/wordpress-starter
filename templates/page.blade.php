@@ -41,7 +41,9 @@
                 @endforeach
                 @php($firstHeroTitle = $firstHeroIndex !== null ? get_post_meta($pageId, "page_sections_{$firstHeroIndex}_title", true) : null)
                 @php($hasTitledHero = !empty($firstHeroTitle))
-                @unless($hasTitledHero)
+                {{-- Die Startseite bleibt ausgenommen: ihr Seitentitel ist ein
+                     Verwaltungsname ("Startseite") und gehoert nicht auf die Seite. --}}
+                @unless(is_front_page() || $hasTitledHero)
                     <header class="page-header max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                         <h1>{{ get_the_title() }}</h1>
                     </header>

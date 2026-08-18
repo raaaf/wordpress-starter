@@ -58,3 +58,17 @@
             </nav>
         </div>
     </header>
+
+    {{-- Die Kopfhoehe steht in CSS als Rueckfallwert (80px), gemessen wird sie in
+         app.ts. Bis das verzoegerte Modul lief, rechnete der Hero mit dem falschen
+         Wert und sprang beim Nachtragen sichtbar. Deshalb hier, direkt hinter dem
+         Kopf und vor dem ersten Anstrich, einmal messen; app.ts haelt den Wert
+         danach ueber seinen ResizeObserver aktuell. --}}
+    <script nonce="{{ $GLOBALS['csp_nonce'] ?? '' }}">
+        (function () {
+            var header = document.querySelector('header[role="banner"]');
+            if (header) {
+                document.documentElement.style.setProperty('--header-height', header.offsetHeight + 'px');
+            }
+        })();
+    </script>
