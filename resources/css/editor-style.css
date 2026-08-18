@@ -14,6 +14,40 @@
 @import './tokens-editor.css';
 
 /* ============================================
+   KOMPENSATIONEN FÜR DIE EDITOR-KETTE
+
+   tokens-editor.css ist generiert und trägt genau das, was Figma liefert.
+   app.css gleicht zwei Lücken für das Frontend aus, wird hier aber nie
+   geladen, deshalb standen sie im Editor weiter offen. Diese Datei ist das
+   Gegenstück zu app.css: handgeschrieben, für dieselben zwei Korrekturen.
+
+   1. Der Figma-Export überspringt --spacing-1 und --spacing-2, obwohl vier
+      Komponenten-Tokens sie referenzieren. Eine undefinierte Variable macht
+      die ganze Deklaration ungültig, der mittlere Button verlor damit den
+      Abstand zwischen Symbol und Beschriftung und Badges ihre vertikale
+      Polsterung. Werte identisch zu app.css.
+
+   2. Der Verlauf zeigte auf das helle Rampenende, unter weisser Schrift sind
+      das 2,84:1. app.css rückt ihn im Hellmodus eine Stufe weiter. Der Editor
+      ist immer hell, also gilt hier dieselbe Korrektur. Werte identisch zu
+      app.css.
+
+   Beides gehört auf Dauer nach Figma, siehe docs/DESIGN-TOKEN-GAPS.md.
+   ============================================ */
+
+:root {
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+
+  --gradient-primary-start: var(--color-accent-700);
+  --gradient-primary-end: var(--color-accent-800);
+  --gradient-primary-hover-start: var(--color-accent-800);
+  --gradient-primary-hover-end: var(--color-accent-900);
+  --gradient-primary-active-start: var(--color-accent-900);
+  --gradient-primary-active-end: var(--color-accent-900);
+}
+
+/* ============================================
    BASE STYLES
    Scoped to body.mce-content-body (TinyMCE editor body)
    ============================================ */

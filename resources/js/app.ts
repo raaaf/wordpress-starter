@@ -402,6 +402,51 @@ Alpine.data('navigation', createNavigationComponent);
 Alpine.data('statsCounter', (target: number) => createStatsCounterComponent(target));
 Alpine.data('beforeAfterSlider', createBeforeAfterComponent);
 
+/**
+ * Positionsanzeige der Styleguide-Sprungnavigation.
+ *
+ * Markiert den Eintrag, dessen Modul gerade oben im Blick steht. Nur auf der
+ * Styleguide-Seite vorhanden, deshalb bricht das Setup ab, wenn es kein Ziel
+ * findet, statt einen Beobachter ins Leere zu haengen.
+ *
+ * rootMargin schneidet oben die Kopfzeilenhoehe weg und unten fast alles: so
+ * gewinnt immer das oberste Modul, das noch sichtbar ist, statt dass mehrere
+ * gleichzeitig als aktiv gelten.
+ */
+Alpine.data('styleguideSprungnavigation', () => ({
+  aktiv: '' as string,
+
+  init(): void {
+    const links = Array.from(
+      (this.$el as HTMLElement).querySelectorAll<HTMLAnchorElement>('a[data-anchor]')
+    );
+
+    const ziele = links
+      .map((link) => document.getElementById(link.dataset.anchor ?? ''))
+      .filter((el): el is HTMLElement => el !== null);
+
+    if (ziele.length === 0) {
+      return;
+    }
+
+    const beobachter = new IntersectionObserver(
+      (eintraege) => {
+        for (const eintrag of eintraege) {
+          if (eintrag.isIntersecting) {
+            this.aktiv = eintrag.target.id;
+            break;
+          }
+        }
+      },
+      { rootMargin: '-96px 0px -85% 0px', threshold: 0 }
+    );
+
+    ziele.forEach((ziel) => beobachter.observe(ziel));
+
+    this.$el.addEventListener('alpine:destroyed', () => beobachter.disconnect());
+  },
+}));
+
 // Register member area components (only registered when the module is present)
 registerMemberAreaComponents(Alpine);
 

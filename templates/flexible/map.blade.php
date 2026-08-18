@@ -40,13 +40,15 @@
             {{-- Consent notice for GDPR compliance --}}
             <div
                 x-show="!loaded"
+                {{-- Wie beim strukturell identischen Overlay in video.blade.php:
+                     ohne Leave-Transition verschwindet der Hinweis in einem Frame. --}}
+                x-transition:leave="transition duration-[var(--motion-exit-duration)] ease-[var(--motion-exit-ease)]"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
                 class="flex flex-col items-center justify-center p-8 text-center bg-surface-secondary map-consent-notice"
                 style="height: {{ esc_attr($height) }}px;"
             >
-                <svg class="w-16 h-16 mb-4 text-content-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
+                <x-icon name="map-pin" class="w-16 h-16 mb-4 text-content-secondary" />
                 <p class="mb-4 text-content-secondary">
                     {{ __('Zum Anzeigen der Karte wird Google Maps geladen.', 'wp-starter') }}<br>
                     {{ __('Es gelten die', 'wp-starter') }} <x-link url="https://policies.google.com/privacy" target="_blank">{{ __('Datenschutzbestimmungen von Google', 'wp-starter') }}</x-link>.

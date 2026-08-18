@@ -101,8 +101,11 @@
                             loading="lazy"
                         />
                         {{-- Abdunkeln, damit Text und Schaltflaeche auf jedem
-                             Standbild lesbar bleiben. --}}
-                        <div x-show="!loaded" class="absolute inset-0 bg-black/55" aria-hidden="true"></div>
+                             Standbild lesbar bleiben. bg-surface-overlay statt
+                             hartem bg-black/55, damit der Scrim wie jedes andere
+                             Overlay im Theme dem Farbschema folgt (heller Modus
+                             .50, dunkler Modus .70). --}}
+                        <div x-show="!loaded" class="absolute inset-0 bg-surface-overlay" aria-hidden="true"></div>
                     @endif
 
                     {{-- Consent notice for GDPR compliance --}}
