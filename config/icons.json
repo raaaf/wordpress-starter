@@ -13,10 +13,25 @@
   ],
   "weight": "regular",
   "icons": {
+    "archive": {
+      "source": "phosphor",
+      "name": "archive",
+      "label": "Archiv"
+    },
+    "arrow-right": {
+      "source": "phosphor",
+      "name": "arrow-right",
+      "label": "Pfeil nach rechts"
+    },
     "calendar": {
       "source": "phosphor",
       "name": "calendar-blank",
       "label": "Kalender"
+    },
+    "chat": {
+      "source": "phosphor",
+      "name": "chat-circle",
+      "label": "Nachricht"
     },
     "check": {
       "source": "phosphor",
@@ -33,11 +48,6 @@
       "name": "caret-down",
       "label": "Pfeil"
     },
-    "chevron-up": {
-      "source": "phosphor",
-      "name": "caret-up",
-      "label": "Pfeil hoch"
-    },
     "chevron-down": {
       "source": "phosphor",
       "name": "caret-down",
@@ -53,10 +63,15 @@
       "name": "caret-right",
       "label": "Pfeil rechts"
     },
-    "arrow-right": {
+    "chevron-up": {
       "source": "phosphor",
-      "name": "arrow-right",
-      "label": "Pfeil nach rechts"
+      "name": "caret-up",
+      "label": "Pfeil hoch"
+    },
+    "clock": {
+      "source": "phosphor",
+      "name": "clock",
+      "label": "Uhr"
     },
     "close": {
       "source": "phosphor",
@@ -73,10 +88,40 @@
       "name": "eye",
       "label": "Auge"
     },
+    "facebook": {
+      "source": "phosphor",
+      "name": "facebook-logo",
+      "label": "Facebook"
+    },
+    "file-text": {
+      "source": "phosphor",
+      "name": "file-text",
+      "label": "Dokument"
+    },
+    "handshake": {
+      "source": "phosphor",
+      "name": "handshake",
+      "label": "Zusammenarbeit"
+    },
     "info": {
       "source": "phosphor",
       "name": "info",
       "label": "Information"
+    },
+    "instagram": {
+      "source": "phosphor",
+      "name": "instagram-logo",
+      "label": "Instagram"
+    },
+    "lightbulb": {
+      "source": "phosphor",
+      "name": "lightbulb",
+      "label": "Idee"
+    },
+    "linkedin": {
+      "source": "phosphor",
+      "name": "linkedin-logo",
+      "label": "LinkedIn"
     },
     "lock": {
       "source": "phosphor",
@@ -93,6 +138,21 @@
       "name": "envelope-simple",
       "label": "E-Mail"
     },
+    "map-pin": {
+      "source": "phosphor",
+      "name": "map-pin",
+      "label": "Standort"
+    },
+    "map-trifold": {
+      "source": "phosphor",
+      "name": "map-trifold",
+      "label": "Landkarte"
+    },
+    "menu": {
+      "source": "phosphor",
+      "name": "list",
+      "label": "Menü"
+    },
     "minus": {
       "source": "phosphor",
       "name": "minus",
@@ -103,10 +163,20 @@
       "name": "phone",
       "label": "Telefon"
     },
+    "play": {
+      "source": "phosphor",
+      "name": "play-circle",
+      "label": "Abspielen"
+    },
     "plus": {
       "source": "phosphor",
       "name": "plus",
       "label": "Plus"
+    },
+    "quotes": {
+      "source": "phosphor",
+      "name": "quotes",
+      "label": "Anführungszeichen"
     },
     "search": {
       "source": "phosphor",
@@ -118,6 +188,16 @@
       "name": "shield-check",
       "label": "Schild"
     },
+    "smiley-sad": {
+      "source": "phosphor",
+      "name": "smiley-sad",
+      "label": "Trauriges Gesicht"
+    },
+    "star": {
+      "source": "phosphor",
+      "name": "star",
+      "label": "Stern"
+    },
     "user": {
       "source": "phosphor",
       "name": "user",
@@ -128,75 +208,20 @@
       "name": "warning-circle",
       "label": "Warnung"
     },
-    "clock": {
-      "source": "phosphor",
-      "name": "clock",
-      "label": "Uhr"
-    },
-    "map-pin": {
-      "source": "phosphor",
-      "name": "map-pin",
-      "label": "Standort"
-    },
-    "star": {
-      "source": "phosphor",
-      "name": "star",
-      "label": "Stern"
-    },
-    "quotes": {
-      "source": "phosphor",
-      "name": "quotes",
-      "label": "Anführungszeichen"
-    },
-    "file-text": {
-      "source": "phosphor",
-      "name": "file-text",
-      "label": "Dokument"
-    },
-    "chat": {
-      "source": "phosphor",
-      "name": "chat-circle",
-      "label": "Nachricht"
-    },
-    "lightbulb": {
-      "source": "phosphor",
-      "name": "lightbulb",
-      "label": "Idee"
-    },
-    "handshake": {
-      "source": "phosphor",
-      "name": "handshake",
-      "label": "Zusammenarbeit"
-    },
-    "facebook": {
-      "source": "phosphor",
-      "name": "facebook-logo",
-      "label": "Facebook"
-    },
-    "instagram": {
-      "source": "phosphor",
-      "name": "instagram-logo",
-      "label": "Instagram"
-    },
-    "linkedin": {
-      "source": "phosphor",
-      "name": "linkedin-logo",
-      "label": "LinkedIn"
-    },
     "x": {
       "source": "phosphor",
       "name": "x-logo",
       "label": "X"
     },
-    "youtube": {
-      "source": "phosphor",
-      "name": "youtube-logo",
-      "label": "YouTube"
-    },
     "xing": {
       "source": "simple-icons",
       "name": "xing",
       "label": "Xing"
+    },
+    "youtube": {
+      "source": "phosphor",
+      "name": "youtube-logo",
+      "label": "YouTube"
     }
   }
 }

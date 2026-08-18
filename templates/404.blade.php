@@ -5,9 +5,7 @@
         <div class="text-center max-w-2xl mx-auto">
             {{-- 404 Icon --}}
             <div class="mb-8">
-                <svg class="w-24 h-24 mx-auto text-content-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+                <x-icon name="smiley-sad" class="w-24 h-24 mx-auto text-content-tertiary" />
             </div>
 
             {{-- Error Message --}}

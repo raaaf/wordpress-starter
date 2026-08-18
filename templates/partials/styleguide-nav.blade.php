@@ -56,9 +56,9 @@
             {{-- Dreht mit dem Aufklappzustand: vorher zeigte der Pfeil auch bei
                  offener Liste nach unten und behauptete damit das Gegenteil des
                  Zustands, in dem die Liste gerade war. --}}
-            <svg class="w-4 h-4 transition-transform duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] group-open:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                <path d="M5 7.5 10 12.5 15 7.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+            <span class="inline-block transition-transform duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] group-open:rotate-180">
+                <x-icon name="chevron-down" class="w-4 h-4" />
+            </span>
         </summary>
 
         {{-- Nach dem Sprung schliessen: die Liste hat ihren Zweck erfuellt und

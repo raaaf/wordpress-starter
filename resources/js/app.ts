@@ -59,8 +59,12 @@ export function createNavigationComponent(): NavigationComponent {
         toggle.className = 'submenu-toggle';
         toggle.setAttribute('aria-expanded', 'false');
         toggle.setAttribute('aria-label', themeStrings.submenuOpen);
+        // Gleiches Chevron wie resources/icons/chevron-down.svg. Hier inline und
+        // nicht ueber <x-icon>, weil der Umschalter erst im Browser entsteht.
+        // Gezeichnet statt gefuellt war der letzte Rest der zweiten Ikonografie:
+        // im Menue sass er neben dem gefuellten Schliessen-Symbol.
         toggle.innerHTML =
-          '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+          '<svg class="w-4 h-4" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path></svg>';
 
         const toggleSubmenu = () => {
           const isExpanded = submenu.classList.toggle('is-open');

@@ -216,9 +216,7 @@
         @else
             {{-- No Posts --}}
             <div class="text-center py-12">
-                <svg class="w-16 h-16 mx-auto text-content-tertiary mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                </svg>
+                <x-icon name="archive" class="w-16 h-16 mx-auto text-content-tertiary mb-6" />
                 <h2 class="text-h3 mb-4">
                     {{ __('Keine Beiträge gefunden', 'wp-starter') }}
                 </h2>

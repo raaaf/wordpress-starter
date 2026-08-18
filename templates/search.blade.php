@@ -9,9 +9,7 @@
         <div class="max-w-2xl mx-auto text-center">
             {{-- Search Icon --}}
             <div class="mb-6">
-                <svg class="w-16 h-16 mx-auto text-content-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
+                <x-icon name="search" class="w-16 h-16 mx-auto text-content-tertiary" />
             </div>
 
             {{-- Search Title --}}
@@ -108,9 +106,7 @@
         @else
             {{-- No Results --}}
             <div class="text-center py-12">
-                <svg class="w-16 h-16 mx-auto text-content-tertiary mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+                <x-icon name="smiley-sad" class="w-16 h-16 mx-auto text-content-tertiary mb-6" />
                 <h2 class="text-h3 mb-4">
                     {{ __('Keine Ergebnisse gefunden', 'wp-starter') }}
                 </h2>
