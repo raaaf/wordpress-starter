@@ -2046,11 +2046,10 @@ html {
     top: 100%;
     left: 0;
     min-width: 200px;
-    /* Polster auf allen vier Seiten: die Eintraege tragen eine eigene
-       Hoverflaeche, und die soll ringsum denselben Rahmen behalten. Mit
-       `0.5rem 0` lief sie links und rechts bis an den Rand, oben und unten
-       aber nicht, was den Abstand ungleich aussehen liess. */
-    padding: 0.5rem;
+    /* Kein Polster: die Hoverflaeche der Eintraege soll buendig im Panel
+       liegen und an allen vier Seiten an den Rand stossen. Die aeusseren
+       Ecken uebernehmen dafuer weiter unten den Radius des Panels. */
+    padding: 0;
     background: var(--bg-primary);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md, 0.5rem);
@@ -2084,13 +2083,25 @@ html {
 
   .desktop-nav .sub-menu a {
     display: block;
-    padding: 0.5rem 0.75rem;
-    border-radius: var(--radius-sm, 0.25rem);
+    padding: 0.75rem 1rem;
     color: var(--text-secondary);
     white-space: nowrap;
     transition:
       color var(--motion-enter-duration) var(--motion-enter-ease),
       background-color var(--motion-enter-duration) var(--motion-enter-ease);
+  }
+
+  /* Ohne Panelpolster wuerde die Hoverflaeche des ersten und letzten Eintrags
+     ueber die Rundung des Panels hinausstehen. Der Innenradius ist der des
+     Panels abzueglich seiner Rahmenstaerke. */
+  .desktop-nav .sub-menu > li:first-child > a {
+    border-start-start-radius: calc(var(--radius-md, 0.5rem) - 1px);
+    border-start-end-radius: calc(var(--radius-md, 0.5rem) - 1px);
+  }
+
+  .desktop-nav .sub-menu > li:last-child > a {
+    border-end-start-radius: calc(var(--radius-md, 0.5rem) - 1px);
+    border-end-end-radius: calc(var(--radius-md, 0.5rem) - 1px);
   }
 
   .desktop-nav .sub-menu a:hover {
