@@ -2326,7 +2326,8 @@ html {
   }
 
   /* Hero background variant: eigenes Reveal (siehe unten), gleiche Ausnahme */
-  .hero--background[x-data] .hero-reveal {
+  .hero--reveal .hero-reveal {
+    animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
@@ -2350,27 +2351,29 @@ html {
 
 /* Hero background variant nutzt kein x-section (volle Viewporthoehe ohne
    Container), daher greift die .section[x-data]-Regel oben nicht — sie traefe
-   ohnehin auch Bild und Overlay, nicht nur den Inhalt. Eigene, gleich
-   aufgebaute Regel, gescoped auf den Inhalts-Wrapper .hero-reveal. */
-.hero--background[x-data]:not(.is-visible) .hero-reveal {
-  opacity: 0;
-  transform: translateY(1rem);
+   ohnehin auch Bild und Overlay, nicht nur den Inhalt. Eigene Regel, gescoped
+   auf den Inhalts-Wrapper .hero-reveal.
+
+   Bewusst eine Animation statt eines Zustandswechsels per Alpine: der Hero
+   steht ueber der Falz und ist beim ersten Anstrich schon zu sehen. Wartet die
+   Einblendung auf das deferrte Modul, zeigt der Browser das Bild bereits ohne
+   Text und der Text springt Millisekunden spaeter nach. Die Animation laeuft
+   ab dem ersten Frame, ohne JavaScript, und braucht deshalb auch keine
+   no-js-Ausnahme mehr. */
+.hero--reveal .hero-reveal {
+  animation: hero-reveal var(--motion-enter-duration) var(--motion-enter-ease) both;
 }
 
-.hero--background[x-data].is-visible .hero-reveal {
-  opacity: 1;
-  transform: translateY(0);
-}
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
 
-.hero--background[x-data] .hero-reveal {
-  transition:
-    opacity var(--motion-enter-duration) var(--motion-enter-ease),
-    transform var(--motion-enter-duration) var(--motion-enter-ease);
-}
-
-.no-js .hero--background[x-data] .hero-reveal {
-  opacity: 1 !important;
-  transform: none !important;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ============================================
@@ -2428,7 +2431,8 @@ html {
   }
 
   /* Hero background variant: eigenes Reveal (siehe oben), gleiche Ausnahme. */
-  .hero--background[x-data] .hero-reveal {
+  .hero--reveal .hero-reveal {
+    animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }

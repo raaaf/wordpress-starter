@@ -72,20 +72,14 @@
          ueber x-section durch, diese hier rendert ein rohes section-Tag. Ohne id
          lief jeder Anker-Link auf einen Hero mit Hintergrundbild ins Leere. --}}
     @php($shouldAnimate = \WordpressStarter\Acf\Fields::option('animations_enabled', false))
-    {{-- Die Reveal-Attribute stehen hier von Hand, weil diese Variante als
-         einzige kein x-section nutzt: sie braucht die volle Viewporthoehe ohne
-         Container. Ohne sie war sie die einzige Sektion der ganzen Seite ohne
-         Einblendung, waehrend centered und split sie ueber x-section bekamen. --}}
+    {{-- Die Einblendung steht hier als Klasse statt als Alpine-Zustand, weil
+         diese Variante als einzige kein x-section nutzt und weil sie ueber der
+         Falz liegt: ein Reveal, das auf das deferrte Modul wartet, zeigt das
+         Bild zuerst ohne Text. Die Klasse startet eine CSS-Animation ab dem
+         ersten Frame, die Regeln stehen in app.css unter .hero--reveal. --}}
     <section
         @if($sectionAnchor) id="{{ esc_attr($sectionAnchor) }}" @endif
-        @if($shouldAnimate)
-            x-data="{ shown: false }"
-            x-init="if (location.hash) shown = true"
-            x-on:hashchange.window="shown = true"
-            x-intersect.once="shown = true"
-            :class="{ 'is-visible': shown }"
-        @endif
-        class="hero hero--background relative overflow-hidden flex items-center"
+        class="hero hero--background @if($shouldAnimate) hero--reveal @endif relative overflow-hidden flex items-center"
         style="min-height: calc(100vh - var(--header-height, 80px)); min-height: calc(100dvh - var(--header-height, 80px));"
     >
         @if($background_image && (!empty($background_image['ID']) || !empty($background_image['url'])))
