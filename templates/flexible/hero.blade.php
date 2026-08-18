@@ -82,7 +82,7 @@
             x-data="{ shown: false }"
             x-init="if (location.hash) shown = true"
             x-on:hashchange.window="shown = true"
-            x-intersect.once.threshold.10="shown = true"
+            x-intersect.once="shown = true"
             :class="{ 'is-visible': shown }"
         @endif
         class="hero hero--background relative overflow-hidden flex items-center"
