@@ -55,7 +55,9 @@
             {{ __('Springe zu', 'wp-starter') }}
             {{-- Dreht mit dem Aufklappzustand: vorher zeigte der Pfeil auch bei
                  offener Liste nach unten und behauptete damit das Gegenteil des
-                 Zustands, in dem die Liste gerade war. --}}
+                 Zustands, in dem die Liste gerade war. Nutzt "group-open" statt
+                 eines Alpine-Ausdrucks, deshalb kein x-rotating-chevron hier: das
+                 dreht ueber :class, nicht ueber eine CSS-Gruppe. --}}
             <span class="inline-block transition-transform duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] group-open:rotate-180">
                 <x-icon name="chevron-down" class="w-4 h-4" />
             </span>

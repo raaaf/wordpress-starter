@@ -82,12 +82,7 @@
                             @endif
                             {{ $item['title'] }}
                         </span>
-                        {{-- Icon-Komponente rendert flaechig, nicht als Outline; Rotation deshalb
-                             auf einem Wrapper-Span, weil x-icon keine :class-Bindung annimmt. --}}
-                        <span class="inline-block transition-transform duration-200"
-                              :class="{ 'rotate-180': active === {{ $index }} }">
-                            <x-icon name="chevron-down" class="w-5 h-5" />
-                        </span>
+                        <x-rotating-chevron active="active === {{ $index }}" size="lg" />
                     </button>
                     <div x-show="active === {{ $index }}"
                          x-collapse
