@@ -55,9 +55,9 @@
                
                 aria-controls="mobile-navigation">
             {{-- Hamburger icon --}}
-            <svg x-show="!isOpen" class="w-6 h-6 text-content" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
+            <span x-show="!isOpen">
+                <x-icon name="menu" size="xl" class="text-content" />
+            </span>
             {{-- Close icon --}}
             <span x-show="isOpen" x-cloak>
                 <x-icon name="close" size="xl" class="text-content" />
