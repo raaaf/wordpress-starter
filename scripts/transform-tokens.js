@@ -662,6 +662,10 @@ function transform() {
   const lightText = flattenTokens(lightTokens.text || {}, '', extractColorAsReference);
   const lightBorder = flattenTokens(lightTokens.border || {}, '', extractColorAsReference);
   const lightIcon = flattenTokens(lightTokens.icon || {}, '', extractColorAsReference);
+  // `ring` is its own group because the focus ring is not a border: it sits
+  // outside the control, does not take part in layout, and has to stay legible
+  // on every surface the control can sit on.
+  const lightRing = flattenTokens(lightTokens.ring || {}, '', extractColorAsReference);
 
   console.log('Processing semantic tokens (dark mode)...');
 
@@ -670,6 +674,7 @@ function transform() {
   const darkText = flattenTokens(darkTokens.text || {}, '', extractColorAsReference);
   const darkBorder = flattenTokens(darkTokens.border || {}, '', extractColorAsReference);
   const darkIcon = flattenTokens(darkTokens.icon || {}, '', extractColorAsReference);
+  const darkRing = flattenTokens(darkTokens.ring || {}, '', extractColorAsReference);
 
   console.log('Generating CSS...');
 
@@ -741,6 +746,9 @@ ${generateCss(lightBorder, 'border')}
 
   /* Icon */
 ${generateCss(lightIcon, 'icon')}
+
+  /* Ring */
+${generateCss(lightRing, 'ring')}
 }
 
 /* ============================================
@@ -760,6 +768,9 @@ ${generateCss(darkBorder, 'border')}
 
   /* Icon */
 ${generateCss(darkIcon, 'icon')}
+
+  /* Ring */
+${generateCss(darkRing, 'ring')}
 }
 
 @media (prefers-color-scheme: dark) {
@@ -775,6 +786,9 @@ ${generateCss(darkBorder, 'border')}
 
     /* Icon */
 ${generateCss(darkIcon, 'icon')}
+
+    /* Ring */
+${generateCss(darkRing, 'ring')}
   }
 }
 `;
@@ -877,6 +891,9 @@ ${generateCss(lightBorder, 'border')}
 
   /* Icon */
 ${generateCss(lightIcon, 'icon')}
+
+  /* Ring */
+${generateCss(lightRing, 'ring')}
 }
 
 /* ============================================

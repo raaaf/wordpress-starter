@@ -111,8 +111,6 @@
    ============================================ */
 
 :root {
-  --border-control: var(--color-gray-500);
-  --ring-focus: var(--color-accent-600);
   --shadow-focus-ring: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--ring-focus);
   --shadow-focus-ring-ghost: 0px 0px 0px 2px var(--ring-focus);
   /* tokens.css points this at --color-error-alpha-50, which it never defines,
@@ -133,16 +131,14 @@
   /* Text that sits on --bg-brand. Deliberately the same value in both colour
      schemes: the brand orange does not change with the scheme, so the text on
      it must not either. */
-  --text-on-brand: var(--color-gray-900);
 
-  /* Text that sits on the ACCENT fill: the checkbox mark, the primary button
-     label. It defaults to --text-inverse, which is right whenever the accent
-     fill flips with the scheme the way the page does. It exists as its own role
-     because that assumption does not hold everywhere: a theme whose accent is
-     light in BOTH schemes needs a dark mark in both, and one whose accent is
-     deep in both needs a light label in both. --text-inverse follows the page,
-     this follows the fill. Themes that need the distinction override it. */
-  --text-on-accent: var(--text-inverse);
+  /* --text-on-accent moved into the export, where it now stands per scheme
+     (white on the light fill, near-black on the dark one). It used to be
+     defined here as var(--text-inverse), which rendered the same values and
+     buried the export's dark one on an unscoped :root. It exists as its own
+     role because following the page is not always right: a theme whose accent
+     is light in BOTH schemes needs a dark mark in both. That is now a decision
+     the export carries, not a line in this file. */
 
   /* Fills, light scheme: dark end of the ramp, white content on top. */
   --gradient-primary-start: var(--color-accent-700);
@@ -185,19 +181,7 @@
 
      Nur fuer dieses Theme gemessen. Nicht in die Kundenthemes kopieren, deren
      Akzentrampen laufen gegenlaeufig. --------------------------------- */
-  --bg-primary: #08090a;
-  --bg-secondary: #0f1011;
-  --bg-tertiary: #16181a;
-  --bg-inverse: #f7f8f8;
   --bg-brand-subtle: #1d1210;
-
-  --text-primary: #f7f8f8;
-  --text-secondary: #9ca3af;
-  --text-tertiary: #7a828d;
-  --text-inverse: #08090a;
-
-  --border-default: #202225;
-  --border-strong: #2c2f34;
 
   --card-bg: var(--bg-secondary);
   --card-border: var(--border-default);
@@ -312,19 +296,7 @@
   
        Nur fuer dieses Theme gemessen. Nicht in die Kundenthemes kopieren, deren
        Akzentrampen laufen gegenlaeufig. --------------------------------- */
-    --bg-primary: #08090a;
-    --bg-secondary: #0f1011;
-    --bg-tertiary: #16181a;
-    --bg-inverse: #f7f8f8;
     --bg-brand-subtle: #1d1210;
-
-    --text-primary: #f7f8f8;
-    --text-secondary: #9ca3af;
-    --text-tertiary: #7a828d;
-    --text-inverse: #08090a;
-
-    --border-default: #202225;
-    --border-strong: #2c2f34;
 
     --card-bg: var(--bg-secondary);
     --card-border: var(--border-default);
@@ -414,7 +386,6 @@
    ein eigener Zwischenwert. Nur fuer dieses Theme gemessen, Client-Themes
    leiten ihren eigenen Wert ab. Hellmodus unveraendert (siehe Regel oben). */
 [data-theme='dark'] {
-  --bg-tertiary-elevated: #1d1f22;
 }
 
 [data-theme='dark'] .bg-surface-tertiary {
@@ -424,7 +395,6 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg-tertiary-elevated: #1d1f22;
   }
 
   :root:not([data-theme='light']) .bg-surface-tertiary {
@@ -455,8 +425,6 @@
   :root {
     /* Escalate one step along the roles that already exist: dividers take the
        strength of a control border, controls take the strength of text. */
-    --border-default: var(--border-control);
-    --border-control: var(--text-secondary);
   }
 }
 
@@ -482,16 +450,13 @@
    ============================================ */
 
 :root {
-  --text-placeholder: var(--color-gray-500);
 }
 
 [data-theme='dark'] {
-  --text-placeholder: var(--color-gray-400);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --text-placeholder: var(--color-gray-400);
   }
 }
 
@@ -1259,15 +1224,11 @@ html {
      ============================================ */
 
   [data-theme='dark'] {
-    --text-disabled: var(--color-gray-500);
-    --border-disabled: var(--color-gray-600);
     --tw-ring-offset-color: var(--bg-primary);
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) {
-      --text-disabled: var(--color-gray-500);
-      --border-disabled: var(--color-gray-600);
       --tw-ring-offset-color: var(--bg-primary);
     }
   }

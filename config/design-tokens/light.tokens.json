@@ -698,6 +698,48 @@
           "targetVariableSetName": "primitives"
         }
       }
+    },
+    "on-brand": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.09019607843137255, 0.09019607843137255, 0.09019607843137255],
+        "alpha": 1,
+        "hex": "#171717"
+      },
+      "$extensions": {
+        "com.figma.aliasData": {
+          "targetVariableName": "color/gray/900"
+        }
+      }
+    },
+    "on-accent": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [1, 1, 1],
+        "alpha": 1,
+        "hex": "#FFFFFF"
+      },
+      "$extensions": {
+        "com.figma.aliasData": {
+          "targetVariableName": "color/white"
+        }
+      }
+    },
+    "placeholder": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.45098039215686275, 0.45098039215686275, 0.45098039215686275],
+        "alpha": 1,
+        "hex": "#737373"
+      },
+      "$extensions": {
+        "com.figma.aliasData": {
+          "targetVariableName": "color/gray/500"
+        }
+      }
     }
   },
   "border": {
@@ -907,6 +949,20 @@
           "targetVariableName": "color/gray/200",
           "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
           "targetVariableSetName": "primitives"
+        }
+      }
+    },
+    "control": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.45098039215686275, 0.45098039215686275, 0.45098039215686275],
+        "alpha": 1,
+        "hex": "#737373"
+      },
+      "$extensions": {
+        "com.figma.aliasData": {
+          "targetVariableName": "color/gray/500"
         }
       }
     }
@@ -1124,5 +1180,21 @@
   },
   "$extensions": {
     "com.figma.modeName": "light"
+  },
+  "ring": {
+    "focus": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.8980392156862745, 0.32941176470588235, 0.11372549019607843],
+        "alpha": 1,
+        "hex": "#E5541D"
+      },
+      "$extensions": {
+        "com.figma.aliasData": {
+          "targetVariableName": "color/accent/600"
+        }
+      }
+    }
   }
 }
