@@ -126,12 +126,59 @@ class Security
     }
 
     /**
+     * Herkunft des Analytics-Hosts fuer die CSP, aus der Plugin-Option.
+     *
+     * Rybbit laedt sein Skript per wp_enqueue_script von einem externen Host und
+     * schickt die Ereignisse per fetch() dorthin zurueck. Beides braucht einen
+     * Eintrag in der CSP: `connect-src` allein reicht nicht, dann wird schon das
+     * Skript blockiert und es sendet nie jemand.
+     *
+     * Der Host wird nicht hartkodiert, weil jede Installation ihre eigene
+     * Rybbit-Instanz haben kann. Quelle ist dieselbe Option, aus der das Plugin
+     * sein Skript zieht, damit CSP und Skript-URL nicht auseinanderlaufen.
+     *
+     * Die Option ist von Administratoren setzbar und landet in einem Header,
+     * deshalb streng gefiltert: nur https, nur Host und optionaler Port, und nur
+     * Zeichen, die in einem Hostnamen vorkommen duerfen. Alles andere faellt
+     * heraus, statt eine Direktive zu zerlegen oder den Header zu spalten.
+     */
+    private static function getAnalyticsOrigin(): string
+    {
+        $url = (string) get_option('rybbit_script_url', 'https://app.rybbit.io/api/script.js');
+
+        if ($url === '') {
+            return '';
+        }
+
+        $host = wp_parse_url($url, PHP_URL_HOST);
+        $scheme = wp_parse_url($url, PHP_URL_SCHEME);
+
+        if (!is_string($host) || $host === '' || $scheme !== 'https') {
+            return '';
+        }
+
+        if (preg_match('/^[A-Za-z0-9.-]+$/', $host) !== 1) {
+            return '';
+        }
+
+        $port = wp_parse_url($url, PHP_URL_PORT);
+        $origin = 'https://' . $host;
+
+        if (is_int($port) && $port > 0 && $port <= 65535) {
+            $origin .= ':' . $port;
+        }
+
+        return ' ' . $origin;
+    }
+
+    /**
      * Build the Content-Security-Policy header value.
      */
     public static function getCSPHeader(): string
     {
         $nonce = self::getNonce();
         $localSources = self::getLocalSources();
+        $analyticsOrigin = self::getAnalyticsOrigin();
 
         // Base directives
         $directives = [
@@ -145,7 +192,7 @@ class Security
 
         // Script sources
         // Note: 'unsafe-eval' is required for Alpine.js to evaluate x-data expressions
-        $scriptSrc = "'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'" . $localSources;
+        $scriptSrc = "'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'" . $analyticsOrigin . $localSources;
         $directives[] = "script-src {$scriptSrc}";
 
         // Style sources (unsafe-inline needed for WordPress/ACF inline styles)
@@ -153,8 +200,7 @@ class Security
         $directives[] = "style-src {$styleSrc}";
 
         // Connect sources (API calls, WebSockets)
-        // Rybbit analytics posts events to the tracking host via fetch().
-        $connectSrc = "'self' https://tracking.maki-it.de" . $localSources;
+        $connectSrc = "'self'" . $analyticsOrigin . $localSources;
         $directives[] = "connect-src {$connectSrc}";
 
         // Worker sources (for WordPress emoji loader and other web workers)
