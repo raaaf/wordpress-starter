@@ -728,7 +728,7 @@ class Options
                     sprintf(
                         /* translators: %s: URL to Rybbit Analytics settings */
                         __('<strong>Rybbit Analytics</strong><br>Analytics wird über das Rybbit-Plugin konfiguriert. Gehe zu <a href="%s">Einstellungen → Rybbit Analytics</a>, um deine Site ID einzutragen.', 'wp-starter'),
-                        esc_url(admin_url('options-general.php?page=rybbit-analytics')),
+                        esc_url(admin_url('options-general.php?page=integrate-rybbit')),
                     ),
                     'info',
                 ),
