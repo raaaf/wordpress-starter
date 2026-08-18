@@ -41,11 +41,6 @@ class StyleguideLayoutData
         // TEIL 3: FLEXIBLE CONTENT LAYOUTS - HERO
         // =====================================================================
 
-        $layouts[] = $this->layout('one_column', [
-            'label' => '',
-            'content' => '<h2>Flexible Content Layouts</h2><p>Alle 32 verfügbaren Layouts für den Seitenaufbau.</p>',
-            'background_color' => 'primary',
-        ]);
 
         $layouts[] = $this->getHeroLayoutData();
 
@@ -1213,7 +1208,7 @@ class StyleguideLayoutData
             $this->layout('accordion', [
                 'section_headline' => 'Akkordeon, ein Eintrag',
                 'show_section_header' => true,
-                'items' => [
+                'accordion' => [
                     ['title' => 'Einziger Eintrag', 'content' => '<p>Ein Akkordeon mit genau einem Eintrag.</p>'],
                 ],
                 'background_color' => 'primary',
