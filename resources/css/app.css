@@ -16,26 +16,35 @@
 /* ============================================
    TOKEN CORRECTIONS
 
-   Corrections to tokens.css that cannot live there, because that file is
-   regenerated from Figma.
+   What this file still overrides in tokens.css, and why.
 
-   One rule runs through most of them: every fill flips with the colour scheme,
-   and whatever sits on a fill uses --text-inverse, which flips with it. The
-   export broke that rule in one place only, the primary button gradient, which
-   is declared once and never flips. That is why the button got worse the more
-   you interacted with it in dark mode: the fill darkened while the text was
-   already dark.
+   Most of what used to stand here has moved into config/design-tokens/, so the
+   export now carries the corrected values itself and this file no longer repeats
+   them. The reasoning did not move with them — a token JSON has nowhere to put
+   it — so the measurements are kept below under "Recorded in the export",
+   because "accent-700 and not accent-600" is a decision somebody has to be able
+   to look up.
+
+   One rule runs through most of it: every fill flips with the colour scheme, and
+   whatever sits on a fill uses --text-inverse, which flips with it. The export
+   broke that rule in one place only, the primary button gradient, which is
+   declared once and never flips. That is why the button got worse the more you
+   interacted with it in dark mode: the fill darkened while the text was already
+   dark.
+
+   STILL OVERRIDDEN HERE
 
    1. --border-control: the boundary of a form control is the only thing that
       shows where the field is, and WCAG 1.4.11 asks for 3:1. --border-default
       reaches 1.2 to 1.5:1 in every palette. This is the lightest shade of each
       theme's own greys that still clears 3:1, per colour scheme. Card borders
       and dividers keep --border-default; 1.4.11 does not apply to them.
+      The export has no such role at all.
 
    2. --ring-focus: the focus ring used a 50 percent alpha accent, which blends
       to roughly 1.8:1 against the page. Solid, and picked per theme so it also
       clears 3:1 against the dark background, where a near-black accent would
-      otherwise be invisible.
+      otherwise be invisible. Also absent from the export.
 
    3. --shadow-color-*: the Tailwind theme block below builds --shadow-sm through
       --shadow-2xl out of these, and the export never delivered them. An
@@ -49,7 +58,22 @@
       6.32:1 on the same orange. --text-inverse is the wrong role here, it
       follows the page, not the brand surface.
 
-   5. Accent text roles: --text-link, --text-brand and --text-accent all point
+   5. Primary button gradient: the only fill in the theme that does not flip
+      with the scheme. Light gets the dark end of the ramp under white text
+      (5.23:1 at rest, improving to 7.39 and 10.36 as it is pressed), dark gets
+      the light end under near-black text (4.80:1 at rest, improving to 6.32
+      and 7.74). Both ladders now move away from the text, not towards it.
+
+   6. The dark surfaces further down: deliberately raw hex, not a step of the
+      grey ramp. See the comment on that block.
+
+   RECORDED IN THE EXPORT
+
+   The values below are in config/design-tokens/light.tokens.json and
+   dark.tokens.json. Changing them means changing the export and re-running
+   npm run tokens; editing tokens.css directly is undone without a word.
+
+   a. Accent text roles: --text-link, --text-brand and --text-accent all pointed
       at accent-600, which measures 3.74:1 on white, 3.58:1 on the secondary
       surface and 3.46:1 inside a filled accent badge. All under 4.5:1. The
       resting state was also weaker than its own hover, which already used
@@ -57,26 +81,20 @@
       (5.23 / 5.01 / 4.84:1), and hover moves to accent-800 to stay darker
       than rest. Dark mode is untouched: accent-400 on gray-900 is 7.74:1.
 
-   6. Primary button gradient: the only fill in the theme that does not flip
-      with the scheme. Light gets the dark end of the ramp under white text
-      (5.23:1 at rest, improving to 7.39 and 10.36 as it is pressed), dark gets
-      the light end under near-black text (4.80:1 at rest, improving to 6.32
-      and 7.74). Both ladders now move away from the text, not towards it.
-
-   7. Filled controls: --bg-accent is the checked fill of checkbox, radio and
+   b. Filled controls: --bg-accent is the checked fill of checkbox, radio and
       toggle. At accent-500 it measured 2.84:1 against a white page, so the
       checked state itself was barely visible, and the white mark on it also
-      2.84:1. Light moves to accent-700 (5.23:1 both ways); dark keeps
-      accent-500, which is 6.32:1 against the dark page.
+      2.84:1. Light is accent-700 (5.23:1 both ways); dark keeps accent-500,
+      which is 6.32:1 against the dark page.
 
-   8. The --bg-*-strong fills are the ones meant to carry content on top of
+   c. The --bg-*-strong fills are the ones meant to carry content on top of
       them: the danger button, the solid status badges. All three pointed at
       the mid tone of their ramp, which under white text gives 3.76:1 for
       error, 2.28:1 for success and 2.15:1 for warning. Light takes the dark
       tone (5.02 to 6.47:1); dark keeps the mid tone, where --text-inverse is
       near-black and reaches 4.76 to 8.35:1.
 
-   9. Icon roles: --icon-secondary was gray-400 (2.52:1 on white) although it
+   d. Icon roles: --icon-secondary was gray-400 (2.52:1 on white) although it
       carries the select chevron and the input clear control. The status icons
       pointed at the mid tone of their ramp while sitting on the light tone of
       the same ramp (2.07 to 3.08:1); they now take the tone their own
@@ -84,12 +102,12 @@
       brand borders that draw the loading spinner and the card hover edge,
       follow the accent text roles down to accent-700.
 
-  10. --border-focus is what focus:border-line-focus and ring-line-focus draw.
+   e. --border-focus is what focus:border-line-focus and ring-line-focus draw.
       It stayed on accent-400 (2.32:1) after --ring-focus was corrected.
 
-  11. Dark status text: dark mode set --bg-* to the dark tone but left --text-*
+   f. Dark status text: dark mode set --bg-* to the dark tone but left --text-*
       on the mid tone, leaving two similar lightnesses on top of each other
-      (1.7 to 3.0:1). The text moves to the light tone of the same ramp.
+      (1.7 to 3.0:1). The text is the light tone of the same ramp.
    ============================================ */
 
 :root {
@@ -126,13 +144,6 @@
      this follows the fill. Themes that need the distinction override it. */
   --text-on-accent: var(--text-inverse);
 
-  /* Accent text one step down the ramp, see 5. above. Light scheme only:
-     the dark scheme reads accent from the light end and already passes. */
-  --text-link: var(--color-accent-700);
-  --text-link-hover: var(--color-accent-800);
-  --text-brand: var(--color-accent-700);
-  --text-accent: var(--color-accent-700);
-
   /* Fills, light scheme: dark end of the ramp, white content on top. */
   --gradient-primary-start: var(--color-accent-700);
   --gradient-primary-end: var(--color-accent-800);
@@ -140,27 +151,12 @@
   --gradient-primary-hover-end: var(--color-accent-900);
   --gradient-primary-active-start: var(--color-accent-900);
   --gradient-primary-active-end: var(--color-accent-900);
-  --bg-accent: var(--color-accent-700);
-  --bg-error-strong: var(--color-error-dark);
-  --bg-success-strong: var(--color-success-dark);
-  --bg-warning-strong: var(--color-warning-dark);
 
   /* Danger button hover: --bg-error-strong is already the darkest of the
      three-step error ramp, so there is no further token to step to. Mixed
      towards black instead, same direction the text-on-white fill needs to
      move to gain contrast (6.47:1 at rest -> 8.15:1 on hover). */
   --bg-error-strong-hover: color-mix(in srgb, var(--color-error-dark) 85%, black);
-
-  /* Borders and icons follow the same step down the ramp. */
-  --border-focus: var(--ring-focus);
-  --border-brand: var(--color-accent-700);
-  --border-accent: var(--color-accent-700);
-  --icon-secondary: var(--color-gray-500);
-  --icon-brand: var(--color-accent-700);
-  --icon-accent: var(--color-accent-700);
-  --icon-success: var(--color-success-dark);
-  --icon-warning: var(--color-warning-dark);
-  --icon-error: var(--color-error-dark);
 
   /* Native widgets the theme does not draw itself: checkboxes and radios in
      WYSIWYG content, date pickers, scrollbars, form autofill. Without a
@@ -171,8 +167,6 @@
 }
 
 [data-theme='dark'] {
-  --border-control: var(--color-gray-500);
-
   /* ------------------------------------------------------------------
      Dunkelmodus-Flaechen, Vorbild Linear.
 
@@ -207,9 +201,6 @@
 
   --card-bg: var(--bg-secondary);
   --card-border: var(--border-default);
-  --text-success: var(--color-success-light);
-  --text-warning: var(--color-warning-light);
-  --text-error: var(--color-error-light);
 
   /* Fills, dark scheme: light end of the ramp, near-black content on top.
      The ladder runs the other way, so pressing still moves away from the text. */
@@ -220,41 +211,12 @@
   --gradient-primary-active-start: var(--color-accent-300);
   --gradient-primary-active-end: var(--color-accent-400);
 
-  /* The export already says gray-500 here; repeating it keeps the unscoped
-     :root correction above from burying that declaration on the next sync. */
-  --icon-secondary: var(--color-gray-500);
-  --icon-success: var(--color-success-light);
-  --icon-warning: var(--color-warning-light);
-  --icon-error: var(--color-error-light);
-
-  /* The export flipped these the wrong way: dark took the dark tone of the ramp
-     while --text-inverse is near-black there, giving 3.57:1. Error already used
-     the mid tone; success and warning now match it. */
-  --bg-success-strong: var(--color-success);
-  --bg-warning-strong: var(--color-warning);
-
-  /* The unlayered :root correction above (see the TOKEN CORRECTIONS comment
-     block at the top of this file) pins each of these to a step of the accent
-     ramp for light-mode contrast, but is not scoped to [data-theme='light'] --
-     so it also reaches dark mode through the cascade unless undone here. These
-     put dark back on the value the comment block above already documents as
-     correct for it (see points 5, 7, 8 and 9). */
-  --bg-accent: var(--color-accent-500);
-  --bg-error-strong: var(--color-error);
   /* Here --bg-error-strong is the mid tone under near-black text (4.76:1 at
-     rest, see point 8 above): darkening it the way light mode does would
-     push it towards the text instead of away, the same trap point 6 already
+     rest, see point c above): darkening it the way light mode does would
+     push it towards the text instead of away, the same trap point 5 already
      documents for the primary gradient. Mixed towards white instead
      (4.76:1 -> 5.99:1). */
   --bg-error-strong-hover: color-mix(in srgb, var(--color-error) 80%, white);
-  --text-link: var(--color-accent-400);
-  --text-link-hover: var(--color-accent-300);
-  --text-brand: var(--color-accent-400);
-  --text-accent: var(--color-accent-400);
-  --border-brand: var(--color-accent-500);
-  --border-accent: var(--color-accent-500);
-  --icon-brand: var(--color-accent-500);
-  --icon-accent: var(--color-accent-400);
 
   /* The plain Tailwind shadow-sm..shadow-2xl scale (see the TOKEN CORRECTIONS
      block above, point 3) is built from these --shadow-color-* custom
@@ -332,8 +294,6 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --border-control: var(--color-gray-500);
-
     /* ------------------------------------------------------------------
        Dunkelmodus-Flaechen, Vorbild Linear.
   
@@ -368,9 +328,6 @@
 
     --card-bg: var(--bg-secondary);
     --card-border: var(--border-default);
-    --text-success: var(--color-success-light);
-    --text-warning: var(--color-warning-light);
-    --text-error: var(--color-error-light);
 
     /* Fills, dark scheme: light end of the ramp, near-black content on top.
        The ladder runs the other way, so pressing still moves away from the text. */
@@ -382,29 +339,13 @@
     --gradient-primary-active-end: var(--color-accent-400);
 
     /* See the [data-theme='dark'] block above. */
-    --icon-secondary: var(--color-gray-500);
-    --icon-success: var(--color-success-light);
-    --icon-warning: var(--color-warning-light);
-    --icon-error: var(--color-error-light);
 
     /* See the [data-theme='dark'] block above. */
-    --bg-success-strong: var(--color-success);
-    --bg-warning-strong: var(--color-warning);
 
     /* See the [data-theme='dark'] block above -- same unscoped :root
        correction, same fix. */
-    --bg-accent: var(--color-accent-500);
-    --bg-error-strong: var(--color-error);
     /* See the [data-theme='dark'] block above: same trap, same fix. */
     --bg-error-strong-hover: color-mix(in srgb, var(--color-error) 80%, white);
-    --text-link: var(--color-accent-400);
-    --text-link-hover: var(--color-accent-300);
-    --text-brand: var(--color-accent-400);
-    --text-accent: var(--color-accent-400);
-    --border-brand: var(--color-accent-500);
-    --border-accent: var(--color-accent-500);
-    --icon-brand: var(--color-accent-500);
-    --icon-accent: var(--color-accent-400);
 
     /* See the [data-theme='dark'] block above: the plain shadow-sm..shadow-2xl
        scale needs its own dark ink too, not just the named component shadows. */

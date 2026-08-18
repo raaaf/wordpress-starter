@@ -12,7 +12,7 @@
  * than dark mode rules in app.css
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-08-10T19:06:19.543Z
+ * Generated: 2026-08-14T10:14:18.553Z
  */
 
 /* ============================================
@@ -341,15 +341,15 @@
   --bg-brand-subtle: var(--color-accent-50);
   --bg-brand-hover: var(--color-accent-600);
   --bg-success: var(--color-success-light);
-  --bg-success-strong: var(--color-success);
+  --bg-success-strong: var(--color-success-dark);
   --bg-warning: var(--color-warning-light);
-  --bg-warning-strong: var(--color-warning);
+  --bg-warning-strong: var(--color-warning-dark);
   --bg-error: var(--color-error-light);
-  --bg-error-strong: var(--color-error);
+  --bg-error-strong: var(--color-error-dark);
   --bg-brand-secondary: var(--color-primary-800);
   --bg-brand-secondary-subtle: var(--color-primary-50);
   --bg-brand-secondary-hover: var(--color-primary-900);
-  --bg-accent: var(--color-accent-500);
+  --bg-accent: var(--color-accent-700);
   --bg-accent-subtle: var(--color-accent-50);
   --bg-accent-hover: var(--color-accent-600);
   --bg-brand-active: var(--color-accent-700);
@@ -362,14 +362,14 @@
   --text-secondary: var(--color-gray-600);
   --text-tertiary: var(--color-gray-500);
   --text-inverse: var(--color-white);
-  --text-brand: var(--color-accent-600);
-  --text-link: var(--color-accent-600);
+  --text-brand: var(--color-accent-700);
+  --text-link: var(--color-accent-700);
   --text-success: var(--color-success-dark);
   --text-warning: var(--color-warning-dark);
   --text-error: var(--color-error-dark);
   --text-brand-secondary: var(--color-primary-800);
-  --text-accent: var(--color-accent-600);
-  --text-link-hover: var(--color-accent-700);
+  --text-accent: var(--color-accent-700);
+  --text-link-hover: var(--color-accent-800);
   --text-disabled: var(--color-gray-400);
   --text-on-color: var(--color-white);
 
@@ -377,26 +377,26 @@
   --border-default: var(--color-gray-200);
   --border-strong: var(--color-gray-300);
   --border-subtle: var(--color-gray-100);
-  --border-brand: var(--color-accent-500);
-  --border-focus: var(--color-accent-400);
+  --border-brand: var(--color-accent-700);
+  --border-focus: var(--color-accent-600);
   --border-success: var(--color-success);
   --border-warning: var(--color-warning);
   --border-error: var(--color-error);
   --border-brand-secondary: var(--color-primary-800);
-  --border-accent: var(--color-accent-500);
+  --border-accent: var(--color-accent-700);
   --border-disabled: var(--color-gray-200);
 
   /* Icon */
   --icon-primary: var(--color-gray-700);
-  --icon-secondary: var(--color-gray-400);
+  --icon-secondary: var(--color-gray-500);
   --icon-inverse: var(--color-white);
-  --icon-brand: var(--color-accent-500);
+  --icon-brand: var(--color-accent-700);
   --icon-brand-secondary: var(--color-primary-800);
-  --icon-accent: var(--color-accent-500);
+  --icon-accent: var(--color-accent-700);
   --icon-disabled: var(--color-gray-300);
-  --icon-success: var(--color-success);
-  --icon-warning: var(--color-warning);
-  --icon-error: var(--color-error);
+  --icon-success: var(--color-success-dark);
+  --icon-warning: var(--color-warning-dark);
+  --icon-error: var(--color-error-dark);
   --icon-on-color: var(--color-white);
 }
 
@@ -422,15 +422,15 @@
     --bg-brand-subtle: var(--color-accent-50) !important;
     --bg-brand-hover: var(--color-accent-600) !important;
     --bg-success: var(--color-success-light) !important;
-    --bg-success-strong: var(--color-success) !important;
+    --bg-success-strong: var(--color-success-dark) !important;
     --bg-warning: var(--color-warning-light) !important;
-    --bg-warning-strong: var(--color-warning) !important;
+    --bg-warning-strong: var(--color-warning-dark) !important;
     --bg-error: var(--color-error-light) !important;
-    --bg-error-strong: var(--color-error) !important;
+    --bg-error-strong: var(--color-error-dark) !important;
     --bg-brand-secondary: var(--color-primary-800) !important;
     --bg-brand-secondary-subtle: var(--color-primary-50) !important;
     --bg-brand-secondary-hover: var(--color-primary-900) !important;
-    --bg-accent: var(--color-accent-500) !important;
+    --bg-accent: var(--color-accent-700) !important;
     --bg-accent-subtle: var(--color-accent-50) !important;
     --bg-accent-hover: var(--color-accent-600) !important;
     --bg-brand-active: var(--color-accent-700) !important;
@@ -443,14 +443,14 @@
     --text-secondary: var(--color-gray-600) !important;
     --text-tertiary: var(--color-gray-500) !important;
     --text-inverse: var(--color-white) !important;
-    --text-brand: var(--color-accent-600) !important;
-    --text-link: var(--color-accent-600) !important;
+    --text-brand: var(--color-accent-700) !important;
+    --text-link: var(--color-accent-700) !important;
     --text-success: var(--color-success-dark) !important;
     --text-warning: var(--color-warning-dark) !important;
     --text-error: var(--color-error-dark) !important;
     --text-brand-secondary: var(--color-primary-800) !important;
-    --text-accent: var(--color-accent-600) !important;
-    --text-link-hover: var(--color-accent-700) !important;
+    --text-accent: var(--color-accent-700) !important;
+    --text-link-hover: var(--color-accent-800) !important;
     --text-disabled: var(--color-gray-400) !important;
     --text-on-color: var(--color-white) !important;
 
@@ -458,25 +458,25 @@
     --border-default: var(--color-gray-200) !important;
     --border-strong: var(--color-gray-300) !important;
     --border-subtle: var(--color-gray-100) !important;
-    --border-brand: var(--color-accent-500) !important;
-    --border-focus: var(--color-accent-400) !important;
+    --border-brand: var(--color-accent-700) !important;
+    --border-focus: var(--color-accent-600) !important;
     --border-success: var(--color-success) !important;
     --border-warning: var(--color-warning) !important;
     --border-error: var(--color-error) !important;
     --border-brand-secondary: var(--color-primary-800) !important;
-    --border-accent: var(--color-accent-500) !important;
+    --border-accent: var(--color-accent-700) !important;
     --border-disabled: var(--color-gray-200) !important;
 
   /* Icon - Light Mode (forced) */
     --icon-primary: var(--color-gray-700) !important;
-    --icon-secondary: var(--color-gray-400) !important;
+    --icon-secondary: var(--color-gray-500) !important;
     --icon-inverse: var(--color-white) !important;
-    --icon-brand: var(--color-accent-500) !important;
+    --icon-brand: var(--color-accent-700) !important;
     --icon-brand-secondary: var(--color-primary-800) !important;
-    --icon-accent: var(--color-accent-500) !important;
+    --icon-accent: var(--color-accent-700) !important;
     --icon-disabled: var(--color-gray-300) !important;
-    --icon-success: var(--color-success) !important;
-    --icon-warning: var(--color-warning) !important;
-    --icon-error: var(--color-error) !important;
+    --icon-success: var(--color-success-dark) !important;
+    --icon-warning: var(--color-warning-dark) !important;
+    --icon-error: var(--color-error-dark) !important;
     --icon-on-color: var(--color-white) !important;
 }
