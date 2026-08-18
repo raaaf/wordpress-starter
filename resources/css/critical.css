@@ -65,8 +65,10 @@
     font-weight: 600;
   }
 
-  /* Header layout - prevent layout shift */
-  header {
+  /* Header layout - prevent layout shift.
+     Only the site header: a page title also sits in a <header>, and a bare
+     element selector lifted it above the sticky banner. */
+  header[role='banner'] {
     position: relative;
     z-index: 50;
   }
