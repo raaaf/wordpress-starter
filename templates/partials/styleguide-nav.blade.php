@@ -50,12 +50,17 @@
 @endphp
 
 @if(!empty($sprungziele))
-    <details class="sticky z-30 mx-auto mb-8 max-w-7xl px-4 sm:px-6 lg:px-8 top-[calc(var(--header-height,80px)+0.5rem)]">
+    <details class="group sticky z-30 mx-auto mb-8 max-w-7xl px-4 sm:px-6 lg:px-8 top-[calc(var(--header-height,80px)+0.5rem)]">
         <summary class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-full cursor-pointer select-none border-line bg-surface text-content shadow-[var(--shadow-button)] hover:bg-surface-secondary focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]">
             {{ __('Springe zu', 'wp-starter') }}
-            <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                <path d="M5 7.5 10 12.5 15 7.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+            {{-- Dreht mit dem Aufklappzustand: vorher zeigte der Pfeil auch bei
+                 offener Liste nach unten und behauptete damit das Gegenteil des
+                 Zustands, in dem die Liste gerade war. Nutzt "group-open" statt
+                 eines Alpine-Ausdrucks, deshalb kein x-rotating-chevron hier: das
+                 dreht ueber :class, nicht ueber eine CSS-Gruppe. --}}
+            <span class="inline-block transition-transform duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] group-open:rotate-180">
+                <x-icon name="chevron-down" class="w-4 h-4" />
+            </span>
         </summary>
 
         {{-- Nach dem Sprung schliessen: die Liste hat ihren Zweck erfuellt und
@@ -70,16 +75,25 @@
              nicht fokussierbar sind. Kein preventDefault: die native
              Hash-Navigation soll laufen, focus() im setTimeout haelt danach
              nur die Scrollposition, ohne selbst zu scrollen. --}}
+        {{-- Positionsanzeige: die Seite ist ueber 50.000px hoch, und ohne
+             Markierung musste man die Liste aufklappen und Modulnamen aus dem
+             Gedaechtnis abgleichen, um zu wissen, wo man gerade steht. Der
+             Beobachter markiert den obersten Eintrag, der noch im Blick ist.
+             Reines Lesen, kein Scrollen, kein Fokuswechsel. --}}
         <nav
             aria-label="{{ __('Module', 'wp-starter') }}"
-            x-data
+            x-data="styleguideSprungnavigation"
             x-on:click="const link = $event.target.closest('a'); if (!link) return; const d = $el.closest('details'); d.open = false; const ziel = document.getElementById(link.getAttribute('href').slice(1)); if (!ziel) return; setTimeout(() => { ziel.setAttribute('tabindex', '-1'); ziel.focus(); })"
             class="p-5 mt-2 border rounded-[var(--card-radius)] border-line bg-surface shadow-[var(--shadow-card)]"
         >
             <ul class="m-0 list-none columns-2 gap-x-8 sm:columns-3 lg:columns-4">
                 @foreach(array_column($sprungziele, 'label', 'anchor') as $anchor => $label)
                     <li class="break-inside-avoid">
-                        <a href="#{{ $anchor }}" class="block py-1.5 text-sm no-underline text-content-secondary hover:text-content focus-visible:outline-none focus-visible:text-content focus-visible:shadow-[var(--shadow-focus-ring)]">{{ $label }}</a>
+                        <a href="#{{ $anchor }}"
+                           data-anchor="{{ $anchor }}"
+                           :aria-current="aktiv === '{{ $anchor }}' ? 'true' : null"
+                           :class="aktiv === '{{ $anchor }}' ? 'font-medium text-content' : 'text-content-secondary'"
+                           class="block py-1.5 text-sm no-underline hover:text-content focus-visible:outline-none focus-visible:text-content focus-visible:shadow-[var(--shadow-focus-ring)]">{{ $label }}</a>
                     </li>
                 @endforeach
             </ul>

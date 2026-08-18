@@ -179,11 +179,13 @@
 
             <div x-show="pages > 1" class="flex items-center gap-1">
 
+                {{-- min-h-11!/min-w-11! statt fixer w-8 h-8: 44px Hit-Flaeche wie bei den
+                     Icon-Buttons in team.blade.php, das Icon bleibt 16px. --}}
                 <button
                     type="button"
                     x-on:click="setPage(currentPage - 1)"
                     :disabled="currentPage === 1"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-line text-content-secondary hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    class="inline-flex items-center justify-center min-h-11! min-w-11! rounded-md border border-line text-content-secondary hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     aria-label="{{ __('Vorherige Seite', 'wp-starter') }}"
                 >
                     <x-icon name="chevron-left" class="w-4 h-4" />
@@ -198,7 +200,7 @@
                             :class="n === currentPage
                                 ? 'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)] text-content-inverse border-line'
                                 : 'text-content-secondary hover:bg-surface-secondary border-line'"
-                            class="inline-flex items-center justify-center w-8 h-8 rounded-md border text-sm font-medium transition-colors"
+                            class="inline-flex items-center justify-center min-h-11! min-w-11! rounded-md border text-sm font-medium transition-colors"
                             :aria-label="`{{ __('Seite', 'wp-starter') }} ${n}`"
                             :aria-current="n === currentPage ? 'page' : false"
                             x-text="n"
@@ -214,7 +216,7 @@
                     type="button"
                     x-on:click="setPage(currentPage + 1)"
                     :disabled="currentPage === pages"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-line text-content-secondary hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    class="inline-flex items-center justify-center min-h-11! min-w-11! rounded-md border border-line text-content-secondary hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     aria-label="{{ __('Nächste Seite', 'wp-starter') }}"
                 >
                     <x-icon name="chevron-right" class="w-4 h-4" />

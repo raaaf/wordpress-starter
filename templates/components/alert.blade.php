@@ -45,7 +45,17 @@
 
 <div
     role="{{ $variant === 'error' ? 'alert' : 'status' }}"
-    @if($dismissible) x-data="{ show: true }" x-show="show" @endif
+    @if($dismissible)
+        x-data="{ show: true }"
+        x-show="show"
+        {{-- Ohne Transition verschwindet der Hinweis in einem Frame. Fade plus
+             leichtes Zusammenziehen macht das Schließen als Aktion sichtbar,
+             wie schon beim Header-Menü (header-menu.blade.php), nur mit dem
+             Exit-Token der Motion-Skala. --}}
+        x-transition:leave="transition duration-[var(--motion-exit-duration)] ease-[var(--motion-exit-ease)]"
+        x-transition:leave-start="opacity-100 transform scale-100"
+        x-transition:leave-end="opacity-0 transform scale-95"
+    @endif
     class="alert flex items-start gap-3 p-4 rounded-lg {{ $config['wrapper'] }} {{ $class }}"
 >
     {{-- Das Icon zentriert sich in einer Box von exakt einer Zeilenhoehe (1lh), nicht

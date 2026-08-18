@@ -101,8 +101,11 @@
                             loading="lazy"
                         />
                         {{-- Abdunkeln, damit Text und Schaltflaeche auf jedem
-                             Standbild lesbar bleiben. --}}
-                        <div x-show="!loaded" class="absolute inset-0 bg-black/55" aria-hidden="true"></div>
+                             Standbild lesbar bleiben. bg-surface-overlay statt
+                             hartem bg-black/55, damit der Scrim wie jedes andere
+                             Overlay im Theme dem Farbschema folgt (heller Modus
+                             .50, dunkler Modus .70). --}}
+                        <div x-show="!loaded" class="absolute inset-0 bg-surface-overlay" aria-hidden="true"></div>
                     @endif
 
                     {{-- Consent notice for GDPR compliance --}}
@@ -117,10 +120,7 @@
                              darunter. Gemessen ohne diese Klassen: 2.9:1. --}}
                         class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center video-consent-notice @if($posterUrl) text-white [&_a]:text-white [&_a]:decoration-white/60 @endif"
                     >
-                        <svg class="w-16 h-16 mb-4 {{ $posterUrl ? 'text-white/80' : 'text-content-secondary' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
+                        <x-icon name="play" class="w-16 h-16 mb-4 {{ $posterUrl ? 'text-white/80' : 'text-content-secondary' }}" />
                         <p class="mb-4 {{ $posterUrl ? 'text-white' : 'text-content-secondary' }}">
                             {{ __('Zum Abspielen des Videos wird ein externer Dienst geladen.', 'wp-starter') }}<br>
                             @if($privacyLink)
@@ -156,9 +156,7 @@
                         x-cloak
                         class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-surface-secondary"
                     >
-                        <svg class="w-16 h-16 mb-4 text-content-error" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
+                        <x-icon name="warning" class="w-16 h-16 mb-4 text-content-error" />
                         {{-- Kein Poster/Scrim mehr im Fehler-Zustand (x-show="!loaded" hat beides
                              bereits ausgeblendet), deshalb hier immer die Textfarbe fuer helle
                              Flaeche, nie den Poster-Ternary aus dem Consent-Overlay. --}}

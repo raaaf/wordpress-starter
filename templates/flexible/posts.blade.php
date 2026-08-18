@@ -90,8 +90,11 @@
                             <x-link :url="get_permalink()" iconRight="chevron-right" aria-hidden="true" tabindex="-1" class="relative z-20 group-hover:text-content-brand!">{{ __('Weiterlesen', 'wp-starter') }}</x-link>
                         </div>
 
-                        {{-- Stretched link covering entire card (z-10, below the Weiterlesen link at z-20) --}}
-                        <a href="{{ get_permalink() }}" class="absolute inset-0 z-10" aria-label="{{ __('Weiterlesen:', 'wp-starter') }} {{ get_the_title() }}">
+                        {{-- Stretched link covering entire card (z-10, below the Weiterlesen link at z-20).
+                             Eigener Fokusring nach innen (statt der globalen :focus-visible-Outline):
+                             die Karte traegt overflow-hidden fuer den Bildzuschnitt (card.blade.php),
+                             ein nach aussen gemalter Ring waere daran unsichtbar geschnitten. --}}
+                        <a href="{{ get_permalink() }}" class="absolute inset-0 z-10 focus-visible:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--ring-focus)]" aria-label="{{ __('Weiterlesen:', 'wp-starter') }} {{ get_the_title() }}">
                             <span class="sr-only">{{ get_the_title() }}</span>
                         </a>
                     </x-card>

@@ -606,6 +606,13 @@ if (!function_exists('wp_get_theme')) {
     }
 }
 
+if (!function_exists('wp_parse_url')) {
+    function wp_parse_url(string $url, int $component = -1): mixed
+    {
+        return $component === -1 ? parse_url($url) : parse_url($url, $component);
+    }
+}
+
 if (!function_exists('get_option')) {
     function get_option(string $option, mixed $default = false): mixed
     {

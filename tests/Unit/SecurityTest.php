@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Support\TestCase;
 use WordpressStarter\Security;
 
@@ -79,6 +80,99 @@ final class SecurityTest extends TestCase
         $this->assertStringContainsString("font-src 'self'", $header);
         $this->assertStringContainsString("img-src 'self'", $header);
         $this->assertStringContainsString("connect-src 'self'", $header);
+    }
+
+    /**
+     * Die Analytics-Herkunft muss in BEIDEN Direktiven stehen.
+     *
+     * So war es gebrochen: nur `connect-src` trug den Host. Das Tracking-Skript
+     * laedt aber per wp_enqueue_script von genau diesem Host, und `script-src`
+     * kannte ihn nicht. Ergebnis: das Skript wurde blockiert, es sendete nie
+     * jemand, und die Erweiterung von `connect-src` lief ins Leere. Am
+     * gesendeten Header gemessen, nicht am Quelltext.
+     */
+    public function testCSPCarriesAnalyticsOriginInScriptAndConnect(): void
+    {
+        update_option('rybbit_script_url', 'https://tracking.example.com/api/script.js');
+
+        $header = Security::getCSPHeader();
+        [$scriptSrc, $connectSrc] = [
+            $this->directive($header, 'script-src'),
+            $this->directive($header, 'connect-src'),
+        ];
+
+        $this->assertStringContainsString('https://tracking.example.com', $scriptSrc);
+        $this->assertStringContainsString('https://tracking.example.com', $connectSrc);
+    }
+
+    /** Ohne eigene Option gilt der Standard des Plugins, nicht gar nichts. */
+    public function testCSPFallsBackToThePluginDefaultOrigin(): void
+    {
+        delete_option('rybbit_script_url');
+
+        $this->assertStringContainsString(
+            'https://app.rybbit.io',
+            $this->directive(Security::getCSPHeader(), 'script-src')
+        );
+    }
+
+    /**
+     * Der Optionswert ist von Administratoren setzbar und landet in einem Header.
+     *
+     * Zwei verschiedene Erwartungen, bewusst getrennt: ein unbrauchbares Schema
+     * fuegt gar nichts hinzu, ein brauchbarer Host mit angehaengtem Muell fuegt
+     * genau den Host hinzu und laesst den Rest fallen. Wer die Analytics-URL
+     * setzen darf, darf auch den Host bestimmen; er darf nur keine zweite
+     * Direktive einschmuggeln.
+     */
+    #[DataProvider('unbrauchbareHerkuenfte')]
+    public function testCSPRejectsUnusableOrigins(string $url, ?string $erwarteterHost, string $warum): void
+    {
+        update_option('rybbit_script_url', $url);
+        $scriptSrc = $this->directive(Security::getCSPHeader(), 'script-src');
+
+        // Struktur haelt immer: eine Direktive, kein Semikolon, kein Komma.
+        $this->assertSame(1, preg_match_all('/script-src/', $scriptSrc), $warum);
+        $this->assertStringNotContainsString(';', $scriptSrc, $warum);
+        $this->assertStringNotContainsString(',', $scriptSrc, $warum);
+
+        if ($erwarteterHost === null) {
+            $this->assertStringNotContainsString('https://', $scriptSrc, $warum);
+
+            return;
+        }
+
+        $this->assertStringContainsString($erwarteterHost, $scriptSrc, $warum);
+        $this->assertStringNotContainsString('script-src *', $scriptSrc, $warum);
+    }
+
+    /** @return array<string, array{0: string, 1: string|null, 2: string}> */
+    public static function unbrauchbareHerkuenfte(): array
+    {
+        return [
+            'http statt https' => ['http://evil.test/s.js', null, 'unverschluesselt, faellt komplett heraus'],
+            'kein Host' => ['javascript:alert(1)', null, 'Schema ohne Host'],
+            'leer' => ['', null, 'nicht gesetzt'],
+            'Direktive angehaengt' => [
+                'https://evil.test/ x; script-src *',
+                'https://evil.test',
+                'nur der Host ueberlebt, die angehaengte Direktive nicht',
+            ],
+            'mit Port' => ['https://analytics.example.com:8443/s.js', 'https://analytics.example.com:8443', 'Port bleibt erhalten'],
+        ];
+    }
+
+    /** Eine einzelne Direktive aus dem Headerwert schneiden. */
+    private function directive(string $header, string $name): string
+    {
+        foreach (explode(';', $header) as $teil) {
+            $teil = trim($teil);
+            if (str_starts_with($teil, $name . ' ')) {
+                return $teil;
+            }
+        }
+
+        return '';
     }
 
     public function testGetCSPHeaderIncludesNonce(): void

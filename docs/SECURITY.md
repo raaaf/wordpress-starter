@@ -18,14 +18,16 @@ $directives = [
     "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com",
     "frame-ancestors 'self'",
     "media-src 'self' https:" . $localSources,
-    "script-src 'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'" . $localSources,
+    "script-src 'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'" . $analyticsOrigin . $localSources,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com" . $localSources,
-    "connect-src 'self'" . $localSources,
+    "connect-src 'self'" . $analyticsOrigin . $localSources,
     "worker-src 'self' blob:",
 ];
 ```
 
 `$localSources` (from `Security::getLocalSources()`) appends a space-separated list of `http://` and `ws://` origins for `localhost` and `127.0.0.1` across common dev ports (3000, 3001, 4173, 5173, 5180-5182, 8000, 8080, 8888, 9000, plus the dynamic Vite port read from `.vite-port`). It only applies when `WP_ENVIRONMENT_TYPE` is `local`; in production it resolves to an empty string. `default-src`, `font-src`, `img-src`, `media-src`, `script-src`, `style-src` and `connect-src` all carry this suffix, `frame-src`, `frame-ancestors` and `worker-src` do not.
+
+`$analyticsOrigin` (from `Security::getAnalyticsOrigin()`) resolves the `rybbit_script_url` option to its `https://` origin and appends it to `script-src` and `connect-src`, so the Rybbit Analytics tracking script (if the plugin is active) can both load and send events. Falls back to the plugin's own default origin when the option is unset, and to an empty string when the value cannot be parsed as a safe `https://` host.
 
 ### Nonce-Based Script Loading
 

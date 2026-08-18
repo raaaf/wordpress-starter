@@ -172,8 +172,9 @@
                     </{{ $heroHeadingTag }}>
                 @endif
 
+                {{-- text-body-large statt text-lg: gleiche Intro-Typografie wie in der background-Variante --}}
                 @if($copy)
-                    <p class="text-lg mb-8 text-content-secondary">{!! $copy !!}</p>
+                    <p class="text-body-large mb-8 text-content-secondary">{!! $copy !!}</p>
                 @endif
 
                 @if($cta_primary || $cta_secondary)
@@ -239,8 +240,9 @@
                 </{{ $heroHeadingTag }}>
             @endif
 
+            {{-- text-body-large statt text-lg md:text-xl: gleiche Intro-Typografie wie in den anderen Varianten --}}
             @if($copy)
-                <p class="text-lg md:text-xl mb-8 text-content-secondary">{!! $copy !!}</p>
+                <p class="text-body-large mb-8 text-content-secondary">{!! $copy !!}</p>
             @endif
 
             @if($cta_primary || $cta_secondary)
@@ -254,12 +256,13 @@
                             size="lg"
                         />
                     @endif
+                    {{-- variant secondary statt outline: "outline" existiert im Button nicht und fiel still auf primary zurück --}}
                     @if($cta_secondary)
                         <x-button
                             :url="$cta_secondary['url']"
                             :title="$cta_secondary['title']"
                             :target="$cta_secondary['target'] ?? '_self'"
-                            variant="outline"
+                            variant="secondary"
                             size="lg"
                         />
                     @endif

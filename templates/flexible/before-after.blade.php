@@ -38,23 +38,30 @@
         <div
             id="{{ $uniqueId }}"
             x-data="beforeAfterSlider()"
-            class="relative max-w-4xl mx-auto overflow-hidden rounded-[var(--card-radius)] select-none"
+            class="relative max-w-4xl mx-auto select-none"
         >
-            {{-- After image (background) --}}
-            {!! wp_get_attachment_image($afterId, 'content', false, [
-                'class'   => 'block w-full',
-                'alt'     => $altAfter,
-            ]) !!}
-
-            {{-- Before image (clipped) --}}
-            <div
-                class="absolute inset-0 overflow-hidden"
-                :style="'clip-path: inset(0 ' + (100 - position) + '% 0 0)'"
-            >
-                {!! wp_get_attachment_image($beforeId, 'content', false, [
+            {{-- Bildbereich traegt das overflow-hidden jetzt selbst, nicht mehr der
+                 aeussere Container: der Slider-Griff ist per inset-y-0 randbuendig
+                 mit dessen Kanten, sein Fokusring waere dort auf voller Hoehe und
+                 zusaetzlich bei Position 0/100 auch seitlich abgeschnitten worden
+                 (gleiche Falle wie im Akkordeon geloest). --}}
+            <div class="relative overflow-hidden rounded-[var(--card-radius)]">
+                {{-- After image (background) --}}
+                {!! wp_get_attachment_image($afterId, 'content', false, [
                     'class'   => 'block w-full',
-                    'alt'     => $altBefore,
+                    'alt'     => $altAfter,
                 ]) !!}
+
+                {{-- Before image (clipped) --}}
+                <div
+                    class="absolute inset-0 overflow-hidden"
+                    :style="'clip-path: inset(0 ' + (100 - position) + '% 0 0)'"
+                >
+                    {!! wp_get_attachment_image($beforeId, 'content', false, [
+                        'class'   => 'block w-full',
+                        'alt'     => $altBefore,
+                    ]) !!}
+                </div>
             </div>
 
             {{-- Slider handle (48px hit area with 1px visual bar) --}}
@@ -83,12 +90,8 @@
 
                 {{-- Handle circle --}}
                 <div class="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 bg-surface rounded-full shadow-lg top-1/2 left-1/2 flex items-center justify-center border-2 border-line pointer-events-none">
-                    <svg class="w-6 h-6 text-content-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                    <svg class="w-6 h-6 text-content-secondary -ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                    </svg>
+                    <x-icon name="chevron-left" class="w-6 h-6 text-content-secondary" />
+                    <x-icon name="chevron-right" class="w-6 h-6 text-content-secondary -ml-2" />
                 </div>
             </div>
 

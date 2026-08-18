@@ -149,11 +149,14 @@
 
         {{-- Right icon or clear button --}}
         @if($clearable)
+            {{-- min-h-11!/min-w-11!: 44px Hit-Flaeche wie bei den Icon-Buttons in
+                 team.blade.php, das Icon selbst bleibt in seiner urspruenglichen
+                 Groesse (sm/md/lg), nur die Klickflaeche waechst per Ueberhang. --}}
             <button
                 type="button"
                 x-show="hasValue"
                 x-on:click="$refs.input.value = ''; hasValue = false; $refs.input.focus()"
-                class="absolute {{ $sizeConfig['iconRight'] }} top-1/2 -translate-y-1/2 text-icon-secondary hover:text-icon transition-colors"
+                class="absolute {{ $sizeConfig['iconRight'] }} top-1/2 -translate-y-1/2 inline-flex items-center justify-center min-h-11! min-w-11! text-icon-secondary hover:text-icon transition-colors"
                 @if($disabled) disabled @endif
             >
                 <x-icon name="close" class="{{ $sizeConfig['icon'] }}" />
