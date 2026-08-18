@@ -1,3 +1,9 @@
+## [2.27.4](https://github.com/raaaf/wordpress-starter/compare/v2.27.3...v2.27.4) (2026-08-18)
+
+### Bug Fixes
+
+- **hero:** Einblendung laeuft ohne JavaScript ([d7d4c00](https://github.com/raaaf/wordpress-starter/commit/d7d4c00194c797139f02e881bcb35969b9a4a23e))
+
 ## [2.27.3](https://github.com/raaaf/wordpress-starter/compare/v2.27.2...v2.27.3) (2026-08-18)
 
 ### Bug Fixes
