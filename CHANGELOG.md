@@ -1,3 +1,10 @@
+## [2.27.3](https://github.com/raaaf/wordpress-starter/compare/v2.27.2...v2.27.3) (2026-08-18)
+
+### Bug Fixes
+
+- **header:** Seitentitel schob sich beim Scrollen ueber den Header ([4047a26](https://github.com/raaaf/wordpress-starter/commit/4047a262e907155951dab2ad631c32cc4c594252))
+- **layout:** Startseitentitel und springende Heroehoehe ([5fa442b](https://github.com/raaaf/wordpress-starter/commit/5fa442bb950598f8ffd4fc607d576e1b454f4cbf))
+
 ## [2.27.2](https://github.com/raaaf/wordpress-starter/compare/v2.27.1...v2.27.2) (2026-08-18)
 
 ### Bug Fixes
