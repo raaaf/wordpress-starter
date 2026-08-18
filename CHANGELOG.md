@@ -1,3 +1,10 @@
+## [2.27.6](https://github.com/raaaf/wordpress-starter/compare/v2.27.5...v2.27.6) (2026-08-18)
+
+### Bug Fixes
+
+- **layout:** Seitenkopf uebernimmt das Mass der ersten Sektion ([9cca3c5](https://github.com/raaaf/wordpress-starter/commit/9cca3c58920dd7ad3d26230b921f0c50ecd934eb))
+- **nav:** Hoverflaeche im Untermenue liegt buendig im Panel ([34b6614](https://github.com/raaaf/wordpress-starter/commit/34b66140947e8b4c4d350105dc59cee87dd8beb6))
+
 ## [2.27.5](https://github.com/raaaf/wordpress-starter/compare/v2.27.4...v2.27.5) (2026-08-18)
 
 ### Bug Fixes
