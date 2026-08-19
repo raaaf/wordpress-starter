@@ -3,6 +3,7 @@
 
     @param string $background - bg color: primary, secondary, tertiary, brand, brand-subtle, inverse
     @param string $padding - sm, md, lg, xl (default: lg)
+    @param string|null $spacing - editor override for $padding: default, sm, xl, none
     @param string $anchor - HTML ID for anchor links
     @param string $class - Additional CSS classes
     @param bool $container - Wrap content in container (default: true)
@@ -12,6 +13,7 @@
 @props([
     'background' => 'primary',
     'padding' => 'lg',
+    'spacing' => null,
     'anchor' => null,
     'class' => '',
     'container' => true,
@@ -37,7 +39,11 @@
     ];
 
     $bgClass = $backgrounds[$background] ?? $backgrounds['primary'];
-    $paddingClass = $paddings[$padding] ?? $paddings['lg'];
+
+    // The editor field wins over the template default, but only when it says
+    // something: "default" means "keep the rhythm the template designed".
+    $paddingKey = ($spacing && $spacing !== 'default' && isset($paddings[$spacing])) ? $spacing : $padding;
+    $paddingClass = $paddings[$paddingKey] ?? $paddings['lg'];
 
     // Determine if animations should be enabled
     $globalAnimations = \WordpressStarter\Acf\Fields::option('animations_enabled', false);

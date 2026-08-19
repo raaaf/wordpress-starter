@@ -18,7 +18,7 @@
 @endphp
 
 @if($embedUrl || $title || current_user_can('edit_posts'))
-<x-section :anchor="$sectionAnchor" :background="$background" class="map">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="map">
     <x-section-header :headline="$title" />
 
     @if($embedUrl)

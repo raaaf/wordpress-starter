@@ -16,7 +16,7 @@
 @endphp
 
 @if($title || !empty($rows) || current_user_can('edit_posts'))
-<x-section :anchor="$sectionAnchor" :background="$background" class="table-block">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="table-block">
     <x-section-header :headline="$title" />
 
     @if(!empty($rows))

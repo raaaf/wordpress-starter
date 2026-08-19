@@ -38,7 +38,7 @@
 @if($chip || $headline || $description
     || $label_1 || ($image_1 && !empty($image_1['url'])) || $column_1 || !empty($accordion_1)
     || $label_2 || ($image_2 && !empty($image_2['url'])) || $column_2 || !empty($accordion_2))
-<x-section :anchor="$sectionAnchor" :background="$background" class="two-columns-images">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="two-columns-images">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="2" gap="xl" align="items-stretch">
         @foreach([1, 2] as $col)

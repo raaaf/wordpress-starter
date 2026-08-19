@@ -30,7 +30,7 @@
 @endphp
 
 @if($title || !empty($stats))
-<x-section :anchor="$sectionAnchor" :background="$background" class="stats">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="stats">
     <x-section-header :headline="$title" />
 
     @if(!empty($stats))

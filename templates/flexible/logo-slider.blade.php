@@ -69,7 +69,7 @@
 @endphp
 
 @if($title || !empty($logoData))
-<x-section :anchor="$sectionAnchor" :background="$background" padding="md" class="logo-slider">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" padding="md" class="logo-slider">
     <x-section-header :headline="$title" />
 
     @if(!empty($logoData))

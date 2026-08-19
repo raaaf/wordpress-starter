@@ -66,6 +66,7 @@ final class StyleguideVariantCoverageTest extends TestCase
      */
     private const UNION_FIELDS = [
         'background_color',
+        'section_spacing',
     ];
 
     public function testEveryRegisteredLayoutHasDemoData(): void

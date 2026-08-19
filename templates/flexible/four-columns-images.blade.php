@@ -48,7 +48,7 @@
     || $label_2 || ($image_2 && !empty($image_2['url'])) || $column_2 || !empty($accordion_2)
     || $label_3 || ($image_3 && !empty($image_3['url'])) || $column_3 || !empty($accordion_3)
     || $label_4 || ($image_4 && !empty($image_4['url'])) || $column_4 || !empty($accordion_4))
-<x-section :anchor="$sectionAnchor" :background="$background" class="four-columns-images">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="four-columns-images">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="4" gap="md" align="items-stretch">
         @foreach([1, 2, 3, 4] as $col)

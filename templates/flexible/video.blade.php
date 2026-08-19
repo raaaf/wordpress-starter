@@ -68,7 +68,7 @@
 @endphp
 
 @if($hasVideo || current_user_can('edit_posts'))
-<x-section :background="$background" :anchor="$sectionAnchor" class="video">
+<x-section :background="$background" :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" class="video">
     @if($hasVideo)
         <div class="max-w-6xl mx-auto">
             <div

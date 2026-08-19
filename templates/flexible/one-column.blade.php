@@ -13,7 +13,7 @@
 @endphp
 
 @if($chip || $headline || $description || $content)
-<x-section :anchor="$sectionAnchor" :background="$background" class="one-column">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="one-column">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" class="max-w-2xl mx-auto" />
     <div class="max-w-2xl mx-auto">
         <x-prose>@kses($content)</x-prose>

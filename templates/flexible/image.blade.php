@@ -28,7 +28,7 @@
 @endphp
 
 @if($imageId)
-<x-section :anchor="$sectionAnchor" :background="$background" padding="md" class="image">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" padding="md" class="image">
     <figure class="mx-auto max-w-4xl">
         {{-- Bewusst ohne 'loading': wp_get_attachment_image() ruft
              wp_get_loading_optimization_attributes() auf. Die zaehlt die

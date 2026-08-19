@@ -867,6 +867,27 @@ class StyleguideLayoutData
             'background_color' => 'inverse',
         ]);
 
+        // --- Abstaende -------------------------------------------------------
+        // Die Stufen sind nur im Vergleich lesbar, deshalb stehen sie direkt
+        // untereinander und alle auf derselben Flaeche.
+        $catalog[] = $this->layout('one_column', [
+            'content' => '<h3>Abstand: Kompakt</h3><p>Kleinste Stufe, fuer eng gesetzte Folgeabschnitte.</p>',
+            'background_color' => 'secondary',
+            'section_spacing' => 'sm',
+        ]);
+
+        $catalog[] = $this->layout('one_column', [
+            'content' => '<h3>Abstand: Groß</h3><p>Groesste Stufe, fuer Abschnitte, die fuer sich stehen sollen.</p>',
+            'background_color' => 'secondary',
+            'section_spacing' => 'xl',
+        ]);
+
+        $catalog[] = $this->layout('one_column', [
+            'content' => '<h3>Abstand: Ohne</h3><p>Ohne eigenen Innenabstand, fuer direkt aneinander stossende Flaechen.</p>',
+            'background_color' => 'secondary',
+            'section_spacing' => 'none',
+        ]);
+
         // --- Spaltenzahlen ---------------------------------------------------
         $catalog[] = $this->layout('cards', [
             'title' => 'Karten, vier Spalten',

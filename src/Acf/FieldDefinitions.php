@@ -97,6 +97,34 @@ class FieldDefinitions
     }
 
     /**
+     * Get section spacing field definition
+     *
+     * Overrides the vertical padding the template hands to x-section. "default"
+     * means: keep whatever the template chose, so an editor who never touches
+     * the field gets the designed rhythm.
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<string, mixed>
+     */
+    public static function sectionSpacingField(string $prefix): array
+    {
+        return self::buttonGroupField(
+            "field_{$prefix}_section_spacing",
+            __('Abstand', 'wp-starter'),
+            'section_spacing',
+            [
+                'default' => __('Standard', 'wp-starter'),
+                'sm' => __('Kompakt', 'wp-starter'),
+                'xl' => __('Groß', 'wp-starter'),
+                'none' => __('Ohne', 'wp-starter'),
+            ],
+            'default',
+            __('Vertikaler Innenabstand dieses Abschnitts.', 'wp-starter'),
+        );
+    }
+
+    /**
      * Get WYSIWYG content field definition
      *
      * @param string $key Unique field key
@@ -1348,6 +1376,7 @@ class FieldDefinitions
                 __('Inhalt der rechten Spalte (50% Breite).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1388,6 +1417,7 @@ class FieldDefinitions
                 __('Inhalt der dritten Spalte (1/3 Breite).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1436,6 +1466,7 @@ class FieldDefinitions
                 __('Inhalt der vierten Spalte (1/4 Breite).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1484,6 +1515,7 @@ class FieldDefinitions
                 __('Füge beliebig viele auf- und zuklappbare Elemente hinzu.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1521,6 +1553,8 @@ class FieldDefinitions
                 true,
                 __('Der Call-to-Action Button mit Link und Text.', 'wp-starter'),
             ),
+            self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1649,6 +1683,7 @@ class FieldDefinitions
             // absetzen, und eine Seite, die zwischen zwei Flaechen wechselt,
             // bekam an dieser Stelle unvermeidlich einen Bruch.
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1759,6 +1794,7 @@ class FieldDefinitions
                 __('Optionaler Titel des Videos. Wird als title-Attribut des iFrames (YouTube/Vimeo) und als aria-label des video-Elements verwendet, um das Video für Screenreader und Suchmaschinen zu beschriften. Leer lassen = generischer Fallback.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1803,6 +1839,7 @@ class FieldDefinitions
                 'wrapper' => ['width' => '50'],
             ],
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1843,6 +1880,7 @@ class FieldDefinitions
                 'step' => 10,
                 'append' => 'px',
             ],
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1875,6 +1913,7 @@ class FieldDefinitions
                 __('Inhalt der breiten rechten Spalte (ca. 2/3 der Breite).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1907,6 +1946,7 @@ class FieldDefinitions
                 __('Inhalt der schmalen rechten Spalte (ca. 1/3 der Breite).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1974,6 +2014,7 @@ class FieldDefinitions
                 __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2073,6 +2114,7 @@ class FieldDefinitions
             ...self::buildColumnImageBlock($prefix, 1, __('Bild für die linke Karte.', 'wp-starter')),
             ...self::buildColumnImageBlock($prefix, 2, __('Bild für die rechte Karte.', 'wp-starter')),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2090,6 +2132,7 @@ class FieldDefinitions
             ...self::buildColumnImageBlock($prefix, 2, __('Bild für die mittlere Karte.', 'wp-starter')),
             ...self::buildColumnImageBlock($prefix, 3, __('Bild für die rechte Karte.', 'wp-starter')),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2108,6 +2151,7 @@ class FieldDefinitions
             ...self::buildColumnImageBlock($prefix, 3, __('Bild für die dritte Karte.', 'wp-starter')),
             ...self::buildColumnImageBlock($prefix, 4, __('Bild für die vierte Karte.', 'wp-starter')),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2208,6 +2252,7 @@ class FieldDefinitions
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2283,6 +2328,7 @@ class FieldDefinitions
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2331,6 +2377,7 @@ class FieldDefinitions
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2397,6 +2444,7 @@ class FieldDefinitions
                 __('Logos automatisch durchlaufen lassen.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2461,6 +2509,7 @@ class FieldDefinitions
                 __('Zeigt die Kontaktdaten aus den Theme-Einstellungen an.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2531,6 +2580,7 @@ class FieldDefinitions
             // Tab: Darstellung
             self::tabField("field_{$prefix}_tab_style", __('Darstellung', 'wp-starter')),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2587,6 +2637,7 @@ class FieldDefinitions
                 __('Füge mindestens 2 Tabs hinzu.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2684,6 +2735,7 @@ class FieldDefinitions
                 __('Füge Preispakete hinzu (empfohlen: 3 Pakete).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2806,6 +2858,7 @@ class FieldDefinitions
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2873,6 +2926,7 @@ class FieldDefinitions
                 __('Füge Kennzahlen hinzu (empfohlen: 3-4).', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2950,6 +3004,7 @@ class FieldDefinitions
                 __('Füge Ereignisse in chronologischer Reihenfolge hinzu.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3068,6 +3123,7 @@ class FieldDefinitions
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3129,6 +3185,7 @@ class FieldDefinitions
                 'wrapper' => ['width' => '50'],
             ],
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3221,6 +3278,7 @@ class FieldDefinitions
                 'wrapper' => ['width' => '50'],
             ],
             self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3237,6 +3295,8 @@ class FieldDefinitions
     public static function memberDownloadsFields(string $prefix): array
     {
         return [
+            self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }

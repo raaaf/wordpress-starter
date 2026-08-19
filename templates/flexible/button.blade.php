@@ -23,7 +23,7 @@
 @endphp
 
 @if($button && !empty($button['url']))
-    <x-section :anchor="$sectionAnchor" :background="$background" padding="sm" class="button-block-section">
+    <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" padding="sm" class="button-block-section">
         <div class="button-block {{ $alignmentClasses }}">
             <x-button
                 :url="$button['url']"

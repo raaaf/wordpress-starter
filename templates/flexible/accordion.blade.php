@@ -42,7 +42,7 @@
 @endphp
 
 @if(!empty($items) || current_user_can('edit_posts'))
-<x-section :anchor="$sectionAnchor" :background="$background" padding="md" class="accordion">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" padding="md" class="accordion">
     <div class="max-w-2xl mx-auto">
         @php $itemCount = count($items); @endphp
         <div

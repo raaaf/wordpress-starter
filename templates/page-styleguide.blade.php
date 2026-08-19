@@ -102,6 +102,7 @@
                     @php($layoutCounters[$layout] = ($layoutCounters[$layout] ?? 0) + 1)
                     @php($anchorCounters[$layout] = ($anchorCounters[$layout] ?? 0) + 1)
                     @php($customAnchor = get_sub_field('section_anchor'))
+                    @php($sectionSpacing = get_sub_field('section_spacing') ?: null)
                     @php($sectionAnchor = $customAnchor ?: str_replace('_', '-', $layout) . '-' . $anchorCounters[$layout])
 
                     @php(ob_start())

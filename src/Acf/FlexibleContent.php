@@ -340,6 +340,7 @@ class FlexibleContent
                     __('Der Textinhalt dieser Sektion.', 'wp-starter'),
                 ),
                 FieldDefinitions::backgroundColorField('flex_one_column'),
+                FieldDefinitions::sectionSpacingField('flex_one_column'),
                 FieldDefinitions::sectionAnchorField('flex_one_column'),
             ],
             'acfe_flexible_category' => self::getCategories()['layout'],

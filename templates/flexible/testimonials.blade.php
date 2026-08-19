@@ -38,7 +38,7 @@
 @endphp
 
 @if(!empty($testimonials) || $title || current_user_can('edit_posts'))
-<x-section :anchor="$sectionAnchor" :background="$background" class="testimonials">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="testimonials">
     <x-section-header :headline="$title" />
 
     @if(!empty($testimonials))

@@ -40,7 +40,7 @@
     $postsQuery = new WP_Query($args);
 @endphp
 
-<x-section :anchor="$sectionAnchor" :background="$background" class="posts">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="posts">
     <x-section-header :headline="$title" />
 
     @if($postsQuery->have_posts())
