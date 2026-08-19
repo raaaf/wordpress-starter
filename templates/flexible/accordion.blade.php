@@ -2,7 +2,8 @@
     Accordion - Flexible Content Layout
 
     Uses shared components: x-section, x-prose
-    Fields: accordion (repeater with icon, title, content), background_color
+    Fields: accordion (repeater with icon, title, content), first_open,
+    allow_multiple, faq_schema, background_color
 
     Includes FAQPage JSON-LD schema for SEO rich snippets, gated to singular,
     published, non-password-protected pages (see $canPublishFaqSchema below).
@@ -16,6 +17,14 @@
 @php
     $items = get_sub_field('accordion') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
+    $firstOpen = (bool) get_sub_field('first_open');
+    $allowMultiple = (bool) get_sub_field('allow_multiple');
+
+    // Only an accordion the editor marked as questions and answers may claim
+    // FAQPage. get_sub_field returns null for rows saved before the field
+    // existed, and those were all emitting the schema, so null keeps it on.
+    $faqSchemaField = get_sub_field('faq_schema');
+    $wantsFaqSchema = $faqSchemaField === null || (bool) $faqSchemaField;
     $accordionId = uniqid();
 
     // Checks that this is a singular, published, non-password-protected
@@ -25,7 +34,7 @@
 
     // Build FAQPage schema for SEO
     $faqQuestions = [];
-    if ($canPublishFaqSchema && !empty($items)) {
+    if ($wantsFaqSchema && $canPublishFaqSchema && !empty($items)) {
         foreach ($items as $item) {
             if (!empty($item['title']) && !empty($item['content'])) {
                 $faqQuestions[] = [
@@ -48,8 +57,23 @@
         <div
             class="flex flex-col"
             x-data="{
-                active: null,
+                open: {{ $firstOpen ? '[0]' : '[]' }},
+                multiple: {{ $allowMultiple ? 'true' : 'false' }},
                 itemCount: {{ $itemCount }},
+                isOpen(index) {
+                    return this.open.includes(index);
+                },
+                toggle(index) {
+                    if (this.multiple) {
+                        this.open = this.isOpen(index)
+                            ? this.open.filter((i) => i !== index)
+                            : [...this.open, index];
+
+                        return;
+                    }
+
+                    this.open = this.isOpen(index) ? [] : [index];
+                },
                 focusItem(index) {
                     this.$nextTick(() => {
                         this.$refs['accordion' + index]?.focus();
@@ -67,24 +91,24 @@
                 <div class="w-full border-b border-line last:border-b-0">
                     <button x-ref="accordion{{ $index }}"
                             id="accordion-header-{{ $accordionId }}-{{ $index }}"
-                            @click="active = active === {{ $index }} ? null : {{ $index }}"
+                            @click="toggle({{ $index }})"
                             @keydown.down.prevent="focusItem(({{ $index }} + 1) % itemCount)"
                             @keydown.up.prevent="focusItem(({{ $index }} - 1 + itemCount) % itemCount)"
                             @keydown.home.prevent="focusItem(0)"
                             @keydown.end.prevent="focusItem(itemCount - 1)"
-                            :aria-expanded="active === {{ $index }}"
+                            :aria-expanded="isOpen({{ $index }})"
                             aria-controls="accordion-content-{{ $accordionId }}-{{ $index }}"
                             class="group flex items-center justify-between w-full py-4 px-3 mb-0 font-bold text-left cursor-pointer transition-colors rounded-[var(--radius-sm)] hover:text-content-brand focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
-                            :class="{ 'text-content-brand': active === {{ $index }} }">
+                            :class="{ 'text-content-brand': isOpen({{ $index }}) }">
                         <span class="flex items-center gap-3">
                             @if(!empty($item['icon']))
                                 <x-icon :name="$item['icon']" class="w-5 h-5" />
                             @endif
                             {{ $item['title'] }}
                         </span>
-                        <x-rotating-chevron active="active === {{ $index }}" size="lg" />
+                        <x-rotating-chevron active="isOpen({{ $index }})" size="lg" />
                     </button>
-                    <div x-show="active === {{ $index }}"
+                    <div x-show="isOpen({{ $index }})"
                          x-collapse
                          id="accordion-content-{{ $accordionId }}-{{ $index }}"
                          @if(count($items) < 7) role="region" @endif

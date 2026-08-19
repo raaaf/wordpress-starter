@@ -418,7 +418,7 @@ final class FieldDefinitionsTest extends TestCase
     {
         $fields = FieldDefinitions::accordionFields('accordion');
 
-        $this->assertCount(4, $fields);
+        $this->assertCount(7, $fields);
 
         // First field should be the repeater
         $repeaterField = $fields[0];

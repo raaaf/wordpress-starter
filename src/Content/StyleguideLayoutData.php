@@ -883,6 +883,21 @@ class StyleguideLayoutData
             'background_color' => 'inverse',
         ]);
 
+        // Akkordeon mit allen drei Schaltern anders herum als im Standardfall
+        // darueber: erster Eintrag offen, mehrere gleichzeitig offen, und ohne
+        // FAQ-Auszeichnung, weil das hier keine Fragen und Antworten sind.
+        $catalog[] = $this->layout('accordion', [
+            'accordion' => [
+                ['title' => 'Erster Eintrag, beim Laden offen', 'content' => '<p>Dieser Eintrag ist ohne Klick sichtbar.</p>'],
+                ['title' => 'Zweiter Eintrag', 'content' => '<p>Er bleibt offen, wenn ein dritter geoeffnet wird.</p>'],
+                ['title' => 'Dritter Eintrag', 'content' => '<p>Mehrere Eintraege duerfen hier gleichzeitig offen stehen.</p>'],
+            ],
+            'first_open' => true,
+            'allow_multiple' => true,
+            'faq_schema' => false,
+            'background_color' => 'secondary',
+        ]);
+
         // --- Abstaende -------------------------------------------------------
         // Die Stufen sind nur im Vergleich lesbar, deshalb stehen sie direkt
         // untereinander und alle auf derselben Flaeche.
