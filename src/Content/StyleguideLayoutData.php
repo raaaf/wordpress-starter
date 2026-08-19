@@ -844,6 +844,19 @@ class StyleguideLayoutData
             'background_color' => 'inverse',
         ]);
 
+        // Karten auf der Markenflaeche: die Sektion faerbt ihre Schrift hell, die
+        // Karte bringt eine helle Flaeche mit. Ohne eigene Schriftfarbe auf der
+        // Karte stand hier weisser Text auf weissem Grund.
+        $catalog[] = $this->layout('cards', [
+            'title' => 'Karten auf der Markenfläche',
+            'cards' => [
+                ['icon' => 'check', 'title' => 'Erste Karte', 'content' => 'Kartentext auf der Markenfläche. Er darf nicht die helle Schrift der Sektion erben.', 'link' => null],
+                ['icon' => 'star', 'title' => 'Zweite Karte', 'content' => 'Prüft, dass die Karte ihre eigene Schriftfarbe mitbringt.', 'link' => null],
+            ],
+            'columns' => '2',
+            'background_color' => 'brand',
+        ]);
+
         $catalog[] = $this->layout('cards', [
             'title' => 'Karten auf dunkler Fläche',
             'cards' => [

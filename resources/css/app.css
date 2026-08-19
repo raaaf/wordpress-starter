@@ -832,6 +832,34 @@ html {
   color: inherit;
 }
 
+/* Jede Flaeche bringt ihre Schriftfarbe selbst mit.
+
+   Die Regeln oben faerben Ueberschriften auf einer Marken- oder Invers-Sektion
+   um und nehmen Karten, Hinweise und Abzeichen davon aus. Fliesstext steht in
+   dieser Liste nicht, er erbt einfach von der Sektion, und `.prose` erbt oben
+   sogar ausdruecklich. Auf einer Markensektion lief damit weisse Schrift in
+   eine helle Karte und verschwand dort.
+
+   Statt die Ausnahmeliste weiter zu verlaengern, traegt jede Flaeche ihre
+   eigene Farbe: wer einen Hintergrund setzt, setzt auch die Schrift dazu. Die
+   Vererbung endet damit an der naechsten Flaeche, egal wie tief sie liegt. */
+.card,
+.alert,
+.bg-surface,
+.bg-surface-secondary,
+.bg-surface-tertiary,
+.bg-surface-brand-subtle {
+  color: var(--text-primary);
+}
+
+.bg-surface-brand {
+  color: var(--text-on-brand);
+}
+
+.bg-surface-inverse {
+  color: var(--text-inverse);
+}
+
 @source "../templates";
 @source "../../blocks";
 @source "../../safelist.txt";
