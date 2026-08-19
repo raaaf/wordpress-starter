@@ -2437,6 +2437,17 @@ html {
   padding-top: 2rem;
 }
 
+/* Derselbe Fall am Seitenkopf: dessen Polster und das der ersten Sektion
+   stapelten sich zu einem Loch zwischen Titel und Inhalt. Auch hier nur, wenn
+   beide dieselbe Flaeche tragen. */
+.page-header:has(+ .section.bg-surface) {
+  padding-bottom: 0;
+}
+
+.page-header + .section.bg-surface {
+  padding-top: 2rem;
+}
+
 .hero--reveal .hero-reveal {
   animation: hero-reveal var(--motion-enter-duration) var(--motion-enter-ease) both;
 }
