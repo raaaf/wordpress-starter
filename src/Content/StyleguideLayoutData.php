@@ -612,9 +612,11 @@ class StyleguideLayoutData
     {
         return $this->layout('newsletter', [
             'title' => 'Auf dem Laufenden bleiben',
-            'content' => 'Viermal im Jahr ein kurzer Bericht darueber, was gefoerdert wurde. Abmeldung jederzeit.',
-            'form_id' => $this->getFirstContactForm7Id(),
-            'width' => 'narrow',
+            'content' => 'Viermal im Jahr ein kurzer Bericht darueber, was gefoerdert wurde.',
+            'action_url' => 'https://beispiel.us1.list-manage.com/subscribe/post?u=demo&id=demo',
+            'email_field' => 'EMAIL',
+            'button_label' => 'Anmelden',
+            'note' => 'Die Anmeldung laeuft ueber unseren Versanddienst. Abmeldung jederzeit ueber den Link in jeder E-Mail.',
             'background_color' => 'brand-subtle',
         ]);
     }
@@ -1093,10 +1095,12 @@ class StyleguideLayoutData
         ]);
 
         $catalog[] = $this->layout('newsletter', [
-            'title' => 'Anmeldung über die volle Breite',
-            'content' => 'Dieselbe Anmeldung, nur ohne die schmale Spalte.',
-            'form_id' => $this->getFirstContactForm7Id(),
-            'width' => 'full',
+            'title' => '',
+            'content' => '',
+            'action_url' => 'https://beispiel.us1.list-manage.com/subscribe/post?u=demo&id=demo',
+            'email_field' => 'EMAIL',
+            'button_label' => 'Eintragen',
+            'note' => 'Ohne Ueberschrift und Text bleibt nur die Leiste.',
             'background_color' => 'secondary',
         ]);
 

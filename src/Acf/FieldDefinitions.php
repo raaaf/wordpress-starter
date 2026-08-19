@@ -3535,9 +3535,10 @@ class FieldDefinitions
     /**
      * Get newsletter signup fields
      *
-     * The form itself comes from Contact Form 7, like the contact layout: a
-     * second form implementation would mean a second spam defence, a second
-     * consent text and a second place to keep the address list.
+     * Das Formular schickt die Adresse direkt an den Anbieter (Mailchimp, Brevo,
+     * CleverReach). Der Vorgaenger hier war ein Contact-Form-7-Formular, das die
+     * Adresse per Mail ins Haus geschickt hat: dann traegt sie jemand von Hand in
+     * den Verteiler ein, es gibt kein Double Opt-in und keine Abmeldung.
      *
      * @param string $prefix Key prefix
      *
@@ -3551,48 +3552,60 @@ class FieldDefinitions
                 __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                __('Überschrift über dem Formular.', 'wp-starter'),
+                __('Überschrift über der Anmeldung.', 'wp-starter'),
                 __('z.B. Auf dem Laufenden bleiben', 'wp-starter'),
             ),
             self::textareaField(
                 "field_{$prefix}_content",
                 __('Text', 'wp-starter'),
                 'content',
-                3,
+                2,
                 __('Was Leser erwartet und wie oft.', 'wp-starter'),
                 __('z.B. Viermal im Jahr ein kurzer Bericht.', 'wp-starter'),
             ),
             self::messageField(
-                "field_{$prefix}_form_help",
-                __('<strong>So findest du die Formular-ID:</strong><br>1) Gehe zu <em>Formulare</em> im Menü<br>2) Wähle dein Formular aus<br>3) Die ID steht in der URL (z.B. post=<strong>123</strong>)', 'wp-starter'),
+                "field_{$prefix}_help",
+                __('<strong>Wo finde ich die Adresse?</strong><br>Mailchimp: <em>Audience → Signup forms → Embedded form</em>, im Code steht <em>form action="…"</em>. Brevo und CleverReach nennen es ebenfalls Einbettungscode. Die Anmeldung öffnet sich beim Absenden im neuen Tab beim Anbieter, dort läuft auch die Bestätigungsmail.', 'wp-starter'),
             ),
-            [
-                'key' => "field_{$prefix}_form_id",
-                'label' => __('Formular-ID', 'wp-starter'),
-                'name' => 'form_id',
-                'type' => 'number',
-                'instructions' => __('Nur die Zahl aus der URL des Anmeldeformulars.', 'wp-starter'),
-                'placeholder' => __('z.B. 123', 'wp-starter'),
-                'min' => 1,
-                'step' => 1,
-                'required' => 1,
-            ],
-            self::buttonGroupField(
-                "field_{$prefix}_width",
-                __('Breite', 'wp-starter'),
-                'width',
-                [
-                    'narrow' => __('Schmal', 'wp-starter'),
-                    'full' => __('Volle Breite', 'wp-starter'),
-                ],
-                'narrow',
-                __('Schmal setzt den Block mittig, volle Breite nutzt den Container.', 'wp-starter'),
+            self::urlField(
+                "field_{$prefix}_action_url",
+                __('Adresse des Anbieters', 'wp-starter'),
+                'action_url',
+                __('Das action-Attribut aus dem Einbettungscode.', 'wp-starter'),
+                null,
+                'https://beispiel.us1.list-manage.com/subscribe/post?u=...&amp;id=...',
+                true,
+            ),
+            self::textField(
+                "field_{$prefix}_email_field",
+                __('Name des E-Mail-Feldes', 'wp-starter'),
+                'email_field',
+                false,
+                __('Steht im Einbettungscode als name des E-Mail-Feldes. Mailchimp und Brevo nutzen EMAIL.', 'wp-starter'),
+                'EMAIL',
+            ),
+            self::textField(
+                "field_{$prefix}_button_label",
+                __('Beschriftung des Buttons', 'wp-starter'),
+                'button_label',
+                false,
+                __('Leer lassen für „Anmelden".', 'wp-starter'),
+                __('z.B. Anmelden', 'wp-starter'),
+            ),
+            self::textField(
+                "field_{$prefix}_note",
+                __('Hinweis unter dem Feld', 'wp-starter'),
+                'note',
+                false,
+                __('Kurzer Satz zu Datenschutz und Abmeldung.', 'wp-starter'),
+                __('z.B. Abmeldung jederzeit über den Link in jeder E-Mail.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
+
 
     /**
      * Get embed fields
