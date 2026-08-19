@@ -1,3 +1,10 @@
+## [2.28.1](https://github.com/raaaf/wordpress-starter/compare/v2.28.0...v2.28.1) (2026-08-19)
+
+### Bug Fixes
+
+- **hero:** kein doppeltes Polster zwischen kompaktem Hero und Folgesektion ([4cde28b](https://github.com/raaaf/wordpress-starter/commit/4cde28b354bb01a58906eb46dcb5b23c409bbcec))
+- **layout:** Seitenkopf stapelt sein Polster nicht mehr mit der ersten Sektion ([87da52a](https://github.com/raaaf/wordpress-starter/commit/87da52a11a6610a86a5c57a614b6f9a913eac4e8))
+
 # [2.28.0](https://github.com/raaaf/wordpress-starter/compare/v2.27.6...v2.28.0) (2026-08-19)
 
 ### Bug Fixes
