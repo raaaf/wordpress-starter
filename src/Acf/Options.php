@@ -111,6 +111,7 @@ class Options
         self::registerFooterFields();
         self::registerSocialFields();
         self::registerAnalyticsFields();
+        self::registerEmbedFields();
         self::registerToolsFields();
         self::registerBlogFields();
         self::registerDesignTokensFields();
@@ -731,6 +732,45 @@ class Options
                         esc_url(admin_url('options-general.php?page=integrate-rybbit')),
                     ),
                     'info',
+                ),
+            ],
+            'location' => [
+                [
+                    [
+                        'param' => 'options_page',
+                        'operator' => '==',
+                        'value' => 'theme-options-analytics',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Einbettungen: Hosts, die in einem iframe geladen werden duerfen.
+     *
+     * Steht auf der Analytics-Seite, weil dort schon die Frage nach externen
+     * Diensten haengt und beide Seiten manage_options verlangen. Eine eigene
+     * Unterseite fuer ein Feld waere ein Menuepunkt zu viel.
+     */
+    private static function registerEmbedFields(): void
+    {
+        acf_add_local_field_group([
+            'key' => 'group_options_embeds',
+            'title' => __('Externe Einbettungen', 'wp-starter'),
+            'fields' => [
+                FieldDefinitions::infoBoxField(
+                    'field_options_embeds_info',
+                    __('<strong>Warum diese Liste?</strong><br>Die Sicherheitsrichtlinie der Seite (CSP) blockiert fremde iframes. Erst ein Host in dieser Liste darf im Modul „Einbettung" geladen werden. YouTube, Vimeo und Google Maps sind bereits freigegeben.', 'wp-starter'),
+                    'info',
+                ),
+                FieldDefinitions::textareaField(
+                    'field_options_embed_allowed_hosts',
+                    __('Erlaubte Hosts', 'wp-starter'),
+                    'embed_allowed_hosts',
+                    4,
+                    __('Ein Host pro Zeile, ohne https:// und ohne Pfad.', 'wp-starter'),
+                    "calendly.com\nwww.eventbrite.de",
                 ),
             ],
             'location' => [

@@ -172,6 +172,56 @@ class Security
     }
 
     /**
+     * Hosts, die als iframe geladen werden duerfen, aus den Theme-Einstellungen.
+     *
+     * Das Modul "Einbettung" laesst beliebige Anbieter zu, die CSP darf das aber
+     * nicht pauschal: `frame-src *` waere die Richtlinie zum Fenster hinaus. Also
+     * eine Liste, die ein Administrator pflegt, und dieselbe strenge Filterung wie
+     * bei der Analytics-Herkunft: nur Hostnamen, kein Schema, kein Pfad, kein
+     * Semikolon, das die Direktive zerlegen koennte.
+     *
+     * @return string Leerer String oder fuehrendes Leerzeichen plus Origins
+     */
+    private static function getEmbedOrigins(): string
+    {
+        $raw = \WordpressStarter\Acf\Fields::option('embed_allowed_hosts', '');
+
+        if (!is_string($raw) || trim($raw) === '') {
+            return '';
+        }
+
+        $origins = [];
+
+        foreach (preg_split('/\r\n|\r|\n/', $raw) ?: [] as $line) {
+            $host = trim($line);
+
+            if ($host === '') {
+                continue;
+            }
+
+            // Ein eingetragenes "https://calendly.com/pfad" soll nicht scheitern,
+            // sondern auf den Host eingedampft werden.
+            if (str_contains($host, '://')) {
+                $host = (string) wp_parse_url($host, PHP_URL_HOST);
+            }
+
+            $host = strtok($host, '/');
+
+            if (!is_string($host) || preg_match('/^[A-Za-z0-9.-]+$/', $host) !== 1) {
+                continue;
+            }
+
+            $origins[] = 'https://' . $host;
+        }
+
+        if ($origins === []) {
+            return '';
+        }
+
+        return ' ' . implode(' ', array_unique($origins));
+    }
+
+    /**
      * Build the Content-Security-Policy header value.
      */
     public static function getCSPHeader(): string
@@ -185,7 +235,7 @@ class Security
             "default-src 'self'" . $localSources,
             "font-src 'self' data: https://fonts.gstatic.com" . $localSources,
             "img-src 'self' data: https:" . $localSources,
-            "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com",
+            "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com" . self::getEmbedOrigins(),
             "frame-ancestors 'self'",
             "media-src 'self' https:" . $localSources,
         ];

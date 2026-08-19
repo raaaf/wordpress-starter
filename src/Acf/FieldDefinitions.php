@@ -3595,6 +3595,76 @@ class FieldDefinitions
     }
 
     /**
+     * Get embed fields
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function embedFields(string $prefix): array
+    {
+        return [
+            self::textField(
+                "field_{$prefix}_title",
+                __('Überschrift', 'wp-starter'),
+                'title',
+                false,
+                __('Optionale Überschrift über der Einbettung.', 'wp-starter'),
+                __('z.B. Termin buchen', 'wp-starter'),
+            ),
+            self::messageField(
+                "field_{$prefix}_help",
+                __('<strong>Nur die Adresse, nicht der ganze Code.</strong> Im Einbettungscode des Anbieters steht <em>src="…"</em>, genau diese Adresse gehört hier hinein. Der Host muss unter <em>Theme-Einstellungen → Analytics → Externe Einbettungen</em> freigegeben sein, sonst blockiert ihn die Sicherheitsrichtlinie der Seite.', 'wp-starter'),
+            ),
+            self::urlField(
+                "field_{$prefix}_url",
+                __('Adresse der Einbettung', 'wp-starter'),
+                'url',
+                __('Die https-Adresse aus dem src-Attribut des Anbieters.', 'wp-starter'),
+                null,
+                'https://calendly.com/beispiel/30min',
+                true,
+            ),
+            self::textField(
+                "field_{$prefix}_iframe_title",
+                __('Beschriftung für Screenreader', 'wp-starter'),
+                'iframe_title',
+                false,
+                __('Was in dem Fenster steckt. Ohne diese Angabe hört ein Screenreader nur „Frame".', 'wp-starter'),
+                __('z.B. Terminbuchung', 'wp-starter'),
+            ),
+            self::buttonGroupField(
+                "field_{$prefix}_aspect_ratio",
+                __('Seitenverhältnis', 'wp-starter'),
+                'aspect_ratio',
+                [
+                    'fixed' => __('Feste Höhe', 'wp-starter'),
+                    '16-9' => '16:9',
+                    '4-3' => '4:3',
+                    '1-1' => '1:1',
+                ],
+                '16-9',
+                __('Feste Höhe für Anbieter, die kein Verhältnis vertragen, etwa Buchungskalender.', 'wp-starter'),
+            ),
+            self::numberField(
+                "field_{$prefix}_height",
+                __('Höhe in Pixeln', 'wp-starter'),
+                'height',
+                700,
+                200,
+                2000,
+                10,
+                'px',
+                __('Nur bei fester Höhe.', 'wp-starter'),
+                [[['field' => "field_{$prefix}_aspect_ratio", 'operator' => '==', 'value' => 'fixed']]],
+            ),
+            self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
+            self::sectionAnchorField($prefix),
+        ];
+    }
+
+    /**
      * Get section anchor field for manual anchor-ID override
      *
      * @param string $prefix Key prefix

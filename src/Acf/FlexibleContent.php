@@ -331,6 +331,7 @@ class FlexibleContent
 
             // Miscellaneous utility layouts
             self::alertLayout(),
+            self::embedLayout(),
             self::dividerLayout(),
             self::logoSliderLayout(),
 
@@ -908,6 +909,23 @@ class FlexibleContent
     // =========================================================================
     // MISC LAYOUTS
     // =========================================================================
+
+    /**
+     * Embed layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function embedLayout(): array
+    {
+        return [
+            'key' => 'layout_embed',
+            'name' => 'embed',
+            'label' => __('Einbettung', 'wp-starter'),
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::embedFields('flex_embed'),
+            'acfe_flexible_category' => self::getCategories()['misc'],
+        ];
+    }
 
     /**
      * Newsletter signup layout

@@ -65,6 +65,7 @@ class StyleguideLayoutData
         $layouts[] = $this->getThreeColumnsImagesLayoutData();
         $layouts[] = $this->getFourColumnsImagesLayoutData();
         $layouts[] = $this->getAlertLayoutData();
+        $layouts[] = $this->getEmbedLayoutData();
         $layouts[] = $this->getDividerLayoutData();
 
         // =====================================================================
@@ -349,6 +350,20 @@ class StyleguideLayoutData
             'variant' => 'info',
             'title' => 'Bitte beachten',
             'content' => '<p>Ein Hinweis steht immer ueber dem Abschnitt, auf den er sich bezieht.</p>',
+            'background_color' => 'primary',
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function getEmbedLayoutData(): array
+    {
+        // YouTube ist von Haus aus freigegeben, deshalb zeigt die Demo einen Host,
+        // der ohne Eintrag in den Einstellungen ohnehin laedt.
+        return $this->layout('embed', [
+            'title' => 'Eingebetteter Inhalt',
+            'url' => 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ',
+            'iframe_title' => 'Beispiel-Einbettung',
+            'aspect_ratio' => '16-9',
             'background_color' => 'primary',
         ]);
     }
@@ -1082,6 +1097,32 @@ class StyleguideLayoutData
             'content' => 'Dieselbe Anmeldung, nur ohne die schmale Spalte.',
             'form_id' => $this->getFirstContactForm7Id(),
             'width' => 'full',
+            'background_color' => 'secondary',
+        ]);
+
+        // Einbettung in den drei uebrigen Verhaeltnissen.
+        $catalog[] = $this->layout('embed', [
+            'title' => 'Einbettung 4:3',
+            'url' => 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ',
+            'iframe_title' => 'Beispiel-Einbettung',
+            'aspect_ratio' => '4-3',
+            'background_color' => 'secondary',
+        ]);
+
+        $catalog[] = $this->layout('embed', [
+            'title' => 'Einbettung 1:1',
+            'url' => 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ',
+            'iframe_title' => 'Beispiel-Einbettung',
+            'aspect_ratio' => '1-1',
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('embed', [
+            'title' => 'Einbettung mit fester Höhe',
+            'url' => 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ',
+            'iframe_title' => 'Beispiel-Einbettung',
+            'aspect_ratio' => 'fixed',
+            'height' => 320,
             'background_color' => 'secondary',
         ]);
 

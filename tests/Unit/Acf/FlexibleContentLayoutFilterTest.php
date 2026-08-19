@@ -48,6 +48,7 @@ final class FlexibleContentLayoutFilterTest extends TestCase
         'posts',
         'table',
         'alert',
+        'embed',
         'divider',
         'logo_slider',
         'member_downloads',
