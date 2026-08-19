@@ -2,7 +2,7 @@
     Image - Flexible Content Layout
 
     Uses shared components: x-section
-    ACF Fields: image (ID), show_border, show_caption, background_color
+    ACF Fields: image (ID), show_border, show_caption, width, background_color
 
     Uses wp_get_attachment_image() for automatic srcset/responsive images
 --}}
@@ -25,11 +25,19 @@
     }
 
     $borderClass = $showBorder ? 'border border-line' : '';
+
+    // Feste Klassennamen und passende sizes, sonst laedt der Browser fuer ein
+    // schmales Bild dieselbe grosse Datei wie fuer ein breites.
+    [$widthClass, $sizes] = match(get_sub_field('width') ?: 'default') {
+        'narrow' => ['max-w-2xl', '(max-width: 672px) 100vw, 672px'],
+        'wide' => ['max-w-6xl', '(max-width: 1152px) 100vw, 1152px'],
+        default => ['max-w-4xl', '(max-width: 896px) 100vw, 896px'],
+    };
 @endphp
 
 @if($imageId)
-<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" padding="md" class="image">
-    <figure class="mx-auto max-w-4xl">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" padding="md" class="image">
+    <figure class="mx-auto {{ $widthClass }}">
         {{-- Bewusst ohne 'loading': wp_get_attachment_image() ruft
              wp_get_loading_optimization_attributes() auf. Die zaehlt die
              Bilder der Hauptschleife und entscheidet selbst, welches
@@ -41,7 +49,7 @@
         {!! wp_get_attachment_image($imageId, 'content', false, [
             'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $caption),
             'class' => 'w-full rounded-[var(--card-radius)] shadow-xl ' . $borderClass,
-            'sizes' => '(max-width: 896px) 100vw, 896px',
+            'sizes' => $sizes,
         ]) !!}
 
         @if($showCaption && ($caption || $alt))

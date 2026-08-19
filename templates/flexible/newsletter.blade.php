@@ -30,7 +30,7 @@
 @endphp
 
 @if($isHttps || current_user_can('edit_posts'))
-<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" padding="md" class="newsletter">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" padding="md" class="newsletter">
     <div class="max-w-4xl mx-auto">
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             @if($title || $content)

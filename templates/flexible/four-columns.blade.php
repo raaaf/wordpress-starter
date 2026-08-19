@@ -16,7 +16,7 @@
 @endphp
 
 @if($chip || $headline || $description || $column_1 || $column_2 || $column_3 || $column_4)
-<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="four-columns">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="four-columns">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="4" gap="md">
         <x-prose>@kses($column_1)</x-prose>

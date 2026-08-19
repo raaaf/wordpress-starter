@@ -20,7 +20,7 @@
 @endphp
 
 @if($quote)
-<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="quote">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="quote">
     <figure class="max-w-3xl mx-auto text-center">
         @if($imageId)
             <img

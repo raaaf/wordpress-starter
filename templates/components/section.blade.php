@@ -4,6 +4,7 @@
     @param string $background - bg color: primary, secondary, tertiary, brand, brand-subtle, inverse
     @param string $padding - sm, md, lg, xl (default: lg)
     @param string|null $spacing - editor override for $padding: default, sm, xl, none
+    @param string|null $width - editor override: container (default) or full
     @param string $anchor - HTML ID for anchor links
     @param string $class - Additional CSS classes
     @param bool $container - Wrap content in container (default: true)
@@ -14,6 +15,7 @@
     'background' => 'primary',
     'padding' => 'lg',
     'spacing' => null,
+    'width' => null,
     'anchor' => null,
     'class' => '',
     'container' => true,
@@ -45,6 +47,12 @@
     $paddingKey = ($spacing && $spacing !== 'default' && isset($paddings[$spacing])) ? $spacing : $padding;
     $paddingClass = $paddings[$paddingKey] ?? $paddings['lg'];
 
+    // Volle Breite laesst nur die Maximalbreite fallen, nicht den seitlichen
+    // Rand: ohne ihn klebt der Inhalt auf dem Handy am Fensterrand.
+    $containerClass = $width === 'full'
+        ? 'w-full px-4 sm:px-6 lg:px-8'
+        : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8';
+
     // Determine if animations should be enabled
     $globalAnimations = \WordpressStarter\Acf\Fields::option('animations_enabled', false);
     $shouldAnimate = $animate ?? $globalAnimations;
@@ -63,7 +71,7 @@
 >
     @if($container)
         <div
-            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 @if($shouldAnimate) transition duration-200 ease-out motion-reduce:opacity-100! motion-reduce:transform-none! motion-reduce:transition-none! @endif"
+            class="{{ $containerClass }} @if($shouldAnimate) transition duration-200 ease-out motion-reduce:opacity-100! motion-reduce:transform-none! motion-reduce:transition-none! @endif"
             @if($shouldAnimate)
                 {{-- Deliberately not x-show: that sets display:none until the
                      intersection observer fires, so the section collapses out of

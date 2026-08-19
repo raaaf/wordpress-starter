@@ -2,7 +2,8 @@
     Table Flexible Content Layout
 
     Uses shared components: x-section, x-section-header
-    Fields: title, headers (repeater: label), rows (repeater: cells), striped, bordered, background_color
+    Fields: title, headers (repeater: label), rows (repeater: cells), striped, bordered,
+    compact, sticky_header, background_color
 --}}
 
 @php
@@ -12,23 +13,33 @@
     $columnCount = count($headers);
     $striped = get_sub_field('striped') ?? true;
     $bordered = get_sub_field('bordered') ?? false;
+    $compact = (bool) get_sub_field('compact');
+    $stickyHeader = (bool) get_sub_field('sticky_header');
+
+    $cellClass = $compact ? 'px-4 py-2' : 'px-6 py-4';
+
+    // Eine mitscrollende Kopfzeile braucht eine Flaeche, in der ueberhaupt
+    // gescrollt wird. overflow-x allein reicht nicht: sticky haengt dann an einem
+    // Kasten, der selbst mit der Seite wandert, und bleibt wirkungslos.
+    $wrapperClass = $stickyHeader ? 'overflow-auto max-h-[70vh]' : 'overflow-x-auto';
+    $headClass = $stickyHeader ? 'sticky top-0 z-10' : '';
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
 @if($title || !empty($rows) || current_user_can('edit_posts'))
-<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="table-block">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="table-block">
     <x-section-header :headline="$title" />
 
     @if(!empty($rows))
         {{-- tabindex, damit der scrollende Bereich auch per Tastatur erreichbar ist (WCAG 2.1.1) --}}
-        <div class="overflow-x-auto rounded-lg" tabindex="0" role="group" aria-label="{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}">
+        <div class="{{ $wrapperClass }} rounded-lg" tabindex="0" role="group" aria-label="{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}">
             <table class="w-full {{ $bordered ? 'border border-line' : '' }}">
                 <caption class="sr-only">{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}</caption>
                 @if(!empty($headers))
-                    <thead class="bg-surface-tertiary">
+                    <thead class="bg-surface-tertiary {{ $headClass }}">
                         <tr>
                             @foreach($headers as $header)
-                                <th scope="col" class="px-6 py-4 text-left font-semibold text-content {{ $bordered ? 'border border-line' : '' }}">
+                                <th scope="col" class="{{ $cellClass }} text-left font-semibold text-content bg-surface-tertiary {{ $bordered ? 'border border-line' : '' }}">
                                     {{ $header['label'] ?? '' }}
                                 </th>
                             @endforeach
@@ -52,11 +63,11 @@
                             @endphp
                             @foreach($cells as $cellIndex => $cell)
                                 @if($cellIndex === 0 && !empty($headers))
-                                    <th scope="row" class="px-6 py-4 font-normal text-left text-content {{ $bordered ? 'border border-line' : '' }}">
+                                    <th scope="row" class="{{ $cellClass }} font-normal text-left text-content {{ $bordered ? 'border border-line' : '' }}">
                                         {!! wp_kses_post($cell['content'] ?? '') !!}
                                     </th>
                                 @else
-                                    <td class="px-6 py-4 text-content tabular-nums {{ $bordered ? 'border border-line' : '' }}">
+                                    <td class="{{ $cellClass }} text-content tabular-nums {{ $bordered ? 'border border-line' : '' }}">
                                         {!! wp_kses_post($cell['content'] ?? '') !!}
                                     </td>
                                 @endif

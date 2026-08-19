@@ -14,7 +14,7 @@
 @endphp
 
 @if($title || $content)
-<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" padding="sm" class="alert-section">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" padding="sm" class="alert-section">
     <div class="max-w-3xl mx-auto">
         <x-alert :variant="$variant" :dismissible="$dismissible">
             @if($title)

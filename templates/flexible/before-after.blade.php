@@ -31,7 +31,7 @@
 @endphp
 
 @if(($hasImageBefore && $hasImageAfter) || $title || current_user_can('edit_posts'))
-<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="before-after">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="before-after">
     <x-section-header :headline="$title" />
 
     @if($hasImageBefore && $hasImageAfter)

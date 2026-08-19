@@ -1130,6 +1130,47 @@ class StyleguideLayoutData
             'background_color' => 'secondary',
         ]);
 
+        // Bildbreiten neben dem Standard, und eine Sektion ueber die volle Breite.
+        $catalog[] = $this->layout('image', [
+            'image' => $this->imageId(2),
+            'show_border' => false,
+            'show_caption' => false,
+            'width' => 'narrow',
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('image', [
+            'image' => $this->imageId(3),
+            'show_border' => false,
+            'show_caption' => false,
+            'width' => 'wide',
+            'section_width' => 'full',
+            'background_color' => 'secondary',
+        ]);
+
+        // Lange Tabelle: kompakt und mit mitscrollender Kopfzeile. Kurz reicht
+        // dafuer nicht, die Kopfzeile bliebe sichtbar, ohne je zu kleben.
+        $catalog[] = $this->layout('table', [
+            'title' => 'Kompakt mit mitscrollender Kopfzeile',
+            'headers' => [['label' => 'Jahr'], ['label' => 'Anträge'], ['label' => 'Bewilligt'], ['label' => 'Summe']],
+            'rows' => array_map(
+                static fn (int $i): array => [
+                    'cells' => [
+                        ['content' => (string) ( 2010 + $i )],
+                        ['content' => (string) ( 40 + $i * 3 )],
+                        ['content' => (string) ( 20 + $i * 2 )],
+                        ['content' => number_format(120000 + $i * 5000, 0, ',', '.') . ' EUR'],
+                    ],
+                ],
+                range(0, 15)
+            ),
+            'striped' => true,
+            'bordered' => false,
+            'compact' => true,
+            'sticky_header' => true,
+            'background_color' => 'primary',
+        ]);
+
         // --- Abstaende -------------------------------------------------------
         // Die Stufen sind nur im Vergleich lesbar, deshalb stehen sie direkt
         // untereinander und alle auf derselben Flaeche.

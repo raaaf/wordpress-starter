@@ -25,7 +25,7 @@
 @endphp
 
 @if($button && !empty($button['url']))
-    <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" padding="sm" class="button-block-section">
+    <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" padding="sm" class="button-block-section">
         <div class="button-block flex gap-4 {{ $fullWidth ? 'flex-col' : 'flex-wrap items-center ' . $alignmentClasses }}">
             <x-button
                 :url="$button['url']"

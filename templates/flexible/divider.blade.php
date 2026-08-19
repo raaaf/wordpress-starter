@@ -11,7 +11,7 @@
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
-<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" padding="none" class="divider">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" padding="none" class="divider">
     <div class="py-4 flex items-center justify-center" style="height: {{ $height }}px">
         @switch($style)
             @case('line')

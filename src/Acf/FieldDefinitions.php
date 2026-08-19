@@ -97,6 +97,32 @@ class FieldDefinitions
     }
 
     /**
+     * Get section width field definition
+     *
+     * Nutzt die vorhandene container-Prop von x-section. Volle Breite behaelt den
+     * seitlichen Rand, sonst klebte der Inhalt am Fensterrand; es faellt nur die
+     * Maximalbreite weg. Fuer Karte, Bild und Einbettung ist genau das gemeint.
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<string, mixed>
+     */
+    public static function sectionWidthField(string $prefix): array
+    {
+        return self::buttonGroupField(
+            "field_{$prefix}_section_width",
+            __('Breite', 'wp-starter'),
+            'section_width',
+            [
+                'container' => __('Container', 'wp-starter'),
+                'full' => __('Volle Breite', 'wp-starter'),
+            ],
+            'container',
+            __('Volle Breite nutzt die ganze Fensterbreite statt der Textspalte.', 'wp-starter'),
+        );
+    }
+
+    /**
      * Get section spacing field definition
      *
      * Overrides the vertical padding the template hands to x-section. "default"
@@ -1377,6 +1403,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1418,6 +1445,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1467,6 +1495,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1537,6 +1566,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1576,6 +1606,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1715,6 +1746,7 @@ class FieldDefinitions
             // bekam an dieser Stelle unvermeidlich einen Bruch.
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1853,6 +1885,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1896,8 +1929,21 @@ class FieldDefinitions
                 'ui' => 1,
                 'wrapper' => ['width' => '50'],
             ],
+            self::buttonGroupField(
+                "field_{$prefix}_width",
+                __('Bildbreite', 'wp-starter'),
+                'width',
+                [
+                    'narrow' => __('Schmal', 'wp-starter'),
+                    'default' => __('Standard', 'wp-starter'),
+                    'wide' => __('Breit', 'wp-starter'),
+                ],
+                'default',
+                __('Schmal passt zu Hochformat und Bildschirmfotos, breit zu Panoramen.', 'wp-starter'),
+            ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1939,6 +1985,7 @@ class FieldDefinitions
                 'append' => 'px',
             ],
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -1972,6 +2019,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2005,6 +2053,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2073,6 +2122,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2173,6 +2223,7 @@ class FieldDefinitions
             ...self::buildColumnImageBlock($prefix, 2, __('Bild für die rechte Karte.', 'wp-starter')),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2191,6 +2242,7 @@ class FieldDefinitions
             ...self::buildColumnImageBlock($prefix, 3, __('Bild für die rechte Karte.', 'wp-starter')),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2210,6 +2262,7 @@ class FieldDefinitions
             ...self::buildColumnImageBlock($prefix, 4, __('Bild für die vierte Karte.', 'wp-starter')),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2311,6 +2364,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2399,6 +2453,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2448,6 +2503,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2515,6 +2571,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2580,6 +2637,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2651,6 +2709,7 @@ class FieldDefinitions
             self::tabField("field_{$prefix}_tab_style", __('Darstellung', 'wp-starter')),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2708,6 +2767,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2831,6 +2891,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -2954,6 +3015,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3022,6 +3084,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3100,6 +3163,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3243,6 +3307,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3305,6 +3370,7 @@ class FieldDefinitions
             ],
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3396,8 +3462,23 @@ class FieldDefinitions
                 'ui' => 1,
                 'wrapper' => ['width' => '50'],
             ],
+            self::trueFalseField(
+                "field_{$prefix}_compact",
+                __('Kompakt', 'wp-starter'),
+                'compact',
+                false,
+                __('Engere Zeilen. Sinnvoll ab etwa zehn Zeilen.', 'wp-starter'),
+            ),
+            self::trueFalseField(
+                "field_{$prefix}_sticky_header",
+                __('Kopfzeile mitscrollen', 'wp-starter'),
+                'sticky_header',
+                false,
+                __('Die Tabelle bekommt eine eigene Scrollfläche, die Kopfzeile bleibt darin stehen.', 'wp-starter'),
+            ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3416,6 +3497,7 @@ class FieldDefinitions
         return [
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3468,6 +3550,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3528,6 +3611,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3602,6 +3686,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }
@@ -3673,6 +3758,7 @@ class FieldDefinitions
             ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
         ];
     }

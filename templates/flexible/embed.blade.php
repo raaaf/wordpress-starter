@@ -35,7 +35,7 @@
 @endphp
 
 @if(($url !== '' && $isHttps) || current_user_can('edit_posts'))
-<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="embed">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="embed">
     @if($title)
         <h2 class="mb-6 text-center">{!! $title !!}</h2>
     @endif

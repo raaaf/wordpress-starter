@@ -7,6 +7,6 @@
 
 @php($background = get_sub_field('background_color') ?: 'primary')
 
-<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background">
     @include('member-area.downloads')
 </x-section>

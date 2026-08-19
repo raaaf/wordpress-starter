@@ -12,7 +12,7 @@
 @endphp
 
 @if(!empty($events) || $title || current_user_can('edit_posts'))
-<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :background="$background" class="timeline">
+<x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="timeline">
     <x-section-header :headline="$title" />
 
     @if(!empty($events))
