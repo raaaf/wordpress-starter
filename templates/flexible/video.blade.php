@@ -3,7 +3,8 @@
 
     Uses shared components: x-section, x-button, x-link
     ACF Fields: source, video, video_url, video_file_url, video_title,
-                captions, captions_language, background_color
+                captions, captions_language, aspect_ratio, autoplay, loop,
+                background_color
 --}}
 
 @php
@@ -58,6 +59,20 @@
         default => '',
     };
 
+    // Feste Klassennamen, damit Tailwind sie findet.
+    $aspectClass = match(get_sub_field('aspect_ratio') ?: '16-9') {
+        '4-3' => 'aspect-[4/3]',
+        '1-1' => 'aspect-square',
+        '21-9' => 'aspect-[21/9]',
+        default => 'aspect-video',
+    };
+
+    // Automatisches Abspielen geht nur stumm, sonst blockieren es die Browser.
+    // YouTube und Vimeo laufen ueber die Einwilligung und bleiben aussen vor.
+    $selfHosted = in_array($source, ['wordpress', 'url'], true);
+    $autoplay = $selfHosted && (bool) get_sub_field('autoplay');
+    $loop = $selfHosted && (bool) get_sub_field('loop');
+
     $posterId = (int) (get_sub_field('poster') ?: 0);
     $posterUrl = $posterId > 0 ? wp_get_attachment_image_url($posterId, 'hero-background') : '';
 
@@ -72,7 +87,7 @@
     @if($hasVideo)
         <div class="max-w-6xl mx-auto">
             <div
-                class="relative overflow-hidden rounded-lg aspect-video bg-surface-secondary"
+                class="relative overflow-hidden rounded-lg {{ $aspectClass }} bg-surface-secondary"
                 x-data="{ loaded: {{ in_array($source, ['wordpress', 'url']) ? 'true' : 'false' }}, iframeLoaded: false, iframeError: false }"
                 x-ref="videoContainer"
                 tabindex="-1"
@@ -201,9 +216,11 @@
                     {{-- Self-hosted video - no consent needed --}}
                     <video
                         controls
+                        @if($autoplay) autoplay muted playsinline @endif
+                        @if($loop) loop @endif
                         preload="metadata"
                         aria-label="{{ $video_title ? sprintf(__('Video: %s', 'wp-starter'), $video_title) : __('Video', 'wp-starter') }}"
-                        class="w-full aspect-video object-cover rounded-lg"
+                        class="w-full {{ $aspectClass }} object-cover rounded-lg"
                         @if($posterUrl) poster="{{ esc_url($posterUrl) }}" @endif
                     >
                         <source src="{{ esc_url($video) }}" type="video/mp4">
@@ -222,9 +239,11 @@
                     {{-- External file URL - no consent needed --}}
                     <video
                         controls
+                        @if($autoplay) autoplay muted playsinline @endif
+                        @if($loop) loop @endif
                         preload="metadata"
                         aria-label="{{ $video_title ? sprintf(__('Video: %s', 'wp-starter'), $video_title) : __('Video', 'wp-starter') }}"
-                        class="w-full aspect-video object-cover rounded-lg"
+                        class="w-full {{ $aspectClass }} object-cover rounded-lg"
                         @if($posterUrl) poster="{{ esc_url($posterUrl) }}" @endif
                     >
                         <source src="{{ esc_url($video_file_url) }}">

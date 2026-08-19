@@ -964,6 +964,37 @@ class StyleguideLayoutData
             'background_color' => 'primary',
         ]);
 
+        // Seitenverhaeltnisse neben 16:9, das der Standardfall oben schon zeigt,
+        // dazu ein selbst gehostetes Video, das stumm in Schleife laeuft.
+        $catalog[] = $this->layout('video', [
+            'source' => 'wordpress',
+            'video' => $this->imageIds['video_demo'] ?? null,
+            'video_url' => '',
+            'poster' => $this->imageId(2),
+            'aspect_ratio' => '4-3',
+            'autoplay' => true,
+            'loop' => true,
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('video', [
+            'source' => 'wordpress',
+            'video' => $this->imageIds['video_demo'] ?? null,
+            'video_url' => '',
+            'poster' => $this->imageId(3),
+            'aspect_ratio' => '1-1',
+            'background_color' => 'secondary',
+        ]);
+
+        $catalog[] = $this->layout('video', [
+            'source' => 'wordpress',
+            'video' => $this->imageIds['video_demo'] ?? null,
+            'video_url' => '',
+            'poster' => $this->imageId(4),
+            'aspect_ratio' => '21-9',
+            'background_color' => 'primary',
+        ]);
+
         // --- Abstaende -------------------------------------------------------
         // Die Stufen sind nur im Vergleich lesbar, deshalb stehen sie direkt
         // untereinander und alle auf derselben Flaeche.
