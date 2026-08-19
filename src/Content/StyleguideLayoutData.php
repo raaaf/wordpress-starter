@@ -867,6 +867,22 @@ class StyleguideLayoutData
             'background_color' => 'inverse',
         ]);
 
+        // Der CTA hatte seine Flaeche fest verdrahtet. Beide Varianten stehen hier,
+        // weil nur der Vergleich zeigt, dass die Karte ihre Markenfarbe behaelt.
+        $catalog[] = $this->layout('cta', [
+            'title' => 'CTA auf sekundärer Fläche',
+            'content' => 'Die Sektion faerbt sich, die Karte bleibt auf der Markenflaeche.',
+            'button' => ['title' => 'Kontakt aufnehmen', 'url' => '#kontakt', 'target' => ''],
+            'background_color' => 'secondary',
+        ]);
+
+        $catalog[] = $this->layout('cta', [
+            'title' => 'CTA auf dunkler Fläche',
+            'content' => 'Dieselbe Karte auf der inversen Flaeche.',
+            'button' => ['title' => 'Kontakt aufnehmen', 'url' => '#kontakt', 'target' => ''],
+            'background_color' => 'inverse',
+        ]);
+
         // --- Abstaende -------------------------------------------------------
         // Die Stufen sind nur im Vergleich lesbar, deshalb stehen sie direkt
         // untereinander und alle auf derselben Flaeche.
