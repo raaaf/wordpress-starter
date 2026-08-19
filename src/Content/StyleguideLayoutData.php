@@ -64,6 +64,7 @@ class StyleguideLayoutData
         $layouts[] = $this->getTwoColumnsImagesLayoutData();
         $layouts[] = $this->getThreeColumnsImagesLayoutData();
         $layouts[] = $this->getFourColumnsImagesLayoutData();
+        $layouts[] = $this->getAlertLayoutData();
         $layouts[] = $this->getDividerLayoutData();
 
         // =====================================================================
@@ -323,6 +324,17 @@ class StyleguideLayoutData
             'column_4' => '<h4>Übergabe</h4><p>Launch und Einweisung in die Pflege der Inhalte.</p>',
             'accordion_4' => [],
             'background_color' => 'brand-subtle',
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function getAlertLayoutData(): array
+    {
+        return $this->layout('alert', [
+            'variant' => 'info',
+            'title' => 'Bitte beachten',
+            'content' => '<p>Ein Hinweis steht immer ueber dem Abschnitt, auf den er sich bezieht.</p>',
+            'background_color' => 'primary',
         ]);
     }
 
@@ -1001,6 +1013,29 @@ class StyleguideLayoutData
             'variant' => 'primary',
             'size' => 'md',
             'alignment' => 'center',
+            'background_color' => 'primary',
+        ]);
+
+        // Hinweise: alle vier Arten, der letzte zusaetzlich schliessbar.
+        $catalog[] = $this->layout('alert', [
+            'variant' => 'success',
+            'title' => 'Antrag eingegangen',
+            'content' => '<p>Der gruene Hinweis bestaetigt etwas, das geklappt hat.</p>',
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('alert', [
+            'variant' => 'warning',
+            'title' => 'Frist laeuft ab',
+            'content' => '<p>Der gelbe Hinweis warnt, ohne einen Fehler zu melden.</p>',
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('alert', [
+            'variant' => 'error',
+            'title' => 'Antrag unvollstaendig',
+            'content' => '<p>Der rote Hinweis meldet einen Fehler und traegt role="alert".</p>',
+            'dismissible' => true,
             'background_color' => 'primary',
         ]);
 

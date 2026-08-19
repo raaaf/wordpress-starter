@@ -328,6 +328,7 @@ class FlexibleContent
             self::tableLayout(),
 
             // Miscellaneous utility layouts
+            self::alertLayout(),
             self::dividerLayout(),
             self::logoSliderLayout(),
 
@@ -905,6 +906,23 @@ class FlexibleContent
     // =========================================================================
     // MISC LAYOUTS
     // =========================================================================
+
+    /**
+     * Alert (notice) layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function alertLayout(): array
+    {
+        return [
+            'key' => 'layout_alert',
+            'name' => 'alert',
+            'label' => __('Hinweis', 'wp-starter'),
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::alertFields('flex_alert'),
+            'acfe_flexible_category' => self::getCategories()['content'],
+        ];
+    }
 
     /**
      * Divider layout

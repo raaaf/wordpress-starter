@@ -45,6 +45,7 @@ final class FlexibleContentLayoutFilterTest extends TestCase
         'map',
         'posts',
         'table',
+        'alert',
         'divider',
         'logo_slider',
         'member_downloads',
@@ -81,7 +82,7 @@ final class FlexibleContentLayoutFilterTest extends TestCase
     {
         $names = $this->names(FlexibleContent::layouts());
 
-        $this->assertCount(32, $names);
+        $this->assertCount(count(self::EXPECTED_ORDER), $names);
         $this->assertSame(self::EXPECTED_ORDER, $names);
     }
 
@@ -101,7 +102,7 @@ final class FlexibleContentLayoutFilterTest extends TestCase
 
         $names = $this->names(FlexibleContent::layouts());
 
-        $this->assertCount(33, $names);
+        $this->assertCount(count(self::EXPECTED_ORDER) + 1, $names);
         $this->assertSame('precious_metals', end($names));
     }
 
@@ -138,7 +139,7 @@ final class FlexibleContentLayoutFilterTest extends TestCase
         $names = $this->names(FlexibleContent::layouts());
 
         $this->assertNotContains('map', $names);
-        $this->assertCount(31, $names);
+        $this->assertCount(count(self::EXPECTED_ORDER) - 1, $names);
     }
 
     public function testRemovingLayoutsKeepsTheListSequential(): void

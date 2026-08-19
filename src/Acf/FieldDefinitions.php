@@ -3421,6 +3421,58 @@ class FieldDefinitions
     }
 
     /**
+     * Get alert (notice) fields
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function alertFields(string $prefix): array
+    {
+        return [
+            self::buttonGroupField(
+                "field_{$prefix}_variant",
+                __('Art', 'wp-starter'),
+                'variant',
+                [
+                    'info' => __('Hinweis', 'wp-starter'),
+                    'success' => __('Erfolg', 'wp-starter'),
+                    'warning' => __('Warnung', 'wp-starter'),
+                    'error' => __('Fehler', 'wp-starter'),
+                ],
+                'info',
+                __('Bestimmt Farbe und Symbol.', 'wp-starter'),
+            ),
+            self::textField(
+                "field_{$prefix}_title",
+                __('Überschrift', 'wp-starter'),
+                'title',
+                false,
+                __('Optionale fette Zeile über dem Text.', 'wp-starter'),
+                __('z.B. Bitte beachten', 'wp-starter'),
+            ),
+            self::wysiwygField(
+                "field_{$prefix}_content",
+                __('Text', 'wp-starter'),
+                'content',
+                true,
+                null,
+                __('Der Text des Hinweises.', 'wp-starter'),
+            ),
+            self::trueFalseField(
+                "field_{$prefix}_dismissible",
+                __('Schließbar', 'wp-starter'),
+                'dismissible',
+                false,
+                __('Zeigt ein Kreuz, mit dem Leser den Hinweis ausblenden. Er kommt beim nächsten Seitenaufruf wieder.', 'wp-starter'),
+            ),
+            self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
+            self::sectionAnchorField($prefix),
+        ];
+    }
+
+    /**
      * Get section anchor field for manual anchor-ID override
      *
      * @param string $prefix Key prefix
