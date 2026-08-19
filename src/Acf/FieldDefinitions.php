@@ -2348,6 +2348,18 @@ class FieldDefinitions
                 '3',
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
+            self::buttonGroupField(
+                "field_{$prefix}_card_style",
+                __('Kartenstil', 'wp-starter'),
+                'card_style',
+                [
+                    'elevated' => __('Erhöht', 'wp-starter'),
+                    'outlined' => __('Umriss', 'wp-starter'),
+                    'filled' => __('Gefüllt', 'wp-starter'),
+                ],
+                'elevated',
+                __('Erhöht traegt einen Schatten, Umriss nur eine Linie, Gefuellt eine eigene Flaeche.', 'wp-starter'),
+            ),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
             self::sectionAnchorField($prefix),

@@ -898,6 +898,30 @@ class StyleguideLayoutData
             'background_color' => 'secondary',
         ]);
 
+        // Kartenstile: Erhoeht ist der Standard und steht schon oben, hier die
+        // beiden anderen auf derselben Flaeche, damit der Unterschied auffaellt.
+        $catalog[] = $this->layout('cards', [
+            'title' => 'Karten im Umriss',
+            'cards' => [
+                ['icon' => 'check', 'title' => 'Umriss', 'content' => 'Nur eine Linie, kein Schatten.', 'link' => null],
+                ['icon' => 'star', 'title' => 'Umriss', 'content' => 'Ruhiger auf dichten Seiten.', 'link' => null],
+            ],
+            'columns' => '2',
+            'card_style' => 'outlined',
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('cards', [
+            'title' => 'Karten gefüllt',
+            'cards' => [
+                ['icon' => 'check', 'title' => 'Gefüllt', 'content' => 'Eine Stufe ueber der Sektionsflaeche.', 'link' => null],
+                ['icon' => 'star', 'title' => 'Gefüllt', 'content' => 'Traegt auch ohne Schatten.', 'link' => null],
+            ],
+            'columns' => '2',
+            'card_style' => 'filled',
+            'background_color' => 'primary',
+        ]);
+
         // --- Abstaende -------------------------------------------------------
         // Die Stufen sind nur im Vergleich lesbar, deshalb stehen sie direkt
         // untereinander und alle auf derselben Flaeche.

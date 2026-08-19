@@ -2,7 +2,7 @@
     Cards / Features - Flexible Content Layout
 
     Uses shared components: x-section, x-section-header, x-grid, x-card, x-link
-    Fields: title, cards (repeater: icon, title, content, link), columns, background_color
+    Fields: title, cards (repeater: icon, title, content, link), columns, card_style, background_color
 --}}
 
 @php
@@ -10,6 +10,7 @@
     $cards = get_sub_field('cards');
     $columns = get_sub_field('columns') ?: '3';
     $background = get_sub_field('background_color') ?: 'primary';
+    $cardStyle = get_sub_field('card_style') ?: 'elevated';
 @endphp
 
 @if(!empty($cards) || $title || current_user_can('edit_posts'))
@@ -19,7 +20,7 @@
     @if(!empty($cards))
         <x-grid :cols="$columns" gap="lg">
             @foreach($cards as $card)
-                <x-card variant="elevated" padding="lg" class="h-full">
+                <x-card :variant="$cardStyle" padding="lg" class="h-full">
                     {{-- Icon --}}
                     @if(!empty($card['icon']))
                         <div class="flex items-center justify-center w-16 h-16 mb-6 rounded-lg bg-surface-brand-subtle text-content-brand">
