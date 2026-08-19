@@ -322,6 +322,7 @@ class FlexibleContent
 
             // Form-related layouts
             self::contactFormLayout(),
+            self::newsletterLayout(),
             self::mapLayout(),
 
             // Post and data display layouts
@@ -907,6 +908,23 @@ class FlexibleContent
     // =========================================================================
     // MISC LAYOUTS
     // =========================================================================
+
+    /**
+     * Newsletter signup layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function newsletterLayout(): array
+    {
+        return [
+            'key' => 'layout_newsletter',
+            'name' => 'newsletter',
+            'label' => __('Newsletter-Anmeldung', 'wp-starter'),
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::newsletterFields('flex_newsletter'),
+            'acfe_flexible_category' => self::getCategories()['forms'],
+        ];
+    }
 
     /**
      * Pull quote layout

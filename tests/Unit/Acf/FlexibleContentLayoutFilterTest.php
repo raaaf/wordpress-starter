@@ -43,6 +43,7 @@ final class FlexibleContentLayoutFilterTest extends TestCase
         'team',
         'pricing_table',
         'contact_form',
+        'newsletter',
         'map',
         'posts',
         'table',

@@ -126,6 +126,7 @@ class StyleguideLayoutData
         ]);
 
         $layouts[] = $this->getContactFormLayoutData();
+        $layouts[] = $this->getNewsletterLayoutData();
         $layouts[] = $this->getMapLayoutData();
 
         // =====================================================================
@@ -588,6 +589,18 @@ class StyleguideLayoutData
             'form_id' => $this->getFirstContactForm7Id(),
             'show_contact_info' => true,
             'background_color' => 'secondary',
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function getNewsletterLayoutData(): array
+    {
+        return $this->layout('newsletter', [
+            'title' => 'Auf dem Laufenden bleiben',
+            'content' => 'Viermal im Jahr ein kurzer Bericht darueber, was gefoerdert wurde. Abmeldung jederzeit.',
+            'form_id' => $this->getFirstContactForm7Id(),
+            'width' => 'narrow',
+            'background_color' => 'brand-subtle',
         ]);
     }
 
@@ -1062,6 +1075,14 @@ class StyleguideLayoutData
             'image' => null,
             'size' => 'lg',
             'background_color' => 'brand-subtle',
+        ]);
+
+        $catalog[] = $this->layout('newsletter', [
+            'title' => 'Anmeldung über die volle Breite',
+            'content' => 'Dieselbe Anmeldung, nur ohne die schmale Spalte.',
+            'form_id' => $this->getFirstContactForm7Id(),
+            'width' => 'full',
+            'background_color' => 'secondary',
         ]);
 
         // --- Abstaende -------------------------------------------------------

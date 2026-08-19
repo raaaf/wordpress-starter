@@ -3533,6 +3533,68 @@ class FieldDefinitions
     }
 
     /**
+     * Get newsletter signup fields
+     *
+     * The form itself comes from Contact Form 7, like the contact layout: a
+     * second form implementation would mean a second spam defence, a second
+     * consent text and a second place to keep the address list.
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function newsletterFields(string $prefix): array
+    {
+        return [
+            self::textField(
+                "field_{$prefix}_title",
+                __('Überschrift', 'wp-starter'),
+                'title',
+                false,
+                __('Überschrift über dem Formular.', 'wp-starter'),
+                __('z.B. Auf dem Laufenden bleiben', 'wp-starter'),
+            ),
+            self::textareaField(
+                "field_{$prefix}_content",
+                __('Text', 'wp-starter'),
+                'content',
+                3,
+                __('Was Leser erwartet und wie oft.', 'wp-starter'),
+                __('z.B. Viermal im Jahr ein kurzer Bericht.', 'wp-starter'),
+            ),
+            self::messageField(
+                "field_{$prefix}_form_help",
+                __('<strong>So findest du die Formular-ID:</strong><br>1) Gehe zu <em>Formulare</em> im Menü<br>2) Wähle dein Formular aus<br>3) Die ID steht in der URL (z.B. post=<strong>123</strong>)', 'wp-starter'),
+            ),
+            [
+                'key' => "field_{$prefix}_form_id",
+                'label' => __('Formular-ID', 'wp-starter'),
+                'name' => 'form_id',
+                'type' => 'number',
+                'instructions' => __('Nur die Zahl aus der URL des Anmeldeformulars.', 'wp-starter'),
+                'placeholder' => __('z.B. 123', 'wp-starter'),
+                'min' => 1,
+                'step' => 1,
+                'required' => 1,
+            ],
+            self::buttonGroupField(
+                "field_{$prefix}_width",
+                __('Breite', 'wp-starter'),
+                'width',
+                [
+                    'narrow' => __('Schmal', 'wp-starter'),
+                    'full' => __('Volle Breite', 'wp-starter'),
+                ],
+                'narrow',
+                __('Schmal setzt den Block mittig, volle Breite nutzt den Container.', 'wp-starter'),
+            ),
+            self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
+            self::sectionAnchorField($prefix),
+        ];
+    }
+
+    /**
      * Get section anchor field for manual anchor-ID override
      *
      * @param string $prefix Key prefix
