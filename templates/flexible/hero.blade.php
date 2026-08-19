@@ -227,14 +227,16 @@
 @else
     @if($hasText)
     {{-- CENTERED VARIANT (default): Centered content --}}
-    <x-section :anchor="$sectionAnchor" :background="$background_color" :padding="$isTitleOnly ? 'lg' : 'xl'" class="hero hero--centered {{ $heroHeightClass }}">
+    <x-section :anchor="$sectionAnchor" :background="$background_color" :padding="$isTitleOnly ? 'md' : 'xl'" class="hero hero--centered {{ $heroHeightClass }}">
         <div class="max-w-3xl mx-auto text-center">
             @if($badge)
                 <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
             @endif
 
+            {{-- Der untere Abstand gehoert zum Folgeelement, nicht zur Ueberschrift:
+                 steht sie allein, schob mb-6 den Hero ohne Grund auseinander. --}}
             @if($title)
-                <{{ $heroHeadingTag }} class="mt-0! mb-6">
+                <{{ $heroHeadingTag }} class="mt-0! {{ $isTitleOnly ? 'mb-0!' : 'mb-6' }}">
                     {!! $title !!}
                 </{{ $heroHeadingTag }}>
             @endif
