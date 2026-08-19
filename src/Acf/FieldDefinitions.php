@@ -1638,6 +1638,16 @@ class FieldDefinitions
                 true,
                 __('Der Button mit Link und Text.', 'wp-starter'),
             ),
+            // Der zweite Button ist optional und tritt immer sekundaer auf, wie im
+            // Hero. Eine eigene Variantenwahl dafuer waere ein zweites Feld mit
+            // fuenf Werten, ohne dass ein zweiter primaerer Button je sinnvoll ist.
+            self::linkField(
+                "field_{$prefix}_button_secondary",
+                __('Zweiter Button', 'wp-starter'),
+                'button_secondary',
+                false,
+                __('Optionaler zweiter Button daneben. Er tritt immer sekundär auf.', 'wp-starter'),
+            ),
             // Schaltergruppe statt Dropdown, wie bei Hero, Trenner und Karten.
             // Fuenf kurze Beschriftungen passen nebeneinander, und die Auswahl
             // kostet einen Klick statt zwei.

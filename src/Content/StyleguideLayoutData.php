@@ -995,6 +995,15 @@ class StyleguideLayoutData
             'background_color' => 'primary',
         ]);
 
+        $catalog[] = $this->layout('button', [
+            'button' => ['title' => 'Termin vereinbaren', 'url' => '#kontakt', 'target' => ''],
+            'button_secondary' => ['title' => 'Unterlagen ansehen', 'url' => '#downloads', 'target' => ''],
+            'variant' => 'primary',
+            'size' => 'md',
+            'alignment' => 'center',
+            'background_color' => 'primary',
+        ]);
+
         // --- Abstaende -------------------------------------------------------
         // Die Stufen sind nur im Vergleich lesbar, deshalb stehen sie direkt
         // untereinander und alle auf derselben Flaeche.
