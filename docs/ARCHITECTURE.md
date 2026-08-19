@@ -289,6 +289,30 @@ private static function myLayout(): array
 
 4. Register in `getLayouts()` array
 
+### Adding a Layout from a Derived Theme
+
+Derived themes must not edit `getLayouts()`. They copy `FlexibleContent.php` into
+their own namespace, so every starter update collides on that one inserted line.
+Use the filter instead:
+
+```php
+// <theme_prefix> is the theme slug with underscores, e.g. goldene_strategie.
+add_filter('goldene_strategie_flexible_content_layouts', function (array $layouts): array {
+    $layouts[] = self::preciousMetalsLayout();
+
+    return $layouts;
+});
+```
+
+- Register the filter before `acf/init` runs, e.g. from a service provider's
+  `register()`. `FlexibleContent::layouts()` caches after the first call.
+- Array order is tile order in the ACF selection modal. Append to add at the end,
+  `array_splice()` to insert at a position, `array_filter()` to remove one.
+- Each entry has the same shape as the built-in layouts: `key`, `name`, `label`,
+  `display`, `sub_fields`, `acfe_flexible_category`.
+- The layout still needs its field definitions and a template
+  `templates/flexible/<name-with-dashes>.blade.php`.
+
 ## Custom Post Types
 
 Use the abstract base class for consistent CPT registration:

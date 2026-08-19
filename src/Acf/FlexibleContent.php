@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WordpressStarter\Acf;
 
 use WordpressStarter\Services\StyleguidePage;
+use WordpressStarter\ThemeContext;
 
 /**
  * Registers flexible content layouts for page building
@@ -154,7 +155,7 @@ class FlexibleContent
                         'class' => '',
                         'id' => '',
                     ],
-                    'layouts' => self::getLayouts(),
+                    'layouts' => self::layouts(),
                     'button_label' => __('Sektion hinzufügen', 'wp-starter'),
                     'min' => '',
                     'max' => '',
@@ -213,15 +214,62 @@ class FlexibleContent
      * registers with ACF, so it needs a way in without duplicating
      * getLayouts() or making it public outright.
      *
+     * This is also the single place where the layout list can be changed from
+     * outside. A derived theme adds, replaces or removes its own layouts here
+     * instead of copying getLayouts() and editing one line in it, which is what
+     * made this file collide on every starter update.
+     *
+     * Filter: "<theme_prefix>_flexible_content_layouts", in this theme
+     * "wp_starter_flexible_content_layouts".
+     *
+     * In:  array<int, array<string, mixed>> - the layout definitions, each in
+     *      the shape ACF expects (key, name, label, display, sub_fields,
+     *      acfe_flexible_category).
+     * Out: the same shape. Anything that is not an array is dropped, and the
+     *      list is reindexed.
+     *
+     * The order of the array is the order of the tiles in the ACF selection
+     * modal, so a layout appended at the end shows up last in its category.
+     *
+     * A filter, not an overridable method: derived themes copy this class into
+     * their own namespace, they do not extend it, so there is nothing to
+     * override.
+     *
+     * Example in a derived theme, registered before "acf/init" runs:
+     *
+     *     add_filter('goldene_strategie_flexible_content_layouts', function (array $layouts): array {
+     *         $layouts[] = self::preciousMetalsLayout();
+     *
+     *         return $layouts;
+     *     });
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function layouts(): array
     {
         if (self::$layoutCache === null) {
-            self::$layoutCache = self::getLayouts();
+            // Filter before caching: whoever calls first would otherwise freeze
+            // the unfiltered list for the rest of the request.
+            $filtered = apply_filters(
+                ThemeContext::prefix() . '_flexible_content_layouts',
+                self::getLayouts()
+            );
+
+            self::$layoutCache = is_array($filtered)
+                ? array_values(array_filter($filtered, 'is_array'))
+                : self::getLayouts();
         }
 
         return self::$layoutCache;
+    }
+
+    /**
+     * Drop the cached layout list. Only needed where one request registers the
+     * field group more than once, which in practice means the test suite.
+     */
+    public static function resetLayoutCache(): void
+    {
+        self::$layoutCache = null;
     }
 
     /**
