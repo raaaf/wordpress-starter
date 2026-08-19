@@ -951,6 +951,19 @@ class StyleguideLayoutData
             'background_color' => 'secondary',
         ]);
 
+        // Preistabelle mit Umschalter: das dritte Paket hat bewusst keinen
+        // Jahrespreis und muss im Jahrestarif seinen Monatspreis behalten.
+        $catalog[] = $this->layout('pricing_table', [
+            'title' => 'Pakete mit Umschalter Monat und Jahr',
+            'plans' => [
+                ['name' => 'Basis', 'price' => '19 EUR', 'period' => 'Monat', 'price_yearly' => '190 EUR', 'period_yearly' => 'Jahr', 'features' => '<ul><li>Grundfunktionen</li><li>E-Mail Support</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                ['name' => 'Plus', 'price' => '39 EUR', 'period' => 'Monat', 'price_yearly' => '390 EUR', 'period_yearly' => 'Jahr', 'features' => '<ul><li>Alle Funktionen</li><li>Prioritäts-Support</li></ul>', 'is_featured' => true, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                ['name' => 'Auf Anfrage', 'price' => 'Individuell', 'period' => '', 'price_yearly' => '', 'period_yearly' => '', 'features' => '<ul><li>Individuelle Lösung</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Kontakt', 'url' => '#', 'target' => '']],
+            ],
+            'billing_toggle' => true,
+            'background_color' => 'primary',
+        ]);
+
         // --- Abstaende -------------------------------------------------------
         // Die Stufen sind nur im Vergleich lesbar, deshalb stehen sie direkt
         // untereinander und alle auf derselben Flaeche.

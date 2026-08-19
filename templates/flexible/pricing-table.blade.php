@@ -2,13 +2,18 @@
     Pricing Table Flexible Content Layout
 
     Uses shared components: x-section, x-section-header, x-grid, x-button, x-badge
-    Fields: title, plans (repeater: name, price, period, features, cta, is_featured), background_color
+    Fields: title, plans (repeater: name, price, period, price_yearly, period_yearly,
+    features, cta, is_featured), billing_toggle, background_color
+
+    Die Spaltenzahl ist bewusst kein Feld: sie folgt der Zahl der Pakete, damit
+    eine unvollstaendige letzte Zeile mittig bleibt.
 --}}
 
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $plans = get_sub_field('plans') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
+    $billingToggle = (bool) get_sub_field('billing_toggle');
 
     // Flex statt Grid, damit eine unvollstaendige letzte Zeile mittig steht.
     // Ab drei Plaenen standen immer drei nebeneinander; bei vieren sass der
@@ -29,6 +34,28 @@
     <x-section-header :headline="$title" />
 
     @if(!empty($plans))
+        <div @if($billingToggle) x-data="{ yearly: false }" @endif>
+        @if($billingToggle)
+            <div class="flex justify-center mb-8">
+                <div class="inline-flex rounded-[var(--radius-md)] border border-line overflow-hidden" role="group" aria-label="{{ __('Abrechnungszeitraum', 'wp-starter') }}">
+                    <button type="button"
+                            @click="yearly = false"
+                            :aria-pressed="!yearly"
+                            :class="yearly ? 'bg-surface text-content-secondary' : 'bg-surface-brand text-content-on-brand'"
+                            class="px-5 py-2 cursor-pointer transition-colors focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]">
+                        {{ __('Monatlich', 'wp-starter') }}
+                    </button>
+                    <button type="button"
+                            @click="yearly = true"
+                            :aria-pressed="yearly"
+                            :class="yearly ? 'bg-surface-brand text-content-on-brand' : 'bg-surface text-content-secondary'"
+                            class="px-5 py-2 cursor-pointer transition-colors focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]">
+                        {{ __('Jährlich', 'wp-starter') }}
+                    </button>
+                </div>
+            </div>
+        @endif
+
         <div class="flex flex-wrap justify-center gap-8">
             @foreach($plans as $plan)
                 @php
@@ -38,6 +65,14 @@
                     $period = $plan['period'] ?? '';
                     $features = $plan['features'] ?? '';
                     $cta = $plan['cta'] ?? null;
+
+                    // Ein Paket ohne Jahrespreis behaelt seinen Monatspreis, sonst
+                    // stuende dort im Jahrestarif eine Luecke.
+                    $priceYearly = $plan['price_yearly'] ?? '';
+                    $periodYearly = $plan['period_yearly'] ?? '';
+                    $switchesPrice = $billingToggle && ($priceYearly !== '' || $periodYearly !== '');
+                    $priceYearly = $priceYearly !== '' ? $priceYearly : $price;
+                    $periodYearly = $periodYearly !== '' ? $periodYearly : $period;
                 @endphp
                 <div class="relative flex flex-col w-full p-8 rounded-[var(--card-radius)] border {{ $itemClass }} {{ $isFeatured ? 'bg-surface-brand text-content-on-brand border-line-brand shadow-[var(--shadow-card-hover)]' : 'bg-surface-secondary border-line shadow-[var(--shadow-card)]' }}">
                     @if($isFeatured)
@@ -52,10 +87,15 @@
 
                     <div class="mb-6">
                         @if($price !== '')
-                            <span class="text-h1 tabular-nums {{ $isFeatured ? 'text-content-on-brand' : 'text-content' }}">{{ $price }}</span>
+                            {{-- x-text statt zweier Spans mit x-show: der Server liefert den
+                                 Monatspreis, Alpine tauscht nur den Text. Kein Aufblitzen des
+                                 zweiten Preises, bevor Alpine laeuft. --}}
+                            <span class="text-h1 tabular-nums {{ $isFeatured ? 'text-content-on-brand' : 'text-content' }}"
+                                  @if($switchesPrice) x-text="yearly ? @js($priceYearly) : @js($price)" @endif>{{ $price }}</span>
                         @endif
                         @if($period)
-                            <span class="{{ $isFeatured ? 'text-content-on-brand' : 'text-content-secondary' }}">/ {{ $period }}</span>
+                            <span class="{{ $isFeatured ? 'text-content-on-brand' : 'text-content-secondary' }}"
+                                  @if($switchesPrice) x-text="'/ ' + (yearly ? @js($periodYearly) : @js($period))" @endif>/ {{ $period }}</span>
                         @endif
                     </div>
 
@@ -77,6 +117,7 @@
                     @endif
                 </div>
             @endforeach
+        </div>
         </div>
     @elseif(current_user_can('edit_posts'))
         <div class="p-8 text-center rounded-[var(--card-radius)] bg-surface-secondary">
