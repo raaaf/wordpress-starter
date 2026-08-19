@@ -61,6 +61,12 @@
     // A hero is worth rendering if it has any text/CTA content, or, per variant,
     // an image that carries the section on its own (background image, split image).
     $hasText = $badge || $title || $copy || $cta_primary || $cta_secondary;
+
+    // Ein Hero, der nur eine Ueberschrift traegt, braucht keine halbe oder ganze
+    // Viewporthoehe: die Flaeche darunter war leer und die erste Sektion rutschte
+    // ohne Grund unter die Falz. Die Hoehe kommt deshalb aus dem Inhalt.
+    $isTitleOnly = $title && !$badge && !$copy && !$cta_primary && !$cta_secondary;
+    $heroHeightClass = $isTitleOnly ? 'hero--compact' : 'hero--full';
     $hasBackgroundImage = $background_image && (!empty($background_image['ID']) || !empty($background_image['url']));
     $hasSplitImage = $imageId || ($image && !empty($image['url']));
 @endphp
@@ -79,8 +85,7 @@
          ersten Frame, die Regeln stehen in app.css unter .hero--reveal. --}}
     <section
         @if($sectionAnchor) id="{{ esc_attr($sectionAnchor) }}" @endif
-        class="hero hero--background @if($shouldAnimate) hero--reveal @endif relative overflow-hidden flex items-center"
-        style="min-height: calc(100vh - var(--header-height, 80px)); min-height: calc(100dvh - var(--header-height, 80px));"
+        class="hero hero--background {{ $heroHeightClass }} @if($shouldAnimate) hero--reveal @endif relative overflow-hidden flex items-center"
     >
         @if($background_image && (!empty($background_image['ID']) || !empty($background_image['url'])))
             <div class="absolute inset-0">
@@ -153,7 +158,7 @@
 @elseif($variant === 'split')
     @if($hasText || $hasSplitImage)
     {{-- SPLIT VARIANT: Content left, image right --}}
-    <x-section :anchor="$sectionAnchor" :background="$background_color" padding="lg" class="hero hero--split">
+    <x-section :anchor="$sectionAnchor" :background="$background_color" padding="lg" class="hero hero--split hero--full">
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
                 @if($badge)
@@ -222,7 +227,7 @@
 @else
     @if($hasText)
     {{-- CENTERED VARIANT (default): Centered content --}}
-    <x-section :anchor="$sectionAnchor" :background="$background_color" padding="xl" class="hero hero--centered">
+    <x-section :anchor="$sectionAnchor" :background="$background_color" :padding="$isTitleOnly ? 'lg' : 'xl'" class="hero hero--centered {{ $heroHeightClass }}">
         <div class="max-w-3xl mx-auto text-center">
             @if($badge)
                 <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>

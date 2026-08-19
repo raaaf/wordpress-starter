@@ -2404,6 +2404,25 @@ html {
    Text und der Text springt Millisekunden spaeter nach. Die Animation laeuft
    ab dem ersten Frame, ohne JavaScript, und braucht deshalb auch keine
    no-js-Ausnahme mehr. */
+/* Hoehe des Heros.
+
+   Vorher stand die volle Viewporthoehe als Inline-Style am Hintergrund-Hero und
+   50vh im Critical CSS an jedem Hero. Ein Hero mit nur einer Ueberschrift kam so
+   auf 386px fuer eine Zeile Text. Die Hoehe haengt jetzt an der Klasse, die das
+   Template aus dem Inhalt ableitet: nur Ueberschrift heisst hero--compact. */
+.hero--background.hero--full {
+  min-height: calc(100vh - var(--header-height, 80px));
+  min-height: calc(100dvh - var(--header-height, 80px));
+}
+
+.hero--background.hero--compact {
+  min-height: clamp(18rem, 55dvh, 34rem);
+}
+
+.hero--centered.hero--compact {
+  min-height: 0;
+}
+
 .hero--reveal .hero-reveal {
   animation: hero-reveal var(--motion-enter-duration) var(--motion-enter-ease) both;
 }
