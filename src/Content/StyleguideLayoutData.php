@@ -92,6 +92,7 @@ class StyleguideLayoutData
 
         $layouts[] = $this->getCardsLayoutData();
         $layouts[] = $this->getTestimonialsLayoutData();
+        $layouts[] = $this->getQuoteLayoutData();
         $layouts[] = $this->getTeamLayoutData();
         $layouts[] = $this->getStatsLayoutData();
         $layouts[] = $this->getPricingLayoutData();
@@ -324,6 +325,19 @@ class StyleguideLayoutData
             'column_4' => '<h4>Übergabe</h4><p>Launch und Einweisung in die Pflege der Inhalte.</p>',
             'accordion_4' => [],
             'background_color' => 'brand-subtle',
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function getQuoteLayoutData(): array
+    {
+        return $this->layout('quote', [
+            'quote' => 'Die Foerderung hat uns den Start ermoeglicht, und die Begleitung danach hat uns gehalten.',
+            'author' => 'Maria Beispiel',
+            'role' => 'Projektleiterin',
+            'image' => $this->imageId(1),
+            'size' => 'md',
+            'background_color' => 'secondary',
         ]);
     }
 
@@ -1037,6 +1051,17 @@ class StyleguideLayoutData
             'content' => '<p>Der rote Hinweis meldet einen Fehler und traegt role="alert".</p>',
             'dismissible' => true,
             'background_color' => 'primary',
+        ]);
+
+        // Einzelzitat gross und ohne Bild: die zweite Groesse und der Fall ohne
+        // Portrait, den die Instanz oben nicht zeigt.
+        $catalog[] = $this->layout('quote', [
+            'quote' => 'Ein grosses Zitat traegt den Abschnitt allein.',
+            'author' => 'Jonas Muster',
+            'role' => '',
+            'image' => null,
+            'size' => 'lg',
+            'background_color' => 'brand-subtle',
         ]);
 
         // --- Abstaende -------------------------------------------------------

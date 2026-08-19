@@ -36,6 +36,7 @@ final class FlexibleContentLayoutFilterTest extends TestCase
         'gallery',
         'before_after',
         'testimonials',
+        'quote',
         'cards',
         'stats',
         'timeline',

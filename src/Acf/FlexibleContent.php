@@ -313,6 +313,7 @@ class FlexibleContent
 
             // Interactive element layouts
             self::testimonialsLayout(),
+            self::quoteLayout(),
             self::cardsLayout(),
             self::statsLayout(),
             self::timelineLayout(),
@@ -906,6 +907,23 @@ class FlexibleContent
     // =========================================================================
     // MISC LAYOUTS
     // =========================================================================
+
+    /**
+     * Pull quote layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function quoteLayout(): array
+    {
+        return [
+            'key' => 'layout_quote',
+            'name' => 'quote',
+            'label' => __('Einzelzitat', 'wp-starter'),
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::quoteFields('flex_quote'),
+            'acfe_flexible_category' => self::getCategories()['content'],
+        ];
+    }
 
     /**
      * Alert (notice) layout

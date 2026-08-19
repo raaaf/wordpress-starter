@@ -3473,6 +3473,66 @@ class FieldDefinitions
     }
 
     /**
+     * Get pull quote fields
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function quoteFields(string $prefix): array
+    {
+        return [
+            self::textareaField(
+                "field_{$prefix}_quote",
+                __('Zitat', 'wp-starter'),
+                'quote',
+                3,
+                __('Der Wortlaut ohne Anführungszeichen, die setzt das Layout.', 'wp-starter'),
+                __('z.B. Die Stiftung hat uns den Start ermöglicht.', 'wp-starter'),
+            ),
+            self::textField(
+                "field_{$prefix}_author",
+                __('Name', 'wp-starter'),
+                'author',
+                false,
+                __('Wer das gesagt hat.', 'wp-starter'),
+                __('z.B. Maria Beispiel', 'wp-starter'),
+            ),
+            self::textField(
+                "field_{$prefix}_role",
+                __('Rolle', 'wp-starter'),
+                'role',
+                false,
+                __('Funktion oder Organisation.', 'wp-starter'),
+                __('z.B. Geschäftsführerin', 'wp-starter'),
+            ),
+            self::imageField(
+                "field_{$prefix}_image",
+                __('Bild', 'wp-starter'),
+                'image',
+                false,
+                'id',
+                null,
+                __('Optionales Portrait neben dem Zitat.', 'wp-starter'),
+            ),
+            self::buttonGroupField(
+                "field_{$prefix}_size",
+                __('Größe', 'wp-starter'),
+                'size',
+                [
+                    'md' => __('Normal', 'wp-starter'),
+                    'lg' => __('Groß', 'wp-starter'),
+                ],
+                'md',
+                __('Groß setzt das Zitat als eigenständigen Blickfang.', 'wp-starter'),
+            ),
+            self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
+            self::sectionAnchorField($prefix),
+        ];
+    }
+
+    /**
      * Get section anchor field for manual anchor-ID override
      *
      * @param string $prefix Key prefix
