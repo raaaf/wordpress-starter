@@ -2423,6 +2423,20 @@ html {
   min-height: 0;
 }
 
+/* Der kompakte Hero und die erste Sektion stapelten ihre Polster: 64px unten
+   plus 80px oben ergaben 144px zwischen Ueberschrift und erstem Text. Traegt die
+   Sektion darunter dieselbe Flaeche, ist das ein Loch und keine Trennung, also
+   faellt das Polster des Heros weg und die Sektion behaelt ein knappes eigenes.
+   Bei einer farbigen oder inversen Sektion bleibt beides stehen: dort ist das
+   Polster ein sichtbares Band. */
+.hero--compact:has(+ .section.bg-surface) {
+  padding-bottom: 0;
+}
+
+.hero--compact + .section.bg-surface {
+  padding-top: 2rem;
+}
+
 .hero--reveal .hero-reveal {
   animation: hero-reveal var(--motion-enter-duration) var(--motion-enter-ease) both;
 }
