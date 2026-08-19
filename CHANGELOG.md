@@ -1,3 +1,14 @@
+# [2.28.0](https://github.com/raaaf/wordpress-starter/compare/v2.27.6...v2.28.0) (2026-08-19)
+
+### Bug Fixes
+
+- **hero:** kleineres Polster und kein Abstand unter der einzelnen Ueberschrift ([b9c21de](https://github.com/raaaf/wordpress-starter/commit/b9c21de70f33bf202c194696c09d44faffce11de))
+- **surfaces:** Flaechen bringen ihre Schriftfarbe selbst mit ([44eff0b](https://github.com/raaaf/wordpress-starter/commit/44eff0b3c824f7f698e135b11ec94ca4a8aa6b1c))
+
+### Features
+
+- **hero:** Hoehe folgt dem Inhalt ([3bf41ab](https://github.com/raaaf/wordpress-starter/commit/3bf41ab70965b96682461ca82ee5515cc335b27e))
+
 ## [2.27.6](https://github.com/raaaf/wordpress-starter/compare/v2.27.5...v2.27.6) (2026-08-18)
 
 ### Bug Fixes
