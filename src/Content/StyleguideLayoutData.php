@@ -922,6 +922,35 @@ class StyleguideLayoutData
             'background_color' => 'primary',
         ]);
 
+        // Beitraege als Liste und die beiden Sortierungen neben "Neueste zuerst",
+        // die der Standardfall oben schon zeigt.
+        $catalog[] = $this->layout('posts', [
+            'title' => 'Beiträge als Liste, älteste zuerst',
+            'post_type' => 'post',
+            'posts_per_page' => 3,
+            'category' => '',
+            'show_excerpt' => true,
+            'show_date' => true,
+            'show_author' => false,
+            'columns' => 3,
+            'post_layout' => 'list',
+            'orderby' => 'date_asc',
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('posts', [
+            'title' => 'Beiträge nach Titel sortiert',
+            'post_type' => 'post',
+            'posts_per_page' => 3,
+            'category' => '',
+            'show_excerpt' => false,
+            'show_date' => false,
+            'show_author' => false,
+            'columns' => 3,
+            'orderby' => 'title',
+            'background_color' => 'secondary',
+        ]);
+
         // --- Abstaende -------------------------------------------------------
         // Die Stufen sind nur im Vergleich lesbar, deshalb stehen sie direkt
         // untereinander und alle auf derselben Flaeche.

@@ -3,7 +3,8 @@
 
     Uses shared components: x-section, x-section-header, x-link, x-card
     Uses get_the_post_thumbnail() for automatic srcset/responsive images
-    Fields: title, post_type, posts_per_page, category, show_excerpt, show_date, show_author, columns, background_color
+    Fields: title, post_type, posts_per_page, category, show_excerpt, show_date, show_author, columns,
+    post_layout, orderby, background_color
 --}}
 
 @php
@@ -16,13 +17,23 @@
     $showAuthor = get_sub_field('show_author') ?? false;
     $columns = (int) (get_sub_field('columns') ?: 3);
     $background = get_sub_field('background_color') ?: 'primary';
+    $isList = get_sub_field('post_layout') === 'list';
+    $orderby = get_sub_field('orderby') ?: 'date_desc';
 
     // Use explicit grid classes to ensure Tailwind includes them (same pattern as stats.blade.php)
+    // Die Liste ist einspaltig, die gewaehlte Spaltenzahl gilt dort nicht.
     $gridClass = match(true) {
+        $isList => 'md:grid-cols-1',
         $columns >= 4 => 'md:grid-cols-4',
         $columns === 3 => 'md:grid-cols-3',
         $columns === 2 => 'md:grid-cols-2',
         default => 'md:grid-cols-1',
+    };
+
+    [$orderByArg, $orderArg] = match($orderby) {
+        'date_asc' => ['date', 'ASC'],
+        'title' => ['title', 'ASC'],
+        default => ['date', 'DESC'],
     };
 
     // Query posts
@@ -31,6 +42,8 @@
         'posts_per_page' => $postsPerPage,
         'post_status' => 'publish',
         'no_found_rows' => true,
+        'orderby' => $orderByArg,
+        'order' => $orderArg,
     ];
 
     if ($category) {
@@ -48,9 +61,9 @@
             @while($postsQuery->have_posts())
                 @php $postsQuery->the_post(); @endphp
                 <li>
-                    <x-card variant="filled" padding="none" hoverable class="group relative cursor-pointer h-full">
+                    <x-card variant="filled" padding="none" hoverable class="group relative cursor-pointer h-full {{ $isList ? 'md:flex md:items-stretch' : '' }}">
                         @if(has_post_thumbnail())
-                            <div class="block overflow-hidden aspect-video">
+                            <div class="block overflow-hidden aspect-video {{ $isList ? 'md:w-2/5 md:shrink-0 md:aspect-auto' : '' }}">
                                 {!! get_the_post_thumbnail(get_the_ID(), 'card-video', [
                                     'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) get_post_thumbnail_id(), get_the_title()),
                                     'class' => 'object-cover w-full h-full transition-transform duration-200 ease-out group-hover:scale-105',
@@ -58,7 +71,7 @@
                             </div>
                         @endif
 
-                        <div class="p-6">
+                        <div class="p-6 {{ $isList ? 'md:flex-1' : '' }}">
                             @if($showDate || $showAuthor)
                                 <div class="flex items-center gap-4 mb-3">
                                     @if($showDate)
