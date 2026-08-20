@@ -81,7 +81,7 @@
         </div>
 
         @if($note && $isHttps)
-            <p class="mt-4 text-body-small text-content-secondary">{{ $note }}</p>
+            <p class="mt-4 max-w-[60ch] text-body-small text-content-secondary">{{ $note }}</p>
         @endif
     </div>
 </x-section>

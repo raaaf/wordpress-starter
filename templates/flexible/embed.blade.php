@@ -53,7 +53,7 @@
         </div>
 
         @if(current_user_can('edit_posts') && $host !== '')
-            <p class="mt-4 text-center text-body-small text-content-secondary">
+            <p class="mt-4 max-w-[60ch] mx-auto text-center text-body-small text-content-secondary">
                 {{ sprintf(__('Nur für dich sichtbar: Diese Einbettung lädt von %s. Bleibt die Fläche leer, fehlt der Host in den Theme-Einstellungen.', 'wp-starter'), $host) }}
             </p>
         @endif

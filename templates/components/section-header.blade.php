@@ -24,7 +24,10 @@
 @php
     $isCenter = $alignment !== 'left';
     $alignClass = $isCenter ? 'text-center' : 'text-left';
-    $descClass  = $isCenter ? 'max-w-3xl mx-auto' : '';
+    // Auch linksbuendig begrenzt: ohne die Breite lief die Beschreibung ueber den
+    // ganzen Container, gemessen 136 Zeichen. Bequem liest sich eine Zeile bis
+    // etwa 75, deshalb dieselbe Spalte wie zentriert, nur eben links.
+    $descClass  = $isCenter ? 'max-w-3xl mx-auto' : 'max-w-3xl';
     $headingTag = in_array((int) $level, [2, 3, 4], true) ? 'h' . (int) $level : 'h2';
 @endphp
 

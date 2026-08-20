@@ -52,8 +52,12 @@
                      loading="lazy">
             @endif
             @if($content)
+                {{-- Die Lesespalte innerhalb der Karte begrenzen: die Karte ist
+                     breiter als eine bequeme Zeile, gemessen 89 Zeichen. --}}
                 <div class="p-6 lg:p-8">
-                    <x-prose>@kses($content)</x-prose>
+                    <div class="max-w-[58ch]">
+                        <x-prose>@kses($content)</x-prose>
+                    </div>
                 </div>
             @endif
             @if(!empty($accordion))
