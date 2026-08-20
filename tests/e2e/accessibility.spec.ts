@@ -2,8 +2,48 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 test.describe('Accessibility', () => {
+  // Ohne diese Zeile misst axe mitten in der Einblend-Animation: die Sektion
+  // steht dann auf opacity 0 bis 1, und axe rechnet die Mischfarbe aus. Gemessen
+  // wurden so 2.14:1 fuer Fliesstext, der im fertigen Zustand 7:1 hat. Das Theme
+  // schaltet die Animation bei prefers-reduced-motion selbst ab.
+  test.use({ reducedMotion: 'reduce' });
+
+  /**
+   * Wartet, bis keine Sektion mehr halb eingeblendet ist.
+   *
+   * Die Sektionen starten auf opacity 0 und blenden per Alpine ein. Misst axe
+   * dazwischen, rechnet es die Mischfarbe aus und meldet Kontrastfehler, die im
+   * fertigen Zustand nicht existieren: gemessen 2.14:1 fuer Fliesstext, der
+   * fertig 7:1 hat.
+   */
+  async function warteAufEingeblendet(page: import('@playwright/test').Page): Promise<void> {
+    // Erst durchscrollen: Sektionen unter dem Falz bleiben absichtlich auf
+    // opacity 0, bis der IntersectionObserver sie sieht. Ohne das Scrollen
+    // wartet man ewig. Schrittweite und Pause bewusst grosszuegig, schnelles
+    // Scrollen ueberholt den Observer.
+    const hoehe = await page.evaluate(() => document.body.scrollHeight);
+    const fenster = await page.evaluate(() => window.innerHeight);
+
+    for (let y = 0; y < hoehe; y += Math.floor(fenster * 0.8)) {
+      await page.evaluate((ziel) => window.scrollTo(0, ziel), y);
+      await page.waitForTimeout(150);
+    }
+
+    await page.evaluate(() => window.scrollTo(0, 0));
+
+    // Nicht auf "opacity ist 0 oder 1" pruefen: der Logolauf blendet seine Logos
+    // dauerhaft auf 0.5, die Bedingung waere nie wahr.
+    await page.waitForFunction(
+      () => document.querySelectorAll('.opacity-0').length === 0,
+      null,
+      { timeout: 10000 }
+    );
+    await page.waitForTimeout(300);
+  }
+
   test('homepage should have no critical accessibility violations', async ({ page }) => {
     await page.goto('/');
+    await warteAufEingeblendet(page);
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
@@ -106,9 +146,14 @@ test.describe('Accessibility', () => {
 
   test('color contrast should be sufficient', async ({ page }) => {
     await page.goto('/');
+    await warteAufEingeblendet(page);
 
+    // cat.color enthaelt auch color-contrast-enhanced, also AAA mit 7:1. Das
+    // Theme zielt auf AA; die Marke selbst (#c43d0a auf Weiss, 5.22:1) koennte
+    // AAA gar nicht erreichen, ohne eine andere Marke zu werden.
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['cat.color'])
+      .disableRules(['color-contrast-enhanced'])
       .analyze();
 
     const colorViolations = accessibilityScanResults.violations.filter(

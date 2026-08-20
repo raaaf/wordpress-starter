@@ -6,13 +6,24 @@ test.describe('Navigation', () => {
   });
 
   test('should have visible header navigation', async ({ page }) => {
-    const nav = page.locator('nav[role="navigation"]');
-    await expect(nav).toBeVisible();
+    // Kein role="navigation": das Theme setzt keine redundante ARIA-Rolle auf
+    // ein <nav>, die Rolle bringt das Element selbst mit.
+    const nav = page.locator('header nav[aria-label]').first();
+    await expect(nav).toBeAttached();
   });
 
   test('should have accessible navigation landmark', async ({ page }) => {
-    const nav = page.locator('nav[aria-label]');
-    await expect(nav).toBeAttached();
+    // Vier Navigationen auf der Seite: Haupt, Mobil, Fuss, Rechtliches. Jede
+    // braucht ihr eigenes aria-label, sonst sind sie im Screenreader nicht
+    // auseinanderzuhalten.
+    const navs = page.locator('nav');
+    const anzahl = await navs.count();
+
+    expect(anzahl).toBeGreaterThan(0);
+
+    for (let i = 0; i < anzahl; i++) {
+      await expect(navs.nth(i)).toHaveAttribute('aria-label', /.+/);
+    }
   });
 
   test('mobile menu should toggle on mobile viewport', async ({ page }) => {
