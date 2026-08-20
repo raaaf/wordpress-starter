@@ -263,7 +263,23 @@ Blade templates use Laravel's Illuminate View package:
 
 ## ACF Flexible Content
 
-The page builder uses ACF Flexible Content with 32 layouts organized by category.
+The page builder uses ACF Flexible Content with 36 layouts organized by category.
+
+### Section Header
+
+Ten column layouts use `FieldDefinitions::sectionHeaderFields()`: a toggle plus
+chip, headline, description and alignment, stored as `section_headline`.
+
+Every other content module keeps its own `title` field and adds
+`FieldDefinitions::sectionHeaderExtras()` for chip, description and alignment.
+Templates read those three with `SectionHeader::extras($title)` and hand the
+result to `x-section-header`. The split exists because renaming `title` to
+`section_headline` would have to migrate every existing section for no visible
+gain.
+
+Layouts without a header on purpose: hero, button, quote, alert, divider,
+member-downloads, newsletter (its heading is part of the bar) and contact-form
+(its heading sits in the left column next to the form).
 
 ### Adding a New Layout
 

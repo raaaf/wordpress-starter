@@ -334,3 +334,16 @@ If you discover a security vulnerability:
 - [WordPress Security Best Practices](https://developer.wordpress.org/plugins/security/)
 - [OWASP WordPress Security](https://owasp.org/www-project-web-security-testing-guide/)
 - [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
+
+## Externe Einbettungen
+
+`frame-src` erlaubt ab Werk YouTube, Vimeo und Google Maps. Jeder weitere
+Anbieter muss unter **Theme-Einstellungen → Analytics → Externe Einbettungen**
+eingetragen werden, ein Host je Zeile. `Security::getEmbedOrigins()` filtert die
+Liste streng: nur Hostnamen, kein Schema, kein Pfad, nichts, was die Direktive
+zerlegen koennte.
+
+Das Modul „Einbettung" nimmt deshalb nur die Adresse aus dem `src`-Attribut und
+baut den iframe selbst. Den Einbettungscode des Anbieters entgegenzunehmen waere
+zwecklos: ACF entfernt `<iframe>` beim Speichern fuer jede Rolle ohne
+`unfiltered_html`, im Multisite also auch fuer Administratoren.

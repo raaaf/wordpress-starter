@@ -88,7 +88,7 @@ npm run dev
 │   └── Vite.php
 └── templates/
     ├── components/        # Blade components (<x-button>, <x-section> etc.)
-    ├── flexible/          # Flexible Content templates (32 layouts)
+    ├── flexible/          # Flexible Content templates (36 layouts)
     ├── layouts/           # Base layouts
     └── partials/          # Reusable partials
 ```
@@ -155,17 +155,17 @@ All providers in `src/Providers/` are registered automatically via `Application:
 
 ## Flexible Content layouts
 
-32 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
+36 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
 
 Grouped by function; the editor modal uses the ACF categories, see CLAUDE.md.
 
 **Structure:** one-column, one-column-image, two-columns, two-columns-images, three-columns, three-columns-images, four-columns, four-columns-images, one-third-two-thirds, two-thirds-one-third
 
-**Content:** hero, accordion, cta, button, image, video, divider
+**Content:** hero, accordion, cta, button, image, video, divider, alert, quote, embed
 
 **Interactive:** testimonials, cards, gallery, logo-slider, tabs, stats, timeline, team, before-after, pricing-table
 
-**Forms:** contact-form, map
+**Forms:** contact-form, map, newsletter
 
 **Posts:** posts, table
 

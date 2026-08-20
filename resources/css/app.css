@@ -1437,7 +1437,7 @@ html {
     font-size: var(--typography-body-size);
     color: var(--text-primary);
     background-color: var(--bg-primary);
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--border-control);
     border-radius: var(--input-md-radius);
     box-shadow: var(--shadow-input);
     transition:
@@ -1491,7 +1491,7 @@ html {
     font-size: var(--typography-body-size);
     color: var(--text-primary);
     background-color: var(--bg-primary);
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--border-control);
     border-radius: var(--input-md-radius);
     box-shadow: var(--shadow-input);
     resize: vertical;
@@ -1531,7 +1531,7 @@ html {
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 1rem;
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--border-control);
     border-radius: var(--input-md-radius);
     box-shadow: var(--shadow-input);
     appearance: none;
@@ -1632,7 +1632,7 @@ html {
     font-weight: 500;
     color: var(--text-primary);
     background-color: var(--bg-secondary);
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--border-control);
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition:
