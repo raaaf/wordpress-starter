@@ -1,3 +1,27 @@
+# [2.29.0](https://github.com/raaaf/wordpress-starter/compare/v2.28.1...v2.29.0) (2026-08-20)
+
+### Bug Fixes
+
+- **a11y:** Formularfelder mit sichtbarem Rand im Dunkelmodus ([8a7711e](https://github.com/raaaf/wordpress-starter/commit/8a7711e7eec0b28378916c62d3d6f396fabcbe62))
+
+### Features
+
+- **accordion:** erster Eintrag offen, Mehrfachoeffnung, FAQ-Auszeichnung schaltbar ([170090c](https://github.com/raaaf/wordpress-starter/commit/170090cf1f9ddeb79a88e18c92202b17f3af61c0))
+- **acf:** Abstandsstufe je Sektion, Hintergrundfarbe fuer CTA und Downloads ([f2f4378](https://github.com/raaaf/wordpress-starter/commit/f2f437839dd3237f29f74482deadde58d0e6ae30))
+- **acf:** Bildspalten je Spalte gegliedert, Ueberschrift fuer Bild und Video ([cac2e1b](https://github.com/raaaf/wordpress-starter/commit/cac2e1bfc251f54b9448893af4748d56dc2a20eb))
+- **acf:** Erweiterungspunkt fuer eigene Flexible-Content-Layouts ([134c78e](https://github.com/raaaf/wordpress-starter/commit/134c78e0353a243fcca026aa8352baca7bbe1afe))
+- **acf:** neues Modul Einbettung mit freigegebenen Hosts ([ab1d3e7](https://github.com/raaaf/wordpress-starter/commit/ab1d3e71691845ba68522d8547900233aba8fa50))
+- **acf:** neues Modul Einzelzitat ([f3193ed](https://github.com/raaaf/wordpress-starter/commit/f3193ed671951446eb493bd5ee42fb4a79905de2))
+- **acf:** neues Modul Hinweis ([668e853](https://github.com/raaaf/wordpress-starter/commit/668e853dfe9b53a1fcbd1e26921628ca64c04796))
+- **acf:** neues Modul Newsletter-Anmeldung ([ff6bf07](https://github.com/raaaf/wordpress-starter/commit/ff6bf0780aa381e185763f7e4dcc5451f8095303))
+- **acf:** Sektionskopf fuer alle inhaltstragenden Module, Vorschaubilder, Icon ans Zeilenende ([3ab909f](https://github.com/raaaf/wordpress-starter/commit/3ab909f83331cd7336bec02ec3204717e17c2f9b))
+- **acf:** volle Breite je Sektion, Bildbreite, kompakte Tabelle mit fester Kopfzeile ([14bef6f](https://github.com/raaaf/wordpress-starter/commit/14bef6fb5acd4a0bfadcc63941c464957899736e))
+- **button:** optionaler zweiter Button daneben ([fed2140](https://github.com/raaaf/wordpress-starter/commit/fed2140f72fe83f0a3e6fdf06d89469aafe97c1c))
+- **cards:** Kartenstil waehlbar ([48ff61d](https://github.com/raaaf/wordpress-starter/commit/48ff61d166f8f13f6e216f6a3640febd713c32de))
+- **posts:** Liste als Darstellung und waehlbare Sortierung ([c322ab3](https://github.com/raaaf/wordpress-starter/commit/c322ab3c78435e230045ad97e52aaeeb60aababe))
+- **pricing:** Umschalter zwischen Monats- und Jahrestarif ([4faa2e1](https://github.com/raaaf/wordpress-starter/commit/4faa2e154f9409f7ee7a46de5a5fa3fada078332))
+- **video:** Seitenverhaeltnis waehlbar, automatisch abspielen und Schleife ([e26bd03](https://github.com/raaaf/wordpress-starter/commit/e26bd03ea846c86d1eec64a6ec8f72e15e6520b6))
+
 ## [2.28.1](https://github.com/raaaf/wordpress-starter/compare/v2.28.0...v2.28.1) (2026-08-19)
 
 ### Bug Fixes
