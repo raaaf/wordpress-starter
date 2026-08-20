@@ -1,3 +1,9 @@
+## [2.29.1](https://github.com/raaaf/wordpress-starter/compare/v2.29.0...v2.29.1) (2026-08-20)
+
+### Bug Fixes
+
+- **footer:** einheitliche Schriftgroesse in allen Spalten ([bff5abc](https://github.com/raaaf/wordpress-starter/commit/bff5abcf5f01d0ae6571bc7410f68c5ca941d7eb))
+
 # [2.29.0](https://github.com/raaaf/wordpress-starter/compare/v2.28.1...v2.29.0) (2026-08-20)
 
 ### Bug Fixes
