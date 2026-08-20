@@ -2695,3 +2695,14 @@ html {
   width: 1.5rem;
   height: 1.5rem;
 }
+
+/* Fusstext, bewusst ausserhalb jeder @layer.
+
+   Der Text kommt aus einem WYSIWYG und traegt deshalb prose. Prose setzt seine
+   eigene Groesse auf p, li und a, gemessen 16px, waehrend Navigation, Kontakt
+   und Rechtliches im Fuss auf 14px stehen. Utilities wie [&_p]:text-sm greifen
+   dagegen nicht: prose liegt in einer Layer, die Utility ebenfalls, und die
+   Reihenfolge entscheidet gegen sie. Ungelayert schlaegt beides. */
+.footer-prose :is(p, li, a) {
+  font-size: var(--typography-body-small-size);
+}

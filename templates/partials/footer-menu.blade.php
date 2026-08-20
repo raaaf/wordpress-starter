@@ -65,7 +65,7 @@
                     <h2 class="text-h5 mb-4">{{ $company }}</h2>
                 @endif
                 @if($footerText)
-                    <div class="text-content-secondary text-sm prose prose-sm">
+                    <div class="footer-prose text-content-secondary text-sm prose prose-sm">
                         {!! wp_kses_post($footerText) !!}
                     </div>
                 @endif
@@ -79,7 +79,7 @@
                         <?php
                         wp_nav_menu([
                             'container' => false,
-                            'menu_class' => 'space-y-2',
+                            'menu_class' => 'space-y-2 text-sm',
                             'theme_location' => $navMenu,
                             'fallback_cb' => false,
                             'items_wrap' => '<ul id="%1$s" class="%2$s">%3$s</ul>',
