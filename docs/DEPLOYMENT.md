@@ -386,6 +386,16 @@ VITE_BASE_URL=https://your-domain.com
 - Verify ACF PRO is activated
 - Check field group export in code
 
+## Nach einem Theme-Update
+
+Neue Flexible-Content-Module erscheinen sofort im Auswahldialog. Die
+**Styleguide-Seite** zeigt sie nicht von allein: ihre Sektionen liegen als
+gespeicherter ACF-Inhalt auf der Seite, nicht als Live-Abfrage.
+
+**Theme-Einstellungen → Werkzeuge → Styleguide neu generieren** schreibt sie neu.
+Die Seite ist generierter Inhalt, den niemand von Hand pflegt; das Neuerzeugen
+ersetzt sie vollstaendig und ist der vorgesehene Weg.
+
 ## Support
 
 For issues, check:
