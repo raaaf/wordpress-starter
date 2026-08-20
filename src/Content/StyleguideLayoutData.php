@@ -494,6 +494,7 @@ class StyleguideLayoutData
     private function getImageLayoutData(): array
     {
         return $this->layout('image', [
+            'title' => 'Bild mit Überschrift',
             'image' => $this->imageId(1),
             'show_border' => false,
             'show_caption' => true,

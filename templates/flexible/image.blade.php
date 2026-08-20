@@ -2,12 +2,14 @@
     Image - Flexible Content Layout
 
     Uses shared components: x-section
-    ACF Fields: image (ID), show_border, show_caption, width, background_color
+    ACF Fields: title, section extras, image (ID), show_border, show_caption, width, background_color
 
     Uses wp_get_attachment_image() for automatic srcset/responsive images
 --}}
 
 @php
+    $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $imageId = get_sub_field('image');
     $showBorder = get_sub_field('show_border');
     $showCaption = get_sub_field('show_caption');
@@ -35,8 +37,11 @@
     };
 @endphp
 
-@if($imageId)
+@if($imageId || $title)
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" padding="md" class="image">
+    <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
+
+    @if($imageId)
     <figure class="mx-auto {{ $widthClass }}">
         {{-- Bewusst ohne 'loading': wp_get_attachment_image() ruft
              wp_get_loading_optimization_attributes() auf. Die zaehlt die
@@ -58,5 +63,6 @@
             </figcaption>
         @endif
     </figure>
+    @endif
 </x-section>
 @endif

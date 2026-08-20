@@ -2,12 +2,14 @@
     Video - Flexible Content Layout
 
     Uses shared components: x-section, x-button, x-link
-    ACF Fields: source, video, video_url, video_file_url, video_title,
+    ACF Fields: title, section extras, source, video, video_url, video_file_url, video_title,
                 captions, captions_language, aspect_ratio, autoplay, loop,
                 background_color
 --}}
 
 @php
+    $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $source = get_sub_field('source') ?: 'wordpress';
     $video = get_sub_field('video'); // URL string for self-hosted
     $video_url = get_sub_field('video_url'); // YouTube/Vimeo URL
@@ -84,6 +86,7 @@
 
 @if($hasVideo || current_user_can('edit_posts'))
 <x-section :background="$background" :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" class="video">
+    <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
     @if($hasVideo)
         <div class="max-w-6xl mx-auto">
             <div

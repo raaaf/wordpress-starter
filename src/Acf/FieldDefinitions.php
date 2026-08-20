@@ -1824,6 +1824,15 @@ class FieldDefinitions
     public static function videoFields(string $prefix): array
     {
         return [
+            self::textField(
+                "field_{$prefix}_title",
+                __('Überschrift', 'wp-starter'),
+                'title',
+                false,
+                __('Optionale Überschrift über dem Video.', 'wp-starter'),
+                __('z.B. Das Leitbild in zwei Minuten', 'wp-starter'),
+            ),
+            ...self::sectionHeaderExtras($prefix),
             self::buttonGroupField(
                 "field_{$prefix}_source",
                 __('Video-Quelle', 'wp-starter'),
@@ -1963,6 +1972,15 @@ class FieldDefinitions
     public static function imageFields(string $prefix): array
     {
         return [
+            self::textField(
+                "field_{$prefix}_title",
+                __('Überschrift', 'wp-starter'),
+                'title',
+                false,
+                __('Optionale Überschrift über dem Bild.', 'wp-starter'),
+                __('z.B. Unser neues Haus', 'wp-starter'),
+            ),
+            ...self::sectionHeaderExtras($prefix),
             self::imageField(
                 "field_{$prefix}_image",
                 __('Bild', 'wp-starter'),
@@ -2213,6 +2231,16 @@ class FieldDefinitions
         $ordinal = $ordinals[$n];
 
         return [
+            // Ein Akkordeon je Spalte: vier gleich aussehende Bloecke aus Bild,
+            // Ueberschrift und Text standen sonst ohne Trennung untereinander,
+            // bei vier Spalten 25 Felder am Stueck. Die erste Spalte steht offen,
+            // damit der Aufbau sofort erkennbar bleibt.
+            self::accordionField(
+                "field_{$prefix}_acc_column_{$n}",
+                /* translators: %d: column number */
+                sprintf(__('Spalte %d', 'wp-starter'), $n),
+                $n === 1,
+            ),
             self::textField(
                 "field_{$prefix}_label_{$n}",
                 /* translators: %d: column number */
@@ -2284,6 +2312,9 @@ class FieldDefinitions
             ...self::sectionHeaderFields($prefix),
             ...self::buildColumnImageBlock($prefix, 1, __('Bild für die linke Karte.', 'wp-starter')),
             ...self::buildColumnImageBlock($prefix, 2, __('Bild für die rechte Karte.', 'wp-starter')),
+            // Endpunkt: ohne ihn zieht das Akkordeon der letzten Spalte auch
+            // Hintergrund, Abstand und Anker zu sich herein.
+            self::accordionField("field_{$prefix}_acc_ende", '', false, true, true),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
             self::sectionWidthField($prefix),
@@ -2303,6 +2334,9 @@ class FieldDefinitions
             ...self::buildColumnImageBlock($prefix, 1, __('Bild für die linke Karte.', 'wp-starter')),
             ...self::buildColumnImageBlock($prefix, 2, __('Bild für die mittlere Karte.', 'wp-starter')),
             ...self::buildColumnImageBlock($prefix, 3, __('Bild für die rechte Karte.', 'wp-starter')),
+            // Endpunkt: ohne ihn zieht das Akkordeon der letzten Spalte auch
+            // Hintergrund, Abstand und Anker zu sich herein.
+            self::accordionField("field_{$prefix}_acc_ende", '', false, true, true),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
             self::sectionWidthField($prefix),
@@ -2323,6 +2357,9 @@ class FieldDefinitions
             ...self::buildColumnImageBlock($prefix, 2, __('Bild für die zweite Karte.', 'wp-starter')),
             ...self::buildColumnImageBlock($prefix, 3, __('Bild für die dritte Karte.', 'wp-starter')),
             ...self::buildColumnImageBlock($prefix, 4, __('Bild für die vierte Karte.', 'wp-starter')),
+            // Endpunkt: ohne ihn zieht das Akkordeon der letzten Spalte auch
+            // Hintergrund, Abstand und Anker zu sich herein.
+            self::accordionField("field_{$prefix}_acc_ende", '', false, true, true),
             self::backgroundColorField($prefix),
             self::sectionSpacingField($prefix),
             self::sectionWidthField($prefix),
