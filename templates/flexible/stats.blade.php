@@ -8,6 +8,7 @@
 
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $stats = get_sub_field('stats') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
     $statsId = uniqid();
@@ -31,7 +32,7 @@
 
 @if($title || !empty($stats))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="stats">
-    <x-section-header :headline="$title" />
+    <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if(!empty($stats))
         <div class="flex flex-wrap justify-center gap-8 text-center">

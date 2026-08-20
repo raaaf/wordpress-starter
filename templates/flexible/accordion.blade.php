@@ -2,7 +2,7 @@
     Accordion - Flexible Content Layout
 
     Uses shared components: x-section, x-prose
-    Fields: accordion (repeater with icon, title, content), first_open,
+    Fields: title, section extras, accordion (repeater with icon, title, content), first_open,
     allow_multiple, faq_schema, background_color
 
     Includes FAQPage JSON-LD schema for SEO rich snippets, gated to singular,
@@ -15,6 +15,8 @@
 --}}
 
 @php
+    $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $items = get_sub_field('accordion') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
     $firstOpen = (bool) get_sub_field('first_open');
@@ -50,8 +52,9 @@
     }
 @endphp
 
-@if(!empty($items) || current_user_can('edit_posts'))
+@if($title || !empty($items) || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" padding="md" class="accordion">
+    <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
     <div class="max-w-2xl mx-auto">
         @php $itemCount = count($items); @endphp
         <div

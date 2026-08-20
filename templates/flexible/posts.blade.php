@@ -9,6 +9,7 @@
 
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $postType = get_sub_field('post_type') ?: 'post';
     $postsPerPage = get_sub_field('posts_per_page') ?: 3;
     $category = get_sub_field('category') ?: '';
@@ -54,7 +55,7 @@
 @endphp
 
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="posts">
-    <x-section-header :headline="$title" />
+    <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if($postsQuery->have_posts())
         <ul class="grid gap-8 {{ $gridClass }}" role="list">

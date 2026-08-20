@@ -13,6 +13,8 @@
     use WordpressStarter\PostTypes\Team;
 
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $source = get_sub_field('source') ?: 'manual';
     $columns = get_sub_field('columns') ?: 3;
     $background = get_sub_field('background_color') ?: 'primary';
@@ -41,7 +43,7 @@
 
 @if(!empty($members) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="team">
-    <x-section-header :headline="$title" />
+    <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if(!empty($members))
         @php

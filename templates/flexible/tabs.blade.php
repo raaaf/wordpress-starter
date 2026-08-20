@@ -8,6 +8,7 @@
 
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $tabs = get_sub_field('tabs') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
     $uniqueId = 'tabs-' . uniqid();
@@ -15,7 +16,7 @@
 
 @if(!empty($tabs) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="tabs">
-    <x-section-header :headline="$title" />
+    <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if(!empty($tabs))
         @php $tabCount = count($tabs); @endphp

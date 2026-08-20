@@ -8,6 +8,7 @@
 
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $labelBefore = get_sub_field('label_before') ?: 'Vorher';
     $labelAfter = get_sub_field('label_after') ?: 'Nachher';
     $background = get_sub_field('background_color') ?: 'primary';
@@ -32,7 +33,7 @@
 
 @if(($hasImageBefore && $hasImageAfter) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="before-after">
-    <x-section-header :headline="$title" />
+    <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if($hasImageBefore && $hasImageAfter)
         <div

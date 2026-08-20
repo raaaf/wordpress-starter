@@ -27,6 +27,33 @@ final class SectionHeader
     }
 
     /**
+     * Reads chip, description and alignment for layouts that keep their own
+     * title field.
+     *
+     * Diese Module heissen ihre Ueberschrift seit jeher "title" und tragen
+     * keinen Schalter fuer das Kopfteil: sie zeigen es, sobald etwas darin
+     * steht. Die Ueberschrift kommt deshalb vom Aufrufer, nicht von hier.
+     *
+     * @param string|null $title Die bereits gelesene Ueberschrift des Layouts
+     *
+     * @return array{chip: ?string, headline: ?string, description: ?string, alignment: string}
+     */
+    public static function extras(?string $title = null): array
+    {
+        $chip = get_sub_field('section_chip');
+        $description = get_sub_field('section_description');
+
+        return [
+            'chip' => is_string($chip) && $chip !== '' ? $chip : null,
+            'headline' => $title,
+            'description' => is_string($description) && $description !== ''
+                ? Text::lineBreaks($description)
+                : null,
+            'alignment' => get_sub_field('section_alignment') ?: 'center',
+        ];
+    }
+
+    /**
      * @return array{chip: ?string, headline: ?string, description: ?string, alignment: string}
      */
     public static function fields(): array

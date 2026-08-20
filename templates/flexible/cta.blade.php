@@ -12,10 +12,12 @@
     $content = get_sub_field('content');
     $button = get_sub_field('button');
     $background = get_sub_field('background_color') ?: 'primary';
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras(null);
 @endphp
 
 @if($title || $content || $button)
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" padding="lg" class="cta">
+    <x-section-header :chip="$kopf['chip']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
     <div class="max-w-3xl mx-auto bg-surface-brand rounded-[var(--card-radius)] p-8 md:p-12 text-center">
         @if($title)
             <h2 class="mb-4 text-content-on-brand">{!! $title !!}</h2>

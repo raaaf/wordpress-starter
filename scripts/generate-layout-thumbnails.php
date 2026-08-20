@@ -74,6 +74,10 @@ const LAYOUTS = [
     'contact_form' => ['cols' => [1, 1], 'cell' => [['head', 'text'], ['form']], 'head' => false],
     'map' => ['cols' => 1, 'cell' => [['map']], 'head' => true],
     'member_downloads' => ['cols' => 1, 'cell' => [['table']], 'head' => true],
+    'alert' => ['cols' => 1, 'cell' => [['alertbox']], 'head' => false],
+    'quote' => ['cols' => 1, 'cell' => [['quote', 'avatar']], 'head' => false],
+    'newsletter' => ['cols' => 1, 'cell' => [['inputbar']], 'head' => true],
+    'embed' => ['cols' => 1, 'cell' => [['embedbox']], 'head' => true],
 ];
 
 final class Canvas
@@ -377,6 +381,35 @@ function draw(Canvas $c, string $kind, int $x, int $y, int $w, int $avail): int
             $c->box($x, $y + 3 * 34, 90, 22, $c->accent, 11);
 
             return $y + 3 * 34 + 30;
+
+        case 'alertbox':
+            $h = 70;
+            $c->box($x, $y, $w, $h, $c->bg, 8);
+            $c->outline($x, $y, $w, $h, $c->accent);
+            $c->box($x + 18, $y + 22, 18, 18, $c->accent, 9);
+            $c->box($x + 48, $y + 24, (int) ($w * 0.35), 8, $c->ink, 3);
+            $c->box($x + 48, $y + 42, (int) ($w * 0.6), 5, $c->inkSoft, 2);
+
+            return $y + $h + $gap;
+
+        case 'inputbar':
+            $feld = (int) ($w * 0.62);
+            $c->box($x, $y, $feld, 30, imagecolorallocate($c->img, 255, 255, 255), 6);
+            $c->outline($x, $y, $feld, 30, $c->line);
+            $c->box($x + 14, $y + 12, (int) ($feld * 0.45), 6, $c->inkSoft, 3);
+            $c->box($x + $feld + 12, $y, $w - $feld - 12, 30, $c->accent, 6);
+
+            return $y + 30 + $gap;
+
+        case 'embedbox':
+            $h = min(150, $avail);
+            $c->box($x, $y, $w, $h, $c->line, 8);
+            $c->outline($x, $y, $w, $h, $c->inkSoft);
+            $pfeil = 26;
+            $c->box($x + $w - $pfeil - 16, $y + 16, $pfeil, 5, $c->accent, 2);
+            $c->box($x + $w - 21, $y + 16, 5, $pfeil, $c->accent, 2);
+
+            return $y + $h + $gap;
 
         case 'divider':
             $c->box($x, $y + (int) ($avail / 2), $w, 3, $c->line, 1);

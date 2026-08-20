@@ -1306,6 +1306,59 @@ class FieldDefinitions
     }
 
     /**
+     * Get the section header extras: chip, description, alignment
+     *
+     * Zehn Spaltenlayouts hatten ueber sectionHeaderFields() ein vollstaendiges
+     * Kopfteil, alle anderen Module nur ein Titelfeld und damit zwangsweise eine
+     * zentrierte Ueberschrift ohne Einleitung. Wer dort eine Einleitung brauchte,
+     * musste eine eigene Textsektion davorsetzen.
+     *
+     * Diese drei Felder ergaenzen ein bestehendes title-Feld, statt es auf
+     * section_headline umzubenennen: die Umbenennung muesste jede bestehende
+     * Sektion migrieren, fuer denselben Effekt.
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function sectionHeaderExtras(string $prefix): array
+    {
+        $chip = self::textField(
+            "field_{$prefix}_section_chip",
+            __('Chip', 'wp-starter'),
+            'section_chip',
+            false,
+            __('Optionaler Chip über der Überschrift.', 'wp-starter'),
+        );
+        $chip['wrapper'] = ['width' => '50'];
+
+        $alignment = self::buttonGroupField(
+            "field_{$prefix}_section_alignment",
+            __('Ausrichtung', 'wp-starter'),
+            'section_alignment',
+            [
+                'center' => __('Zentriert', 'wp-starter'),
+                'left' => __('Linksbündig', 'wp-starter'),
+            ],
+            'center',
+            __('Ausrichtung von Chip, Überschrift und Beschreibung.', 'wp-starter'),
+        );
+        $alignment['wrapper'] = ['width' => '50'];
+
+        return [
+            $chip,
+            $alignment,
+            self::textareaField(
+                "field_{$prefix}_section_description",
+                __('Beschreibung', 'wp-starter'),
+                'section_description',
+                2,
+                __('Optionale Einleitung unter der Überschrift.', 'wp-starter'),
+            ),
+        ];
+    }
+
+    /**
      * Get Section Header fields (toggle + chip + headline + description)
      *
      * @param string $prefix Key prefix
@@ -1510,17 +1563,20 @@ class FieldDefinitions
     public static function accordionFields(string $prefix): array
     {
         return [
+            self::textField(
+                "field_{$prefix}_title",
+                __('Überschrift', 'wp-starter'),
+                'title',
+                false,
+                __('Optionale Überschrift über dem Akkordeon.', 'wp-starter'),
+                __('z.B. Häufige Fragen', 'wp-starter'),
+            ),
+            ...self::sectionHeaderExtras($prefix),
             self::repeaterField(
                 "field_{$prefix}_accordion",
                 __('Akkordeon-Einträge', 'wp-starter'),
                 'accordion',
                 [
-                    self::iconRadioField(
-                        "field_{$prefix}_accordion_icon",
-                        __('Icon', 'wp-starter'),
-                        'icon',
-                        __('Optionales Icon vor dem Titel.', 'wp-starter'),
-                    ),
                     self::textField(
                         "field_{$prefix}_accordion_title",
                         __('Titel', 'wp-starter'),
@@ -1536,6 +1592,12 @@ class FieldDefinitions
                         true,
                         null,
                         __('Der ausgeklappte Inhalt des Akkordeon-Eintrags.', 'wp-starter'),
+                    ),
+                    self::iconRadioField(
+                        "field_{$prefix}_accordion_icon",
+                        __('Icon', 'wp-starter'),
+                        'icon',
+                        __('Optionales Icon vor dem Titel.', 'wp-starter'),
                     ),
                 ],
                 __('Eintrag hinzufügen', 'wp-starter'),
@@ -1589,6 +1651,7 @@ class FieldDefinitions
                 __('Die Hauptüberschrift des Call-to-Action Bereichs.', 'wp-starter'),
                 __('z.B. Jetzt starten!', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::textareaField(
                 "field_{$prefix}_content",
                 __('Beschreibung', 'wp-starter'),
@@ -2292,6 +2355,7 @@ class FieldDefinitions
                 __('Optionale Überschrift über den Testimonials.', 'wp-starter'),
                 __('z.B. Das sagen unsere Kunden', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::buttonGroupField(
                 "field_{$prefix}_source",
                 __('Datenquelle', 'wp-starter'),
@@ -2387,17 +2451,12 @@ class FieldDefinitions
                 __('Optionale Überschrift über den Karten.', 'wp-starter'),
                 __('z.B. Unsere Leistungen', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::repeaterField(
                 "field_{$prefix}_cards",
                 __('Karten', 'wp-starter'),
                 'cards',
                 [
-                    self::iconRadioField(
-                        "field_{$prefix}_card_icon",
-                        __('Icon', 'wp-starter'),
-                        'icon',
-                        __('Wähle ein Icon aus dem Theme.', 'wp-starter'),
-                    ),
                     self::textField(
                         "field_{$prefix}_card_title",
                         __('Titel', 'wp-starter'),
@@ -2420,6 +2479,12 @@ class FieldDefinitions
                         'link',
                         false,
                         __('Optionaler Link zu mehr Informationen.', 'wp-starter'),
+                    ),
+                    self::iconRadioField(
+                        "field_{$prefix}_card_icon",
+                        __('Icon', 'wp-starter'),
+                        'icon',
+                        __('Wähle ein Icon aus dem Theme.', 'wp-starter'),
                     ),
                 ],
                 __('Karte hinzufügen', 'wp-starter'),
@@ -2476,6 +2541,7 @@ class FieldDefinitions
                 __('Optionale Überschrift über der Galerie.', 'wp-starter'),
                 __('z.B. Unsere Projekte', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             [
                 'key' => "field_{$prefix}_images",
                 'label' => __('Bilder', 'wp-starter'),
@@ -2526,6 +2592,7 @@ class FieldDefinitions
                 __('Optionale Überschrift über dem Logo-Slider.', 'wp-starter'),
                 __('z.B. Unsere Partner', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::repeaterField(
                 "field_{$prefix}_logos",
                 __('Logos', 'wp-starter'),
@@ -2689,6 +2756,7 @@ class FieldDefinitions
                 __('Optionale Überschrift über der Karte.', 'wp-starter'),
                 __('z.B. So findest du uns', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::textareaField(
                 "field_{$prefix}_address",
                 __('Adresse', 'wp-starter'),
@@ -2732,17 +2800,12 @@ class FieldDefinitions
                 __('Optionale Überschrift über den Tabs.', 'wp-starter'),
                 __('z.B. Häufige Fragen', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::repeaterField(
                 "field_{$prefix}_tabs",
                 __('Tabs', 'wp-starter'),
                 'tabs',
                 [
-                    self::iconRadioField(
-                        "field_{$prefix}_tab_icon",
-                        __('Icon', 'wp-starter'),
-                        'icon',
-                        __('Optionales Icon neben dem Tab-Titel.', 'wp-starter'),
-                    ),
                     self::textField(
                         "field_{$prefix}_tab_title",
                         __('Tab-Titel', 'wp-starter'),
@@ -2758,6 +2821,12 @@ class FieldDefinitions
                         true,
                         null,
                         __('Der Inhalt, der angezeigt wird, wenn dieser Tab aktiv ist.', 'wp-starter'),
+                    ),
+                    self::iconRadioField(
+                        "field_{$prefix}_tab_icon",
+                        __('Icon', 'wp-starter'),
+                        'icon',
+                        __('Optionales Icon neben dem Tab-Titel.', 'wp-starter'),
                     ),
                 ],
                 __('Tab hinzufügen', 'wp-starter'),
@@ -2794,6 +2863,7 @@ class FieldDefinitions
                 __('Optionale Überschrift über der Preistabelle.', 'wp-starter'),
                 __('z.B. Unsere Pakete', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::repeaterField(
                 "field_{$prefix}_plans",
                 __('Preispakete', 'wp-starter'),
@@ -2917,6 +2987,7 @@ class FieldDefinitions
                 __('Optionale Überschrift über dem Team.', 'wp-starter'),
                 __('z.B. Unser Team', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::buttonGroupField(
                 "field_{$prefix}_source",
                 __('Datenquelle', 'wp-starter'),
@@ -3038,6 +3109,7 @@ class FieldDefinitions
                 __('Optionale Überschrift über den Statistiken.', 'wp-starter'),
                 __('z.B. Zahlen & Fakten', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::repeaterField(
                 "field_{$prefix}_stats",
                 __('Statistiken', 'wp-starter'),
@@ -3070,12 +3142,6 @@ class FieldDefinitions
                         __('Was diese Zahl bedeutet.', 'wp-starter'),
                         __('z.B. Zufriedene Kunden', 'wp-starter'),
                     ),
-                    self::iconRadioField(
-                        "field_{$prefix}_stat_icon",
-                        __('Icon', 'wp-starter'),
-                        'icon',
-                        __('Optionales Icon für diese Statistik.', 'wp-starter'),
-                    ),
                 ],
                 __('Statistik hinzufügen', 'wp-starter'),
                 1,
@@ -3107,6 +3173,7 @@ class FieldDefinitions
                 __('Optionale Überschrift über dem Zeitstrahl.', 'wp-starter'),
                 __('z.B. Unsere Geschichte', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::repeaterField(
                 "field_{$prefix}_events",
                 __('Ereignisse', 'wp-starter'),
@@ -3155,6 +3222,12 @@ class FieldDefinitions
                     ),
                     // Accordion Ende
                     self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
+                    self::iconRadioField(
+                        "field_{$prefix}_stat_icon",
+                        __('Icon', 'wp-starter'),
+                        'icon',
+                        __('Optionales Icon für diese Statistik.', 'wp-starter'),
+                    ),
                 ],
                 __('Ereignis hinzufügen', 'wp-starter'),
                 2,
@@ -3199,6 +3272,7 @@ class FieldDefinitions
                 __('Optionale Überschrift über den Beiträgen.', 'wp-starter'),
                 __('z.B. Aktuelle Neuigkeiten', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::buttonGroupField(
                 "field_{$prefix}_post_type",
                 __('Beitragstyp', 'wp-starter'),
@@ -3330,6 +3404,7 @@ class FieldDefinitions
                 __('Optionale Überschrift über dem Vergleich.', 'wp-starter'),
                 __('z.B. Vorher vs. Nachher', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::imageField(
                 "field_{$prefix}_image_before",
                 __('Vorher-Bild', 'wp-starter'),
@@ -3393,6 +3468,7 @@ class FieldDefinitions
                 __('Optionale Überschrift über der Tabelle.', 'wp-starter'),
                 __('z.B. Preisübersicht', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::repeaterField(
                 "field_{$prefix}_headers",
                 __('Spaltenüberschriften', 'wp-starter'),
@@ -3710,6 +3786,7 @@ class FieldDefinitions
                 __('Optionale Überschrift über der Einbettung.', 'wp-starter'),
                 __('z.B. Termin buchen', 'wp-starter'),
             ),
+            ...self::sectionHeaderExtras($prefix),
             self::messageField(
                 "field_{$prefix}_help",
                 __('<strong>Nur die Adresse, nicht der ganze Code.</strong> Im Einbettungscode des Anbieters steht <em>src="…"</em>, genau diese Adresse gehört hier hinein. Der Host muss unter <em>Theme-Einstellungen → Analytics → Externe Einbettungen</em> freigegeben sein, sonst blockiert ihn die Sicherheitsrichtlinie der Seite.', 'wp-starter'),

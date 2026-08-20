@@ -7,6 +7,7 @@
 
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $address = get_sub_field('address') ?: '';
     $embedUrl = get_sub_field('embed_url') ?: '';
     $height = get_sub_field('height') ?: 400;
@@ -19,7 +20,7 @@
 
 @if($embedUrl || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="map">
-    <x-section-header :headline="$title" />
+    <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if($embedUrl)
         <div

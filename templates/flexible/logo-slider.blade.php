@@ -8,6 +8,7 @@
 
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $logos = get_sub_field('logos');
     $autoplay = get_sub_field('autoplay') ?? true;
     $background = get_sub_field('background_color') ?: 'primary';
@@ -70,7 +71,7 @@
 
 @if($title || !empty($logoData))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" padding="md" class="logo-slider">
-    <x-section-header :headline="$title" />
+    <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if(!empty($logoData))
         <div

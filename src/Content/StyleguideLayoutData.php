@@ -1171,6 +1171,21 @@ class StyleguideLayoutData
             'background_color' => 'primary',
         ]);
 
+        // Sektionskopf ausserhalb der Spaltenlayouts: Chip, Einleitung und
+        // linksbuendig. Vorher konnte das nur eine vorgeschaltete Textsektion.
+        $catalog[] = $this->layout('cards', [
+            'title' => 'Karten mit Chip und Einleitung',
+            'section_chip' => 'Leistungen',
+            'section_description' => 'Die Einleitung steht jetzt im Modul selbst, nicht mehr in einer eigenen Textsektion davor.',
+            'section_alignment' => 'left',
+            'cards' => [
+                ['icon' => 'check', 'title' => 'Linksbündig', 'content' => 'Chip, Überschrift und Einleitung stehen links.', 'link' => null],
+                ['icon' => 'star', 'title' => 'Zwei Spalten', 'content' => 'Der Kopf gilt für das ganze Modul.', 'link' => null],
+            ],
+            'columns' => '2',
+            'background_color' => 'secondary',
+        ]);
+
         // --- Abstaende -------------------------------------------------------
         // Die Stufen sind nur im Vergleich lesbar, deshalb stehen sie direkt
         // untereinander und alle auf derselben Flaeche.

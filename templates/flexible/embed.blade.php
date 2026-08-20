@@ -21,6 +21,7 @@
     $ratio = get_sub_field('aspect_ratio') ?: '16-9';
     $height = (int) (get_sub_field('height') ?: 700);
     $background = get_sub_field('background_color') ?: 'primary';
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
 
     $host = $url !== '' ? (string) wp_parse_url($url, PHP_URL_HOST) : '';
     $isHttps = $url !== '' && wp_parse_url($url, PHP_URL_SCHEME) === 'https';
@@ -36,9 +37,7 @@
 
 @if(($url !== '' && $isHttps) || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="embed">
-    @if($title)
-        <h2 class="mb-6 text-center">{!! $title !!}</h2>
-    @endif
+    <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if($url !== '' && $isHttps)
         <div class="max-w-4xl mx-auto {{ $aspectClass }}">

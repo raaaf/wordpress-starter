@@ -11,6 +11,7 @@
 
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+    $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $plans = get_sub_field('plans') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
     $billingToggle = (bool) get_sub_field('billing_toggle');
@@ -31,7 +32,7 @@
 
 @if($title || !empty($plans) || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="pricing-table">
-    <x-section-header :headline="$title" />
+    <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if(!empty($plans))
         <div @if($billingToggle) x-data="{ yearly: false }" @endif>

@@ -925,6 +925,7 @@ class FlexibleContent
             'display' => 'block',
             'sub_fields' => FieldDefinitions::embedFields('flex_embed'),
             'acfe_flexible_category' => self::getCategories()['misc'],
+            'acfe_flexible_thumbnail' => 'embed.png',
         ];
     }
 
@@ -942,6 +943,7 @@ class FlexibleContent
             'display' => 'block',
             'sub_fields' => FieldDefinitions::newsletterFields('flex_newsletter'),
             'acfe_flexible_category' => self::getCategories()['forms'],
+            'acfe_flexible_thumbnail' => 'newsletter.png',
         ];
     }
 
@@ -959,6 +961,7 @@ class FlexibleContent
             'display' => 'block',
             'sub_fields' => FieldDefinitions::quoteFields('flex_quote'),
             'acfe_flexible_category' => self::getCategories()['content'],
+            'acfe_flexible_thumbnail' => 'quote.png',
         ];
     }
 
@@ -976,6 +979,7 @@ class FlexibleContent
             'display' => 'block',
             'sub_fields' => FieldDefinitions::alertFields('flex_alert'),
             'acfe_flexible_category' => self::getCategories()['content'],
+            'acfe_flexible_thumbnail' => 'alert.png',
         ];
     }
 

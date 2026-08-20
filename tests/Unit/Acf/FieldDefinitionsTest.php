@@ -418,10 +418,13 @@ final class FieldDefinitionsTest extends TestCase
     {
         $fields = FieldDefinitions::accordionFields('accordion');
 
-        $this->assertCount(8, $fields);
+        $this->assertCount(12, $fields);
 
-        // First field should be the repeater
-        $repeaterField = $fields[0];
+        // Der Wiederholer steht seit dem Sektionskopf nicht mehr an erster Stelle.
+        $repeaterField = array_values(array_filter(
+            $fields,
+            static fn (array $field): bool => ( $field['name'] ?? '' ) === 'accordion'
+        ))[0];
         $this->assertSame('repeater', $repeaterField['type']);
         $this->assertSame('accordion', $repeaterField['name']);
 

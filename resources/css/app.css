@@ -2687,4 +2687,11 @@ html {
 .wpcf7-form .wpcf7-acceptance input[type='checkbox'] {
   flex: none;
   margin-top: 0.15rem;
+
+  /* WCAG 2.5.8 will 24px Trefferflaeche. CF7 liefert die Checkbox in der
+     Browsergroesse aus, gemessen 20x20. Die Flaeche waechst, das gezeichnete
+     Kaestchen bleibt optisch gleich gross, weil accent-color und Rahmen
+     unveraendert bleiben. */
+  width: 1.5rem;
+  height: 1.5rem;
 }
