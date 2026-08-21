@@ -44,7 +44,10 @@
     // Variants matching Figma design with gradients and shadows
     $variants = [
         'primary' => implode(' ', [
-            'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)]',
+            // Flaeche und Glanz stehen in app.css: eine flache Farbe laesst sich
+            // animieren, ein Verlauf nicht, und der Kontrast bleibt ueber die
+            // ganze Hoehe gleich. Der Verlauf davor fiel je nach Theme von 6.08
+            // auf 2.69 zwischen oberer und unterer Kante.
             // Follows the fill, not the page: see --text-on-accent in app.css.
             'text-content-on-accent',
             // Transparent statt --border-default: eine helle Haarlinie auf der
@@ -52,9 +55,11 @@
             // damit der Knopf neben den umrandeten Varianten gleich hoch steht.
             'border border-transparent',
             'shadow-[var(--shadow-button)]',
-            'hover:from-[var(--gradient-primary-hover-start)] hover:to-[var(--gradient-primary-hover-end)]',
+            // Hover und Aktiv wechseln den Verlauf nicht mehr hier, sondern ueber
+            // eine zweite Ebene in app.css: Browser interpolieren
+            // background-image nicht, der Wechsel sprang also, waehrend die
+            // Varianten mit background-color weich liefen.
             'hover:shadow-[var(--shadow-button-hover)]',
-            'active:from-[var(--gradient-primary-active-start)] active:to-[var(--gradient-primary-active-end)]',
             'active:shadow-[var(--shadow-inner)]',
             'focus-visible:shadow-[var(--shadow-focus-ring)]',
         ]),
