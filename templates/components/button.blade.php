@@ -36,7 +36,10 @@
     // 'button' class is used for editor CSS overrides (prevents WordPress link styling)
     // active:scale-[0.98] is a Tailwind v4 `scale` utility, not `transform` --
     // the transition list has to name the property that actually animates.
-    $baseClasses = 'button inline-flex items-center justify-center font-semibold transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-none active:scale-[0.98]';
+    // button--<variante> traegt keine Gestaltung, sie macht die Variante nur
+    // adressierbar: fuer Flaechen, die der Utility-Klasse nicht bekannt sind
+    // (invers, Markenflaeche, Hero-Scrim), und fuer Messungen.
+    $baseClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-semibold transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-none active:scale-[0.98]';
 
     // Variants matching Figma design with gradients and shadows
     $variants = [
@@ -44,7 +47,10 @@
             'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)]',
             // Follows the fill, not the page: see --text-on-accent in app.css.
             'text-content-on-accent',
-            'border border-line',
+            // Transparent statt --border-default: eine helle Haarlinie auf der
+            // farbigen Fuellung liest sich als Ausfransung. Die Geometrie bleibt,
+            // damit der Knopf neben den umrandeten Varianten gleich hoch steht.
+            'border border-transparent',
             'shadow-[var(--shadow-button)]',
             'hover:from-[var(--gradient-primary-hover-start)] hover:to-[var(--gradient-primary-hover-end)]',
             'hover:shadow-[var(--shadow-button-hover)]',
@@ -57,6 +63,9 @@
             'text-content',
             'border border-line',
             'shadow-[var(--shadow-button)]',
+            // Nur Rand und Schatten zu wechseln war als Rueckmeldung zu leise,
+            // die Flaeche geht eine Stufe mit.
+            'hover:bg-surface-tertiary',
             'hover:border-line-strong',
             'hover:shadow-[var(--shadow-button-hover)]',
             'active:bg-surface-tertiary',
@@ -67,9 +76,15 @@
             'bg-transparent',
             'text-content',
             'border border-transparent',
-            'hover:bg-surface-tertiary',
-            'active:bg-surface-secondary',
-            'active:border-line',
+            // Dezent unterscheidet seine Zustaende allein ueber die Flaeche.
+            // Vorher kam im Aktiv-Zustand ein Rand dazu, den weder Ruhe noch
+            // Hover haben; nebeneinander sahen die drei Zustaende nach drei
+            // verschiedenen Knoepfen aus.
+            // Die Flaechenleiter geht primary, secondary, tertiary von hell nach
+            // dunkel. Vorher lag Hover auf tertiary und Aktiv auf secondary, das
+            // Druecken war also heller als das Ueberfahren.
+            'hover:bg-surface-secondary',
+            'active:bg-surface-tertiary',
             'focus-visible:shadow-[var(--shadow-focus-ring-ghost)]',
         ]),
         'danger' => implode(' ', [
@@ -104,11 +119,19 @@
     // Disabled state overrides (same for all variants)
     $disabledClasses = 'bg-surface-disabled text-content-disabled border border-line-disabled cursor-not-allowed shadow-none hover:bg-surface-disabled hover:shadow-none active:bg-surface-disabled';
 
-    // Sizes matching Figma with CSS variables
+    // Sizes matching Figma with CSS variables.
+    //
+    // Ein Radius fuer alle drei Groessen, nicht drei. Vorher waren es 4, 8 und 12
+    // Pixel; nebeneinander sah der kleine Knopf kantig und der grosse weich aus,
+    // obwohl es dieselbe Komponente ist. Der Eindruck "gleiche Ecke" entsteht am
+    // gleichen absoluten Radius, nicht an einem, der mit der Hoehe waechst.
+    // --button-radius laesst sich je Theme setzen, die scharfe Marke bleibt scharf.
+    $radius = 'rounded-[var(--button-radius,var(--button-md-radius))]';
+
     $sizes = [
-        'sm' => 'px-[var(--button-sm-padding-x)] py-[var(--button-sm-padding-y)] text-xs min-h-[var(--button-sm-min-height)] gap-[var(--button-sm-gap)] rounded-[var(--button-sm-radius)]',
-        'md' => 'px-[var(--button-md-padding-x)] py-[var(--button-md-padding-y)] text-sm min-h-[var(--button-md-min-height)] gap-[var(--button-md-gap)] rounded-[var(--button-md-radius)]',
-        'lg' => 'px-[var(--button-lg-padding-x)] py-[var(--button-lg-padding-y)] text-base min-h-[var(--button-lg-min-height)] gap-[var(--button-lg-gap)] rounded-[var(--button-lg-radius)]',
+        'sm' => 'px-[var(--button-sm-padding-x)] py-[var(--button-sm-padding-y)] text-xs min-h-[var(--button-sm-min-height)] gap-[var(--button-sm-gap)] ' . $radius,
+        'md' => 'px-[var(--button-md-padding-x)] py-[var(--button-md-padding-y)] text-sm min-h-[var(--button-md-min-height)] gap-[var(--button-md-gap)] ' . $radius,
+        'lg' => 'px-[var(--button-lg-padding-x)] py-[var(--button-lg-padding-y)] text-base min-h-[var(--button-lg-min-height)] gap-[var(--button-lg-gap)] ' . $radius,
     ];
 
     $variantClass = $disabled ? $disabledClasses : ($variants[$variant] ?? $variants['primary']);

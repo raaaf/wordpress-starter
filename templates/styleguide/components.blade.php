@@ -19,21 +19,73 @@
 
     {{-- Buttons --}}
     <h3 class="mb-6">Buttons</h3>
+
+    @php
+        $btnVarianten = ['primary' => 'Primär', 'secondary' => 'Sekundär', 'ghost' => 'Dezent', 'danger' => 'Warnung', 'inverse' => 'Invertiert'];
+        $btnZustaende = ['' => 'Standard', 'zeige-hover' => 'Hover', 'zeige-fokus' => 'Fokus', 'zeige-aktiv' => 'Aktiv'];
+    @endphp
+
+    {{-- Varianten mal Zustaende.
+         Die Zustandsspalten sind keine echten Pseudoklassen, die lassen sich nicht
+         erzwingen. Die Demo-Klassen in app.css greifen auf dieselben Tokens zu wie
+         die Komponente, kopieren also keine Werte, nur die Struktur. --}}
+    <div class="p-6 mb-6 overflow-x-auto bg-surface rounded-[var(--card-radius)] border border-line">
+        <table class="w-full text-left">
+            <thead>
+                <tr>
+                    <th class="pb-4 pr-6 text-body-small text-content-secondary font-normal">Variante</th>
+                    @foreach($btnZustaende as $label)
+                        <th class="pb-4 pr-6 text-body-small text-content-secondary font-normal">{{ $label }}</th>
+                    @endforeach
+                    <th class="pb-4 text-body-small text-content-secondary font-normal">Deaktiviert</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($btnVarianten as $variante => $label)
+                    <tr>
+                        <th scope="row" class="py-3 pr-6 font-normal text-content-secondary text-body-small">{{ $label }}</th>
+                        @foreach($btnZustaende as $klasse => $zustand)
+                            <td class="py-3 pr-6 {{ $klasse }}">
+                                <x-button url="#" :title="$label" :variant="$variante" />
+                            </td>
+                        @endforeach
+                        <td class="py-3">
+                            <x-button url="#" :title="$label" :variant="$variante" :disabled="true" />
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    {{-- Groessen --}}
     <div class="p-6 mb-6 bg-surface rounded-[var(--card-radius)] border border-line">
+        <p class="mb-4 text-body-small text-content-secondary">Größen. Sichtbar 32, 40 und 48 Pixel hoch; die Trefferfläche misst am Finger überall mindestens 44 Pixel.</p>
         <div class="flex flex-wrap items-center gap-4">
-            <x-button url="#" title="Primary" variant="primary" />
-            <x-button url="#" title="Secondary" variant="secondary" />
-            <x-button url="#" title="Ghost" variant="ghost" />
-            <x-button url="#" title="Danger" variant="danger" />
-            <x-button url="#" title="Inverse" variant="inverse" />
-            <x-button url="#" title="Disabled" variant="primary" :disabled="true" />
+            <x-button url="#" title="Klein" size="sm" />
+            <x-button url="#" title="Mittel" size="md" />
+            <x-button url="#" title="Groß" size="lg" />
+            <x-button url="#" title="Über die Breite" size="md" class="w-full sm:w-auto" />
         </div>
     </div>
-    <div class="p-6 mb-16 bg-surface rounded-[var(--card-radius)] border border-line">
-        <div class="flex flex-wrap items-center gap-4">
-            <x-button url="#" title="Small" size="sm" />
-            <x-button url="#" title="Medium" size="md" />
-            <x-button url="#" title="Large" size="lg" />
+
+    {{-- Auf fremden Flaechen --}}
+    <div class="grid gap-4 mb-16 md:grid-cols-2">
+        <div class="p-6 bg-surface-inverse text-content-inverse rounded-[var(--card-radius)]">
+            <p class="mb-4 text-body-small">Auf der inversen Fläche</p>
+            <div class="flex flex-wrap items-center gap-4">
+                <x-button url="#" title="Primär" variant="primary" />
+                <x-button url="#" title="Sekundär" variant="secondary" />
+                <x-button url="#" title="Dezent" variant="ghost" />
+            </div>
+        </div>
+        <div class="p-6 bg-surface-brand text-content-on-brand rounded-[var(--card-radius)]">
+            <p class="mb-4 text-body-small">Auf der Markenfläche</p>
+            <div class="flex flex-wrap items-center gap-4">
+                <x-button url="#" title="Invertiert" variant="inverse" />
+                <x-button url="#" title="Sekundär" variant="secondary" />
+                <x-button url="#" title="Dezent" variant="ghost" />
+            </div>
         </div>
     </div>
 

@@ -2735,3 +2735,123 @@ html {
   border: 1px solid rgb(255 255 255 / 0.35);
   color: rgb(255 255 255 / 0.9);
 }
+
+/* Buttons, bewusst ausserhalb jeder @layer.
+
+   1. Trefferflaeche. Die sichtbaren Hoehen sind 32, 40 und 48 Pixel. WCAG 2.5.8
+      verlangt 24, Apple und Google empfehlen 44 fuer den Finger. Statt die
+      kleinen Knoepfe optisch aufzublasen, vergroessert ein unsichtbares
+      Pseudoelement nur die Trefferflaeche. Zeiger und Tastatur merken nichts,
+      der Daumen schon.
+
+   2. Ghost und Sekundaer auf fremden Flaechen. Beide Varianten holen ihre Farben
+      aus den Seitentokens. Auf der inversen Flaeche und der Markenflaeche ist das
+      die falsche Seite: dort steht heller Text, ein Knopf mit --text-primary
+      verschwindet. */
+.button {
+  position: relative;
+}
+
+.button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: 100%;
+  height: 100%;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (pointer: fine) {
+  /* Am Zeiger ist die Vergroesserung unnoetig und kann Nachbarn ueberdecken. */
+  .button::after {
+    min-width: 0;
+    min-height: 0;
+  }
+}
+
+.bg-surface-inverse :is(.button--ghost, .button--secondary) {
+  color: var(--text-inverse);
+  border-color: rgb(255 255 255 / 0.4);
+  background-color: rgb(255 255 255 / 0.08);
+}
+
+.bg-surface-inverse :is(.button--ghost, .button--secondary):hover {
+  background-color: rgb(255 255 255 / 0.16);
+  border-color: rgb(255 255 255 / 0.7);
+}
+
+/* Auf der Markenflaeche ist Weiss die falsche Richtung: gemessen 2.84:1 auf dem
+   Orange. Dort gilt --text-on-brand, dieselbe Rolle, die auch Ueberschriften und
+   Fliesstext auf dieser Flaeche tragen, und die Aufhellung wird zur Abdunklung. */
+.bg-surface-brand :is(.button--ghost, .button--secondary) {
+  color: var(--text-on-brand);
+  border-color: rgb(0 0 0 / 0.35);
+  background-color: rgb(0 0 0 / 0.06);
+}
+
+.bg-surface-brand :is(.button--ghost, .button--secondary):hover {
+  background-color: rgb(0 0 0 / 0.12);
+  border-color: rgb(0 0 0 / 0.6);
+}
+
+/* Zustandsspalten im Styleguide, bewusst ausserhalb jeder @layer.
+
+   :hover, :focus-visible und :active lassen sich nicht erzwingen, eine Matrix
+   aller Zustaende braucht aber alle vier nebeneinander. Diese Regeln greifen auf
+   dieselben Tokens zu wie die Komponente, kopieren also keine Farbwerte. */
+.zeige-hover .button--primary {
+  background-image: linear-gradient(
+    to bottom,
+    var(--gradient-primary-hover-start),
+    var(--gradient-primary-hover-end)
+  );
+  box-shadow: var(--shadow-button-hover);
+}
+
+.zeige-hover .button--secondary {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-strong);
+}
+
+/* Dezent wechselt nur die Flaeche, keinen Rand. */
+.zeige-hover .button--ghost {
+  background-color: var(--bg-secondary);
+}
+
+.zeige-hover .button--danger {
+  background-color: var(--bg-error-strong-hover);
+}
+
+.zeige-hover .button--inverse {
+  background-color: var(--bg-secondary);
+}
+
+.zeige-fokus .button {
+  box-shadow: var(--shadow-focus-ring);
+}
+
+.zeige-aktiv .button {
+  scale: 0.98;
+}
+
+/* Den Innenschatten setzt die Komponente nur auf den gefuellten Varianten.
+   Dezent bekommt ihn nicht, sonst zeichnet der Aktiv-Zustand einen Rand, den
+   Ruhe und Hover nicht haben. */
+.zeige-aktiv :is(.button--primary, .button--secondary, .button--danger, .button--inverse) {
+  box-shadow: var(--shadow-inner);
+}
+
+.zeige-aktiv :is(.button--secondary, .button--ghost) {
+  background-color: var(--bg-tertiary);
+}
+
+.zeige-aktiv .button--primary {
+  background-image: linear-gradient(
+    to bottom,
+    var(--gradient-primary-active-start),
+    var(--gradient-primary-active-end)
+  );
+}
