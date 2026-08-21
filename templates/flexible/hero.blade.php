@@ -125,7 +125,7 @@
                 @endif
 
                 @if($copy)
-                    <p class="text-body-large mb-8 max-w-[52ch] text-content-secondary">{!! $copy !!}</p>
+                    <p class="text-body-large mb-8 max-w-[52ch] mx-auto text-pretty text-content-secondary">{!! $copy !!}</p>
                 @endif
 
                 @if($cta_primary || $cta_secondary)
@@ -245,10 +245,12 @@
                  Die Breite in ch statt aus dem 3xl des Wrappers: zentrierter Text
                  lief gemessen 83 Zeichen weit, und zentriert liest sich lang
                  schwerer als linksbuendig. ch ist die Breite der Null und damit
-                 breiter als das mittlere Zeichen, deshalb 52ch fuer rund 70. Die Ueberschrift behaelt die volle
+                 breiter als das mittlere Zeichen, deshalb 52ch fuer rund 70.
+                 Der Text bleibt zentriert, die Variante heisst so. text-pretty
+                 verteilt die Zeilen gleichmaessig, statt lang, lang, kurz. Die Ueberschrift behaelt die volle
                  Breite, sie ist kurz und soll tragen. --}}
             @if($copy)
-                <p class="text-body-large mb-8 max-w-[52ch] mx-auto text-content-secondary">{!! $copy !!}</p>
+                <p class="text-body-large mb-8 max-w-[52ch] mx-auto text-pretty text-content-secondary">{!! $copy !!}</p>
             @endif
 
             @if($cta_primary || $cta_secondary)
