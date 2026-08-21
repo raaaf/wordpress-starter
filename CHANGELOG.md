@@ -1,3 +1,16 @@
+# [2.30.0](https://github.com/raaaf/wordpress-starter/compare/v2.29.1...v2.30.0) (2026-08-21)
+
+### Bug Fixes
+
+- **button:** flache Fuellung statt Verlauf beim primaeren Knopf ([127edfc](https://github.com/raaaf/wordpress-starter/commit/127edfcd760c2e3cedc27b39c7da34c9ec133487))
+- **hero:** Chip und sekundaerer Button treten hinter der Ueberschrift zurueck ([4176589](https://github.com/raaaf/wordpress-starter/commit/41765891a48bef9072865463fc813d8e77fb2da5))
+- **hero:** Copy mittig im Block, Zeilen ueber text-pretty ausgeglichen ([920947e](https://github.com/raaaf/wordpress-starter/commit/920947ee7efc6949f082b218705329fbdc2ae8cf))
+- **typo:** Lesespalten auf bequeme Zeilenlaenge, Textspalte folgt der Ausrichtung ([6742a41](https://github.com/raaaf/wordpress-starter/commit/6742a41edb5a80f5d47aea6f54edad24f263cb92))
+
+### Features
+
+- **button:** einheitlicher Radius, groessere Trefferflaeche, Zustandsmatrix im Styleguide ([89b9560](https://github.com/raaaf/wordpress-starter/commit/89b95607f622524b24121ce63cda5067bc0c10f4))
+
 ## [2.29.1](https://github.com/raaaf/wordpress-starter/compare/v2.29.0...v2.29.1) (2026-08-20)
 
 ### Bug Fixes
