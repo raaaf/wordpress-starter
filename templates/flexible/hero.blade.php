@@ -28,6 +28,24 @@
     // Convert 0-100 to 0-1 for CSS opacity
     $overlay_opacity_css = $overlay_opacity / 100;
 
+    // Der Scrim dunkelt immer ab, in beiden Farbschemata. Ein heller Schleier
+    // ueber dem Bild zieht jedes Motiv ins Pastellige und garantiert trotzdem
+    // keine Lesbarkeit, weil sie vom hellsten Fleck des Bildes abhaengt.
+    // Abdunkeln plus helle Schrift ist die uebliche Loesung (NN/g, Smashing):
+    // 40 bis 60 Prozent Schwarz fuer weisse Schrift.
+    //
+    // Kein flaechiger Schleier, sondern ein Verlauf, der hinter dem Text am
+    // staerksten deckt und zu den Ecken hin nachlaesst. Das Bild behaelt dort
+    // seine Farbe, wo kein Text steht.
+    $scrimMitte = min(0.85, $overlay_opacity_css * 0.75);
+    $scrimAussen = round($scrimMitte * 0.55, 2);
+    $scrimCss = sprintf(
+        'radial-gradient(ellipse 90%% 75%% at 50%% 50%%, rgba(0,0,0,%s) 0%%, rgba(0,0,0,%s) 55%%, rgba(0,0,0,%s) 100%%)',
+        round($scrimMitte, 2),
+        round($scrimMitte * 0.8, 2),
+        $scrimAussen,
+    );
+
     // Handle ID vs array format for images - preserve ID for wp_get_attachment_image()
     $imageId = null;
     if (is_numeric($image)) {
@@ -105,8 +123,8 @@
                          loading="eager"
                          fetchpriority="high">
                 @endif
-                {{-- Overlay with configurable opacity --}}
-                <div class="absolute inset-0 bg-surface" style="opacity: {{ $overlay_opacity_css }};"></div>
+                {{-- Scrim, siehe Berechnung oben --}}
+                <div class="absolute inset-0" style="background-image: {{ $scrimCss }};"></div>
             </div>
         @else
             <div class="absolute inset-0 bg-surface-brand"></div>
@@ -115,17 +133,17 @@
         <div class="hero-reveal relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center text-center w-full">
             <div class="max-w-3xl">
                 @if($badge)
-                    <x-badge variant="brand" style="outline" size="md" class="mb-8">{{ $badge }}</x-badge>
+                    <x-badge variant="brand" size="md" class="mb-8">{{ $badge }}</x-badge>
                 @endif
 
                 @if($title)
-                    <{{ $heroHeadingTag }} class="text-display mt-0! mb-6">
+                    <{{ $heroHeadingTag }} class="text-display mt-0! mb-6 text-content-inverse">
                         {!! $title !!}
                     </{{ $heroHeadingTag }}>
                 @endif
 
                 @if($copy)
-                    <p class="text-body-large mb-8 max-w-[52ch] mx-auto text-pretty text-content-secondary">{!! $copy !!}</p>
+                    <p class="text-body-large mb-8 max-w-[52ch] mx-auto text-pretty text-content-inverse/85">{!! $copy !!}</p>
                 @endif
 
                 @if($cta_primary || $cta_secondary)
@@ -140,12 +158,16 @@
                             />
                         @endif
                         @if($cta_secondary)
+                            {{-- Umriss statt Fuellung: der gefuellte sekundaere Button war
+                                 auf dem abgedunkelten Bild heller als die Ueberschrift und
+                                 zog die Hierarchie zu sich. --}}
                             <x-button
                                 :url="$cta_secondary['url']"
                                 :title="$cta_secondary['title']"
                                 :target="$cta_secondary['target'] ?? '_self'"
                                 variant="secondary"
                                 size="lg"
+                                class="bg-transparent! border-white/60! text-white! shadow-none! hover:bg-white/10! hover:border-white!"
                             />
                         @endif
                     </div>

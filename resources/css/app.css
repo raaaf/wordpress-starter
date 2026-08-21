@@ -2706,3 +2706,32 @@ html {
 .footer-prose :is(p, li, a) {
   font-size: var(--typography-body-small-size);
 }
+
+/* Hero mit Hintergrundbild, bewusst ausserhalb jeder @layer.
+
+   Der Scrim ueber dem Bild dunkelt in beiden Farbschemata ab, also muss der Text
+   in beiden hell stehen. Ein Token waere hier falsch: jedes Text-Token dreht sich
+   mit dem Schema, der Scrim nicht. Deshalb ein fester heller Wert.
+
+   Warum ungelayert: die Basisregeln fuer Ueberschriften setzen color explizit,
+   eine Utility am Element kommt dagegen nicht an. Dasselbe Muster wie bei den
+   Ueberschriften auf der Markenflaeche weiter oben. */
+.hero--background :is(h1, h2, h3, .text-display) {
+  color: #fff;
+}
+
+.hero--background .text-content-secondary {
+  color: rgb(255 255 255 / 0.85);
+}
+
+/* Der Chip ueber dem Scrim.
+
+   Die Badge-Varianten tragen alle eine helle Flaeche. Auf dem abgedunkelten Bild
+   war der Chip damit der hellste Fleck im ganzen Hero und zog den Blick vor der
+   Ueberschrift auf sich. Hier stattdessen eine sehr leichte Aufhellung mit
+   feinem Rand: erkennbar als Chip, ohne zu leuchten. */
+.hero--background .badge {
+  background-color: rgb(255 255 255 / 0.12);
+  border: 1px solid rgb(255 255 255 / 0.35);
+  color: rgb(255 255 255 / 0.9);
+}

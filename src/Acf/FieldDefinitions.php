@@ -1278,13 +1278,13 @@ class FieldDefinitions
             // Overlay-Deckkraft (nur bei Background-Variante)
             self::rangeField(
                 "field_{$prefix}_overlay_opacity",
-                __('Overlay-Deckkraft', 'wp-starter'),
+                __('Abdunklung des Bildes', 'wp-starter'),
                 'overlay_opacity',
                 20,
                 100,
                 5,
                 80,
-                __('Wie stark die Fläche über dem Bild deckt. 20% = Bild dominiert, 100% = Bild kaum sichtbar. Unter 20% wird der Text auf hellen Bildern unlesbar.', 'wp-starter'),
+                __('Wie stark der Scrim das Bild abdunkelt. 20% = Bild dominiert, 100% = Bild kaum sichtbar. Der Text steht immer hell auf dem abgedunkelten Bild, deshalb wird es unter 40% auf hellen Motiven knapp.', 'wp-starter'),
                 '%',
                 $showOnBackground,
             ),
