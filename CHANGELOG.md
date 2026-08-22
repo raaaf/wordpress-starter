@@ -1,3 +1,13 @@
+# [2.31.0](https://github.com/raaaf/wordpress-starter/compare/v2.30.0...v2.31.0) (2026-08-22)
+
+### Bug Fixes
+
+- **acf:** Ja/Nein-Schalter mit Vorgabe "ja" ignorierte sein Nein ([e6c78fd](https://github.com/raaaf/wordpress-starter/commit/e6c78fda97a94295fd26f67a0a53e8cfb47ab043))
+
+### Features
+
+- **seo:** Breadcrumbs trennen mit » statt > ([04d0c09](https://github.com/raaaf/wordpress-starter/commit/04d0c09b13db13392d5c902656617b9557c9dbb1))
+
 # [2.30.0](https://github.com/raaaf/wordpress-starter/compare/v2.29.1...v2.30.0) (2026-08-21)
 
 ### Bug Fixes
