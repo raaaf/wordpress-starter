@@ -32,6 +32,7 @@ class SeoServiceProvider extends ServiceProvider
         $this->addAiCrawlerPolicy();
         $this->addStructuredData();
         $this->addBreadcrumbSchema();
+        $this->setBreadcrumbSeparator();
         $this->addCanonicalUrl();
         $this->addOpenGraphTags();
         $this->addMetaDescription();
@@ -993,5 +994,17 @@ class SeoServiceProvider extends ServiceProvider
         echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
             . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
             . '</script>' . "\n";
+    }
+
+    /**
+     * Krumen mit » statt > trennen.
+     *
+     * Yoast nimmt das Trennzeichen aus seinen Einstellungen. Der Filter setzt
+     * es unabhaengig davon, was dort gespeichert ist, damit alle Seiten
+     * dasselbe Zeichen zeigen.
+     */
+    private function setBreadcrumbSeparator(): void
+    {
+        add_filter('wpseo_breadcrumb_separator', static fn (): string => '»');
     }
 }

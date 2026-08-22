@@ -121,4 +121,12 @@ final class SeoServiceProviderTest extends TestCase
 
         $this->assertSame('', $out);
     }
+
+    public function testBreadcrumbSeparatorIsAlwaysAngleQuote(): void
+    {
+        $this->provider->boot();
+
+        $this->assertSame('»', apply_filters('wpseo_breadcrumb_separator', ' > '));
+    }
+
 }

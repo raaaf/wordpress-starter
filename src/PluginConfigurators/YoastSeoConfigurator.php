@@ -73,7 +73,7 @@ class YoastSeoConfigurator extends AbstractPluginConfigurator
 
         // --- Breadcrumbs ---
         $options['breadcrumbs-enable'] = true;
-        $options['breadcrumbs-sep'] = ' > ';
+        $options['breadcrumbs-sep'] = ' » ';
         $options['breadcrumbs-home'] = __('Startseite', 'wp-starter');
         $options['breadcrumbs-prefix'] = '';
         $options['breadcrumbs-archiveprefix'] = __('Archiv:', 'wp-starter');

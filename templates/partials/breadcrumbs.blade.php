@@ -48,7 +48,7 @@
                             <a href="{{ home_url('/') }}" class="hover:text-content transition-colors">{{ __('Startseite', 'wp-starter') }}</a>
                         </li>
                         @if(!is_front_page())
-                            <li aria-hidden="true" class="text-content-tertiary">›</li>
+                            <li aria-hidden="true" class="text-content-tertiary">»</li>
                             <li>
                                 <span class="text-content" aria-current="page">{{ get_the_title() }}</span>
                             </li>
