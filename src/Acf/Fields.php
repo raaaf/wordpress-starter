@@ -19,7 +19,7 @@ class Fields
 
         $value = get_field($field, $postId);
 
-        return $value !== null && $value !== false ? $value : $default;
+        return self::oderVorgabe($value, $default);
     }
 
     /**
@@ -32,14 +32,15 @@ class Fields
         }
 
         $cacheKey = ThemeContext::prefix() . '_acf_option_' . $field;
-        $cached = wp_cache_get($cacheKey, 'theme');
+        $found = false;
+        $cached = wp_cache_get($cacheKey, 'theme', false, $found);
 
-        if ($cached !== false) {
+        if ($found) {
             return $cached;
         }
 
         $value = get_field($field, 'option');
-        $result = $value !== null && $value !== false ? $value : $default;
+        $result = self::oderVorgabe($value, $default);
 
         wp_cache_set($cacheKey, $result, 'theme', HOUR_IN_SECONDS);
 
@@ -374,5 +375,27 @@ class Fields
         }
 
         return sprintf('<a%s>%s</a>', $attrString, esc_html($link['title']));
+    }
+
+    /**
+     * Leeren Feldwert durch den Vorgabewert ersetzen.
+     *
+     * ACF liefert false fuer zwei verschiedene Dinge: fuer einen abgeschalteten
+     * Ja/Nein-Schalter und fuer manche leeren Felder. Ein boolescher
+     * Vorgabewert kennzeichnet den Schalter, dort ist false die Antwort und
+     * darf nicht auf den Vorgabewert zurueckfallen. Sonst ignoriert jeder
+     * Schalter mit Vorgabe "ja" sein Nein.
+     */
+    private static function oderVorgabe(mixed $value, mixed $default): mixed
+    {
+        if ($value === null) {
+            return $default;
+        }
+
+        if ($value === false && !is_bool($default)) {
+            return $default;
+        }
+
+        return $value;
     }
 }

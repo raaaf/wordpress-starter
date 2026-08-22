@@ -43,6 +43,24 @@ final class FieldsTest extends TestCase
         $this->assertSame('default_value', $result);
     }
 
+    public function testGetKeepsFalseWhenDefaultIsBoolean(): void
+    {
+        $this->setMockField('toggle_field', false);
+
+        $result = Fields::get('toggle_field', null, true);
+
+        $this->assertFalse($result);
+    }
+
+    public function testOptionKeepsFalseInsteadOfFallingBackToDefault(): void
+    {
+        $this->setMockField('footer_show_company', false, 'option');
+
+        $result = Fields::option('footer_show_company', true);
+
+        $this->assertFalse($result);
+    }
+
     public function testGetReturnsZeroAsValidValue(): void
     {
         $this->setMockField('zero_field', 0);

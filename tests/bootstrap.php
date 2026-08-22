@@ -132,11 +132,12 @@ if (!function_exists('esc_attr')) {
 
 // WordPress cache functions
 if (!function_exists('wp_cache_get')) {
-    function wp_cache_get(string $key, string $group = 'default'): mixed
+    function wp_cache_get(string $key, string $group = 'default', bool $force = false, ?bool &$found = null): mixed
     {
         $cacheKey = "{$group}:{$key}";
+        $found = isset($GLOBALS['wp_mock_cache']) && array_key_exists($cacheKey, $GLOBALS['wp_mock_cache']);
 
-        return $GLOBALS['wp_mock_cache'][$cacheKey] ?? false;
+        return $found ? $GLOBALS['wp_mock_cache'][$cacheKey] : false;
     }
 }
 
