@@ -1,3 +1,14 @@
+# [2.32.0](https://github.com/raaaf/wordpress-starter/compare/v2.31.0...v2.32.0) (2026-08-26)
+
+### Bug Fixes
+
+- **hero:** Höhe im Critical CSS reservieren, Audit-Befunde ([08b4bd6](https://github.com/raaaf/wordpress-starter/commit/08b4bd666a5f33aac31c67e5b770971ca58988e6))
+
+### Features
+
+- **acf:** alle Module in die Reiter Inhalt und Darstellung teilen ([c32e1f8](https://github.com/raaaf/wordpress-starter/commit/c32e1f8037cd97e4eb21a1c1993cd0a578539747))
+- **hero:** Höhe als Feld, Inhalt und Darstellung in Reitern ([eca3a23](https://github.com/raaaf/wordpress-starter/commit/eca3a235eadae4af25fa32a8c9f3f1a2ab9f0e69))
+
 # [2.31.0](https://github.com/raaaf/wordpress-starter/compare/v2.30.0...v2.31.0) (2026-08-22)
 
 ### Bug Fixes
