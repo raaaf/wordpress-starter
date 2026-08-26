@@ -73,7 +73,7 @@ npm run dev
 │   │   ├── AcfExtended.php      # ACF Extended configuration
 │   │   ├── FieldDefinitions.php # Central field definitions
 │   │   ├── Fields.php           # Field helpers
-│   │   ├── FlexibleContent.php  # 32 Flexible Content layouts
+│   │   ├── FlexibleContent.php  # 36 Flexible Content layouts
 │   │   └── Options.php          # Theme options pages
 │   ├── MemberArea/              # Member area (optional)
 │   ├── PostTypes/               # Custom post types
@@ -190,7 +190,7 @@ private static function myLayout(): array
 ```
 
 2. Field definitions in `src/Acf/FieldDefinitions.php`
-3. Template `templates/flexible/my.blade.php`
+3. Template `templates/flexible/{name}.blade.php`
 4. Add it to `getLayouts()`
 
 ## Design tokens
