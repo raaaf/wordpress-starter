@@ -2755,7 +2755,7 @@ class FieldDefinitions
                 __('Optionaler Text über dem Formular.', 'wp-starter'),
             ),
 
-            // Tab: Optionen
+            // Tab: Darstellung
             self::tabField("field_{$prefix}_tab_style", __('Darstellung', 'wp-starter')),
             self::trueFalseField(
                 "field_{$prefix}_show_contact_info",

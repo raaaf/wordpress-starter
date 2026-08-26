@@ -108,9 +108,11 @@ Die Felder der meisten Blöcke stehen in zwei Reitern: **Inhalt** trägt Texte,
 Bilder und Links, **Darstellung** die Hintergrundfarbe, den Abstand, die Breite
 und die Anker-ID.
 
-Zwei Ausnahmen: Blöcke mit eigener Gliederung benennen ihre Reiter anders, das
-Kontaktformular, die Karte und die Beiträge etwa. Und ein paar kleine Blöcke
-haben gar keine Reiter, weil zu wenig zu trennen wäre, der Trenner und die
+Zwei Ausnahmen. Manche Blöcke stellen einen eigenen Reiter voran und behalten
+Inhalt und Darstellung dahinter: das Kontaktformular seinen Reiter "Formular",
+die Karte ihren Reiter "Karte". Die Beiträge teilen die Darstellung stattdessen
+auf zwei Reiter auf, "Anzeige" und "Layout". Und ein paar kleine Blöcke haben
+gar keine Reiter, weil zu wenig zu trennen wäre, der Trenner und die
 Spaltenlayouts mit Bildern, die sich stattdessen je Spalte aufklappen.
 
 Der Hero-Bereich hat unter "Darstellung" zusätzlich das Feld **Höhe**:
