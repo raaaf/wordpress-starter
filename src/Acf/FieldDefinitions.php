@@ -1205,6 +1205,11 @@ class FieldDefinitions
                 __('Wähle das Layout für den Hero-Bereich.', 'wp-starter'),
             ),
 
+            // Der Reiter beginnt erst hier: die Variante entscheidet, welche
+            // Felder in beiden Reitern ueberhaupt erscheinen, und muss deshalb
+            // sichtbar bleiben, egal welcher Reiter offen ist.
+            self::tabField("field_{$prefix}_tab_content", __('Inhalt', 'wp-starter')),
+
             // Inhalt
             self::textField(
                 "field_{$prefix}_badge",
@@ -1273,6 +1278,26 @@ class FieldDefinitions
                 'array',
                 $showOnBackground,
                 __('Empfohlene Größe: mindestens 1920×1080 Pixel (16:9).', 'wp-starter'),
+            ),
+
+            self::tabField("field_{$prefix}_tab_style", __('Darstellung', 'wp-starter')),
+
+            // Hoehe des Heros.
+            //
+            // Vorher lag die volle Bildschirmhoehe fest im Stylesheet. Alle drei
+            // Werte setzen nur eine Mindesthoehe, der Hero waechst also mit
+            // seinem Inhalt und schneidet nie ab.
+            self::buttonGroupField(
+                "field_{$prefix}_height",
+                __('Höhe', 'wp-starter'),
+                'height',
+                [
+                    'auto' => __('Automatisch', 'wp-starter'),
+                    'half' => __('Halber Bildschirm', 'wp-starter'),
+                    'full' => __('Voller Bildschirm', 'wp-starter'),
+                ],
+                'auto',
+                __('Automatisch heißt: die Höhe folgt dem Inhalt. Halb und Voll setzen zusätzlich eine Mindesthöhe aus der Bildschirmhöhe. Wird der Inhalt höher, wächst der Hero mit, er schneidet nichts ab.', 'wp-starter'),
             ),
 
             // Overlay-Deckkraft (nur bei Background-Variante)

@@ -171,6 +171,7 @@ class StyleguideLayoutData
     {
         return $this->layout('hero', [
             'variant' => 'background',
+            'height' => 'full',
             'badge' => 'Design System',
             'title' => 'Willkommen auf unserer Website',
             'copy' => 'Wir bauen dir Lösungen, die zu deinen Anforderungen passen. Mit langjähriger Erfahrung und einem Team, das zuhört.',
@@ -759,6 +760,7 @@ class StyleguideLayoutData
         // --- Hero: die beiden Varianten, die oben fehlen ---------------------
         $catalog[] = $this->layout('hero', [
             'variant' => 'centered',
+            'height' => 'half',
             'badge' => 'Variante',
             'title' => 'Hero, zentriert',
             'copy' => 'Diese Variante stellt Text und Buttons mittig über einer Flächenfarbe dar.',

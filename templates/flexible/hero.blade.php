@@ -84,7 +84,12 @@
     // Viewporthoehe: die Flaeche darunter war leer und die erste Sektion rutschte
     // ohne Grund unter die Falz. Die Hoehe kommt deshalb aus dem Inhalt.
     $isTitleOnly = $title && !$badge && !$copy && !$cta_primary && !$cta_secondary;
-    $heroHeightClass = $isTitleOnly ? 'hero--compact' : 'hero--full';
+
+    // Die Hoehe kommt aus dem Feld, nicht mehr aus dem Inhalt. hero--compact
+    // bleibt daneben stehen: die Klasse steuert nur noch das Polster zur
+    // Folgesektion, nicht die Hoehe.
+    $height = get_sub_field('height') ?: 'auto';
+    $heroHeightClass = 'hero--height-' . $height . ($isTitleOnly ? ' hero--compact' : '');
     $hasBackgroundImage = $background_image && (!empty($background_image['ID']) || !empty($background_image['url']));
     $hasSplitImage = $imageId || ($image && !empty($image['url']));
 @endphp
@@ -180,7 +185,7 @@
 @elseif($variant === 'split')
     @if($hasText || $hasSplitImage)
     {{-- SPLIT VARIANT: Content left, image right --}}
-    <x-section :anchor="$sectionAnchor" :background="$background_color" padding="lg" class="hero hero--split hero--full">
+    <x-section :anchor="$sectionAnchor" :background="$background_color" padding="lg" class="hero hero--split {{ $heroHeightClass }}">
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
                 @if($badge)

@@ -2406,21 +2406,34 @@ html {
    no-js-Ausnahme mehr. */
 /* Hoehe des Heros.
 
-   Vorher stand die volle Viewporthoehe als Inline-Style am Hintergrund-Hero und
-   50vh im Critical CSS an jedem Hero. Ein Hero mit nur einer Ueberschrift kam so
-   auf 386px fuer eine Zeile Text. Die Hoehe haengt jetzt an der Klasse, die das
-   Template aus dem Inhalt ableitet: nur Ueberschrift heisst hero--compact. */
-.hero--background.hero--full {
+   Die Hoehe kommt aus dem Feld "Höhe" des Moduls. Alle Werte setzen
+   ausschliesslich min-height, nie height: waechst der Inhalt ueber die
+   Mindesthoehe hinaus, waechst der Hero mit, statt ihn abzuschneiden. Das
+   Polster des Inhalts steht unabhaengig davon im Template, damit Text in
+   keiner Hoehe am Rand klebt.
+
+   Automatisch heisst: keine Mindesthoehe. Ausnahme ist die Bildvariante, ein
+   Hintergrundbild auf Zeilenhoehe waere ein Streifen. */
+.hero--background.hero--height-auto {
+  min-height: 18rem;
+}
+
+.hero--height-half {
+  min-height: clamp(18rem, 55dvh, 38rem);
+}
+
+.hero--height-full {
   min-height: calc(100vh - var(--header-height, 80px));
   min-height: calc(100dvh - var(--header-height, 80px));
 }
 
-.hero--background.hero--compact {
-  min-height: clamp(18rem, 55dvh, 34rem);
-}
-
-.hero--centered.hero--compact {
-  min-height: 0;
+/* Geteilt liegt sonst als Block, damit das innere Raster die Breite bestimmt.
+   Sobald eine Mindesthoehe gesetzt ist, muss der Inhalt darin mittig stehen,
+   sonst klebt er oben und der Rest der Flaeche bleibt leer. */
+.hero--split:is(.hero--height-half, .hero--height-full) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Der kompakte Hero und die erste Sektion stapelten ihre Polster: 64px unten
