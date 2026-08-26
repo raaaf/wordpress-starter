@@ -163,6 +163,27 @@ All pages use Flexible Content as the primary content builder. 36 layouts in `te
 </x-section>
 ```
 
+### Field Tabs
+
+`FlexibleContent::withTabs()` splits every layout's fields into two tabs,
+**Inhalt** and **Darstellung**, at registration time. The split point is the
+first field named `background_color`, `section_spacing`, `section_width` or
+`section_anchor` (`FlexibleContent::DISPLAY_FIELDS`); everything from there on
+is display.
+
+The rule lives in one place instead of in ~30 field builders, and it applies to
+layouts a derived theme adds through the layout filter too. Field order and
+field names are untouched, only two markers are inserted.
+
+Skipped, on purpose:
+
+- Layouts that already group themselves with their own tabs or accordions
+  (hero, posts, map, contact-form, the three `*-columns-images`).
+- Layouts with fewer than three fields on the content side, where a tab would
+  sit above a single control (divider).
+- Layouts without a display tail at all, so there is nothing to separate
+  (member-downloads, and in some themes cta and button).
+
 ### Background Colors
 
 All layouts support: `primary`, `secondary`, `tertiary`, `brand`, `brand-subtle`, `inverse`

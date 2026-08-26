@@ -102,6 +102,24 @@ Dies startet den Entwicklungsserver auf `http://localhost:5180` mit Hot Module R
 4. Füge weitere Blöcke hinzu (z.B. Zwei Spalten, Handlungsaufforderung)
 5. Veröffentliche die Seite
 
+### Reiter in den Blöcken
+
+Die Felder eines Blocks stehen in zwei Reitern: **Inhalt** trägt Texte, Bilder
+und Links, **Darstellung** die Hintergrundfarbe, den Abstand, die Breite und
+die Anker-ID. Ein paar Blöcke bringen eigene Reiter mit, etwa das
+Kontaktformular oder die Karte.
+
+Der Hero-Bereich hat unter "Darstellung" zusätzlich das Feld **Höhe**:
+
+| Wert              | Wirkung                                                       |
+| ----------------- | ------------------------------------------------------------- |
+| Automatisch       | Die Höhe folgt dem Inhalt. Vorgabe.                           |
+| Halber Bildschirm | Mindestens die halbe Bildschirmhöhe.                          |
+| Voller Bildschirm | Mindestens die volle Bildschirmhöhe, abzüglich der Kopfzeile. |
+
+Alle drei Werte setzen nur eine Mindesthöhe. Wird der Inhalt höher, wächst der
+Hero mit, er schneidet nichts ab.
+
 ## Verfügbare Layouts
 
 Das Theme enthält 32 vorgefertigte Flexible Content Layouts:

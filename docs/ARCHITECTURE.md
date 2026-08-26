@@ -281,6 +281,23 @@ Layouts without a header on purpose: hero, button, quote, alert, divider,
 member-downloads, newsletter (its heading is part of the bar) and contact-form
 (its heading sits in the left column next to the form).
 
+### Field Tabs
+
+Modules carry between 4 and 25 fields, and the tail is nearly always the same:
+background colour, spacing, width, anchor. `FlexibleContent::withTabs()` runs
+over the layout list after the filter and inserts two tabs, **Inhalt** and
+**Darstellung**, splitting at the first field in `DISPLAY_FIELDS`.
+
+Doing it here rather than in each `FieldDefinitions::*Fields()` builder keeps
+the rule in one place and covers layouts a derived theme contributes. Nothing
+is renamed or reordered.
+
+A layout is skipped when it already has a `tab` or `accordion` field of its own,
+when it has no display tail at all, or when fewer than three fields precede it.
+
+Note for derived themes: register the field group with `self::layouts()`, not
+`self::getLayouts()`. The latter bypasses both the layout filter and the tabs.
+
 ### Adding a New Layout
 
 1. Define layout in `FlexibleContent.php`:

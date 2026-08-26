@@ -22,6 +22,21 @@ use WordpressStarter\ThemeContext;
 class FlexibleContent
 {
     /**
+     * Feldnamen, die zur Darstellung gehoeren, nicht zum Inhalt.
+     *
+     * Der erste Treffer in der Feldliste eines Layouts markiert die Stelle,
+     * an der {@see withTabs()} den Reiter "Darstellung" einsetzt.
+     *
+     * @var array<int, string>
+     */
+    private const DISPLAY_FIELDS = [
+        'background_color',
+        'section_spacing',
+        'section_width',
+        'section_anchor',
+    ];
+
+    /**
      * Cache for {@see getLayouts()} so repeated calls in one request are free.
      *
      * @var array<int, array<string, mixed>>|null
@@ -255,12 +270,84 @@ class FlexibleContent
                 self::getLayouts()
             );
 
-            self::$layoutCache = is_array($filtered)
-                ? array_values(array_filter($filtered, 'is_array'))
-                : self::getLayouts();
+            self::$layoutCache = self::withTabs(
+                is_array($filtered)
+                    ? array_values(array_filter($filtered, 'is_array'))
+                    : self::getLayouts()
+            );
         }
 
         return self::$layoutCache;
+    }
+
+    /**
+     * Die Felder eines Layouts in die Reiter "Inhalt" und "Darstellung" teilen.
+     *
+     * Die Module tragen zwischen 4 und 25 Felder, und der hintere Teil ist
+     * fast ueberall derselbe: Hintergrundfarbe, Abstand, Breite, Anker. Wer
+     * eine Ueberschrift aendern wollte, scrollte an diesem Block vorbei. Zwei
+     * Reiter trennen beides, ohne ein Feld umzubenennen oder zu verschieben:
+     * die Reihenfolge bleibt, es kommen nur zwei Marken dazwischen.
+
+     * Hier statt in jedem der rund 30 Feldbauer: die Regel steht damit an
+     * einer Stelle und gilt auch fuer Layouts, die ein abgeleitetes Theme
+     * ueber den Filter oben nachreicht.
+     *
+     * Unberuehrt bleiben Layouts, die schon eigene Reiter oder Akkordeons
+     * mitbringen, dort ist die Gliederung bewusst gesetzt, und Layouts mit zu
+     * wenig Inhalt fuer eine eigene Seite.
+     *
+     * @param array<int, array<string, mixed>> $layouts
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private static function withTabs(array $layouts): array
+    {
+        foreach ($layouts as &$layout) {
+            $fields = $layout['sub_fields'] ?? null;
+
+            if (!is_array($fields) || $fields === []) {
+                continue;
+            }
+
+            foreach ($fields as $field) {
+                if (in_array($field['type'] ?? '', ['tab', 'accordion'], true)) {
+                    continue 2;
+                }
+            }
+
+            $split = null;
+
+            foreach ($fields as $index => $field) {
+                if (in_array($field['name'] ?? '', self::DISPLAY_FIELDS, true)) {
+                    $split = $index;
+                    break;
+                }
+            }
+
+            // Weniger als drei Felder auf der Inhaltsseite: dort steht dann ein
+            // Reiter "Inhalt" ueber einer einzigen Auswahl, und der Klick kostet
+            // mehr, als die Trennung einbringt. Ein Trenner ist so ein Fall.
+            if ($split === null || $split < 3) {
+                continue;
+            }
+
+            $key = isset($layout['key']) ? (string) $layout['key'] : '';
+
+            array_splice($fields, $split, 0, [
+                FieldDefinitions::tabField("field_{$key}_tab_style", __('Darstellung', 'wp-starter')),
+            ]);
+            array_unshift(
+                $fields,
+                FieldDefinitions::tabField("field_{$key}_tab_content", __('Inhalt', 'wp-starter')),
+            );
+
+            $layout['sub_fields'] = $fields;
+        }
+
+        unset($layout);
+
+        return $layouts;
     }
 
     /**
