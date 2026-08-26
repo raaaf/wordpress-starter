@@ -3403,8 +3403,8 @@ class FieldDefinitions
                 'wrapper' => ['width' => '34'],
             ],
 
-            // Tab: Layout
-            self::tabField("field_{$prefix}_tab_layout", __('Layout', 'wp-starter')),
+            // Tab: Darstellung
+            self::tabField("field_{$prefix}_tab_style", __('Darstellung', 'wp-starter')),
             self::buttonGroupField(
                 "field_{$prefix}_columns",
                 __('Spalten', 'wp-starter'),

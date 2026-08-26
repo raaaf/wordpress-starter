@@ -22,6 +22,13 @@ use WordpressStarter\ThemeContext;
 class FlexibleContent
 {
     /**
+     * So viele Felder muss die Inhaltsseite mindestens tragen, damit sich ein
+     * eigener Reiter lohnt. Darunter stuende "Inhalt" ueber einer einzelnen
+     * Auswahl, und der Klick kostet mehr, als die Trennung einbringt.
+     */
+    private const MIN_CONTENT_FIELDS = 3;
+
+    /**
      * Feldnamen, die zur Darstellung gehoeren, nicht zum Inhalt.
      *
      * Der erste Treffer in der Feldliste eines Layouts markiert die Stelle,
@@ -29,13 +36,6 @@ class FlexibleContent
      *
      * @var array<int, string>
      */
-    /**
-     * So viele Felder muss die Inhaltsseite mindestens tragen, damit sich ein
-     * eigener Reiter lohnt. Darunter stuende "Inhalt" ueber einer einzelnen
-     * Auswahl, und der Klick kostet mehr, als die Trennung einbringt.
-     */
-    private const MIN_CONTENT_FIELDS = 3;
-
     private const DISPLAY_FIELDS = [
         'background_color',
         'section_spacing',
@@ -339,6 +339,12 @@ class FlexibleContent
             }
 
             $key = isset($layout['key']) ? (string) $layout['key'] : '';
+
+            // Ohne Schluessel keine eindeutigen Reiter-Schluessel: zwei per
+            // Filter ergaenzte Layouts bekaemen beide field__tab_content.
+            if ($key === '') {
+                continue;
+            }
 
             array_splice($fields, $split, 0, [
                 FieldDefinitions::tabField("field_{$key}_tab_style", __('Darstellung', 'wp-starter')),

@@ -157,4 +157,49 @@ final class FlexibleContentTabsTest extends TestCase
 
         $this->assertGreaterThan(0, $geprueft, 'Kein Layout unterhalb der Mindestgroesse geprueft.');
     }
+    /**
+     * Die Gegenrichtung zu {@see testDisplayFieldsSitBehindTheStyleTab()}.
+     *
+     * Jener Test belegt nur, dass Darstellungsfelder hinter ihrem Reiter
+     * stehen. Rutschte durch eine Fehlzuordnung ein Inhaltsfeld dahinter,
+     * bliebe er gruen. Genau das prueft dieser Test.
+     *
+     * Nur fuer die zentral eingesetzten Reiter: Layouts mit eigenen Reitern
+     * gruppieren bewusst anders, das Kontaktformular etwa haelt seinen
+     * Schalter "Kontaktdaten anzeigen" unter "Darstellung". Erkennbar sind
+     * die eingesetzten am Schluessel, den withTabs() aus dem Layoutschluessel
+     * bildet.
+     */
+    public function testNothingButDisplayFieldsSitsBehindAnInjectedStyleTab(): void
+    {
+        $geprueft = 0;
+
+        foreach (FlexibleContent::layouts() as $layout) {
+            $fields = $layout['sub_fields'] ?? [];
+            $eigenerSchluessel = 'field_' . ($layout['key'] ?? '') . '_tab_style';
+            $styleTab = null;
+
+            foreach ($fields as $index => $field) {
+                if (($field['type'] ?? '') === 'tab' && ($field['key'] ?? '') === $eigenerSchluessel) {
+                    $styleTab = $index;
+                    break;
+                }
+            }
+
+            if ($styleTab === null) {
+                continue;
+            }
+
+            foreach (array_slice($fields, $styleTab + 1) as $field) {
+                ++$geprueft;
+                $this->assertContains(
+                    $field['name'] ?? '',
+                    self::DISPLAY_FIELDS,
+                    "Layout {$layout['name']}: Feld {$field['name']} steht hinter dem Reiter Darstellung, gehoert aber zum Inhalt.",
+                );
+            }
+        }
+
+        $this->assertGreaterThan(0, $geprueft, 'Kein eingesetzter Darstellungsreiter geprueft.');
+    }
 }

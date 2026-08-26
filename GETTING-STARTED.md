@@ -80,7 +80,7 @@ Dies startet den Entwicklungsserver auf `http://localhost:5180` mit Hot Module R
 1. Öffne deine WordPress-Seite im Browser
 2. Erstelle eine neue Seite mit der Vorlage "Flexibler Seiteninhalt"
 3. Im Classic Editor siehst du den "Sektion hinzufügen" Button
-4. Wähle eines der 32 verfügbaren Layouts aus
+4. Wähle eines der 36 verfügbaren Layouts aus
 
 ## Erste Schritte nach der Installation
 
@@ -108,11 +108,11 @@ Die Felder der meisten Blöcke stehen in zwei Reitern: **Inhalt** trägt Texte,
 Bilder und Links, **Darstellung** die Hintergrundfarbe, den Abstand, die Breite
 und die Anker-ID.
 
-Zwei Ausnahmen. Manche Blöcke stellen einen eigenen Reiter voran und behalten
-Inhalt und Darstellung dahinter: das Kontaktformular seinen Reiter "Formular",
-die Karte ihren Reiter "Karte". Die Beiträge teilen die Darstellung stattdessen
-auf zwei Reiter auf, "Anzeige" und "Layout". Und ein paar kleine Blöcke haben
-gar keine Reiter, weil zu wenig zu trennen wäre, der Trenner und die
+Zwei Ausnahmen. Manche Blöcke schieben einen eigenen Reiter dazwischen und
+behalten Inhalt und Darstellung: das Kontaktformular seinen Reiter "Formular",
+die Karte ihren Reiter "Karte", die Beiträge ihren Reiter "Anzeige" mit den
+Schaltern für Auszug, Datum und Autor. Und ein paar kleine Blöcke haben gar
+keine Reiter, weil zu wenig zu trennen wäre, der Trenner und die
 Spaltenlayouts mit Bildern, die sich stattdessen je Spalte aufklappen.
 
 Der Hero-Bereich hat unter "Darstellung" zusätzlich das Feld **Höhe**:
@@ -128,25 +128,26 @@ Hero mit, er schneidet nichts ab.
 
 ## Verfügbare Layouts
 
-Das Theme enthält 32 vorgefertigte Flexible Content Layouts:
+Das Theme enthält 36 vorgefertigte Flexible Content Layouts:
 
-| Kategorie  | Layouts                                                                                                                                               |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Header     | Hero-Bereich                                                                                                                                          |
-| Layout     | Eine Spalte, Zwei Spalten, Drei Spalten, Vier Spalten, 1/3+2/3, 2/3+1/3, Zwei Spalten mit Bildern, Drei Spalten mit Bildern, Vier Spalten mit Bildern |
-| Inhalte    | Akkordeon, Tabs, CTA, Button                                                                                                                          |
-| Medien     | Bild, Video, Galerie, Vorher/Nachher                                                                                                                  |
-| Interaktiv | Kundenstimmen, Karten, Statistiken, Zeitstrahl, Team, Preistabelle, Downloads (Interner Bereich)                                                      |
-| Formulare  | Kontaktformular, Google Maps                                                                                                                          |
-| Beiträge   | Posts, Tabelle                                                                                                                                        |
-| Sonstiges  | Trenner/Abstand, Logo-Slider                                                                                                                          |
+| Kategorie        | Layouts                                                                                                                                                                                         |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Header           | Hero-Bereich                                                                                                                                                                                    |
+| Layout           | Eine Spalte, Zwei Spalten, Drei Spalten, Vier Spalten, 1/3 + 2/3 Spalten, 2/3 + 1/3 Spalten, Eine Spalte mit Bild, Zwei Spalten mit Bildern, Drei Spalten mit Bildern, Vier Spalten mit Bildern |
+| Inhalte          | Akkordeon (FAQ), Tabs, Handlungsaufforderung (CTA), Button, Einzelzitat, Hinweis                                                                                                                |
+| Medien           | Bild, Video, Bildergalerie, Vorher/Nachher Vergleich                                                                                                                                            |
+| Interaktiv       | Kundenstimmen, Karten / Features, Statistiken / Zahlen, Zeitstrahl, Team, Preistabelle                                                                                                          |
+| Formulare        | Kontaktformular, Newsletter-Anmeldung, Karte (Google Maps)                                                                                                                                      |
+| Beiträge         | Beitrags-Liste, Tabelle                                                                                                                                                                         |
+| Sonstiges        | Einbettung, Trenner / Abstand, Logo-Slider                                                                                                                                                      |
+| Interner Bereich | Downloads (Interner Bereich)                                                                                                                                                                    |
 
 ## Wichtige Dateien
 
 | Datei/Ordner                   | Beschreibung                                   |
 | ------------------------------ | ---------------------------------------------- |
 | `templates/`                   | Blade-Templates                                |
-| `templates/flexible/`          | Flexible Content Layout-Templates (32 Layouts) |
+| `templates/flexible/`          | Flexible Content Layout-Templates (36 Layouts) |
 | `src/Acf/FlexibleContent.php`  | Layout-Definitionen                            |
 | `src/Acf/FieldDefinitions.php` | Feld-Definitionen                              |
 | `resources/css/`               | CSS-Quelldateien (TailwindCSS)                 |

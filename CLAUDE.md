@@ -178,11 +178,14 @@ field names are untouched, only two markers are inserted.
 Skipped, on purpose:
 
 - Layouts that already group themselves with their own tabs or accordions
-  (hero, posts, map, contact-form, the three `*-columns-images`).
+  (hero, posts, map, contact-form, the three `*-columns-images`). Those that
+  carry a display tail name that tab "Darstellung" too; only the extra leading
+  tab differs ("Formular", "Karte", "Anzeige").
 - Layouts with fewer than three fields on the content side, where a tab would
-  sit above a single control (divider).
-- Layouts without a display tail at all, so there is nothing to separate
-  (member-downloads, and in some themes cta and button).
+  sit above a single control (divider), or none at all because the layout _is_
+  the display tail (member-downloads).
+- Layouts without a display tail at all, so there is nothing to separate (in
+  some themes cta and button).
 
 ### Background Colors
 
@@ -284,7 +287,7 @@ private static function myNewLayout(): array
 
 2. Add field definitions in `src/Acf/FieldDefinitions.php`
 
-3. Create template `templates/flexible/my-new.blade.php`
+3. Create template `templates/flexible/{name}.blade.php`
 
 4. Register layout in `getLayouts()` array
 
