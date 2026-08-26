@@ -29,6 +29,13 @@ class FlexibleContent
      *
      * @var array<int, string>
      */
+    /**
+     * So viele Felder muss die Inhaltsseite mindestens tragen, damit sich ein
+     * eigener Reiter lohnt. Darunter stuende "Inhalt" ueber einer einzelnen
+     * Auswahl, und der Klick kostet mehr, als die Trennung einbringt.
+     */
+    private const MIN_CONTENT_FIELDS = 3;
+
     private const DISPLAY_FIELDS = [
         'background_color',
         'section_spacing',
@@ -325,10 +332,9 @@ class FlexibleContent
                 }
             }
 
-            // Weniger als drei Felder auf der Inhaltsseite: dort steht dann ein
-            // Reiter "Inhalt" ueber einer einzigen Auswahl, und der Klick kostet
-            // mehr, als die Trennung einbringt. Ein Trenner ist so ein Fall.
-            if ($split === null || $split < 3) {
+            // Zu wenig Inhalt fuer eine eigene Seite, siehe MIN_CONTENT_FIELDS.
+            // Ein Trenner ist so ein Fall.
+            if ($split === null || $split < self::MIN_CONTENT_FIELDS) {
                 continue;
             }
 

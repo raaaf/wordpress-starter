@@ -88,8 +88,18 @@
     // Die Hoehe kommt aus dem Feld, nicht mehr aus dem Inhalt. hero--compact
     // bleibt daneben stehen: die Klasse steuert nur noch das Polster zur
     // Folgesektion, nicht die Hoehe.
-    $height = get_sub_field('height') ?: 'auto';
-    $heroHeightClass = 'hero--height-' . $height . ($isTitleOnly ? ' hero--compact' : '');
+    // Gegen die Auswahlliste pruefen statt roh zu uebernehmen: der Wert landet
+    // in einem Klassennamen, und ein von Hand gesetzter Postmeta-Wert haengte
+    // sonst beliebige weitere Klassen an.
+    $height = get_sub_field('height');
+    $height = in_array($height, ['auto', 'half', 'full'], true) ? $height : 'auto';
+
+    // hero--compact steuert nur noch das Polster zur Folgesektion. Das ergibt
+    // allein bei automatischer Hoehe Sinn: bei halber oder voller Hoehe wuerde
+    // die Regel unten das untere Polster streichen und den mittig gesetzten
+    // Inhalt aus der Mitte schieben.
+    $heroHeightClass = 'hero--height-' . $height
+        . ($isTitleOnly && $height === 'auto' ? ' hero--compact' : '');
     $hasBackgroundImage = $background_image && (!empty($background_image['ID']) || !empty($background_image['url']));
     $hasSplitImage = $imageId || ($image && !empty($image['url']));
 @endphp

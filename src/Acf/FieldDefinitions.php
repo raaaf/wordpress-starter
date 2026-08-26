@@ -1297,7 +1297,7 @@ class FieldDefinitions
                     'full' => __('Voller Bildschirm', 'wp-starter'),
                 ],
                 'auto',
-                __('Automatisch heißt: die Höhe folgt dem Inhalt. Halb und Voll setzen zusätzlich eine Mindesthöhe aus der Bildschirmhöhe. Wird der Inhalt höher, wächst der Hero mit, er schneidet nichts ab.', 'wp-starter'),
+                __('Automatisch heißt: die Höhe folgt dem Inhalt. Die Variante Hintergrund behält dabei ein Mindestmaß, sonst wäre das Bild nur ein Streifen. Halb und Voll setzen eine Mindesthöhe aus der Bildschirmhöhe. Wird der Inhalt höher, wächst der Hero mit, er schneidet nichts ab.', 'wp-starter'),
             ),
 
             // Overlay-Deckkraft (nur bei Background-Variante)
@@ -2756,7 +2756,7 @@ class FieldDefinitions
             ),
 
             // Tab: Optionen
-            self::tabField("field_{$prefix}_tab_options", __('Optionen', 'wp-starter')),
+            self::tabField("field_{$prefix}_tab_style", __('Darstellung', 'wp-starter')),
             self::trueFalseField(
                 "field_{$prefix}_show_contact_info",
                 __('Kontaktdaten anzeigen', 'wp-starter'),

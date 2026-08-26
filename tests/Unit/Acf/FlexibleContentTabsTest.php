@@ -19,10 +19,12 @@ use WordpressStarter\Acf\FlexibleContent;
  */
 final class FlexibleContentTabsTest extends TestCase
 {
+    private const MIN_CONTENT_FIELDS = 3;
+
     /**
      * Muss mit FlexibleContent::DISPLAY_FIELDS uebereinstimmen. Bewusst
      * doppelt: der Test soll den Vertrag festhalten, nicht die Konstante
-     * zurueckspiegeln, die er prueft.
+     * zurueckspiegeln, die er prueft. Dasselbe gilt fuer MIN_CONTENT_FIELDS.
      *
      * @var array<int, string>
      */
@@ -35,6 +37,8 @@ final class FlexibleContentTabsTest extends TestCase
 
     public function testDisplayFieldsSitBehindTheStyleTab(): void
     {
+        $geprueft = 0;
+
         foreach (FlexibleContent::layouts() as $layout) {
             $fields = $layout['sub_fields'] ?? [];
             $styleTab = null;
@@ -52,6 +56,7 @@ final class FlexibleContentTabsTest extends TestCase
 
             foreach ($fields as $index => $field) {
                 if (in_array($field['name'] ?? '', self::DISPLAY_FIELDS, true)) {
+                    ++$geprueft;
                     $this->assertGreaterThan(
                         $styleTab,
                         $index,
@@ -60,6 +65,8 @@ final class FlexibleContentTabsTest extends TestCase
                 }
             }
         }
+
+        $this->assertGreaterThan(0, $geprueft, 'Kein einziges Darstellungsfeld geprueft.');
     }
 
     public function testTabKeysAreUniqueAcrossAllLayouts(): void
@@ -83,6 +90,8 @@ final class FlexibleContentTabsTest extends TestCase
 
     public function testLayoutsWithTheirOwnGroupingAreNotSplitAgain(): void
     {
+        $geprueft = 0;
+
         foreach (FlexibleContent::layouts() as $layout) {
             $fields = $layout['sub_fields'] ?? [];
             $hasAccordion = false;
@@ -98,6 +107,8 @@ final class FlexibleContentTabsTest extends TestCase
                 continue;
             }
 
+            ++$geprueft;
+
             foreach ($fields as $field) {
                 $this->assertNotSame(
                     'tab',
@@ -106,10 +117,14 @@ final class FlexibleContentTabsTest extends TestCase
                 );
             }
         }
+
+        $this->assertGreaterThan(0, $geprueft, 'Kein Layout mit eigener Gliederung geprueft.');
     }
 
     public function testLayoutsWithTooLittleContentKeepOneFieldList(): void
     {
+        $geprueft = 0;
+
         foreach (FlexibleContent::layouts() as $layout) {
             $fields = array_values(array_filter(
                 $layout['sub_fields'] ?? [],
@@ -125,9 +140,11 @@ final class FlexibleContentTabsTest extends TestCase
                 }
             }
 
-            if ($split !== null && $split >= 3) {
+            if ($split !== null && $split >= self::MIN_CONTENT_FIELDS) {
                 continue;
             }
+
+            ++$geprueft;
 
             foreach ($layout['sub_fields'] ?? [] as $field) {
                 $this->assertNotSame(
@@ -137,5 +154,7 @@ final class FlexibleContentTabsTest extends TestCase
                 );
             }
         }
+
+        $this->assertGreaterThan(0, $geprueft, 'Kein Layout unterhalb der Mindestgroesse geprueft.');
     }
 }

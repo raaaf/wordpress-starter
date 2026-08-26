@@ -74,10 +74,24 @@
   }
 
   /* Hero section minimum height to prevent CLS.
-     Nur der volle Hero reserviert Hoehe; ein Hero mit nur einer Ueberschrift
-     traegt hero--compact und richtet sich nach seinem Inhalt. */
-  .hero--full {
-    min-height: 50vh;
+
+     Die Hoehe kommt aus dem Feld "Höhe" des Moduls. Die Werte muessen mit
+     denen in app.css uebereinstimmen, sonst entsteht beim Nachladen des
+     Stylesheets genau der Sprung, den diese Regel verhindern soll.
+
+     "Automatisch" reserviert nichts, dort bestimmt der Inhalt die Hoehe.
+     Ausnahme ist die Bildvariante, die auch ohne Zutun Flaeche braucht. */
+  .hero--height-full {
+    min-height: calc(100vh - var(--header-height, 80px));
+    min-height: calc(100dvh - var(--header-height, 80px));
+  }
+
+  .hero--height-half {
+    min-height: clamp(18rem, 55dvh, 38rem);
+  }
+
+  .hero--background.hero--height-auto {
+    min-height: 18rem;
   }
 
   /* Image aspect ratios - prevent CLS */

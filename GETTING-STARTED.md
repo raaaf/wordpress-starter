@@ -104,18 +104,22 @@ Dies startet den Entwicklungsserver auf `http://localhost:5180` mit Hot Module R
 
 ### Reiter in den Blöcken
 
-Die Felder eines Blocks stehen in zwei Reitern: **Inhalt** trägt Texte, Bilder
-und Links, **Darstellung** die Hintergrundfarbe, den Abstand, die Breite und
-die Anker-ID. Ein paar Blöcke bringen eigene Reiter mit, etwa das
-Kontaktformular oder die Karte.
+Die Felder der meisten Blöcke stehen in zwei Reitern: **Inhalt** trägt Texte,
+Bilder und Links, **Darstellung** die Hintergrundfarbe, den Abstand, die Breite
+und die Anker-ID.
+
+Zwei Ausnahmen: Blöcke mit eigener Gliederung benennen ihre Reiter anders, das
+Kontaktformular, die Karte und die Beiträge etwa. Und ein paar kleine Blöcke
+haben gar keine Reiter, weil zu wenig zu trennen wäre, der Trenner und die
+Spaltenlayouts mit Bildern, die sich stattdessen je Spalte aufklappen.
 
 Der Hero-Bereich hat unter "Darstellung" zusätzlich das Feld **Höhe**:
 
-| Wert              | Wirkung                                                       |
-| ----------------- | ------------------------------------------------------------- |
-| Automatisch       | Die Höhe folgt dem Inhalt. Vorgabe.                           |
-| Halber Bildschirm | Mindestens die halbe Bildschirmhöhe.                          |
-| Voller Bildschirm | Mindestens die volle Bildschirmhöhe, abzüglich der Kopfzeile. |
+| Wert              | Wirkung                                                                                                                 |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Automatisch       | Die Höhe folgt dem Inhalt. Vorgabe. Die Variante Hintergrund behält ein Mindestmaß, sonst wäre das Bild ein Streifen.   |
+| Halber Bildschirm | Etwa die halbe Bildschirmhöhe, mindestens 18rem und höchstens 38rem. Auf sehr hohen Bildschirmen greift die Obergrenze. |
+| Voller Bildschirm | Mindestens die volle Bildschirmhöhe, abzüglich der Kopfzeile.                                                           |
 
 Alle drei Werte setzen nur eine Mindesthöhe. Wird der Inhalt höher, wächst der
 Hero mit, er schneidet nichts ab.
