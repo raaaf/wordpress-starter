@@ -159,6 +159,12 @@
      brand text on top keeps its contrast on any background, images included. */
   --bg-brand-tint: var(--bg-brand-subtle);
 
+  /* Form controls draw a hairline, not a grey frame (rafaelalex.de design
+     system, section 5). The field is told apart from the page by its paper
+     fill and its label; the boundary only firms up on focus. This trades the
+     3:1 boundary of WCAG 1.4.11 for the quieter look on purpose. */
+  --border-control: var(--border-strong);
+
   /* Danger button hover: --bg-error-strong is already the darkest of the
      three-step error ramp, so there is no further token to step to. Mixed
      towards black instead, same direction the text-on-white fill needs to

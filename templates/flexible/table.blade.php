@@ -34,13 +34,13 @@
     @if(!empty($rows))
         {{-- tabindex, damit der scrollende Bereich auch per Tastatur erreichbar ist (WCAG 2.1.1) --}}
         <div class="{{ $wrapperClass }} rounded-lg" tabindex="0" role="group" aria-label="{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}">
-            <table class="w-full {{ $bordered ? 'border border-line' : '' }}">
+            <table class="w-full border-collapse {{ $bordered ? 'border border-line' : '' }}">
                 <caption class="sr-only">{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}</caption>
                 @if(!empty($headers))
                     <thead class="bg-surface-tertiary {{ $headClass }}">
                         <tr>
                             @foreach($headers as $header)
-                                <th scope="col" class="{{ $cellClass }} text-left font-normal text-xs uppercase tracking-[0.08em] text-content-secondary bg-surface-tertiary border-b border-line-strong {{ $bordered ? 'border border-line' : '' }}">
+                                <th scope="col" class="{{ $cellClass }} text-left font-normal text-xs uppercase tracking-[0.08em] text-content-secondary bg-surface-tertiary {{ $bordered ? 'border border-line' : 'border-b border-line-strong' }}">
                                     {{ $header['label'] ?? '' }}
                                 </th>
                             @endforeach
