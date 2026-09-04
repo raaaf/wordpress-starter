@@ -1,3 +1,9 @@
+# [2.33.0](https://github.com/raaaf/wordpress-starter/compare/v2.32.0...v2.33.0) (2026-09-04)
+
+### Features
+
+- landing page mode per page ([d92af89](https://github.com/raaaf/wordpress-starter/commit/d92af89d654b5f38745d1b6f7207d9c1a1b33b5d))
+
 # [2.32.0](https://github.com/raaaf/wordpress-starter/compare/v2.31.0...v2.32.0) (2026-08-26)
 
 ### Bug Fixes
