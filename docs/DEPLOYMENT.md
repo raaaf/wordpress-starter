@@ -58,7 +58,7 @@ Recommended plugins (auto-install via `composer install`):
 
 | Requirement         | Version              |
 | ------------------- | -------------------- |
-| PHP                 | 8.3+                 |
+| PHP                 | 8.2+                 |
 | MySQL               | 5.7+ / MariaDB 10.3+ |
 | WordPress           | 6.8+                 |
 | Memory Limit        | 256M                 |

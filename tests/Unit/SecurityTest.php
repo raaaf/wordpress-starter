@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use ReflectionClass;
 use Tests\Support\TestCase;
 use WordpressStarter\Security;
 
@@ -27,7 +28,7 @@ final class SecurityTest extends TestCase
 
     private function resetSecurityState(): void
     {
-        $reflection = new \ReflectionClass(Security::class);
+        $reflection = new ReflectionClass(Security::class);
         $nonceProperty = $reflection->getProperty('nonce');
         $nonceProperty->setAccessible(true);
         $nonceProperty->setValue(null, null);
@@ -80,6 +81,7 @@ final class SecurityTest extends TestCase
         $this->assertStringContainsString("font-src 'self'", $header);
         $this->assertStringContainsString("img-src 'self'", $header);
         $this->assertStringContainsString("connect-src 'self'", $header);
+        $this->assertStringContainsString("base-uri 'self'", $header);
     }
 
     /**
@@ -112,7 +114,7 @@ final class SecurityTest extends TestCase
 
         $this->assertStringContainsString(
             'https://app.rybbit.io',
-            $this->directive(Security::getCSPHeader(), 'script-src')
+            $this->directive(Security::getCSPHeader(), 'script-src'),
         );
     }
 
@@ -224,5 +226,87 @@ final class SecurityTest extends TestCase
 
         // All directives should be separated by semicolons
         $this->assertGreaterThan(5, substr_count($header, ';'));
+    }
+
+    /**
+     * No existing nonce/hash in either directive: 'unsafe-eval' is appended to
+     * script-src, but our nonce is NOT injected anywhere, since 'unsafe-inline'
+     * alone (no nonce/hash present) is still effective and must stay that way.
+     */
+    public function testAddUnsafeEvalToCSPSkipsNonceWhenNoNonceOrHashPresent(): void
+    {
+        $csp = "script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'";
+
+        $result = Security::addUnsafeEvalToCSP($csp);
+
+        $this->assertSame(
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'",
+            $result,
+        );
+    }
+
+    /**
+     * script-src already carries a nonce: our own nonce is added there (a
+     * nonce source already makes the browser ignore 'unsafe-inline' in that
+     * directive, so nothing is lost), plus 'unsafe-eval'. style-src has no
+     * nonce/hash, so it is left untouched.
+     */
+    public function testAddUnsafeEvalToCSPAddsNonceOnlyToDirectiveThatAlreadyHasOne(): void
+    {
+        $nonce = Security::getNonce();
+        $csp = "script-src 'self' 'nonce-abc'; style-src 'self'";
+
+        $result = Security::addUnsafeEvalToCSP($csp);
+
+        $this->assertSame(
+            "script-src 'self' 'nonce-abc' 'unsafe-eval' 'nonce-{$nonce}'; style-src 'self'",
+            $result,
+        );
+    }
+
+    /**
+     * A second, comma-separated policy in the same header value must stay
+     * untouched: the patch only ever touches the first policy.
+     */
+    public function testAddUnsafeEvalToCSPStaysWithinFirstCommaSeparatedPolicy(): void
+    {
+        $csp = "script-src 'none', default-src 'self'";
+
+        $result = Security::addUnsafeEvalToCSP($csp);
+
+        $this->assertSame("script-src 'none' 'unsafe-eval', default-src 'self'", $result);
+    }
+
+    /** No script-src/style-src at all: nothing to touch, nothing errors. */
+    public function testAddUnsafeEvalToCSPLeavesHeaderWithoutScriptOrStyleSrcUnchanged(): void
+    {
+        $csp = "default-src 'self'";
+
+        $result = Security::addUnsafeEvalToCSP($csp);
+
+        $this->assertSame("default-src 'self'", $result);
+    }
+
+    /**
+     * script-src-elem is a separate CSP3 directive and must not be matched by
+     * the "script-src" patch; only the real script-src is touched.
+     */
+    public function testAddUnsafeEvalToCSPDoesNotMatchScriptSrcElem(): void
+    {
+        $csp = "script-src-elem 'self'; script-src 'self'";
+
+        $result = Security::addUnsafeEvalToCSP($csp);
+
+        $this->assertSame("script-src-elem 'self'; script-src 'self' 'unsafe-eval'", $result);
+    }
+
+    /** 'unsafe-eval' already present in script-src: it must not be appended twice. */
+    public function testAddUnsafeEvalToCSPDoesNotDuplicateExistingUnsafeEval(): void
+    {
+        $csp = "script-src 'self' 'unsafe-eval'";
+
+        $result = Security::addUnsafeEvalToCSP($csp);
+
+        $this->assertSame("script-src 'self' 'unsafe-eval'", $result);
     }
 }

@@ -15,8 +15,9 @@ $directives = [
     "default-src 'self'" . $localSources,
     "font-src 'self' data: https://fonts.gstatic.com" . $localSources,
     "img-src 'self' data: https:" . $localSources,
-    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com",
+    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com" . self::getEmbedOrigins(),
     "frame-ancestors 'self'",
+    "base-uri 'self'",
     "media-src 'self' https:" . $localSources,
     "script-src 'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'" . $analyticsOrigin . $localSources,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com" . $localSources,
@@ -25,9 +26,11 @@ $directives = [
 ];
 ```
 
-`$localSources` (from `Security::getLocalSources()`) appends a space-separated list of `http://` and `ws://` origins for `localhost` and `127.0.0.1` across common dev ports (3000, 3001, 4173, 5173, 5180-5182, 8000, 8080, 8888, 9000, plus the dynamic Vite port read from `.vite-port`). It only applies when `WP_ENVIRONMENT_TYPE` is `local`; in production it resolves to an empty string. `default-src`, `font-src`, `img-src`, `media-src`, `script-src`, `style-src` and `connect-src` all carry this suffix, `frame-src`, `frame-ancestors` and `worker-src` do not.
+`$localSources` (from `Security::getLocalSources()`) appends a space-separated list of `http://` and `ws://` origins for `localhost` and `127.0.0.1` across common dev ports (3000, 3001, 4173, 5173, 5180-5182, 8000, 8080, 8888, 9000, plus the dynamic Vite port read from `.vite-port`). It only applies when `WP_ENVIRONMENT_TYPE` is `local`; in production it resolves to an empty string. `default-src`, `font-src`, `img-src`, `media-src`, `script-src`, `style-src` and `connect-src` all carry this suffix, `frame-src`, `frame-ancestors`, `base-uri` and `worker-src` do not.
 
 `$analyticsOrigin` (from `Security::getAnalyticsOrigin()`) resolves the `rybbit_script_url` option to its `https://` origin and appends it to `script-src` and `connect-src`, so the Rybbit Analytics tracking script (if the plugin is active) can both load and send events. Falls back to the plugin's own default origin when the option is unset, and to an empty string when the value cannot be parsed as a safe `https://` host.
+
+`Security::getEmbedOrigins()` reads the admin-configured `embed_allowed_hosts` option, one host per line, and appends the resulting `https://` origins to `frame-src`. It strips any scheme or path from each entry and drops anything it cannot parse as a plain hostname, so `frame-src` never widens beyond a host list an administrator explicitly entered under Theme-Einstellungen → Analytics → Externe Einbettungen.
 
 ### Nonce-Based Script Loading
 
@@ -215,6 +218,17 @@ header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=()');
 ```
+
+`Strict-Transport-Security` is set separately, in `SecurityServiceProvider::boot()`:
+
+```php
+// In SecurityServiceProvider.php
+header('Strict-Transport-Security: max-age=63072000; includeSubDomains; preload');
+```
+
+Only sent on HTTPS frontend requests (skipped for admin and AJAX requests, and
+whenever the request is not HTTPS), so it never interferes with a non-HTTPS
+staging login.
 
 ## Database Security
 

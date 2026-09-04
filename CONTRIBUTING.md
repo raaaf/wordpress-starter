@@ -21,7 +21,7 @@
 
 ### PHP
 
-- **PHP 8.3+** mit `declare(strict_types=1)`
+- **PHP 8.2+** mit `declare(strict_types=1)`
 - **PSR-4** Autoloading unter `WordpressStarter\` Namespace
 - Folge den WordPress Coding Standards (mit Anpassungen, siehe `phpcs.xml`)
 

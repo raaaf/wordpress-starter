@@ -1407,7 +1407,7 @@ Client-Theme für {$name}. Basiert auf dem wordpress-starter-theme.
 
 ## Stack
 
-Blade, TailwindCSS v4.1, Alpine.js, ACF Pro + ACF Extended, Vite 7.3, PHP 8.2+. Kein Gutenberg.
+Blade, TailwindCSS v4.1, Alpine.js, ACF Pro + ACF Extended, Vite 8, PHP 8.2+. Kein Gutenberg.
 
 ## Entwicklung
 

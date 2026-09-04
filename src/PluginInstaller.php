@@ -27,10 +27,9 @@ class PluginInstaller
             ];
         }
 
-        // Sanitize slug - only allow alphanumeric and hyphens
-        $slug = sanitize_title($slug);
+        $slug = self::validateSlug($slug);
 
-        if (empty($slug)) {
+        if ($slug === null) {
             return [
                 'success' => false,
                 'message' => __('Ungültiger Plugin-Slug.', 'wp-starter'),
@@ -45,22 +44,106 @@ class PluginInstaller
             ];
         }
 
-        require_once ABSPATH . 'wp-admin/includes/file.php';
-        require_once ABSPATH . 'wp-admin/includes/misc.php';
-        require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-        require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-        require_once ABSPATH . 'wp-admin/includes/class-plugin-upgrader.php';
-
-        // Use direct filesystem access (no FTP credentials needed for local)
-        if (!WP_Filesystem(false, false, true)) {
+        if (!self::ensureFilesystem()) {
             return [
                 'success' => false,
                 'message' => __('Dateisystem konnte nicht initialisiert werden.', 'wp-starter'),
             ];
         }
 
-        // Get plugin info from WordPress.org
-        $api = plugins_api('plugin_information', [
+        $api = self::fetchPluginInfo($slug);
+
+        if (is_wp_error($api)) {
+            return [
+                'success' => false,
+                'message' => $api->get_error_message(),
+            ];
+        }
+
+        if (is_array($api)) {
+            $api = (object) $api;
+        }
+
+        if (empty($api->download_link) || !is_string($api->download_link)) {
+            return [
+                'success' => false,
+                'message' => __('Keine Download-URL für das Plugin gefunden.', 'wp-starter'),
+            ];
+        }
+
+        $upgrade = self::runUpgrader($api->download_link);
+        $result = $upgrade['result'];
+        $skin = $upgrade['skin'];
+
+        if (is_wp_error($result)) {
+            return [
+                'success' => false,
+                'message' => $result->get_error_message(),
+            ];
+        }
+
+        $skinErrorMessage = self::collectSkinErrors($skin);
+
+        if ($skinErrorMessage !== null) {
+            return [
+                'success' => false,
+                'message' => $skinErrorMessage,
+            ];
+        }
+
+        if ($result === false || $result === null) {
+            return [
+                'success' => false,
+                'message' => __('Installation fehlgeschlagen.', 'wp-starter'),
+            ];
+        }
+
+        self::clearCaches();
+
+        return [
+            'success' => true,
+            'message' => __('Plugin erfolgreich installiert.', 'wp-starter'),
+        ];
+    }
+
+    /**
+     * Sanitize and validate a plugin slug
+     *
+     * Only alphanumeric characters and hyphens are allowed.
+     *
+     * @return string|null Sanitized slug, or null if it is empty after sanitization
+     */
+    private static function validateSlug(string $slug): ?string
+    {
+        $slug = sanitize_title($slug);
+
+        return $slug === '' ? null : $slug;
+    }
+
+    /**
+     * Load the WordPress upgrader includes and initialize direct filesystem access
+     *
+     * No FTP credentials are needed for local filesystem access.
+     */
+    private static function ensureFilesystem(): bool
+    {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/misc.php';
+        require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+        require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+        require_once ABSPATH . 'wp-admin/includes/class-plugin-upgrader.php';
+
+        return WP_Filesystem(false, false, true);
+    }
+
+    /**
+     * Get plugin info from WordPress.org
+     *
+     * @return array<string, mixed>|object|\WP_Error
+     */
+    private static function fetchPluginInfo(string $slug): array|object
+    {
+        return plugins_api('plugin_information', [
             'slug' => $slug,
             'fields' => [
                 'short_description' => false,
@@ -77,56 +160,48 @@ class PluginInstaller
                 'donate_link' => false,
             ],
         ]);
+    }
 
-        if (is_wp_error($api)) {
-            return [
-                'success' => false,
-                'message' => $api->get_error_message(),
-            ];
-        }
-
-        // Install the plugin using quiet skin to suppress output
+    /**
+     * Install the plugin using a quiet skin to suppress output
+     *
+     * @return array{result: mixed, skin: \WP_Upgrader_Skin}
+     */
+    private static function runUpgrader(string $downloadLink): array
+    {
         $skin = self::createQuietSkin();
         $upgrader = new \Plugin_Upgrader($skin);
-        /** @var object{download_link: string} $api */
-        $result = $upgrader->install($api->download_link);
+        $result = $upgrader->install($downloadLink);
 
-        if (is_wp_error($result)) {
-            return [
-                'success' => false,
-                'message' => $result->get_error_message(),
-            ];
-        }
+        return ['result' => $result, 'skin' => $skin];
+    }
 
-        // Check for skin errors (methods defined in anonymous class)
+    /**
+     * Check for skin errors (methods defined in anonymous class)
+     *
+     * @return string|null Error message, or null if there were no errors
+     */
+    private static function collectSkinErrors(\WP_Upgrader_Skin $skin): ?string
+    {
         // @phpstan-ignore method.notFound
-        if ($skin->has_errors()) {
-            // @phpstan-ignore method.notFound
-            $errors = $skin->get_errors();
-            $errorMessage = is_wp_error($errors[0])
-                ? $errors[0]->get_error_message()
-                : (string) $errors[0];
-
-            return [
-                'success' => false,
-                'message' => $errorMessage,
-            ];
+        if (!$skin->has_errors()) {
+            return null;
         }
 
-        if ($result === false || $result === null) {
-            return [
-                'success' => false,
-                'message' => __('Installation fehlgeschlagen.', 'wp-starter'),
-            ];
-        }
+        // @phpstan-ignore method.notFound
+        $errors = $skin->get_errors();
 
-        // Clear plugin cache so WordPress sees the newly installed plugin
+        return is_wp_error($errors[0])
+            ? $errors[0]->get_error_message()
+            : (string) $errors[0];
+    }
+
+    /**
+     * Clear plugin cache so WordPress sees the newly installed plugin
+     */
+    private static function clearCaches(): void
+    {
         wp_clean_plugins_cache();
-
-        return [
-            'success' => true,
-            'message' => __('Plugin erfolgreich installiert.', 'wp-starter'),
-        ];
     }
 
     /**
@@ -142,6 +217,15 @@ class PluginInstaller
             return [
                 'success' => false,
                 'message' => __('Du hast keine Berechtigung, Plugins zu aktivieren.', 'wp-starter'),
+            ];
+        }
+
+        $slug = self::validateSlug($slug);
+
+        if ($slug === null) {
+            return [
+                'success' => false,
+                'message' => __('Ungültiger Plugin-Slug.', 'wp-starter'),
             ];
         }
 
@@ -190,6 +274,17 @@ class PluginInstaller
      */
     public static function installAndActivate(string $slug): array
     {
+        $slug = self::validateSlug($slug);
+
+        if ($slug === null) {
+            return [
+                'success' => false,
+                'message' => __('Ungültiger Plugin-Slug.', 'wp-starter'),
+                'installed' => false,
+                'activated' => false,
+            ];
+        }
+
         $installed = false;
         $activated = false;
 
@@ -262,7 +357,7 @@ class PluginInstaller
      *
      * @param array<string> $slugs Plugin slugs
      *
-     * @return array<string, array{success: bool, message: string}>
+     * @return array<string, array{success: bool, message: string, installed: bool, activated: bool}>
      */
     public static function bulkInstallAndActivate(array $slugs): array
     {

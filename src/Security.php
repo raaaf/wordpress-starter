@@ -39,18 +39,62 @@ class Security
     }
 
     /**
-     * Add 'unsafe-eval' to a CSP header's script-src directive.
-     * Required for Alpine.js to work in the block editor.
+     * Patch a foreign admin CSP header (set by another plugin, e.g. Solid
+     * Security) so the theme's own admin inline scripts/styles still work:
+     *
+     * - Adds 'unsafe-eval' to script-src, still required because ACF Pro's
+     *   block-preview rendering (REST API, not caught by is_admin()) evaluates
+     *   inline JavaScript.
+     * - Adds the theme's current nonce ('nonce-{value}') to script-src and
+     *   style-src, but ONLY when that directive already carries a
+     *   'nonce-...'/'sha256-...'/'sha384-...'/'sha512-...' source. Per the
+     *   CSP2+ spec, a nonce or hash source in a directive makes browsers
+     *   ignore 'unsafe-inline' in that same directive, so nothing is lost
+     *   by adding our nonce there. Injecting the nonce into a directive that
+     *   still relies on 'unsafe-inline' alone (no nonce/hash present) would
+     *   make CSP2+ browsers ignore that 'unsafe-inline' too and block every
+     *   other plugin's and WordPress core's un-nonced inline script or
+     *   style in wp-admin, so such directives are left untouched. The
+     *   theme's own admin tags remain unblocked because the foreign
+     *   'unsafe-inline' still applies to them.
+     * - A foreign header with only default-src (no script-src/style-src) is
+     *   a no-op for both patches: nothing to touch, nothing errors.
+     *
+     * Only script-src and style-src are touched. script-src-elem and
+     * script-src-attr are separate directives under CSP3 and are left alone;
+     * matching them here would also modify allowances the foreign header
+     * intentionally set apart from script-src. Directive bodies are matched
+     * up to the next ';' or ',' so a second, comma-separated policy in the
+     * same header value is never touched.
      */
     public static function addUnsafeEvalToCSP(string $csp): string
     {
-        if (!str_contains($csp, "'unsafe-eval'")) {
+        if (preg_match('/(^|;\s*)(script-src)(\s[^;,]*)/', $csp, $scriptSrcMatch) === 1
+            && !str_contains($scriptSrcMatch[3], "'unsafe-eval'")
+        ) {
             $csp = preg_replace(
-                '/(script-src[^;]*)/',
-                "$1 'unsafe-eval'",
-                $csp
+                '/(^|;\s*)(script-src)(\s[^;,]*)/',
+                '$1$2$3 \'unsafe-eval\'',
+                $csp,
+                1
             ) ?? $csp;
         }
+
+        $nonceSource = "'nonce-" . self::getNonce() . "'";
+        foreach (['script-src', 'style-src'] as $directive) {
+            if (preg_match('/(^|;\s*)(' . $directive . ')(\s[^;,]*)/', $csp, $matches) === 1
+                && preg_match('/\'(?:nonce|sha256|sha384|sha512)-/', $matches[3]) === 1
+                && !str_contains($matches[3], $nonceSource)
+            ) {
+                $csp = preg_replace(
+                    '/(^|;\s*)(' . $directive . ')(\s[^;,]*)/',
+                    '$1$2$3 ' . $nonceSource,
+                    $csp,
+                    1
+                ) ?? $csp;
+            }
+        }
+
         return $csp;
     }
 
@@ -126,6 +170,29 @@ class Security
     }
 
     /**
+     * Baue eine https-Origin aus einem geprueften Hostnamen.
+     *
+     * Gemeinsame Validierung und Aufbau fuer getAnalyticsOrigin() und
+     * getEmbedOrigins(): nur Zeichen, die in einem Hostnamen vorkommen
+     * duerfen, kein Schema, kein Pfad. Gibt null zurueck, wenn der Host
+     * nicht passt, statt eine Direktive zu zerlegen.
+     */
+    private static function httpsOriginFromHost(string $host, mixed $port = null): ?string
+    {
+        if (preg_match('/^[A-Za-z0-9.-]+$/', $host) !== 1) {
+            return null;
+        }
+
+        $origin = 'https://' . $host;
+
+        if (is_int($port) && $port > 0 && $port <= 65535) {
+            $origin .= ':' . $port;
+        }
+
+        return $origin;
+    }
+
+    /**
      * Herkunft des Analytics-Hosts fuer die CSP, aus der Plugin-Option.
      *
      * Rybbit laedt sein Skript per wp_enqueue_script von einem externen Host und
@@ -157,15 +224,11 @@ class Security
             return '';
         }
 
-        if (preg_match('/^[A-Za-z0-9.-]+$/', $host) !== 1) {
-            return '';
-        }
-
         $port = wp_parse_url($url, PHP_URL_PORT);
-        $origin = 'https://' . $host;
+        $origin = self::httpsOriginFromHost($host, $port);
 
-        if (is_int($port) && $port > 0 && $port <= 65535) {
-            $origin .= ':' . $port;
+        if ($origin === null) {
+            return '';
         }
 
         return ' ' . $origin;
@@ -207,11 +270,17 @@ class Security
 
             $host = strtok($host, '/');
 
-            if (!is_string($host) || preg_match('/^[A-Za-z0-9.-]+$/', $host) !== 1) {
+            if (!is_string($host)) {
                 continue;
             }
 
-            $origins[] = 'https://' . $host;
+            $origin = self::httpsOriginFromHost($host);
+
+            if ($origin === null) {
+                continue;
+            }
+
+            $origins[] = $origin;
         }
 
         if ($origins === []) {
@@ -237,6 +306,7 @@ class Security
             "img-src 'self' data: https:" . $localSources,
             "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com" . self::getEmbedOrigins(),
             "frame-ancestors 'self'",
+            "base-uri 'self'",
             "media-src 'self' https:" . $localSources,
         ];
 
@@ -260,9 +330,6 @@ class Security
     }
 
     /**
-     * Initialize security features.
-     */
-    /**
      * Send hardening headers that do not depend on the CSP.
      *
      * Registered before the CSP guard so disabling the CSP does not silently
@@ -282,6 +349,9 @@ class Security
         });
     }
 
+    /**
+     * Initialize security features.
+     */
     public static function init(): void
     {
         self::addHardeningHeaders();
@@ -316,8 +386,13 @@ class Security
                     $headers = headers_list();
                     foreach ($headers as $header) {
                         if (stripos($header, 'Content-Security-Policy:') === 0) {
-                            // Remove the old header and set a new one with unsafe-eval
-                            $csp = substr($header, strlen('Content-Security-Policy: '));
+                            // Remove the old header and set a new one with unsafe-eval.
+                            // Regex-strip the prefix instead of substr(): a header value can
+                            // arrive without a space after the colon (e.g. no leading space
+                            // from the sending plugin), and substr() with a fixed 'Content-
+                            // Security-Policy: ' length would then eat the CSP's first
+                            // character.
+                            $csp = preg_replace('/^content-security-policy:\s*/i', '', $header) ?? $header;
                             header_remove('Content-Security-Policy');
                             header('Content-Security-Policy: ' . Security::addUnsafeEvalToCSP($csp));
                             break;
@@ -332,17 +407,26 @@ class Security
 
         // Add nonce to script tags (preparation for removing unsafe-inline)
         add_filter('script_loader_tag', function (string $tag, string $handle): string {
-            // Skip if already has nonce
-            if (str_contains($tag, 'nonce=')) {
-                return $tag;
-            }
+            // Core can concatenate several script tags (before/main/after
+            // inline scripts) into one $tag string, so nonce each opening
+            // <script ...> tag individually instead of only the first.
             $nonce = self::getNonce();
-            return str_replace('<script ', "<script nonce=\"{$nonce}\" ", $tag);
+            return preg_replace_callback('/<script\b[^>]*>/i', function (array $matches) use ($nonce): string {
+                $openingTag = $matches[0];
+                // Skip if this tag already carries a nonce attribute, not
+                // merely the substring "nonce=" inside a src URL query string
+                if (preg_match('/\snonce=/i', $openingTag) === 1) {
+                    return $openingTag;
+                }
+                return preg_replace('/<script\b/i', "<script nonce=\"{$nonce}\"", $openingTag, 1) ?? $openingTag;
+            }, $tag) ?? $tag;
         }, 10, 2);
 
         // Add nonce to WordPress inline scripts (wp_add_inline_script)
         add_filter('wp_inline_script_attributes', function (array $attributes): array {
-            $attributes['nonce'] = self::getNonce();
+            if (!isset($attributes['nonce'])) {
+                $attributes['nonce'] = self::getNonce();
+            }
             return $attributes;
         });
 

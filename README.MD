@@ -6,11 +6,11 @@ My own WordPress theme framework as the basis for every client project. No page 
 
 | Technology                    | Version        | Purpose                         |
 | ----------------------------- | -------------- | ------------------------------- |
-| PHP                           | 8.3+           | Strict types, modern features   |
-| Laravel Blade                 | Illuminate v13 | Templating                      |
+| PHP                           | 8.2+           | Strict types, modern features   |
+| Laravel Blade                 | Illuminate v12 | Templating                      |
 | TailwindCSS                   | v4.1           | Utility CSS, design tokens      |
 | Alpine.js                     | v3.15          | Interactive components, bundled |
-| Vite                          | 7.3            | Build tool with HMR             |
+| Vite                          | 8              | Build tool with HMR             |
 | ACF Pro + ACF Extended (FREE) | -              | Flexible Content page builder   |
 | TypeScript                    | -              | Type-safe JS                    |
 
@@ -18,7 +18,7 @@ Gutenberg is disabled. Content model: Classic Editor + ACF Flexible Content.
 
 ## Requirements
 
-- PHP 8.3+
+- PHP 8.2+
 - Composer
 - Node.js 20.19+ / 22.12+
 - WordPress 6.8+
@@ -254,6 +254,8 @@ ACF Pro must be installed manually (premium).
 - [docs/SECURITY.md](docs/SECURITY.md): CSP, security practices
 - [docs/SEO.md](docs/SEO.md): Schema.org, structured data
 - [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md): Token system
+- [docs/DESIGN-TOKEN-GAPS.md](docs/DESIGN-TOKEN-GAPS.md): Known token coverage gaps
+- [docs/COMPONENT-DEVELOPMENT.md](docs/COMPONENT-DEVELOPMENT.md): Adding new Blade components
 
 ## Author
 

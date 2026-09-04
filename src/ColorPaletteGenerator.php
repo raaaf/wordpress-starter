@@ -39,25 +39,25 @@ class ColorPaletteGenerator
      *
      * @return array<int, string> Array of shade => hex color
      */
-    public function generate(string $hexColor): array
+    public static function generate(string $hexColor): array
     {
         $rgb = self::hexToRgb($hexColor);
         if ($rgb === null) {
             return [];
         }
 
-        $hsl = $this->rgbToHsl($rgb['r'], $rgb['g'], $rgb['b']);
+        $hsl = self::rgbToHsl($rgb['r'], $rgb['g'], $rgb['b']);
         $palette = [];
 
         foreach (self::SHADE_ADJUSTMENTS as $shade => $adjustment) {
             if ($shade === 500) {
-                // Base color unchanged
-                $palette[$shade] = strtoupper($hexColor);
+                // Base color, normalized to #RRGGBB
+                $palette[$shade] = self::rgbToHex($rgb['r'], $rgb['g'], $rgb['b']);
             } else {
                 // Adjust lightness
-                $newLightness = $this->adjustLightness($hsl['l'], $adjustment);
-                $newRgb = $this->hslToRgb($hsl['h'], $hsl['s'], $newLightness);
-                $palette[$shade] = $this->rgbToHex($newRgb['r'], $newRgb['g'], $newRgb['b']);
+                $newLightness = self::adjustLightness($hsl['l'], $adjustment);
+                $newRgb = self::hslToRgb($hsl['h'], $hsl['s'], $newLightness);
+                $palette[$shade] = self::rgbToHex($newRgb['r'], $newRgb['g'], $newRgb['b']);
             }
         }
 
@@ -74,7 +74,7 @@ class ColorPaletteGenerator
      *
      * @return float New lightness value (0-1)
      */
-    private function adjustLightness(float $lightness, float $adjustment): float
+    private static function adjustLightness(float $lightness, float $adjustment): float
     {
         if ($adjustment > 0) {
             // Lighter: move towards 1.0 (white)
@@ -94,14 +94,14 @@ class ColorPaletteGenerator
      */
     public static function hexToRgb(string $hex): ?array
     {
-        $hex = ltrim($hex, '#');
+        $hex = preg_replace('/^#/', '', $hex);
 
         // Support 3-character hex
         if (strlen($hex) === 3) {
             $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
         }
 
-        if (strlen($hex) !== 6) {
+        if (!preg_match('/^[0-9a-fA-F]{6}$/', $hex)) {
             return null;
         }
 
@@ -126,7 +126,7 @@ class ColorPaletteGenerator
      *
      * @return string Hex color (#RRGGBB)
      */
-    private function rgbToHex(int $r, int $g, int $b): string
+    private static function rgbToHex(int $r, int $g, int $b): string
     {
         return sprintf(
             '#%02X%02X%02X',
@@ -145,7 +145,7 @@ class ColorPaletteGenerator
      *
      * @return array{h: float, s: float, l: float}
      */
-    private function rgbToHsl(int $r, int $g, int $b): array
+    private static function rgbToHsl(int $r, int $g, int $b): array
     {
         $r /= 255;
         $g /= 255;
@@ -186,7 +186,7 @@ class ColorPaletteGenerator
      *
      * @return array{r: int, g: int, b: int}
      */
-    private function hslToRgb(float $h, float $s, float $l): array
+    private static function hslToRgb(float $h, float $s, float $l): array
     {
         if ($s === 0.0) {
             $r = $l;
@@ -195,9 +195,9 @@ class ColorPaletteGenerator
         } else {
             $q = $l < 0.5 ? $l * ( 1 + $s ) : $l + $s - $l * $s;
             $p = 2 * $l - $q;
-            $r = $this->hueToRgb($p, $q, $h + 1 / 3);
-            $g = $this->hueToRgb($p, $q, $h);
-            $b = $this->hueToRgb($p, $q, $h - 1 / 3);
+            $r = self::hueToRgb($p, $q, $h + 1 / 3);
+            $g = self::hueToRgb($p, $q, $h);
+            $b = self::hueToRgb($p, $q, $h - 1 / 3);
         }
 
         return [
@@ -216,7 +216,7 @@ class ColorPaletteGenerator
      *
      * @return float
      */
-    private function hueToRgb(float $p, float $q, float $t): float
+    private static function hueToRgb(float $p, float $q, float $t): float
     {
         if ($t < 0) {
             ++$t;
@@ -245,7 +245,7 @@ class ColorPaletteGenerator
      *
      * @return array<int, array<string, mixed>> Figma-compatible token structure
      */
-    public function toFigmaTokenFormat(array $palette, string $colorName): array
+    public static function toFigmaTokenFormat(array $palette, string $colorName): array
     {
         $tokens = [];
 

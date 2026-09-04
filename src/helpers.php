@@ -88,7 +88,9 @@ if (!function_exists('get_reading_time')) {
         }
 
         $content = wp_strip_all_tags($post->post_content);
-        $wordCount = str_word_count($content);
+        // str_word_count() is not UTF-8 aware and undercounts German words with
+        // umlauts (ä, ö, ü), so match Unicode letter sequences instead.
+        $wordCount = preg_match_all('/\p{L}+/u', $content);
         $minutes = max(1, (int) ceil($wordCount / $wordsPerMinute));
 
         return sprintf('%d Min. Lesezeit', $minutes);

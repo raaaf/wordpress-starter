@@ -6,7 +6,7 @@ Guidance for Claude Code when working with this WordPress starter theme.
 
 - **Namespace:** `WordpressStarter\`
 - **Text Domain:** `wp-starter`
-- **PHP:** 8.3+ with strict types
+- **PHP:** 8.2+ with strict types
 - **Dev Server:** `npm run dev` (localhost:5180)
 - **Editor:** Classic Editor + ACF Flexible Content (Gutenberg disabled)
 
@@ -77,16 +77,18 @@ docs/                 # Documentation
 ├── DEPLOYMENT.md          # Production deployment
 ├── SECURITY.md            # Security practices
 ├── SEO.md                 # SEO implementation
+├── DESIGN-TOKENS.md       # Token system
+├── DESIGN-TOKEN-GAPS.md   # Known token coverage gaps
 ```
 
 ### Key Technologies
 
-- **Blade** (Laravel Illuminate v13) - Templates extend `layouts.app`
+- **Blade** (Laravel Illuminate v12) - Templates extend `layouts.app`
 - **Alpine.js** (bundled, no CDN) - Interactive components
 - **TailwindCSS v4.1** - Utility-first CSS
 - **ACF Pro** - Flexible Content page builder
 - **ACF Extended** (FREE) - Enhanced Flexible Content UX
-- **Vite 7.3** - Asset compilation with HMR
+- **Vite 8** - Asset compilation with HMR
 
 ## Plugin Management
 

@@ -65,18 +65,29 @@ class Config
     {
         self::load();
 
-        // Support dot notation
+        [$found, $value] = self::resolve($key);
+
+        return $found ? $value : $default;
+    }
+
+    /**
+     * Walk the dot-notation path and report whether it resolved.
+     *
+     * @return array{0: bool, 1: mixed}
+     */
+    private static function resolve(string $key): array
+    {
         $keys = explode('.', $key);
         $value = self::$config;
 
         foreach ($keys as $k) {
             if (!is_array($value) || !isset($value[$k])) {
-                return $default;
+                return [false, null];
             }
             $value = $value[$k];
         }
 
-        return $value;
+        return [true, $value];
     }
 
     public static function set(string $key, mixed $value): void
@@ -102,6 +113,8 @@ class Config
     {
         self::load();
 
-        return isset(self::$config[$key]);
+        [$found] = self::resolve($key);
+
+        return $found;
     }
 }

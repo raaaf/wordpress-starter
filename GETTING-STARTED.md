@@ -4,7 +4,7 @@
 
 Stelle sicher, dass folgende Software installiert ist:
 
-- **PHP 8.4+** (mit Composer)
+- **PHP 8.2+** (mit Composer)
 - **Node.js 20.19+ oder 22.12+** (mit npm)
 - **WordPress 6.8+**
 - **Local by Flywheel** (empfohlen für Mac-Entwicklung)
