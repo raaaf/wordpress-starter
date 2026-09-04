@@ -152,13 +152,13 @@
                 @endif
 
                 @if($title)
-                    <{{ $heroHeadingTag }} class="text-display mt-0! mb-6 text-content-inverse">
+                    <{{ $heroHeadingTag }} class="text-display mt-0! mb-6 text-content-on-color">
                         {!! $title !!}
                     </{{ $heroHeadingTag }}>
                 @endif
 
                 @if($copy)
-                    <p class="text-body-large mb-8 max-w-[52ch] mx-auto text-pretty text-content-inverse/85">{!! $copy !!}</p>
+                    <p class="text-body-large mb-8 max-w-[52ch] mx-auto text-pretty text-content-on-color/85">{!! $copy !!}</p>
                 @endif
 
                 @if($cta_primary || $cta_secondary)

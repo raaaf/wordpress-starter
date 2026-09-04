@@ -134,7 +134,7 @@
                                     href="{{ esc_url($logo['link']) }}"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    class="block transition-[opacity,filter] duration-200 opacity-50 hover:opacity-100 grayscale hover:grayscale-0"
+                                    class="block transition-[opacity,filter] duration-200 opacity-70 hover:opacity-100 grayscale hover:grayscale-0"
                                     aria-label="{{ $logo['name'] ? $logo['name'] . ' ' : '' }}{{ __('(öffnet in neuem Tab)', 'wp-starter') }}"
                                 >
                                     <img
@@ -149,7 +149,7 @@
                             @else
                                 {{-- Not linked: no hover promise to make, so no
                                      hover/transition classes either. --}}
-                                <div class="opacity-50 grayscale">
+                                <div class="opacity-70 grayscale">
                                     <img
                                         src="{{ $logo['url'] }}"
                                         alt="{{ $logo['name'] }}"
