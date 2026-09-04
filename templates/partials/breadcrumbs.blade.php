@@ -2,7 +2,7 @@
     // Only show breadcrumbs if:
     // 1. We're not on the front page
     // 2. We're not on a single post (clean reading experience)
-    $showBreadcrumbs = !is_front_page() && !is_singular('post');
+    $showBreadcrumbs = !is_front_page() && !is_singular('post') && !\WordpressStarter\Acf\PageSettings::isLandingPage();
     $hasYoast = function_exists('yoast_breadcrumb');
 
     $isMemberArea = is_page() && function_exists('get_field') && get_field('page_is_member_area');

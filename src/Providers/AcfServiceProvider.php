@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Blade;
 use WordpressStarter\Acf\AcfExtended;
 use WordpressStarter\Acf\FlexibleContent;
 use WordpressStarter\Acf\Options;
+use WordpressStarter\Acf\PageSettings;
 use WordpressStarter\Vite;
 
 class AcfServiceProvider extends ServiceProvider
@@ -22,6 +23,9 @@ class AcfServiceProvider extends ServiceProvider
 
         // Register options pages
         add_action('acf/init', [Options::class, 'register']);
+
+        // Register page settings (e.g. landing page mode)
+        add_action('acf/init', [PageSettings::class, 'register']);
 
         // Register flexible content fields
         add_action('acf/init', [FlexibleContent::class, 'register']);

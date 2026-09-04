@@ -94,6 +94,35 @@ if (!function_exists('get_template_directory_uri')) {
     }
 }
 
+if (!function_exists('wp_nav_menu')) {
+    function wp_nav_menu(array $args = []): ?string
+    {
+        $output = '<ul id="mock-nav-menu" class="' . ($args['menu_class'] ?? '') . '"></ul>';
+
+        if (!empty($args['echo']) || !isset($args['echo'])) {
+            echo $output;
+
+            return null;
+        }
+
+        return $output;
+    }
+}
+
+if (!function_exists('get_theme_mod')) {
+    function get_theme_mod(string $name, mixed $default = false): mixed
+    {
+        return $GLOBALS['wp_mock_theme_mods'][$name] ?? $default;
+    }
+}
+
+if (!function_exists('has_nav_menu')) {
+    function has_nav_menu(string $location): bool
+    {
+        return $GLOBALS['wp_mock_nav_menus'][$location] ?? true;
+    }
+}
+
 if (!function_exists('get_theme_file_path')) {
     function get_theme_file_path(string $file = ''): string
     {
@@ -105,6 +134,32 @@ if (!function_exists('get_theme_file_uri')) {
     function get_theme_file_uri(string $file = ''): string
     {
         return get_template_directory_uri() . ( $file ? '/' . ltrim($file, '/') : '' );
+    }
+}
+
+if (!function_exists('get_language_attributes')) {
+    function get_language_attributes(): string
+    {
+        return 'lang="de-DE"';
+    }
+}
+
+if (!function_exists('wp_head')) {
+    function wp_head(): void
+    {
+    }
+}
+
+if (!function_exists('wp_body_open')) {
+    function wp_body_open(): void
+    {
+    }
+}
+
+if (!function_exists('get_body_class')) {
+    function get_body_class(array|string $class = ''): array
+    {
+        return is_array($class) ? $class : array_filter(explode(' ', $class));
     }
 }
 
@@ -306,6 +361,13 @@ if (!function_exists('wp_enqueue_style')) {
 }
 
 // ACF functions
+if (!function_exists('acf_add_local_field_group')) {
+    function acf_add_local_field_group(array $group): void
+    {
+        $GLOBALS['wp_mock_registered_field_groups'][] = $group;
+    }
+}
+
 if (!function_exists('get_field')) {
     function get_field(string $field, mixed $postId = false): mixed
     {
@@ -856,6 +918,13 @@ if (!function_exists('is_front_page')) {
     function is_front_page(): bool
     {
         return $GLOBALS['wp_mock_is_front_page'] ?? false;
+    }
+}
+
+if (!function_exists('is_page')) {
+    function is_page(mixed $page = ''): bool
+    {
+        return $GLOBALS['wp_mock_is_page'] ?? false;
     }
 }
 

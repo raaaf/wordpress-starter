@@ -49,13 +49,20 @@
 
     @php
         $headerSticky = \WordpressStarter\Acf\Fields::option('header_sticky');
+        $isLandingPage = \WordpressStarter\Acf\PageSettings::isLandingPage();
     @endphp
 
     <header class="bg-surface {{ $headerSticky ? 'sticky top-0 z-50 shadow-sm' : '' }}" role="banner">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <nav aria-label="{{ __('Hauptnavigation', 'wp-starter') }}">
-                @include('partials.header-menu')
-            </nav>
+            @if($isLandingPage)
+                <div>
+                    @include('partials.header-menu')
+                </div>
+            @else
+                <nav aria-label="{{ __('Hauptnavigation', 'wp-starter') }}">
+                    @include('partials.header-menu')
+                </nav>
+            @endif
         </div>
     </header>
 

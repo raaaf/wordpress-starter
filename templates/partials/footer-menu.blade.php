@@ -4,10 +4,12 @@
     $showCompany = \WordpressStarter\Acf\Fields::option('footer_show_company', true);
     $footerText = \WordpressStarter\Acf\Fields::option('footer_text', '');
 
+    $isLandingPage = \WordpressStarter\Acf\PageSettings::isLandingPage();
+
     // Navigation column
     $navMenu = \WordpressStarter\Acf\Fields::option('footer_nav_menu', 'footer-menu');
     // Ohne zugewiesenes Menü blieben sonst eine leere Überschrift und ein leeres nav-Landmark stehen.
-    $showNav = \WordpressStarter\Acf\Fields::option('footer_show_nav', true) && has_nav_menu($navMenu);
+    $showNav = \WordpressStarter\Acf\Fields::option('footer_show_nav', true) && has_nav_menu($navMenu) && !$isLandingPage;
     $navTitle = \WordpressStarter\Acf\Fields::option('footer_nav_title') ?: __('Navigation', 'wp-starter');
 
     // Contact column
@@ -15,7 +17,7 @@
     $contactTitle = \WordpressStarter\Acf\Fields::option('footer_contact_title') ?: __('Kontakt', 'wp-starter');
 
     // Social column
-    $showSocial = \WordpressStarter\Acf\Fields::option('footer_show_social', true);
+    $showSocial = \WordpressStarter\Acf\Fields::option('footer_show_social', true) && !$isLandingPage;
     $socialTitle = \WordpressStarter\Acf\Fields::option('footer_social_title') ?: __('Folge uns', 'wp-starter');
 
     // Bottom bar
@@ -43,23 +45,24 @@
 
 <footer class="bg-surface border-t border-line">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 {{ $isLandingPage ? 'lg:grid-cols-2' : 'lg:grid-cols-4' }} gap-8 lg:gap-12">
             {{-- Logo / Company Info / Footer Text --}}
             <div class="lg:col-span-1">
                 @if($showLogo && ($logo_id || $logo_url))
-                    <a href="{{ esc_url(home_url('/')) }}" class="inline-block mb-4">
-                        @if($logo_id)
-                            {!! wp_get_attachment_image($logo_id, 'logo', false, [
+                    @php
+                        $footerLogoMarkup = $logo_id
+                            ? wp_get_attachment_image($logo_id, 'logo', false, [
                                 'alt' => esc_attr(get_bloginfo('name')),
                                 'class' => 'h-10 w-auto',
                                 'sizes' => '(max-width: 768px) 128px, 256px',
-                            ]) !!}
-                        @else
-                            <img src="{{ esc_url($logo_url) }}"
-                                 alt="{{ esc_attr(get_bloginfo('name')) }}"
-                                 class="h-10 w-auto">
-                        @endif
-                    </a>
+                            ])
+                            : '<img src="' . esc_url($logo_url) . '" alt="' . esc_attr(get_bloginfo('name')) . '" class="h-10 w-auto">';
+                    @endphp
+                    @if($isLandingPage)
+                        <span class="inline-block mb-4">{!! $footerLogoMarkup !!}</span>
+                    @else
+                        <a href="{{ esc_url(home_url('/')) }}" class="inline-block mb-4">{!! $footerLogoMarkup !!}</a>
+                    @endif
                 @endif
                 @if($showCompany && $company)
                     <h2 class="text-h5 mb-4">{{ $company }}</h2>
