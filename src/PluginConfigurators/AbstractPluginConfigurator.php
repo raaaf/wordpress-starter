@@ -109,4 +109,23 @@ abstract class AbstractPluginConfigurator
     {
         delete_option(ThemeContext::optionKey('configured_' . static::getPluginSlug()));
     }
+
+    /**
+     * Merge values into an existing array-shaped wp_options entry
+     *
+     * Reads the current value of $option (or [] if it does not exist
+     * or is not an array), merges $values on top of it, and writes the
+     * result back in a single update_option() call.
+     *
+     * @param array<string, mixed> $values
+     */
+    protected static function mergeOption(string $option, array $values): void
+    {
+        $current = get_option($option, []);
+        if (!is_array($current)) {
+            $current = [];
+        }
+
+        update_option($option, array_merge($current, $values));
+    }
 }

@@ -153,6 +153,22 @@ class Access
 
         // Member area dashboard page
         $isMemberArea = $flags['is_member_area'];
+        // Protected page
+        $isProtected = $flags['is_protected'];
+
+        // Neither the page cache nor a personalised member/protected page may ever be
+        // cached: an anonymous visitor could otherwise be served a cached copy of
+        // another visitor's authenticated view, or of the login redirect meant for
+        // someone else. WP-Optimize's page cache honours DONOTCACHEPAGE (see
+        // wp-optimize/cache/file-based-page-cache-functions.php); W3TC, WP Rocket and
+        // WP Super Cache all honour the same constant.
+        if ($isMemberArea || $isProtected) {
+            if (!defined('DONOTCACHEPAGE')) {
+                define('DONOTCACHEPAGE', true);
+            }
+            nocache_headers();
+        }
+
         if ($isMemberArea) {
             $blade = $GLOBALS['blade'] ?? null;
             if (!$blade) {
@@ -169,7 +185,6 @@ class Access
         }
 
         // Protected page — redirect to login if not authenticated
-        $isProtected = $flags['is_protected'];
         if (!$isProtected) {
             return $template;
         }

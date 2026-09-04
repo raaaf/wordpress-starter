@@ -17,7 +17,7 @@ namespace WordpressStarter\PluginConfigurators;
  * - Admin notices moved to collapsible panel
  * - Welcome panel disabled
  * - WP logo hidden from admin bar
- * - Admin bar hidden for non-admin/non-editor roles
+ * - Admin bar hidden for subscribers
  * - Wider admin menu
  * - Show ID column in list tables
  *
@@ -32,12 +32,12 @@ namespace WordpressStarter\PluginConfigurators;
  * Security:
  * - XML-RPC disabled
  * - Application Passwords disabled
- * - Login attempts limited (5 fails, 24h lockout)
+ * - Login attempts limited (5 fails, extended lockout after 3 lockouts)
  * - Author slugs obfuscated
  * - Email addresses obfuscated on frontend
  *
  * Media:
- * - SVG upload enabled (administrator, editor)
+ * - SVG upload enabled (administrator only)
  * - AVIF upload enabled
  *
  * Utilities:
@@ -59,7 +59,7 @@ class AdminSiteEnhancementsConfigurator extends AbstractPluginConfigurator
 
     protected static function doConfigure(): void
     {
-        $options = get_option('admin_site_enhancements', []);
+        $options = [];
 
         // === Content Management ===
         $options['enable_duplication'] = true;
@@ -71,7 +71,7 @@ class AdminSiteEnhancementsConfigurator extends AbstractPluginConfigurator
         $options['disable_welcome_panel_in_dashboard'] = true;
         $options['hide_ab_wp_logo_menu'] = true;
         $options['hide_admin_bar'] = true;
-        $options['hide_admin_bar_for'] = ['subscriber'];
+        $options['hide_admin_bar_for'] = ['subscriber' => true];
         $options['wider_admin_menu'] = true;
         $options['show_id_column'] = true;
         $options['show_last_modified_column'] = true;
@@ -99,20 +99,20 @@ class AdminSiteEnhancementsConfigurator extends AbstractPluginConfigurator
 
         $options['limit_login_attempts'] = true;
         $options['login_fails_allowed'] = 5;
-        $options['login_lockout_maxcount'] = 24; // Hours
+        $options['login_lockout_maxcount'] = 3; // Lockouts before the extended (24h) ban kicks in
 
         $options['obfuscate_author_slugs'] = true;
         $options['obfuscate_email_address'] = true;
 
         // === Media ===
         $options['enable_svg_upload'] = true;
-        $options['enable_svg_upload_for'] = ['administrator'];
+        $options['enable_svg_upload_for'] = ['administrator' => true];
         $options['enable_avif_upload'] = true;
 
         // === Utilities ===
         $options['enable_missed_schedule_posts_auto_publish'] = true;
 
-        update_option('admin_site_enhancements', $options);
+        self::mergeOption('admin_site_enhancements', $options);
 
         self::markConfigured();
     }

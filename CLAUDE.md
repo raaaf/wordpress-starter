@@ -246,14 +246,21 @@ FieldDefinitions::repeaterField('key', 'Label', 'name', $subFields);
 
 ## Theme Options
 
-Available under "Theme-Einstellungen" in admin:
+Available under "Theme-Einstellungen" in admin (`src/Acf/Options.php`):
 
-- **Allgemein:** Logo, Favicon, Contact info
-- **Header:** Sticky header, CTA button
-- **Footer:** Footer text, copyright, alert bar (Hinweisleiste)
-- **Social Media:** Social links repeater
-- **Analytics:** Rybbit Analytics (DSGVO-konform, via Plugin)
-- **Rechtliches:** Privacy, Imprint pages
+| Sub page         | Content                                                                                               | Capability           |
+| ---------------- | ----------------------------------------------------------------------------------------------------- | -------------------- |
+| Allgemein        | Logo, Favicon, contact info                                                                           | `edit_theme_options` |
+| Blog             | Blog listing settings                                                                                 | `edit_theme_options` |
+| Header           | Sticky header, CTA button                                                                             | `edit_theme_options` |
+| Footer           | Footer text, copyright, alert bar (Hinweisleiste)                                                     | `edit_theme_options` |
+| Social Media     | Social links repeater                                                                                 | `edit_theme_options` |
+| Interner Bereich | Member-area auth mode, shared password for protected downloads (conditional on `member_area.enabled`) | `manage_options`     |
+| Analytics        | Rybbit Analytics (DSGVO-konform, via Plugin)                                                          | `manage_options`     |
+| Werkzeuge        | Maintenance tools                                                                                     | `manage_options`     |
+| Design Tokens    | Design token overrides                                                                                | `manage_options`     |
+
+Administrators can reach all nine sub pages. Editors reach none of them by default: WordPress grants `edit_theme_options` and `manage_options` to Administrators only. If Editors should manage the five content pages (Allgemein, Blog, Header, Footer, Social Media), switching those to `edit_pages` is a product decision, not a default.
 
 ## Alpine.js Components
 

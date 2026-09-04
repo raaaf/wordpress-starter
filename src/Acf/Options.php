@@ -15,7 +15,6 @@ use WordpressStarter\ThemeContext;
  * - Contact Information
  * - Social Media Links
  * - Analytics & Tracking
- * - Legal Pages (Privacy, Imprint)
  */
 class Options
 {
@@ -29,24 +28,32 @@ class Options
         }
 
         // Main theme options
+        // Theme-Optionen aendern Logo, Header-CTA-Ziel, Footer-Texte, rechtliche
+        // Links und Social-URLs global. edit_theme_options ist WordPress' eigene
+        // Capability dafuer: Administratoren haben sie, Redakteure standardmaessig
+        // nicht. Alternative waere edit_pages, falls Redakteure diese Seiten
+        // bearbeiten sollen, ist das eine Produktentscheidung.
         acf_add_options_page([
             'page_title' => __('Theme-Einstellungen', 'wp-starter'),
             'menu_title' => __('Theme-Einstellungen', 'wp-starter'),
             'menu_slug' => 'theme-options',
-            'capability' => 'edit_posts',
+            'capability' => 'edit_theme_options',
             'redirect' => true,
             'icon_url' => 'dashicons-admin-generic',
             'position' => 2,
         ]);
 
         // Sub pages with translated labels and icons
-        self::addSubPage(__('Allgemein', 'wp-starter'), 'general', 'dashicons-admin-home');
-        self::addSubPage(__('Blog', 'wp-starter'), 'blog', 'dashicons-edit-page');
-        self::addSubPage(__('Header', 'wp-starter'), 'header', 'dashicons-arrow-up-alt');
-        self::addSubPage(__('Footer', 'wp-starter'), 'footer', 'dashicons-arrow-down-alt');
-        self::addSubPage(__('Social Media', 'wp-starter'), 'social', 'dashicons-share');
+        self::addSubPage(__('Allgemein', 'wp-starter'), 'general', 'dashicons-admin-home', 'edit_theme_options');
+        self::addSubPage(__('Blog', 'wp-starter'), 'blog', 'dashicons-edit-page', 'edit_theme_options');
+        self::addSubPage(__('Header', 'wp-starter'), 'header', 'dashicons-arrow-up-alt', 'edit_theme_options');
+        self::addSubPage(__('Footer', 'wp-starter'), 'footer', 'dashicons-arrow-down-alt', 'edit_theme_options');
+        self::addSubPage(__('Social Media', 'wp-starter'), 'social', 'dashicons-share', 'edit_theme_options');
+        // Interner Bereich steuert Auth-Modus und das geteilte Mitglieder-Passwort
+        // (MemberArea/Acf.php) fuer geschuetzte Downloads: manage_options wie
+        // Analytics/Werkzeuge/Design Tokens, sonst kaeme jeder Mitarbeiter ran.
         if (config('member_area.enabled', false)) {
-            self::addSubPage(__('Interner Bereich', 'wp-starter'), 'member-area', 'dashicons-lock');
+            self::addSubPage(__('Interner Bereich', 'wp-starter'), 'member-area', 'dashicons-lock', 'manage_options');
         }
         self::addSubPage(__('Analytics', 'wp-starter'), 'analytics', 'dashicons-chart-bar', 'manage_options');
 
@@ -83,16 +90,20 @@ class Options
 
     /**
      * Add options sub page with optional icon
+     *
+     * Default capability matches the parent menu (edit_theme_options); a
+     * sub page added without an explicit capability must not end up weaker
+     * than its parent and stay reachable by URL.
      */
     private static function addSubPage(
         string $title,
         string $slug,
         string $icon = '',
-        string $capability = 'edit_posts',
+        string $capability = 'edit_theme_options',
     ): void {
         $config = [
             'page_title' => $title,
-            'menu_title' => $icon ? '<span class="dashicons ' . $icon . '" style="font-size: 16px; width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></span>' . $title : $title,
+            'menu_title' => $icon ? '<span class="dashicons ' . esc_attr($icon) . '" style="font-size: 16px; width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></span>' . $title : $title,
             'parent_slug' => 'theme-options',
             'menu_slug' => 'theme-options-' . $slug,
             'capability' => $capability,
@@ -458,7 +469,7 @@ class Options
                         sprintf(
                             /* translators: %s: URL to general settings page */
                             __('Verwendet Daten aus den <a href="%s">allgemeinen Einstellungen</a> (Kontaktdaten Tab).', 'wp-starter'),
-                            \admin_url('admin.php?page=theme-options-general'),
+                            esc_url(\admin_url('admin.php?page=theme-options-general')),
                         ),
                         'info',
                     ),
@@ -503,7 +514,7 @@ class Options
                         sprintf(
                             /* translators: %s: URL to social media settings page */
                             __('Verwendet Icons aus den <a href="%s">Social Media Einstellungen</a>.', 'wp-starter'),
-                            \admin_url('admin.php?page=theme-options-social'),
+                            esc_url(\admin_url('admin.php?page=theme-options-social')),
                         ),
                         'info',
                     ),

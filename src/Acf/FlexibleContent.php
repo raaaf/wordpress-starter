@@ -88,6 +88,22 @@ class FlexibleContent
 
     /**
      * Register filter to hide the member-downloads layout on non-member-area pages
+     *
+     * Faellt bewusst geschlossen aus: ohne aufloesbare Post-ID (z.B. beim
+     * ACF-Extended-Copy/Paste-Flow, der eigene AJAX-Endpunkte ausserhalb
+     * dieses Filters nutzt) bleibt das Layout in der Auswahlliste versteckt,
+     * statt ungeprueft angeboten zu werden. Die eigentliche Sicherheitsgrenze
+     * bleibt ohnehin der Laufzeit-Check in
+     * templates/flexible/member-downloads.blade.php, der unabhaengig davon
+     * greift, wie das Layout auf die Seite kam.
+     *
+     * Waehrend ACF einen Post speichert (acf/save_post bzw. dessen AJAX-
+     * Validierung), darf dieser Filter die Layouts nicht ausduennen: ACF laedt
+     * das Feld ueber acf_get_field() bei jeder Sub-Feld-Aktualisierung erneut,
+     * und ein hier entferntes member_downloads-Layout laesst update_row() die
+     * komplette Zeile stillschweigend verwerfen (Datenverlust beim Umsortieren
+     * bestehender Seiten). Dieser Filter ist reine Editor-UI-Hygiene, nicht die
+     * Sicherheitsgrenze, deshalb gewinnt im Zweifel Datenerhalt.
      */
     private static function registerMemberDownloadsVisibilityFilter(): void
     {
@@ -96,12 +112,12 @@ class FlexibleContent
                 return $field;
             }
 
-            $postId = absint(wp_unslash($_GET['post'] ?? $_POST['post_id'] ?? 0)); // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended
-            if (!$postId) {
+            if (doing_action('acf/save_post') || ( function_exists('acf_is_ajax') && acf_is_ajax('save') )) {
                 return $field;
             }
 
-            $isMemberArea = get_field('page_is_member_area', $postId);
+            $postId = self::resolveEditedPostId();
+            $isMemberArea = $postId ? get_field('page_is_member_area', $postId) : false;
 
             if (!$isMemberArea) {
                 $field['layouts'] = array_values(array_filter(
@@ -112,6 +128,34 @@ class FlexibleContent
 
             return $field;
         }, 10);
+    }
+
+    /**
+     * Resolve the post id of the page currently being edited
+     *
+     * `$_GET['post']` only carries a value on the initial edit-screen load; a
+     * classic-editor save POSTs `post_ID` instead (no `?post=` in the request),
+     * which previously made this resolve to 0 during save.
+     */
+    private static function resolveEditedPostId(): int
+    {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended
+        $postId = absint(wp_unslash($_POST['post_ID'] ?? $_GET['post'] ?? $_GET['post_id'] ?? 0));
+        // phpcs:enable WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended
+
+        if ($postId) {
+            return $postId;
+        }
+
+        if (function_exists('acf_get_valid_post_id')) {
+            $validPostId = acf_get_valid_post_id();
+
+            if (is_numeric($validPostId)) {
+                return (int) $validPostId;
+            }
+        }
+
+        return (int) get_the_ID();
     }
 
     /**
@@ -372,7 +416,7 @@ class FlexibleContent
     }
 
     /**
-     * Get all flexible content layouts (32 total)
+     * Get all flexible content layouts
      *
      * @return array<int, array<string, mixed>>
      */
@@ -1164,6 +1208,16 @@ class FlexibleContent
         // fuer Redakteure aufgeloest wird, nicht manage_options, weil der
         // Hinweis im Seiteneditor auch fuer Redakteure sichtbar sein soll.
         if (!is_admin() || wp_doing_ajax() || !current_user_can('edit_posts')) {
+            return $text;
+        }
+
+        // acf/init feuert vor current_screen, deshalb $pagenow statt
+        // get_current_screen() oder acf_is_screen(): StyleguidePage::find()
+        // kann ueber adopt() Post-Meta/Options schreiben und soll deshalb nur
+        // auf echten Seiteneditor-Screens laufen, nicht auf jeder
+        // wp-admin-Seite fuer Redakteure (analog Options::isOnOptionsPage()).
+        global $pagenow;
+        if (!in_array($pagenow, ['post.php', 'post-new.php'], true)) {
             return $text;
         }
 

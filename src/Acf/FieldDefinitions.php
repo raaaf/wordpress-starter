@@ -151,6 +151,27 @@ class FieldDefinitions
     }
 
     /**
+     * Get the shared display-settings tail for layout field lists
+     *
+     * Background color, spacing, width and anchor override repeat verbatim at
+     * the end of almost every layout's field list. One helper instead of the
+     * same four calls copied into ~33 methods.
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function displaySettingsFields(string $prefix): array
+    {
+        return [
+            self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
+            self::sectionAnchorField($prefix),
+        ];
+    }
+
+    /**
      * Get WYSIWYG content field definition
      *
      * @param string $key Unique field key
@@ -609,7 +630,8 @@ class FieldDefinitions
      * Get message field definition for displaying help text
      *
      * @param string $key Unique field key
-     * @param string $message The message content (HTML allowed)
+     * @param string $message The message content. May contain trusted inline HTML,
+     *                        which is filtered through wp_kses_post() before output.
      * @param string $label Optional label above the message
      *
      * @return array<string, mixed>
@@ -623,7 +645,7 @@ class FieldDefinitions
             'key' => $key,
             'label' => $label,
             'type' => 'message',
-            'message' => $message,
+            'message' => wp_kses_post($message),
             'new_lines' => 'wpautop',
             'esc_html' => 0,
         ];
@@ -633,7 +655,8 @@ class FieldDefinitions
      * Get styled info box field for contextual help messages
      *
      * @param string $key Unique field key
-     * @param string $message The message content (HTML allowed)
+     * @param string $message The message content. May contain trusted inline HTML,
+     *                        which is filtered through wp_kses_post() before output.
      * @param string $type Box type: info, success, warning, tip
      *
      * @return array<string, mixed>
@@ -681,7 +704,7 @@ class FieldDefinitions
                 $color,
                 $icon,
                 $color,
-                $message,
+                wp_kses_post($message),
             ),
             'new_lines' => '',
             'esc_html' => 0,
@@ -1479,10 +1502,7 @@ class FieldDefinitions
                 '50',
                 __('Inhalt der rechten Spalte (50% Breite).', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -1521,10 +1541,7 @@ class FieldDefinitions
                 '33.333',
                 __('Inhalt der dritten Spalte (1/3 Breite).', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -1571,10 +1588,7 @@ class FieldDefinitions
                 '25',
                 __('Inhalt der vierten Spalte (1/4 Breite).', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -1651,10 +1665,7 @@ class FieldDefinitions
                 true,
                 __('Gibt FAQPage-Auszeichnung fuer Suchmaschinen aus. Nur einschalten, wenn die Eintraege wirklich Fragen und Antworten sind.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -1692,10 +1703,7 @@ class FieldDefinitions
                 true,
                 __('Der Call-to-Action Button mit Link und Text.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -1832,10 +1840,7 @@ class FieldDefinitions
             // Hintergrundfarbe. Damit liess sich eine Handlungsaufforderung nicht
             // absetzen, und eine Seite, die zwischen zwei Flaechen wechselt,
             // bekam an dieser Stelle unvermeidlich einen Bruch.
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -1980,10 +1985,7 @@ class FieldDefinitions
                 false,
                 __('Das Video beginnt nach dem Ende von vorn. Gilt nicht für YouTube und Vimeo.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2047,10 +2049,7 @@ class FieldDefinitions
                 'default',
                 __('Schmal passt zu Hochformat und Bildschirmfotos, breit zu Panoramen.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2123,10 +2122,7 @@ class FieldDefinitions
                 '66.667',
                 __('Inhalt der breiten rechten Spalte (ca. 2/3 der Breite).', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2157,10 +2153,7 @@ class FieldDefinitions
                 '33.333',
                 __('Inhalt der schmalen rechten Spalte (ca. 1/3 der Breite).', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2226,10 +2219,7 @@ class FieldDefinitions
                 'block',
                 __('Auf- und zuklappbare Elemente unter dem Bild.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2340,10 +2330,7 @@ class FieldDefinitions
             // Endpunkt: ohne ihn zieht das Akkordeon der letzten Spalte auch
             // Hintergrund, Abstand und Anker zu sich herein.
             self::accordionField("field_{$prefix}_acc_ende", '', false, true, true),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2362,10 +2349,7 @@ class FieldDefinitions
             // Endpunkt: ohne ihn zieht das Akkordeon der letzten Spalte auch
             // Hintergrund, Abstand und Anker zu sich herein.
             self::accordionField("field_{$prefix}_acc_ende", '', false, true, true),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2385,10 +2369,7 @@ class FieldDefinitions
             // Endpunkt: ohne ihn zieht das Akkordeon der letzten Spalte auch
             // Hintergrund, Abstand und Anker zu sich herein.
             self::accordionField("field_{$prefix}_acc_ende", '', false, true, true),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2488,10 +2469,7 @@ class FieldDefinitions
                 '3',
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2578,10 +2556,7 @@ class FieldDefinitions
                 'elevated',
                 __('Erhöht traegt einen Schatten, Umriss nur eine Linie, Gefuellt eine eigene Flaeche.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2629,10 +2604,7 @@ class FieldDefinitions
                 '3',
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2698,10 +2670,7 @@ class FieldDefinitions
                 true,
                 __('Logos automatisch durchlaufen lassen.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2730,7 +2699,7 @@ class FieldDefinitions
                 'type' => 'number',
                 'instructions' => __('Nur die Zahl aus der URL des Formulars. Vorbelegt ist das Formular, das das Theme beim Aktivieren von Contact Form 7 angelegt hat.', 'wp-starter'),
                 'placeholder' => __('z.B. 123', 'wp-starter'),
-                'default_value' => \WordpressStarter\PluginConfigurators\ContactForm7Configurator::defaultFormId() ?: '',
+                'default_value' => is_admin() ? ( \WordpressStarter\PluginConfigurators\ContactForm7Configurator::defaultFormId() ?: '' ) : '',
                 'min' => 1,
                 'step' => 1,
                 'required' => 1,
@@ -2764,10 +2733,7 @@ class FieldDefinitions
                 true,
                 __('Zeigt die Kontaktdaten aus den Theme-Einstellungen an.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2837,10 +2803,7 @@ class FieldDefinitions
 
             // Tab: Darstellung
             self::tabField("field_{$prefix}_tab_style", __('Darstellung', 'wp-starter')),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -2896,10 +2859,7 @@ class FieldDefinitions
                 'block',
                 __('Füge mindestens 2 Tabs hinzu.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -3021,10 +2981,7 @@ class FieldDefinitions
                 false,
                 __('Zeigt über den Paketen einen Umschalter. Pakete ohne Jahrespreis behalten ihren Monatspreis.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -3146,10 +3103,7 @@ class FieldDefinitions
                 '3',
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -3210,10 +3164,7 @@ class FieldDefinitions
                 'table',
                 __('Füge Kennzahlen hinzu (empfohlen: 3-4).', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -3282,24 +3233,21 @@ class FieldDefinitions
                         null,
                         __('Optionales Bild zum Ereignis.', 'wp-starter'),
                     ),
-                    // Accordion Ende
-                    self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
                     self::iconRadioField(
-                        "field_{$prefix}_stat_icon",
+                        "field_{$prefix}_event_icon",
                         __('Icon', 'wp-starter'),
                         'icon',
-                        __('Optionales Icon für diese Statistik.', 'wp-starter'),
+                        __('Optionales Icon für dieses Ereignis.', 'wp-starter'),
                     ),
+                    // Accordion Ende
+                    self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
                 ],
                 __('Ereignis hinzufügen', 'wp-starter'),
                 2,
                 'block',
                 __('Füge Ereignisse in chronologischer Reihenfolge hinzu.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -3441,10 +3389,7 @@ class FieldDefinitions
                 false,
                 __('Reihenfolge der ausgegebenen Beiträge.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -3505,10 +3450,7 @@ class FieldDefinitions
                 'placeholder' => __('Nachher', 'wp-starter'),
                 'wrapper' => ['width' => '50'],
             ],
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -3614,10 +3556,7 @@ class FieldDefinitions
                 false,
                 __('Die Tabelle bekommt eine eigene Scrollfläche, die Kopfzeile bleibt darin stehen.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -3632,12 +3571,7 @@ class FieldDefinitions
      */
     public static function memberDownloadsFields(string $prefix): array
     {
-        return [
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
-        ];
+        return self::displaySettingsFields($prefix);
     }
 
     /**
@@ -3686,10 +3620,7 @@ class FieldDefinitions
                 false,
                 __('Zeigt ein Kreuz, mit dem Leser den Hinweis ausblenden. Er kommt beim nächsten Seitenaufruf wieder.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -3747,10 +3678,7 @@ class FieldDefinitions
                 'md',
                 __('Groß setzt das Zitat als eigenständigen Blickfang.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -3822,10 +3750,7 @@ class FieldDefinitions
                 __('Kurzer Satz zu Datenschutz und Abmeldung.', 'wp-starter'),
                 __('z.B. Abmeldung jederzeit über den Link in jeder E-Mail.', 'wp-starter'),
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 
@@ -3895,10 +3820,7 @@ class FieldDefinitions
                 __('Nur bei fester Höhe.', 'wp-starter'),
                 [[['field' => "field_{$prefix}_aspect_ratio", 'operator' => '==', 'value' => 'fixed']]],
             ),
-            self::backgroundColorField($prefix),
-            self::sectionSpacingField($prefix),
-            self::sectionWidthField($prefix),
-            self::sectionAnchorField($prefix),
+            ...self::displaySettingsFields($prefix),
         ];
     }
 

@@ -48,3 +48,7 @@ parameters:
         - '#Call to an undefined method YahnisElsts\\PluginUpdateChecker\\v5p6\\Vcs\\Api::enableReleaseAssets#'
         # iThemes Security Pro — premium plugin, not installed in CI
         - '#(Call to static method|on an unknown class) ITSEC_Modules#'
+        # WP-Optimize — premium-adjacent cache/DB plugin, not installed in CI
+        - '#Function WP_Optimize not found#'
+        - '#(Call to method|invalid type|on an unknown class) WP_Optimize_Options#'
+        - '#(Call to static method|on an unknown class) WPO_Cache_Config#'

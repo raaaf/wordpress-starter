@@ -41,27 +41,27 @@ class YoastSeoConfigurator extends AbstractPluginConfigurator
      */
     private static function configureGeneralSettings(): void
     {
-        $options = get_option('wpseo', []);
+        $options = [
+            // Enable XML sitemaps
+            'enable_xml_sitemap' => true,
 
-        // Enable XML sitemaps
-        $options['enable_xml_sitemap'] = true;
+            // Keep analysis features active
+            'keyword_analysis_active' => true,
+            'content_analysis_active' => true,
 
-        // Keep analysis features active
-        $options['keyword_analysis_active'] = true;
-        $options['content_analysis_active'] = true;
+            // Enable link suggestions
+            'enable_link_suggestions' => true,
 
-        // Enable link suggestions
-        $options['enable_link_suggestions'] = true;
+            // Disable admin bar menu (cleaner admin UI)
+            'enable_admin_bar_menu' => false,
 
-        // Disable admin bar menu (cleaner admin UI)
-        $options['enable_admin_bar_menu'] = false;
-
-        // Disable enhanced slack sharing
-        $options['enable_enhanced_slack_sharing'] = false;
+            // Disable enhanced slack sharing
+            'enable_enhanced_slack_sharing' => false,
+        ];
 
         self::disableUnusedFeatures($options);
 
-        update_option('wpseo', $options);
+        self::mergeOption('wpseo', $options);
     }
 
     /**
@@ -69,34 +69,34 @@ class YoastSeoConfigurator extends AbstractPluginConfigurator
      */
     private static function configureTitles(): void
     {
-        $options = get_option('wpseo_titles', []);
+        $options = [
+            // --- Breadcrumbs ---
+            'breadcrumbs-enable' => true,
+            'breadcrumbs-sep' => ' » ',
+            'breadcrumbs-home' => __('Startseite', 'wp-starter'),
+            'breadcrumbs-prefix' => '',
+            'breadcrumbs-archiveprefix' => __('Archiv:', 'wp-starter'),
+            'breadcrumbs-searchprefix' => __('Suche:', 'wp-starter'),
+            'breadcrumbs-404crumb' => __('Seite nicht gefunden', 'wp-starter'),
+            'breadcrumbs-display-blog-page' => true,
 
-        // --- Breadcrumbs ---
-        $options['breadcrumbs-enable'] = true;
-        $options['breadcrumbs-sep'] = ' » ';
-        $options['breadcrumbs-home'] = __('Startseite', 'wp-starter');
-        $options['breadcrumbs-prefix'] = '';
-        $options['breadcrumbs-archiveprefix'] = __('Archiv:', 'wp-starter');
-        $options['breadcrumbs-searchprefix'] = __('Suche:', 'wp-starter');
-        $options['breadcrumbs-404crumb'] = __('Seite nicht gefunden', 'wp-starter');
-        $options['breadcrumbs-display-blog-page'] = true;
-
-        // --- Schema ---
-        $options['company_or_person'] = 'company';
+            // --- Schema ---
+            'company_or_person' => 'company',
+        ];
 
         if (function_exists('get_field')) {
             $companyName = get_field('company_name', 'option');
-            if ($companyName) {
-                $options['company_name'] = $companyName;
+            if (is_string($companyName) && $companyName !== '') {
+                $options['company_name'] = sanitize_text_field($companyName);
             }
 
             $logo = get_field('site_logo', 'option');
-            if ($logo && isset($logo['url'])) {
-                $options['company_logo'] = $logo['url'];
+            if (is_array($logo) && isset($logo['url']) && is_string($logo['url'])) {
+                $options['company_logo'] = esc_url_raw($logo['url']);
             }
         }
 
-        update_option('wpseo_titles', $options);
+        self::mergeOption('wpseo_titles', $options);
     }
 
     /**
