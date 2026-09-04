@@ -159,6 +159,7 @@
     rgba(255, 255, 255, 0.015) 45%,
     transparent 80%
   );
+  --page-sheen: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, transparent 50%);
 
   /* Primary button at rest: the opaque subtle brand surface (accent-50 in
      light, the warm near-black in dark), so the pill reads as filled and the
@@ -220,6 +221,7 @@
     rgba(255, 255, 255, 0.015) 45%,
     transparent 80%
   );
+  --page-sheen: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, transparent 50%);
 
   /* Flat fill, same rule as the light-mode block above (start === end). */
   --gradient-primary-start: var(--color-accent-500);
@@ -329,6 +331,7 @@
       rgba(255, 255, 255, 0.015) 45%,
       transparent 80%
     );
+    --page-sheen: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, transparent 50%);
 
     /* Flat fill, same rule as the [data-theme='dark'] block above. */
     --gradient-primary-start: var(--color-accent-500);
