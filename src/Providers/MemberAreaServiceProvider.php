@@ -16,6 +16,8 @@ use WordpressStarter\ThemeContext;
 
 class MemberAreaServiceProvider extends ServiceProvider
 {
+    use AdminActionGuard;
+
     public function register(): void
     {
         add_action('acf/init', [Acf::class, 'register']);
@@ -30,7 +32,9 @@ class MemberAreaServiceProvider extends ServiceProvider
         $this->registerLogoutHandler();
         $this->registerCronJobs();
         $this->registerPasswordEncryption();
+        $this->registerHostKeyRetrust();
         $this->registerUserRole();
+        $this->registerDownloadCacheInvalidation();
     }
 
     /**
@@ -136,9 +140,14 @@ class MemberAreaServiceProvider extends ServiceProvider
 
         if (is_wp_error($result)) {
             $errorCode = $result->get_error_code();
+            // Auth::login() already collapses the enumeration-relevant wp_signon()
+            // codes (invalid_username / invalid_email / incorrect_password / invalidcombo)
+            // into 'member_login_failed', and password mode returns 'wrong_password' —
+            // both are wrong-credential cases and get the same generic message. Any
+            // other WP_Error (e.g. 'no_password', or a structural code passed through
+            // unchanged from wp_signon()) uses its own message.
             $message = match ($errorCode) {
-                'invalid_username', 'invalid_email' => __('Unbekannter Benutzername.', 'wp-starter'),
-                'incorrect_password' => __('Falsches Passwort.', 'wp-starter'),
+                'member_login_failed', 'wrong_password' => __('Falsches Passwort.', 'wp-starter'),
                 'no_password' => $result->get_error_message(),
                 default => __('Anmeldung fehlgeschlagen.', 'wp-starter'),
             };
@@ -226,6 +235,24 @@ class MemberAreaServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Invalidate the cached member_download facets whenever a download is saved,
+     * trashed or permanently deleted (facets have no per-user visibility filter,
+     * so a single shared cache and a single invalidation point are sufficient).
+     */
+    private function registerDownloadCacheInvalidation(): void
+    {
+        add_action('save_post_member_download', [DownloadQuery::class, 'invalidateFacetsCache']);
+
+        // before_delete_post (not deleted_post): the post row, and its type, is
+        // already gone by the time deleted_post fires.
+        add_action('before_delete_post', static function (int $postId): void {
+            if (get_post_type($postId) === 'member_download') {
+                DownloadQuery::invalidateFacetsCache();
+            }
+        });
+    }
+
     private function registerPasswordEncryption(): void
     {
         // One-time migration: encrypt any existing plaintext passwords on first admin load.
@@ -308,6 +335,98 @@ class MemberAreaServiceProvider extends ServiceProvider
                 return '';
             }
         });
+    }
+
+    /**
+     * SFTP host key mismatch transient key (see SftpClient::HOST_KEY_MISMATCH_TRANSIENT).
+     */
+    private const HOST_KEY_MISMATCH_TRANSIENT_SUFFIX = 'member_sftp_host_key_mismatch';
+
+    /**
+     * SFTP pinned host keys option key suffix (see SftpClient::HOST_KEYS_OPTION).
+     */
+    private const HOST_KEYS_OPTION_SUFFIX = 'member_sftp_host_keys';
+
+    /**
+     * Registers the admin_init handler for the "re-trust host key" action link
+     * and the admin notice that offers it.
+     *
+     * SftpClient pins each SFTP host key trust-on-first-use, keyed by host:port.
+     * On a mismatch (e.g. after a server migration) it stores nothing, throws,
+     * and sets a transient naming the affected host:port. This notice surfaces
+     * that transient to admins and lets them explicitly clear the stale pin so
+     * the next connection re-pins against the new key.
+     */
+    private function registerHostKeyRetrust(): void
+    {
+        add_action('admin_init', function (): void {
+            if (!self::verifyAdminAction(
+                'member_sftp_retrust',
+                'member_sftp_retrust',
+                'manage_options',
+                __('Keine Berechtigung.', 'wp-starter'),
+            )) {
+                return;
+            }
+
+            $hostPort = sanitize_text_field(wp_unslash($_GET['host'] ?? '')); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified via verifyAdminAction()
+            $pinRemoved = false;
+            if ($hostPort !== '') {
+                $optionKey = ThemeContext::optionKey(self::HOST_KEYS_OPTION_SUFFIX);
+                $hostKeys = get_option($optionKey, []);
+                if (is_array($hostKeys) && isset($hostKeys[$hostPort])) {
+                    unset($hostKeys[$hostPort]);
+                    update_option($optionKey, $hostKeys, autoload: false);
+                    $pinRemoved = true;
+                }
+            }
+
+            // Only clear the mismatch notice once a matching pin was actually
+            // removed; a host parameter that matches nothing (stale link,
+            // tampered value) must leave the notice in place instead of
+            // silently dismissing a real mismatch.
+            if ($pinRemoved) {
+                delete_transient(ThemeContext::prefix() . '_' . self::HOST_KEY_MISMATCH_TRANSIENT_SUFFIX);
+            }
+
+            wp_safe_redirect(remove_query_arg(['member_sftp_retrust', '_wpnonce', 'host']));
+            exit;
+        });
+
+        add_action('admin_notices', [$this, 'displayHostKeyMismatchNotice']);
+    }
+
+    /**
+     * Shows an admin notice with a re-trust link when SftpClient reported a
+     * host key mismatch. manage_options only, mirroring the capability the
+     * re-trust action itself requires.
+     */
+    public function displayHostKeyMismatchNotice(): void
+    {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        $hostPort = get_transient(ThemeContext::prefix() . '_' . self::HOST_KEY_MISMATCH_TRANSIENT_SUFFIX);
+        if (!is_string($hostPort) || $hostPort === '') {
+            return;
+        }
+
+        $retrustUrl = wp_nonce_url(
+            add_query_arg(['member_sftp_retrust' => '1', 'host' => $hostPort]),
+            'member_sftp_retrust',
+        );
+
+        printf(
+            '<div class="notice notice-error"><p>%s <a href="%s">%s</a></p></div>',
+            sprintf(
+                // translators: %s is the "host:port" of the SFTP server whose key changed.
+                esc_html__('SSH-Host-Key von %s hat sich geändert. Wenn der Wechsel erwartet war (Serverumzug), Host-Key neu vertrauen.', 'wp-starter'),
+                esc_html($hostPort),
+            ),
+            esc_url($retrustUrl),
+            esc_html__('Host-Key neu vertrauen', 'wp-starter'),
+        );
     }
 
     private function enqueueAssets(): void

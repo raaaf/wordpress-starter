@@ -7,16 +7,38 @@ namespace WordpressStarter\MemberArea;
 use phpseclib3\Net\SFTP;
 use Throwable;
 use WordpressStarter\Providers\LogServiceProvider;
+use WordpressStarter\ThemeContext;
 use WP_Query;
 
 class FolderSync
 {
-    private const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'zip'];
+    /**
+     * Default cap on how many new member_download entries a single run() call may
+     * create from remote SFTP directory listings, overridable via the
+     * '{prefix}_member_area_sync_max_entries' filter.
+     */
+    private const DEFAULT_MAX_NEW_ENTRIES_PER_RUN = 500;
 
+    /**
+     * Scan SFTP folder connections and imported/external entries, creating CPT
+     * entries for newly discovered remote files and refreshing availability.
+     *
+     * New entries created from remote directory listings are capped per run at
+     * '{prefix}_member_area_sync_max_entries' filter (default:
+     * self::DEFAULT_MAX_NEW_ENTRIES_PER_RUN) to bound wp_insert_post() calls
+     * driven by an untrusted remote listing.
+     */
     public static function run(): void
     {
         // Pre-load all existing SFTP identifiers in a single DB query to avoid N+1
         $existingIdentifiers = self::loadExistingIdentifiers();
+
+        $maxNewEntries = (int) apply_filters(
+            ThemeContext::prefix() . '_member_area_sync_max_entries',
+            self::DEFAULT_MAX_NEW_ENTRIES_PER_RUN,
+        );
+        $newEntriesCreated = 0;
+        $capLogged = false;
 
         // Scan SFTP folder parent entries (those without a download_sftp_source = created by admin)
         $folderPosts = new WP_Query([
@@ -41,15 +63,27 @@ class FolderSync
             '/',
             static fn (array $creds, string $path): bool => empty($creds['host']) || empty($creds['username']) || empty($creds['password']),
             'folder group',
-            static function (SFTP $sftp, array $creds, int $postId, string $path) use (&$existingIdentifiers): void {
+            static function (SFTP $sftp, array $creds, int $postId, string $path) use (&$existingIdentifiers, &$newEntriesCreated, &$capLogged, $maxNewEntries): void {
                 $files = self::scanSftpDirectory($sftp, $creds['host'], $creds['port'], $path);
 
                 foreach ($files as $file) {
                     $identifier = $creds['host'] . ':' . $creds['port'] . $file['remotePath'];
                     if (!isset($existingIdentifiers[$identifier])) {
+                        if ($newEntriesCreated >= $maxNewEntries) {
+                            if (!$capLogged) {
+                                LogServiceProvider::warning('SFTP sync reached per-run new-entry cap', [
+                                    'max_new_entries' => $maxNewEntries,
+                                ]);
+                                $capLogged = true;
+                            }
+
+                            continue;
+                        }
+
                         self::createSftpFileCpt($file, $creds['host'], $creds['port'], $creds['username'], $creds['password'], $path, $postId);
                         // Track newly created identifiers so duplicate files in the same run are not re-created
                         $existingIdentifiers[$identifier] = true;
+                        $newEntriesCreated++;
                     }
                 }
 
@@ -96,11 +130,29 @@ class FolderSync
             'fields' => 'ids',
         ]);
 
+        $externalUrlsByPostId = [];
         foreach ($externalPosts->posts as $postId) {
             $url = get_field('download_external_url', $postId) ?: '';
-            if (!empty($url)) {
-                self::updateExternalAvailability($postId, $url);
+            if (empty($url)) {
+                continue;
             }
+
+            try {
+                SsrfGuard::assertSafeUrl($url);
+            } catch (Throwable $e) {
+                LogServiceProvider::warning('Skipping external availability check', [
+                    'post_id' => $postId,
+                    'message' => $e->getMessage(),
+                ]);
+
+                continue;
+            }
+
+            $externalUrlsByPostId[$postId] = $url;
+        }
+
+        if (!empty($externalUrlsByPostId)) {
+            self::updateExternalAvailabilityBatch($externalUrlsByPostId);
         }
     }
 
@@ -205,7 +257,7 @@ class FolderSync
         string $remotePath,
     ): array {
         try {
-            $files = SftpClient::listFiles($sftp, $remotePath, self::ALLOWED_EXTENSIONS);
+            $files = SftpClient::listFiles($sftp, $remotePath, DownloadFileTypes::allowed());
 
             $normalizedPath = rtrim($remotePath, '/') . '/';
 
@@ -295,10 +347,7 @@ class FolderSync
             ]);
         }
 
-        $current = (bool) get_field('download_available', $postId);
-        if ($current !== $available) {
-            update_field('download_available', $available, $postId);
-        }
+        self::updateFieldIfChanged($postId, 'download_available', $available, false, castBool: true);
     }
 
     /**
@@ -322,57 +371,101 @@ class FolderSync
             ]);
         }
 
-        $current = (bool) get_field('download_available', $postId);
-        if ($current !== $available) {
-            update_field('download_available', $available, $postId);
-        }
+        self::updateFieldIfChanged($postId, 'download_available', $available, false, castBool: true);
 
         if (isset($mtime)) {
-            $iso = gmdate('c', $mtime);
-            $stored = get_field('download_last_modified', $postId) ?: '';
-            if ($stored !== $iso) {
-                update_field('download_last_modified', $iso, $postId);
+            self::updateFieldIfChanged($postId, 'download_last_modified', gmdate('c', $mtime), '');
+        }
+    }
+
+    /**
+     * Check availability for a batch of external URLs in a single round of parallel
+     * HEAD requests, then persist the results per post. Batching avoids one sequential
+     * wp_remote_head() call per post (both from the daily cron and the synchronous
+     * admin manual-sync AJAX handler).
+     *
+     * This intentionally bypasses the WordPress HTTP API (WP_HTTP_BLOCK_EXTERNAL,
+     * WP_PROXY_*, the pre_http_request/http_request_args filters) because that API
+     * has no batched/parallel request call: one round-trip per sync run via
+     * Requests::request_multiple() instead of N sequential wp_remote_head() calls
+     * and their timeouts. WP_HTTP_BLOCK_EXTERNAL is checked explicitly below so a
+     * site that blocks external requests is still honoured; the other WP HTTP API
+     * facilities (proxy settings, request filters) remain bypassed.
+     *
+     * @param array<int, string> $urlsByPostId Post ID => external URL.
+     */
+    private static function updateExternalAvailabilityBatch(array $urlsByPostId): void
+    {
+        if (defined('WP_HTTP_BLOCK_EXTERNAL') && WP_HTTP_BLOCK_EXTERNAL) {
+            LogServiceProvider::warning('Skipping batched external availability check: WP_HTTP_BLOCK_EXTERNAL is set', []);
+
+            return;
+        }
+
+        $requests = [];
+        foreach ($urlsByPostId as $postId => $url) {
+            $requests[$postId] = [
+                'url' => $url,
+                'type' => \WpOrg\Requests\Requests::HEAD,
+            ];
+        }
+
+        try {
+            $responses = \WpOrg\Requests\Requests::request_multiple($requests, [
+                'timeout' => 5,
+                // Mirrors wp_remote_head()'s sslcertificates default.
+                // WPINC is 'wp-includes'; hardcoded because phpstan's WP stubs don't declare the constant.
+                'verify' => ABSPATH . 'wp-includes/certificates/ca-bundle.crt',
+                // Mirrors wp_remote_head()'s redirection => 0 default (HEAD requests don't follow redirects).
+                'follow_redirects' => false,
+            ]);
+        } catch (Throwable $e) {
+            LogServiceProvider::warning('Batched external availability check failed', [
+                'message' => $e->getMessage(),
+            ]);
+            $responses = [];
+        }
+
+        foreach ($urlsByPostId as $postId => $url) {
+            $response = $responses[$postId] ?? null;
+
+            if (!$response instanceof \WpOrg\Requests\Response) {
+                self::updateFieldIfChanged($postId, 'download_available', false, false, castBool: true);
+
+                continue;
+            }
+
+            $available = $response->status_code >= 200 && $response->status_code < 300;
+            self::updateFieldIfChanged($postId, 'download_available', $available, false, castBool: true);
+
+            $lastModified = $response->headers['last-modified'] ?? null;
+            if (!empty($lastModified)) {
+                $timestamp = strtotime($lastModified);
+                if ($timestamp !== false) {
+                    self::updateFieldIfChanged($postId, 'download_last_modified', gmdate('c', $timestamp), '');
+                }
             }
         }
     }
 
     /**
-     * Update availability for an external URL entry via HEAD request.
+     * Fetch a field's current value and write the new one only if it changed.
+     *
+     * @return bool Whether the field was written.
      */
-    private static function updateExternalAvailability(int $postId, string $url): void
+    private static function updateFieldIfChanged(int $postId, string $field, mixed $value, mixed $default, bool $castBool = false): bool
     {
-        try {
-            SsrfGuard::assertSafeUrl($url);
-        } catch (Throwable $e) {
-            LogServiceProvider::warning('Skipping external availability check', [
-                'post_id' => $postId,
-                'message' => $e->getMessage(),
-            ]);
-
-            return;
+        $current = get_field($field, $postId) ?: $default;
+        if ($castBool) {
+            $current = (bool) $current;
         }
 
-        $response = wp_remote_head($url, ['timeout' => 10]);
-        $available = !is_wp_error($response) && (int) wp_remote_retrieve_response_code($response) >= 200
-            && (int) wp_remote_retrieve_response_code($response) < 300;
+        if ($current !== $value) {
+            update_field($field, $value, $postId);
 
-        $current = (bool) get_field('download_available', $postId);
-        if ($current !== $available) {
-            update_field('download_available', $available, $postId);
+            return true;
         }
 
-        if (!is_wp_error($response)) {
-            $lastModified = wp_remote_retrieve_header($response, 'last-modified');
-            if (!empty($lastModified)) {
-                $timestamp = strtotime($lastModified);
-                if ($timestamp !== false) {
-                    $iso = gmdate('c', $timestamp);
-                    $stored = get_field('download_last_modified', $postId) ?: '';
-                    if ($stored !== $iso) {
-                        update_field('download_last_modified', $iso, $postId);
-                    }
-                }
-            }
-        }
+        return false;
     }
 }

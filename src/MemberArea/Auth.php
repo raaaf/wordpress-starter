@@ -29,6 +29,11 @@ class Auth
         return self::$cachedAuthMode;
     }
 
+    private static function isWordpressMode(): bool
+    {
+        return strtolower(self::getAuthMode()) === self::MODE_WORDPRESS;
+    }
+
     private static function getCookieTtl(): int
     {
         if (self::$cachedCookieTtl === false) {
@@ -54,9 +59,7 @@ class Auth
             return true;
         }
 
-        $mode = self::getAuthMode();
-
-        if (strtolower($mode) === self::MODE_WORDPRESS) {
+        if (self::isWordpressMode()) {
             if (!is_user_logged_in()) {
                 return false;
             }
@@ -109,9 +112,7 @@ class Auth
         // capped at the same budget.
         \WordpressStarter\RateLimiter::enforce('member_login_auth', 5, 300);
 
-        $mode = self::getAuthMode();
-
-        if (strtolower($mode) === self::MODE_WORDPRESS) {
+        if (self::isWordpressMode()) {
             $result = wp_signon([
                 'user_login' => $credential,
                 'user_password' => $password ?? '',
@@ -119,6 +120,19 @@ class Auth
             ], is_ssl());
 
             if (is_wp_error($result)) {
+                \WordpressStarter\Providers\LogServiceProvider::info('Member login failed', [
+                    'wp_error_code' => $result->get_error_code(),
+                ]);
+
+                // Only collapse the enumeration-relevant codes into a generic message.
+                // Other WP_Error codes (e.g. account blocked by a security plugin, no
+                // such user on a closed-registration site) are structural failures, not
+                // retryable credential mistakes, so their message is passed through.
+                $enumerationCodes = ['invalid_username', 'incorrect_password', 'invalid_email', 'invalidcombo'];
+                if (in_array($result->get_error_code(), $enumerationCodes, true)) {
+                    return new WP_Error('member_login_failed', __('Falsches Passwort.', 'wp-starter'));
+                }
+
                 return $result;
             }
 
@@ -146,9 +160,7 @@ class Auth
 
     public static function logout(): void
     {
-        $mode = self::getAuthMode();
-
-        if (strtolower($mode) === self::MODE_WORDPRESS) {
+        if (self::isWordpressMode()) {
             wp_logout();
 
             return;

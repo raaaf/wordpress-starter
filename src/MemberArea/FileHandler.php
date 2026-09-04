@@ -171,15 +171,7 @@ class FileHandler
 
     private static function guessMimeType(string $fileName): string
     {
-        return match (strtolower(pathinfo($fileName, PATHINFO_EXTENSION))) {
-            'pdf' => 'application/pdf',
-            'doc' => 'application/msword',
-            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'xls' => 'application/vnd.ms-excel',
-            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'zip' => 'application/zip',
-            default => 'application/octet-stream',
-        };
+        return DownloadFileTypes::mimeFor(pathinfo($fileName, PATHINFO_EXTENSION));
     }
 
     /**

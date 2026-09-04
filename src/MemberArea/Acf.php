@@ -210,7 +210,9 @@ class Acf
 
     private static function registerPasswordHashing(): void
     {
-        // Never show the stored hash in the admin input field — only when rendering an ACF field form, not during AJAX
+        // Never show the stored hash in the admin input field, but not on admin-ajax:
+        // Auth::getSharedPassword() reads this field via get_field() during member
+        // AJAX requests (login, download, downloads_query), so hiding it there breaks auth.
         add_filter('acf/load_value/key=field_member_shared_password', function ($value) {
             if (is_admin() && !wp_doing_ajax()) {
                 return '';

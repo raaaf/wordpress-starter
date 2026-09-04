@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WordpressStarter\MemberArea;
 
 use WordpressStarter\RateLimiter;
+use WordpressStarter\ThemeContext;
 use WP_Post;
 use WP_Query;
 
@@ -12,15 +13,6 @@ class DownloadQuery
 {
     private const ALLOWED_PER_PAGE = [20, 50, 100];
     private const DEFAULT_PER_PAGE = 20;
-
-    private const EXT_VARIANTS = [
-        'pdf' => 'error',
-        'xls' => 'success',
-        'xlsx' => 'success',
-        'doc' => 'brand',
-        'docx' => 'brand',
-        'zip' => 'warning',
-    ];
 
     public static function handle(): void
     {
@@ -65,6 +57,95 @@ class DownloadQuery
         int $page,
         int $perPage,
     ): array {
+        $args = self::buildArgs($search, $category, $ext, $page, $perPage);
+
+        // Extend search to also match download_description meta field. The base
+        // meta_query already binds the unaliased $wpdb->postmeta join to
+        // 'download_source_type' (see sftpParentExclusionMetaQuery()), so a single
+        // postmeta row cannot also carry 'download_description' there -- a dedicated
+        // LEFT JOIN under its own alias is required for the description to be
+        // matchable at all.
+        $extendSearch = null;
+        $extendJoin = null;
+        if (!empty($search)) {
+            $extendJoin = static function (string $joinSql, WP_Query $wpQuery): string {
+                global $wpdb;
+                if ($wpQuery->get('member_download_search') !== true || !$wpQuery->get('s')) {
+                    return $joinSql;
+                }
+
+                return $joinSql . " LEFT JOIN {$wpdb->postmeta} AS md_desc ON (md_desc.post_id = {$wpdb->posts}.ID AND md_desc.meta_key = 'download_description')";
+            };
+            add_filter('posts_join', $extendJoin, 10, 2);
+
+            $extendSearch = static function (string $searchSql, WP_Query $wpQuery) use ($search): string {
+                global $wpdb;
+                if ($wpQuery->get('member_download_search') !== true || !$wpQuery->get('s')) {
+                    return $searchSql;
+                }
+                $term = '%' . $wpdb->esc_like($search) . '%';
+                $metaCondition = $wpdb->prepare(
+                    'md_desc.meta_value LIKE %s',
+                    $term,
+                );
+                if (!is_user_logged_in()) {
+                    $metaCondition .= " AND ({$wpdb->posts}.post_password = '')";
+                }
+
+                // $searchSql already carries its own leading " AND " (and, for guests, its own
+                // post_password guard) from WP_Query::parse_search(). Appending " OR (...)" here
+                // directly would escape that grouping (AND binds tighter than OR) and drop every
+                // clause composed before this filter runs, e.g. the tax_query category filter and
+                // the post_password guard. Strip the leading " AND " and wrap both branches in one
+                // self-contained group so the OR cannot leak past this fragment.
+                $rest = trim($searchSql);
+                if (str_starts_with($rest, 'AND ')) {
+                    $rest = substr($rest, 4);
+                }
+
+                return " AND (({$rest}) OR ({$metaCondition}))";
+            };
+            add_filter('posts_search', $extendSearch, 10, 2);
+        }
+
+        $wpQuery = new WP_Query($args);
+
+        if ($extendSearch !== null) {
+            remove_filter('posts_search', $extendSearch, 10);
+        }
+        if ($extendJoin !== null) {
+            remove_filter('posts_join', $extendJoin, 10);
+        }
+
+        $posts = $wpQuery->posts;
+
+        // Pre-warm the object cache so subsequent get_field() calls inside the loop
+        // hit cache instead of issuing individual DB queries (avoids N+1).
+        update_meta_cache('post', wp_list_pluck($posts, 'ID'));
+
+        [$posts, $total, $pages, $page] = self::filterByExtension($posts, $wpQuery, $ext, $page, $perPage);
+
+        $items = self::buildItems($posts);
+
+        return [
+            'items' => $items,
+            'total' => $total,
+            'pages' => $pages,
+            'current_page' => $page,
+            'per_page' => $perPage,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function buildArgs(
+        string $search,
+        string $category,
+        string $ext,
+        int $page,
+        int $perPage,
+    ): array {
         // Base meta_query: exclude SFTP parent folder entries
         $metaQuery = self::sftpParentExclusionMetaQuery();
 
@@ -81,6 +162,7 @@ class DownloadQuery
 
         if (!empty($search)) {
             $args['s'] = $search;
+            $args['member_download_search'] = true;
         }
 
         if (!empty($category)) {
@@ -93,39 +175,24 @@ class DownloadQuery
             ];
         }
 
-        // Extend search to also match download_description meta field
-        $extendSearch = null;
-        if (!empty($search)) {
-            $extendSearch = static function (string $searchSql, WP_Query $wpQuery) use ($search): string {
-                global $wpdb;
-                if (!$wpQuery->get('s')) {
-                    return $searchSql;
-                }
-                $term = '%' . $wpdb->esc_like($search) . '%';
-                $searchSql .= $wpdb->prepare(
-                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                    " OR ({$wpdb->postmeta}.meta_key = 'download_description' AND {$wpdb->postmeta}.meta_value LIKE %s)",
-                    $term,
-                );
+        return $args;
+    }
 
-                return $searchSql;
-            };
-            add_filter('posts_search', $extendSearch, 10, 2);
-        }
-
-        $wpQuery = new WP_Query($args);
-
-        if ($extendSearch !== null) {
-            remove_filter('posts_search', $extendSearch, 10);
-        }
-
-        $posts = $wpQuery->posts;
-
-        // Pre-warm the object cache so subsequent get_field() calls inside the loop
-        // hit cache instead of issuing individual DB queries (avoids N+1).
-        update_meta_cache('post', wp_list_pluck($posts, 'ID'));
-
-        // PHP-level extension filter (avoids complex SQL JOIN on attachments table)
+    /**
+     * PHP-level extension filter (avoids complex SQL JOIN on attachments table) and
+     * pagination bookkeeping. Returns [$posts, $total, $pages, $page].
+     *
+     * @param list<WP_Post> $posts
+     *
+     * @return array{0: list<WP_Post>, 1: int, 2: int, 3: int}
+     */
+    private static function filterByExtension(
+        array $posts,
+        WP_Query $wpQuery,
+        string $ext,
+        int $page,
+        int $perPage,
+    ): array {
         if (!empty($ext)) {
             $posts = array_filter($posts, static function (WP_Post $post) use ($ext): bool {
                 return self::getPostExt($post->ID) === strtolower($ext);
@@ -136,12 +203,24 @@ class DownloadQuery
             $pages = max(1, (int) ceil($total / $perPage));
             $page = min($page, $pages);
             $posts = array_slice($posts, ( $page - 1 ) * $perPage, $perPage);
-        } else {
-            $total = $wpQuery->found_posts;
-            $pages = max(1, (int) ceil($total / $perPage));
-            $page = min($page, $pages);
+
+            return [$posts, $total, $pages, $page];
         }
 
+        $total = $wpQuery->found_posts;
+        $pages = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $pages);
+
+        return [$posts, $total, $pages, $page];
+    }
+
+    /**
+     * @param list<WP_Post> $posts
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function buildItems(array $posts): array
+    {
         // Build term label cache
         $terms = get_terms(['taxonomy' => 'download_category', 'hide_empty' => false]);
         $termLabels = [];
@@ -161,7 +240,7 @@ class DownloadQuery
             $available = (bool) ( get_field('download_available', $postId) ?? true );
 
             $fileExt = self::getPostExt($postId);
-            $extVariant = self::EXT_VARIANTS[$fileExt] ?? 'gray';
+            $extVariant = DownloadFileTypes::variantFor($fileExt);
 
             $lastModifiedLabel = '';
             $isUpdated = false;
@@ -191,13 +270,7 @@ class DownloadQuery
             ];
         }
 
-        return [
-            'items' => $items,
-            'total' => $total,
-            'pages' => $pages,
-            'current_page' => $page,
-            'per_page' => $perPage,
-        ];
+        return $items;
     }
 
     private static function getPostExt(int $postId): string
@@ -242,6 +315,19 @@ class DownloadQuery
         ];
     }
 
+    private static function facetsCacheKey(): string
+    {
+        return ThemeContext::prefix() . '_member_downloads_facets';
+    }
+
+    /**
+     * Invalidate the cached facets (called on save/delete of a member_download post).
+     */
+    public static function invalidateFacetsCache(): void
+    {
+        delete_transient(self::facetsCacheKey());
+    }
+
     /**
      * Return available filter options with counts (only items that actually exist).
      *
@@ -249,6 +335,12 @@ class DownloadQuery
      */
     private static function facets(): array
     {
+        $cacheKey = self::facetsCacheKey();
+        $cached = get_transient($cacheKey);
+        if (is_array($cached)) {
+            return $cached;
+        }
+
         // Fetch all published, non-parent downloads
         $posts = get_posts([
             'post_type' => 'member_download',
@@ -262,6 +354,9 @@ class DownloadQuery
         // Pre-warm the object cache for all post IDs so getPostExt() calls inside
         // the loop hit cache instead of issuing individual DB queries (avoids N+1).
         update_meta_cache('post', $posts);
+        // Pre-warm the term relationship cache so get_the_terms() below hits cache
+        // instead of issuing a term query per post ID (avoids N+1).
+        update_object_term_cache($posts, 'member_download');
 
         // Count by category
         $categoryCounts = [];
@@ -319,9 +414,14 @@ class DownloadQuery
             }
         }
 
-        return [
+        $result = [
             'categories' => $categories,
             'extensions' => $extensions,
         ];
+
+        // 10 minutes: facets have no per-user visibility filter, safe to share across requests.
+        set_transient($cacheKey, $result, 10 * MINUTE_IN_SECONDS);
+
+        return $result;
     }
 }
