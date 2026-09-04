@@ -52,7 +52,9 @@
             />
 
             {{-- Track --}}
-            {{-- The border is always present and transparent by default, so the error
+            {{-- The border is always present: control grey when off (the track sits on
+                 the tertiary surface and would otherwise vanish on light pages),
+                 transparent on the accent fill, error red when invalid. The error
                  state recolours an existing boundary instead of growing a new ring.
                  That is the mechanism input, select, textarea, checkbox and radio all
                  use; a ring would also make the track read 4px larger when invalid. --}}
@@ -61,13 +63,13 @@
                     ? 'bg-surface-disabled'
                     : ($hasError
                         ? 'bg-surface-tertiary peer-checked:bg-surface-accent peer-focus-visible:shadow-[var(--shadow-focus-ring)] border-line-error'
-                        : 'bg-surface-tertiary peer-checked:bg-surface-accent peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
+                        : 'bg-surface-tertiary border-line-control peer-checked:bg-surface-accent peer-checked:border-transparent peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
                     )
                 }}
             "></span>
 
             {{-- Knob --}}
-            <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface shadow-md transition-[translate,background-color] duration-200
+            <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface-secondary shadow-md transition-[translate,background-color] duration-200
                 peer-checked:translate-x-5
                 {{ $disabled ? 'bg-surface-secondary' : '' }}
             "></span>
