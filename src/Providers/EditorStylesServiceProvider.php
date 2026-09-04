@@ -256,9 +256,9 @@ class EditorStylesServiceProvider extends ServiceProvider
         });
 
         add_action('wp_ajax_theme_tinymce_icon_picker', function (): void {
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public TinyMCE plugin asset
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Authenticated admin-ajax response, response is cacheable privately per logged-in user
             header('Content-Type: application/javascript; charset=utf-8');
-            header('Cache-Control: public, max-age=3600');
+            header('Cache-Control: private, max-age=3600');
             // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted internal JS
             echo $this->getIconPickerPluginJs();
             exit;

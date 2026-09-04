@@ -24,6 +24,7 @@ trait WordPressMocks
         $GLOBALS['wp_mock_enqueued'] = ['scripts' => [], 'styles' => []];
         $GLOBALS['wp_mock_attachments'] = [];
         $GLOBALS['wp_mock_post_meta'] = [];
+        $GLOBALS['wp_mock_post_fields'] = [];
         $GLOBALS['wp_mock_all_fields'] = [];
         $GLOBALS['wp_mock_sub_fields'] = [];
         $GLOBALS['wp_mock_repeater_rows'] = [];

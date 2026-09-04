@@ -881,6 +881,39 @@ if (!function_exists('sanitize_text_field')) {
     }
 }
 
+if (!function_exists('sanitize_file_name')) {
+    function sanitize_file_name(string $filename): string
+    {
+        $specialChars = ['?', '[', ']', '/', '\\', '=', '<', '>', ':', ';', ',', "'", '"', '&', '$', '#', '*', '(', ')', '|', '~', '`', '!', '{', '}', '%', '+', chr(0)];
+        $filename = str_replace($specialChars, '', $filename);
+
+        return trim($filename, '.-');
+    }
+}
+
+if (!function_exists('sanitize_html_class')) {
+    function sanitize_html_class(string $class, string $fallback = ''): string
+    {
+        $sanitized = preg_replace('/[^A-Za-z0-9_-]/', '', $class) ?? '';
+
+        return $sanitized === '' ? $fallback : $sanitized;
+    }
+}
+
+if (!function_exists('shortcode_atts')) {
+    function shortcode_atts(array $pairs, array|string $atts, string $shortcode = ''): array
+    {
+        $atts = (array) $atts;
+        $out = [];
+
+        foreach ($pairs as $name => $default) {
+            $out[$name] = array_key_exists($name, $atts) ? $atts[$name] : $default;
+        }
+
+        return $out;
+    }
+}
+
 if (!function_exists('wp_unslash')) {
     function wp_unslash(mixed $value): mixed
     {

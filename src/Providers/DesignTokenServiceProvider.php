@@ -24,6 +24,13 @@ class DesignTokenServiceProvider extends ServiceProvider
     private const TOKENS_DIR = 'config/design-tokens';
     private const BACKUP_DIR = 'config/design-tokens/backups';
 
+    /**
+     * Memoized, decoded primitives.tokens.json for the current request.
+     *
+     * @var array<string, mixed>|null
+     */
+    private static ?array $tokensDataCache = null;
+
     private static function nonceDownload(): string
     {
         return ThemeContext::kebabPrefix() . '-download-tokens';
@@ -429,6 +436,8 @@ class DesignTokenServiceProvider extends ServiceProvider
             }
         }
 
+        self::resetTokensDataCache();
+
         if (!empty($copyErrors)) {
             return [
                 'success' => false,
@@ -457,9 +466,6 @@ class DesignTokenServiceProvider extends ServiceProvider
             return;
         }
 
-        // Set flag to prevent ACF color sync from overwriting uploaded files
-        set_transient(self::transientTokensJustUploaded(), true, 60);
-
         $nonce = isset($_POST[self::paramUploadTokens() . '-nonce']) ? sanitize_text_field(wp_unslash($_POST[self::paramUploadTokens() . '-nonce'])) : '';
 
         if (!wp_verify_nonce($nonce, self::nonceUpload())) {
@@ -477,10 +483,15 @@ class DesignTokenServiceProvider extends ServiceProvider
             return;
         }
 
+        // Set flag to prevent ACF color sync from overwriting uploaded files
+        set_transient(self::transientTokensJustUploaded(), true, 60);
+
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- File uploads handled via WordPress file functions
         $result = $this->processTokenUpload($_FILES);
 
         if (isset($result['validationErrors'])) {
+            delete_transient(self::transientTokensJustUploaded());
+
             $this->addAdminNotice(
                 'error',
                 $result['message'] . '<ul><li>' . implode('</li><li>', array_map('esc_html', $result['validationErrors'])) . '</li></ul>',
@@ -490,12 +501,16 @@ class DesignTokenServiceProvider extends ServiceProvider
         }
 
         if (!empty($result['noFilesSelected'])) {
+            delete_transient(self::transientTokensJustUploaded());
+
             $this->addAdminNotice('warning', $result['message']);
 
             return;
         }
 
         if (isset($result['copyErrors'])) {
+            delete_transient(self::transientTokensJustUploaded());
+
             $this->addAdminNotice('error', implode('<br>', array_map('esc_html', $result['copyErrors'])));
 
             return;
@@ -536,6 +551,17 @@ class DesignTokenServiceProvider extends ServiceProvider
             wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
         }
 
+        // Rate limiting
+        if (!RateLimiter::check('token_regenerate', 5, 60)) {
+            set_transient(self::transientTokenNotice(), [
+                'type' => 'error',
+                'message' => __('Zu viele Anfragen. Bitte warte eine Minute.', 'wp-starter'),
+            ], 30);
+
+            wp_safe_redirect(sanitize_url(wp_get_referer()) ?: admin_url('admin.php?page=theme-options-tokens'));
+            exit;
+        }
+
         $result = $this->runTokenTransform();
 
         set_transient(self::transientTokenNotice(), [
@@ -566,12 +592,23 @@ class DesignTokenServiceProvider extends ServiceProvider
             wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
         }
 
+        // Rate limiting
+        if (!RateLimiter::check('token_apply_colors', 5, 60)) {
+            set_transient(self::transientTokenNotice(), [
+                'type' => 'error',
+                'message' => __('Zu viele Anfragen. Bitte warte eine Minute.', 'wp-starter'),
+            ], 30);
+
+            wp_safe_redirect(add_query_arg('colors-applied', '1', sanitize_url(wp_get_referer()) ?: admin_url()));
+            exit;
+        }
+
         $result = $this->syncColorsToTokens();
 
         if ($result !== null) {
             set_transient(self::transientTokenNotice(), [
                 'type' => $result['success'] ? 'success' : 'error',
-                'message' => $result['message'],
+                'message' => self::formatTokenNoticeMessage($result),
             ], 30);
         }
 
@@ -646,6 +683,8 @@ class DesignTokenServiceProvider extends ServiceProvider
             ];
         }
 
+        self::resetTokensDataCache();
+
         // Regenerate CSS
         $result = $this->runTokenTransform();
 
@@ -671,9 +710,6 @@ class DesignTokenServiceProvider extends ServiceProvider
             return;
         }
 
-        // Set flag to prevent ACF color sync from overwriting restored files
-        set_transient(self::transientTokensJustUploaded(), true, 60);
-
         $nonce = isset($_POST['_wpnonce']) ? sanitize_text_field(wp_unslash($_POST['_wpnonce'])) : '';
 
         if (!wp_verify_nonce($nonce, self::nonceRestore())) {
@@ -684,11 +720,23 @@ class DesignTokenServiceProvider extends ServiceProvider
             wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
         }
 
+        // Rate limiting
+        if (!RateLimiter::check('token_restore', 5, 60)) {
+            $this->addAdminNotice('error', __('Zu viele Anfragen. Bitte warte eine Minute.', 'wp-starter'));
+
+            return;
+        }
+
+        // Set flag to prevent ACF color sync from overwriting restored files
+        set_transient(self::transientTokensJustUploaded(), true, 60);
+
         $timestamp = isset($_POST['backup_timestamp']) ? sanitize_text_field(wp_unslash($_POST['backup_timestamp'])) : '';
 
         $result = $this->processBackupRestore($timestamp);
 
         if (!isset($result['restored'])) {
+            delete_transient(self::transientTokensJustUploaded());
+
             $this->addAdminNotice('error', $result['message']);
 
             return;
@@ -746,20 +794,29 @@ class DesignTokenServiceProvider extends ServiceProvider
             wp_send_json_error(['message' => __('Zu viele Anfragen. Bitte warte eine Minute.', 'wp-starter')]);
         }
 
+        // Set flag to prevent ACF color sync from overwriting uploaded files
+        set_transient(self::transientTokensJustUploaded(), true, 60);
+
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- File uploads handled via WordPress file functions
         $result = $this->processTokenUpload($_FILES);
 
         if (isset($result['validationErrors'])) {
+            delete_transient(self::transientTokensJustUploaded());
+
             wp_send_json_error([
                 'message' => $result['message'] . ' ' . implode(', ', $result['validationErrors']),
             ]);
         }
 
         if (!empty($result['noFilesSelected'])) {
+            delete_transient(self::transientTokensJustUploaded());
+
             wp_send_json_error(['message' => $result['message']]);
         }
 
         if (isset($result['copyErrors'])) {
+            delete_transient(self::transientTokensJustUploaded());
+
             wp_send_json_error(['message' => implode(', ', $result['copyErrors'])]);
         }
 
@@ -792,11 +849,21 @@ class DesignTokenServiceProvider extends ServiceProvider
             wp_send_json_error(['message' => __('Keine Berechtigung.', 'wp-starter')]);
         }
 
+        // Rate limiting
+        if (!RateLimiter::check('token_restore', 5, 60)) {
+            wp_send_json_error(['message' => __('Zu viele Anfragen. Bitte warte eine Minute.', 'wp-starter')]);
+        }
+
+        // Set flag to prevent ACF color sync from overwriting restored files
+        set_transient(self::transientTokensJustUploaded(), true, 60);
+
         $timestamp = isset($_POST['timestamp']) ? sanitize_text_field(wp_unslash($_POST['timestamp'])) : '';
 
         $result = $this->processBackupRestore($timestamp);
 
         if (!isset($result['restored'])) {
+            delete_transient(self::transientTokensJustUploaded());
+
             wp_send_json_error(['message' => $result['message']]);
         }
 
@@ -878,6 +945,16 @@ class DesignTokenServiceProvider extends ServiceProvider
             return;
         }
 
+        // Rate limiting
+        if (!RateLimiter::check('token_sync_colors', 5, 60)) {
+            set_transient(self::transientTokenNotice(), [
+                'type' => 'error',
+                'message' => __('Zu viele Synchronisierungen in kurzer Zeit. Bitte in einer Minute erneut speichern.', 'wp-starter'),
+            ], 30);
+
+            return;
+        }
+
         // Sync colors from ACF to token files and capture result
         $result = $this->syncColorsToTokens();
 
@@ -885,9 +962,19 @@ class DesignTokenServiceProvider extends ServiceProvider
         if ($result !== null) {
             set_transient(self::transientTokenNotice(), [
                 'type' => $result['success'] ? 'success' : 'error',
-                'message' => $result['message'] . ( !empty($result['details']) ? "\n" . $result['details'] : '' ),
+                'message' => self::formatTokenNoticeMessage($result),
             ], 30);
         }
+    }
+
+    /**
+     * Append validation/sync details to a result message for display in an admin notice
+     *
+     * @param array{success: bool, message: string, details?: string} $result
+     */
+    private static function formatTokenNoticeMessage(array $result): string
+    {
+        return $result['message'] . ( !empty($result['details']) ? "\n" . $result['details'] : '' );
     }
 
     /**
@@ -899,12 +986,21 @@ class DesignTokenServiceProvider extends ServiceProvider
     {
         // Collect all palette colors from ACF
         $paletteColors = [];
+        $invalidColors = [];
         foreach (self::PALETTE_COLORS as $colorName => $fieldKey) {
             $optionName = 'token_' . $colorName . '_color';
             $color = get_field($optionName, 'option');
-            if ($color) {
-                $paletteColors[$colorName] = $color;
+            if (!$color) {
+                continue;
             }
+
+            $sanitizedColor = sanitize_hex_color($color);
+            if ($sanitizedColor === null) {
+                $invalidColors[] = $colorName;
+                continue;
+            }
+
+            $paletteColors[$colorName] = $sanitizedColor;
         }
 
         // Collect all status colors from ACF
@@ -912,12 +1008,29 @@ class DesignTokenServiceProvider extends ServiceProvider
         foreach (self::STATUS_COLORS as $colorName => $fieldKey) {
             $optionName = 'token_' . $colorName . '_color';
             $color = get_field($optionName, 'option');
-            if ($color) {
-                $statusColors[$colorName] = $color;
+            if (!$color) {
+                continue;
             }
+
+            $sanitizedColor = sanitize_hex_color($color);
+            if ($sanitizedColor === null) {
+                $invalidColors[] = $colorName;
+                continue;
+            }
+
+            $statusColors[$colorName] = $sanitizedColor;
         }
 
         if (empty($paletteColors) && empty($statusColors)) {
+            if (!empty($invalidColors)) {
+                return [
+                    'success' => false,
+                    'message' => __('Keine gültigen Farbwerte zum Synchronisieren.', 'wp-starter'),
+                    /* translators: %s: comma-separated list of invalid color field names */
+                    'details' => sprintf(__('Ungültige Farbwerte: %s', 'wp-starter'), implode(', ', $invalidColors)),
+                ];
+            }
+
             return null;
         }
 
@@ -952,12 +1065,10 @@ class DesignTokenServiceProvider extends ServiceProvider
             ];
         }
 
-        $generator = new ColorPaletteGenerator();
-
         // Update palette colors (full shade range 50-900)
         foreach ($paletteColors as $colorName => $color) {
-            $palette = $generator->generate($color);
-            $tokens = $generator->toFigmaTokenFormat($palette, $colorName);
+            $palette = ColorPaletteGenerator::generate($color);
+            $tokens = ColorPaletteGenerator::toFigmaTokenFormat($palette, $colorName);
 
             if (!isset($primitives['color'][$colorName])) {
                 $primitives['color'][$colorName] = [];
@@ -970,21 +1081,42 @@ class DesignTokenServiceProvider extends ServiceProvider
 
         // Update status colors (single color with light/dark variants)
         foreach ($statusColors as $colorName => $color) {
-            $this->updateStatusColorInPrimitives($primitives, $colorName, $color, $generator);
+            $this->updateStatusColorInPrimitives($primitives, $colorName, $color);
         }
 
         // Save updated primitives
         $json = wp_json_encode($primitives, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($json === false) {
+            return [
+                'success' => false,
+                'message' => __('Konnte Token-Daten nicht kodieren.', 'wp-starter'),
+            ];
+        }
 
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-        file_put_contents($primitivesFile, $json);
+        if (file_put_contents($primitivesFile, $json) === false) {
+            return [
+                'success' => false,
+                'message' => __('Konnte Token-Datei nicht schreiben.', 'wp-starter'),
+            ];
+        }
+
+        self::resetTokensDataCache();
 
         // Update semantic tokens (light.tokens.json and dark.tokens.json)
         // These files contain resolved values that need to match the updated primitives
-        $this->updateSemanticTokens($tokensDir, $primitives, $generator, $paletteColors, $statusColors);
+        $this->updateSemanticTokens($tokensDir, $primitives, $paletteColors, $statusColors);
 
         // Run transform and build
-        return $this->runTokenTransform();
+        $result = $this->runTokenTransform();
+
+        if (!empty($invalidColors)) {
+            /* translators: %s: comma-separated list of invalid color field names */
+            $invalidDetails = sprintf(__('Ungültige Farbwerte übersprungen: %s', 'wp-starter'), implode(', ', $invalidColors));
+            $result['details'] = isset($result['details']) ? $result['details'] . "\n" . $invalidDetails : $invalidDetails;
+        }
+
+        return $result;
     }
 
     /**
@@ -992,14 +1124,12 @@ class DesignTokenServiceProvider extends ServiceProvider
      *
      * @param string $tokensDir Path to tokens directory
      * @param array<string, mixed> $primitives Updated primitives
-     * @param ColorPaletteGenerator $generator Color palette generator
      * @param array<string, string> $paletteColors Changed palette colors
      * @param array<string, string> $statusColors Changed status colors
      */
     private function updateSemanticTokens(
         string $tokensDir,
         array $primitives,
-        ColorPaletteGenerator $generator,
         array $paletteColors,
         array $statusColors,
     ): void {
@@ -1028,6 +1158,10 @@ class DesignTokenServiceProvider extends ServiceProvider
 
             if ($updated) {
                 $json = wp_json_encode($tokens, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                if ($json === false) {
+                    continue;
+                }
+
                 // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
                 file_put_contents($filePath, $json);
             }
@@ -1167,24 +1301,32 @@ class DesignTokenServiceProvider extends ServiceProvider
      * @param array<string, mixed> &$primitives Primitives array (modified by reference)
      * @param string $colorName Color name (success, warning, error)
      * @param string $color Hex color value
-     * @param ColorPaletteGenerator $generator Color palette generator
      */
-    private function updateStatusColorInPrimitives(array &$primitives, string $colorName, string $color, ColorPaletteGenerator $generator): void
+    private function updateStatusColorInPrimitives(array &$primitives, string $colorName, string $color): void
     {
         // Generate palette to get light (shade 100) and dark (shade 700) variants
-        $palette = $generator->generate($color);
+        $palette = ColorPaletteGenerator::generate($color);
 
         // Main color
-        $primitives['color'][$colorName] = $this->createColorToken($color);
+        $mainToken = $this->createColorToken($color);
+        if ($mainToken !== null) {
+            $primitives['color'][$colorName] = $mainToken;
+        }
 
         // Light variant (shade 100)
         if (isset($palette['100'])) {
-            $primitives['color'][$colorName . '-light'] = $this->createColorToken($palette['100']);
+            $lightToken = $this->createColorToken($palette['100']);
+            if ($lightToken !== null) {
+                $primitives['color'][$colorName . '-light'] = $lightToken;
+            }
         }
 
         // Dark variant (shade 700)
         if (isset($palette['700'])) {
-            $primitives['color'][$colorName . '-dark'] = $this->createColorToken($palette['700']);
+            $darkToken = $this->createColorToken($palette['700']);
+            if ($darkToken !== null) {
+                $primitives['color'][$colorName . '-dark'] = $darkToken;
+            }
         }
     }
 
@@ -1193,11 +1335,14 @@ class DesignTokenServiceProvider extends ServiceProvider
      *
      * @param string $hex Hex color value
      *
-     * @return array<string, mixed> Token array
+     * @return array<string, mixed>|null Token array, or null if $hex is not a valid color
      */
-    private function createColorToken(string $hex): array
+    private function createColorToken(string $hex): ?array
     {
-        $rgb = ColorPaletteGenerator::hexToRgb($hex) ?? ['r' => 0, 'g' => 0, 'b' => 0];
+        $rgb = ColorPaletteGenerator::hexToRgb($hex);
+        if ($rgb === null) {
+            return null;
+        }
 
         // Normalize hex for the output value
         $normalizedHex = ltrim($hex, '#');
@@ -1439,30 +1584,7 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     private function findNpmPath(): ?string
     {
-        // Common paths
-        $paths = [
-            '/usr/local/bin/npm',
-            '/usr/bin/npm',
-            '/opt/homebrew/bin/npm',
-        ];
-
-        foreach ($paths as $path) {
-            if (is_executable($path)) {
-                return $path;
-            }
-        }
-
-        // Try 'which npm'
-        // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec
-        $which = shell_exec('which npm 2>/dev/null');
-        if ($which) {
-            $path = trim($which);
-            if (is_executable($path)) {
-                return $path;
-            }
-        }
-
-        return null;
+        return $this->findExecutable('npm');
     }
 
     /**
@@ -1472,11 +1594,23 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     private function findNodePath(): ?string
     {
+        return $this->findExecutable('node');
+    }
+
+    /**
+     * Find an executable by common install paths, falling back to 'which'
+     *
+     * @param string $binary Executable name (e.g. 'node', 'npm')
+     *
+     * @return string|null Path to the executable or null if not found
+     */
+    private function findExecutable(string $binary): ?string
+    {
         // Common paths
         $paths = [
-            '/usr/local/bin/node',
-            '/usr/bin/node',
-            '/opt/homebrew/bin/node',
+            "/usr/local/bin/{$binary}",
+            "/usr/bin/{$binary}",
+            "/opt/homebrew/bin/{$binary}",
         ];
 
         foreach ($paths as $path) {
@@ -1485,9 +1619,9 @@ class DesignTokenServiceProvider extends ServiceProvider
             }
         }
 
-        // Try 'which node'
+        // Try 'which' with the given binary name
         // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec
-        $which = shell_exec('which node 2>/dev/null');
+        $which = shell_exec('which ' . escapeshellarg($binary) . ' 2>/dev/null');
         if ($which) {
             $path = trim($which);
             if (is_executable($path)) {
@@ -1686,20 +1820,8 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     public static function getCurrentTokenColor(string $colorName, string $shade = '500'): ?string
     {
-        $tokensFile = get_template_directory() . '/' . self::TOKENS_DIR . '/primitives.tokens.json';
-
-        if (!file_exists($tokensFile)) {
-            return null;
-        }
-
-        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-        $content = file_get_contents($tokensFile);
-        if ($content === false) {
-            return null;
-        }
-
-        $tokens = json_decode($content, true);
-        if (!is_array($tokens)) {
+        $tokens = self::getTokensData();
+        if ($tokens === null) {
             return null;
         }
 
@@ -1723,6 +1845,33 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     public static function getCurrentStatusColor(string $colorName): ?string
     {
+        $tokens = self::getTokensData();
+        if ($tokens === null) {
+            return null;
+        }
+
+        // Navigate to color.[colorName].$value.hex (status colors are flat, not nested in shades)
+        if (
+            isset($tokens['color'][$colorName]['$value']['hex']) &&
+            is_string($tokens['color'][$colorName]['$value']['hex'])
+        ) {
+            return $tokens['color'][$colorName]['$value']['hex'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Read and decode primitives.tokens.json, memoized for the current request.
+     *
+     * @return array<string, mixed>|null Decoded tokens, or null if unreadable/invalid
+     */
+    private static function getTokensData(): ?array
+    {
+        if (self::$tokensDataCache !== null) {
+            return self::$tokensDataCache;
+        }
+
         $tokensFile = get_template_directory() . '/' . self::TOKENS_DIR . '/primitives.tokens.json';
 
         if (!file_exists($tokensFile)) {
@@ -1740,15 +1889,17 @@ class DesignTokenServiceProvider extends ServiceProvider
             return null;
         }
 
-        // Navigate to color.[colorName].$value.hex (status colors are flat, not nested in shades)
-        if (
-            isset($tokens['color'][$colorName]['$value']['hex']) &&
-            is_string($tokens['color'][$colorName]['$value']['hex'])
-        ) {
-            return $tokens['color'][$colorName]['$value']['hex'];
-        }
+        self::$tokensDataCache = $tokens;
 
-        return null;
+        return $tokens;
+    }
+
+    /**
+     * Reset the memoized tokens data, e.g. after writing primitives.tokens.json.
+     */
+    private static function resetTokensDataCache(): void
+    {
+        self::$tokensDataCache = null;
     }
 
     /**

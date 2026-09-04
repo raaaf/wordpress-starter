@@ -177,6 +177,7 @@ class LlmsTxtProvider extends ServiceProvider
         $topPages = get_posts([
             'post_type' => 'page',
             'post_status' => 'publish',
+            'has_password' => false,
             'post_parent' => 0,
             'numberposts' => 20,
             'orderby' => 'menu_order title',
@@ -201,6 +202,7 @@ class LlmsTxtProvider extends ServiceProvider
         $posts = get_posts([
             'post_type' => $postType,
             'post_status' => 'publish',
+            'has_password' => false,
             'numberposts' => 200, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_numberposts -- curated export for LLMs, capped and cached 12h
             'orderby' => 'title',
             'order' => 'ASC',
@@ -219,6 +221,17 @@ class LlmsTxtProvider extends ServiceProvider
 
     private function linkLineForPost(int $postId): string
     {
+        // Callers may pass IDs from get_option() (front page, posts page) that
+        // bypass the has_password/post_status filters used by the get_posts()
+        // calls above, so the guard is enforced here, once, for every caller.
+        if (get_post_field('post_status', $postId) !== 'publish') {
+            return '';
+        }
+
+        if (get_post_field('post_password', $postId) !== '') {
+            return '';
+        }
+
         $title = get_the_title($postId);
         $url = get_permalink($postId);
         if (!is_string($url) || $url === '') {

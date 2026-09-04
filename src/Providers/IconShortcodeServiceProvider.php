@@ -55,14 +55,16 @@ class IconShortcodeServiceProvider extends ServiceProvider
         ];
 
         $sizeClass = $sizes[$atts['size']] ?? $sizes['md'];
-        $extraClass = $atts['class'] !== '' ? ' ' . $atts['class'] : '';
+        $classTokens = preg_split('/\s+/', trim($atts['class']), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $extraClasses = array_filter($classTokens, static fn (string $c): bool => preg_match('/^[A-Za-z0-9_\-:.\/\[\]%()!,]+$/', $c) === 1);
+        $classParts = array_merge(['icon'], explode(' ', $sizeClass), $extraClasses, ['inline-block', 'align-middle', 'shrink-0']);
+        $classAttr = esc_attr(implode(' ', $classParts));
 
-        $svg = preg_replace(
-            '/<svg/',
-            '<svg class="icon ' . $sizeClass . $extraClass . ' inline-block align-middle shrink-0" aria-hidden="true"',
-            $svg,
-            1,
-        ) ?? $svg;
+        $svgTagPos = strpos($svg, '<svg');
+
+        if ($svgTagPos !== false) {
+            $svg = substr_replace($svg, '<svg class="' . $classAttr . '" aria-hidden="true"', $svgTagPos, 4);
+        }
 
         return '<span class="inline-icon">' . $svg . '</span>';
     }
