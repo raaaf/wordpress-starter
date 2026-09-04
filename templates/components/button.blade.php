@@ -11,11 +11,11 @@
     @param string $type - Button type for <button> element (submit, button, reset)
     @param array $analytics - ['event' => 'name', 'meta' => 'value'] for Rybbit
 
-    States from Figma:
-    - Default: Gradient background with shadow
-    - Hover: Darker gradient, enhanced shadow
-    - Active: Darkest gradient with inner shadow
-    - Focus: Focus ring using accent-alpha-50
+    States (rafaelalex.de design system, section 5 - pill CTAs, never boxes):
+    - Default: Hairline pill, transparent fill, brand-colour border and text
+    - Hover: Solid brand fill, no border, no shadow
+    - Active: Deeper brand fill, 97% scale
+    - Focus: 3px outline in --ring-focus, 2px offset
     - Disabled: Greyed out, no interaction
 --}}
 
@@ -34,90 +34,60 @@
 @php
     // Base classes - common to all buttons
     // 'button' class is used for editor CSS overrides (prevents WordPress link styling)
-    // active:scale-[0.98] is a Tailwind v4 `scale` utility, not `transform` --
+    // active:scale-[0.97] is a Tailwind v4 `scale` utility, not `transform` --
     // the transition list has to name the property that actually animates.
     // button--<variante> traegt keine Gestaltung, sie macht die Variante nur
     // adressierbar: fuer Flaechen, die der Utility-Klasse nicht bekannt sind
     // (invers, Markenflaeche, Hero-Scrim), und fuer Messungen.
-    $baseClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-semibold transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-none active:scale-[0.98]';
+    $baseClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-normal transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] active:scale-[0.97]';
 
-    // Variants matching Figma design with gradients and shadows
+    // Variants: hairline pill at rest, flat fill on hover/active, never a
+    // gradient (rafaelalex.de design system, section 5). No shadow on any
+    // state, rest or hover: the Flat-at-Rest Rule applies to buttons too.
     $variants = [
         'primary' => implode(' ', [
-            // Flaeche und Glanz stehen in app.css: eine flache Farbe laesst sich
-            // animieren, ein Verlauf nicht, und der Kontrast bleibt ueber die
-            // ganze Hoehe gleich. Der Verlauf davor fiel je nach Theme von 6.08
-            // auf 2.69 zwischen oberer und unterer Kante.
-            // Follows the fill, not the page: see --text-on-accent in app.css.
-            'text-content-on-accent',
-            // Transparent statt --border-default: eine helle Haarlinie auf der
-            // farbigen Fuellung liest sich als Ausfransung. Die Geometrie bleibt,
-            // damit der Knopf neben den umrandeten Varianten gleich hoch steht.
-            'border border-transparent',
-            'shadow-[var(--shadow-button)]',
-            // Hover und Aktiv wechseln den Verlauf nicht mehr hier, sondern ueber
-            // eine zweite Ebene in app.css: Browser interpolieren
-            // background-image nicht, der Wechsel sprang also, waehrend die
-            // Varianten mit background-color weich liefen.
-            'hover:shadow-[var(--shadow-button-hover)]',
-            'active:shadow-[var(--shadow-inner)]',
-            'focus-visible:shadow-[var(--shadow-focus-ring)]',
+            'text-content-brand',
+            'border border-line-brand',
+            'bg-transparent',
+            'hover:bg-surface-brand',
+            'hover:text-content-on-accent',
+            'hover:border-transparent',
+            'active:bg-[var(--bg-brand-active)]',
         ]),
         'secondary' => implode(' ', [
-            'bg-surface-secondary',
+            'bg-transparent',
             'text-content',
             'border border-line',
-            'shadow-[var(--shadow-button)]',
-            // Nur Rand und Schatten zu wechseln war als Rueckmeldung zu leise,
-            // die Flaeche geht eine Stufe mit.
-            'hover:bg-surface-tertiary',
             'hover:border-line-strong',
-            'hover:shadow-[var(--shadow-button-hover)]',
+            'hover:bg-surface-secondary',
             'active:bg-surface-tertiary',
-            'active:shadow-[var(--shadow-inner)]',
-            'focus-visible:shadow-[var(--shadow-focus-ring)]',
         ]),
         'ghost' => implode(' ', [
             'bg-transparent',
             'text-content',
             'border border-transparent',
-            // Dezent unterscheidet seine Zustaende allein ueber die Flaeche.
-            // Vorher kam im Aktiv-Zustand ein Rand dazu, den weder Ruhe noch
-            // Hover haben; nebeneinander sahen die drei Zustaende nach drei
-            // verschiedenen Knoepfen aus.
-            // Die Flaechenleiter geht primary, secondary, tertiary von hell nach
-            // dunkel. Vorher lag Hover auf tertiary und Aktiv auf secondary, das
-            // Druecken war also heller als das Ueberfahren.
-            'hover:bg-surface-secondary',
-            'active:bg-surface-tertiary',
-            'focus-visible:shadow-[var(--shadow-focus-ring-ghost)]',
+            'hover:underline',
+            'underline-offset-4',
+            'active:opacity-80',
         ]),
         'danger' => implode(' ', [
             'bg-surface-error-strong',
             // Flips with the scheme, like the content on every other fill.
             'text-content-inverse',
             'border border-transparent',
-            'shadow-[var(--shadow-button)]',
             // The status ramp has only light/base/dark and --bg-error-strong
             // already takes the end of it, so there is no token to step to.
             // --bg-error-strong-hover (app.css) mixes towards black in light
             // mode and towards white in dark mode, i.e. away from whichever
-            // text colour sits on top, same rule the primary gradient follows.
+            // text colour sits on top, same rule the primary fill follows.
             'hover:bg-[var(--bg-error-strong-hover)]',
-            'hover:shadow-[var(--shadow-button-hover)]',
-            'active:shadow-[var(--shadow-inner)]',
-            'focus-visible:shadow-[var(--shadow-focus-ring)]',
         ]),
         'inverse' => implode(' ', [
             'bg-surface',
             'text-content-brand',
             'border border-line',
-            'shadow-[var(--shadow-button)]',
             'hover:bg-surface-secondary',
-            'hover:shadow-[var(--shadow-button-hover)]',
             'active:bg-surface-tertiary',
-            'active:shadow-[var(--shadow-inner)]',
-            'focus-visible:shadow-[var(--shadow-focus-ring)]',
         ]),
     ];
 

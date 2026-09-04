@@ -46,8 +46,8 @@
 @php
     // Variants from Figma - use semantic token fallbacks instead of hardcoded hex values
     $variants = [
-        'default' => 'bg-[var(--card-bg,var(--bg-primary))] border border-[var(--card-border,var(--border-default))] shadow-[var(--shadow-card)]',
-        'elevated' => 'bg-[var(--card-bg,var(--bg-primary))] shadow-lg',
+        'default' => 'bg-[var(--card-bg,var(--bg-primary))] border border-[var(--card-border,var(--border-default))]',
+        'elevated' => 'border border-line bg-[var(--card-bg,var(--bg-secondary))]',
         'outlined' => 'bg-[var(--card-bg,var(--bg-primary))] border border-line',
         // Gefuellt heisst: eine Stufe ueber der Sektion, nicht fix
         // bg-surface-secondary. Der feste Wert liess die Karte auf jeder Sektion

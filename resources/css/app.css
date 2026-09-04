@@ -140,13 +140,19 @@
      is light in BOTH schemes needs a dark mark in both. That is now a decision
      the export carries, not a line in this file. */
 
-  /* Fills, light scheme: dark end of the ramp, white content on top. */
-  --gradient-primary-start: var(--color-accent-700);
-  --gradient-primary-end: var(--color-accent-800);
-  --gradient-primary-hover-start: var(--color-accent-800);
-  --gradient-primary-hover-end: var(--color-accent-900);
-  --gradient-primary-active-start: var(--color-accent-900);
-  --gradient-primary-active-end: var(--color-accent-900);
+  /* Primary button reads as a flat fill, not a gradient (start === end):
+     rafaelalex.de design system, section 5, primary CTA is a hairline pill
+     at rest and a flat colour fill on hover/active, never a gradient. */
+  --gradient-primary-start: var(--color-accent-500);
+  --gradient-primary-end: var(--color-accent-500);
+  --gradient-primary-hover-start: var(--color-accent-600);
+  --gradient-primary-hover-end: var(--color-accent-600);
+  --gradient-primary-active-start: var(--color-accent-600);
+  --gradient-primary-active-end: var(--color-accent-600);
+
+  /* Pure Paper cards on the Warm Paper page (light mode). */
+  --card-bg: var(--bg-secondary);
+  --card-border: var(--border-default);
 
   /* Danger button hover: --bg-error-strong is already the darkest of the
      three-step error ramp, so there is no further token to step to. Mixed
@@ -186,14 +192,13 @@
   --card-bg: var(--bg-secondary);
   --card-border: var(--border-default);
 
-  /* Fills, dark scheme: light end of the ramp, near-black content on top.
-     The ladder runs the other way, so pressing still moves away from the text. */
+  /* Flat fill, same rule as the light-mode block above (start === end). */
   --gradient-primary-start: var(--color-accent-500);
-  --gradient-primary-end: var(--color-accent-600);
-  --gradient-primary-hover-start: var(--color-accent-400);
-  --gradient-primary-hover-end: var(--color-accent-500);
-  --gradient-primary-active-start: var(--color-accent-300);
-  --gradient-primary-active-end: var(--color-accent-400);
+  --gradient-primary-end: var(--color-accent-500);
+  --gradient-primary-hover-start: var(--color-accent-600);
+  --gradient-primary-hover-end: var(--color-accent-600);
+  --gradient-primary-active-start: var(--color-accent-600);
+  --gradient-primary-active-end: var(--color-accent-600);
 
   /* Here --bg-error-strong is the mid tone under near-black text (4.76:1 at
      rest, see point c above): darkening it the way light mode does would
@@ -237,14 +242,15 @@
        silhouette alone here, since a single soft blur at low alpha just
        smears into the background. Button and input stay at two layers, they
        sit close to the surface and don't need the third. */
-  --shadow-button: 0px 1px 2px 0px rgba(4, 6, 20, 0.45), 0px 1px 3px 0px rgba(4, 6, 20, 0.3);
+  /* Flat-at-Rest Rule: no drop shadow on any surface at rest, in either
+     colour scheme. Hover/overlay shadows below are interaction state and
+     stay. */
+  --shadow-button: none;
   --shadow-button-hover:
     0px 2px 4px -1px rgba(4, 6, 20, 0.5), 0px 4px 6px -2px rgba(4, 6, 20, 0.35);
-  --shadow-input: 0px 1px 2px 0px rgba(4, 6, 20, 0.4), 0px 1px 1px 0px rgba(4, 6, 20, 0.3);
+  --shadow-input: none;
   --shadow-input-hover: 0px 1px 3px 0px rgba(4, 6, 20, 0.45), 0px 1px 2px -1px rgba(4, 6, 20, 0.35);
-  --shadow-card:
-    0px 1px 2px 0px rgba(4, 6, 20, 0.5), 0px 4px 8px 0px rgba(4, 6, 20, 0.35),
-    0px 12px 24px -4px rgba(4, 6, 20, 0.3);
+  --shadow-card: none;
   --shadow-card-hover:
     0px 2px 4px 0px rgba(4, 6, 20, 0.55), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
     0px 20px 40px -8px rgba(4, 6, 20, 0.3);
@@ -256,18 +262,6 @@
     0px 20px 40px -8px rgba(4, 6, 20, 0.3);
 
   color-scheme: dark;
-}
-
-/* Elevated cards (`x-card variant="elevated"`, e.g. the "cards" flexible
-   layout) carry no border in any colour scheme and rely on `shadow-lg` alone
-   for their silhouette. `shadow-lg` is Tailwind's own utility, built from
-   --shadow-color-lg above, which is not part of the --shadow-card family and
-   stays at the light-mode ink even in dark mode, so this variant's edge
-   vanished the same way the --shadow-card ones did. A 1px line in the same
-   colour the default/filled/outlined variants already carry as a real border
-   fixes it without touching the shadow. */
-[data-theme='dark'] .card.shadow-lg {
-  border: 1px solid var(--border-default);
 }
 
 /* Karten heben sich im Dunkelmodus ueber ihre Flaeche ab, siehe den
@@ -301,14 +295,13 @@
     --card-bg: var(--bg-secondary);
     --card-border: var(--border-default);
 
-    /* Fills, dark scheme: light end of the ramp, near-black content on top.
-       The ladder runs the other way, so pressing still moves away from the text. */
+    /* Flat fill, same rule as the [data-theme='dark'] block above. */
     --gradient-primary-start: var(--color-accent-500);
-    --gradient-primary-end: var(--color-accent-600);
-    --gradient-primary-hover-start: var(--color-accent-400);
-    --gradient-primary-hover-end: var(--color-accent-500);
-    --gradient-primary-active-start: var(--color-accent-300);
-    --gradient-primary-active-end: var(--color-accent-400);
+    --gradient-primary-end: var(--color-accent-500);
+    --gradient-primary-hover-start: var(--color-accent-600);
+    --gradient-primary-hover-end: var(--color-accent-600);
+    --gradient-primary-active-start: var(--color-accent-600);
+    --gradient-primary-active-end: var(--color-accent-600);
 
     /* See the [data-theme='dark'] block above. */
 
@@ -330,15 +323,14 @@
 
     /* See the [data-theme='dark'] block above for the measurement and the
        reasoning behind the ink and opacity change. */
-    --shadow-button: 0px 1px 2px 0px rgba(4, 6, 20, 0.45), 0px 1px 3px 0px rgba(4, 6, 20, 0.3);
+    /* Flat-at-Rest Rule: no drop shadow on any surface at rest. */
+    --shadow-button: none;
     --shadow-button-hover:
       0px 2px 4px -1px rgba(4, 6, 20, 0.5), 0px 4px 6px -2px rgba(4, 6, 20, 0.35);
-    --shadow-input: 0px 1px 2px 0px rgba(4, 6, 20, 0.4), 0px 1px 1px 0px rgba(4, 6, 20, 0.3);
+    --shadow-input: none;
     --shadow-input-hover:
       0px 1px 3px 0px rgba(4, 6, 20, 0.45), 0px 1px 2px -1px rgba(4, 6, 20, 0.35);
-    --shadow-card:
-      0px 1px 2px 0px rgba(4, 6, 20, 0.5), 0px 4px 8px 0px rgba(4, 6, 20, 0.35),
-      0px 12px 24px -4px rgba(4, 6, 20, 0.3);
+    --shadow-card: none;
     --shadow-card-hover:
       0px 2px 4px 0px rgba(4, 6, 20, 0.55), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
       0px 20px 40px -8px rgba(4, 6, 20, 0.3);
@@ -350,10 +342,6 @@
       0px 20px 40px -8px rgba(4, 6, 20, 0.3);
 
     color-scheme: dark;
-  }
-
-  :root:not([data-theme='light']) .card.shadow-lg {
-    border: 1px solid var(--border-default);
   }
 
   /* Siehe den [data-theme='dark'] Block oben. */
@@ -1030,11 +1018,44 @@ html {
     --header-height: 80px;
   }
 
+  /* Page-Frame Rule (rafaelalex.de design system, section 2): the page
+     background carries a noise-textured SVG plus two diagonal radial
+     gradients in Signal Orange, a property of the body, not a layout
+     choice. Cells sit on top transparently. */
   body {
     color: var(--text-primary);
-    background-color: var(--bg-primary);
+    background:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")
+        repeat,
+      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.04) 0%, transparent 60%) fixed,
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.03) 0%, transparent 50%)
+        fixed,
+      var(--bg-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  :root[data-theme='light'] body {
+    background:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")
+        repeat,
+      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.03) 0%, transparent 60%) fixed,
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.02) 0%, transparent 50%)
+        fixed,
+      var(--bg-primary);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme='dark']) body {
+      background:
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")
+          repeat,
+        radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.03) 0%, transparent 60%)
+          fixed,
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.02) 0%, transparent 50%)
+          fixed,
+        var(--bg-primary);
+    }
   }
 
   /* ============================================
@@ -1203,9 +1224,10 @@ html {
   /* Focus-visible styles - WCAG 2.1 SC 2.4.7 and 2.4.13: Visible focus indicator.
      --border-focus is accent-400 and measures 2.32:1 on the page; --ring-focus
      is the corrected token from the block at the top of this file (3.74:1) and
-     is what every component ring already uses. */
+     is what every component ring already uses. 3px/2px per the rafaelalex.de
+     focus-ring spec (section 4). */
   :focus-visible {
-    outline: 2px solid var(--ring-focus);
+    outline: 3px solid var(--ring-focus);
     outline-offset: 2px;
   }
 
@@ -1646,7 +1668,8 @@ html {
   }
 
   /* --- Submit Button --- */
-  /* Matches: button.blade.php primary variant, md size */
+  /* Matches: button.blade.php primary variant, md size (hairline pill at
+     rest, flat fill on hover/active, no shadow). */
   .wpcf7-form input[type='submit'] {
     display: inline-flex;
     align-items: center;
@@ -1654,50 +1677,49 @@ html {
     padding: var(--button-md-padding-y) var(--button-md-padding-x);
     min-height: var(--button-md-min-height);
     font-size: var(--typography-body-small-size);
-    font-weight: 600;
-    /* Mirrors button.blade.php primary: content on a fill uses --text-inverse,
-       which flips with the scheme exactly as the gradient now does. */
-    color: var(--text-inverse);
-    background: linear-gradient(
-      to bottom,
-      var(--gradient-primary-start),
-      var(--gradient-primary-end)
-    );
-    border: 1px solid var(--border-default);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--color-content-brand);
+    background-color: transparent;
+    border: 1px solid var(--color-line-brand);
     border-radius: var(--button-md-radius);
-    box-shadow: var(--shadow-button);
     cursor: pointer;
     transition:
-      color var(--motion-enter-duration) var(--motion-enter-ease),
-      background var(--motion-enter-duration) var(--motion-enter-ease),
-      border-color var(--motion-enter-duration) var(--motion-enter-ease),
-      box-shadow var(--motion-enter-duration) var(--motion-enter-ease),
-      transform var(--motion-enter-duration) var(--motion-enter-ease);
+      color 200ms ease-out,
+      background-color 200ms ease-out,
+      border-color 200ms ease-out,
+      transform 200ms ease-out;
     appearance: none;
   }
 
   .wpcf7-form input[type='submit']:hover {
-    background: linear-gradient(
-      to bottom,
-      var(--gradient-primary-hover-start),
-      var(--gradient-primary-hover-end)
-    );
-    box-shadow: var(--shadow-button-hover);
+    background-color: var(--bg-brand);
+    color: var(--text-on-accent);
+    border-color: transparent;
+  }
+
+  :root[data-theme='light'] .wpcf7-form input[type='submit']:hover {
+    background-color: var(--bg-brand-hover);
+    color: var(--text-on-accent);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme='dark']) .wpcf7-form input[type='submit']:hover {
+      background-color: var(--bg-brand-hover);
+      color: var(--text-on-accent);
+    }
   }
 
   .wpcf7-form input[type='submit']:active {
-    background: linear-gradient(
-      to bottom,
-      var(--gradient-primary-active-start),
-      var(--gradient-primary-active-end)
-    );
-    box-shadow: var(--shadow-inner);
-    transform: scale(0.98);
+    background-color: var(--bg-brand-active);
+    color: var(--text-on-accent);
+    border-color: transparent;
+    transform: scale(0.97);
   }
 
   .wpcf7-form input[type='submit']:focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-focus-ring);
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
   }
 
   /* --- Submitting State --- */
@@ -1761,79 +1783,61 @@ html {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-weight: 400;
+    letter-spacing: -0.02em;
     text-decoration: none;
     cursor: pointer;
     transition:
-      color var(--motion-enter-duration) var(--motion-enter-ease),
-      border-color var(--motion-enter-duration) var(--motion-enter-ease),
-      box-shadow var(--motion-enter-duration) var(--motion-enter-ease),
-      transform var(--motion-enter-duration) var(--motion-enter-ease);
+      background-color 200ms ease-out,
+      border-color 200ms ease-out,
+      color 200ms ease-out,
+      transform 200ms ease-out;
   }
 
-  /* button-primary uses an ::after cross-fade for the hover gradient so that only
-     opacity is animated (GPU-composited) instead of repainting background each frame. */
+  /* Hairline pill at rest (rafaelalex.de design system, section 5): transparent
+     fill, brand-colour border and text, no shadow. Fills solid on hover/focus,
+     no gradient layer. */
   .prose a.button-primary,
   .button-primary {
-    position: relative;
-    /* Own stacking context, so the hover layer can sit at z-index -1: above
-       this element's own background, below its text. */
-    isolation: isolate;
-    overflow: hidden;
-    background: linear-gradient(
-      to bottom,
-      var(--gradient-primary-start),
-      var(--gradient-primary-end)
-    );
-    color: var(--color-content-inverse);
-    border: 1px solid var(--color-line);
-    box-shadow: var(--shadow-button);
-  }
-
-  /* Hover gradient layer — fades in via opacity, no background repaint */
-  .prose a.button-primary::after,
-  .button-primary::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      var(--gradient-primary-hover-start),
-      var(--gradient-primary-hover-end)
-    );
-    opacity: 0;
-    transition: opacity var(--motion-enter-duration) var(--motion-enter-ease);
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  .prose a.button-primary:hover::after,
-  .button-primary:hover::after {
-    opacity: 1;
+    background-color: transparent;
+    color: var(--color-content-brand);
+    border: 1px solid var(--color-line-brand);
   }
 
   .prose a.button-primary:hover,
-  .button-primary:hover {
-    box-shadow: var(--shadow-button-hover);
-    color: var(--color-content-inverse);
+  .prose a.button-primary:focus-visible,
+  .button-primary:hover,
+  .button-primary:focus-visible {
+    background-color: var(--bg-brand);
+    color: var(--text-on-accent);
+    border-color: transparent;
     text-decoration: none;
+  }
+
+  :root[data-theme='light'] .prose a.button-primary:hover,
+  :root[data-theme='light'] .prose a.button-primary:focus-visible,
+  :root[data-theme='light'] .button-primary:hover,
+  :root[data-theme='light'] .button-primary:focus-visible {
+    background-color: var(--bg-brand-hover);
+    color: var(--text-on-accent);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme='dark']) .prose a.button-primary:hover,
+    :root:not([data-theme='dark']) .prose a.button-primary:focus-visible,
+    :root:not([data-theme='dark']) .button-primary:hover,
+    :root:not([data-theme='dark']) .button-primary:focus-visible {
+      background-color: var(--bg-brand-hover);
+      color: var(--text-on-accent);
+    }
   }
 
   .prose a.button-primary:active,
   .button-primary:active {
-    background: linear-gradient(
-      to bottom,
-      var(--gradient-primary-active-start),
-      var(--gradient-primary-active-end)
-    );
-    box-shadow: var(--shadow-inner);
-    transform: scale(0.98);
-  }
-
-  /* Hide hover layer when active so the active gradient shows through */
-  .prose a.button-primary:active::after,
-  .button-primary:active::after {
-    opacity: 0;
+    background-color: var(--bg-brand-active);
+    color: var(--text-on-accent);
+    border-color: transparent;
+    transform: scale(0.97);
   }
 
   .prose a.button-secondary,
@@ -2767,24 +2771,17 @@ html {
 
 /* Fuellung des primaeren Knopfes.
 
-   Flache Farbe statt Verlauf: nur background-color laesst sich animieren,
-   background-image nicht. Der Lichtschimmer bleibt als duenner Verlauf oben
-   liegen und aendert sich nie, so bleibt der Wechsel weich.
-
-   Die Farbstufen sind die alten Verlaufsanfaenge, das Aussehen bleibt also
-   gleich. --button-fill* ueberschreibt sie dort, wo die Tokenkette den
-   Textkontrast reissen wuerde. */
-.button--primary {
-  background-color: var(--button-fill, var(--gradient-primary-start));
-  background-image: linear-gradient(to bottom, var(--button-gloss), transparent 55%);
-}
-
+   Hairline pill statt Verlauf (rafaelalex.de Designsystem, Abschnitt 5): die
+   Flaeche bleibt in Ruhe transparent (siehe die Tailwind-Klassen in
+   button.blade.php), erst Hover/Fokus/Aktiv fuellen. --button-fill*
+   ueberschreibt die Stufe dort, wo die Tokenkette den Textkontrast reissen
+   wuerde. */
 .button--primary:hover {
-  background-color: var(--button-fill-hover, var(--gradient-primary-hover-start));
+  background-color: var(--button-fill-hover, var(--bg-brand));
 }
 
 .button--primary:active {
-  background-color: var(--button-fill-active, var(--gradient-primary-active-start));
+  background-color: var(--button-fill-active, var(--bg-brand-active));
 }
 
 .button::after {
@@ -2838,7 +2835,7 @@ html {
    aller Zustaende braucht aber alle vier nebeneinander. Diese Regeln greifen auf
    dieselben Tokens zu wie die Komponente, kopieren also keine Farbwerte. */
 .zeige-hover .button--primary {
-  background-color: var(--button-fill-hover, var(--gradient-primary-hover-start));
+  background-color: var(--button-fill-hover, var(--bg-brand));
   box-shadow: var(--shadow-button-hover);
 }
 
@@ -2880,13 +2877,5 @@ html {
 }
 
 .zeige-aktiv .button--primary {
-  background-color: var(--button-fill-active, var(--gradient-primary-active-start));
-}
-
-/* Glanz des primaeren Knopfes.
-
-   Heller Text auf der Marke: der Glanz muss abdunkeln, sonst
-   verliert die obere Kante Kontrast (gemessen 5.23 auf 3.90 mit hellem Glanz). */
-:root {
-  --button-gloss: rgb(0 0 0 / 0.1);
+  background-color: var(--button-fill-active, var(--bg-brand-active));
 }

@@ -34,10 +34,10 @@ const FLUID_SIZES = {
   lg: { min: 17, max: 18 },
   xl: { min: 18, max: 20 },
   '2xl': { min: 20, max: 24 },
-  '3xl': { min: 24, max: 30 },
-  '4xl': { min: 28, max: 36 },
-  '5xl': { min: 32, max: 48 },
-  '6xl': { min: 38, max: 60 },
+  '3xl': { min: 24, max: 32 },
+  '4xl': { min: 30, max: 44 },
+  '5xl': { min: 36, max: 56 },
+  '6xl': { min: 40, max: 72 },
 };
 
 const VIEWPORT_MIN = 320;
@@ -288,13 +288,13 @@ function generateCssImportant(tokens, prefix = '') {
  * always resolves to the same number, which is more confusing than a second shape.
  */
 const HEADING_LINE_HEIGHTS = {
-  display: { key: '6xl', mobile: 1.2, desktop: 1.12 },
-  h1: { key: '4xl', mobile: 1.25, desktop: 1.15 },
-  h2: { key: '3xl', mobile: 1.3, desktop: 1.2 },
-  h3: { key: '2xl', mobile: 1.35, desktop: 1.28 },
-  h4: { static: 1.38 },
-  h5: { static: 1.42 },
-  body: { static: 1.5 },
+  display: { key: '6xl', mobile: 1.15, desktop: 1.1 },
+  h1: { key: '4xl', mobile: 1.15, desktop: 1.1 },
+  h2: { key: '3xl', mobile: 1.25, desktop: 1.2 },
+  h3: { key: '2xl', mobile: 1.35, desktop: 1.3 },
+  h4: { static: 1.4 },
+  h5: { static: 1.4 },
+  body: { static: 1.6 },
 };
 
 function buildTypographyTokens() {
@@ -328,59 +328,59 @@ function buildTypographyTokens() {
      Standard typography styles using primitives
      ============================================ */
 
-  /* Display - 6xl / Bold (for hero headlines) */
+  /* Display - 6xl / Regular (for hero headlines) */
   --typography-display-size: var(--font-size-6xl);
-  --typography-display-weight: var(--font-weight-bold);
+  --typography-display-weight: var(--font-weight-regular);
   --typography-display-line-height: ${displayLh};
-  --typography-display-letter-spacing: -0.02em;
+  --typography-display-letter-spacing: -0.05em;
 
-  /* Heading 1 - 4xl / Bold */
+  /* Heading 1 - 4xl / Regular */
   --typography-h1-size: var(--font-size-4xl);
-  --typography-h1-weight: var(--font-weight-bold);
+  --typography-h1-weight: var(--font-weight-regular);
   --typography-h1-line-height: ${h1Lh};
-  --typography-h1-letter-spacing: -0.01em;
+  --typography-h1-letter-spacing: -0.045em;
 
-  /* Heading 2 - 3xl / Semibold */
+  /* Heading 2 - 3xl / Regular */
   --typography-h2-size: var(--font-size-3xl);
-  --typography-h2-weight: var(--font-weight-semibold);
+  --typography-h2-weight: var(--font-weight-regular);
   --typography-h2-line-height: ${h2Lh};
-  --typography-h2-letter-spacing: -0.01em;
+  --typography-h2-letter-spacing: -0.04em;
 
-  /* Heading 3 - 2xl / Semibold */
+  /* Heading 3 - 2xl / Regular */
   --typography-h3-size: var(--font-size-2xl);
-  --typography-h3-weight: var(--font-weight-semibold);
+  --typography-h3-weight: var(--font-weight-regular);
   --typography-h3-line-height: ${h3Lh};
-  --typography-h3-letter-spacing: 0;
+  --typography-h3-letter-spacing: -0.035em;
 
-  /* Heading 4 - xl / Semibold */
+  /* Heading 4 - xl / Regular */
   --typography-h4-size: var(--font-size-xl);
-  --typography-h4-weight: var(--font-weight-semibold);
+  --typography-h4-weight: var(--font-weight-regular);
   --typography-h4-line-height: ${h4Lh};
-  --typography-h4-letter-spacing: 0;
+  --typography-h4-letter-spacing: -0.03em;
 
-  /* Heading 5 - lg / Medium */
+  /* Heading 5 - lg / Regular */
   --typography-h5-size: var(--font-size-lg);
-  --typography-h5-weight: var(--font-weight-medium);
+  --typography-h5-weight: var(--font-weight-regular);
   --typography-h5-line-height: ${h5Lh};
-  --typography-h5-letter-spacing: 0;
+  --typography-h5-letter-spacing: -0.025em;
 
   /* Body Large - lg / Regular */
   --typography-body-large-size: var(--font-size-lg);
   --typography-body-large-weight: var(--font-weight-regular);
   --typography-body-large-line-height: 1.6;
-  --typography-body-large-letter-spacing: 0;
+  --typography-body-large-letter-spacing: -0.025em;
 
   /* Body - base / Regular */
   --typography-body-size: var(--font-size-base);
   --typography-body-weight: var(--font-weight-regular);
   --typography-body-line-height: ${bodyLh};
-  --typography-body-letter-spacing: 0;
+  --typography-body-letter-spacing: -0.025em;
 
   /* Body Small - sm / Regular */
   --typography-body-small-size: var(--font-size-sm);
   --typography-body-small-weight: var(--font-weight-regular);
   --typography-body-small-line-height: 1.5;
-  --typography-body-small-letter-spacing: 0;
+  --typography-body-small-letter-spacing: -0.015em;
 
   /* Caption - xs / Regular */
   --typography-caption-size: var(--font-size-xs);
@@ -388,11 +388,11 @@ function buildTypographyTokens() {
   --typography-caption-line-height: 1.4;
   --typography-caption-letter-spacing: 0;
 
-  /* Overline - xs / Semibold / Uppercase */
+  /* Overline - xs / Regular / Uppercase */
   --typography-overline-size: var(--font-size-xs);
-  --typography-overline-weight: var(--font-weight-semibold);
+  --typography-overline-weight: var(--font-weight-regular);
   --typography-overline-line-height: 1.4;
-  --typography-overline-letter-spacing: 0.1em;
+  --typography-overline-letter-spacing: 0.08em;
   --typography-overline-transform: uppercase;
 
   /* Code - sm / Regular */
@@ -414,35 +414,38 @@ const COMPONENT_TOKENS = `
      ============================================ */
 
   /* Shadows */
-  /* Shadow color: gray-900 (#171717 = 23,23,23) instead of pure black for warmer, less harsh shadows */
-  --shadow-button: 0px 1px 3px 0px rgba(23, 23, 23, 0.1), 0px 1px 2px 0px rgba(23, 23, 23, 0.05);
+  /* Flat-at-Rest Rule: no drop shadow on any surface at rest. Interaction-state
+     shadows (hover lift, overlays) stay, since they respond to user action. */
+  --shadow-button: none;
   --shadow-button-hover: 0px 4px 6px -1px rgba(23, 23, 23, 0.1), 0px 2px 4px -2px rgba(23, 23, 23, 0.1);
   --shadow-inner: inset 0px 2px 4px 0px rgba(23, 23, 23, 0.06);
   --shadow-focus-ring: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-accent-alpha-50);
   --shadow-focus-ring-ghost: 0px 0px 0px 2px var(--color-accent-alpha-50);
   --shadow-focus-ring-error: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-error-alpha-50, rgba(220, 38, 38, 0.5));
-  --shadow-input: 0px 1px 2px 0px rgba(23, 23, 23, 0.05);
+  --shadow-input: none;
   --shadow-input-hover: 0px 1px 3px 0px rgba(23, 23, 23, 0.1), 0px 1px 2px -1px rgba(23, 23, 23, 0.1);
-  --shadow-card: 0px 1px 2px 0px rgba(23, 23, 23, 0.05);
+  --shadow-card: none;
   --shadow-card-hover: 0px 10px 15px -3px rgba(23, 23, 23, 0.1), 0px 4px 6px -4px rgba(23, 23, 23, 0.1);
   --shadow-dropdown: 0px 10px 15px -3px rgba(23, 23, 23, 0.1), 0px 4px 6px -4px rgba(23, 23, 23, 0.1);
   --shadow-modal: 0px 25px 50px -12px rgba(23, 23, 23, 0.25);
 
   /* Button Sizes */
+  /* Pill CTAs: radius is full on every size. Heights follow the rafaelalex.de
+     scale (md = 44px, the thumbable minimum). */
   --button-sm-padding-x: var(--spacing-3);
   --button-sm-padding-y: 4px;
-  --button-sm-radius: var(--radius-sm);
-  --button-sm-min-height: var(--spacing-8);
+  --button-sm-radius: var(--radius-full);
+  --button-sm-min-height: 2.25rem;
   --button-sm-gap: var(--spacing-1-5);
   --button-md-padding-x: var(--spacing-5);
   --button-md-padding-y: var(--spacing-2-5);
-  --button-md-radius: var(--radius-md);
-  --button-md-min-height: var(--spacing-10);
+  --button-md-radius: var(--radius-full);
+  --button-md-min-height: 2.75rem;
   --button-md-gap: var(--spacing-2);
   --button-lg-padding-x: var(--spacing-6);
   --button-lg-padding-y: var(--spacing-3);
-  --button-lg-radius: var(--radius-lg);
-  --button-lg-min-height: var(--spacing-12);
+  --button-lg-radius: var(--radius-full);
+  --button-lg-min-height: 3.25rem;
   --button-lg-gap: var(--spacing-2-5);
 
   /* Input Sizes */
@@ -463,7 +466,7 @@ const COMPONENT_TOKENS = `
   --badge-sm-gap: var(--spacing-1);
   --badge-md-padding-x: var(--spacing-2-5);
   --badge-md-padding-y: var(--spacing-1);
-  --badge-md-radius: var(--radius-default);
+  --badge-md-radius: var(--radius-md);
   --badge-md-gap: var(--spacing-1-5);
   --badge-lg-padding-x: var(--spacing-3);
   --badge-lg-padding-y: var(--spacing-1-5);

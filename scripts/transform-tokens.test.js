@@ -188,7 +188,8 @@ describe('fluidLineHeight', () => {
 
   it('keeps the ratio between the two endpoints across the range', () => {
     const expr = fluidLineHeight('4xl', 1.4, 1.2);
-    const sizeExpr = fluidClamp(28, 36);
+    // 4xl min/max per FLUID_SIZES (updated with the rafaelalex.de type scale).
+    const sizeExpr = fluidClamp(30, 44);
     for (const vw of [320, 640, 960, 1280, 1600, 1920]) {
       const ratio = evaluate(expr, vw) / evaluate(sizeExpr, vw);
       expect(ratio, `ratio ${ratio} out of range at ${vw}px`).toBeGreaterThanOrEqual(1.2 - 0.001);
@@ -219,17 +220,23 @@ describe('fluidLineHeight', () => {
       const sizeExpr = fluidClamp(minPx, maxPx);
       for (const vw of [320, 768, 1280, 1920]) {
         const ratio = evaluate(lhExpr, vw) / evaluate(sizeExpr, vw);
+        // display/h1 desktop ratio sits exactly on the floor; tolerate float rounding.
         expect(ratio, `${key} at ${vw}px is ${ratio.toFixed(3)}`).toBeGreaterThanOrEqual(
-          MIN_HEADING_LINE_HEIGHT
+          MIN_HEADING_LINE_HEIGHT - 1e-9
         );
       }
     }
   });
 
-  it('keeps the ratio falling as the level rises, at both ends of the range', () => {
+  it('keeps the ratio non-decreasing as the level rises, at both ends of the range', () => {
     // Read straight from the single source of truth so a change to h4/h5/body in
     // transform-tokens.js is caught here instead of being checked against a copy
     // of itself.
+    //
+    // The rafaelalex.de scale intentionally ties display/h1 and h4/h5 to the same
+    // ratio (both pairs read as one visual step, not two), so this uses >= instead
+    // of the strict > a fully distinct curve would need. The overall curve still
+    // has to be non-decreasing, and body still has to be the loosest.
     const { static: h4 } = HEADING_LINE_HEIGHTS.h4;
     const { static: h5 } = HEADING_LINE_HEIGHTS.h5;
     const { static: body } = HEADING_LINE_HEIGHTS.body;
@@ -241,12 +248,13 @@ describe('fluidLineHeight', () => {
         const ratio =
           evaluate(fluidLineHeight(key, mobile, desktop), vw) /
           evaluate(fluidClamp(minPx, maxPx), vw);
-        expect(ratio, `${key} at ${vw}px breaks the descending curve`).toBeGreaterThan(previous);
+        // Ties (display/h1) can land a hair below `previous` due to float rounding.
+        expect(ratio, `${key} at ${vw}px breaks the curve`).toBeGreaterThanOrEqual(previous - 1e-9);
         previous = ratio;
       }
       // h4 and h5 are static and sit at the loose end of the curve.
-      expect(h4, `h4 at ${vw}px breaks the curve`).toBeGreaterThan(previous);
-      expect(h5).toBeGreaterThan(h4);
+      expect(h4, `h4 at ${vw}px breaks the curve`).toBeGreaterThanOrEqual(previous - 1e-9);
+      expect(h5).toBeGreaterThanOrEqual(h4);
       // Body stays clearly looser than every heading.
       expect(body).toBeGreaterThan(h5);
     }
