@@ -18,7 +18,7 @@
     <div class="max-w-3xl mx-auto">
         <x-alert :variant="$variant" :dismissible="$dismissible">
             @if($title)
-                <p class="font-bold mb-1">{{ $title }}</p>
+                <p class="font-normal mb-1">{{ $title }}</p>
             @endif
 
             @if($content)

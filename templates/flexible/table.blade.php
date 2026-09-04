@@ -40,7 +40,7 @@
                     <thead class="bg-surface-tertiary {{ $headClass }}">
                         <tr>
                             @foreach($headers as $header)
-                                <th scope="col" class="{{ $cellClass }} text-left font-semibold text-content bg-surface-tertiary {{ $bordered ? 'border border-line' : '' }}">
+                                <th scope="col" class="{{ $cellClass }} text-left font-normal text-content bg-surface-tertiary {{ $bordered ? 'border border-line' : '' }}">
                                     {{ $header['label'] ?? '' }}
                                 </th>
                             @endforeach

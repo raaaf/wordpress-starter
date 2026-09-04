@@ -65,7 +65,7 @@
                 x-bind:tabindex="mode === '{{ $value }}' ? '0' : '-1'"
                 x-on:click="apply('{{ $value }}')"
                 x-bind:class="mode === '{{ $value }}' ? 'bg-surface text-content shadow-[var(--shadow-button)]' : 'text-content-secondary hover:text-content'"
-                class="px-3 py-1 text-sm font-medium transition-colors rounded-full cursor-pointer focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
+                class="px-3 py-1 text-sm font-normal transition-colors rounded-full cursor-pointer focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
             >{{ $label }}</button>
         @endforeach
     </div>

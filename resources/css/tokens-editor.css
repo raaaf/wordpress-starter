@@ -12,7 +12,7 @@
  * than dark mode rules in app.css
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-09-04T21:36:29.129Z
+ * Generated: 2026-09-04T21:49:25.446Z
  */
 
 /* ============================================
@@ -132,9 +132,10 @@
 
   /* Font Weight */
   --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
+  --font-weight-medium: 400;
+  --font-weight-semibold: 400;
+  --font-weight-bold: 400;
+  --font-weight-light: 300;
 
   /* Font Family */
   --font-family-headline: "Colaborate";

@@ -58,14 +58,14 @@
                         @endif
                     @else
                         <div class="w-16 h-16 rounded-full bg-surface-tertiary flex items-center justify-center">
-                            <span class="text-2xl font-bold text-content-secondary">
+                            <span class="text-2xl font-normal text-content-secondary">
                                 {{ mb_substr($authorName, 0, 1) }}
                             </span>
                         </div>
                     @endif
 
                     <div>
-                        <cite class="text-lg font-semibold text-content not-italic">
+                        <cite class="text-lg font-normal text-content not-italic">
                             {{ $authorName }}
                         </cite>
                         @if($authorPosition)

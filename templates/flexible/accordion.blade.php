@@ -101,7 +101,7 @@
                             @keydown.end.prevent="focusItem(itemCount - 1)"
                             :aria-expanded="isOpen({{ $index }})"
                             aria-controls="accordion-content-{{ $accordionId }}-{{ $index }}"
-                            class="group flex items-center justify-between w-full py-4 px-3 mb-0 font-bold text-left cursor-pointer transition-colors rounded-[var(--radius-sm)] hover:text-content-brand focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
+                            class="group flex items-center justify-between w-full py-4 px-3 mb-0 font-normal text-left cursor-pointer transition-colors rounded-[var(--radius-sm)] hover:text-content-brand focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
                             :class="{ 'text-content-brand': isOpen({{ $index }}) }">
                         <span class="flex items-center gap-3">
                             @if(!empty($item['icon']))

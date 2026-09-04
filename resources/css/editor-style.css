@@ -227,7 +227,7 @@ body.mce-content-body td {
 
 body.mce-content-body th {
   background-color: var(--bg-secondary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 400;
 }
 
 body.mce-content-body img {
@@ -367,7 +367,7 @@ body.mce-content-body a.button-ghost {
 }
 
 body.mce-content-body a.button-primary {
-  background-color: transparent;
+  background-color: color-mix(in srgb, var(--bg-brand) 15%, transparent);
   color: var(--text-brand);
   border: 1px solid var(--border-brand);
 }

@@ -79,7 +79,7 @@
     $dotColor = $dotColors[$variant] ?? $dotColors['gray'];
 @endphp
 
-<span class="badge inline-flex w-fit items-center font-medium {{ $variantClass }} {{ $sizeClass }} {{ $class }}">
+<span class="badge inline-flex w-fit items-center font-normal {{ $variantClass }} {{ $sizeClass }} {{ $class }}">
     @if($dot)
         <span class="rounded-full {{ $dotSize }} {{ $dotColor }}" aria-hidden="true"></span>
     @endif

@@ -42,7 +42,7 @@
 
         @if($author || $role)
             <figcaption class="mt-6 text-content-secondary">
-                @if($author)<span class="font-bold text-content">{{ $author }}</span>@endif
+                @if($author)<span class="font-normal text-content">{{ $author }}</span>@endif
                 @if($author && $role) <span aria-hidden="true">&middot;</span> @endif
                 @if($role){{ $role }}@endif
             </figcaption>

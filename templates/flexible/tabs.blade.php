@@ -56,7 +56,7 @@
                         :tabindex="activeTab === {{ $index }} ? 0 : -1"
                         {{-- Radius nur oben: der Fokusring bleibt weich, die Unterstreichung des aktiven
                              Tabs bleibt flach. Ein umlaufender Radius rundete auch sie ab. --}}
-                        class="inline-flex items-center gap-2 px-1 py-3 font-medium border-b-2 -mb-px transition-colors cursor-pointer rounded-t-[var(--radius-sm)] focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
+                        class="inline-flex items-center gap-2 px-1 py-3 font-normal border-b-2 -mb-px transition-colors cursor-pointer rounded-t-[var(--radius-sm)] focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
                         role="tab"
                         aria-controls="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"
                     >

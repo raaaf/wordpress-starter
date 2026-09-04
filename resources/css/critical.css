@@ -62,7 +62,7 @@
     padding: 0.5rem 1rem;
     background: var(--bg-inverse, #1a1a1a);
     color: var(--text-inverse, #fff);
-    font-weight: 600;
+    font-weight: 400;
   }
 
   /* Header layout - prevent layout shift.

@@ -65,7 +65,7 @@
                             ]) !!}
                         @endif
                         <div>
-                            <div class="font-semibold text-content">{{ $testimonial['author'] ?? '' }}</div>
+                            <div class="font-normal text-content">{{ $testimonial['author'] ?? '' }}</div>
                             @if(!empty($testimonial['role']))
                                 <div class="text-body-small text-content-secondary">{{ $testimonial['role'] }}</div>
                             @endif

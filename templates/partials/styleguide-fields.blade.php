@@ -29,10 +29,10 @@
                 <caption class="sr-only">{{ sprintf(__('ACF-Felder von %s', 'wp-starter'), $layout) }}</caption>
                 <thead>
                     <tr class="border-b border-line">
-                        <th scope="col" class="py-1 pr-4 font-medium text-content-secondary">{{ __('Feld', 'wp-starter') }}</th>
-                        <th scope="col" class="py-1 pr-4 font-medium text-content-secondary">{{ __('Typ', 'wp-starter') }}</th>
-                        <th scope="col" class="py-1 pr-4 font-medium text-content-secondary">{{ __('Pflicht', 'wp-starter') }}</th>
-                        <th scope="col" class="py-1 pr-4 font-medium text-content-secondary">{{ __('Auswahl', 'wp-starter') }}</th>
+                        <th scope="col" class="py-1 pr-4 font-normal text-content-secondary">{{ __('Feld', 'wp-starter') }}</th>
+                        <th scope="col" class="py-1 pr-4 font-normal text-content-secondary">{{ __('Typ', 'wp-starter') }}</th>
+                        <th scope="col" class="py-1 pr-4 font-normal text-content-secondary">{{ __('Pflicht', 'wp-starter') }}</th>
+                        <th scope="col" class="py-1 pr-4 font-normal text-content-secondary">{{ __('Auswahl', 'wp-starter') }}</th>
                     </tr>
                 </thead>
                 <tbody>

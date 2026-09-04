@@ -38,7 +38,7 @@
                     <h3 class="text-h5 mb-4">{{ __('Kontaktdaten', 'wp-starter') }}</h3>
 
                     @if($companyName)
-                        <p class="mb-2 font-medium text-content">{{ $companyName }}</p>
+                        <p class="mb-2 font-normal text-content">{{ $companyName }}</p>
                     @endif
 
                     @if($address)

@@ -102,16 +102,16 @@
                 <caption class="sr-only">{{ __('Verfügbare Dokumente', 'wp-starter') }}</caption>
                 <thead>
                     <tr class="bg-surface-secondary border-b border-line">
-                        <th scope="col" class="px-4 py-3 text-left font-semibold text-content-secondary text-xs uppercase tracking-wide">
+                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase tracking-wide">
                             {{ __('Dateiname', 'wp-starter') }}
                         </th>
-                        <th scope="col" class="px-4 py-3 text-left font-semibold text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
+                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
                             {{ __('Typ', 'wp-starter') }}
                         </th>
-                        <th scope="col" class="px-4 py-3 text-left font-semibold text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
+                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
                             {{ __('Kategorie', 'wp-starter') }}
                         </th>
-                        <th scope="col" class="px-4 py-3 text-left font-semibold text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
+                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
                             {{ __('Datum', 'wp-starter') }}
                         </th>
                         <th scope="col" class="px-4 py-3 whitespace-nowrap"><span class="sr-only">{{ __('Aktionen', 'wp-starter') }}</span></th>
@@ -128,11 +128,11 @@
                                         :href="item.download_url"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        class="font-medium text-content hover:text-content-accent transition-colors"
+                                        class="font-normal text-content hover:text-content-accent transition-colors"
                                     ><span x-text="item.title"></span><span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
                                     <span
                                         x-show="item.is_updated"
-                                        class="badge inline-flex w-fit items-center font-medium text-xs px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] gap-[var(--badge-sm-gap)] rounded-full bg-transparent text-content border border-line"
+                                        class="badge inline-flex w-fit items-center font-normal text-xs px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] gap-[var(--badge-sm-gap)] rounded-full bg-transparent text-content border border-line"
                                     >{{ __('Neu', 'wp-starter') }}</span>
                                 </div>
                             </td>
@@ -141,7 +141,7 @@
                             <td class="px-4 py-3">
                                 <span
                                     x-show="item.ext"
-                                    class="badge inline-flex w-fit items-center font-medium px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] gap-[var(--badge-sm-gap)] text-xs rounded-md"
+                                    class="badge inline-flex w-fit items-center font-normal px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] gap-[var(--badge-sm-gap)] text-xs rounded-md"
                                     :class="badgeClass()"
                                     x-text="item.ext"
                                 ></span>
@@ -157,7 +157,7 @@
                                     :href="item.download_url"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    class="button inline-flex items-center justify-center font-semibold transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-none active:scale-[0.98] bg-transparent text-content border border-transparent hover:bg-surface-tertiary active:bg-surface-secondary active:border-line focus-visible:shadow-[var(--shadow-focus-ring-ghost)] px-[var(--button-sm-padding-x)] py-[var(--button-sm-padding-y)] text-xs min-h-[var(--button-sm-min-height)] gap-[var(--button-sm-gap)] rounded-[var(--button-sm-radius)]"
+                                    class="button inline-flex items-center justify-center font-normal transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-none active:scale-[0.98] bg-transparent text-content border border-transparent hover:bg-surface-tertiary active:bg-surface-secondary active:border-line focus-visible:shadow-[var(--shadow-focus-ring-ghost)] px-[var(--button-sm-padding-x)] py-[var(--button-sm-padding-y)] text-xs min-h-[var(--button-sm-min-height)] gap-[var(--button-sm-gap)] rounded-[var(--button-sm-radius)]"
                                 >{{ __('Herunterladen', 'wp-starter') }}<span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
                                 <span
                                     x-show="!item.available"
@@ -200,7 +200,7 @@
                             :class="n === currentPage
                                 ? 'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)] text-content-inverse border-line'
                                 : 'text-content-secondary hover:bg-surface-secondary border-line'"
-                            class="inline-flex items-center justify-center min-h-11! min-w-11! rounded-md border text-sm font-medium transition-colors"
+                            class="inline-flex items-center justify-center min-h-11! min-w-11! rounded-md border text-sm font-normal transition-colors"
                             :aria-label="`{{ __('Seite', 'wp-starter') }} ${n}`"
                             :aria-current="n === currentPage ? 'page' : false"
                             x-text="n"

@@ -81,7 +81,7 @@
     <div class="border-b-2 border-l-4 bg-surface-secondary border-line border-l-line-brand">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <p class="flex flex-wrap items-baseline gap-2 m-0 text-body-small text-content-secondary">
-                <span class="font-medium text-content">{{ $modul['label'] }}</span>
+                <span class="font-normal text-content">{{ $modul['label'] }}</span>
                 <span class="text-code">{{ $layout }}</span>
                 @if($anzahl > 1 && $alleVarianten)
                     <span>{{ sprintf(_n('%d Variante', '%d Varianten', $anzahl, 'wp-starter'), $anzahl) }}</span>
@@ -127,7 +127,7 @@
                             x-bind:class="aktiv === {{ $index }}
                                 ? 'bg-surface text-content border-line shadow-[var(--shadow-button)]'
                                 : 'border-transparent text-content-secondary hover:text-content'"
-                            class="px-3 py-1 text-sm font-medium border rounded-full cursor-pointer transition-colors focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
+                            class="px-3 py-1 text-sm font-normal border rounded-full cursor-pointer transition-colors focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
                         >{{ $varianten[$index] ?? '' }}</button>
                     @endforeach
                 </div>

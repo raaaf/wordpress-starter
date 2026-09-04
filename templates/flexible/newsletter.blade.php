@@ -68,7 +68,7 @@
 
                     <button
                         type="submit"
-                        class="px-6 py-3 rounded-[var(--radius-md)] bg-surface-brand text-content-on-brand font-bold cursor-pointer transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
+                        class="px-6 py-3 rounded-[var(--radius-md)] bg-surface-brand text-content-on-brand font-normal cursor-pointer transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
                     >
                         {{ $buttonLabel }}
                     </button>

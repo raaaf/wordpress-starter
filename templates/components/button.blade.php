@@ -48,7 +48,7 @@
         'primary' => implode(' ', [
             'text-content-brand',
             'border border-line-brand',
-            'bg-transparent',
+            'bg-[var(--bg-brand-tint)]',
             'hover:bg-surface-brand',
             'hover:text-content-on-accent',
             'hover:border-transparent',

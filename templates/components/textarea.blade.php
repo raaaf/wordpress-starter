@@ -77,7 +77,7 @@
 <div class="w-full">
     {{-- Label --}}
     @if($label)
-        <label for="{{ $textareaId }}" class="block text-sm font-medium text-content mb-1.5">
+        <label for="{{ $textareaId }}" class="block text-sm font-normal text-content mb-1.5">
             {{ $label }}
             @if($required)
                 <span class="text-content-error ml-0.5" aria-hidden="true">*</span>

@@ -77,7 +77,7 @@
                 @if($lbl || $text)
                     <div class="p-6 lg:p-8">
                         @if($lbl)
-                            <p class="text-sm font-bold uppercase tracking-wider text-content-secondary mb-2">{{ $lbl }}</p>
+                            <p class="text-sm font-normal uppercase tracking-wider text-content-secondary mb-2">{{ $lbl }}</p>
                         @endif
                         @if($text)
                             <x-prose>@kses($text)</x-prose>
