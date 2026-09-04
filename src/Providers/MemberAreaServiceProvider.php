@@ -48,8 +48,13 @@ class MemberAreaServiceProvider extends ServiceProvider
             );
         });
 
-        // Block backend access for this role — frontend only
+        // Block backend access for this role — frontend only.
+        // Skip during AJAX requests (admin-ajax.php also fires admin_init): member-area
+        // AJAX actions (login, download, downloads_query, logout) must not be 403'd here.
         add_action('admin_init', static function (): void {
+            if (wp_doing_ajax()) {
+                return;
+            }
             $user = wp_get_current_user();
             if (in_array('member_area_access', (array) $user->roles, true)) {
                 wp_die(
@@ -213,16 +218,23 @@ class MemberAreaServiceProvider extends ServiceProvider
             $sftpSource = get_post_meta($postId, 'download_sftp_source', true);
 
             // Only trigger for parent SFTP entries (no download_sftp_source = parent)
-            if ($sourceType === 'sftp' && empty($sftpSource)) {
-                wp_schedule_single_event(time() + 5, 'member_area_sync_folders');
+            // Args ($postId) distinguish this debounce event from the daily cron above,
+            // which shares the same hook name but is scheduled without args.
+            if ($sourceType === 'sftp' && empty($sftpSource) && !wp_next_scheduled('member_area_sync_folders', [$postId])) {
+                wp_schedule_single_event(time() + 5, 'member_area_sync_folders', [$postId]);
             }
         });
     }
 
     private function registerPasswordEncryption(): void
     {
-        // One-time migration: encrypt any existing plaintext passwords on first admin load
+        // One-time migration: encrypt any existing plaintext passwords on first admin load.
+        // Skip on AJAX (admin-ajax.php also fires admin_init, incl. unauthenticated requests)
+        // and require manage_options, so the meta_query batch loop never runs on member AJAX.
         add_action('admin_init', static function (): void {
+            if (wp_doing_ajax() || !current_user_can('manage_options')) {
+                return;
+            }
             if (get_option(ThemeContext::optionKey('sftp_passwords_encrypted')) === '1') {
                 return;
             }
@@ -253,7 +265,10 @@ class MemberAreaServiceProvider extends ServiceProvider
                         update_post_meta($postId, 'download_sftp_password', Crypto::encrypt($pw));
                     } catch (RuntimeException $e) {
                         // AUTH_KEY not configured — skip, but make the condition visible
-                        error_log(ThemeContext::logPrefix() . ': SFTP password migration skipped for post ' . $postId . ' — ' . $e->getMessage()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                        LogServiceProvider::warning('SFTP password migration skipped', [
+                            'post_id' => $postId,
+                            'error' => $e->getMessage(),
+                        ]);
                     }
                 }
 
@@ -282,7 +297,7 @@ class MemberAreaServiceProvider extends ServiceProvider
                 return Crypto::encrypt($value);
             } catch (RuntimeException $e) {
                 // AUTH_KEY not configured — never store the plaintext password
-                error_log(ThemeContext::logPrefix() . ': SFTP password was not saved — ' . $e->getMessage()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                LogServiceProvider::error('SFTP password was not saved', ['error' => $e->getMessage()]);
 
                 add_action('admin_notices', static function (): void {
                     echo '<div class="notice notice-error is-dismissible"><p>'

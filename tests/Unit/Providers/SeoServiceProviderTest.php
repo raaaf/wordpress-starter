@@ -94,6 +94,23 @@ final class SeoServiceProviderTest extends TestCase
         $this->assertSame('', $out);
     }
 
+    public function testEmitFaqSchemaEscapesScriptTagsInAnswer(): void
+    {
+        ob_start();
+        SeoServiceProvider::emitFaqSchema([
+            ['question' => 'Is this safe?', 'answer' => '</script><script>alert(1)</script>'],
+        ]);
+        $out = (string) ob_get_clean();
+
+        $ldJsonStart = strpos($out, '<script type="application/ld+json"');
+        $this->assertNotFalse($ldJsonStart, 'ld+json script block not found');
+        $ldJsonEnd = strpos($out, '</script>', $ldJsonStart);
+        $ldJsonBlock = substr($out, $ldJsonStart, $ldJsonEnd - $ldJsonStart);
+
+        $this->assertStringNotContainsString('</script><script>', $ldJsonBlock);
+        $this->assertStringContainsString('\u003C/script\u003E', $out);
+    }
+
     public function testEmitPersonSchemaIncludesOptionalFields(): void
     {
         ob_start();
@@ -108,7 +125,7 @@ final class SeoServiceProviderTest extends TestCase
 
         $this->assertStringContainsString('"@type":"Person"', $out);
         $this->assertStringContainsString('Rafael Alex', $out);
-        $this->assertStringContainsString('Designer & Developer', $out);
+        $this->assertStringContainsString('Designer \u0026 Developer', $out);
         $this->assertStringContainsString('linkedin.com', $out);
         $this->assertStringContainsString('"worksFor"', $out);
     }
@@ -128,5 +145,4 @@ final class SeoServiceProviderTest extends TestCase
 
         $this->assertSame('»', apply_filters('wpseo_breadcrumb_separator', ' > '));
     }
-
 }

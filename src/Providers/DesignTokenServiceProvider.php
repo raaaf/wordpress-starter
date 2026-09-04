@@ -21,6 +21,8 @@ use WordpressStarter\ThemeContext;
  */
 class DesignTokenServiceProvider extends ServiceProvider
 {
+    use AdminActionGuard;
+
     private const TOKENS_DIR = 'config/design-tokens';
     private const BACKUP_DIR = 'config/design-tokens/backups';
 
@@ -257,21 +259,16 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     private function handleDownloadTokens(): void
     {
-        if (!isset($_GET[self::paramDownloadToken()])) {
+        if (!self::verifyAdminAction(
+            self::paramDownloadToken(),
+            self::nonceDownload(),
+            'manage_options',
+            __('Keine Berechtigung.', 'wp-starter'),
+        )) {
             return;
         }
 
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-
-        if (!wp_verify_nonce($nonce, self::nonceDownload())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
-        }
-
-        $type = isset($_GET['type']) ? sanitize_file_name(wp_unslash($_GET['type'])) : 'primitives';
+        $type = isset($_GET['type']) ? sanitize_file_name(wp_unslash($_GET['type'])) : 'primitives'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified via verifyAdminAction()
 
         if (!in_array($type, self::TOKEN_TYPES, true)) {
             wp_die(esc_html__('Ungültiger Token-Typ.', 'wp-starter'));
@@ -537,18 +534,13 @@ class DesignTokenServiceProvider extends ServiceProvider
      */
     private function handleRegenerateTokens(): void
     {
-        if (!isset($_GET[self::paramRegenerateTokens()])) {
+        if (!self::verifyAdminAction(
+            self::paramRegenerateTokens(),
+            self::nonceRegenerate(),
+            'manage_options',
+            __('Keine Berechtigung.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-
-        if (!wp_verify_nonce($nonce, self::nonceRegenerate())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
         }
 
         // Rate limiting

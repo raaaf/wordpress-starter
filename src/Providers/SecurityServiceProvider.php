@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WordpressStarter\Providers;
 
 use WordpressStarter\Security;
+use WordpressStarter\ThemeContext;
 
 class SecurityServiceProvider extends ServiceProvider
 {
@@ -29,7 +30,8 @@ class SecurityServiceProvider extends ServiceProvider
             if (is_admin() || wp_doing_ajax()) {
                 return;
             }
-            $forwardedProto = isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+            $trustProxyHeaders = apply_filters(ThemeContext::prefix() . '_trust_proxy_headers', false);
+            $forwardedProto = ( $trustProxyHeaders && isset($_SERVER['HTTP_X_FORWARDED_PROTO']) )
                 ? strtolower(sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_PROTO'])))
                 : '';
             $isHttps = is_ssl() || $forwardedProto === 'https';

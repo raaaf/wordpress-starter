@@ -17,6 +17,8 @@ use WordpressStarter\ThemeContext;
  */
 class WelcomeServiceProvider extends ServiceProvider
 {
+    use AdminActionGuard;
+
     /**
      * Post meta flag marking an attachment as one this importer created.
      *
@@ -108,41 +110,6 @@ class WelcomeServiceProvider extends ServiceProvider
     private static function nonceMigrateStyleguide(): string
     {
         return ThemeContext::kebabPrefix() . '-migrate-styleguide';
-    }
-
-    private static function paramMigrateStyleguide(): string
-    {
-        return ThemeContext::kebabPrefix() . '-migrate-styleguide';
-    }
-
-    private static function paramCreateStyleguide(): string
-    {
-        return ThemeContext::kebabPrefix() . '-create-styleguide';
-    }
-
-    private static function paramDismissWelcome(): string
-    {
-        return ThemeContext::kebabPrefix() . '-dismiss-welcome';
-    }
-
-    private static function paramImportOptions(): string
-    {
-        return ThemeContext::kebabPrefix() . '-import-options';
-    }
-
-    private static function paramRegenerateStyleguide(): string
-    {
-        return ThemeContext::kebabPrefix() . '-regenerate-styleguide';
-    }
-
-    private static function paramRestoreStyleguide(): string
-    {
-        return ThemeContext::kebabPrefix() . '-restore-styleguide';
-    }
-
-    private static function paramDeleteStyleguide(): string
-    {
-        return ThemeContext::kebabPrefix() . '-delete-styleguide';
     }
 
     /** @var array<string, int> Imported placeholder image IDs */
@@ -302,12 +269,12 @@ class WelcomeServiceProvider extends ServiceProvider
     private function renderNotice(): void
     {
         $createUrl = wp_nonce_url(
-            add_query_arg(self::paramCreateStyleguide(), '1'),
+            add_query_arg(self::nonceCreate(), '1'),
             self::nonceCreate(),
         );
 
         $dismissUrl = wp_nonce_url(
-            add_query_arg(self::paramDismissWelcome(), '1'),
+            add_query_arg(self::nonceDismiss(), '1'),
             self::nonceDismiss(),
         );
 
@@ -348,18 +315,13 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleImportOptions(): void
     {
-        if (!isset($_GET[self::paramImportOptions()])) {
+        if (!self::verifyAdminAction(
+            self::nonceImportOptions(),
+            self::nonceImportOptions(),
+            'manage_options',
+            __('Du hast keine Berechtigung für diese Aktion.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-
-        if (!wp_verify_nonce($nonce, self::nonceImportOptions())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Du hast keine Berechtigung für diese Aktion.', 'wp-starter'));
         }
 
         update_option(self::optAcfPrefillPending(), true);
@@ -413,7 +375,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         $importUrl = wp_nonce_url(
-            admin_url('admin.php?' . self::paramImportOptions() . '=1'),
+            admin_url('admin.php?' . self::nonceImportOptions() . '=1'),
             self::nonceImportOptions(),
         );
         ?>
@@ -436,18 +398,13 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleCreateStyleguide(): void
     {
-        if (!isset($_GET[self::paramCreateStyleguide()])) {
+        if (!self::verifyAdminAction(
+            self::nonceCreate(),
+            self::nonceCreate(),
+            'publish_pages',
+            __('Du hast keine Berechtigung, Seiten zu erstellen.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-
-        if (!wp_verify_nonce($nonce, self::nonceCreate())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('publish_pages')) {
-            wp_die(esc_html__('Du hast keine Berechtigung, Seiten zu erstellen.', 'wp-starter'));
         }
 
         $pageId = $this->createStyleguidePage();
@@ -471,19 +428,18 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleDismiss(): void
     {
-        if (!isset($_GET[self::paramDismissWelcome()])) {
-            return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-
-        if (!wp_verify_nonce($nonce, self::nonceDismiss())) {
+        if (!self::verifyAdminAction(
+            self::nonceDismiss(),
+            self::nonceDismiss(),
+            'manage_options',
+            __('Du hast keine Berechtigung für diese Aktion.', 'wp-starter'),
+        )) {
             return;
         }
 
         update_option(self::optDismissed(), true);
 
-        wp_safe_redirect(remove_query_arg([self::paramDismissWelcome(), '_wpnonce']));
+        wp_safe_redirect(remove_query_arg([self::nonceDismiss(), '_wpnonce']));
         exit;
     }
 
@@ -492,14 +448,13 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleRegenerateStyleguide(): void
     {
-        if (!isset($_GET[self::paramRegenerateStyleguide()])) {
+        if (!self::verifyAdminAction(
+            self::nonceRegenerateStyleguide(),
+            self::nonceRegenerateStyleguide(),
+            'delete_pages',
+            __('Du hast keine Berechtigung, Seiten zu löschen.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-
-        if (!wp_verify_nonce($nonce, self::nonceRegenerateStyleguide())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
         }
 
         if (!current_user_can('publish_pages')) {
@@ -534,18 +489,13 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleRestoreStyleguide(): void
     {
-        if (!isset($_GET[self::paramRestoreStyleguide()])) {
+        if (!self::verifyAdminAction(
+            self::nonceRestoreStyleguide(),
+            self::nonceRestoreStyleguide(),
+            'publish_pages',
+            __('Du hast keine Berechtigung, Seiten zu bearbeiten.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-
-        if (!wp_verify_nonce($nonce, self::nonceRestoreStyleguide())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('publish_pages')) {
-            wp_die(esc_html__('Du hast keine Berechtigung, Seiten zu bearbeiten.', 'wp-starter'));
         }
 
         $existingPageId = self::resolveStyleguidePageId();
@@ -568,18 +518,13 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleDeleteStyleguide(): void
     {
-        if (!isset($_GET[self::paramDeleteStyleguide()])) {
+        if (!self::verifyAdminAction(
+            self::nonceDeleteStyleguide(),
+            self::nonceDeleteStyleguide(),
+            'delete_pages',
+            __('Du hast keine Berechtigung, Seiten zu löschen.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-
-        if (!wp_verify_nonce($nonce, self::nonceDeleteStyleguide())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('delete_pages')) {
-            wp_die(esc_html__('Du hast keine Berechtigung, Seiten zu löschen.', 'wp-starter'));
         }
 
         $existingPageId = self::resolveStyleguidePageId();
@@ -592,11 +537,6 @@ class WelcomeServiceProvider extends ServiceProvider
         exit;
     }
 
-    /**
-     * Create the styleguide page with ACF Flexible Content layouts
-     *
-     * @return int Post ID on success, 0 on failure
-     */
     /**
      * Offer the switch to the component-rendered styleguide.
      *
@@ -630,7 +570,7 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         $url = wp_nonce_url(
-            add_query_arg(self::paramMigrateStyleguide(), '1', admin_url()),
+            add_query_arg(self::nonceMigrateStyleguide(), '1', admin_url()),
             self::nonceMigrateStyleguide()
         );
 
@@ -657,18 +597,13 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function handleMigrateStyleguide(): void
     {
-        if (!isset($_GET[self::paramMigrateStyleguide()])) {
+        if (!self::verifyAdminAction(
+            self::nonceMigrateStyleguide(),
+            self::nonceMigrateStyleguide(),
+            'publish_pages',
+            __('Du hast keine Berechtigung für diese Aktion.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-
-        if (!wp_verify_nonce($nonce, self::nonceMigrateStyleguide())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('publish_pages')) {
-            wp_die(esc_html__('Du hast keine Berechtigung für diese Aktion.', 'wp-starter'));
         }
 
         if (!function_exists('update_field')) {
@@ -697,6 +632,11 @@ class WelcomeServiceProvider extends ServiceProvider
         }
     }
 
+    /**
+     * Create the styleguide page with ACF Flexible Content layouts
+     *
+     * @return int Post ID on success, 0 on failure
+     */
     private function createStyleguidePage(): int
     {
         $this->importPlaceholderImages();

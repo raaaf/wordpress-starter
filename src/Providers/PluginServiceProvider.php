@@ -17,6 +17,8 @@ use WordpressStarter\ThemeContext;
  */
 class PluginServiceProvider extends ServiceProvider
 {
+    use AdminActionGuard;
+
     private static function setupPageSlug(): string
     {
         return ThemeContext::kebabPrefix() . '-setup';
@@ -174,17 +176,13 @@ class PluginServiceProvider extends ServiceProvider
             return;
         }
 
-        if (!isset($_GET[self::paramRerunContentSetup()])) {
+        if (!self::verifyAdminAction(
+            self::paramRerunContentSetup(),
+            self::paramRerunContentSetup(),
+            'manage_options',
+            __('Keine Berechtigung.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-        if (!wp_verify_nonce($nonce, self::paramRerunContentSetup())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
         }
 
         $this->loadSetupConfig();
@@ -204,17 +202,13 @@ class PluginServiceProvider extends ServiceProvider
             return;
         }
 
-        if (!isset($_GET[self::paramGenerateDemoPosts()])) {
+        if (!self::verifyAdminAction(
+            self::paramGenerateDemoPosts(),
+            self::paramGenerateDemoPosts(),
+            'manage_options',
+            __('Keine Berechtigung.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-        if (!wp_verify_nonce($nonce, self::paramGenerateDemoPosts())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
         }
 
         // German sample blog posts
@@ -298,17 +292,13 @@ class PluginServiceProvider extends ServiceProvider
             return;
         }
 
-        if (!isset($_GET[self::paramDeleteDemoPosts()])) {
+        if (!self::verifyAdminAction(
+            self::paramDeleteDemoPosts(),
+            self::paramDeleteDemoPosts(),
+            'manage_options',
+            __('Keine Berechtigung.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-        if (!wp_verify_nonce($nonce, self::paramDeleteDemoPosts())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
         }
 
         $posts = get_posts([
@@ -485,16 +475,16 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function maybeRedirectToSetup(): void
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Core WordPress bulk activation parameter
+        if (wp_doing_ajax() || isset($_GET['activate-multi']) || !current_user_can('manage_options')) {
+            return;
+        }
+
         if (!get_transient(ThemeContext::optionKey('activation_redirect'))) {
             return;
         }
 
         delete_transient(ThemeContext::optionKey('activation_redirect'));
-
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Core WordPress bulk activation parameter
-        if (wp_doing_ajax() || isset($_GET['activate-multi'])) {
-            return;
-        }
 
         wp_safe_redirect(admin_url('themes.php?page=' . self::setupPageSlug()));
         exit;
@@ -619,6 +609,10 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function displayPluginNotices(): void
     {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
         global $pagenow;
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading page parameter for display logic only
         $page = isset($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
@@ -703,17 +697,18 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function handleDismissal(): void
     {
-        if (!isset($_GET[self::paramDismissPlugins()])) {
+        if (!self::verifyAdminAction(
+            self::paramDismissPlugins(),
+            self::paramDismissPlugins(),
+            'manage_options',
+            __('Keine Berechtigung.', 'wp-starter'),
+        )) {
             return;
         }
 
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-
-        if (wp_verify_nonce($nonce, self::paramDismissPlugins())) {
-            update_option(ThemeContext::optionKey('dismissed_plugin_notice'), true);
-            wp_safe_redirect(remove_query_arg([self::paramDismissPlugins(), '_wpnonce']));
-            exit;
-        }
+        update_option(ThemeContext::optionKey('dismissed_plugin_notice'), true);
+        wp_safe_redirect(remove_query_arg([self::paramDismissPlugins(), '_wpnonce']));
+        exit;
     }
 
     /**

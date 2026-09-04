@@ -82,8 +82,9 @@ class PluginConfiguratorServiceProvider extends ServiceProvider
         foreach ($this->configurators as $configuratorClass) {
             $configuratorSlug = $configuratorClass::getPluginSlug();
 
-            // Match by slug or partial match (e.g., "wordpress-seo" matches "wordpress-seo-premium")
-            if ($configuratorSlug === $slug || strpos($slug, $configuratorSlug) === 0) {
+            // Match by exact slug or hyphen-bounded prefix (e.g., "wordpress-seo" matches
+            // "wordpress-seo-premium" but not "wordpress-seolite")
+            if ($configuratorSlug === $slug || str_starts_with($slug, $configuratorSlug . '-')) {
                 $this->configurePlugin($configuratorClass);
                 break;
             }
@@ -98,6 +99,12 @@ class PluginConfiguratorServiceProvider extends ServiceProvider
      */
     public function configureUnconfiguredPlugins(): void
     {
+        // admin_init also fires during unauthenticated admin-ajax.php requests,
+        // so gate this fallback to real wp-admin page loads by a capable user.
+        if (wp_doing_ajax() || !current_user_can('manage_options')) {
+            return;
+        }
+
         foreach ($this->configurators as $configuratorClass) {
             if (!$configuratorClass::isConfigured()) {
                 $this->configurePlugin($configuratorClass);
@@ -144,6 +151,10 @@ class PluginConfiguratorServiceProvider extends ServiceProvider
      */
     public function displayConfigurationNotice(): void
     {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
         $messages = [];
 
         foreach ($this->configurators as $configuratorClass) {

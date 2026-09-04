@@ -241,8 +241,6 @@ class SeoServiceProvider extends ServiceProvider
         $this->enrichSeoPluginOrganization();
 
         add_action('wp_head', function (): void {
-            $nonce = \WordpressStarter\Security::getNonce();
-
             // Yoast emits WebSite and Organization itself; two competing nodes
             // for the same entity are worse than one.
             $seoPluginOwnsSchema = defined('WPSEO_VERSION');
@@ -260,7 +258,7 @@ class SeoServiceProvider extends ServiceProvider
                         'query-input' => 'required name=search_term_string',
                     ],
                 ];
-                echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($websiteSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+                self::renderJsonLd($websiteSchema);
             }
 
             // Organization Schema (from batched theme options)
@@ -296,7 +294,7 @@ class SeoServiceProvider extends ServiceProvider
                     $orgSchema['address'] = $this->buildPostalAddress($address);
                 }
 
-                echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($orgSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+                self::renderJsonLd($orgSchema);
             }
 
             // Article Schema for single posts
@@ -327,7 +325,7 @@ class SeoServiceProvider extends ServiceProvider
                     $articleSchema['description'] = wp_strip_all_tags($excerpt);
                 }
 
-                echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($articleSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+                self::renderJsonLd($articleSchema);
             }
         });
     }
@@ -359,6 +357,23 @@ class SeoServiceProvider extends ServiceProvider
         $schema['addressLocality'] = $matches[2];
 
         return $schema;
+    }
+
+    /**
+     * Echo a JSON-LD <script> block with the CSP nonce applied.
+     *
+     * JSON_HEX_TAG | JSON_HEX_AMP escape "<", ">" and "&" so user-controlled
+     * content (titles, names, addresses) inside the schema cannot close the
+     * <script> tag early and inject markup.
+     *
+     * @param array<string, mixed> $schema
+     */
+    private static function renderJsonLd(array $schema): void
+    {
+        $nonce = \WordpressStarter\Security::getNonce();
+        echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
+            . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP)
+            . '</script>' . "\n";
     }
 
     /**
@@ -406,8 +421,7 @@ class SeoServiceProvider extends ServiceProvider
                 'itemListElement' => $listItems,
             ];
 
-            $nonce = \WordpressStarter\Security::getNonce();
-            echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+            self::renderJsonLd($json);
         }, 15);
     }
 
@@ -935,10 +949,7 @@ class SeoServiceProvider extends ServiceProvider
             'mainEntity' => $mainEntity,
         ];
 
-        $nonce = \WordpressStarter\Security::getNonce();
-        echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
-            . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-            . '</script>' . "\n";
+        self::renderJsonLd($schema);
     }
 
     /**
@@ -990,10 +1001,7 @@ class SeoServiceProvider extends ServiceProvider
             ];
         }
 
-        $nonce = \WordpressStarter\Security::getNonce();
-        echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
-            . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-            . '</script>' . "\n";
+        self::renderJsonLd($schema);
     }
 
     /**
