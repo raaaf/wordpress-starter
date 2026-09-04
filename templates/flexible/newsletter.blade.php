@@ -74,7 +74,7 @@
                     </button>
                 </form>
             @elseif(current_user_can('edit_posts'))
-                <div class="p-6 rounded-[var(--card-radius)] bg-surface-secondary">
+                <div class="p-6 rounded-[var(--card-radius)] bg-surface-secondary surface-sheen">
                     <p class="text-content-secondary">{{ __('Bitte trage die https-Adresse aus dem Einbettungscode deines Newsletter-Anbieters ein.', 'wp-starter') }}</p>
                 </div>
             @endif

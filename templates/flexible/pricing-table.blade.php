@@ -75,7 +75,7 @@
                     $priceYearly = $priceYearly !== '' ? $priceYearly : $price;
                     $periodYearly = $periodYearly !== '' ? $periodYearly : $period;
                 @endphp
-                <div class="relative flex flex-col w-full p-8 rounded-[var(--card-radius)] border {{ $itemClass }} {{ $isFeatured ? 'bg-surface-brand text-content-on-brand border-line-brand' : 'bg-surface-secondary border-line' }}">
+                <div class="relative flex flex-col w-full p-8 rounded-[var(--card-radius)] surface-sheen border {{ $itemClass }} {{ $isFeatured ? 'bg-surface-brand text-content-on-brand border-line-brand' : 'bg-surface-secondary border-line' }}">
                     @if($isFeatured)
                         <x-badge variant="accent" size="md" class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
                             {{ __('Empfohlen', 'wp-starter') }}
@@ -121,7 +121,7 @@
         </div>
         </div>
     @elseif(current_user_can('edit_posts'))
-        <div class="p-8 text-center rounded-[var(--card-radius)] bg-surface-secondary">
+        <div class="p-8 text-center rounded-[var(--card-radius)] bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge mindestens ein Preispaket hinzu.', 'wp-starter') }}</p>
         </div>
     @endif

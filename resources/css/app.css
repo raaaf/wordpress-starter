@@ -153,11 +153,22 @@
   /* Pure Paper cards on the Warm Paper page (light mode). */
   --card-bg: var(--bg-secondary);
   --card-border: var(--border-default);
+  --surface-sheen: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.015) 45%,
+    transparent 80%
+  );
 
   /* Primary button at rest: the opaque subtle brand surface (accent-50 in
      light, the warm near-black in dark), so the pill reads as filled and the
      brand text on top keeps its contrast on any background, images included. */
   --bg-brand-tint: var(--bg-brand-subtle);
+
+  /* Surface sheen (rafaelalex.de ph.css): a diagonal ink wash on cards and
+     panels, a few percent at most, so a flat surface still has a direction.
+     Light: darkens towards the bottom right. Dark: lightens the top left. */
+  --surface-sheen: linear-gradient(135deg, transparent 35%, rgba(17, 24, 39, 0.035) 100%);
 
   /* Form controls draw a hairline, not a grey frame (rafaelalex.de design
      system, section 5). The field is told apart from the page by its paper
@@ -202,6 +213,12 @@
 
   --card-bg: var(--bg-secondary);
   --card-border: var(--border-default);
+  --surface-sheen: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.015) 45%,
+    transparent 80%
+  );
 
   /* Flat fill, same rule as the light-mode block above (start === end). */
   --gradient-primary-start: var(--color-accent-500);
@@ -305,6 +322,12 @@
 
     --card-bg: var(--bg-secondary);
     --card-border: var(--border-default);
+    --surface-sheen: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.015) 45%,
+      transparent 80%
+    );
 
     /* Flat fill, same rule as the [data-theme='dark'] block above. */
     --gradient-primary-start: var(--color-accent-500);
@@ -1385,6 +1408,11 @@ html {
    ============================================ */
 
 @layer components {
+  .card,
+  .surface-sheen {
+    background-image: var(--surface-sheen);
+  }
+
   /* --- Form Layout --- */
   /* autop is disabled (ContactForm7Configurator), so elements are direct children.
      Spacing via adjacent sibling selector works for all patterns:
