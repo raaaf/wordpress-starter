@@ -1,3 +1,9 @@
+## [2.33.1](https://github.com/raaaf/wordpress-starter/compare/v2.33.0...v2.33.1) (2026-09-04)
+
+### Bug Fixes
+
+- **seo:** escape tags in breadcrumb JSON-LD to prevent script breakout ([0367d62](https://github.com/raaaf/wordpress-starter/commit/0367d62253b65f49f73dd3c0cb50fac7f5713ee9)), closes [raaaf/fim-vertrieb#10](https://github.com/raaaf/fim-vertrieb/issues/10)
+
 # [2.33.0](https://github.com/raaaf/wordpress-starter/compare/v2.32.0...v2.33.0) (2026-09-04)
 
 ### Features
