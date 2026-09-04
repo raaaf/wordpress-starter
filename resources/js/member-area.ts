@@ -157,7 +157,6 @@ interface DownloadTableState extends AlpineMagics {
   fetch(): Promise<void>;
   setPage(page: number): void;
   pageNumbers(): (number | string)[];
-  badgeClass(): string;
 }
 
 function createDownloadTableComponent(): DownloadTableState {
@@ -299,10 +298,6 @@ function createDownloadTableComponent(): DownloadTableState {
       pages.push(last);
 
       return pages;
-    },
-
-    badgeClass(): string {
-      return 'bg-transparent text-content border border-line';
     },
   };
 }

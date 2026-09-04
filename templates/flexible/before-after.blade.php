@@ -90,7 +90,7 @@
                 <span class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1 bg-surface opacity-80 pointer-events-none" aria-hidden="true"></span>
 
                 {{-- Handle circle --}}
-                <div class="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 bg-surface rounded-full shadow-lg top-1/2 left-1/2 flex items-center justify-center border-2 border-line pointer-events-none">
+                <div class="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 bg-surface rounded-full top-1/2 left-1/2 flex items-center justify-center border border-line-strong pointer-events-none">
                     <x-icon name="chevron-left" class="w-6 h-6 text-content-secondary" />
                     <x-icon name="chevron-right" class="w-6 h-6 text-content-secondary -ml-2" />
                 </div>

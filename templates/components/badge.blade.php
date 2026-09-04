@@ -56,9 +56,9 @@
         'gray' => 'bg-transparent text-content border border-line',
         'brand' => 'bg-surface-accent-subtle text-content-accent border border-line-accent',
         'accent' => 'bg-surface-accent-subtle text-content-accent border border-line-accent', // Alias
-        'success' => 'bg-surface-success text-content-success border border-line-success',
-        'warning' => 'bg-surface-warning text-content-warning border border-line-warning',
-        'error' => 'bg-surface-error text-content-error border border-line-error',
+        'success' => 'bg-transparent text-content-success border border-line-success',
+        'warning' => 'bg-transparent text-content-warning border border-line-warning',
+        'error' => 'bg-transparent text-content-error border border-line-error',
     ];
 
     // Dot colors - semantic tokens auto-switch between light/dark mode

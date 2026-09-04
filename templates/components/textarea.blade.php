@@ -64,13 +64,13 @@
     $actualRows = $rows ?? $sizeConfig['rows'];
 
     // Base textarea classes from Figma
-    $baseClasses = 'textarea w-full border bg-surface-secondary text-content placeholder:text-content-placeholder resize-y transition-[color,background,border-color,box-shadow] duration-200 focus:outline-none';
+    $baseClasses = 'textarea w-full border bg-surface-secondary text-content placeholder:text-content-placeholder resize-y transition-[color,background,border-color,box-shadow] duration-200';
 
     // State classes from Figma
     $stateClasses = match(true) {
         $disabled => 'border-line-disabled bg-surface-disabled text-content-disabled cursor-not-allowed resize-none',
-        $hasError => 'border-line-error shadow-[var(--shadow-input)] focus:border-line-error focus:shadow-[var(--shadow-focus-ring)]',
-        default => 'border-line-control shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]',
+        $hasError => 'border-line-error shadow-[var(--shadow-input)] focus:border-line-error focus:outline-3 focus:outline-offset-2 focus:outline-[var(--color-error)]',
+        default => 'border-line-control shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:outline-3 focus:outline-offset-2 focus:outline-[var(--ring-focus)]',
     };
 @endphp
 

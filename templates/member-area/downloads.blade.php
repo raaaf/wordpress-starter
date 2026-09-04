@@ -32,13 +32,16 @@
                 <select
                     x-model="category"
                     aria-label="{{ __('Kategorie filtern', 'wp-starter') }}"
-                    class="w-full border bg-surface text-content appearance-none cursor-pointer transition-all duration-200 focus:outline-none h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]"
+                    class="w-full border bg-surface-secondary text-content appearance-none cursor-pointer transition-[color,background,border-color] duration-200 h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line-control hover:border-line-strong focus:border-line-focus focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                 >
                     <option value="">{{ __('Alle Kategorien', 'wp-starter') }}</option>
                     <template x-for="cat in categories" :key="cat.slug">
                         <option :value="cat.slug" x-text="cat.label + ' (' + cat.count + ')'"></option>
                     </template>
                 </select>
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-icon-secondary">
+                    <x-icon name="chevron-down" class="w-4 h-4" />
+                </div>
             </div>
         </div>
 
@@ -48,13 +51,16 @@
                 <select
                     x-model="ext"
                     aria-label="{{ __('Dateityp filtern', 'wp-starter') }}"
-                    class="w-full border bg-surface text-content appearance-none cursor-pointer transition-all duration-200 focus:outline-none h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]"
+                    class="w-full border bg-surface-secondary text-content appearance-none cursor-pointer transition-[color,background,border-color] duration-200 h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line-control hover:border-line-strong focus:border-line-focus focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                 >
                     <option value="">{{ __('Alle Typen', 'wp-starter') }}</option>
                     <template x-for="e in extensions" :key="e.value">
                         <option :value="e.value" x-text="e.label + ' (' + e.count + ')'"></option>
                     </template>
                 </select>
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-icon-secondary">
+                    <x-icon name="chevron-down" class="w-4 h-4" />
+                </div>
             </div>
         </div>
 
@@ -130,21 +136,24 @@
                                         rel="noopener noreferrer"
                                         class="font-normal text-content hover:text-content-accent transition-colors"
                                     ><span x-text="item.title"></span><span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
-                                    <span
-                                        x-show="item.is_updated"
-                                        class="badge inline-flex w-fit items-center font-normal text-xs px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] gap-[var(--badge-sm-gap)] rounded-full bg-transparent text-content border border-line"
-                                    >{{ __('Neu', 'wp-starter') }}</span>
+                                    {{-- x-badge never echoes $attributes, so x-show has to sit on a
+                                         wrapping span; the badge itself stays a plain static x-badge. --}}
+                                    <span x-show="item.is_updated">
+                                        <x-badge variant="brand" size="sm">{{ __('Neu', 'wp-starter') }}</x-badge>
+                                    </span>
                                 </div>
                             </td>
 
-                            {{-- Extension badge: dynamic variant, use badge token classes directly --}}
+                            {{-- Extension badge: standardised to gray/outline via x-badge instead of
+                                 the former per-extension colour map; x-badge cannot forward
+                                 :class either, so the wrapping span carries x-show, x-text goes on
+                                 an inner span for the slot content. --}}
                             <td class="px-4 py-3">
-                                <span
-                                    x-show="item.ext"
-                                    class="badge inline-flex w-fit items-center font-normal px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] gap-[var(--badge-sm-gap)] text-xs rounded-md"
-                                    :class="badgeClass()"
-                                    x-text="item.ext"
-                                ></span>
+                                <span x-show="item.ext">
+                                    <x-badge variant="gray" style="outline" size="sm">
+                                        <span x-text="item.ext"></span>
+                                    </x-badge>
+                                </span>
                             </td>
 
                             <td class="px-4 py-3 text-content-secondary" x-text="item.category_label"></td>

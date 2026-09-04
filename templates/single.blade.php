@@ -21,9 +21,9 @@
                     </figure>
                 @endif
 
-                <div class="prose max-w-none">
+                <x-prose>
                     @php the_content(); @endphp
-                </div>
+                </x-prose>
             </article>
 
             {{-- Post Navigation --}}

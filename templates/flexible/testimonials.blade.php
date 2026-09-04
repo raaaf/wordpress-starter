@@ -52,7 +52,7 @@
 
                     {{-- Quote --}}
                     <blockquote class="text-body-large italic flex-grow mb-6 text-content-secondary">
-                        "{!! \WordpressStarter\Helpers\Text::lineBreaks($testimonial['quote'] ?? '') !!}"
+                        &bdquo;{!! \WordpressStarter\Helpers\Text::lineBreaks($testimonial['quote'] ?? '') !!}&ldquo;
                     </blockquote>
 
                     {{-- Author --}}

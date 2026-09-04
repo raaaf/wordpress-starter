@@ -62,8 +62,8 @@
                 {{ $disabled
                     ? 'border-line-disabled bg-surface-disabled'
                     : ($hasError
-                        ? 'border-line-error peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
-                        : 'border-line-control hover:border-line-strong peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
+                        ? 'border-line-error peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-error)]'
+                        : 'border-line-control hover:border-line-strong peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--ring-focus)]'
                     )
                 }}
                 peer-checked:bg-surface-accent peer-checked:border-surface-accent

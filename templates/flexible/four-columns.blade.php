@@ -19,10 +19,18 @@
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="four-columns">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="4" gap="md">
-        <x-prose>@kses($column_1)</x-prose>
-        <x-prose>@kses($column_2)</x-prose>
-        <x-prose>@kses($column_3)</x-prose>
-        <x-prose>@kses($column_4)</x-prose>
+        @if($column_1)
+            <x-prose>@kses($column_1)</x-prose>
+        @endif
+        @if($column_2)
+            <x-prose>@kses($column_2)</x-prose>
+        @endif
+        @if($column_3)
+            <x-prose>@kses($column_3)</x-prose>
+        @endif
+        @if($column_4)
+            <x-prose>@kses($column_4)</x-prose>
+        @endif
     </x-grid>
 </x-section>
 @endif

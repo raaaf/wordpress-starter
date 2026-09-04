@@ -1001,6 +1001,7 @@ html {
   --color-icon-success: var(--icon-success);
   --color-icon-warning: var(--icon-warning);
   --color-icon-error: var(--icon-error);
+  --color-icon-disabled: var(--icon-disabled);
 
   /* Status Colors - direct mapping */
   --color-success: var(--color-success);
@@ -1656,8 +1657,10 @@ html {
 
   .wpcf7-form .wpcf7-list-item input[type='checkbox'],
   .wpcf7-form .wpcf7-list-item input[type='radio'] {
-    width: 1.25rem;
-    height: 1.25rem;
+    /* WCAG 2.5.8 needs a 24px hit target; see the acceptance checkbox below
+       for the same fix. */
+    width: 1.5rem;
+    height: 1.5rem;
     accent-color: var(--bg-accent);
     cursor: pointer;
   }
@@ -2322,6 +2325,9 @@ html {
 
 /* Footer nav link styles */
 .footer-nav a {
+  display: inline-block;
+  /* WCAG 2.5.8 24px target-size floor; matches .desktop-nav > ul > li > a. */
+  padding: 0.5rem 0;
   color: var(--text-secondary);
   transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
@@ -2346,6 +2352,9 @@ html {
 
 /* Legal nav link styles */
 .legal-nav a {
+  display: inline-block;
+  /* WCAG 2.5.8 24px target-size floor; matches .desktop-nav > ul > li > a. */
+  padding: 0.5rem 0;
   color: var(--text-secondary);
   transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }

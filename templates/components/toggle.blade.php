@@ -62,14 +62,14 @@
                 {{ $disabled
                     ? 'bg-surface-disabled'
                     : ($hasError
-                        ? 'bg-surface-tertiary peer-checked:bg-surface-accent peer-focus-visible:shadow-[var(--shadow-focus-ring)] border-line-error'
-                        : 'bg-surface-tertiary border-line-control peer-checked:bg-surface-accent peer-checked:border-transparent peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
+                        ? 'bg-surface-tertiary peer-checked:bg-surface-accent peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-error)] border-line-error'
+                        : 'bg-surface-tertiary border-line-control peer-checked:bg-surface-accent peer-checked:border-transparent peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--ring-focus)]'
                     )
                 }}
             "></span>
 
             {{-- Knob --}}
-            <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface-secondary shadow-md transition-[translate,background-color] duration-200
+            <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface-secondary transition-[translate,background-color] duration-200
                 peer-checked:translate-x-5
                 {{ $disabled ? 'bg-surface-secondary' : '' }}
             "></span>

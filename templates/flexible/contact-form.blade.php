@@ -17,8 +17,12 @@
     $address = \WordpressStarter\Acf\Fields::option('address', '');
     $phone = \WordpressStarter\Acf\Fields::option('phone', '');
     $email = \WordpressStarter\Acf\Fields::option('email', '');
+
+    $hasContactInfo = $showContactInfo && ($companyName || $address || $phone || $email);
+    $hasForm = $formId && shortcode_exists('contact-form-7');
 @endphp
 
+@if($title || $content || $hasContactInfo || $hasForm || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="contact-form">
     <x-grid cols="2" gap="xl" class="items-stretch">
         {{-- Left: Title, Content, Contact Info --}}
@@ -33,7 +37,7 @@
                 </div>
             @endif
 
-            @if($showContactInfo && ($companyName || $address || $phone || $email))
+            @if($hasContactInfo)
                 <x-card variant="filled" padding="lg">
                     <h3 class="text-h5 mb-4">{{ __('Kontaktdaten', 'wp-starter') }}</h3>
 
@@ -68,9 +72,9 @@
              Statusmeldung bringt CF7 als eigene Region mit, siehe die Regel fuer
              .wpcf7-response-output in app.css. --}}
         <div class="p-8 rounded-lg bg-surface-secondary surface-sheen">
-            @if($formId && shortcode_exists('contact-form-7'))
+            @if($hasForm)
                 {!! do_shortcode('[contact-form-7 id="' . esc_attr($formId) . '"]') !!}
-            @else
+            @elseif(current_user_can('edit_posts'))
                 <p class="text-content-secondary">
                     @if(!shortcode_exists('contact-form-7'))
                         {{ __('Contact Form 7 Plugin ist nicht installiert.', 'wp-starter') }}
@@ -82,3 +86,4 @@
         </div>
     </x-grid>
 </x-section>
+@endif

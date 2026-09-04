@@ -58,7 +58,7 @@
             <x-card variant="outlined" padding="none" class="overflow-hidden">
                 @if($lbl)
                     <div class="p-6 lg:p-8 pb-0 lg:pb-0">
-                        <p class="text-sm font-normal uppercase tracking-wider text-content-secondary mb-4">{{ $lbl }}</p>
+                        <p class="text-overline text-content-secondary mb-4">{{ $lbl }}</p>
                     </div>
                 @endif
                 @if($imgId)

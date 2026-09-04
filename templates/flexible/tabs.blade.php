@@ -88,9 +88,10 @@
                         id="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"
                         role="tabpanel"
                         aria-labelledby="{{ esc_attr($uniqueId) }}-tab-{{ $index }}"
-                        class="prose max-w-2xl text-content"
                     >
-                        @kses($tab['content'] ?? '')
+                        <x-prose class="max-w-2xl text-content">
+                            @kses($tab['content'] ?? '')
+                        </x-prose>
                     </div>
                 @endforeach
             </div>

@@ -46,9 +46,9 @@
                                 @endif
 
                                 @if($content)
-                                    <div class="prose text-content-secondary">
+                                    <x-prose class="text-content-secondary">
                                         @kses($content)
-                                    </div>
+                                    </x-prose>
                                 @endif
 
                                 @if($imageId)
