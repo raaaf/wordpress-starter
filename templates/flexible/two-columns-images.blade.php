@@ -70,7 +70,7 @@
                          loading="lazy">
                 @endif
                 @if($text)
-                    <div class="p-6 lg:p-8">
+                    <div class="p-6 lg:p-8 {{ !empty($acc) ? 'pb-0 lg:pb-0' : '' }}">
                         <x-prose>@kses($text)</x-prose>
                     </div>
                 @endif

@@ -367,7 +367,7 @@ body.mce-content-body a.button-ghost {
 }
 
 body.mce-content-body a.button-primary {
-  background-color: color-mix(in srgb, var(--bg-brand) 15%, transparent);
+  background-color: var(--bg-brand-subtle);
   color: var(--text-brand);
   border: 1px solid var(--border-brand);
 }

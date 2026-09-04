@@ -42,16 +42,16 @@
       "$type": "color",
       "$value": {
         "colorSpace": "srgb",
-        "components": [0.8980392156862745, 0.8980392156862745, 0.8980392156862745],
+        "components": [0.9607843137254902, 0.9607843137254902, 0.9607843137254902],
         "alpha": 1,
-        "hex": "#E5E5E5"
+        "hex": "#F5F5F5"
       },
       "$extensions": {
         "com.figma.variableId": "VariableID:1:2020",
         "com.figma.scopes": ["ALL_SCOPES"],
         "com.figma.aliasData": {
           "targetVariableId": "VariableID:5322f4bd83635eb8d8c64a8572cc7789eae34974/-1:-1",
-          "targetVariableName": "color/gray/200",
+          "targetVariableName": "color/gray/100",
           "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
           "targetVariableSetName": "primitives"
         }

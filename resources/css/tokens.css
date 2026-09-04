@@ -5,7 +5,7 @@
  * Run: node scripts/transform-tokens.js
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-09-04T21:49:25.443Z
+ * Generated: 2026-09-04T21:52:11.220Z
  */
 
 /* ============================================
@@ -345,7 +345,7 @@
   /* Background */
   --bg-primary: var(--color-gray-100);
   --bg-secondary: var(--color-white);
-  --bg-tertiary: var(--color-gray-200);
+  --bg-tertiary: var(--color-gray-100);
   --bg-inverse: var(--color-black);
   --bg-brand: var(--color-accent-500);
   --bg-brand-subtle: var(--color-accent-50);

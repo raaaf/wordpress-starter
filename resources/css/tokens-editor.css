@@ -12,7 +12,7 @@
  * than dark mode rules in app.css
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-09-04T21:49:25.446Z
+ * Generated: 2026-09-04T21:52:11.222Z
  */
 
 /* ============================================
@@ -351,7 +351,7 @@
   /* Background */
   --bg-primary: var(--color-gray-100);
   --bg-secondary: var(--color-white);
-  --bg-tertiary: var(--color-gray-200);
+  --bg-tertiary: var(--color-gray-100);
   --bg-inverse: var(--color-black);
   --bg-brand: var(--color-accent-500);
   --bg-brand-subtle: var(--color-accent-50);
@@ -439,7 +439,7 @@
   /* Background - Light Mode (forced) */
     --bg-primary: var(--color-gray-100) !important;
     --bg-secondary: var(--color-white) !important;
-    --bg-tertiary: var(--color-gray-200) !important;
+    --bg-tertiary: var(--color-gray-100) !important;
     --bg-inverse: var(--color-black) !important;
     --bg-brand: var(--color-accent-500) !important;
     --bg-brand-subtle: var(--color-accent-50) !important;

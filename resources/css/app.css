@@ -154,9 +154,10 @@
   --card-bg: var(--bg-secondary);
   --card-border: var(--border-default);
 
-  /* Primary button at rest: brand colour at 15% over whatever surface it sits
-     on, so the pill reads as filled without losing the brand text on top. */
-  --bg-brand-tint: color-mix(in srgb, var(--bg-brand) 15%, transparent);
+  /* Primary button at rest: the opaque subtle brand surface (accent-50 in
+     light, the warm near-black in dark), so the pill reads as filled and the
+     brand text on top keeps its contrast on any background, images included. */
+  --bg-brand-tint: var(--bg-brand-subtle);
 
   /* Danger button hover: --bg-error-strong is already the darkest of the
      three-step error ramp, so there is no further token to step to. Mixed
