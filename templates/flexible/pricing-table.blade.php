@@ -77,7 +77,7 @@
                 @endphp
                 <div class="relative flex flex-col w-full p-8 rounded-[var(--card-radius)] surface-sheen border {{ $itemClass }} {{ $isFeatured ? 'bg-surface-brand text-content-on-brand border-line-brand' : 'bg-surface-secondary border-line' }}">
                     @if($isFeatured)
-                        <x-badge variant="accent" size="md" class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                        <x-badge variant="accent" size="md" class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-surface! text-content-brand! border border-line-brand">
                             {{ __('Empfohlen', 'wp-starter') }}
                         </x-badge>
                     @endif

@@ -83,11 +83,14 @@
             'hover:bg-[var(--bg-error-strong-hover)]',
         ]),
         'inverse' => implode(' ', [
+            // Sits on the brand surface, so the page surface is the fill and
+            // the brand colour the text. The unlayered .bg-surface rule in
+            // app.css would paint the text primary again, hence the important.
             'bg-surface',
-            'text-content-brand',
-            'border border-line',
-            'hover:bg-surface-secondary',
-            'active:bg-surface-tertiary',
+            'text-content-brand!',
+            'border border-line-brand',
+            'hover:bg-[var(--bg-brand-subtle)]',
+            'active:bg-[var(--bg-brand-subtle)]',
         ]),
     ];
 
