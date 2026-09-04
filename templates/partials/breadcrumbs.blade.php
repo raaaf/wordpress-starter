@@ -41,7 +41,7 @@
                         $nonce = $GLOBALS['csp_nonce'] ?? '';
                     @endphp
                     <script type="application/ld+json" @if($nonce) nonce="{{ $nonce }}" @endif>
-                        {!! wp_json_encode($breadcrumbSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+                        {!! wp_json_encode($breadcrumbSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HEX_AMP) !!}
                     </script>
                     <ol class="flex items-center gap-1 text-sm text-content-secondary">
                         <li>
