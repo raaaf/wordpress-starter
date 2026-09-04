@@ -80,7 +80,7 @@
                             ]) !!}
                         </div>
                     @else
-                        <div class="flex items-center justify-center mx-auto mb-6 rounded-[var(--card-radius)] aspect-[4/5] max-w-[260px] bg-surface-secondary">
+                        <div class="flex items-center justify-center mx-auto mb-6 rounded-[var(--card-radius)] aspect-[4/5] max-w-[260px] bg-surface-secondary surface-sheen">
                             <x-icon name="user" class="w-24 h-24 text-content-tertiary" />
                         </div>
                     @endif
@@ -134,7 +134,7 @@
             @endforeach
         </div>
     @elseif(current_user_can('edit_posts'))
-        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+        <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge Teammitglieder hinzu oder wähle eine Quelle mit Einträgen.', 'wp-starter') }}</p>
         </div>
     @endif

@@ -84,7 +84,7 @@
             aria-label="{{ __('Module', 'wp-starter') }}"
             x-data="styleguideSprungnavigation"
             x-on:click="const link = $event.target.closest('a'); if (!link) return; const d = $el.closest('details'); d.open = false; const ziel = document.getElementById(link.getAttribute('href').slice(1)); if (!ziel) return; setTimeout(() => { ziel.setAttribute('tabindex', '-1'); ziel.focus(); })"
-            class="p-5 mt-2 border rounded-[var(--card-radius)] border-line bg-surface shadow-[var(--shadow-card)]"
+            class="p-5 mt-2 border rounded-[var(--card-radius)] border-line bg-surface surface-sheen shadow-[var(--shadow-card)]"
         >
             <ul class="m-0 list-none columns-2 gap-x-8 sm:columns-3 lg:columns-4">
                 @foreach(array_column($sprungziele, 'label', 'anchor') as $anchor => $label)

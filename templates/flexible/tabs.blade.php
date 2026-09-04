@@ -96,7 +96,7 @@
             </div>
         </div>
     @elseif(current_user_can('edit_posts'))
-        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+        <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge mindestens einen Tab hinzu.', 'wp-starter') }}</p>
         </div>
     @endif

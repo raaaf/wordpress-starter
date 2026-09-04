@@ -58,7 +58,7 @@
             </p>
         @endif
     @elseif(current_user_can('edit_posts'))
-        <div class="p-8 text-center rounded-[var(--card-radius)] bg-surface-secondary">
+        <div class="p-8 text-center rounded-[var(--card-radius)] bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte trage eine https-Adresse ein. Der Einbettungscode des Anbieters enthält sie im src-Attribut.', 'wp-starter') }}</p>
         </div>
     @endif

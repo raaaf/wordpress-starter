@@ -49,7 +49,7 @@
             <div class="space-y-6">
                 @while (have_posts())
                     @php the_post(); @endphp
-                    <article class="p-6 bg-surface-secondary rounded-lg hover:shadow-md transition-shadow">
+                    <article class="p-6 bg-surface-secondary surface-sheen rounded-lg hover:shadow-md transition-shadow">
                         <div class="flex items-start gap-4">
                             @if (has_post_thumbnail())
                                 <a href="{{ get_permalink() }}" class="shrink-0">

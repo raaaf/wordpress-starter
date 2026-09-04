@@ -67,7 +67,7 @@
              Screenreader bei jeder Aenderung das ganze Formular vorlesen. Die
              Statusmeldung bringt CF7 als eigene Region mit, siehe die Regel fuer
              .wpcf7-response-output in app.css. --}}
-        <div class="p-8 rounded-lg bg-surface-secondary">
+        <div class="p-8 rounded-lg bg-surface-secondary surface-sheen">
             @if($formId && shortcode_exists('contact-form-7'))
                 {!! do_shortcode('[contact-form-7 id="' . esc_attr($formId) . '"]') !!}
             @else

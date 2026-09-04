@@ -169,6 +169,7 @@
      panels, a few percent at most, so a flat surface still has a direction.
      Light: darkens towards the bottom right. Dark: lightens the top left. */
   --surface-sheen: linear-gradient(135deg, transparent 35%, rgba(17, 24, 39, 0.035) 100%);
+  --page-sheen: linear-gradient(160deg, rgba(17, 24, 39, 0.035) 0%, transparent 50%);
 
   /* Form controls draw a hairline, not a grey frame (rafaelalex.de design
      system, section 5). The field is told apart from the page by its paper
@@ -1068,6 +1069,7 @@ html {
     background:
       url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")
         repeat,
+      var(--page-sheen) no-repeat 0 0 / 100% 100vh,
       radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.04) 0%, transparent 60%) fixed,
       radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.03) 0%, transparent 50%)
         fixed,
@@ -1080,6 +1082,7 @@ html {
     background:
       url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")
         repeat,
+      var(--page-sheen) no-repeat 0 0 / 100% 100vh,
       radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.03) 0%, transparent 60%) fixed,
       radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.02) 0%, transparent 50%)
         fixed,
@@ -1091,6 +1094,7 @@ html {
       background:
         url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")
           repeat,
+        var(--page-sheen) no-repeat 0 0 / 100% 100vh,
         radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.03) 0%, transparent 60%)
           fixed,
         radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.02) 0%, transparent 50%)
