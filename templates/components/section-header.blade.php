@@ -32,7 +32,7 @@
 @endphp
 
 @if($chip || $headline || $description)
-    <div class="section-header {{ $alignClass }} mb-12 {{ $class }}">
+    <div {{ $attributes->merge(['class' => "section-header {$alignClass} mb-12 {$class}"]) }}>
         @if($chip)
             <x-badge variant="brand" size="sm" class="mb-4">{{ $chip }}</x-badge>
         @endif

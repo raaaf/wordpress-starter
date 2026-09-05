@@ -35,9 +35,15 @@
                 continue;
             }
 
+            // section.blade.php slugifies a custom anchor via sanitize_title()
+            // (ComponentId::anchor()) before it lands as the <section> id, e.g.
+            // "Über uns" becomes "ueber-uns". Building the href from the raw
+            // field here without the same slugify step made the jump-link
+            // target diverge from the actual id as soon as the anchor field
+            // contained umlauts, spaces, or uppercase letters.
             $eigener = get_sub_field('section_anchor');
             $sprungziele[$layout] = [
-                'anchor' => $eigener ?: str_replace('_', '-', $layout) . '-' . $zaehler[$layout],
+                'anchor' => $eigener ? \WordpressStarter\Helpers\ComponentId::anchor($eigener) : str_replace('_', '-', $layout) . '-' . $zaehler[$layout],
                 'label' => $labels[$layout],
             ];
         }

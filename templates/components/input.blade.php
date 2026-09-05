@@ -46,9 +46,35 @@
 ])
 
 @php
-    $inputId = $id ?? $name;
+    $inputId = $id !== null
+        ? sanitize_html_class((string) $id, sanitize_html_class((string) $name))
+        : \WordpressStarter\Helpers\ComponentId::next(sanitize_html_class((string) $name));
     $hasError = $error || $errorMessage;
+
+    // Icon-only or label-less input without an accessible name: same guard
+    // as x-checkbox/x-radio (checkbox.blade.php:43, radio.blade.php:41).
+    // No dedicated $ariaLabel prop exists here, so it is read from the
+    // attribute bag (still reaches the input via the aria- prefix
+    // passthrough below).
+    if (defined('WP_DEBUG') && WP_DEBUG && !$label && !$attributes->has('aria-label')) {
+        trigger_error('x-input requires a "label" prop or an "aria-label" attribute for accessibility.', E_USER_WARNING);
+    }
+
+    // Shared allowlist for x-input/x-checkbox/x-radio: plain HTML/validation
+    // attributes must be named exactly, only x-/@/:/aria-/data- may pass through
+    // by prefix. A "form" prefix admitted formaction/formmethod too, which are
+    // not validation attributes.
+    $passthroughAttrs = \WordpressStarter\Helpers\FormAttributes::passthrough();
+    $passthroughPrefixes = \WordpressStarter\Helpers\FormAttributes::prefixes();
     $displayHint = $hasError && $errorMessage ? $errorMessage : $hint;
+
+    // aria-describedby is also rendered explicitly below (pointing at the
+    // hint/error <p>), so a caller-supplied aria-describedby (which would
+    // otherwise reach the input a second time via the aria- prefix
+    // passthrough) is merged into one value instead, hint id first.
+    $callerDescribedBy = $attributes->get('aria-describedby');
+    $describedByIds = array_filter([$displayHint ? $inputId . '-hint' : null, $callerDescribedBy]);
+    $describedBy = $describedByIds ? implode(' ', $describedByIds) : null;
 
     // Size classes
     // 'padding' puts the icon's right edge plus an 8px gap between the two
@@ -116,7 +142,7 @@
     @endif
 
     {{-- Input wrapper --}}
-    <div class="relative" @if($clearable) x-data="{ hasValue: {{ $value ? 'true' : 'false' }} }" @endif>
+    <div class="relative" @if($clearable) x-data="{ hasValue: {{ $value ? 'true' : 'false' }} }" x-init="hasValue = $refs.input.value.length > 0" @endif>
         {{-- Left icon --}}
         {{-- inset-y-0 + flex items-center, not top-1/2 -translate-y-1/2: the icon
              is an inline-block SVG (align-middle, see icon.blade.php), so its
@@ -138,12 +164,14 @@
             @if($required) required @endif
             @if($disabled) disabled @endif
             @if($hasError) aria-invalid="true" @endif
-            @if($displayHint) aria-describedby="{{ $inputId }}-hint" @endif
+            @if($describedBy) aria-describedby="{{ $describedBy }}" @endif
             @if($clearable)
                 x-ref="input"
                 x-on:input="hasValue = $event.target.value.length > 0"
+                x-on:change="hasValue = $event.target.value.length > 0"
             @endif
-            {{ $attributes->whereStartsWith(['x-', '@', ':', 'autocomplete', 'aria-', 'data-']) }}
+            {{ $attributes->only($passthroughAttrs) }}
+            {{ $attributes->whereStartsWith($passthroughPrefixes)->except('aria-describedby') }}
             class="{{ $baseClasses }} {{ $radiusClass }} {{ $stateClasses }} {{ $sizeConfig['input'] }} {{ $sizeConfig['padding'] }} {{ $sizeConfig['paddingRight'] }} {{ $class }}"
         />
 
@@ -156,7 +184,7 @@
                 type="button"
                 x-show="hasValue"
                 x-on:click="$refs.input.value = ''; hasValue = false; $refs.input.focus()"
-                class="absolute {{ $sizeConfig['iconRight'] }} top-1/2 -translate-y-1/2 inline-flex items-center justify-center min-h-11! min-w-11! text-icon-secondary hover:text-icon transition-colors"
+                class="absolute {{ $sizeConfig['iconRight'] }} top-1/2 -translate-y-1/2 inline-flex items-center justify-center min-h-11! min-w-11! text-icon-secondary hover:text-icon transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                 @if($disabled) disabled @endif
             >
                 <x-icon name="close" class="{{ $sizeConfig['icon'] }}" />

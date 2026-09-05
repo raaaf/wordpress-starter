@@ -125,4 +125,93 @@ final class ButtonComponentTest extends TestCase
         $this->assertMatchesRegularExpression('/<a[\s>]/', $html);
         $this->assertStringNotContainsString('<span', $html);
     }
+
+    public function testDisabledIconOnlyButtonKeepsAriaLabel(): void
+    {
+        $html = $this->renderMarkup(
+            '<x-button url="https://x.test" title="" aria-label="LinkedIn" disabled="true" />',
+        );
+
+        $this->assertStringContainsString('<span', $html);
+        $this->assertStringContainsString('aria-label="LinkedIn"', $html);
+        // Disabled means it never navigates, so no new-tab notice is added.
+        $this->assertStringNotContainsString('öffnet in neuem Tab', $html);
+    }
+
+    public function testLinkAriaLabelIsComposedWithNewTabNotice(): void
+    {
+        $html = $this->renderMarkup(
+            '<x-link url="https://x.test" target="_blank" aria-label="LinkedIn">Los</x-link>',
+        );
+
+        $this->assertStringContainsString('aria-label="LinkedIn (öffnet in neuem Tab)"', $html);
+        $this->assertSame(1, substr_count($html, 'öffnet in neuem Tab'));
+    }
+
+    public function testEmptyCallerAriaLabelIsTreatedAsAbsent(): void
+    {
+        $html = $this->renderMarkup(
+            '<x-button url="https://x.test" target="_blank" title="Los" aria-label="" />',
+        );
+
+        $this->assertStringNotContainsString('aria-label=""', $html);
+        $this->assertSame(1, substr_count($html, 'öffnet in neuem Tab'));
+        $this->assertSame(1, substr_count($html, 'sr-only'));
+    }
+
+    public function testDisabledLinkButtonSpanDropsCursorPointerAndFocusVisible(): void
+    {
+        $html = $this->renderMarkup(
+            '<x-button url="https://x.test" title="Los" disabled="true" />',
+        );
+
+        $this->assertStringNotContainsString('cursor-pointer', $html);
+        $this->assertStringNotContainsString('focus-visible:outline-3', $html);
+        $this->assertStringContainsString('cursor-not-allowed', $html);
+    }
+
+    public function testLinkUppercaseTargetIsNormalized(): void
+    {
+        $html = $this->renderMarkup(
+            '<x-link url="https://x.test" target="_BLANK">Los</x-link>',
+        );
+
+        $this->assertStringContainsString('target="_blank"', $html);
+        $this->assertStringContainsString('rel="noopener noreferrer"', $html);
+        $this->assertStringContainsString('öffnet in neuem Tab', $html);
+    }
+
+    public function testButtonLinkBranchDropsDisallowedAttributes(): void
+    {
+        $html = $this->renderMarkup(
+            '<x-button url="https://x.test" title="Los" formaction="https://evil.test" onfocus="alert(1)" />',
+        );
+
+        $this->assertStringNotContainsString('formaction', $html);
+        $this->assertStringNotContainsString('onfocus', $html);
+    }
+
+    public function testButtonFormBranchDropsDisallowedAttributes(): void
+    {
+        $html = $this->renderMarkup(
+            '<x-button title="Los" formaction="https://evil.test" onfocus="alert(1)" />',
+        );
+
+        $this->assertStringNotContainsString('formaction', $html);
+        $this->assertStringNotContainsString('onfocus', $html);
+    }
+
+    public function testButtonDisabledSpanDropsInteractiveAttributes(): void
+    {
+        $html = $this->renderMarkup(
+            '<x-button url="https://x.test" title="Los" disabled="true" tabindex="3" name="cta" value="1" />',
+        );
+
+        preg_match('/<span\b[^>]*>/', $html, $matches);
+        $spanTag = $matches[0] ?? '';
+
+        $this->assertStringNotContainsString('tabindex', $spanTag);
+        $this->assertStringNotContainsString('name=', $spanTag);
+        $this->assertStringNotContainsString('value=', $spanTag);
+    }
 }

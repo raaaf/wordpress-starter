@@ -21,6 +21,10 @@
 ])
 
 @php
+    // 'accent' is a legacy alias for 'brand', resolved once here instead of
+    // being duplicated across all three variant maps below.
+    $variant = $variant === 'accent' ? 'brand' : $variant;
+
     // Sizes from Figma tokens - subtle border radius per Figma design
     $sizes = [
         'sm' => 'px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] text-xs gap-[var(--badge-sm-gap)] rounded-full',
@@ -45,7 +49,6 @@
     $filledVariants = [
         'gray' => 'bg-surface-tertiary text-content',
         'brand' => 'bg-surface-accent-subtle text-content-accent dark:bg-surface-accent dark:text-content-inverse',
-        'accent' => 'bg-surface-accent-subtle text-content-accent dark:bg-surface-accent dark:text-content-inverse',
         'success' => 'bg-surface-success text-content-success',
         'warning' => 'bg-surface-warning text-content-warning',
         'error' => 'bg-surface-error text-content-error',
@@ -55,7 +58,6 @@
     $outlineVariants = [
         'gray' => 'bg-transparent text-content border border-line',
         'brand' => 'bg-surface-accent-subtle text-content-accent border border-line-accent',
-        'accent' => 'bg-surface-accent-subtle text-content-accent border border-line-accent', // Alias
         'success' => 'bg-transparent text-content-success border border-line-success',
         'warning' => 'bg-transparent text-content-warning border border-line-warning',
         'error' => 'bg-transparent text-content-error border border-line-error',
@@ -65,7 +67,6 @@
     $dotColors = [
         'gray' => 'bg-content-secondary',
         'brand' => 'bg-content-accent',
-        'accent' => 'bg-content-accent',
         'success' => 'bg-content-success',
         'warning' => 'bg-content-warning',
         'error' => 'bg-content-error',
@@ -79,7 +80,7 @@
     $dotColor = $dotColors[$variant] ?? $dotColors['gray'];
 @endphp
 
-<span class="badge inline-flex w-fit items-center font-normal {{ $variantClass }} {{ $sizeClass }} {{ $class }}">
+<span {{ $attributes->merge(['class' => "badge inline-flex w-fit items-center font-normal {$variantClass} {$sizeClass} {$class}"]) }}>
     @if($dot)
         <span class="rounded-full {{ $dotSize }} {{ $dotColor }}" aria-hidden="true"></span>
     @endif

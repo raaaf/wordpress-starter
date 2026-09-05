@@ -37,6 +37,9 @@
         'xl' => 'gap-12 lg:gap-16',
     ];
 
+    if (defined('WP_DEBUG') && WP_DEBUG && !isset($colClasses[$cols])) {
+        trigger_error('x-grid: unsupported "cols" value "' . esc_html($cols) . '", falling back to 2.', E_USER_WARNING);
+    }
     $colClass = $colClasses[$cols] ?? $colClasses[2];
     $gapClass = $gaps[$gap] ?? $gaps['lg'];
 @endphp
@@ -44,6 +47,6 @@
 {{-- justify-items-stretch haelt volle Zeilen unveraendert, eine
      unvollstaendige letzte Zeile bleibt dadurch links. Wer sie zentriert haben
      will, setzt class="justify-items-center" am Aufruf. --}}
-<div class="grid {{ $colClass }} {{ $gapClass }} {{ $align }} {{ $class }}">
+<div {{ $attributes->merge(['class' => "grid {$colClass} {$gapClass} {$align} {$class}"]) }}>
     {{ $slot }}
 </div>

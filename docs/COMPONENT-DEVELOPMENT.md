@@ -194,6 +194,16 @@ Das Theme enthält bereits diese Komponenten:
 </x-section>
 ```
 
+`anchor` wird über `WordpressStarter\Helpers\ComponentId::anchor()` (= `sanitize_title()`) zu einer gültigen HTML-ID geslugt, bevor sie als `id` gerendert wird (z. B. "Über uns" → `uber-uns`); Duplikate bekommen über `ComponentId::unique()` ein `-2`, `-3`, ... angehängt. Jede Stelle, die aus demselben `section_anchor`-Feld einen `href="#..."`-Link baut (z. B. `templates/partials/styleguide-nav.blade.php`), muss denselben `ComponentId::anchor()`-Aufruf verwenden, sonst zeigt der Sprunglink ins Leere.
+
+Migrationshinweis: Der Wechsel auf `sanitize_title()` (statt der vorherigen Transliteration) ändert die gerenderte ID akzentuierter Anker auf produktiven Seiten; alte externe Links auf solche Anker lösen danach nicht mehr auf.
+
+### Gemeinsame Helfer
+
+**`WordpressStarter\Helpers\ComponentId`** - request-gebundene ID-Vergabe für Blade-Komponenten (`next()`, `unique()`, `anchor()`), weil ein `static`-Zähler innerhalb einer kompilierten Blade-View nicht pro Request, sondern pro kompilierter Funktion zählt. Test-Reset über `ComponentId::reset()`, aufgerufen von `Tests\Support\WordPressMocks::resetAllMocks()`.
+
+**`WordpressStarter\Helpers\FormAttributes`** - zentrales Attribut-Allowlist für `x-input`/`x-checkbox`/`x-radio` (`passthrough(array $extra = [])`, `prefixes()`), damit die drei Komponenten nicht dieselbe Liste dreifach pflegen.
+
 **`<x-grid>`** - CSS-Grid Container
 
 ```blade
@@ -232,6 +242,8 @@ Größen: `sm`, `md`, `lg`
     Karteninhalt
 </x-card>
 ```
+
+`level` (2-4, Standard `3`) setzt die Überschriftenebene des `title`-Props (`<h2>`-`<h4>`); Werte außerhalb des Bereichs werden auf 2-4 begrenzt.
 
 **`<x-badge>`** - Kleine Labels
 
@@ -274,6 +286,8 @@ Größen: `sm`, `md`, `lg`
 ```blade
 <x-select name="country" label="Land" :options="$countries" />
 ```
+
+`visibleRows` (int) rendert nur bei `multiple` das native `size`-Attribut, um mehrere Zeilen gleichzeitig sichtbar zu machen; ohne `multiple` bleibt es ohne Wirkung.
 
 **`<x-checkbox>`** / **`<x-radio>`** - Auswahl
 

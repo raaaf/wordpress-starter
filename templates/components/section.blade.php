@@ -5,7 +5,10 @@
     @param string $padding - sm, md, lg, xl (default: lg)
     @param string|null $spacing - editor override for $padding: default, sm, xl, none
     @param string|null $width - editor override: container (default) or full
-    @param string $anchor - HTML ID for anchor links
+    @param string $anchor - HTML ID for anchor links (slugged via
+        sanitize_title(); switching to it from the previous transliteration
+        changed the rendered id of anchors with accented characters, so
+        older external links to those anchors on a live site stop resolving)
     @param string $class - Additional CSS classes
     @param bool $container - Wrap content in container (default: true)
     @param bool|null $animate - Enable scroll animation (null = use global setting)
@@ -56,10 +59,30 @@
     // Determine if animations should be enabled
     $globalAnimations = \WordpressStarter\Acf\Fields::option('animations_enabled', false);
     $shouldAnimate = $animate ?? $globalAnimations;
+
+    // Two flexible-content sections can carry the same anchor (same heading
+    // text, copy-pasted layout, ...). Duplicate ids break in-page links, so
+    // the first occurrence on the request keeps its id unchanged and every
+    // repeat gets "-2", "-3", ... appended.
+    $anchorId = null;
+    if ($anchor) {
+        // sanitize_html_class() strips accented characters outright instead of
+        // transliterating them, so an anchor like "Über uns" collapsed to "ber-uns"
+        // (or worse, an empty id). ComponentId::anchor() is WordPress' own slug
+        // generator (sanitize_title()): it transliterates umlauts via
+        // remove_accents() first. Every template that builds an "#anchor" link
+        // from the same raw field (e.g. styleguide-nav.blade.php) must slugify
+        // through the same helper, or the link target stops matching this id.
+        $anchorId = \WordpressStarter\Helpers\ComponentId::anchor($anchor);
+        if ($anchorId === '') {
+            $anchorId = \WordpressStarter\Helpers\ComponentId::next('section');
+        }
+        $anchorId = \WordpressStarter\Helpers\ComponentId::unique($anchorId);
+    }
 @endphp
 
 <section
-    @if($anchor) id="{{ esc_attr($anchor) }}" @endif
+    @if($anchorId) id="{{ $anchorId }}" @endif
     @if($shouldAnimate)
         x-data="{ shown: false }"
         x-init="if (location.hash) shown = true"
@@ -67,7 +90,7 @@
         x-intersect.once="shown = true"
         :class="{ 'is-visible': shown }"
     @endif
-    class="section {{ $bgClass }} {{ $paddingClass }} {{ $class }}"
+    {{ $attributes->except('id')->merge(['class' => "section {$bgClass} {$paddingClass} {$class}"]) }}
 >
     @if($container)
         <div

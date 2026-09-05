@@ -41,6 +41,8 @@ $GLOBALS['wp_mock_cache'] = [];
 $GLOBALS['wp_mock_hooks'] = ['actions' => [], 'filters' => []];
 $GLOBALS['wp_mock_enqueued'] = ['scripts' => [], 'styles' => []];
 $GLOBALS['wp_mock_have_rows_cursor'] = [];
+$GLOBALS['wp_mock_loop_posts'] = [];
+$GLOBALS['wp_mock_loop_cursor'] = 0;
 
 // WordPress path functions
 if (!function_exists('get_template')) {
@@ -931,6 +933,35 @@ if (!function_exists('get_the_ID')) {
     }
 }
 
+// Main-loop doubles for templates/partials that iterate the global query
+// directly (have_posts()/the_post()), rather than through a WP_Query
+// instance. Tests seed $GLOBALS['wp_mock_loop_posts'] with the posts to
+// iterate; the_post() advances a cursor and sets $GLOBALS['post'].
+if (!function_exists('have_posts')) {
+    function have_posts(): bool
+    {
+        $posts = $GLOBALS['wp_mock_loop_posts'] ?? [];
+        $cursor = $GLOBALS['wp_mock_loop_cursor'] ?? 0;
+
+        return $cursor < count($posts);
+    }
+}
+
+if (!function_exists('the_post')) {
+    function the_post(): void
+    {
+        $posts = $GLOBALS['wp_mock_loop_posts'] ?? [];
+        $cursor = $GLOBALS['wp_mock_loop_cursor'] ?? 0;
+
+        if ($cursor >= count($posts)) {
+            return;
+        }
+
+        $GLOBALS['post'] = $posts[$cursor]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test double mirrors core's the_post(), which sets this same global
+        $GLOBALS['wp_mock_loop_cursor'] = $cursor + 1;
+    }
+}
+
 // Theme functions
 if (!function_exists('wp_get_theme')) {
     function wp_get_theme(): object
@@ -1247,6 +1278,62 @@ if (!function_exists('get_the_title')) {
     }
 }
 
+// Post thumbnail / taxonomy / excerpt helpers used by templates/partials that
+// iterate the main loop (post-loop.blade.php). Always the empty/false shape,
+// same tolerance level as the other post-context doubles above: enough for a
+// render smoke test to prove the template does not throw, not a content
+// fixture.
+if (!function_exists('has_post_thumbnail')) {
+    function has_post_thumbnail(int|object|null $post = null): bool
+    {
+        return false;
+    }
+}
+
+if (!function_exists('get_the_post_thumbnail')) {
+    function get_the_post_thumbnail(int|object|null $post = null, string $size = 'post-thumbnail', string|array $attr = ''): string
+    {
+        return '';
+    }
+}
+
+if (!function_exists('has_category')) {
+    function has_category(int|string|array $category = '', int|object|null $post = null): bool
+    {
+        return false;
+    }
+}
+
+if (!function_exists('get_the_category')) {
+    /** @return list<object> */
+    function get_the_category(int|object|null $post = null): array
+    {
+        return [];
+    }
+}
+
+if (!function_exists('wp_trim_words')) {
+    function wp_trim_words(string $text, int $numWords = 55, ?string $more = null): string
+    {
+        $words = preg_split('/[\n\r\t ]+/', trim($text), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        if (count($words) <= $numWords) {
+            return $text;
+        }
+
+        $more ??= '…';
+
+        return implode(' ', array_slice($words, 0, $numWords)) . $more;
+    }
+}
+
+if (!function_exists('get_the_date')) {
+    function get_the_date(string $format = '', int|object|null $post = null): string
+    {
+        return $GLOBALS['wp_mock_the_date'] ?? '';
+    }
+}
+
 if (!function_exists('get_post_field')) {
     function get_post_field(string $field, int|object $post): string
     {
@@ -1294,6 +1381,56 @@ if (!function_exists('sanitize_html_class')) {
         $sanitized = preg_replace('/[^A-Za-z0-9_-]/', '', $class) ?? '';
 
         return $sanitized === '' ? $fallback : $sanitized;
+    }
+}
+
+if (!function_exists('remove_accents')) {
+    function remove_accents(string $string): string
+    {
+        // Faithful to WordPress core's DEFAULT (non-German-locale) map for
+        // the accents that occur in this theme's German-language content;
+        // not the full core table. Core only maps ä/ö/ü to "ae"/"oe"/"ue"
+        // when get_locale() is one of the de_* locales; this codebase runs
+        // single-locale (see TRANSLATION_DATEIEN) and never switches that
+        // check on, so the map here has to mirror the "else" branch instead
+        // ('ä' => 'a', not 'ae'), or an anchor like "Über uns" would slugify
+        // to "ueber-uns" here while sanitize_title() on the actual German
+        // WordPress install this theme ships to produces "uber-uns".
+        $map = [
+            'ä' => 'a', 'ö' => 'o', 'ü' => 'u', 'Ä' => 'A', 'Ö' => 'O', 'Ü' => 'U', 'ß' => 'ss',
+            'á' => 'a', 'à' => 'a', 'â' => 'a', 'é' => 'e', 'è' => 'e', 'ê' => 'e',
+            'í' => 'i', 'ì' => 'i', 'î' => 'i', 'ó' => 'o', 'ò' => 'o', 'ô' => 'o',
+            'ú' => 'u', 'ù' => 'u', 'û' => 'u', 'ç' => 'c', 'ñ' => 'n',
+        ];
+
+        return strtr($string, $map);
+    }
+}
+
+if (!function_exists('sanitize_title')) {
+    function sanitize_title(string $title, string $fallback = ''): string
+    {
+        // Faithful enough port of core's sanitize_title_with_dashes() for
+        // the cases this theme actually hits: underscores survive (core's
+        // charset keeps '_', unlike sanitize_html_class()), a literal dot
+        // becomes a hyphen (core: str_replace('.', '-', $title)), and any
+        // remaining non-ASCII byte sequence is percent-encoded rather than
+        // silently dropped (core: utf8_uri_encode()) so a title outside the
+        // accent map above still yields a valid, non-empty id fragment
+        // instead of losing the character entirely.
+        $title = remove_accents($title);
+        $title = mb_strtolower($title);
+        $title = preg_replace_callback(
+            '/[^\x00-\x7f]+/',
+            static fn (array $matches): string => strtolower(rawurlencode($matches[0])),
+            $title
+        ) ?? '';
+        $title = str_replace('.', '-', $title);
+        $title = preg_replace('/[^a-z0-9%_\s-]/', '', $title) ?? '';
+        $title = preg_replace('/[\s-]+/', '-', $title) ?? '';
+        $title = trim($title, '-');
+
+        return $title === '' ? $fallback : $title;
     }
 }
 

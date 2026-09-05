@@ -52,17 +52,40 @@
     $variantClass = $disabled
         ? 'text-content-disabled cursor-not-allowed'
         : 'cursor-pointer ' . ($variants[$variant] ?? $variants['accent']);
+
+    // Normalise target: only _self/_blank are valid link targets. Anything
+    // else, including a case variant like "_BLANK", falls back to _self so
+    // the rel/notice logic below still fires consistently, same as x-button
+    // (button.blade.php).
+    $normalizedTarget = strtolower((string) $target);
+    if (!in_array($normalizedTarget, ['_self', '_blank'], true)) {
+        $normalizedTarget = '_self';
+    }
+
+    // A custom aria-label replaces the accessible name entirely, so the
+    // "opens in new tab" sr-only span (below) never gets announced. Append
+    // the notice to the label itself instead of relying on the span, same
+    // composition as x-button (button.blade.php).
+    $linkAriaLabel = $ariaLabel;
+    if ($linkAriaLabel && $normalizedTarget === '_blank' && !$disabled) {
+        $linkAriaLabel .= ' ' . __('(öffnet in neuem Tab)', 'wp-starter');
+    }
+
+    $linkClasses = "link inline-flex items-center font-normal underline underline-offset-4 transition-colors duration-200 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] {$variantClass} {$sizeClass} {$class}";
 @endphp
 
 {{-- Disabled link: rendered as a span, not an <a>, so it never navigates. --}}
 <{{ $disabled ? 'span' : 'a' }}
    @if(!$disabled) href="{{ esc_url($url) }}" @endif
-   @if(!$disabled) target="{{ esc_attr($target) }}" @endif
-   @if($target === '_blank' && !$disabled) rel="noopener noreferrer" @endif
+   @if(!$disabled) target="{{ esc_attr($normalizedTarget) }}" @endif
+   @if($normalizedTarget === '_blank' && !$disabled) rel="noopener noreferrer" @endif
    @if($disabled) aria-disabled="true" @endif
-   @if($ariaLabel) aria-label="{{ esc_attr($ariaLabel) }}" @endif
-   {{ $disabled ? $attributes->except(['tabindex', 'href', 'target']) : $attributes }}
-   class="link inline-flex items-center font-normal underline underline-offset-4 transition-colors duration-200 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] {{ $variantClass }} {{ $sizeClass }} {{ $class }}">
+   @if($linkAriaLabel) aria-label="{{ esc_attr($linkAriaLabel) }}" @endif
+   {{-- Merged (not printed as a plain trailing class="..." attribute): a
+        caller-supplied class in the bag would otherwise render as an earlier
+        duplicate "class" attribute, and browsers keep only the first one,
+        silently dropping every component style below. --}}
+   {{ ($disabled ? $attributes->except(['tabindex', 'href', 'target']) : $attributes)->merge(['class' => $linkClasses]) }}>
     @if($iconLeft)
         <x-icon name="{{ $iconLeft }}" class="{{ $iconSize }}" />
     @endif
@@ -84,7 +107,7 @@
         <x-icon name="{{ $iconRight }}" class="{{ $iconSize }}" />
     @endif
 
-    @if($target === '_blank' && !$ariaLabel)
+    @if($normalizedTarget === '_blank' && !$ariaLabel)
         <span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
     @endif
 </{{ $disabled ? 'span' : 'a' }}>

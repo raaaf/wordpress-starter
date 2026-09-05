@@ -155,20 +155,52 @@
     // value explicitly on the element ($attributes->merge() would let the
     // caller's raw value win over this composed one, silently dropping the
     // notice), then exclude 'aria-label' from the merged bag below.
+    // An empty-string aria-label ("" from a caller that composed one
+    // conditionally) is not a real accessible name: treat it like an absent
+    // one so the "opens in new tab" sr-only span still renders below.
     $callerAriaLabel = $attributes->get('aria-label');
+    if ($callerAriaLabel === '') {
+        $callerAriaLabel = null;
+    }
     $linkAriaLabel = $callerAriaLabel;
     if ($linkAriaLabel !== null && $normalizedTarget === '_blank') {
         $linkAriaLabel .= ' ' . __('(öffnet in neuem Tab)', 'wp-starter');
     }
     $linkClasses = "{$baseClasses} {$variantClass} {$sizeClass} {$class}";
+
+    // The disabled span never becomes focusable or clickable: no pointer
+    // cursor, no focus ring, no active-state transition/scale. Listed
+    // explicitly (layout/typography only) instead of stripping them back out
+    // of $baseClasses via string surgery, which silently kept whatever
+    // active/transition utilities baseClasses happened to carry.
+    $disabledSpanClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-normal select-none';
+    $disabledSpanClasses = "{$disabledSpanClasses} {$variantClass} {$sizeClass} {$class}";
+
+    // Exact-name allowlist for everything the bag may add to a rendered
+    // <a>/<button>: plain HTML attributes have to be named exactly, only
+    // x-/@/:/aria-/data- may pass through by prefix. Without this, a caller
+    // could add formaction, formmethod or an onXxx handler to either branch.
+    $allowedAttrs = ['type', 'form', 'name', 'value', 'disabled', 'id', 'title', 'class', 'tabindex', 'autofocus'];
+    $allowedPrefixes = ['x-', '@', ':', 'aria-', 'data-'];
+
+    // The disabled span never becomes interactive: it drops the handful of
+    // attributes above that only make sense on a focusable/submittable
+    // element, same exclusion x-link (link.blade.php) applies to its
+    // disabled span.
+    $disabledSpanAttrs = array_diff($allowedAttrs, ['href', 'target', 'tabindex', 'type', 'name', 'value', 'formaction']);
 @endphp
 
 @if($url)
     @if($disabled)
         {{-- Disabled link button: rendered as a span, not an <a>, so it never
-             navigates and needs no inline onclick (blocked under nonce CSP). --}}
+             navigates and needs no inline onclick (blocked under nonce CSP).
+             Disabled means it never opens a new tab either, so the composed
+             label here is the caller's own aria-label, without the "opens in
+             new tab" notice that $linkAriaLabel would add. --}}
         <span aria-disabled="true"
-              {{ $attributes->except('aria-label')->merge(['class' => $linkClasses]) }}>
+              @if($callerAriaLabel !== null) aria-label="{{ esc_attr($callerAriaLabel) }}" @endif
+              {{ $attributes->only($disabledSpanAttrs)->merge(['class' => $disabledSpanClasses]) }}
+              {{ $attributes->whereStartsWith($allowedPrefixes)->except('aria-label') }}>
             {{ $title }}
             {{ $slot ?? '' }}
         </span>
@@ -179,7 +211,8 @@
            @if($normalizedTarget === '_blank') rel="noopener noreferrer" @endif
            @if($linkAriaLabel !== null) aria-label="{{ esc_attr($linkAriaLabel) }}" @endif
            {!! $analyticsAttrs !!}
-           {{ $attributes->except('aria-label')->merge(['class' => $linkClasses]) }}>
+           {{ $attributes->only($allowedAttrs)->merge(['class' => $linkClasses]) }}
+           {{ $attributes->whereStartsWith($allowedPrefixes)->except('aria-label') }}>
             {{ $title }}
             {{ $slot ?? '' }}
             @if($normalizedTarget === '_blank' && $callerAriaLabel === null)
@@ -192,7 +225,8 @@
     <button type="{{ $type }}"
             @if($disabled) disabled aria-disabled="true" @endif
             {!! $analyticsAttrs !!}
-            {{ $attributes->merge(['class' => "{$baseClasses} {$variantClass} {$sizeClass} {$class}"]) }}>
+            {{ $attributes->only($allowedAttrs)->merge(['class' => "{$baseClasses} {$variantClass} {$sizeClass} {$class}"]) }}
+            {{ $attributes->whereStartsWith($allowedPrefixes) }}>
         {{ $title }}
         {{ $slot ?? '' }}
     </button>
