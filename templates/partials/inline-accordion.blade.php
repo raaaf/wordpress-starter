@@ -7,11 +7,24 @@
       $idPrefix — string prefix for button/panel IDs to ensure uniqueness per layout instance
 --}}
 
-<div class="p-6 lg:p-8" x-data="{ active: null }">
+<div class="p-6 lg:p-8" x-data="{
+    active: null,
+    itemCount: {{ count($items) }},
+    focusItem(index) {
+        this.$nextTick(() => {
+            this.$refs['{{ $idPrefix }}' + index]?.focus();
+        });
+    }
+}">
     @foreach($items as $aIdx => $aItem)
         <div class="border-b border-line last:border-b-0">
-            <button id="{{ $idPrefix }}-btn-{{ $aIdx }}"
+            <button x-ref="{{ $idPrefix }}{{ $aIdx }}"
+                    id="{{ $idPrefix }}-btn-{{ $aIdx }}"
                     @click="active = active === {{ $aIdx }} ? null : {{ $aIdx }}"
+                    @keydown.down.prevent="focusItem(({{ $aIdx }} + 1) % itemCount)"
+                    @keydown.up.prevent="focusItem(({{ $aIdx }} - 1 + itemCount) % itemCount)"
+                    @keydown.home.prevent="focusItem(0)"
+                    @keydown.end.prevent="focusItem(itemCount - 1)"
                     :aria-expanded="active === {{ $aIdx }}"
                     aria-controls="{{ $idPrefix }}-{{ $aIdx }}"
                     class="group flex items-center justify-between w-full py-3 font-normal text-left cursor-pointer transition-colors hover:text-content-brand focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
@@ -26,7 +39,10 @@
             <div x-show="active === {{ $aIdx }}"
                  x-collapse.duration.200ms
                  id="{{ $idPrefix }}-{{ $aIdx }}"
-                 role="region"
+                 {{-- role=region nur unter 7 Eintraegen: darueber ueberladet jeder
+                      Eintrag die Landmark-Liste der Screenreader-Navigation
+                      (gleiche Schwelle wie templates/flexible/accordion.blade.php). --}}
+                 @if(count($items) < 7) role="region" @endif
                  aria-labelledby="{{ $idPrefix }}-btn-{{ $aIdx }}"
                  class="pb-4">
                 <x-prose class="text-sm">@kses($aItem['content'])</x-prose>

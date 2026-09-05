@@ -21,7 +21,7 @@
 
 @props([
     'url' => null,
-    'title' => 'Click here',
+    'title' => null,
     'target' => '_self',
     'variant' => 'primary',
     'size' => 'md',
@@ -32,6 +32,11 @@
 ])
 
 @php
+    // Empty/absent title falls back to the default label instead of
+    // rendering a blank button (component-tag attributes can't carry an
+    // @if, so callers always pass :title, even when it may be empty).
+    $title = $title ?: __('Mehr erfahren', 'wp-starter');
+
     // Base classes - common to all buttons
     // 'button' class is used for editor CSS overrides (prevents WordPress link styling)
     // active:scale-[0.97] is a Tailwind v4 `scale` utility, not `transform` --

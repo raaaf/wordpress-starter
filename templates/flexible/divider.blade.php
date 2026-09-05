@@ -7,7 +7,8 @@
 
 @php
     $style = get_sub_field('style') ?: 'line';
-    $height = get_sub_field('height') ?: 50;
+    // Clamp mirrors the field's own bounds (FieldDefinitions::dividerFields: min 10, max 200).
+    $height = min(200, max(10, (int) (get_sub_field('height') ?: 50)));
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 

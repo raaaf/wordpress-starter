@@ -555,9 +555,12 @@ final class SecurityTest extends TestCase
             'Options-Host erlaubt' => ['https://calendly.com/meeting', true, 'aus der embed_allowed_hosts Option'],
             'Subdomain des Options-Hosts abgelehnt' => ['https://sub.calendly.com/meeting', false, 'heutige Semantik: nur exakte Eintraege, keine Subdomains'],
             'eigener Host abgelehnt' => ['https://' . (string) wp_parse_url(home_url(), PHP_URL_HOST) . '/x', false, 'allow-same-origin darf den Sandkasten nicht aushebeln'],
+            'www-Alias des eigenen Hosts abgelehnt' => ['https://www.' . (string) wp_parse_url(home_url(), PHP_URL_HOST) . '/x', false, 'www-Alias ist derselbe same-origin Sandkasten-Bruch'],
             'Userinfo-Trick abgelehnt' => ['https://calendly.com@evil.test/x', false, 'wp_parse_url liest den echten Host (evil.test), nicht das Userinfo-Feld'],
             'Grossschreibung im Schema akzeptiert' => ['HTTPS://calendly.com/meeting', true, 'Schema-Vergleich ist case-insensitiv'],
             'http abgelehnt' => ['http://calendly.com/meeting', false, 'nur https ist zulaessig'],
+            'expliziter Port 8443 abgelehnt' => ['https://calendly.com:8443/meeting', false, 'CSP frame-src schreibt den portlosen Origin, ein anderer Port waere same-origin blockiert'],
+            'expliziter Standardport 443 erlaubt' => ['https://calendly.com:443/meeting', true, 'Port 443 entspricht dem impliziten https-Standardport'],
         ];
     }
 

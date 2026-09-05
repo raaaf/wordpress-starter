@@ -780,7 +780,7 @@ class Options
                     __('Erlaubte Hosts', 'wp-starter'),
                     'embed_allowed_hosts',
                     4,
-                    __('Ein Host pro Zeile, ohne https:// und ohne Pfad.', 'wp-starter'),
+                    __('Ein Host pro Zeile, ohne https:// und ohne Pfad. Internationalisierte Hosts müssen in Punycode-Form (xn--...) eingetragen werden. Der eigene Host der Seite ist nie erlaubt.', 'wp-starter'),
                     "calendly.com\nwww.eventbrite.de",
                 ),
             ],

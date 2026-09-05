@@ -30,7 +30,9 @@ $directives = [
 
 `$analyticsOrigin` (from `Security::getAnalyticsOrigin()`) resolves the `rybbit_script_url` option to its `https://` origin and appends it to `script-src` and `connect-src`, so the Rybbit Analytics tracking script (if the plugin is active) can both load and send events. Falls back to the plugin's own default origin when the option is unset, and to an empty string when the value cannot be parsed as a safe `https://` host.
 
-`Security::getEmbedOrigins()` reads the admin-configured `embed_allowed_hosts` option, one host per line, and appends the resulting `https://` origins to `frame-src`. It strips any scheme or path from each entry and drops anything it cannot parse as a plain hostname, so `frame-src` never widens beyond a host list an administrator explicitly entered under Theme-Einstellungen → Analytics → Externe Einbettungen.
+`Security::getEmbedOrigins()` reads the admin-configured `embed_allowed_hosts` option, one host per line, and appends the resulting `https://` origins to `frame-src`. It strips any scheme or path from each entry and drops anything it cannot parse as a plain hostname, so `frame-src` never widens beyond a host list an administrator explicitly entered under Theme-Einstellungen → Analytics → Externe Einbettungen. The hostname pattern is ASCII-only, so an internationalised host must be entered in its punycode form (`xn--...`), not as Unicode.
+
+`Security::isAllowedEmbedHost()` is the shared gate the same layouts use before rendering an iframe: it accepts exactly what `getCSPHeader()` writes into `frame-src`. On top of the host list it rejects a non-default port (only an implicit or explicit `443` passes) and rejects the site's own host together with its `www.`/non-www counterpart, so a same-origin alias in `home_url()` cannot combine with `allow-same-origin` to break the sandbox.
 
 ### Nonce-Based Script Loading
 

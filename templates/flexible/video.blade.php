@@ -91,7 +91,7 @@
         <div class="max-w-6xl mx-auto">
             <div
                 class="relative overflow-hidden rounded-lg {{ $aspectClass }} bg-surface-secondary"
-                x-data="{ loaded: {{ in_array($source, ['wordpress', 'url']) ? 'true' : 'false' }}, iframeLoaded: false, iframeError: false }"
+                x-data="{ loaded: {{ $selfHosted ? 'true' : 'false' }}, iframeLoaded: false, iframeError: false }"
                 x-ref="videoContainer"
                 tabindex="-1"
             >
@@ -126,38 +126,24 @@
                         <div x-show="!loaded" class="absolute inset-0 bg-surface-overlay" aria-hidden="true"></div>
                     @endif
 
-                    {{-- Consent notice for GDPR compliance --}}
-                    <div
-                        x-show="!loaded"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100"
-                        x-transition:leave-end="opacity-0"
+                    {{-- Consent notice for GDPR compliance. Geteiltes Markup in
+                         partials/consent-gate.blade.php. --}}
+                    @include('partials.consent-gate', [
+                        'containerRef' => 'videoContainer',
+                        'icon' => 'play',
                         {{-- Auf dem Standbild helle Schrift erzwingen: die
                              Standardfarben sind auf die Sektionsflaeche
                              gerechnet, hier liegt aber ein abgedunkeltes Bild
                              darunter. Gemessen ohne diese Klassen: 2.9:1. --}}
-                        class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center video-consent-notice @if($posterUrl) text-white [&_a]:text-white [&_a]:decoration-white/60 @endif"
-                    >
-                        <x-icon name="play" class="w-16 h-16 mb-4 {{ $posterUrl ? 'text-white/80' : 'text-content-secondary' }}" />
-                        <p class="mb-4 {{ $posterUrl ? 'text-white' : 'text-content-secondary' }}">
-                            {{ __('Zum Abspielen des Videos wird ein externer Dienst geladen.', 'wp-starter') }}<br>
-                            @if($privacyLink)
-                                {{-- Der Punkt steht im Linktext, weil ein Satzzeichen
-                                     direkt hinter <x-link> mit einer Luecke davor
-                                     rendert (siehe Hinweis in link.blade.php). --}}
-                                {{ __('Es gelten die', 'wp-starter') }} <x-link url="{{ $privacyLink }}" target="_blank">{{ __('Datenschutzbestimmungen von', 'wp-starter') }} {{ $providerName }}.</x-link>
-                            @endif
-                        </p>
-                        <x-button
-                            :title="__('Video laden', 'wp-starter')"
-                            variant="primary"
-                            size="md"
-                            {{-- scrollIntoView nur ohne reduced-motion-Praeferenz: sonst laeuft
-                                 nach focus() eine zweite, ungewollte Bewegung. --}}
-                            x-on:click="loaded = true; $nextTick(() => { $refs.videoContainer.focus(); if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) { $refs.videoContainer.scrollIntoView({ behavior: 'smooth', block: 'center' }) } })"
-                            class="video-consent-btn"
-                        />
-                    </div>
+                        'iconClass' => $posterUrl ? 'text-white/80' : 'text-content-secondary',
+                        'wrapperClass' => 'video-consent-notice ' . ($posterUrl ? 'text-white [&_a]:text-white [&_a]:decoration-white/60' : ''),
+                        'textClass' => $posterUrl ? 'text-white' : 'text-content-secondary',
+                        'message' => __('Zum Abspielen des Videos wird ein externer Dienst geladen.', 'wp-starter'),
+                        'buttonLabel' => __('Video laden', 'wp-starter'),
+                        'buttonClass' => 'video-consent-btn',
+                        'providerName' => $providerName,
+                        'privacyLink' => $privacyLink,
+                    ])
 
                     {{-- Loading indicator --}}
                     <div

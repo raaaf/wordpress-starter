@@ -7,7 +7,7 @@
 
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
-    $content = wp_kses_post(get_sub_field('content'));
+    $content = get_sub_field('content');
     $formId = get_sub_field('form_id');
     $showContactInfo = get_sub_field('show_contact_info') ?? true;
     $background = get_sub_field('background_color') ?: 'primary';
@@ -19,7 +19,7 @@
     $email = \WordpressStarter\Acf\Fields::option('email', '');
 
     $hasContactInfo = $showContactInfo && ($companyName || $address || $phone || $email);
-    $hasForm = $formId && shortcode_exists('contact-form-7');
+    $hasForm = $formId && absint($formId) > 0 && shortcode_exists('contact-form-7');
 @endphp
 
 @if($title || $content || $hasContactInfo || $hasForm || current_user_can('edit_posts'))
@@ -32,9 +32,9 @@
             @endif
 
             @if($content)
-                <div class="mb-8 prose text-content-secondary">
-                    {!! $content !!}
-                </div>
+                <x-prose class="mb-8 text-content-secondary">
+                    @kses($content)
+                </x-prose>
             @endif
 
             @if($hasContactInfo)
@@ -73,7 +73,7 @@
              .wpcf7-response-output in app.css. --}}
         <div class="p-8 rounded-lg bg-surface-secondary surface-sheen">
             @if($hasForm)
-                {!! do_shortcode('[contact-form-7 id="' . esc_attr($formId) . '"]') !!}
+                {!! do_shortcode('[contact-form-7 id="' . absint($formId) . '"]') !!}
             @elseif(current_user_can('edit_posts'))
                 <p class="text-content-secondary">
                     @if(!shortcode_exists('contact-form-7'))

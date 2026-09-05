@@ -239,11 +239,13 @@ add_action('wp_head', function () {
 
 ### Alt Text
 
-Always add descriptive alt text to images:
+Always add descriptive alt text to images. Use `\WordpressStarter\Helpers\Text::imageAlt()`, which
+falls back from the media library's stored alt text to a context string (card label, person name,
+post title) and finally to the attachment caption:
 
 ```blade
 <img src="{{ $image['url'] }}"
-     alt="{{ $image['alt'] ?: $image['title'] }}"
+     alt="{{ \WordpressStarter\Helpers\Text::imageAlt((int) $image['ID'], $contextLabel) }}"
      width="{{ $image['width'] }}"
      height="{{ $image['height'] }}">
 ```

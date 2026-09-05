@@ -359,6 +359,15 @@ class Security
             return false;
         }
 
+        // Ein expliziter Nicht-443-Port passiert diese Pruefung, waehrend
+        // die CSP frame-src den portlosen Origin ausgibt: der Browser
+        // blockiert den Iframe dann still. Nur der Standardport ist erlaubt.
+        $port = wp_parse_url($url, PHP_URL_PORT);
+
+        if (is_int($port) && $port !== 443) {
+            return false;
+        }
+
         $host = wp_parse_url($url, PHP_URL_HOST);
 
         if (!is_string($host) || $host === '') {
@@ -369,8 +378,18 @@ class Security
 
         $siteHost = wp_parse_url(home_url(), PHP_URL_HOST);
 
-        if (is_string($siteHost) && $siteHost !== '' && $host === strtolower($siteHost)) {
-            return false;
+        if (is_string($siteHost) && $siteHost !== '') {
+            $siteHost = strtolower($siteHost);
+            // www./non-www-Alias des eigenen Hosts faellt unter dieselbe
+            // Sperre, sonst reicht ein Alias in der home_url()-Option fuer
+            // ein same-origin Iframe mit allow-same-origin + allow-scripts.
+            $siteHostAlias = str_starts_with($siteHost, 'www.')
+                ? substr($siteHost, 4)
+                : 'www.' . $siteHost;
+
+            if ($host === $siteHost || $host === $siteHostAlias) {
+                return false;
+            }
         }
 
         if (in_array($host, self::HARDCODED_FRAME_SRC_HOSTS, true)) {

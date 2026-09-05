@@ -114,6 +114,9 @@
                     <div x-show="isOpen({{ $index }})"
                          x-collapse
                          id="accordion-content-{{ $accordionId }}-{{ $index }}"
+                         {{-- role=region nur unter 7 Eintraegen: darueber ueberladet jeder
+                              Eintrag die Landmark-Liste der Screenreader-Navigation
+                              (gleiche Schwelle wie templates/partials/inline-accordion.blade.php). --}}
                          @if(count($items) < 7) role="region" @endif
                          :aria-labelledby="'accordion-header-{{ $accordionId }}-{{ $index }}'"
                          class="px-3 pt-1 mb-6">
