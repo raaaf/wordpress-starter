@@ -13,21 +13,26 @@ Built by `Security::getCSPHeader()` in `src/Security.php`:
 ```php
 $directives = [
     "default-src 'self'" . $localSources,
-    "font-src 'self' data: https://fonts.gstatic.com" . $localSources,
+    "font-src 'self' data:" . $localSources,
     "img-src 'self' data: https:" . $localSources,
-    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com",
+    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com" . self::getEmbedOrigins(),
     "frame-ancestors 'self'",
+    "base-uri 'self'",
     "media-src 'self' https:" . $localSources,
     "script-src 'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'" . $analyticsOrigin . $localSources,
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com" . $localSources,
+    "style-src 'self' 'unsafe-inline'" . $localSources,
     "connect-src 'self'" . $analyticsOrigin . $localSources,
     "worker-src 'self' blob:",
 ];
 ```
 
-`$localSources` (from `Security::getLocalSources()`) appends a space-separated list of `http://` and `ws://` origins for `localhost` and `127.0.0.1` across common dev ports (3000, 3001, 4173, 5173, 5180-5182, 8000, 8080, 8888, 9000, plus the dynamic Vite port read from `.vite-port`). It only applies when `WP_ENVIRONMENT_TYPE` is `local`; in production it resolves to an empty string. `default-src`, `font-src`, `img-src`, `media-src`, `script-src`, `style-src` and `connect-src` all carry this suffix, `frame-src`, `frame-ancestors` and `worker-src` do not.
+`$localSources` (from `Security::getLocalSources()`) appends a space-separated list of `http://` and `ws://` origins for `localhost` and `127.0.0.1` across common dev ports (3000, 3001, 4173, 5173, 5180-5182, 8000, 8080, 8888, 9000, plus the dynamic Vite port read from `.vite-port`). It only applies when `WP_ENVIRONMENT_TYPE` is `local`; in production it resolves to an empty string. `default-src`, `font-src`, `img-src`, `media-src`, `script-src`, `style-src` and `connect-src` all carry this suffix, `frame-src`, `frame-ancestors`, `base-uri` and `worker-src` do not.
 
 `$analyticsOrigin` (from `Security::getAnalyticsOrigin()`) resolves the `rybbit_script_url` option to its `https://` origin and appends it to `script-src` and `connect-src`, so the Rybbit Analytics tracking script (if the plugin is active) can both load and send events. Falls back to the plugin's own default origin when the option is unset, and to an empty string when the value cannot be parsed as a safe `https://` host.
+
+`Security::getEmbedOrigins()` reads the admin-configured `embed_allowed_hosts` option, one host per line, and appends the resulting `https://` origins to `frame-src`. It strips any scheme or path from each entry and drops anything it cannot parse as a plain hostname, so `frame-src` never widens beyond a host list an administrator explicitly entered under Theme-Einstellungen → Analytics → Externe Einbettungen. The hostname pattern is ASCII-only, so an internationalised host must be entered in its punycode form (`xn--...`), not as Unicode.
+
+`Security::isAllowedEmbedHost()` is the shared gate the same layouts use before rendering an iframe: it accepts exactly what `getCSPHeader()` writes into `frame-src`. On top of the host list it rejects a non-default port (only an implicit or explicit `443` passes) and rejects the site's own host together with its `www.`/non-www counterpart, so a same-origin alias in `home_url()` cannot combine with `allow-same-origin` to break the sandbox.
 
 ### Nonce-Based Script Loading
 
@@ -142,6 +147,18 @@ add_filter('acf/update_value/type=url', function ($value) {
 | Email          | `is_email()`                              |
 | HTML (WYSIWYG) | `wp_kses_post()`                          |
 
+### Member Area Shared Password
+
+`Acf::registerPasswordHashing()` (`src/MemberArea/Acf.php`) validates the shared-password field on save via `acf/validate_value/key=field_member_shared_password`, rejecting `<`, `>`, `&` and leading/trailing whitespace before the value is hashed with `wp_hash_password()`. This keeps the hashed value consistent with what `Auth::getSharedPassword()` receives at login: without the check, users without `unfiltered_html` have their input run through `wp_kses_post_deep` on the ACF save path (encoding `&` to `&amp;` and stripping `<`/`>`) before hashing, while the login form submits the raw value, so the hash would never match.
+
+### Seitenpasswort und Mitgliederbereich
+
+Ein WordPress-Seitenpasswort auf einer Mitgliederbereich-Seite ist nur eine
+Anzeigesperre für diese eine Seite. Die Download-Endpunkte prüfen dagegen
+gegen den Mitgliederbereich-Login (`Auth`/`Access`), nicht gegen das
+Seitenpasswort. Empfohlenes Setup ist ausschließlich der Mitgliederbereich-Login,
+ohne zusätzliches Seitenpasswort (Entscheidung 2026-09-05).
+
 ## Nonce Verification
 
 All state-changing actions verify WordPress nonces:
@@ -216,6 +233,17 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=()');
 ```
 
+`Strict-Transport-Security` is set separately, in `SecurityServiceProvider::boot()`:
+
+```php
+// In SecurityServiceProvider.php
+header('Strict-Transport-Security: max-age=63072000; includeSubDomains; preload');
+```
+
+Only sent on HTTPS frontend requests (skipped for admin and AJAX requests, and
+whenever the request is not HTTPS), so it never interferes with a non-HTTPS
+staging login.
+
 ## Database Security
 
 ### Prepared Statements
@@ -245,6 +273,11 @@ echo esc_url($url);
 {!! $trusted_html !!}  // Raw output (use carefully)
 ```
 
+`phpcs.xml` excludes `*.blade.php` because Blade syntax cannot be parsed by phpcs, so the
+WordPress.Security escaping sniffs never run against `templates/`. Escaping in Blade
+templates is instead verified by `tests/Unit/TemplateRenderTest.php` (a hostile-payload
+render pass across all templates) and by the `@kses` Blade directive, not by phpcs.
+
 ## File Security
 
 ### Sensitive Files
@@ -266,6 +299,21 @@ These files should not be web-accessible:
 </FilesMatch>
 ```
 
+## Update-Integritaet
+
+Theme-Updates kommen ueber `ThemeUpdateProvider` (`src/Providers/ThemeUpdateProvider.php`)
+per plugin-update-checker aus GitHub-Releases. Die Release-Pipeline
+(`.github/workflows/release.yml`) legt neben der Release-Zip eine `.sha256`-Datei
+als zweiten Release-Asset ab (`shasum -a 256`-Ausgabe).
+
+Vor der Installation haengt sich `ThemeUpdateProvider::verifyPackageChecksum()` in
+den WordPress-Kernfilter `upgrader_pre_download` ein, laedt die Zip selbst
+herunter und vergleicht ihren Hash gegen die zugehoerige `.sha256`-Datei desselben
+Release. Stimmt die Pruefsumme nicht ueberein, wird die Installation mit einem
+`WP_Error` abgebrochen. Fehlt die `.sha256`-Datei (aeltere Releases vor dieser
+Aenderung), wird das Update nicht blockiert, aber als Warnung ueber
+`LogServiceProvider::warning()` protokolliert.
+
 ## Contact Form Spam Protection
 
 Contact Form 7 submissions pass through server-side heuristics registered in
@@ -276,10 +324,12 @@ no admin configuration, GDPR-clean.
 
 1. **Honeypot** -- a hidden field (`your-website`) is injected into every form.
    Real users never see it; bots that fill every field are flagged.
-2. **Time-trap** -- a signed render timestamp (HMAC, `wp_salt`) is injected.
-   Submissions arriving in under `MIN_SUBMIT_SECONDS` (3s) are flagged. Fails
-   open when the timestamp is missing or its signature mismatches (page cache),
-   so legitimate users are never blocked.
+2. **JS token** -- a hidden field (`_wpcf7_js_token`) starts empty and is only
+   filled client-side on the first interaction with the form. A submission
+   without JavaScript or without any interaction never fills it and is
+   flagged. Replaces an earlier signed-timestamp time-trap, which was inert
+   in production: the timestamp got baked into the cached HTML under
+   full-page caching, so every visitor's form looked "old".
 3. **Link limit** -- submissions with more than `MAX_URLS` (2) URLs across all
    fields are flagged.
 4. **Keyword filter** -- a conservative, high-confidence list (pharma, gambling,

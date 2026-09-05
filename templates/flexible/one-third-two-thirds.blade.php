@@ -17,9 +17,13 @@
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="one-third-two-thirds">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="1/3-2/3" gap="lg" align="items-center">
-        <x-prose>@kses($column_1)</x-prose>
+        <div class="max-w-[58ch]">
+            <x-prose>@kses($column_1)</x-prose>
+        </div>
         <x-card variant="outlined" padding="lg">
-            <x-prose>@kses($column_2)</x-prose>
+            <div class="max-w-[58ch]">
+                <x-prose>@kses($column_2)</x-prose>
+            </div>
         </x-card>
     </x-grid>
 </x-section>

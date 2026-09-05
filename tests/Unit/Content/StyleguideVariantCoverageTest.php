@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Content;
 
-use ReflectionMethod;
 use Tests\Support\TestCase;
 use WordpressStarter\Acf\FlexibleContent;
 use WordpressStarter\Content\StyleguideLayoutData;
@@ -200,11 +199,8 @@ final class StyleguideVariantCoverageTest extends TestCase
      */
     private function registeredChoices(): array
     {
-        $method = new ReflectionMethod(FlexibleContent::class, 'getLayouts');
-        $method->setAccessible(true);
-
         /** @var array<int, array<string, mixed>> $layouts */
-        $layouts = $method->invoke(null);
+        $layouts = $this->invokeStaticMethod(FlexibleContent::class, 'getLayouts');
 
         $result = [];
         foreach ($layouts as $layout) {
@@ -239,7 +235,7 @@ final class StyleguideVariantCoverageTest extends TestCase
             $type = (string) ( $field['type'] ?? '' );
 
             if ($name !== '') {
-                if (in_array($type, ['select', 'radio', 'button_group'], true) && !empty($field['choices'])) {
+                if (in_array($type, ['select', 'radio', 'button_group', 'checkbox'], true) && !empty($field['choices'])) {
                     $choices = array_map('strval', array_keys( (array) $field['choices']));
                     $found[$name] = [
                         'choices' => array_values(array_filter($choices, static fn (string $c): bool => $c !== '')),
@@ -391,13 +387,30 @@ final class StyleguideVariantCoverageTest extends TestCase
             );
         }
 
-        $this->assertGreaterThanOrEqual(
-            6,
-            count($zustaende),
-            'Es sind kaum noch Zustaende geseedet. Wurden sie beim Umbau entfernt?'
-        );
+        // Feste Referenzliste aus StyleguideLayoutData::build(): jeder Anker
+        // dort, der `-zustand-` enthaelt. Eine reine Anzahlpruefung ("mindestens
+        // 6") benennt beim Ausfall nicht, WELCHER Zustand fehlt; diese Liste tut
+        // das, indem sie jeden erwarteten Anker einzeln prueft.
+        $erwarteteZustaende = [
+            'cards-zustand-ohne-bild',
+            'cards-zustand-ein-eintrag',
+            'stats-zustand-letzte-zeile',
+            'pricing-table-zustand-letzte-zeile',
+            'team-zustand-ohne-bild',
+            'testimonials-zustand-ohne-foto',
+            'accordion-zustand-ein-eintrag',
+            'gallery-zustand-ein-bild',
+        ];
 
         $anker = array_column($zustaende, 'anker');
+
+        foreach ($erwarteteZustaende as $erwarteterAnker) {
+            $this->assertContains(
+                $erwarteterAnker,
+                $anker,
+                "Zustand {$erwarteterAnker} ist nicht mehr geseedet. Wurde er beim Umbau entfernt?"
+            );
+        }
         $this->assertSame(
             $anker,
             array_values(array_unique($anker)),

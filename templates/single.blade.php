@@ -4,26 +4,30 @@
     @if (have_posts())
         @while (have_posts()) @php the_post(); @endphp
             <article class="single-post container mx-auto max-w-3xl px-4 py-16 md:py-24">
-                <header class="mb-8">
-                    <x-link :url="get_post_type_archive_link('post')" variant="dark" iconLeft="chevron-left" size="sm" class="mb-4">
-                        {{ __('Zurück zur Übersicht', 'wp-starter') }}
-                    </x-link>
-                    <h1 class="mb-4">{{ get_the_title() }}</h1>
-                    <div class="flex items-center gap-3">
-                        <x-badge variant="gray" style="outline">{{ get_the_date() }}</x-badge>
-                        <x-badge variant="gray" style="outline">{{ get_reading_time() }}</x-badge>
-                    </div>
-                </header>
+                @if (post_password_required())
+                    @include('partials.password-form')
+                @else
+                    <header class="mb-8">
+                        <x-link :url="get_post_type_archive_link('post')" variant="dark" iconLeft="chevron-left" size="sm" class="mb-4">
+                            {{ __('Zurück zur Übersicht', 'wp-starter') }}
+                        </x-link>
+                        <h1 class="mb-4">{{ get_the_title() }}</h1>
+                        <div class="flex items-center gap-3">
+                            <x-badge variant="gray" style="outline">{{ get_the_date() }}</x-badge>
+                            <x-badge variant="gray" style="outline">{{ get_reading_time() }}</x-badge>
+                        </div>
+                    </header>
 
-                @if (has_post_thumbnail())
-                    <figure class="mb-8">
-                        {!! get_the_post_thumbnail(null, 'content', ['class' => 'w-full h-auto rounded-lg']) !!}
-                    </figure>
+                    @if (has_post_thumbnail())
+                        <figure class="mb-8">
+                            {!! get_the_post_thumbnail(null, 'content', ['class' => 'w-full h-auto rounded-lg']) !!}
+                        </figure>
+                    @endif
+
+                    <x-prose>
+                        @php the_content(); @endphp
+                    </x-prose>
                 @endif
-
-                <div class="prose max-w-none">
-                    @php the_content(); @endphp
-                </div>
             </article>
 
             {{-- Post Navigation --}}
@@ -39,7 +43,7 @@
                         <div class="flex-1">
                             @if ($hasPrev)
                                 <span class="text-body-small text-content-secondary mb-2 block">{{ __('Vorheriger Beitrag', 'wp-starter') }}</span>
-                                <a href="{{ get_permalink($prevPost) }}" aria-label="{{ __('Vorheriger Beitrag', 'wp-starter') }}: {{ get_the_title($prevPost) }}" class="inline-flex items-center gap-1.5 text-content hover:text-content-brand transition-colors focus-visible:shadow-[var(--shadow-focus-ring-ghost)] focus-visible:outline-none rounded-sm">
+                                <a href="{{ get_permalink($prevPost) }}" aria-label="{{ __('Vorheriger Beitrag', 'wp-starter') }}: {{ get_the_title($prevPost) }}" class="inline-flex items-center gap-1.5 text-content hover:text-content-brand transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] rounded-sm">
                                     <x-icon name="chevron-left" class="w-4 h-4" />
                                     {{ get_the_title($prevPost) }}
                                 </a>
@@ -48,7 +52,7 @@
                         <div class="flex-1 text-right">
                             @if ($hasNext)
                                 <span class="text-body-small text-content-secondary mb-2 block">{{ __('Nächster Beitrag', 'wp-starter') }}</span>
-                                <a href="{{ get_permalink($nextPost) }}" aria-label="{{ __('Nächster Beitrag', 'wp-starter') }}: {{ get_the_title($nextPost) }}" class="inline-flex items-center justify-end gap-1.5 text-content hover:text-content-brand transition-colors focus-visible:shadow-[var(--shadow-focus-ring-ghost)] focus-visible:outline-none rounded-sm">
+                                <a href="{{ get_permalink($nextPost) }}" aria-label="{{ __('Nächster Beitrag', 'wp-starter') }}: {{ get_the_title($nextPost) }}" class="inline-flex items-center justify-end gap-1.5 text-content hover:text-content-brand transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] rounded-sm">
                                     {{ get_the_title($nextPost) }}
                                     <x-icon name="chevron-right" class="w-4 h-4" />
                                 </a>

@@ -8,12 +8,29 @@ import { createStatsCounterCore, type StatsCounterCore } from './stats-counter';
 import { initColumnHeadingAlignment } from './column-headings';
 
 // Declare localized strings from WordPress (object name is fixed as 'themeStrings' for all themes)
-declare const themeStrings: {
-  submenuOpen: string;
-  submenuClose: string;
-  image: string;
-  imageZoomInstruction: string;
+declare const themeStrings:
+  | {
+      submenuOpen: string;
+      submenuClose: string;
+      image: string;
+      imageZoomInstruction: string;
+    }
+  | undefined;
+
+// German fallback labels, mirroring src/Vite.php:getFrontendStrings(), used
+// when wp_localize_script has not run (e.g. a cached page fragment served
+// without the script data). Without this guard initMobileSubmenus() throws
+// and the whole mobile navigation stays inert.
+const FALLBACK_STRINGS = {
+  submenuOpen: 'Untermenü öffnen',
+  submenuClose: 'Untermenü schließen',
+  image: 'Bild',
+  imageZoomInstruction: 'Klicken oder Enter zum Vergrößern',
 };
+
+function getThemeStrings(): typeof FALLBACK_STRINGS {
+  return typeof themeStrings !== 'undefined' ? themeStrings : FALLBACK_STRINGS;
+}
 
 // ============================================
 // Navigation Component
@@ -58,7 +75,8 @@ export function createNavigationComponent(): NavigationComponent {
         const toggle = document.createElement('button');
         toggle.className = 'submenu-toggle';
         toggle.setAttribute('aria-expanded', 'false');
-        toggle.setAttribute('aria-label', themeStrings.submenuOpen);
+        const strings = getThemeStrings();
+        toggle.setAttribute('aria-label', strings.submenuOpen);
         // Gleiches Chevron wie resources/icons/chevron-down.svg. Hier inline und
         // nicht ueber <x-icon>, weil der Umschalter erst im Browser entsteht.
         // Gezeichnet statt gefuellt war der letzte Rest der zweiten Ikonografie:
@@ -71,7 +89,7 @@ export function createNavigationComponent(): NavigationComponent {
           toggle.setAttribute('aria-expanded', String(isExpanded));
           toggle.setAttribute(
             'aria-label',
-            isExpanded ? themeStrings.submenuClose : themeStrings.submenuOpen
+            isExpanded ? strings.submenuClose : strings.submenuOpen
           );
         };
 
@@ -174,14 +192,42 @@ export function createStatsCounterComponent(target: number): StatsCounterCompone
 // Rybbit Analytics Tracking
 // ============================================
 
-export const CONTENT_SELECTORS =
-  '.prose a, .one-column a, .two-columns a, .three-columns a, .four-columns a, .two-columns-images a, .one-third-columns a';
+// Layout classes shared by the content-link selector, the block-type selector
+// and the block-type regex below. Kept in one array so the three stay in sync
+// when a layout is renamed. `two-columns-images` MUST stay before `two-columns`:
+// regex alternation matches the first successful alternative at a position, not
+// the longest, so the shorter class would otherwise truncate the match.
+export const TRACKED_LAYOUT_CLASSES = [
+  'two-columns-images',
+  'one-column',
+  'two-columns',
+  'three-columns',
+  'four-columns',
+  'one-third-two-thirds',
+  'two-thirds-one-third',
+] as const;
 
-export const BLOCK_TYPE_SELECTOR =
-  '[class*="-column"], .hero, .cta-block, .video, .accordion, .two-columns-images, .one-third-columns';
+// Block types with no content-link tracking selector of their own but still
+// recognized as a distinct block type for analytics.
+export const NON_COLUMN_BLOCK_CLASSES = ['hero', 'cta-block', 'video', 'accordion'] as const;
 
-export const BLOCK_TYPE_REGEX =
-  /(one|two|three|four)-column(?:s)?(?:-images)?|one-third-columns|hero|cta-block|video|accordion/;
+function escapeRegExpChar(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+export const CONTENT_SELECTORS = ['.prose', ...TRACKED_LAYOUT_CLASSES.map((c) => `.${c}`)]
+  .map((selector) => `${selector} a`)
+  .join(', ');
+
+export const BLOCK_TYPE_SELECTOR = [
+  '[class*="-column"]',
+  ...NON_COLUMN_BLOCK_CLASSES.map((c) => `.${c}`),
+  ...TRACKED_LAYOUT_CLASSES.map((c) => `.${c}`),
+].join(', ');
+
+export const BLOCK_TYPE_REGEX = new RegExp(
+  [...TRACKED_LAYOUT_CLASSES, ...NON_COLUMN_BLOCK_CLASSES].map(escapeRegExpChar).join('|')
+);
 
 export function extractBlockType(element: Element): string | null {
   const parentBlock = element.closest(BLOCK_TYPE_SELECTOR);
@@ -191,19 +237,45 @@ export function extractBlockType(element: Element): string | null {
   return match?.[0] || 'unknown';
 }
 
+const PERSONAL_DATA_PROTOCOLS = new Set(['mailto:', 'tel:', 'sms:']);
+
+// mailto:/tel:/sms: hrefs carry personal data (an email address or phone
+// number), and their visible link text is often that same address or number.
+// Forward only the scheme in that case, never the url or the text, so
+// neither ends up in analytics. Shared by content-link and image-link
+// tracking so both redact the same way.
+function applyAnalyticsLinkAttrs(link: HTMLAnchorElement, linkText?: string): void {
+  if (PERSONAL_DATA_PROTOCOLS.has(link.protocol)) {
+    link.setAttribute('data-rybbit-prop-link-type', link.protocol.replace(':', ''));
+    return;
+  }
+
+  // Forward origin + pathname only: the query string and hash can carry
+  // tracking tokens, search terms or other user-entered data that should not
+  // end up in analytics.
+  link.setAttribute('data-rybbit-prop-link-url', link.origin + link.pathname);
+  if (linkText !== undefined) {
+    link.setAttribute('data-rybbit-prop-link-text', linkText);
+  }
+}
+
 export function addContentLinkTracking(link: HTMLAnchorElement): void {
   if (link.hasAttribute('data-rybbit-event')) return;
 
+  const isContactLink = PERSONAL_DATA_PROTOCOLS.has(link.protocol);
   const isExternal = link.hostname && link.hostname !== window.location.hostname;
   const linkText = link.textContent?.trim() || 'Unknown';
 
   link.setAttribute(
     'data-rybbit-event',
-    isExternal ? 'External_Link_Click' : 'Internal_Link_Click'
+    isContactLink
+      ? 'Contact_Link_Click'
+      : isExternal
+        ? 'External_Link_Click'
+        : 'Internal_Link_Click'
   );
   link.setAttribute('data-rybbit-prop-key', 'content_link');
-  link.setAttribute('data-rybbit-prop-link-text', linkText);
-  link.setAttribute('data-rybbit-prop-link-url', link.href);
+  applyAnalyticsLinkAttrs(link, linkText);
 
   const blockType = extractBlockType(link);
   if (blockType) {
@@ -216,7 +288,7 @@ export function addImageLinkTracking(link: HTMLAnchorElement): void {
 
   link.setAttribute('data-rybbit-event', 'Image_Link_Click');
   link.setAttribute('data-rybbit-prop-key', 'image_block');
-  link.setAttribute('data-rybbit-prop-link-url', link.href);
+  applyAnalyticsLinkAttrs(link);
 }
 
 export function initRybbitTracking(): void {
@@ -225,26 +297,6 @@ export function initRybbitTracking(): void {
 
   const imageLinks = document.querySelectorAll<HTMLAnchorElement>('.image a');
   imageLinks.forEach(addImageLinkTracking);
-}
-
-// ============================================
-// Video Consent Handler
-// ============================================
-
-export function initVideoConsent(): void {
-  document.querySelectorAll<HTMLElement>('.video-consent-btn').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const container = btn.closest('.video');
-      const iframe = container?.querySelector<HTMLIFrameElement>('iframe[data-src]');
-      if (iframe) {
-        const src = iframe.getAttribute('data-src');
-        if (src) {
-          iframe.setAttribute('src', src);
-        }
-      }
-    });
-  });
 }
 
 // ============================================
@@ -311,9 +363,10 @@ export async function initGalleryZoom(): Promise<void> {
     // Bild ohne umgebenden Button: dann traegt es die Rolle selbst.
     el.setAttribute('role', 'button');
     el.setAttribute('tabindex', '0');
+    const strings = getThemeStrings();
     el.setAttribute(
       'aria-label',
-      (el.getAttribute('alt') || themeStrings.image) + ' - ' + themeStrings.imageZoomInstruction
+      (el.getAttribute('alt') || strings.image) + ' - ' + strings.imageZoomInstruction
     );
     el.addEventListener('keydown', (e) => {
       if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') {
@@ -391,6 +444,71 @@ export function createBeforeAfterComponent(): BeforeAfterComponent {
 }
 
 // ============================================
+// Styleguide Modul Component
+// ============================================
+
+export interface StyleguideModulComponent extends AlpineMagics {
+  aktiv: number;
+  waehlen(index: number, schreibeHash?: boolean): void;
+  init(): void;
+}
+
+/**
+ * Umschalter fuer die Instanzen eines Styleguide-Moduls (siehe
+ * templates/partials/styleguide-module.blade.php). Die Pfeiltasten-Navigation
+ * bleibt im Blade-Template, weil sie die serverseitig bekannte Anzahl der
+ * Instanzen braucht, die dieser Komponente nicht vorliegt.
+ */
+export function createStyleguideModulComponent(): StyleguideModulComponent {
+  return {
+    // Alpine magic properties ($el, $refs, etc.) are injected at runtime
+    ...({} as AlpineMagics),
+    aktiv: 0,
+
+    waehlen(index: number, schreibeHash = false): void {
+      this.aktiv = index;
+      // Der aria-hidden Trenner-Span zaehlt in children mit, darum ueber die
+      // role=radio-Elemente indizieren statt ueber children.
+      (this.$refs.chips as HTMLElement)
+        .querySelectorAll<HTMLElement>('[role=radio]')
+        [index].focus();
+
+      if (!schreibeHash) return;
+
+      const anker = (this.$el as HTMLElement).querySelectorAll<HTMLElement>('[data-variant]')[index]
+        ?.dataset.variant;
+      if (anker) {
+        // Safari drosselt replaceState (~100 Aufrufe je 30s) und wirft dann
+        // SecurityError. Bewusst still verschluckt: der Hash ist rein
+        // kosmetisch, ein Fehlschlag bleibt folgenlos.
+        try {
+          history.replaceState(null, '', '#' + anker);
+        } catch {
+          // ignored, see comment above
+        }
+      }
+    },
+
+    init(): void {
+      // Deep-Link: der Browser springt auf einen Anker, dessen Instanz
+      // ausgeblendet sein kann. Dann diese aktivieren und erneut anspringen,
+      // weil der erste Sprung ins Leere lief.
+      const ziel = window.location.hash.slice(1);
+      if (!ziel) return;
+
+      const index = Array.from(
+        (this.$el as HTMLElement).querySelectorAll<HTMLElement>('[data-variant]')
+      ).findIndex((panel) => panel.dataset.variant === ziel);
+
+      if (index < 1) return;
+
+      this.aktiv = index;
+      this.$nextTick(() => document.getElementById(ziel)?.scrollIntoView());
+    },
+  };
+}
+
+// ============================================
 // Initialize Application
 // ============================================
 
@@ -405,6 +523,7 @@ Alpine.plugin(intersect);
 Alpine.data('navigation', createNavigationComponent);
 Alpine.data('statsCounter', (target: number) => createStatsCounterComponent(target));
 Alpine.data('beforeAfterSlider', createBeforeAfterComponent);
+Alpine.data('styleguideModul', createStyleguideModulComponent);
 
 /**
  * Positionsanzeige der Styleguide-Sprungnavigation.
@@ -481,11 +600,42 @@ export function initHeaderHeight(): void {
   observer.observe(header);
 }
 
+// ============================================
+// CF7 Spam Trap: JS Token
+// ============================================
+
+/** Hidden field name, mirrors ContactForm7Configurator::JS_TOKEN_FIELD. */
+const CF7_JS_TOKEN_FIELD = '_wpcf7_js_token';
+
+/**
+ * Fills the CF7 JS-token field on the first interaction with a form.
+ *
+ * The field starts empty and only a browser running this script, with a
+ * visitor who actually touches the form, ever fills it. detectSpam() in
+ * ContactForm7Configurator flags submissions where it is still empty. A
+ * constant value is enough: the point is presence, not entropy.
+ */
+export function initCf7SpamTrapTokens(): void {
+  const forms = document.querySelectorAll<HTMLFormElement>('.wpcf7-form');
+
+  forms.forEach((form) => {
+    const tokenField = form.elements.namedItem(CF7_JS_TOKEN_FIELD) as HTMLInputElement | null;
+    if (!tokenField) return;
+
+    const fillToken = (): void => {
+      tokenField.value = 'ok';
+    };
+
+    form.addEventListener('focusin', fillToken, { once: true });
+    form.addEventListener('input', fillToken, { once: true });
+  });
+}
+
 // Initialize features on DOM ready
 document.addEventListener('DOMContentLoaded', async () => {
   initHeaderHeight();
   initColumnHeadingAlignment();
   initRybbitTracking();
-  initVideoConsent();
+  initCf7SpamTrapTokens();
   await initGalleryZoom();
 });

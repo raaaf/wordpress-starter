@@ -52,20 +52,20 @@
 
                     {{-- Quote --}}
                     <blockquote class="text-body-large italic flex-grow mb-6 text-content-secondary">
-                        "{!! \WordpressStarter\Helpers\Text::lineBreaks($testimonial['quote'] ?? '') !!}"
+                        &bdquo;{!! \WordpressStarter\Helpers\Text::lineBreaks($testimonial['quote'] ?? '') !!}&ldquo;
                     </blockquote>
 
                     {{-- Author --}}
                     <div class="flex items-center gap-4 mt-auto">
                         @if(!empty($testimonial['image']))
-                            {!! wp_get_attachment_image($testimonial['image'], 'avatar', false, [
+                            {!! wp_get_attachment_image((int) $testimonial['image'], 'avatar', false, [
                                 'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $testimonial['image'], $testimonial['author'] ?? ''),
                                 'class' => 'object-cover w-12 h-12 rounded-full',
                                 'sizes' => '48px',
                             ]) !!}
                         @endif
                         <div>
-                            <div class="font-semibold text-content">{{ $testimonial['author'] ?? '' }}</div>
+                            <span class="not-italic font-normal text-content">{{ $testimonial['author'] ?? '' }}</span>
                             @if(!empty($testimonial['role']))
                                 <div class="text-body-small text-content-secondary">{{ $testimonial['role'] }}</div>
                             @endif
@@ -75,7 +75,7 @@
             @endforeach
         </x-grid>
     @elseif(current_user_can('edit_posts'))
-        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+        <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge Kundenstimmen hinzu oder wähle eine Quelle mit Einträgen.', 'wp-starter') }}</p>
         </div>
     @endif

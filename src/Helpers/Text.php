@@ -77,7 +77,7 @@ class Text
         }
 
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Entwicklerhinweis, kein Frontend-Output.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped,WordPress.PHP.DevelopmentFunctions.error_log_trigger_error -- Entwicklerhinweis, kein Frontend-Output.
             trigger_error(
                 sprintf('Bild #%d hat keinen Alt-Text und keinen Kontext.', (int) $attachmentId),
                 E_USER_WARNING

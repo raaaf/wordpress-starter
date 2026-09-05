@@ -38,22 +38,23 @@
         <div @if($billingToggle) x-data="{ yearly: false }" @endif>
         @if($billingToggle)
             <div class="flex justify-center mb-8">
-                <div class="inline-flex rounded-[var(--radius-md)] border border-line overflow-hidden" role="group" aria-label="{{ __('Abrechnungszeitraum', 'wp-starter') }}">
+                <div class="inline-flex items-center gap-1 p-1 border rounded-full border-line bg-surface-secondary" role="group" aria-label="{{ __('Abrechnungszeitraum', 'wp-starter') }}">
                     <button type="button"
                             @click="yearly = false"
                             :aria-pressed="!yearly"
-                            :class="yearly ? 'bg-surface text-content-secondary' : 'bg-surface-brand text-content-on-brand'"
-                            class="px-5 py-2 cursor-pointer transition-colors focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]">
+                            :class="yearly ? 'text-content-secondary hover:text-content' : 'bg-[var(--bg-brand-tint)] text-content-brand ring-1 ring-inset ring-[var(--border-brand)]'"
+                            class="inline-flex items-center justify-center min-h-11 px-3 py-1 text-sm font-normal transition-colors duration-200 rounded-full cursor-pointer focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
                         {{ __('Monatlich', 'wp-starter') }}
                     </button>
                     <button type="button"
                             @click="yearly = true"
                             :aria-pressed="yearly"
-                            :class="yearly ? 'bg-surface-brand text-content-on-brand' : 'bg-surface text-content-secondary'"
-                            class="px-5 py-2 cursor-pointer transition-colors focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]">
+                            :class="yearly ? 'bg-[var(--bg-brand-tint)] text-content-brand ring-1 ring-inset ring-[var(--border-brand)]' : 'text-content-secondary hover:text-content'"
+                            class="inline-flex items-center justify-center min-h-11 px-3 py-1 text-sm font-normal transition-colors duration-200 rounded-full cursor-pointer focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
                         {{ __('Jährlich', 'wp-starter') }}
                     </button>
                 </div>
+                <span class="sr-only" aria-live="polite" x-text="yearly ? '{{ esc_js(__('Preise jährlich', 'wp-starter')) }}' : '{{ esc_js(__('Preise monatlich', 'wp-starter')) }}'"></span>
             </div>
         @endif
 
@@ -75,9 +76,9 @@
                     $priceYearly = $priceYearly !== '' ? $priceYearly : $price;
                     $periodYearly = $periodYearly !== '' ? $periodYearly : $period;
                 @endphp
-                <div class="relative flex flex-col w-full p-8 rounded-[var(--card-radius)] border {{ $itemClass }} {{ $isFeatured ? 'bg-surface-brand text-content-on-brand border-line-brand shadow-[var(--shadow-card-hover)]' : 'bg-surface-secondary border-line shadow-[var(--shadow-card)]' }}">
+                <div class="relative flex flex-col w-full p-8 rounded-[var(--card-radius)] surface-sheen border {{ $itemClass }} {{ $isFeatured ? 'bg-surface-brand text-content-on-brand border-line-brand' : 'bg-surface-secondary border-line' }}">
                     @if($isFeatured)
-                        <x-badge variant="accent" size="md" class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                        <x-badge variant="accent" size="md" class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-surface! text-content-brand! border border-line-brand">
                             {{ __('Empfohlen', 'wp-starter') }}
                         </x-badge>
                     @endif
@@ -101,7 +102,7 @@
                     </div>
 
                     @if($features)
-                        <div class="flex-grow mb-8 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_li]:pl-1 {{ $isFeatured ? 'text-content-on-brand [&_li]:marker:text-content-on-brand' : 'text-content [&_li]:marker:text-content-brand' }}">
+                        <div class="flex-grow mb-8 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_li]:pl-1 {{ $isFeatured ? 'text-content-on-brand [&_li::marker]:text-content-on-brand' : 'text-content [&_li::marker]:text-content-brand' }}">
                             {!! wp_kses_post($features ?? '') !!}
                         </div>
                     @endif
@@ -111,7 +112,7 @@
                             :url="$cta['url'] ?? '#'"
                             :target="$cta['target'] ?? '_self'"
                             :title="$cta['title'] ?? __('Auswählen', 'wp-starter')"
-                            :variant="$isFeatured ? 'secondary' : 'primary'"
+                            :variant="$isFeatured ? 'inverse' : 'primary'"
                             size="lg"
                             class="w-full justify-center"
                         />
@@ -121,7 +122,7 @@
         </div>
         </div>
     @elseif(current_user_can('edit_posts'))
-        <div class="p-8 text-center rounded-[var(--card-radius)] bg-surface-secondary">
+        <div class="p-8 text-center rounded-[var(--card-radius)] bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge mindestens ein Preispaket hinzu.', 'wp-starter') }}</p>
         </div>
     @endif

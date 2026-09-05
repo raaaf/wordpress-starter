@@ -210,7 +210,9 @@ class Acf
 
     private static function registerPasswordHashing(): void
     {
-        // Never show the stored hash in the admin input field — only when rendering an ACF field form, not during AJAX
+        // Never show the stored hash in the admin input field, but not on admin-ajax:
+        // Auth::getSharedPassword() reads this field via get_field() during member
+        // AJAX requests (login, download, downloads_query), so hiding it there breaks auth.
         add_filter('acf/load_value/key=field_member_shared_password', function ($value) {
             if (is_admin() && !wp_doing_ajax()) {
                 return '';
@@ -218,6 +220,21 @@ class Acf
 
             return $value;
         }, 10, 1);
+
+        // Reject characters that acf/update_value_shared_password's save path
+        // (wp_kses_post_deep, for users without unfiltered_html) would strip or
+        // encode before hashing, so the hash always matches the raw login input.
+        add_filter('acf/validate_value/key=field_member_shared_password', function ($valid, $value, $field) {
+            if (!$valid || empty($value) || !is_string($value)) {
+                return $valid;
+            }
+
+            if (preg_match('/[<>&]/', $value) || $value !== trim($value)) {
+                return __('Das Passwort darf keine spitzen Klammern oder & enthalten.', 'wp-starter');
+            }
+
+            return $valid;
+        }, 10, 3);
 
         // Hash password before saving to ACF options
         add_filter('acf/update_value/key=field_member_shared_password', function ($value) {

@@ -88,7 +88,9 @@ if (!function_exists('get_reading_time')) {
         }
 
         $content = wp_strip_all_tags($post->post_content);
-        $wordCount = str_word_count($content);
+        // str_word_count() is not UTF-8 aware and undercounts German words with
+        // umlauts (ä, ö, ü), so match Unicode letter sequences instead.
+        $wordCount = preg_match_all('/\p{L}+/u', $content);
         $minutes = max(1, (int) ceil($wordCount / $wordsPerMinute));
 
         return sprintf('%d Min. Lesezeit', $minutes);
@@ -112,6 +114,20 @@ if (!function_exists('wp_starter_consent_banner')) {
     function wp_starter_consent_banner(): void
     {
         do_action('wp_starter_consent_banner');
+    }
+}
+
+if (!function_exists('wp_starter_js_literal')) {
+    /**
+     * Encode a value as a JSON literal for embedding inside a `<script>` block.
+     *
+     * Escapes `<`, `&`, `'` and `"` so the literal is safe next to a
+     * surrounding HTML/script context. For use inside `<script>` blocks only,
+     * never for attribute context (use `esc_attr()`/`esc_js()` there instead).
+     */
+    function wp_starter_js_literal(mixed $value): string
+    {
+        return wp_json_encode($value, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
     }
 }
 

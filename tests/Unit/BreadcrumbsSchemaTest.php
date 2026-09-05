@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use Tests\Support\TestCase;
-use WordpressStarter\Application;
 
 /**
- * Tests for the breadcrumb JSON-LD schema output.
+ * Tests for the breadcrumbs partial's visual trail.
+ *
+ * The partial used to also render its own BreadcrumbList JSON-LD in the
+ * non-Yoast branch. That duplicated SeoServiceProvider::addBreadcrumbSchema(),
+ * which already emits a BreadcrumbList (including page ancestors) on wp_head
+ * regardless of Yoast. The JSON-LD sink was removed from the partial; only
+ * the visual <ol> trail remains here.
  */
 final class BreadcrumbsSchemaTest extends TestCase
 {
@@ -23,32 +28,36 @@ final class BreadcrumbsSchemaTest extends TestCase
         parent::tearDown();
     }
 
-    public function testJsonLdEscapesScriptTagsInTitle(): void
+    public function testVisualTrailEscapesHostileTitle(): void
     {
         $GLOBALS['wp_mock_is_front_page'] = false;
         $GLOBALS['wp_mock_is_singular'] = false;
         $GLOBALS['wp_mock_is_page'] = false;
-        $GLOBALS['wp_mock_titles'][0] = 'Angebot </script><script>alert(1)</script>';
+        $GLOBALS['wp_mock_titles'][0] = 'Angebot & Nachfrage </script><script>alert(1)</script>';
 
         $output = $this->renderBreadcrumbs();
 
-        $ldJsonStart = strpos($output, '<script type="application/ld+json"');
-        $this->assertNotFalse($ldJsonStart, 'ld+json script block not found');
-        $ldJsonEnd = strpos($output, '</script>', $ldJsonStart);
-        $ldJsonBlock = substr($output, $ldJsonStart, $ldJsonEnd - $ldJsonStart);
+        $this->assertStringNotContainsString('<script>alert(1)</script>', $output);
+        $this->assertStringContainsString('aria-current="page"', $output);
+        $this->assertStringContainsString('&amp; Nachfrage', $output);
+    }
 
-        $this->assertStringNotContainsString('</script><script>', $ldJsonBlock);
-        $this->assertStringContainsString('</script>', $output);
+    public function testPartialNoLongerEmitsItsOwnJsonLd(): void
+    {
+        $GLOBALS['wp_mock_is_front_page'] = false;
+        $GLOBALS['wp_mock_is_singular'] = false;
+        $GLOBALS['wp_mock_is_page'] = false;
+
+        $output = $this->renderBreadcrumbs();
+
+        // Regression guard: BreadcrumbList JSON-LD comes from
+        // SeoServiceProvider::addBreadcrumbSchema() alone now.
+        $this->assertStringNotContainsString('application/ld+json', $output);
+        $this->assertStringNotContainsString('BreadcrumbList', $output);
     }
 
     private function renderBreadcrumbs(): string
     {
-        $app = Application::getInstance();
-        $app->boot();
-
-        $factory = blade();
-        $factory->getFinder()->addLocation(dirname(__DIR__, 2) . '/templates');
-
-        return $factory->make('partials.breadcrumbs')->render();
+        return $this->renderTemplate('partials.breadcrumbs');
     }
 }

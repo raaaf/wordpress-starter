@@ -44,7 +44,7 @@ const appOverrides = appCss.slice(0, themeStart);
  */
 const appTheme = appCss.slice(themeStart);
 
-type Mode = 'light' | 'dark';
+type Mode = 'light' | 'dark' | 'contrast';
 
 /**
  * Drop comments before a selector is classified.
@@ -69,6 +69,14 @@ function stripComments(css: string): string {
  *
  * Dark is declared twice, via [data-theme='dark'] and inside a
  * prefers-color-scheme query; both carry the same values.
+ *
+ * A fourth block exists that this walk used to skip entirely:
+ * `@media (prefers-contrast: more) { :root { ... } }`. Its own selector is
+ * the @media line, which matches none of isDarkSelector/isDarkQuery/
+ * isLightSelector, so the whole block — and any token it declares — was
+ * invisible to every contract below it, for every mode. It is modelled the
+ * same way as the prefers-color-scheme query: recurse into its nested
+ * :root only when the caller actually asked for 'contrast'.
  */
 function blocksFor(css: string, mode: Mode): string {
   const out: string[] = [];
@@ -90,12 +98,17 @@ function blocksFor(css: string, mode: Mode): string {
 
     const isDarkSelector = /\[data-theme=['"]dark['"]\]/.test(selector);
     const isDarkQuery = /prefers-color-scheme:\s*dark/.test(selector);
+    const isContrastQuery = /prefers-contrast:\s*more/.test(selector);
     const isLightSelector = selector.includes(':root') && !isDarkSelector;
 
     if (isDarkQuery) {
       // The query wraps its own :root rule; recurse into it.
       if (mode === 'dark') out.push(blocksFor(body, 'light'));
-    } else if (mode === 'dark' ? isDarkSelector : isLightSelector) {
+    } else if (isContrastQuery) {
+      // Same shape: the query wraps its own :root rule.
+      if (mode === 'contrast') out.push(blocksFor(body, 'light'));
+    } else if (mode !== 'contrast' && (mode === 'dark' ? isDarkSelector : isLightSelector)) {
+      // Nothing outside the prefers-contrast query belongs to that mode.
       out.push(body);
     }
 
@@ -143,7 +156,15 @@ function resolve_(name: string, mode: Mode): string | null {
           declarations(blocksFor(tokensCss, mode)),
           declarations(blocksFor(tokensCss, 'light')),
         ]
-      : [declarations(blocksFor(tokensCss, mode))]),
+      : mode === 'contrast'
+        ? // The query only escalates roles it explicitly names; everything
+          // else falls through to light, the same way an unscoped media
+          // query would resolve in the browser.
+          [
+            declarations(blocksFor(appOverrides, 'light')),
+            declarations(blocksFor(tokensCss, 'light')),
+          ]
+        : [declarations(blocksFor(tokensCss, mode))]),
   ];
 
   let value: string | undefined;
@@ -262,6 +283,9 @@ const TEXT_PAIRS: [string, string, string][] = [
   ['--text-inverse', '--bg-success-strong', 'solid success badge label'],
   ['--text-inverse', '--bg-warning-strong', 'solid warning badge label'],
   ['--text-on-accent', '--bg-accent', 'checkbox mark on the checked fill'],
+  ['--text-brand', '--bg-brand-tint', 'primary button at rest (tint)'],
+  ['--text-on-accent', '--bg-brand', 'primary button on hover (solid fill)'],
+  ['--text-on-accent', '--bg-brand-active', 'primary button when pressed'],
 ];
 
 const UI_PAIRS: [string, string, string][] = [
@@ -278,12 +302,15 @@ const UI_PAIRS: [string, string, string][] = [
 ];
 
 /**
- * The primary button is the one fill built from a gradient, so a single pair
- * cannot describe it: the label has to clear 4.5:1 against BOTH stops, in every
- * interaction state and both schemes. It is also the place the export got wrong
- * — the gradient was declared once and never flipped with the scheme, so in dark
- * mode the fill darkened while --text-inverse was already near-black, and the
- * button lost contrast the more it was used.
+ * The primary button is no longer a gradient fill (rafaelalex.de design
+ * system, section 5): it is a pill, so a single foreground/background pair
+ * describes each state and lives in TEXT_PAIRS above ('primary button at
+ * rest (tint)', 'on hover (solid fill)', 'when pressed').
+ *
+ * These gradient tokens still exist in the export and are still used outside
+ * the button, e.g. the current-page fill in the member-area downloads
+ * pagination (templates/member-area/downloads.blade.php), so the pairs below
+ * keep covering those legacy fills, not the button pill.
  */
 const BUTTON_GRADIENTS: [string, string, string][] = [
   ['--gradient-primary-start', '--gradient-primary-end', 'primary button at rest'],
@@ -295,7 +322,17 @@ const BUTTON_GRADIENTS: [string, string, string][] = [
   ],
 ];
 
-describe.each<Mode>(['light', 'dark'])('contrast contract (%s)', (mode) => {
+/**
+ * 'contrast' is included here on purpose: the same 4.5:1/3:1 floors this
+ * theme guarantees in light/dark must not regress under
+ * `@media (prefers-contrast: more)` either. Since that query currently
+ * escalates nothing (its :root body is empty), resolve_() falls all the way
+ * through to the light values and this reduces to the light contract by
+ * construction — the point is that a future escalation is now measured
+ * instead of silently unmodelled, not that a real third palette is being
+ * checked yet.
+ */
+describe.each<Mode>(['light', 'dark', 'contrast'])('contrast contract (%s)', (mode) => {
   it.each(TEXT_PAIRS)('%s on %s clears 4.5:1 (%s)', (fg, bg) => {
     const [fgValue, bgValue] = [resolve_(fg, mode), resolve_(bg, mode)];
     expect(fgValue, `${fg} does not resolve`).not.toBeNull();
@@ -344,7 +381,7 @@ describe.each<Mode>(['light', 'dark'])('contrast contract (%s)', (mode) => {
 
 describe('focus ring', () => {
   it('is opaque, so it is not washed out by the surface behind it', () => {
-    for (const mode of ['light', 'dark'] as Mode[]) {
+    for (const mode of ['light', 'dark', 'contrast'] as Mode[]) {
       const value = resolve_('--ring-focus', mode);
       expect(value, `--ring-focus does not resolve in ${mode} mode`).not.toBeNull();
       expect(value, `--ring-focus is translucent in ${mode} mode: ${value}`).not.toMatch(
@@ -359,6 +396,14 @@ describe('focus ring', () => {
  *
  * blocksFor() deliberately merges both, because for contrast purposes they are
  * one scheme. Telling them apart is what the mirroring test below needs.
+ *
+ * `@media (prefers-contrast: more)` is not covered by this dual-source
+ * mirroring check: the query is written once, there is no separate
+ * attribute-selected equivalent to disagree with it, so there is nothing to
+ * mirror. Its declarations are still covered by the two general reference-
+ * completeness tests above (they scan appOverrides as plain text, not by
+ * mode) and by the contrast-contract describe.each block below, which is
+ * where a value that IS declared there gets checked.
  */
 function darkBlocksByKind(css: string): { attribute: string; query: string } {
   const out = { attribute: '', query: '' };

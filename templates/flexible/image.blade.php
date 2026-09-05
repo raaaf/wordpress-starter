@@ -53,12 +53,12 @@
              behalten ihr lazy: dort laeuft der Kern gar nicht. --}}
         {!! wp_get_attachment_image($imageId, 'content', false, [
             'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $caption),
-            'class' => 'w-full rounded-[var(--card-radius)] shadow-xl ' . $borderClass,
+            'class' => 'w-full rounded-[var(--card-radius)] ' . $borderClass,
             'sizes' => $sizes,
         ]) !!}
 
         @if($showCaption && ($caption || $alt))
-            <figcaption class="mt-4 text-sm text-content-secondary text-center">
+            <figcaption class="mt-4 text-body-small text-content-secondary text-center">
                 {{ $caption ?: $alt }}
             </figcaption>
         @endif

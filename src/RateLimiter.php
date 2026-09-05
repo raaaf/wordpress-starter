@@ -18,11 +18,16 @@ namespace WordpressStarter;
  */
 class RateLimiter
 {
-    private string $key;
+    /**
+     * Object cache group used when a persistent object cache is available.
+     */
+    private const CACHE_GROUP = 'rate_limit';
 
-    private int $maxAttempts;
+    private readonly string $key;
 
-    private int $decaySeconds;
+    private readonly int $maxAttempts;
+
+    private readonly int $decaySeconds;
 
     /**
      * Create a new rate limiter instance
@@ -46,19 +51,20 @@ class RateLimiter
     /**
      * Check if the rate limit has been exceeded and record an attempt
      *
+     * With a persistent object cache, the count is incremented atomically
+     * via wp_cache_add()/wp_cache_incr() so concurrent requests cannot all
+     * pass. Without one, the transient path below is best-effort: it reads
+     * the transient exactly once and writes the incremented value right
+     * away to keep the race window as small as possible, but two requests
+     * arriving inside that window can still both be counted as attempt 1.
+     *
      * @return bool True if the request is allowed, false if rate limited
      */
     public function attempt(): bool
     {
-        $current = $this->getCurrentAttempts();
+        $count = $this->recordAttempt();
 
-        if ($current >= $this->maxAttempts) {
-            return false;
-        }
-
-        $this->incrementAttempts($current);
-
-        return true;
+        return $count <= $this->maxAttempts;
     }
 
     /**
@@ -82,6 +88,17 @@ class RateLimiter
      */
     public function retryAfter(): int
     {
+        if ($this->usingExternalObjectCache()) {
+            $found = false;
+            $expires = wp_cache_get($this->expiresCacheKey(), self::CACHE_GROUP, false, $found);
+
+            if (!$found || !is_int($expires)) {
+                return 0;
+            }
+
+            return max(0, $expires - time());
+        }
+
         $data = get_transient($this->key);
         if (!is_array($data) || !isset($data['expires'])) {
             return 0;
@@ -96,13 +113,22 @@ class RateLimiter
     public function clear(): void
     {
         delete_transient($this->key);
+        wp_cache_delete($this->key, self::CACHE_GROUP);
+        wp_cache_delete($this->expiresCacheKey(), self::CACHE_GROUP);
     }
 
     /**
-     * Get the current number of attempts
+     * Get the current number of attempts, without recording a new one
      */
     private function getCurrentAttempts(): int
     {
+        if ($this->usingExternalObjectCache()) {
+            $found = false;
+            $count = wp_cache_get($this->key, self::CACHE_GROUP, false, $found);
+
+            return $found ? (int) $count : 0;
+        }
+
         $data = get_transient($this->key);
 
         if (!is_array($data)) {
@@ -120,25 +146,67 @@ class RateLimiter
     }
 
     /**
-     * Increment the attempt counter
+     * Record an attempt and return the resulting count for the current window.
+     *
+     * When a persistent object cache is available, the count is stored and
+     * incremented atomically via wp_cache_add()/wp_cache_incr(), so
+     * concurrent requests cannot read the same stale count. Without a
+     * persistent object cache, the transient is read exactly once and
+     * written back immediately with the incremented value.
      */
-    private function incrementAttempts(int $current): void
+    private function recordAttempt(): int
     {
-        $data = get_transient($this->key);
+        if ($this->usingExternalObjectCache()) {
+            // Seed the window on first use; a no-op if it already exists.
+            wp_cache_add($this->expiresCacheKey(), time() + $this->decaySeconds, self::CACHE_GROUP, $this->decaySeconds);
+            wp_cache_add($this->key, 0, self::CACHE_GROUP, $this->decaySeconds);
 
-        if (!is_array($data) || !isset($data['expires']) || $data['expires'] <= time()) {
+            $count = wp_cache_incr($this->key, 1, self::CACHE_GROUP);
+
+            // wp_cache_incr() returns false if the key vanished between the
+            // add() above and the incr() (e.g. TTL expiry race); treat that
+            // as the first attempt of a fresh window.
+            return $count === false ? 1 : $count;
+        }
+
+        $data = get_transient($this->key);
+        $now = time();
+
+        if (!is_array($data) || !isset($data['expires']) || $data['expires'] <= $now) {
             // Start a new window
+            $count = 1;
             $data = [
                 'count' => 1,
-                'expires' => time() + $this->decaySeconds,
+                'expires' => $now + $this->decaySeconds,
             ];
         } else {
             // Increment existing window
-            $data['count'] = $current + 1;
+            $count = (int) ( $data['count'] ?? 0 ) + 1;
+            $data['count'] = $count;
         }
 
         // Store with expiration slightly longer than the decay to ensure cleanup
         set_transient($this->key, $data, $this->decaySeconds + 10);
+
+        return $count;
+    }
+
+    /**
+     * Whether a persistent object cache is available for atomic counting
+     */
+    private function usingExternalObjectCache(): bool
+    {
+        // Returns null (not false) until wp_start_object_cache() ran, and some
+        // cache plugins leave it null on admin-ajax; treat null as "no cache".
+        return (bool) wp_using_ext_object_cache();
+    }
+
+    /**
+     * Cache key that stores the current window's expiry timestamp
+     */
+    private function expiresCacheKey(): string
+    {
+        return $this->key . '_expires';
     }
 
     /**
@@ -170,10 +238,18 @@ class RateLimiter
         foreach ($forwardedHeaders as $header) {
             if (!empty($_SERVER[$header])) {
                 $ip = sanitize_text_field(wp_unslash($_SERVER[$header]));
-                // X-Forwarded-For can contain multiple IPs, take the first
+                // X-Forwarded-For can contain multiple IPs: the client controls the
+                // leftmost entries, so take the rightmost one, which is the one
+                // appended by the trusted proxy itself.
                 if (str_contains($ip, ',')) {
-                    $ip = trim(explode(',', $ip)[0]);
+                    $ipParts = explode(',', $ip);
+                    $ip = trim( (string) end($ipParts));
                 }
+
+                if (filter_var($ip, FILTER_VALIDATE_IP) === false) {
+                    $ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''));
+                }
+
                 break;
             }
         }

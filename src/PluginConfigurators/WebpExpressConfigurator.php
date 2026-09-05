@@ -7,10 +7,9 @@ namespace WordpressStarter\PluginConfigurators;
 /**
  * Configures WebP Express plugin
  *
- * Settings applied:
- * - Auto-conversion: Enabled
- * - Quality: 80%
- * - WebP serving via redirect
+ * WebP Express stores its configuration exclusively in a JSON file, not in
+ * wp_options, so this configurator currently applies no settings. It stays
+ * registered as a placeholder in case a supported write path is added later.
  *
  * @see https://wordpress.org/plugins/webp-express/
  */
@@ -28,58 +27,18 @@ class WebpExpressConfigurator extends AbstractPluginConfigurator
 
     protected static function doConfigure(): void
     {
-        // WebP Express stores config in a JSON file and wp_options
-        $config = [
-            // Enable conversion
-            'operation-mode' => 'varied-image-responses',
-
-            // Quality settings
-            'quality' => 80,
-            'max-quality' => 85,
-            'quality-specific' => [
-                'jpeg' => 80,
-                'png' => 85,
-            ],
-
-            // Conversion settings
-            'converters' => [
-                // Try multiple converters in order of preference
-                ['converter' => 'cwebp', 'options' => []],
-                ['converter' => 'gd', 'options' => []],
-                ['converter' => 'imagick', 'options' => []],
-            ],
-
-            // Metadata handling
-            'metadata' => 'none', // Strip metadata for smaller files
-
-            // Enable features
-            'enable-redirection-to-webp-realizer' => true,
-            'enable-redirection-to-converter' => true,
-
-            // Don't use cloud service
-            'web-service' => false,
-
-            // Destination folder
-            'destination-folder' => 'separate',
-            'destination-extension' => 'append',
-
-            // Cache settings
-            'cache-control' => 'set',
-            'cache-control-max-age' => 31536000, // 1 year
-        ];
-
-        // Store in wp_options (WebP Express reads from here on some setups)
-        update_option('webp-express-config', $config);
-
-        // Note: WebP Express primarily uses JSON config files
-        // The wp_options storage serves as initial configuration
-        // that WebP Express will pick up on first admin visit
-
-        self::markConfigured();
+        // WebP Express reads its configuration exclusively from a JSON file
+        // (see \WebPExpress\Config::loadConfig() / Paths::getConfigFileName()),
+        // never from wp_options. There is no safe public API to write that
+        // file from here (it requires running the plugin's own migration and
+        // fix() pipeline), so this configurator intentionally does not write
+        // any settings. Mark as configured anyway so this runs, and the
+        // admin notice appears, only once instead of on every admin page load.
+        static::markConfigured();
     }
 
     public static function getConfigurationSummary(): string
     {
-        return __('WebP Express: Auto-Konvertierung aktiv, Qualitaet 80%', 'wp-starter');
+        return __('WebP Express: behält seine eigenen Standardeinstellungen, bitte im Plugin selbst konfigurieren', 'wp-starter');
     }
 }

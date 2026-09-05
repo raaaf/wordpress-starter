@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script, terminal output only.
+
 // Nur per CLI ausfuehrbar. Im Theme-Ordner ist die Datei sonst per HTTP
 // erreichbar und wuerde bei jedem Aufruf Bilder erzeugen und schreiben.
 if (\PHP_SAPI !== 'cli') {
@@ -24,8 +28,17 @@ if (\PHP_SAPI !== 'cli') {
  * - eine Massangabe in der Ecke aus Bloecken, damit man die Quelle erkennt,
  *   ohne dass eine Schriftart noetig waere.
  */
-
 $targetDir = dirname(__DIR__) . '/assets/images';
+
+if (!is_dir($targetDir) && !mkdir($targetDir, 0o755, true) && !is_dir($targetDir)) {
+    fwrite(STDERR, "Fehler: Zielordner {$targetDir} konnte nicht angelegt werden.\n");
+    exit(1);
+}
+
+if (!is_writable($targetDir)) {
+    fwrite(STDERR, "Fehler: Zielordner {$targetDir} ist nicht beschreibbar.\n");
+    exit(1);
+}
 
 $palette = [
     1 => ['0f1729', '1e3a5f'],
@@ -62,7 +75,7 @@ function render(string $path, int $w, int $h, string $from, string $to): void
                 $img,
                 (int) round($r1 + ( $r2 - $r1 ) * $t),
                 (int) round($g1 + ( $g2 - $g1 ) * $t),
-                (int) round($b1 + ( $b2 - $b1 ) * $t)
+                (int) round($b1 + ( $b2 - $b1 ) * $t),
             );
             imagefilledrectangle($img, $x, $y, $x + 8, $y, $c);
         }
@@ -101,7 +114,7 @@ function render(string $path, int $w, int $h, string $from, string $to): void
         (int) round($iy + $iconH * 0.30),
         $sunR * 2,
         $sunR * 2,
-        $glyph
+        $glyph,
     );
 
     // Zwei Berge, unten buendig im Rahmen
@@ -129,11 +142,14 @@ function render(string $path, int $w, int $h, string $from, string $to): void
             $my,
             $mx + $i * $unit * 3 + $unit * 2,
             $my + $unit * 2,
-            $mark
+            $mark,
         );
     }
 
-    imagejpeg($img, $path, 82);
+    if (!imagejpeg($img, $path, 82)) {
+        fwrite(STDERR, "Fehler: {$path} konnte nicht geschrieben werden.\n");
+        exit(1);
+    }
 
     printf("%-42s %dx%d  %s\n", basename($path), $w, $h, size_format_local(filesize($path)));
 }

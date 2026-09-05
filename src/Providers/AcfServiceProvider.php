@@ -368,7 +368,7 @@ class AcfServiceProvider extends ServiceProvider
             if ($isDev) {
                 // Development mode - load from Vite dev server
                 $host = config('vite.dev_server.host', 'localhost');
-                $port = config('vite.dev_server.port', 5173);
+                $port = config('vite.dev_server.port', 5180);
                 wp_enqueue_script(
                     'acf-flexible-titles',
                     "http://{$host}:{$port}/resources/js/admin/flexible-titles.ts",

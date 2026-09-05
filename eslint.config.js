@@ -65,14 +65,63 @@ export default tseslint.config(
     },
   },
   {
-    ignores: [
-      'dist/**',
-      'compiled/**',
-      'node_modules/**',
-      'vendor/**',
-      'vite.config.js',
-      'eslint.config.js',
-      'vitest.config.ts',
-    ],
+    // E2E specs log axe violations to the console when a check fails, as a
+    // deliberate diagnostic right before the assertion. Allow console here.
+    files: ['tests/e2e/**/*.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  {
+    // Node-side build/CLI scripts, run outside the browser: no type-aware
+    // parserOptions.project (they aren't part of tsconfig.json). Flat config
+    // merges `languageOptions.globals` across matching blocks rather than
+    // replacing it, so these Node globals are added on top of the browser
+    // globals declared above, not instead of them.
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      parserOptions: {
+        project: null,
+      },
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        Buffer: 'readonly',
+      },
+    },
+  },
+  {
+    // vite.config.js and eslint.config.js are plain Node config files, not
+    // part of tsconfig.json's `include`: no type-aware parserOptions.project.
+    files: ['vite.config.js', 'eslint.config.js'],
+    languageOptions: {
+      parserOptions: {
+        project: null,
+      },
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        Buffer: 'readonly',
+      },
+    },
+  },
+  {
+    // playwright.config.ts and vitest.config.ts are part of tsconfig.json's
+    // `include`, so they are type-checked by `tsc --noEmit`; lint them too so
+    // they don't get type-checked but never linted. They run under Node, not
+    // the browser, so they need Node globals rather than the browser set above.
+    files: ['playwright.config.ts', 'vitest.config.ts'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+      },
+    },
+  },
+  {
+    ignores: ['dist/**', 'compiled/**', 'node_modules/**', 'vendor/**'],
   }
 );

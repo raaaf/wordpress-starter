@@ -29,7 +29,7 @@
         <div class="button-block flex gap-4 {{ $fullWidth ? 'flex-col' : 'flex-wrap items-center ' . $alignmentClasses }}">
             <x-button
                 :url="$button['url']"
-                :title="$button['title'] ?: __('Mehr erfahren', 'wp-starter')"
+                :title="$button['title'] ?: null"
                 :target="$button['target'] ?? '_self'"
                 :variant="$variant"
                 :size="$size"
@@ -39,7 +39,7 @@
             @if($buttonSecondary && !empty($buttonSecondary['url']))
                 <x-button
                     :url="$buttonSecondary['url']"
-                    :title="$buttonSecondary['title'] ?: __('Mehr erfahren', 'wp-starter')"
+                    :title="$buttonSecondary['title'] ?: null"
                     :target="$buttonSecondary['target'] ?? '_self'"
                     variant="secondary"
                     :size="$size"

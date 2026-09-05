@@ -8,85 +8,61 @@
 @php
     ['chip' => $chip, 'headline' => $headline, 'description' => $description, 'alignment' => $alignment]
         = \WordpressStarter\Helpers\SectionHeader::fields();
-    $label_1 = get_sub_field('label_1');
-    $image_1 = get_sub_field('image_1');
-    $column_1 = get_sub_field('column_1');
-    $accordion_1 = get_sub_field('accordion_1') ?: [];
-    $label_2 = get_sub_field('label_2');
-    $image_2 = get_sub_field('image_2');
-    $column_2 = get_sub_field('column_2');
-    $accordion_2 = get_sub_field('accordion_2') ?: [];
-    $label_3 = get_sub_field('label_3');
-    $image_3 = get_sub_field('image_3');
-    $column_3 = get_sub_field('column_3');
-    $accordion_3 = get_sub_field('accordion_3') ?: [];
-    $label_4 = get_sub_field('label_4');
-    $image_4 = get_sub_field('image_4');
-    $column_4 = get_sub_field('column_4');
-    $accordion_4 = get_sub_field('accordion_4') ?: [];
     $background = get_sub_field('background_color') ?: 'primary';
     $layoutId = uniqid();
 
-    // Preserve numeric IDs for wp_get_attachment_image; also build array fallback
-    $imageIds = [];
-    foreach (['image_1', 'image_2', 'image_3', 'image_4'] as $var) {
-        $imageIds[$var] = is_numeric($$var) ? (int) $$var : null;
-        if (is_numeric($$var)) {
-            $imgSrc = wp_get_attachment_image_src($$var, 'hero-split');
-            $$var = [
-                'url' => $imgSrc ? $imgSrc[0] : wp_get_attachment_url($$var),
-                'alt' => get_post_meta($$var, '_wp_attachment_image_alt', true) ?: '',
-                'width' => $imgSrc ? $imgSrc[1] : '',
-                'height' => $imgSrc ? $imgSrc[2] : '',
-            ];
+    $columns = [];
+    $hasAnyColumn = false;
+    foreach ([1, 2, 3, 4] as $col) {
+        $label = get_sub_field("label_{$col}");
+        $imageValue = get_sub_field("image_{$col}");
+        $text = get_sub_field("column_{$col}");
+        $accordion = get_sub_field("accordion_{$col}") ?: [];
+
+        // image_N is registered with return_format 'id' (see
+        // FieldDefinitions::buildColumnImageBlock), so this is always an int or empty.
+        $imgId = is_numeric($imageValue) ? (int) $imageValue : null;
+
+        if ($label || $imgId || $text || !empty($accordion)) {
+            $hasAnyColumn = true;
         }
+
+        $columns[$col] = [
+            'label' => $label,
+            'imgId' => $imgId,
+            'text' => $text,
+            'accordion' => $accordion,
+        ];
     }
 @endphp
 
-@if($chip || $headline || $description
-    || $label_1 || ($image_1 && !empty($image_1['url'])) || $column_1 || !empty($accordion_1)
-    || $label_2 || ($image_2 && !empty($image_2['url'])) || $column_2 || !empty($accordion_2)
-    || $label_3 || ($image_3 && !empty($image_3['url'])) || $column_3 || !empty($accordion_3)
-    || $label_4 || ($image_4 && !empty($image_4['url'])) || $column_4 || !empty($accordion_4))
+@if($chip || $headline || $description || $hasAnyColumn)
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="four-columns-images">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="4" gap="md" align="items-stretch">
-        @foreach([1, 2, 3, 4] as $col)
-            @php
-                $lbl = ${'label_' . $col};
-                $img = ${'image_' . $col};
-                $imgId = $imageIds['image_' . $col];
-                $text = ${'column_' . $col};
-                $acc = ${'accordion_' . $col};
-            @endphp
-            @if($lbl || ($img && !empty($img['url'])) || $text || !empty($acc))
+        @foreach($columns as $col => $data)
+            @if($data['label'] || $data['imgId'] || $data['text'] || !empty($data['accordion']))
             <x-card variant="outlined" padding="none" class="overflow-hidden">
-                @if($imgId)
-                    {!! wp_get_attachment_image($imgId, 'hero-split', false, [
+                @if($data['imgId'])
+                    {!! wp_get_attachment_image($data['imgId'], 'hero-split', false, [
                         'class' => 'w-full aspect-[16/10] object-cover',
-                        'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imgId, $lbl ?: strip_tags((string) $text)),
+                        'alt' => \WordpressStarter\Helpers\Text::imageAlt($data['imgId'], $data['label'] ?: (string) $data['text']),
                         'decoding' => 'async',
                     ]) !!}
-                @elseif($img && !empty($img['url']))
-                    <img src="{{ $img['url'] }}"
-                         alt="{{ $img['alt'] ?? '' }}"
-                         @if(!empty($img['width']) && !empty($img['height']))width="{{ $img['width'] }}" height="{{ $img['height'] }}"@endif
-                         class="w-full aspect-[16/10] object-cover"
-                         loading="lazy">
                 @endif
-                @if($lbl || $text)
-                    <div class="p-6 lg:p-8">
-                        @if($lbl)
-                            <p class="text-sm font-bold uppercase tracking-wider text-content-secondary mb-2">{{ $lbl }}</p>
+                @if($data['label'] || $data['text'])
+                    <div class="p-6 lg:p-8 {{ !empty($data['accordion']) ? 'pb-0 lg:pb-0' : '' }}">
+                        @if($data['label'])
+                            <p class="text-overline text-content-secondary mb-2">{{ $data['label'] }}</p>
                         @endif
-                        @if($text)
-                            <x-prose>@kses($text)</x-prose>
+                        @if($data['text'])
+                            <x-prose>@kses($data['text'])</x-prose>
                         @endif
                     </div>
                 @endif
-                @if(!empty($acc))
+                @if(!empty($data['accordion']))
                     @include('partials.inline-accordion', [
-                        'items' => $acc,
+                        'items' => $data['accordion'],
                         'idPrefix' => 'acc-4ci-' . $layoutId . '-' . $col,
                     ])
                 @endif

@@ -141,12 +141,12 @@ class DesignTokenValidator
                             __('Fehlender Hex-Wert für: %s', 'wp-starter'),
                             $currentPath
                         );
-                    } elseif (!$this->isValidHexColor($value['$value']['hex'])) {
+                    } elseif (!is_string($value['$value']['hex']) || !$this->isValidHexColor($value['$value']['hex'])) {
                         $errors[] = sprintf(
                             /* translators: 1: token path, 2: invalid hex value */
                             __('Ungültiger Hex-Wert für %1$s: %2$s', 'wp-starter'),
                             $currentPath,
-                            $value['$value']['hex']
+                            $this->formatInvalidValue($value['$value']['hex'])
                         );
                     }
                 } elseif (is_string($value['$value'])) {
@@ -168,6 +168,29 @@ class DesignTokenValidator
         }
 
         return $errors;
+    }
+
+    /**
+     * Render a value safely for interpolation into an error message
+     *
+     * @param mixed $value Value to render
+     * @return string Safe string representation
+     */
+    private function formatInvalidValue(mixed $value): string
+    {
+        if ($value === null) {
+            return 'null';
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        if (is_scalar($value)) {
+            return (string) $value;
+        }
+
+        return (string) wp_json_encode($value);
     }
 
     /**

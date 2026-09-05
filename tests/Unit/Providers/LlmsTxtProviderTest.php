@@ -47,9 +47,165 @@ final class LlmsTxtProviderTest extends TestCase
         $this->assertFalse(get_transient('wp_starter_llms_txt_full'));
     }
 
-    public function testRegisterIsNoop(): void
+    public function testRegisterAddsNoHooks(): void
     {
-        $this->expectNotToPerformAssertions();
         $this->provider->register();
+
+        $this->assertSame([], $GLOBALS['wp_mock_hooks']['actions']);
+        $this->assertSame([], $GLOBALS['wp_mock_hooks']['filters']);
+    }
+
+    public function testKeyPageLinksIncludesPublishedPublicFrontPage(): void
+    {
+        $GLOBALS['wp_mock_options']['page_on_front'] = 42;
+        $GLOBALS['wp_mock_post_fields'][42] = ['post_status' => 'publish', 'post_password' => ''];
+        $GLOBALS['wp_mock_titles'][42] = 'Home';
+        $GLOBALS['wp_mock_permalinks'][42] = 'https://example.com/';
+
+        $links = $this->invokeRenderKeyPageLinks();
+
+        $this->assertSame(['- [Home](https://example.com/)'], $links);
+    }
+
+    public function testKeyPageLinksExcludePasswordProtectedFrontPage(): void
+    {
+        $GLOBALS['wp_mock_options']['page_on_front'] = 42;
+        $GLOBALS['wp_mock_post_fields'][42] = ['post_status' => 'publish', 'post_password' => 'secret'];
+        $GLOBALS['wp_mock_titles'][42] = 'Protected Front Page';
+        $GLOBALS['wp_mock_permalinks'][42] = 'https://example.com/';
+
+        $links = $this->invokeRenderKeyPageLinks();
+
+        $this->assertSame([], $links);
+    }
+
+    public function testKeyPageLinksExcludeUnpublishedFrontPage(): void
+    {
+        $GLOBALS['wp_mock_options']['page_on_front'] = 42;
+        $GLOBALS['wp_mock_post_fields'][42] = ['post_status' => 'draft', 'post_password' => ''];
+        $GLOBALS['wp_mock_titles'][42] = 'Draft Front Page';
+        $GLOBALS['wp_mock_permalinks'][42] = 'https://example.com/';
+
+        $links = $this->invokeRenderKeyPageLinks();
+
+        $this->assertSame([], $links);
+    }
+
+    public function testKeyPageLinksExcludePasswordProtectedPostsPage(): void
+    {
+        $GLOBALS['wp_mock_options']['page_for_posts'] = 55;
+        $GLOBALS['wp_mock_post_fields'][55] = ['post_status' => 'publish', 'post_password' => 'secret'];
+        $GLOBALS['wp_mock_titles'][55] = 'Protected Blog Page';
+        $GLOBALS['wp_mock_permalinks'][55] = 'https://example.com/blog/';
+
+        $links = $this->invokeRenderKeyPageLinks();
+
+        $this->assertSame([], $links);
+    }
+
+    public function testKeyPageLinksExcludeUnpublishedPostsPage(): void
+    {
+        $GLOBALS['wp_mock_options']['page_for_posts'] = 55;
+        $GLOBALS['wp_mock_post_fields'][55] = ['post_status' => 'draft', 'post_password' => ''];
+        $GLOBALS['wp_mock_titles'][55] = 'Draft Blog Page';
+        $GLOBALS['wp_mock_permalinks'][55] = 'https://example.com/blog/';
+
+        $links = $this->invokeRenderKeyPageLinks();
+
+        $this->assertSame([], $links);
+    }
+
+    public function testRenderPostLinksExcludesPasswordProtectedPost(): void
+    {
+        $GLOBALS['wp_mock_posts']['post'] = [ (object) ['ID' => 77]];
+        $GLOBALS['wp_mock_post_fields'][77] = ['post_status' => 'publish', 'post_password' => 'secret'];
+        $GLOBALS['wp_mock_titles'][77] = 'Protected Post';
+        $GLOBALS['wp_mock_permalinks'][77] = 'https://example.com/protected/';
+
+        $lines = $this->invokeMethod($this->provider, 'renderPostLinks', ['post']);
+
+        $this->assertSame([], $lines);
+    }
+
+    /** The get_posts() call only queries by post_status/has_password; linkLineForPost() enforces the guard itself, so a non-public post reaching renderPostLinks() must still be dropped. */
+    public function testRenderPostLinksExcludesNonPublicPost(): void
+    {
+        $GLOBALS['wp_mock_posts']['post'] = [ (object) ['ID' => 88]];
+        $GLOBALS['wp_mock_post_fields'][88] = ['post_status' => 'draft', 'post_password' => ''];
+        $GLOBALS['wp_mock_titles'][88] = 'Draft Post';
+        $GLOBALS['wp_mock_permalinks'][88] = 'https://example.com/draft/';
+
+        $lines = $this->invokeMethod($this->provider, 'renderPostLinks', ['post']);
+
+        $this->assertSame([], $lines);
+    }
+
+    public function testRenderPostLinksIncludesPublishedPublicPost(): void
+    {
+        $GLOBALS['wp_mock_posts']['post'] = [ (object) ['ID' => 99]];
+        $GLOBALS['wp_mock_post_fields'][99] = [
+            'post_status' => 'publish',
+            'post_password' => '',
+            'post_excerpt' => 'A short summary.',
+        ];
+        $GLOBALS['wp_mock_titles'][99] = 'Public Post';
+        $GLOBALS['wp_mock_permalinks'][99] = 'https://example.com/public-post/';
+
+        $lines = $this->invokeMethod($this->provider, 'renderPostLinks', ['post']);
+
+        $this->assertSame(
+            ['- [Public Post](https://example.com/public-post/): A short summary.'],
+            $lines,
+        );
+    }
+
+    /** The page_is_protected flag has neither a non-publish post_status nor a post_password, so only the member-area guard in linkLineForPost() catches it. */
+    public function testRenderPostLinksExcludesProtectedPage(): void
+    {
+        $GLOBALS['wp_mock_posts']['page'] = [ (object) ['ID' => 111]];
+        $GLOBALS['wp_mock_post_fields'][111] = ['post_status' => 'publish', 'post_password' => ''];
+        $GLOBALS['wp_mock_titles'][111] = 'Protected Page';
+        $GLOBALS['wp_mock_permalinks'][111] = 'https://example.com/protected-page/';
+        $GLOBALS['wp_mock_fields']['page_is_protected:111'] = true;
+
+        $lines = $this->invokeMethod($this->provider, 'renderPostLinks', ['page']);
+
+        $this->assertSame([], $lines);
+    }
+
+    public function testRenderPostLinksExcludesMemberAreaPage(): void
+    {
+        $GLOBALS['wp_mock_posts']['page'] = [ (object) ['ID' => 112]];
+        $GLOBALS['wp_mock_post_fields'][112] = ['post_status' => 'publish', 'post_password' => ''];
+        $GLOBALS['wp_mock_titles'][112] = 'Member Area';
+        $GLOBALS['wp_mock_permalinks'][112] = 'https://example.com/member-area/';
+        $GLOBALS['wp_mock_fields']['page_is_member_area:112'] = true;
+
+        $lines = $this->invokeMethod($this->provider, 'renderPostLinks', ['page']);
+
+        $this->assertSame([], $lines);
+    }
+
+    public function testRenderPostLinksIncludesProtectedPageForAuthenticatedMember(): void
+    {
+        $GLOBALS['wp_mock_posts']['page'] = [ (object) ['ID' => 113]];
+        $GLOBALS['wp_mock_post_fields'][113] = ['post_status' => 'publish', 'post_password' => ''];
+        $GLOBALS['wp_mock_titles'][113] = 'Protected Page';
+        $GLOBALS['wp_mock_permalinks'][113] = 'https://example.com/protected-page/';
+        $GLOBALS['wp_mock_fields']['page_is_protected:113'] = true;
+        $GLOBALS['wp_mock_current_user_id'] = 7;
+        $GLOBALS['wp_mock_current_user_can'] = ['manage_options' => true];
+
+        $lines = $this->invokeMethod($this->provider, 'renderPostLinks', ['page']);
+
+        $this->assertSame(['- [Protected Page](https://example.com/protected-page/)'], $lines);
+    }
+
+    /**
+     * @return string[]
+     */
+    private function invokeRenderKeyPageLinks(): array
+    {
+        return $this->invokeMethod($this->provider, 'renderKeyPageLinks');
     }
 }

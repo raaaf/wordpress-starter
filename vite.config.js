@@ -12,14 +12,32 @@ const __dirname = dirname(__filename);
 // Image optimization can be added back when plugins support Vite 7
 // Legacy browser support removed - saves ~44KB (modern browsers only)
 
-export default defineConfig({
+// Normalises VITE_HOST into the value Vite's `server.host` option expects:
+// 'true'/'1' (any case) -> boolean true (wildcard, all interfaces)
+// unset -> 'localhost'
+// anything else (e.g. '0.0.0.0') -> passed through as-is; note that
+// '0.0.0.0' exposes the dev server on the LAN, not just this machine.
+function resolveViteHost(value) {
+  if (!value) {
+    return 'localhost';
+  }
+  return ['true', '1'].includes(value.toLowerCase()) ? true : value;
+}
+
+export default defineConfig(({ mode }) => ({
   plugins: [
     // TailwindCSS must be first for optimal performance
     tailwindcss(),
-    visualizer({
-      open: false,
-      filename: 'dist/bundle-analysis.html',
-    }),
+    // Only generate the bundle analysis report for `npm run analyze`,
+    // otherwise it ends up in every production build (and release zip)
+    ...(mode === 'analyze'
+      ? [
+          visualizer({
+            open: false,
+            filename: 'dist/bundle-analysis.html',
+          }),
+        ]
+      : []),
     // Write active port to file so PHP can read it
     {
       name: 'write-port-file',
@@ -76,14 +94,23 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
-    // esbuild minify options (drop console/debugger in production)
-    esbuild: {
-      drop: ['console', 'debugger'],
-    },
   },
+  // esbuild minify options (drop console/debugger in production only)
+  // Must sit at the top level, not under `build` - Vite ignores it there.
+  esbuild:
+    mode !== 'development'
+      ? {
+          drop: ['console', 'debugger'],
+        }
+      : undefined,
   server: {
     origin: process.env.VITE_DEV_SERVER_URL || 'http://localhost:5180',
-    host: true, // Listen on all interfaces
+    // Bind to localhost only by default - Local by Flywheel sites are
+    // reached through https://wordpress.local, the dev server only needs
+    // to be reachable locally for HMR. Set VITE_HOST=true (or 1/True) to
+    // opt in to listening on all interfaces (e.g. testing from another
+    // device).
+    host: resolveViteHost(process.env.VITE_HOST),
     port: parseInt(process.env.VITE_DEV_SERVER_PORT) || 5180,
     strictPort: true,
     cors: {
@@ -94,4 +121,4 @@ export default defineConfig({
       ignored: ['!**/templates/**', '!**/config/**'],
     },
   },
-});
+}));

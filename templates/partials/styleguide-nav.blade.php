@@ -35,9 +35,15 @@
                 continue;
             }
 
+            // section.blade.php slugifies a custom anchor via sanitize_title()
+            // (ComponentId::anchor()) before it lands as the <section> id, e.g.
+            // "Über uns" becomes "ueber-uns". Building the href from the raw
+            // field here without the same slugify step made the jump-link
+            // target diverge from the actual id as soon as the anchor field
+            // contained umlauts, spaces, or uppercase letters.
             $eigener = get_sub_field('section_anchor');
             $sprungziele[$layout] = [
-                'anchor' => $eigener ?: str_replace('_', '-', $layout) . '-' . $zaehler[$layout],
+                'anchor' => $eigener ? \WordpressStarter\Helpers\ComponentId::anchor($eigener) : str_replace('_', '-', $layout) . '-' . $zaehler[$layout],
                 'label' => $labels[$layout],
             ];
         }
@@ -51,7 +57,7 @@
 
 @if(!empty($sprungziele))
     <details class="group sticky z-30 mx-auto mb-8 max-w-7xl px-4 sm:px-6 lg:px-8 top-[calc(var(--header-height,80px)+0.5rem)]">
-        <summary class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-full cursor-pointer select-none border-line bg-surface text-content shadow-[var(--shadow-button)] hover:bg-surface-secondary focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]">
+        <summary class="inline-flex items-center gap-2 px-4 py-2 text-sm font-normal border rounded-full cursor-pointer select-none border-line bg-surface text-content shadow-[var(--shadow-button)] hover:bg-surface-secondary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
             {{ __('Springe zu', 'wp-starter') }}
             {{-- Dreht mit dem Aufklappzustand: vorher zeigte der Pfeil auch bei
                  offener Liste nach unten und behauptete damit das Gegenteil des
@@ -84,16 +90,16 @@
             aria-label="{{ __('Module', 'wp-starter') }}"
             x-data="styleguideSprungnavigation"
             x-on:click="const link = $event.target.closest('a'); if (!link) return; const d = $el.closest('details'); d.open = false; const ziel = document.getElementById(link.getAttribute('href').slice(1)); if (!ziel) return; setTimeout(() => { ziel.setAttribute('tabindex', '-1'); ziel.focus(); })"
-            class="p-5 mt-2 border rounded-[var(--card-radius)] border-line bg-surface shadow-[var(--shadow-card)]"
+            class="p-5 mt-2 border rounded-[var(--card-radius)] border-line bg-surface surface-sheen shadow-[var(--shadow-card)]"
         >
             <ul class="m-0 list-none columns-2 gap-x-8 sm:columns-3 lg:columns-4">
                 @foreach(array_column($sprungziele, 'label', 'anchor') as $anchor => $label)
                     <li class="break-inside-avoid">
                         <a href="#{{ $anchor }}"
                            data-anchor="{{ $anchor }}"
-                           :aria-current="aktiv === '{{ $anchor }}' ? 'true' : null"
-                           :class="aktiv === '{{ $anchor }}' ? 'font-medium text-content' : 'text-content-secondary'"
-                           class="block py-1.5 text-sm no-underline hover:text-content focus-visible:outline-none focus-visible:text-content focus-visible:shadow-[var(--shadow-focus-ring)]">{{ $label }}</a>
+                           :aria-current="aktiv === '{{ $anchor }}' ? 'location' : null"
+                           :class="aktiv === '{{ $anchor }}' ? 'font-normal text-content' : 'text-content-secondary'"
+                           class="block py-1.5 text-sm no-underline hover:text-content focus-visible:text-content focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">{{ $label }}</a>
                     </li>
                 @endforeach
             </ul>

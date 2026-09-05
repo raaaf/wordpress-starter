@@ -122,6 +122,10 @@ final class StyleguideFieldReferenceTest extends TestCase
     private function assertKeinerDerSchluesselTief(array $felder, array $verboten): void
     {
         foreach ($felder as $feld) {
+            if (!is_array($feld)) {
+                continue;
+            }
+
             foreach ($verboten as $schluessel) {
                 $this->assertArrayNotHasKey($schluessel, $feld, sprintf(
                     'Feld "%s" traegt den ACF-Editor-Schluessel "%s", der nicht in die Referenz gehoert.',
@@ -130,7 +134,14 @@ final class StyleguideFieldReferenceTest extends TestCase
                 ));
             }
 
-            $this->assertKeinerDerSchluesselTief($feld['children'], $verboten);
+            // Nicht nur "children" (Repeater/Gruppen): jedes verschachtelte Array
+            // im Feldbaum kann Plumbing-Schluessel tragen und muss mitgeprueft
+            // werden, sonst bleibt ein blinder Fleck neben "children" bestehen.
+            foreach ($feld as $wert) {
+                if (is_array($wert)) {
+                    $this->assertKeinerDerSchluesselTief($wert, $verboten);
+                }
+            }
         }
     }
 
@@ -193,7 +204,7 @@ final class StyleguideFieldReferenceTest extends TestCase
         $mitKindern = 0;
         $rekursivZaehlen = function (array $felder) use (&$mitKindern, &$rekursivZaehlen): void {
             foreach ($felder as $feld) {
-                $mitKindern++;
+                ++$mitKindern;
                 $rekursivZaehlen($feld['children']);
             }
         };

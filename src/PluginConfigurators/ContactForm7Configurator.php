@@ -15,6 +15,12 @@ use WordpressStarter\ThemeContext;
  * Note: CF7 has limited global settings. Most configuration is per-form.
  * This configurator primarily sets up sensible defaults.
  *
+ * Spam protection no longer includes a time-trap: a signed render timestamp
+ * is baked into the cached HTML under full-page caching, so every visitor's
+ * form looked "old" and the time-trap never rejected anything on any
+ * production site (all sites run a page cache). Replaced by a hidden field
+ * that only JavaScript fills on first interaction (see JS_TOKEN_FIELD).
+ *
  * @see https://wordpress.org/plugins/contact-form-7/
  */
 class ContactForm7Configurator extends AbstractPluginConfigurator
@@ -28,11 +34,8 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
     /** Hidden honeypot field name injected into every CF7 form. */
     private const HONEYPOT_FIELD = 'your-website';
 
-    /** Hidden field carrying the signed render timestamp. */
-    private const TIMESTAMP_FIELD = '_cf7_rendered_at';
-
-    /** Submissions faster than this (seconds) are treated as bots. */
-    private const MIN_SUBMIT_SECONDS = 3;
+    /** Hidden field a real browser fills via JS on first form interaction. */
+    private const JS_TOKEN_FIELD = '_wpcf7_js_token';
 
     /** Maximum number of URLs allowed across all submitted fields. */
     private const MAX_URLS = 2;
@@ -87,37 +90,35 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
         // Ein fertiges Formular anlegen, sobald das Plugin aktiv ist.
         add_action('admin_init', [self::class, 'ensureDefaultForm']);
 
-        // Spam protection: inject honeypot + signed timestamp into every form.
+        // Spam protection: inject honeypot + JS-only token into every form.
         add_filter('wpcf7_form_elements', [self::class, 'injectSpamTraps']);
 
         // Pflichtfelder sichtbar kennzeichnen.
         add_filter('wpcf7_form_elements', [self::class, 'markRequiredFields']);
 
-        // Spam protection: server-side heuristics (honeypot, time-trap, links, keywords).
+        // Spam protection: server-side heuristics (honeypot, JS token, links, keywords).
         add_filter('wpcf7_spam', [self::class, 'detectSpam'], 10, 2);
     }
 
     /**
-     * Inject a hidden honeypot field and a signed render timestamp into the form.
+     * Inject a hidden honeypot field and a JS-only token field into the form.
      *
-     * Real users never see or fill the honeypot. The timestamp lets us reject
-     * submissions that arrive implausibly fast (bots). Both are validated in
+     * Real users never see or fill the honeypot. The token field starts
+     * empty and is only filled client-side, on the first interaction with
+     * the form (see resources/js/app.ts). A submission without JavaScript or
+     * without any interaction never fills it. Both are validated in
      * {@see self::detectSpam()}.
      */
     public static function injectSpamTraps(string $elements): string
     {
-        $timestamp = time();
-        $token = $timestamp . '|' . self::signTimestamp($timestamp);
-
         $traps = sprintf(
             '<div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden;">'
                 . '<label>Bitte dieses Feld leer lassen</label>'
                 . '<input type="text" name="%1$s" value="" tabindex="-1" autocomplete="off">'
                 . '</div>'
-                . '<input type="hidden" name="%2$s" value="%3$s">',
+                . '<input type="hidden" name="%2$s" value="">',
             esc_attr(self::HONEYPOT_FIELD),
-            esc_attr(self::TIMESTAMP_FIELD),
-            esc_attr($token),
+            esc_attr(self::JS_TOKEN_FIELD),
         );
 
         return $elements . $traps;
@@ -144,9 +145,15 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
             return self::flag($submission, 'honeypot', 'Honeypot field was filled');
         }
 
-        // 2. Time-trap: forms submitted faster than a human can type.
-        if (self::submittedTooFast()) {
-            return self::flag($submission, 'time-trap', 'Form submitted too fast');
+        // 2. JS token: only a browser running JavaScript that the visitor
+        // interacted with fills this in. Survives full-page caching, unlike
+        // a baked-in render timestamp.
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        $jsToken = isset($_POST[self::JS_TOKEN_FIELD])
+            ? sanitize_text_field(wp_unslash($_POST[self::JS_TOKEN_FIELD])) // phpcs:ignore WordPress.Security.NonceVerification.Missing
+            : '';
+        if ($jsToken === '') {
+            return self::flag($submission, 'no-js', 'JS token field empty');
         }
 
         // 3. Content heuristics on all submitted text.
@@ -222,42 +229,6 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
         }
 
         return implode(' ', $parts);
-    }
-
-    /**
-     * Reject submissions that arrive faster than a human could fill the form.
-     *
-     * Fails open when the timestamp is missing or its signature does not match
-     * (e.g. a page-cached form), so legitimate users are never blocked.
-     */
-    private static function submittedTooFast(): bool
-    {
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing
-        $raw = isset($_POST[self::TIMESTAMP_FIELD])
-            ? sanitize_text_field(wp_unslash($_POST[self::TIMESTAMP_FIELD])) // phpcs:ignore WordPress.Security.NonceVerification.Missing
-            : '';
-        if ($raw === '' || !str_contains($raw, '|')) {
-            return false;
-        }
-
-        [$timestamp, $signature] = explode('|', $raw, 2);
-        $timestamp = (int) $timestamp;
-
-        if (!hash_equals(self::signTimestamp($timestamp), $signature)) {
-            return false;
-        }
-
-        return ( time() - $timestamp ) < self::MIN_SUBMIT_SECONDS;
-    }
-
-    /**
-     * HMAC-sign the render timestamp so it cannot be forged client-side.
-     */
-    private static function signTimestamp(int $timestamp): string
-    {
-        $salt = function_exists('wp_salt') ? wp_salt('nonce') : 'cf7-spam-trap';
-
-        return hash_hmac('sha256', (string) $timestamp, $salt);
     }
 
     /**

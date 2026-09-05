@@ -8,7 +8,10 @@
     $instanceId = uniqid('downloads-');
 @endphp
 
-<div x-data="downloadTable" x-init="init()">
+{{-- Alpine calls init() on Alpine.data components automatically; an
+     explicit x-init="init()" here would run it a second time (double
+     fetch, double $watch registration). --}}
+<div x-data="downloadTable">
 
     {{-- Toolbar --}}
     <div class="flex flex-col sm:flex-row gap-3 mb-5">
@@ -26,36 +29,30 @@
             />
         </div>
 
-        {{-- Category filter — dynamic from facets --}}
+        {{-- Category filter, dynamic from facets --}}
         <div class="sm:w-52">
-            <div class="select relative">
-                <select
-                    x-model="category"
-                    aria-label="{{ __('Kategorie filtern', 'wp-starter') }}"
-                    class="w-full border bg-surface text-content appearance-none cursor-pointer transition-all duration-200 focus:outline-none h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]"
-                >
-                    <option value="">{{ __('Alle Kategorien', 'wp-starter') }}</option>
-                    <template x-for="cat in categories" :key="cat.slug">
-                        <option :value="cat.slug" x-text="cat.label + ' (' + cat.count + ')'"></option>
-                    </template>
-                </select>
-            </div>
+            @include('partials.member-area-filter-select', [
+                'xModel' => 'category',
+                'optionsVar' => 'categories',
+                'ariaLabel' => __('Kategorie filtern', 'wp-starter'),
+                'placeholder' => __('Alle Kategorien', 'wp-starter'),
+                'valueExpr' => 'opt.slug',
+                'textExpr' => "opt.label + ' (' + opt.count + ')'",
+                'keyExpr' => 'opt.slug',
+            ])
         </div>
 
-        {{-- Extension filter — dynamic from facets --}}
+        {{-- Extension filter, dynamic from facets --}}
         <div class="sm:w-40">
-            <div class="select relative">
-                <select
-                    x-model="ext"
-                    aria-label="{{ __('Dateityp filtern', 'wp-starter') }}"
-                    class="w-full border bg-surface text-content appearance-none cursor-pointer transition-all duration-200 focus:outline-none h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]"
-                >
-                    <option value="">{{ __('Alle Typen', 'wp-starter') }}</option>
-                    <template x-for="e in extensions" :key="e.value">
-                        <option :value="e.value" x-text="e.label + ' (' + e.count + ')'"></option>
-                    </template>
-                </select>
-            </div>
+            @include('partials.member-area-filter-select', [
+                'xModel' => 'ext',
+                'optionsVar' => 'extensions',
+                'ariaLabel' => __('Dateityp filtern', 'wp-starter'),
+                'placeholder' => __('Alle Typen', 'wp-starter'),
+                'valueExpr' => 'opt.value',
+                'textExpr' => "opt.label + ' (' + opt.count + ')'",
+                'keyExpr' => 'opt.value',
+            ])
         </div>
 
         {{-- Per-page --}}
@@ -71,8 +68,10 @@
 
     </div>
 
-    {{-- Loading state --}}
-    <div x-show="loading" x-cloak class="space-y-2" role="status" aria-label="{{ __('Dokumente werden geladen...', 'wp-starter') }}">
+    {{-- Loading state: skeleton only before the first result set. Later
+         fetches (typing, filters, paging) keep the table in place and dim it,
+         so the layout does not jump on every keystroke. --}}
+    <div x-show="loading && items.length === 0" x-cloak class="space-y-2" role="status" aria-label="{{ __('Dokumente werden geladen...', 'wp-starter') }}">
         @foreach(range(1, 6) as $i)
             <div class="h-12 bg-surface-secondary rounded-lg animate-pulse"></div>
         @endforeach
@@ -91,27 +90,42 @@
             <div class="text-center py-8 text-content-secondary">
                 <x-icon name="download" class="w-12 h-12 mx-auto mb-3 text-icon-tertiary" />
                 <p>{{ __('Keine Dokumente gefunden.', 'wp-starter') }}</p>
+                <div x-show="search || category || ext" class="mt-4">
+                    <x-button
+                        type="button"
+                        x-on:click="search = ''; category = ''; ext = ''"
+                        :title="__('Filter zurücksetzen', 'wp-starter')"
+                        variant="secondary"
+                        size="sm"
+                    />
+                </div>
             </div>
         </x-card>
     </div>
 
     {{-- Table --}}
-    <div x-show="!loading && !error && items.length > 0" x-cloak>
+    <div
+        x-show="!error && items.length > 0"
+        x-cloak
+        :aria-busy="loading ? 'true' : 'false'"
+        :class="{ 'opacity-60 pointer-events-none': loading }"
+        class="transition-opacity duration-[var(--motion-exit-duration)] motion-reduce:transition-none"
+    >
         <div class="overflow-x-auto rounded-lg border border-line">
             <table class="w-full text-sm">
                 <caption class="sr-only">{{ __('Verfügbare Dokumente', 'wp-starter') }}</caption>
                 <thead>
                     <tr class="bg-surface-secondary border-b border-line">
-                        <th scope="col" class="px-4 py-3 text-left font-semibold text-content-secondary text-xs uppercase tracking-wide">
+                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase tracking-wide">
                             {{ __('Dateiname', 'wp-starter') }}
                         </th>
-                        <th scope="col" class="px-4 py-3 text-left font-semibold text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
+                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
                             {{ __('Typ', 'wp-starter') }}
                         </th>
-                        <th scope="col" class="px-4 py-3 text-left font-semibold text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
+                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
                             {{ __('Kategorie', 'wp-starter') }}
                         </th>
-                        <th scope="col" class="px-4 py-3 text-left font-semibold text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
+                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
                             {{ __('Datum', 'wp-starter') }}
                         </th>
                         <th scope="col" class="px-4 py-3 whitespace-nowrap"><span class="sr-only">{{ __('Aktionen', 'wp-starter') }}</span></th>
@@ -121,48 +135,66 @@
                     <template x-for="item in items" :key="item.id">
                         <tr class="border-t border-line hover:bg-surface-secondary transition-colors">
 
-                            {{-- Title + "Neu"-Badge --}}
+                            {{-- Title + "Neu"-Badge. safeUrl() (member-area.ts) returns an empty
+                                 string for rejected URLs; a rejected URL renders the title as
+                                 plain text instead of a dead link (template x-if keeps the unused
+                                 branch out of the DOM, so no anchor without a working href ever
+                                 announces "opens in new tab" to assistive tech). --}}
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-2 flex-wrap">
-                                    <a
-                                        :href="item.download_url"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="font-medium text-content hover:text-content-accent transition-colors"
-                                    ><span x-text="item.title"></span><span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
-                                    <span
-                                        x-show="item.is_updated"
-                                        class="badge inline-flex w-fit items-center font-medium text-xs px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] gap-[var(--badge-sm-gap)] rounded-full bg-transparent text-content border border-line"
-                                    >{{ __('Neu', 'wp-starter') }}</span>
+                                    <template x-if="item.available && item.download_url">
+                                        <a
+                                            :href="item.download_url"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="font-normal text-content hover:text-content-accent transition-colors"
+                                        ><span x-text="item.title"></span><span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
+                                    </template>
+                                    <template x-if="!item.available || !item.download_url">
+                                        <span class="font-normal text-content" x-text="item.title"></span>
+                                    </template>
+                                    {{-- x-badge never echoes $attributes, so x-show has to sit on a
+                                         wrapping span; the badge itself stays a plain static x-badge. --}}
+                                    <span x-show="item.is_updated">
+                                        <x-badge variant="brand" size="sm">{{ __('Neu', 'wp-starter') }}</x-badge>
+                                    </span>
                                 </div>
                             </td>
 
-                            {{-- Extension badge: dynamic variant, use badge token classes directly --}}
+                            {{-- Extension badge: standardised to gray/outline via x-badge instead of
+                                 the former per-extension colour map; x-badge cannot forward
+                                 :class either, so the wrapping span carries x-show, x-text goes on
+                                 an inner span for the slot content. --}}
                             <td class="px-4 py-3">
-                                <span
-                                    x-show="item.ext"
-                                    class="badge inline-flex w-fit items-center font-medium px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] gap-[var(--badge-sm-gap)] text-xs rounded-md"
-                                    :class="badgeClass()"
-                                    x-text="item.ext"
-                                ></span>
+                                <span x-show="item.ext">
+                                    <x-badge variant="gray" style="outline" size="sm">
+                                        <span x-text="item.ext"></span>
+                                    </x-badge>
+                                </span>
                             </td>
 
                             <td class="px-4 py-3 text-content-secondary" x-text="item.category_label"></td>
                             <td class="px-4 py-3 text-content-secondary tabular-nums" x-text="item.last_modified"></td>
 
-                            {{-- Download button (ghost) --}}
+                            {{-- Download button (ghost, not <x-button>: needs a per-row dynamic
+                                 :href/x-if that the component's static props cannot express).
+                                 safeUrl() (member-area.ts) returns an empty string for rejected
+                                 URLs; item.available alone is not enough (a rejected URL can still
+                                 be "available"), so the link branch requires both, and the
+                                 "Nicht verfügbar" branch covers either failing. template x-if
+                                 keeps the unused branch out of the DOM. --}}
                             <td class="px-4 py-3 text-right">
-                                <a
-                                    x-show="item.available"
-                                    :href="item.download_url"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="button inline-flex items-center justify-center font-semibold transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-none active:scale-[0.98] bg-transparent text-content border border-transparent hover:bg-surface-tertiary active:bg-surface-secondary active:border-line focus-visible:shadow-[var(--shadow-focus-ring-ghost)] px-[var(--button-sm-padding-x)] py-[var(--button-sm-padding-y)] text-xs min-h-[var(--button-sm-min-height)] gap-[var(--button-sm-gap)] rounded-[var(--button-sm-radius)]"
-                                >{{ __('Herunterladen', 'wp-starter') }}<span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
-                                <span
-                                    x-show="!item.available"
-                                    class="text-xs text-content-disabled"
-                                >{{ __('Nicht verfügbar', 'wp-starter') }}</span>
+                                <template x-if="item.available && item.download_url">
+                                    <a
+                                        :href="item.download_url"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="button inline-flex items-center justify-center font-normal transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none active:scale-[0.98] bg-transparent text-content border border-transparent hover:bg-surface-tertiary active:bg-surface-secondary active:border-line focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] px-[var(--button-sm-padding-x)] py-[var(--button-sm-padding-y)] text-xs min-h-[var(--button-sm-min-height)] gap-[var(--button-sm-gap)] rounded-[var(--button-sm-radius)]"
+                                    >{{ __('Herunterladen', 'wp-starter') }}<span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
+                                </template>
+                                <template x-if="!item.available || !item.download_url">
+                                    <span class="text-xs text-content-disabled">{{ __('Nicht verfügbar', 'wp-starter') }}</span>
+                                </template>
                             </td>
 
                         </tr>
@@ -198,10 +230,16 @@
                             type="button"
                             x-on:click="setPage(n)"
                             :class="n === currentPage
-                                ? 'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)] text-content-inverse border-line'
+                                ? 'bg-surface-brand text-content-on-brand border-line'
                                 : 'text-content-secondary hover:bg-surface-secondary border-line'"
-                            class="inline-flex items-center justify-center min-h-11! min-w-11! rounded-md border text-sm font-medium transition-colors"
-                            :aria-label="`{{ __('Seite', 'wp-starter') }} ${n}`"
+                            class="inline-flex items-center justify-center min-h-11! min-w-11! rounded-md border text-sm font-normal transition-colors"
+                            {{-- Raw sink: wp_json_encode() with the JSON_HEX_* flags produces a
+                                 JS string literal whose internal quotes/tags/amp are all
+                                 \u-escaped, so it is safe both as JS and inside this
+                                 single-quoted HTML attribute; esc_js() alone only targets
+                                 single-quoted strings and broke inside the previous backtick
+                                 template literal. --}}
+                            :aria-label='{!! wp_json_encode(__('Seite', 'wp-starter'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!} + " " + n'
                             :aria-current="n === currentPage ? 'page' : false"
                             x-text="n"
                         ></button>
@@ -241,8 +279,17 @@
          die echte Zahl liefert. Waehrend error ebenfalls leer, sonst wuerde
          neben der Fehlermeldung im Alert faelschlich "0 Dokumente" angesagt --
          die Fehlermeldung selbst uebernimmt die Ansage. --}}
-    <p class="text-sm text-content-secondary mt-4" aria-live="polite" aria-atomic="true">
-        <span x-text="(loading || error) ? '' : total + ' ' + '{{ __('Dokumente', 'wp-starter') }}'"></span>
+    <p class="text-sm text-content-secondary mt-4 flex items-center gap-2" aria-live="polite" aria-atomic="true">
+        <span
+            x-show="loading && items.length > 0"
+            x-cloak
+            class="inline-block w-4 h-4 rounded-full border-2 border-line-strong border-t-transparent animate-spin motion-reduce:animate-none"
+            aria-hidden="true"
+        ></span>
+        {{-- Visual only: the live region stays silent while loading (see above),
+             so typing is not interrupted by a "loading" announcement per keystroke. --}}
+        <span x-show="loading && items.length > 0" x-cloak aria-hidden="true">{{ __('Wird geladen …', 'wp-starter') }}</span>
+        <span x-text="(loading || error) ? '' : total + ' ' + '{{ esc_js(__('Dokumente', 'wp-starter')) }}'"></span>
     </p>
 
 </div>

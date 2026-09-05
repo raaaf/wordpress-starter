@@ -4,30 +4,36 @@ on:
   push:
     branches: [master]
 
+permissions:
+  contents: read
+
 jobs:
   # Run tests first before releasing
+  # PHP version fixed at 8.4 here; see ci.yml for the full 8.2/8.4 matrix.
   test:
     name: Test
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # v2.37.0
         with:
-          php-version: "8.4"
+          php-version: '8.4'
           extensions: mbstring, xml, ctype, json
           tools: composer:v2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "22"
-          cache: "npm"
+          node-version: '22'
+          cache: 'npm'
 
       - name: Install PHP dependencies
-        run: composer install --prefer-dist --no-progress
+        run: composer install --prefer-dist --no-progress --no-scripts
 
       - name: Install Node dependencies
         run: npm ci
@@ -58,16 +64,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "22"
-          cache: "npm"
+          node-version: '22'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -87,7 +93,10 @@ jobs:
         run: |
           OUTPUT=$(npx semantic-release 2>&1)
           echo "$OUTPUT"
-          if echo "$OUTPUT" | grep -q "Published release"; then
+          # Fragile: matches semantic-release's log wording, not a stable exit signal.
+          # A wording change in a future semantic-release version can silently
+          # break release detection here without failing the job.
+          if echo "$OUTPUT" | grep -Eiq "published release|published .* release"; then
             echo "released=true" >> $GITHUB_OUTPUT
           else
             echo "released=false" >> $GITHUB_OUTPUT
@@ -101,18 +110,24 @@ jobs:
 
       - name: Setup PHP for packaging
         if: steps.semantic.outputs.released == 'true'
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # v2.37.0
         with:
-          php-version: "8.4"
+          php-version: '8.4'
           tools: composer:v2
 
       - name: Install PHP dependencies for packaging
         if: steps.semantic.outputs.released == 'true'
-        run: composer install --prefer-dist --no-progress --no-dev
+        run: composer install --prefer-dist --no-progress --no-dev --no-scripts
 
       - name: Package theme
         if: steps.semantic.outputs.released == 'true'
         run: npm run package
+
+      - name: Checksum release zip
+        if: steps.semantic.outputs.released == 'true'
+        run: |
+          ZIP=$(ls wp-theme/*.zip | head -1)
+          shasum -a 256 "${ZIP}" > "${ZIP}.sha256"
 
       - name: Upload release asset
         if: steps.semantic.outputs.released == 'true'
@@ -121,4 +136,4 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           ZIP=$(ls wp-theme/*.zip | head -1)
-          gh release upload "v${VERSION}" "${ZIP}" --clobber
+          gh release upload "v${VERSION}" "${ZIP}" "${ZIP}.sha256" --clobber

@@ -8,7 +8,7 @@
 
 ## Voraussetzungen
 
-- [ ] Local by Flywheel mit PHP 8.4+
+- [ ] Local by Flywheel mit PHP 8.2+
 - [ ] Neue WordPress-Instanz (leer)
 - [ ] ACF Pro Lizenz verfügbar
 - [ ] Node.js 20.19+ oder 22.12+
@@ -158,94 +158,72 @@ ls -la dist/
 
 ---
 
-## Phase 6: Block Editor - Hero Block (3 Varianten NEU)
+## Phase 6: ACF Flexible Content im Editor
 
-### 6.1 Variante: Centered
+Kein Gutenberg, kein Block-Editor: Der Classic Editor bekommt sein Flexible-Content-Feld über ACF Extended. Layouts werden über ein visuelles Modal ausgewählt und in einem großen Modal bearbeitet (`src/Acf/AcfExtended.php`).
 
-| #     | Test                 | Erwartet                            | ✓   |
-| ----- | -------------------- | ----------------------------------- | --- |
-| 6.1.1 | Block einfügen       | "Hero" unter Theme Blocks           |     |
-| 6.1.2 | Variante "Zentriert" | Default-Auswahl                     |     |
-| 6.1.3 | Badge-Feld           | Optional, Text                      |     |
-| 6.1.4 | Titel                | Pflichtfeld                         |     |
-| 6.1.5 | Copy (Beschreibung)  | Optional                            |     |
-| 6.1.6 | Primärer CTA         | Link-Feld                           |     |
-| 6.1.7 | Sekundärer CTA       | Link-Feld                           |     |
-| 6.1.8 | Hintergrundfarbe     | Dropdown (primary, secondary, etc.) |     |
-| 6.1.9 | Frontend             | Zentrierter Inhalt, volle Höhe      |     |
-
-### 6.2 Variante: Split
-
-| #     | Test                    | Erwartet                  | ✓   |
-| ----- | ----------------------- | ------------------------- | --- |
-| 6.2.1 | Variante "Split" wählen | Bild-Feld erscheint       |     |
-| 6.2.2 | Bild hochladen          | Rechte Spalte             |     |
-| 6.2.3 | Frontend Desktop        | 50/50 Grid, Content links |     |
-| 6.2.4 | Frontend Mobile         | Bild oben, Content unten  |     |
-
-### 6.3 Variante: Background
-
-| #     | Test                          | Erwartet                             | ✓   |
-| ----- | ----------------------------- | ------------------------------------ | --- |
-| 6.3.1 | Variante "Hintergrund" wählen | Hintergrundbild-Feld                 |     |
-| 6.3.2 | Hintergrundbild hochladen     | Vollbild                             |     |
-| 6.3.3 | Overlay-Slider                | 0-100% Deckkraft                     |     |
-| 6.3.4 | Frontend                      | Bild + Overlay + zentrierter Content |     |
-| 6.3.5 | Dark Mode                     | Overlay-Farbe passt sich an          |     |
+| #    | Test                                | Erwartet                                                                                           | ✓   |
+| ---- | ----------------------------------- | -------------------------------------------------------------------------------------------------- | --- |
+| 6.1  | Layout hinzufügen                   | "Auswählen"-Button öffnet Modal mit 4-Spalten-Grid                                                 |     |
+| 6.2  | Kategorien im Modal                 | Header, Layout, Inhalte, Medien, Interaktiv, Formulare, Beiträge, Interner Bereich, Sonstiges      |     |
+| 6.3  | Layout-Thumbnails                   | Jedes der 36 Layouts zeigt ein Vorschaubild statt nur Text                                         |     |
+| 6.4  | Layout auswählen (z. B. Hero)       | Layout wird eingefügt, Bearbeiten-Modal öffnet sich groß ("large")                                 |     |
+| 6.5  | Feld-Tabs im Modal                  | Layouts mit Tab-Split zeigen "Inhalt" und "Darstellung" als getrennte Tabs                         |     |
+| 6.6  | Layouts ohne Tab-Split              | hero, posts, map, contact-form, die drei `*-columns-images`-Layouts zeigen ihre eigene Gruppierung |     |
+| 6.7  | Layout-Titel bearbeiten             | Freitext-Titel ist editierbar und erscheint in der Layout-Übersicht                                |     |
+| 6.8  | Layout einklappen/ausklappen        | Neu eingefügte Layouts starten eingeklappt (Standard)                                              |     |
+| 6.9  | Layouts per Drag & Drop verschieben | Reihenfolge in der Layout-Liste ändert sich, Frontend übernimmt neue Reihenfolge                   |     |
+| 6.10 | Layout kopieren & einfügen          | Copy/Paste zwischen zwei Layouts (auch seitenübergreifend) funktioniert                            |     |
+| 6.11 | Layout entfernen                    | Entfernen-Button löscht das Layout aus der Liste                                                   |     |
 
 ---
 
-## Phase 7: Block Editor - CTA Block (aktualisiert)
+## Phase 7: Flexible-Content-Layouts im Frontend
 
-| #   | Test             | Erwartet                                | ✓   |
-| --- | ---------------- | --------------------------------------- | --- |
-| 7.1 | Block einfügen   | "Handlungsaufforderung"                 |     |
-| 7.2 | Titel eingeben   | Pflichtfeld                             |     |
-| 7.3 | Beschreibung     | WYSIWYG                                 |     |
-| 7.4 | Button           | Link-Feld                               |     |
-| 7.5 | Hintergrundfarbe | brand / brand-secondary                 |     |
-| 7.6 | Frontend         | Zentrierte Karte mit abgerundeten Ecken |     |
-| 7.7 | Button-Variante  | "inverse" (weiß auf Farbe)              |     |
+Stichprobe über die 36 Layouts aus `templates/flexible/`, je Layout mindestens ein Pflichtfeld leer lassen, um das Verhalten bei unvollständigen Daten zu prüfen.
 
----
-
-## Phase 8: Block Editor - Button Block (NEU)
-
-| #   | Test            | Erwartet                                    | ✓   |
-| --- | --------------- | ------------------------------------------- | --- |
-| 8.1 | Block einfügen  | "Button" unter Theme Blocks                 |     |
-| 8.2 | Text eingeben   | Pflichtfeld                                 |     |
-| 8.3 | Link-Feld       | URL + Target                                |     |
-| 8.4 | Variante        | primary, secondary, outline, ghost, inverse |     |
-| 8.5 | Größe           | sm, md, lg                                  |     |
-| 8.6 | Icon (optional) | Links/Rechts                                |     |
-| 8.7 | Frontend        | Korrekte Styles pro Variante                |     |
+| #    | Layout                                 | Test                                                                   | Erwartet                                                                 | ✓   |
+| ---- | -------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------ | --- |
+| 7.1  | hero                                   | Variante Zentriert/Split/Hintergrund                                   | Je Variante korrektes Layout, Overlay-Regler wirkt nur bei Hintergrund   |     |
+| 7.2  | hero                                   | Zwei Hero-Layouts auf einer Seite                                      | Erstes Hero rendert `<h1>`, jedes weitere `<h2>`                         |     |
+| 7.3  | accordion                              | Mehrere Items, FAQ-Schema                                              | Auf-/Zuklappen funktioniert, strukturierte Daten im Quelltext vorhanden  |     |
+| 7.4  | tabs                                   | Mehrere Tabs mit Inhalt                                                | Tab-Wechsel funktioniert, aktiver Tab visuell markiert                   |     |
+| 7.5  | gallery                                | Mehrere Bilder                                                         | Lightbox öffnet über medium-zoom, kein Alpine-Fehler in der Konsole      |     |
+| 7.6  | posts                                  | Kategorie + Anzahl gesetzt                                             | Passende Beiträge werden dynamisch ausgegeben                            |     |
+| 7.7  | contact-form                           | Gültige CF7-Formular-ID                                                | Contact-Form-7-Formular rendert und sendet ab                            |     |
+| 7.8  | contact-form                           | Keine/ungültige CF7-Formular-ID                                        | Layout zeigt keinen Fehler, sondern verzichtet sichtbar auf das Formular |     |
+| 7.9  | beliebiges Layout mit Pflichtfeld leer | Pflichtfeld (z. B. Titel) nicht ausgefüllt                             | Layout blendet den leeren Bereich aus, kein leerer Tag im Markup         |     |
+| 7.10 | Hintergrundfarbe                       | primary/secondary/tertiary/brand/brand-subtle/inverse je Layout testen | Farbe wird korrekt übernommen, Kontrast passt in Hell und Dunkel         |     |
 
 ---
 
-## Phase 9: Alle Blocks testen
+## Phase 8: Seiteneinstellungen
 
-| #       | Block         | Felder prüfen        | Frontend               | ✓   |
-| ------- | ------------- | -------------------- | ---------------------- | --- |
-| 9.1     | accordion     | Items, FAQ Schema    | Auf/Zuklappen          |     |
-| 9.2     | tabs          | Tabs + Inhalte       | Tab-Wechsel            |     |
-| 9.3     | cards         | Icon, Titel, Link    | Grid-Layout            |     |
-| 9.4     | testimonials  | Zitat, Autor, Bild   | Slider/Grid            |     |
-| 9.5     | gallery       | Bilder               | Lightbox (medium-zoom) |     |
-| 9.6     | stats         | Zahlen, Labels       | Animation beim Scroll  |     |
-| 9.7     | team          | Foto, Name, Position | Grid                   |     |
-| 9.8     | pricing-table | Pakete, Features     | Vergleichstabelle      |     |
-| 9.9     | timeline      | Events, Daten        | Vertikale Timeline     |     |
-| 9.10    | posts         | Kategorie, Anzahl    | Dynamische Posts       |     |
-| 9.11    | before-after  | 2 Bilder             | Slider                 |     |
-| 9.12    | table         | Header, Zeilen       | Responsive Tabelle     |     |
-| 9.13    | map           | Adresse              | DSGVO-Consent → Maps   |     |
-| 9.14    | logo-slider   | Logos                | Carousel               |     |
-| 9.15    | contact-form  | CF7 ID               | Formular (mit CF7)     |     |
-| 9.16    | video         | YouTube/Mediathek    | Player                 |     |
-| 9.17    | image         | Bild, Caption        | Responsive             |     |
-| 9.18    | divider       | Höhe, Farbe          | Abstand                |     |
-| 9.19-27 | Layout-Blocks | Spalten              | InnerBlocks            |     |
+`src/Acf/PageSettings.php` registriert die Metabox "Seiteneinstellungen" für den Post-Type `page`, dazu je Layout die Darstellungs-Felder Breite und Abstand (`src/Acf/FieldDefinitions.php`).
+
+| #   | Test                                   | Erwartet                                                                                                | ✓   |
+| --- | -------------------------------------- | ------------------------------------------------------------------------------------------------------- | --- |
+| 8.1 | Metabox "Seiteneinstellungen" sichtbar | In der Seiten-Bearbeitung, Sidebar, unter den Standard-Metaboxen                                        |     |
+| 8.2 | "Als Landingpage anzeigen" aktivieren  | Navigation, Brotkrumen, Fußnavigation und Social-Links im Frontend ausgeblendet                         |     |
+| 8.3 | Landingpage: Logo, Kontakt, Recht      | Logo, Kontaktdaten und rechtliche Links bleiben trotzdem sichtbar                                       |     |
+| 8.4 | "Als Landingpage anzeigen" deaktiviert | Seite zeigt Navigation und Footer wie gewohnt                                                           |     |
+| 8.5 | Feld "Breite" auf einem Layout         | Container (Standard) vs. Volle Breite: volle Breite nutzt die Fensterbreite, behält aber den Seitenrand |     |
+| 8.6 | Feld "Abstand" auf einem Layout        | Standard, Kompakt, Groß, Ohne verändern den vertikalen Innenabstand sichtbar                            |     |
+
+---
+
+## Phase 9: Styleguide-Seite
+
+`templates/page-styleguide.blade.php` rendert Design-Tokens/Komponenten aus dem echten CSS und darunter eine Galerie aller Flexible-Content-Layouts, gruppiert nach Layout mit Varianten-Schalter.
+
+| #   | Test                                               | Erwartet                                                                                          | ✓   |
+| --- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --- |
+| 9.1 | Ansicht "Design-System" (`?ansicht=design-system`) | Zeigt Farb-Tokens, Typografie und Komponenten aus `styleguide/tokens` und `styleguide/components` |     |
+| 9.2 | Ansicht "Module" (Standard)                        | Zeigt Layout-Galerie, gruppiert nach den 36 Flexible-Content-Layouts                              |     |
+| 9.3 | Varianten-Schalter je Layout                       | Wechselt zwischen mehreren Instanzen desselben Layouts (z. B. Hero-Varianten)                     |     |
+| 9.4 | Navigation innerhalb der Seite                     | Sprungmarken/Nav führen zum passenden Abschnitt                                                   |     |
+| 9.5 | Hell/Dunkel-Umschalter auf der Seite               | Theme-Switcher im Seiten-Header schaltet sofort um, alle Module bleiben lesbar                    |     |
+| 9.6 | Passwortschutz                                     | Bei gesetztem Seitenpasswort erscheint das Passwort-Formular statt der Galerie                    |     |
 
 ---
 
@@ -328,7 +306,7 @@ ls -la dist/
 
 | #    | Test            | Erwartet                 | ✓   |
 | ---- | --------------- | ------------------------ | --- |
-| 13.1 | `npm run dev`   | Vite HMR auf :5173       |     |
+| 13.1 | `npm run dev`   | Vite HMR auf :5180       |     |
 | 13.2 | CSS ändern      | Hot Reload               |     |
 | 13.3 | `npm run build` | Minifiziert, Hashes      |     |
 | 13.4 | `npm run lint`  | Keine Fehler             |     |

@@ -5,15 +5,28 @@
     <!-- Scan these files -->
     <file>./src</file>
     <file>./config</file>
+    <file>./tests</file>
+    <file>./functions.php</file>
+    <file>./index.php</file>
+    <file>./bin</file>
+    <file>./scripts</file>
 
-    <!-- Ignore vendor, compiled files, and Blade templates -->
+    <!-- Ignore vendor, compiled files, and Blade templates. Blade syntax cannot be parsed
+         by phpcs, so templates/ gets no WordPress.Security escaping sniffs from this
+         ruleset at all; escaping in templates/ is covered instead by
+         tests/Unit/TemplateRenderTest.php (hostile-payload render pass) and the @kses
+         Blade directive, not by phpcs. -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/compiled/*</exclude-pattern>
     <exclude-pattern>*/node_modules/*</exclude-pattern>
     <exclude-pattern>*.blade.php</exclude-pattern>
 
+    <!-- ./scripts also holds build-tooling JS (sync-icons.js, transform-tokens.js) that this
+         PHP ruleset was never meant to cover; only the PHP CLI scripts in that folder are in scope. -->
+    <exclude-pattern>*/scripts/*.js</exclude-pattern>
+
     <!-- PHP version -->
-    <config name="minimum_supported_wp_version" value="6.0"/>
+    <config name="minimum_supported_wp_version" value="6.8"/>
     <config name="testVersion" value="8.2-"/>
 
     <!-- Use WordPress coding standards with PSR-4/PSR-12 exclusions -->
@@ -80,8 +93,22 @@
         <!-- Vite handles versioning -->
         <exclude name="WordPress.WP.EnqueuedResourceParameters"/>
 
-        <!-- Allow direct filesystem operations in theme code -->
-        <exclude name="WordPress.WP.AlternativeFunctions"/>
+        <!-- Allow direct filesystem operations in theme code. Narrowed to the
+             filesystem/file_get_contents codes so the curl group (unused in this
+             codebase) and other AlternativeFunctions codes (rand, parse_url,
+             json_encode, strip_tags) stay active. -->
+        <exclude name="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_chmod"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_fclose"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_fopen"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_fread"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_fsockopen"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_mkdir"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_readfile"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_rmdir"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.rename_rename"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.unlink_unlink"/>
 
         <!-- Allow error suppression for fsockopen -->
         <exclude name="WordPress.PHP.NoSilencedErrors"/>
@@ -95,11 +122,11 @@
         <!-- Allow unused method parameters (often required by interfaces/hooks) -->
         <exclude name="Generic.CodeAnalysis.UnusedFunctionParameter"/>
 
-        <!-- Allow debug logging in development -->
-        <exclude name="WordPress.PHP.DevelopmentFunctions"/>
+        <!-- Allow error_log() (see src/Providers/LogServiceProvider.php,
+             config/index.php); other DevelopmentFunctions codes (var_dump, print_r,
+             debug_backtrace, path-disclosure error_reporting) stay active. -->
+        <exclude name="WordPress.PHP.DevelopmentFunctions.error_log_error_log"/>
 
-        <!-- Allow base64 for CSP nonces -->
-        <exclude name="WordPress.PHP.DiscouragedPHPFunctions"/>
     </rule>
 
     <!-- Require newline at end of file -->

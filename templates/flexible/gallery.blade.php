@@ -41,9 +41,12 @@
                              aussen gemalter Ring waere an allen Kanten abgeschnitten. --}}
                         <button type="button" class="block w-full rounded-lg focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--ring-focus)]" aria-label="{{ sprintf(__('Bild vergrößern: %s', 'wp-starter'), $accessibleLabel ?: __('Galeriebild', 'wp-starter')) }}">
                         {!! wp_get_attachment_image($imageId, 'gallery-thumb', false, [
-                            'class' => 'object-cover w-full transition-transform duration-200 ease-out cursor-zoom-in aspect-square gallery-zoom group-hover:scale-[1.03]',
+                            'class' => 'object-cover w-full transition-[transform] duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] cursor-zoom-in aspect-square gallery-zoom group-hover:scale-[1.03]',
                             'sizes' => '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw',
-                            'data-zoom-src' => esc_url($full[0]),
+                            {{-- Kein esc_url hier: wp_get_attachment_image() escaped jedes
+                                 Attribut selbst per esc_attr(), esc_url() vorher haette das
+                                 "&" ein zweites Mal kodiert. --}}
+                            'data-zoom-src' => $full[0],
                         ]) !!}
                         </button>
                         {{-- Permanent zoom cue. The cursor change and the hover scale only
@@ -55,7 +58,9 @@
                             <x-icon name="search" size="lg" />
                         </span>
                         @if($caption)
-                            <figcaption class="absolute inset-x-0 bottom-0 p-3 text-body-small text-content-inverse transition-opacity duration-200 ease-out opacity-0 bg-gradient-to-t from-surface-inverse/70 to-transparent group-hover:opacity-100 group-focus-within:opacity-100">
+                            {{-- Ohne Hover-Faehigkeit (Touch) bleibt die Bildunterschrift dauerhaft
+                                 sichtbar, sonst gibt es keine Moeglichkeit, sie zu erreichen. --}}
+                            <figcaption class="absolute inset-x-0 bottom-0 p-3 text-body-small text-content-inverse transition-[opacity] duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] motion-reduce:transition-none opacity-0 bg-gradient-to-t from-surface-inverse/70 to-transparent group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100">
                                 {{ $caption }}
                             </figcaption>
                         @endif
@@ -64,7 +69,7 @@
             @endforeach
         </x-grid>
     @elseif(current_user_can('edit_posts'))
-        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+        <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge mindestens ein Bild hinzu.', 'wp-starter') }}</p>
         </div>
     @endif

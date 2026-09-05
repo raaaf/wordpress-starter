@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\MemberArea\Access;
+use WordpressStarter\Services\StyleguidePage;
 use WP_Post;
 use WP_Post_Type;
 
@@ -148,26 +150,98 @@ class SeoServiceProvider extends ServiceProvider
      *
      * 404 pages: noindex, follow (broken URLs should not be indexed)
      * Password-protected pages: noindex, nofollow (only the gate is public)
+     * Styleguide page: noindex, nofollow (internal reference, not content)
      */
     private function addRobotsOverrides(): void
     {
         add_filter('wp_robots', function (array $robots): array {
-            if (is_404()) {
-                $robots['noindex'] = true;
-                unset($robots['nofollow']);
+            return $this->applyRobotsOverrides($robots);
+        });
+
+        // Yoast filters its own robots string separately from wp_robots on
+        // some versions, so without this the styleguide/password overrides
+        // above are silently overridden back to indexable when Yoast is active.
+        if (defined('WPSEO_VERSION')) {
+            add_filter('wpseo_robots', function (string $robots): string {
+                $overridden = $this->applyRobotsOverrides(['index' => true]);
+
+                if (!empty($overridden['noindex'])) {
+                    return 'noindex, ' . ( empty($overridden['nofollow']) ? 'follow' : 'nofollow' );
+                }
 
                 return $robots;
+            });
+
+            $this->addYoastDescriptionGate();
+        }
+    }
+
+    /**
+     * Yoast builds its own description/og:description/twitter:description from
+     * the post content, bypassing getMetaDescription()'s protected-page gate.
+     * Without this, an anonymous visitor sees the protected page's content in
+     * the og:description meta tag even though the page itself is gated.
+     */
+    private function addYoastDescriptionGate(): void
+    {
+        $gate = function (string $value): string {
+            if (Access::isProtectedForCurrentVisitor( (int) get_queried_object_id())) {
+                return (string) get_bloginfo('description');
             }
 
-            // Without this the password form itself gets indexed, which puts an
-            // unlisted page into the search results under its own title.
-            if (is_singular() && post_password_required()) {
-                $robots['noindex'] = true;
-                $robots['nofollow'] = true;
-            }
+            return $value;
+        };
+
+        add_filter('wpseo_metadesc', $gate);
+        add_filter('wpseo_opengraph_desc', $gate);
+        add_filter('wpseo_twitter_description', $gate);
+    }
+
+    /**
+     * Shared decision logic for both the wp_robots and wpseo_robots filters.
+     *
+     * @param array<string, bool> $robots
+     *
+     * @return array<string, bool>
+     */
+    private function applyRobotsOverrides(array $robots): array
+    {
+        if (is_404()) {
+            $robots['noindex'] = true;
+            unset($robots['nofollow']);
 
             return $robots;
-        });
+        }
+
+        // Without this the password form itself gets indexed, which puts an
+        // unlisted page into the search results under its own title.
+        if (is_singular() && post_password_required()) {
+            $robots['noindex'] = true;
+            $robots['nofollow'] = true;
+
+            return $robots;
+        }
+
+        // The styleguide is an internal reference for the team, not content
+        // meant for search results, and carries no canonical-worthy value.
+        // The '_wp_page_template' postmeta match alone decides this: a second
+        // page assigned the styleguide template (e.g. a duplicate created
+        // while migrating) must stay noindexed too, not only the one page
+        // StyleguidePage::find() currently resolves to. find() answers "which
+        // page is THE styleguide" for admin/migration purposes; this check
+        // answers "does this page render the styleguide template", which is
+        // the actual reason it must not be indexed.
+        $queriedId = get_queried_object_id();
+        if (
+            is_singular()
+            && $queriedId > 0
+            && (string) get_post_meta($queriedId, '_wp_page_template', true) === StyleguidePage::TEMPLATE
+        ) {
+            $robots['noindex'] = true;
+            $robots['nofollow'] = true;
+        }
+
+        return $robots;
     }
 
     /**
@@ -241,8 +315,6 @@ class SeoServiceProvider extends ServiceProvider
         $this->enrichSeoPluginOrganization();
 
         add_action('wp_head', function (): void {
-            $nonce = \WordpressStarter\Security::getNonce();
-
             // Yoast emits WebSite and Organization itself; two competing nodes
             // for the same entity are worse than one.
             $seoPluginOwnsSchema = defined('WPSEO_VERSION');
@@ -260,7 +332,7 @@ class SeoServiceProvider extends ServiceProvider
                         'query-input' => 'required name=search_term_string',
                     ],
                 ];
-                echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($websiteSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+                self::renderJsonLd($websiteSchema);
             }
 
             // Organization Schema (from batched theme options)
@@ -296,7 +368,7 @@ class SeoServiceProvider extends ServiceProvider
                     $orgSchema['address'] = $this->buildPostalAddress($address);
                 }
 
-                echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($orgSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+                self::renderJsonLd($orgSchema);
             }
 
             // Article Schema for single posts
@@ -327,7 +399,7 @@ class SeoServiceProvider extends ServiceProvider
                     $articleSchema['description'] = wp_strip_all_tags($excerpt);
                 }
 
-                echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($articleSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+                self::renderJsonLd($articleSchema);
             }
         });
     }
@@ -359,6 +431,23 @@ class SeoServiceProvider extends ServiceProvider
         $schema['addressLocality'] = $matches[2];
 
         return $schema;
+    }
+
+    /**
+     * Echo a JSON-LD <script> block with the CSP nonce applied.
+     *
+     * JSON_HEX_TAG | JSON_HEX_AMP escape "<", ">" and "&" so user-controlled
+     * content (titles, names, addresses) inside the schema cannot close the
+     * <script> tag early and inject markup.
+     *
+     * @param array<string, mixed> $schema
+     */
+    private static function renderJsonLd(array $schema): void
+    {
+        $nonce = \WordpressStarter\Security::getNonce();
+        echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
+            . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP)
+            . '</script>' . "\n";
     }
 
     /**
@@ -406,8 +495,7 @@ class SeoServiceProvider extends ServiceProvider
                 'itemListElement' => $listItems,
             ];
 
-            $nonce = \WordpressStarter\Security::getNonce();
-            echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">' . wp_json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+            self::renderJsonLd($json);
         }, 15);
     }
 
@@ -618,13 +706,13 @@ class SeoServiceProvider extends ServiceProvider
             return $this->normalizeDescription($archive !== '' ? $archive : (string) get_bloginfo('description'));
         }
 
-        // Password-protected posts describe nothing. get_the_excerpt() returns
-        // WordPress' "there is no excerpt because this is a protected post"
-        // placeholder, and the ACF sections are readable even while the
-        // password gate is up, because they bypass the_content(). Deriving a
-        // description from either would publish protected content in a meta
-        // tag that every crawler reads.
-        if (post_password_required()) {
+        // Protected posts describe nothing: password-protected posts (core
+        // mechanism) and member-area/protected pages (this theme's own gate)
+        // both bypass the_content(), so get_the_excerpt() and the ACF sections
+        // stay readable while the gate is up. Deriving a description from
+        // either would publish protected content in a meta tag that every
+        // crawler reads.
+        if (Access::isProtectedForCurrentVisitor( (int) get_the_ID())) {
             return $this->normalizeDescription( (string) get_bloginfo('description'));
         }
 
@@ -935,10 +1023,7 @@ class SeoServiceProvider extends ServiceProvider
             'mainEntity' => $mainEntity,
         ];
 
-        $nonce = \WordpressStarter\Security::getNonce();
-        echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
-            . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-            . '</script>' . "\n";
+        self::renderJsonLd($schema);
     }
 
     /**
@@ -990,10 +1075,7 @@ class SeoServiceProvider extends ServiceProvider
             ];
         }
 
-        $nonce = \WordpressStarter\Security::getNonce();
-        echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
-            . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-            . '</script>' . "\n";
+        self::renderJsonLd($schema);
     }
 
     /**

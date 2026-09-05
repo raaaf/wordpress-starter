@@ -28,6 +28,12 @@
 @extends('layouts.app')
 
 @section('content')
+    @if(!current_user_can('edit_pages'))
+        <h1 class="sr-only">{{ get_the_title() }}</h1>
+        <p class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {{ __('Diese Seite ist ein internes Werkzeug und für dich nicht sichtbar.', 'wp-starter') }}
+        </p>
+    @else
     <article class="page page-styleguide">
         @if(post_password_required())
             @include('partials.password-form')
@@ -106,9 +112,14 @@
                     @php($sectionWidth = get_sub_field('section_width') ?: null)
                     @php($sectionAnchor = $customAnchor ?: str_replace('_', '-', $layout) . '-' . $anchorCounters[$layout])
 
-                    @php(ob_start())
-                    @includeIf('flexible.' . str_replace('_', '-', $layout))
-                    @php($instanzHtml = ob_get_clean())
+                    {{--
+                        render() returns the rendered HTML as a string directly, so no
+                        ob_start()/ob_get_clean() buffer is needed to capture it (unlike
+                        @includeIf, which echoes). This also means there is no output
+                        buffer left open if the flexible view throws.
+                    --}}
+                    @php($flexibleView = 'flexible.' . str_replace('_', '-', $layout))
+                    @php($instanzHtml = $__env->exists($flexibleView) ? $__env->make($flexibleView, array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render() : '')
 
                     {{--
                         The intermission "one_column" rows (e.g. "Flexible Content
@@ -174,4 +185,5 @@
             @endif
         @endif
     </article>
+    @endif
 @endsection

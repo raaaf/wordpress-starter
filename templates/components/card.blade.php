@@ -16,6 +16,8 @@
     @param bool $hoverable - Add hover effect (brand border)
     @param string $url - Make entire card clickable
     @param bool $disabled - Disabled state
+    @param int $level - Title heading level, 2-4 (default: 3)
+    @param bool $eager - Load the image eagerly with high fetch priority instead of lazy (use for above-the-fold cards)
 
     States from Figma:
     - Default: Subtle shadow
@@ -41,13 +43,14 @@
     'disabled' => false,
     'selected' => false,
     'eager' => false,
+    'level' => 3,
 ])
 
 @php
     // Variants from Figma - use semantic token fallbacks instead of hardcoded hex values
     $variants = [
-        'default' => 'bg-[var(--card-bg,var(--bg-primary))] border border-[var(--card-border,var(--border-default))] shadow-[var(--shadow-card)]',
-        'elevated' => 'bg-[var(--card-bg,var(--bg-primary))] shadow-lg',
+        'default' => 'bg-[var(--card-bg,var(--bg-primary))] border border-[var(--card-border,var(--border-default))]',
+        'elevated' => 'border border-line bg-[var(--card-bg,var(--bg-secondary))]',
         'outlined' => 'bg-[var(--card-bg,var(--bg-primary))] border border-line',
         // Gefuellt heisst: eine Stufe ueber der Sektion, nicht fix
         // bg-surface-secondary. Der feste Wert liess die Karte auf jeder Sektion
@@ -73,6 +76,7 @@
 
     $sizeConfig = $sizes[$size] ?? $sizes['md'];
     $variantClass = $variants[$variant] ?? $variants['default'];
+    $titleTag = is_numeric($level) ? max(2, min(4, (int) $level)) : 3;
 
     // Use legacy padding if no structured content, else use size-based padding
     $isStructuredCard = $image || $title || $subtitle || $description;
@@ -85,8 +89,8 @@
             // active:scale-[0.99] is a Tailwind v4 `scale` utility, not `transform`.
             'transition-[color,background,border-color,box-shadow,scale] duration-200 cursor-pointer',
             'hover:border-line-brand hover:shadow-[var(--shadow-card-hover)]',
-            'active:shadow-[var(--shadow-inner)] active:scale-[0.99]',
-            'focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]',
+            'active:shadow-[var(--shadow-inner)] active:scale-[0.99] motion-reduce:transform-none',
+            'focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--ring-focus)]',
         ])
         : '';
 
@@ -102,22 +106,34 @@
 
     // Use stretched-link pattern to avoid nested interactive elements
     // Card is always a div, with an optional absolute-positioned link overlay
-    $hasNestedInteractive = isset($actions) || $slot->isNotEmpty();
+
+    // Accessible name for the stretched link: title first, then subtitle,
+    // then a truncated plain-text description, then a generic fallback.
+    // wp_strip_all_tags() removes markup from the description before
+    // truncation so the label never carries a leftover tag.
+    $stretchedLinkLabel = $title
+        ?: $subtitle
+        ?: ($description ? mb_substr(wp_strip_all_tags($description), 0, 80) : null)
+        ?: __('Karte öffnen', 'wp-starter');
 @endphp
 
 <div
-    @if($disabled) aria-disabled="true" @endif
-    class="card block rounded-[var(--card-radius)] overflow-hidden {{ $variantClass }} {{ $paddingClass }} {{ $interactiveClasses }} {{ $selectedClasses }} {{ $disabledClasses }} {{ $class }} {{ $url && !$disabled ? 'relative' : '' }}"
+    {{-- The root div itself is never a focusable/interactive element (the
+         optional stretched-link <a> below carries the real interactivity),
+         so 'aria-disabled' here had no semantics to disable; disabled
+         behaviour is expressed by omitting that link and via $disabledClasses. --}}
+    {{ $attributes->merge(['class' => "card block rounded-[var(--card-radius)] overflow-hidden {$variantClass} {$paddingClass} {$interactiveClasses} {$selectedClasses} {$disabledClasses} {$class} " . ($url && !$disabled ? 'relative' : '')]) }}
 >
     {{-- Stretched link overlay for entire card clickability (accessibility-safe pattern) --}}
     @if($url && !$disabled)
         <a
             href="{{ esc_url($url) }}"
             class="absolute inset-0 z-0"
-            aria-label="{{ $title ? esc_attr($title) : __('Karte öffnen', 'wp-starter') }}"
-        >
-            <span class="sr-only">{{ $title ?: __('Mehr erfahren', 'wp-starter') }}</span>
-        </a>
+            {{-- $stretchedLinkLabel is plain text (title/subtitle/stripped
+                 description/fallback), never pre-escaped, so {{ }} is the
+                 correct single escape here, not a double-encode risk. --}}
+            aria-label="{{ $stretchedLinkLabel }}"
+        ></a>
     @endif
 
     @if($isStructuredCard)
@@ -133,7 +149,7 @@
             @if($title || $subtitle)
                 <div class="space-y-1">
                     @if($title)
-                        <h3 class="text-h5">{{ $title }}</h3>
+                        <h{{ $titleTag }} class="text-h5">{{ $title }}</h{{ $titleTag }}>
                     @endif
                     @if($subtitle)
                         <p class="text-sm text-content-secondary">{{ $subtitle }}</p>

@@ -14,21 +14,16 @@
     $background = get_sub_field('background_color') ?: 'primary';
     $uniqueId = 'before-after-' . uniqid();
 
-    // Handle both ID and array format for images
+    // return_format on both image fields is 'id' (see FieldDefinitions::beforeAfterFields),
+    // so get_sub_field() always yields an int, never an array.
     $beforeId = get_sub_field('image_before');
     $afterId = get_sub_field('image_after');
-    if (is_array($beforeId)) {
-        $beforeId = $beforeId['ID'] ?? $beforeId['id'] ?? null;
-    }
-    if (is_array($afterId)) {
-        $afterId = $afterId['ID'] ?? $afterId['id'] ?? null;
-    }
 
     $hasImageBefore = $beforeId && wp_attachment_is_image($beforeId);
     $hasImageAfter  = $afterId && wp_attachment_is_image($afterId);
 
-    $altBefore = $beforeId ? (get_post_meta($beforeId, '_wp_attachment_image_alt', true) ?: $labelBefore) : $labelBefore;
-    $altAfter  = $afterId  ? (get_post_meta($afterId,  '_wp_attachment_image_alt', true) ?: $labelAfter)  : $labelAfter;
+    $altBefore = $beforeId ? \WordpressStarter\Helpers\Text::imageAlt((int) $beforeId, $labelBefore) : $labelBefore;
+    $altAfter  = $afterId  ? \WordpressStarter\Helpers\Text::imageAlt((int) $afterId,  $labelAfter)  : $labelAfter;
 @endphp
 
 @if(($hasImageBefore && $hasImageAfter) || $title || current_user_can('edit_posts'))
@@ -72,8 +67,9 @@
                 :aria-valuenow="Math.round(position)"
                 aria-valuemin="0"
                 aria-valuemax="100"
+                :aria-valuetext="Math.round(position) + ' Prozent Nachher'"
                 aria-label="{{ __('Bildvergleich: Nutze die Pfeiltasten, um zwischen Vorher und Nachher zu wechseln', 'wp-starter') }}"
-                class="absolute inset-y-0 w-12 -translate-x-1/2 cursor-ew-resize before-after-handle focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)] rounded-full"
+                class="group absolute inset-y-0 w-12 -translate-x-1/2 cursor-ew-resize before-after-handle focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] rounded-full"
                 :style="'left: ' + position + '%'"
                 @mousedown="handleMouseDown($event)"
                 @touchstart="handleTouchStart($event)"
@@ -90,7 +86,7 @@
                 <span class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1 bg-surface opacity-80 pointer-events-none" aria-hidden="true"></span>
 
                 {{-- Handle circle --}}
-                <div class="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 bg-surface rounded-full shadow-lg top-1/2 left-1/2 flex items-center justify-center border-2 border-line pointer-events-none">
+                <div class="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 bg-surface rounded-full top-1/2 left-1/2 flex items-center justify-center border border-line-strong group-hover:border-line-brand group-active:scale-95 transition-[border-color,transform] duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] motion-reduce:transition-none pointer-events-none">
                     <x-icon name="chevron-left" class="w-6 h-6 text-content-secondary" />
                     <x-icon name="chevron-right" class="w-6 h-6 text-content-secondary -ml-2" />
                 </div>
@@ -105,7 +101,7 @@
             </div>
         </div>
     @elseif(current_user_can('edit_posts'))
-        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+        <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge ein Vorher- und Nachher-Bild hinzu.', 'wp-starter') }}</p>
         </div>
     @endif

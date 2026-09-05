@@ -25,6 +25,7 @@
     $wrapperClass = $stickyHeader ? 'overflow-auto max-h-[70vh]' : 'overflow-x-auto';
     $headClass = $stickyHeader ? 'sticky top-0 z-10' : '';
     $background = get_sub_field('background_color') ?: 'primary';
+    $captionId = 'table-caption-' . uniqid();
 @endphp
 
 @if($title || !empty($rows) || current_user_can('edit_posts'))
@@ -33,14 +34,14 @@
 
     @if(!empty($rows))
         {{-- tabindex, damit der scrollende Bereich auch per Tastatur erreichbar ist (WCAG 2.1.1) --}}
-        <div class="{{ $wrapperClass }} rounded-lg" tabindex="0" role="group" aria-label="{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}">
-            <table class="w-full {{ $bordered ? 'border border-line' : '' }}">
-                <caption class="sr-only">{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}</caption>
+        <div class="{{ $wrapperClass }} rounded-lg" tabindex="0" role="group" aria-labelledby="{{ esc_attr($captionId) }}">
+            <table class="w-full border-collapse {{ $bordered ? 'border border-line' : '' }}">
+                <caption class="sr-only" id="{{ esc_attr($captionId) }}">{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}</caption>
                 @if(!empty($headers))
                     <thead class="bg-surface-tertiary {{ $headClass }}">
                         <tr>
                             @foreach($headers as $header)
-                                <th scope="col" class="{{ $cellClass }} text-left font-semibold text-content bg-surface-tertiary {{ $bordered ? 'border border-line' : '' }}">
+                                <th scope="col" class="{{ $cellClass }} text-left font-normal text-xs uppercase tracking-[0.08em] text-content-secondary bg-surface-tertiary {{ $bordered ? 'border border-line' : 'border-b border-line-strong' }}">
                                     {{ $header['label'] ?? '' }}
                                 </th>
                             @endforeach
@@ -79,7 +80,7 @@
             </table>
         </div>
     @elseif(current_user_can('edit_posts'))
-        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+        <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge Tabellenzeilen hinzu.', 'wp-starter') }}</p>
         </div>
     @endif

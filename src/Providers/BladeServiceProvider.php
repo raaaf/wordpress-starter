@@ -58,12 +58,34 @@ class BladeServiceProvider extends ServiceProvider
         Container::setInstance($this->container);
         /** @phpstan-ignore argument.type */
         Facade::setFacadeApplication($this->container);
+
+        // Application::getInstance()->boot() can run more than once in one
+        // PHP process (e.g. each test that calls renderTemplate()). Facades
+        // cache their resolved instance (Facade::$resolvedInstance) across
+        // that, so without clearing it here the Blade facade keeps serving
+        // the PREVIOUS boot's compiler even though a fresh one was just
+        // bound above. Custom directives (@kses, @field, ...) then get
+        // registered on the new compiler while views render through the
+        // stale one, so the directives silently never fire.
+        // Safe to clear unconditionally: this theme is the only illuminate/support
+        // facade user in the process, so no other component's resolved facade is lost.
+        Facade::clearResolvedInstances();
     }
 
     private function registerBladeEngine(): void
     {
         $filesystem = new Filesystem();
         $compiler = new BladeCompiler($filesystem, $this->getCompiledPath());
+
+        // WordPress's own escapers (esc_url(), esc_attr(), ...) already return
+        // HTML entities and never double-encode themselves. Blade's default
+        // echo format calls e($value, true), which re-encodes those entities
+        // (esc_url()'s "&#038;" becomes "&amp;#038;", and the browser then
+        // resolves the literal "#" as a URL fragment, corrupting the query
+        // string). withoutDoubleEncoding() switches the echo format to
+        // e($value, false), matching WordPress escaping semantics for every
+        // {{ }} in this theme.
+        $compiler->withoutDoubleEncoding();
 
         $viewResolver = new EngineResolver();
         $viewResolver->register('blade', fn () => new CompilerEngine($compiler));

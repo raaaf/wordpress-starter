@@ -10,8 +10,14 @@
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
-    $postType = get_sub_field('post_type') ?: 'post';
-    $postsPerPage = get_sub_field('posts_per_page') ?: 3;
+    // Freies Textfeld im Backend, deshalb gegen echte oeffentliche Post-Types
+    // pruefen statt es roh in WP_Query zu geben.
+    $requestedPostType = get_sub_field('post_type') ?: 'post';
+    $publicPostTypes = get_post_types(['public' => true]);
+    unset($publicPostTypes['attachment']);
+    $publicPostTypes['post'] = 'post';
+    $postType = array_key_exists($requestedPostType, $publicPostTypes) ? $requestedPostType : 'post';
+    $postsPerPage = max(1, min(50, (int) (get_sub_field('posts_per_page') ?: 3)));
     $category = get_sub_field('category') ?: '';
     $showExcerpt = get_sub_field('show_excerpt') ?? true;
     $showDate = get_sub_field('show_date') ?? true;

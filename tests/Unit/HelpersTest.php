@@ -12,6 +12,8 @@ use WordpressStarter\Config;
  */
 final class HelpersTest extends TestCase
 {
+    private mixed $originalBlade = null;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -22,6 +24,14 @@ final class HelpersTest extends TestCase
                 putenv($key);
             }
         }
+
+        $this->originalBlade = $GLOBALS['blade'] ?? null;
+    }
+
+    protected function tearDown(): void
+    {
+        $GLOBALS['blade'] = $this->originalBlade;
+        parent::tearDown();
     }
 
     public function testEnvReturnsDefaultWhenNotSet(): void
@@ -100,12 +110,39 @@ final class HelpersTest extends TestCase
 
     public function testConfigDelegatesToConfigClass(): void
     {
-        // Set a value directly in Config
-        Config::set('test_key', 'test_value');
+        // Snapshot the key's prior state so this test can restore it:
+        // Config has no unset(), and the underlying array is static, so a
+        // leftover 'test_key' would otherwise leak into every later test in
+        // this process.
+        $hadKey = Config::has('test_key');
+        $original = $hadKey ? Config::get('test_key') : null;
 
-        $result = config('test_key', 'default');
+        try {
+            Config::set('test_key', 'test_value');
 
-        $this->assertSame('test_value', $result);
+            $result = config('test_key', 'default');
+
+            $this->assertSame('test_value', $result);
+        } finally {
+            if ($hadKey) {
+                Config::set('test_key', $original);
+            } else {
+                $this->unsetConfigKey('test_key');
+            }
+        }
+    }
+
+    /**
+     * Config exposes no removal method; reach into its private static
+     * $config array via reflection to drop a key this test added.
+     */
+    private function unsetConfigKey(string $key): void
+    {
+        $property = new \ReflectionProperty(Config::class, 'config');
+        $property->setAccessible(true);
+        $value = $property->getValue();
+        unset($value[$key]);
+        $property->setValue(null, $value);
     }
 
     public function testGetBladeViewFactoryReturnsGlobal(): void
@@ -126,5 +163,12 @@ final class HelpersTest extends TestCase
         $result = getBladeViewFactory();
 
         $this->assertNull($result);
+    }
+
+    public function testJsLiteralEscapesForScriptContext(): void
+    {
+        $result = wp_starter_js_literal('<script>&\'"ä');
+
+        $this->assertSame('"\u003Cscript\u003E\u0026\u0027\u0022\u00e4"', $result);
     }
 }

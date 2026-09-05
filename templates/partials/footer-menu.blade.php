@@ -35,10 +35,6 @@
     // Get social links
     $socialLinks = \WordpressStarter\Acf\Fields::option('social_links', []);
 
-    // Get logo (same fallback order as header, see Fields::siteLogoUrl)
-    $logo_url = $showLogo ? \WordpressStarter\Acf\Fields::siteLogoUrl() : null;
-    $logo_id = $showLogo ? \WordpressStarter\Acf\Fields::siteLogoId() : null;
-
     // Replace {year} placeholder
     $copyrightText = str_replace('{year}', wp_date('Y'), $copyrightText);
 @endphp
@@ -48,15 +44,11 @@
         <div class="grid grid-cols-1 md:grid-cols-2 {{ $isLandingPage ? 'lg:grid-cols-2' : 'lg:grid-cols-4' }} gap-8 lg:gap-12">
             {{-- Logo / Company Info / Footer Text --}}
             <div class="lg:col-span-1">
-                @if($showLogo && ($logo_id || $logo_url))
+                @if($showLogo)
                     @php
-                        $footerLogoMarkup = $logo_id
-                            ? wp_get_attachment_image($logo_id, 'logo', false, [
-                                'alt' => esc_attr(get_bloginfo('name')),
-                                'class' => 'h-10 w-auto',
-                                'sizes' => '(max-width: 768px) 128px, 256px',
-                            ])
-                            : '<img src="' . esc_url($logo_url) . '" alt="' . esc_attr(get_bloginfo('name')) . '" class="h-10 w-auto">';
+                        // Same fallback chain as the header (custom logo, Customizer, text
+                        // fallback), see Fields::siteLogoMarkup. Escaped inside that method.
+                        $footerLogoMarkup = \WordpressStarter\Acf\Fields::siteLogoMarkup('footer');
                     @endphp
                     @if($isLandingPage)
                         <span class="inline-block mb-4">{!! $footerLogoMarkup !!}</span>
@@ -65,7 +57,7 @@
                     @endif
                 @endif
                 @if($showCompany && $company)
-                    <h2 class="text-h5 mb-4">{{ $company }}</h2>
+                    <h2 class="text-overline text-content-secondary mb-4">{{ $company }}</h2>
                 @endif
                 @if($footerText)
                     <div class="footer-prose text-content-secondary text-sm prose prose-sm">
@@ -77,7 +69,7 @@
             {{-- Footer Navigation --}}
             @if($showNav)
                 <div>
-                    <h2 class="text-h5 mb-4">{{ $navTitle }}</h2>
+                    <h2 class="text-overline text-content-secondary mb-4">{{ $navTitle }}</h2>
                     <nav class="footer-nav" aria-label="{{ __('Fußnavigation', 'wp-starter') }}">
                         <?php
                         wp_nav_menu([
@@ -95,7 +87,7 @@
             {{-- Contact Info --}}
             @if($showContact && ($address || $phone || $email))
                 <div>
-                    <h2 class="text-h5 mb-4">{{ $contactTitle }}</h2>
+                    <h2 class="text-overline text-content-secondary mb-4">{{ $contactTitle }}</h2>
                     <address class="not-italic text-content-secondary text-sm space-y-2">
                         @if($address)
                             <p>{!! nl2br(esc_html($address)) !!}</p>
@@ -109,7 +101,7 @@
                         @endif
                         @if($email)
                             <p>
-                                <a href="mailto:{{ $email }}" class="hover:text-content transition-colors">
+                                <a href="{{ esc_url('mailto:' . $email) }}" class="hover:text-content transition-colors">
                                     {{ $email }}
                                 </a>
                             </p>
@@ -121,7 +113,7 @@
             {{-- Social Links --}}
             @if($showSocial && !empty($socialLinks))
                 <div>
-                    <h2 class="text-h5 mb-4">{{ $socialTitle }}</h2>
+                    <h2 class="text-overline text-content-secondary mb-4">{{ $socialTitle }}</h2>
                     <div class="flex gap-4">
                         @foreach($socialLinks as $social)
                             @if(!empty($social['url']))
@@ -131,7 +123,7 @@
                                    {{-- 44px Klickflaeche wie bei den Team-Icons. Das sichtbare Symbol bleibt
                                         24px, nur der anklickbare Bereich waechst; der negative Rand
                                         haelt den optischen Abstand. --}}
-                                   class="inline-flex items-center justify-center w-11 h-11 -m-2 text-content-secondary hover:text-content transition-colors rounded-full focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
+                                   class="inline-flex items-center justify-center w-11 h-11 -m-2 text-content-secondary hover:text-content transition-colors rounded-full focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                                    aria-label="{{ ($social['platform'] ?? 'Social Media') . ' ' . __('(öffnet in neuem Tab)', 'wp-starter') }}">
                                     @switch($social['platform'] ?? '')
                                         @case('facebook')

@@ -3,7 +3,7 @@
 
     Uses shared components: x-section, x-section-header
     Uses Alpine.js for animated counting
-    Fields: title, stats (repeater: number, suffix, label, icon), background_color
+    Fields: title, stats (repeater: number, suffix, label), background_color
 --}}
 
 @php
@@ -30,7 +30,7 @@
     };
 @endphp
 
-@if($title || !empty($stats))
+@if($title || !empty($stats) || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="stats">
     <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
@@ -41,7 +41,6 @@
                     $number = floatval($stat['number'] ?? 0);
                     $suffix = $stat['suffix'] ?? '';
                     $label = $stat['label'] ?? '';
-                    $icon = $stat['icon'] ?? '';
                 @endphp
                 <div
                     x-data="statsCounter({{ $number }})"
@@ -53,12 +52,6 @@
                         aria-label="{{ __('Statistik', 'wp-starter') }}"
                     @endif
                 >
-                    @if($icon)
-                        <div class="flex justify-center mb-4 text-content-brand">
-                            <x-icon :name="$icon" class="w-10 h-10" aria-hidden="true" />
-                        </div>
-                    @endif
-
                     <div class="text-display tabular-nums mb-2 text-content" aria-hidden="true">
                         {{-- whitespace-nowrap statt NBSP: das Suffix ist dynamisch (ACF-Feld), ein
                         NBSP muesste bei jeder moeglichen Zeichenkette manuell eingefuegt werden.
@@ -74,6 +67,10 @@
                     @endif
                 </div>
             @endforeach
+        </div>
+    @elseif(current_user_can('edit_posts'))
+        <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
+            <p class="text-content-secondary">{{ __('Bitte füge mindestens eine Kennzahl hinzu.', 'wp-starter') }}</p>
         </div>
     @endif
 </x-section>

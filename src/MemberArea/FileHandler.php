@@ -16,6 +16,10 @@ class FileHandler
 
     public static function handleDownload(): void
     {
+        if (!Auth::isMemberAreaActive()) {
+            wp_send_json_error(['message' => __('Interner Bereich ist deaktiviert.', 'wp-starter')], 404);
+        }
+
         if (!Auth::isAuthenticated()) {
             wp_send_json_error(['message' => __('Nicht authentifiziert.', 'wp-starter')], 401);
         }
@@ -171,15 +175,7 @@ class FileHandler
 
     private static function guessMimeType(string $fileName): string
     {
-        return match (strtolower(pathinfo($fileName, PATHINFO_EXTENSION))) {
-            'pdf' => 'application/pdf',
-            'doc' => 'application/msword',
-            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'xls' => 'application/vnd.ms-excel',
-            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'zip' => 'application/zip',
-            default => 'application/octet-stream',
-        };
+        return DownloadFileTypes::mimeFor(pathinfo($fileName, PATHINFO_EXTENSION));
     }
 
     /**

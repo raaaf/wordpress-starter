@@ -6,23 +6,31 @@ Guidance for Claude Code when working with this WordPress starter theme.
 
 - **Namespace:** `WordpressStarter\`
 - **Text Domain:** `wp-starter`
-- **PHP:** 8.3+ with strict types
+- **PHP:** 8.2+ with strict types
 - **Dev Server:** `npm run dev` (localhost:5180)
 - **Editor:** Classic Editor + ACF Flexible Content (Gutenberg disabled)
 
 ## Essential Commands
 
 ```bash
+composer install    # PHP dependencies
+npm install          # JS dependencies
 npm run dev        # Development with HMR
 npm run build      # Production build
 npm run lint       # JS/TS linting
 npm run icons      # Sync resources/icons/ from config/icons.json
+npm test            # Vitest (JS unit tests)
+npm run test:watch  # Vitest in watch mode
+npm run test:coverage # Vitest with coverage report
 npm run test:e2e   # Playwright E2E tests
 npm run test:a11y  # Accessibility tests
 npm run test:styleguide  # Styleguide-Seite (braucht WP_USER + WP_PASSWORD, siehe unten)
 composer lint      # PHP linting (phpcs + phpstan)
 composer test      # PHPUnit tests
 ```
+
+Der Vite-Dev-Server bindet standardmäßig nur an `localhost`. `VITE_HOST=true` bindet
+zusätzlich an alle Interfaces (z. B. zum Testen von einem anderen Gerät im LAN).
 
 ### E2E gegen die Styleguide-Seite
 
@@ -51,7 +59,7 @@ src/                    # PHP source code
 ├── Providers/         # Service providers
 ├── Services/          # StyleguidePage.php
 ├── Content/           # Styleguide reference/data classes
-├── Helpers/           # Text.php, SectionHeader.php (used across templates/flexible/)
+├── Helpers/           # Text.php, SectionHeader.php, ComponentId.php (request-scoped ids + anchor slugs), FormAttributes.php (shared form-attribute allowlist)
 ├── RateLimiter.php    # AJAX rate limiting
 templates/             # Blade templates
 ├── layouts/          # Base layouts
@@ -77,16 +85,18 @@ docs/                 # Documentation
 ├── DEPLOYMENT.md          # Production deployment
 ├── SECURITY.md            # Security practices
 ├── SEO.md                 # SEO implementation
+├── DESIGN-TOKENS.md       # Token system
+├── DESIGN-TOKEN-GAPS.md   # Known token coverage gaps
 ```
 
 ### Key Technologies
 
-- **Blade** (Laravel Illuminate v13) - Templates extend `layouts.app`
+- **Blade** (Laravel Illuminate v12) - Templates extend `layouts.app`
 - **Alpine.js** (bundled, no CDN) - Interactive components
 - **TailwindCSS v4.1** - Utility-first CSS
 - **ACF Pro** - Flexible Content page builder
 - **ACF Extended** (FREE) - Enhanced Flexible Content UX
-- **Vite 7.3** - Asset compilation with HMR
+- **Vite 8** - Asset compilation with HMR
 
 ## Plugin Management
 
@@ -227,6 +237,10 @@ Configuration in `src/Acf/AcfExtended.php`.
 - `@group('name')...@endgroup` - Conditional block around an ACF group field
 - `@kses(...)` - Sanitize HTML via `wp_kses_post()`
 
+**Escaping (`{{ }}`):**
+
+`{{ }}` matches WordPress `esc_html()` semantics: it escapes `<>"'&`, but does not double-encode a value that already contains valid entities (`BladeServiceProvider::boot()` calls `$compiler->withoutDoubleEncoding()`). Pass raw values into `{{ }}`, never pre-escaped ones. A value already run through `esc_html()`/`wp_kses_post()` before reaching the view keeps its entities as entities instead of being re-encoded, and a raw `<` or `&` in the value is still escaped exactly once, as expected. Covered by `tests/Unit/Providers/BladeServiceProviderTest.php`.
+
 ## ACF Field Definitions
 
 Single source of truth in `src/Acf/FieldDefinitions.php`:
@@ -244,14 +258,21 @@ FieldDefinitions::repeaterField('key', 'Label', 'name', $subFields);
 
 ## Theme Options
 
-Available under "Theme-Einstellungen" in admin:
+Available under "Theme-Einstellungen" in admin (`src/Acf/Options.php`):
 
-- **Allgemein:** Logo, Favicon, Contact info
-- **Header:** Sticky header, CTA button
-- **Footer:** Footer text, copyright, alert bar (Hinweisleiste)
-- **Social Media:** Social links repeater
-- **Analytics:** Rybbit Analytics (DSGVO-konform, via Plugin)
-- **Rechtliches:** Privacy, Imprint pages
+| Sub page         | Content                                                                                               | Capability           |
+| ---------------- | ----------------------------------------------------------------------------------------------------- | -------------------- |
+| Allgemein        | Logo, Favicon, contact info                                                                           | `edit_theme_options` |
+| Blog             | Blog listing settings                                                                                 | `edit_theme_options` |
+| Header           | Sticky header, CTA button                                                                             | `edit_theme_options` |
+| Footer           | Footer text, copyright, alert bar (Hinweisleiste)                                                     | `edit_theme_options` |
+| Social Media     | Social links repeater                                                                                 | `edit_theme_options` |
+| Interner Bereich | Member-area auth mode, shared password for protected downloads (conditional on `member_area.enabled`) | `manage_options`     |
+| Analytics        | Rybbit Analytics (DSGVO-konform, via Plugin)                                                          | `manage_options`     |
+| Werkzeuge        | Maintenance tools                                                                                     | `manage_options`     |
+| Design Tokens    | Design token overrides                                                                                | `manage_options`     |
+
+Administrators can reach all nine sub pages. Editors reach none of them by default: WordPress grants `edit_theme_options` and `manage_options` to Administrators only. If Editors should manage the five content pages (Allgemein, Blog, Header, Footer, Social Media), switching those to `edit_pages` is a product decision, not a default.
 
 ## Alpine.js Components
 
@@ -262,10 +283,12 @@ Registered via `Alpine.data()` in `resources/js/app.ts`:
 - `beforeAfterSlider` - Image comparison slider
 - `memberLogin` - Member area login form
 - `downloadTable` - Member area download table
+- `styleguideSprungnavigation` - Styleguide jump navigation (active-section highlighting)
+- `styleguideModul` - Switches between the instances of a styleguide gallery module
 
 `memberLogin` and `downloadTable` are registered in `resources/js/member-area.ts` and wired in via `registerMemberAreaComponents(Alpine)` in `resources/js/app.ts`.
 
-Components using inline `x-data` (not registered via `Alpine.data`): `tabs`, `accordion`. The logo slider (`templates/flexible/logo-slider.blade.php`) uses inline `x-data` plus a CSS animation, pausing on hover and focus and honouring `prefers-reduced-motion`. The gallery uses medium-zoom directly, not Alpine.
+Components using inline `x-data` (not registered via `Alpine.data`): `tabs`, `accordion`, `theme-switcher` (`templates/partials/theme-switcher.blade.php`), `footer-alert-bar` (`templates/partials/footer-alert-bar.blade.php`). The logo slider (`templates/flexible/logo-slider.blade.php`) uses inline `x-data` plus a CSS animation, pausing on hover and focus and honouring `prefers-reduced-motion`. The gallery uses medium-zoom directly, not Alpine.
 
 ## Adding New Layouts
 

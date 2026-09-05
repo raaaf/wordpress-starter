@@ -10,17 +10,73 @@
  * Output: resources/css/tokens.css (auto-generated)
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { readFileSync, writeFileSync, realpathSync } from 'fs';
+import { dirname, join, resolve, relative, isAbsolute } from 'path';
+import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
 // Input/output paths
 const TOKENS_DIR = join(ROOT, 'config/design-tokens');
-const OUTPUT_FILE = join(ROOT, 'resources/css/tokens.css');
-const OUTPUT_EDITOR_FILE = join(ROOT, 'resources/css/tokens-editor.css');
+
+/**
+ * Resolve the directory tokens.css/tokens-editor.css are written to.
+ *
+ * Defaults to resources/css and is verified to stay inside it, since this
+ * file is auto-generated and DELETES/overwrites whatever is at OUTPUT_FILE.
+ * `TOKENS_OUT_DIR` (env) or an explicit `overrideDir` argument opt out of
+ * that containment check deliberately, so tests can point this at a temp
+ * directory instead of the real resources/css.
+ */
+function resolveOutputDir(overrideDir = process.env.TOKENS_OUT_DIR) {
+  if (overrideDir) {
+    const resolvedOverride = resolve(overrideDir);
+    console.log(`transform-tokens: TOKENS_OUT_DIR set, writing to "${resolvedOverride}"`);
+    return resolvedOverride;
+  }
+
+  // No override: the write target is resources/css, but resources/css could
+  // itself be a symlink pointing outside the project. `resolve()` does not
+  // follow symlinks, so comparing the un-resolved path against itself would
+  // always pass trivially. Resolve the real (symlink-followed) path and
+  // check THAT for containment under the real project root.
+  const resourcesCss = resolve(ROOT, 'resources/css');
+  const realRoot = realpathSync(ROOT);
+  const realResourcesCss = realpathSync(resourcesCss);
+  const rel = relative(join(realRoot, 'resources', 'css'), realResourcesCss);
+  if (rel.startsWith('..') || isAbsolute(rel)) {
+    throw new Error(
+      `transform-tokens: resolved output dir "${realResourcesCss}" is not resources/css`
+    );
+  }
+  return resourcesCss;
+}
+
+const OUTPUT_DIR = resolveOutputDir();
+const OUTPUT_FILE = join(OUTPUT_DIR, 'tokens.css');
+const OUTPUT_EDITOR_FILE = join(OUTPUT_DIR, 'tokens-editor.css');
+
+/**
+ * Write generated CSS and read it back to confirm the file on disk actually
+ * matches what was generated (a full disk, a permissions error swallowed by
+ * a race, or a symlinked output path can all make writeFileSync succeed while
+ * the persisted bytes differ).
+ *
+ * `readImpl` defaults to the real `readFileSync` and exists only so a test can
+ * inject a stub that returns mismatched content, to exercise the mismatch
+ * branch without needing a real full-disk/permissions failure.
+ */
+function writeAndVerify(path, content, readImpl = readFileSync) {
+  writeFileSync(path, content, 'utf8');
+  const readBack = readImpl(path, 'utf8');
+  if (readBack !== content) {
+    console.error(
+      `transform-tokens: write verification failed for ${path} (content mismatch after write)`
+    );
+    process.exit(1);
+  }
+}
 
 // Fluid typography configuration
 // Mobile min values (at VIEWPORT_MIN). Max values come from Figma primitives.fontSize.
@@ -34,10 +90,10 @@ const FLUID_SIZES = {
   lg: { min: 17, max: 18 },
   xl: { min: 18, max: 20 },
   '2xl': { min: 20, max: 24 },
-  '3xl': { min: 24, max: 30 },
-  '4xl': { min: 28, max: 36 },
-  '5xl': { min: 32, max: 48 },
-  '6xl': { min: 38, max: 60 },
+  '3xl': { min: 24, max: 32 },
+  '4xl': { min: 30, max: 44 },
+  '5xl': { min: 36, max: 56 },
+  '6xl': { min: 40, max: 72 },
 };
 
 const VIEWPORT_MIN = 320;
@@ -95,6 +151,54 @@ function fluidLineHeight(sizeKey, mobileLh, desktopLh, minVw = VIEWPORT_MIN, max
 }
 
 /**
+ * Guard against Figma-sourced strings being interpolated raw into generated CSS.
+ * Token names/paths must only ever produce `--foo-bar` style identifiers;
+ * anything else could break out of the declaration it is placed in.
+ */
+function assertSafeVarNameSegment(raw, context) {
+  if (!/^[a-zA-Z0-9-]+$/.test(raw)) {
+    throw new Error(
+      `transform-tokens: unsafe variable name "${raw}" in ${context} (allowed: a-z A-Z 0-9 -)`
+    );
+  }
+  return raw;
+}
+
+/**
+ * Decode CSS escape sequences (`\XX` hex or `\` + any char) so a value that
+ * spells out a dangerous token via CSS escaping (e.g. `\75rl(` for `url(`)
+ * cannot slip past the plain-text checks below.
+ */
+function decodeCssEscapes(str) {
+  return str
+    .replace(/\\([0-9a-f]{1,6})\s?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\\(.)/g, '$1');
+}
+
+/**
+ * Guard against Figma-sourced values that could inject additional CSS
+ * declarations or break out into surrounding markup when interpolated.
+ */
+function assertSafeCssValue(value, context) {
+  // Primitives like fontWeight/opacity are extracted as raw numbers (unit '').
+  // A number has no .includes()/regex methods, but it also can't carry an
+  // injection payload, so stringify it before running the checks below.
+  const str = decodeCssEscapes(String(value));
+  if (
+    /[;{}]/.test(str) ||
+    str.includes('</') ||
+    str.includes('*/') ||
+    str.includes('/*') ||
+    str.includes('@') ||
+    /url\s*\(/i.test(str) ||
+    /expression\s*\(/i.test(str)
+  ) {
+    throw new Error(`transform-tokens: unsafe CSS value in ${context}: "${str}"`);
+  }
+  return value;
+}
+
+/**
  * Extract CSS var() reference from Figma token alias data.
  * Converts aliasData.targetVariableName (e.g. "color/accent/500")
  * to var(--color-accent-500). Falls back to resolved hex value.
@@ -104,7 +208,10 @@ function extractColorAsReference(token) {
 
   const aliasData = token.$extensions?.['com.figma.aliasData'];
   if (aliasData?.targetVariableName) {
-    const varName = aliasData.targetVariableName.replace(/\//g, '-');
+    const varName = assertSafeVarNameSegment(
+      aliasData.targetVariableName.replace(/\//g, '-'),
+      'aliasData.targetVariableName'
+    );
     return `var(--${varName})`;
   }
 
@@ -166,8 +273,13 @@ function extractNumericValue(token, unit = 'px') {
  */
 function extractStringValue(token) {
   if (!token || token.$type !== 'string') return null;
-  // Wrap font family names in quotes for CSS
-  return `"${token.$value}"`;
+  const raw = String(token.$value);
+  assertSafeCssValue(raw, 'fontFamily value');
+  // Escape backslashes first, then double quotes, before wrapping in CSS
+  // quotes. Reversing the order lets a trailing backslash in the source value
+  // escape the closing quote instead of itself.
+  const escaped = raw.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `"${escaped}"`;
 }
 
 /**
@@ -182,7 +294,7 @@ function extractColorOrAlias(token) {
   // Handle alias references like "{color.accent.500}"
   if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
     const path = value.slice(1, -1); // Remove braces
-    const varName = path.replace(/\./g, '-'); // dots to dashes
+    const varName = assertSafeVarNameSegment(path.replace(/\./g, '-'), 'gradient alias path'); // dots to dashes
     return `var(--${varName})`;
   }
 
@@ -198,10 +310,9 @@ function flattenTokens(obj, prefix = '', processor = extractColorValue) {
   const result = {};
 
   for (const [key, value] of Object.entries(obj)) {
-    // Skip metadata keys
-    if (key.startsWith('$')) continue;
-
-    // Handle $root special case (Figma uses this for base values in nested objects)
+    // Handle $root special case (Figma uses this for base values in nested objects).
+    // MUST run before the generic "$"-prefixed metadata skip below, since "$root"
+    // itself starts with "$" and would otherwise never be reached.
     if (key === '$root') {
       const processed = processor(value);
       if (processed !== null) {
@@ -209,6 +320,9 @@ function flattenTokens(obj, prefix = '', processor = extractColorValue) {
       }
       continue;
     }
+
+    // Skip metadata keys
+    if (key.startsWith('$')) continue;
 
     const newPrefix = prefix ? `${prefix}-${key}` : key;
 
@@ -232,7 +346,10 @@ function flattenTokens(obj, prefix = '', processor = extractColorValue) {
  * e.g., "gray-50" -> "--color-gray-50"
  */
 function toCssVarName(name, prefix = '') {
-  const varName = name.toLowerCase().replace(/\s+/g, '-');
+  const varName = assertSafeVarNameSegment(
+    name.toLowerCase().replace(/\s+/g, '-'),
+    `token name "${name}"`
+  );
   return prefix ? `--${prefix}-${varName}` : `--${varName}`;
 }
 
@@ -241,7 +358,10 @@ function toCssVarName(name, prefix = '') {
  */
 function generateCss(tokens, prefix = '') {
   return Object.entries(tokens)
-    .map(([name, value]) => `  ${toCssVarName(name, prefix)}: ${value};`)
+    .map(([name, value]) => {
+      assertSafeCssValue(value, `token "${name}"`);
+      return `  ${toCssVarName(name, prefix)}: ${value};`;
+    })
     .join('\n');
 }
 
@@ -251,7 +371,10 @@ function generateCss(tokens, prefix = '') {
  */
 function generateCssImportant(tokens, prefix = '') {
   return Object.entries(tokens)
-    .map(([name, value]) => `    ${toCssVarName(name, prefix)}: ${value} !important;`)
+    .map(([name, value]) => {
+      assertSafeCssValue(value, `token "${name}"`);
+      return `    ${toCssVarName(name, prefix)}: ${value} !important;`;
+    })
     .join('\n');
 }
 
@@ -288,13 +411,13 @@ function generateCssImportant(tokens, prefix = '') {
  * always resolves to the same number, which is more confusing than a second shape.
  */
 const HEADING_LINE_HEIGHTS = {
-  display: { key: '6xl', mobile: 1.2, desktop: 1.12 },
-  h1: { key: '4xl', mobile: 1.25, desktop: 1.15 },
-  h2: { key: '3xl', mobile: 1.3, desktop: 1.2 },
-  h3: { key: '2xl', mobile: 1.35, desktop: 1.28 },
-  h4: { static: 1.38 },
-  h5: { static: 1.42 },
-  body: { static: 1.5 },
+  display: { key: '6xl', mobile: 1.15, desktop: 1.1 },
+  h1: { key: '4xl', mobile: 1.15, desktop: 1.1 },
+  h2: { key: '3xl', mobile: 1.25, desktop: 1.2 },
+  h3: { key: '2xl', mobile: 1.35, desktop: 1.3 },
+  h4: { static: 1.4 },
+  h5: { static: 1.4 },
+  body: { static: 1.6 },
 };
 
 function buildTypographyTokens() {
@@ -328,59 +451,59 @@ function buildTypographyTokens() {
      Standard typography styles using primitives
      ============================================ */
 
-  /* Display - 6xl / Bold (for hero headlines) */
+  /* Display - 6xl / Regular (for hero headlines) */
   --typography-display-size: var(--font-size-6xl);
-  --typography-display-weight: var(--font-weight-bold);
+  --typography-display-weight: var(--font-weight-regular);
   --typography-display-line-height: ${displayLh};
-  --typography-display-letter-spacing: -0.02em;
+  --typography-display-letter-spacing: -0.05em;
 
-  /* Heading 1 - 4xl / Bold */
+  /* Heading 1 - 4xl / Regular */
   --typography-h1-size: var(--font-size-4xl);
-  --typography-h1-weight: var(--font-weight-bold);
+  --typography-h1-weight: var(--font-weight-regular);
   --typography-h1-line-height: ${h1Lh};
-  --typography-h1-letter-spacing: -0.01em;
+  --typography-h1-letter-spacing: -0.045em;
 
-  /* Heading 2 - 3xl / Semibold */
+  /* Heading 2 - 3xl / Regular */
   --typography-h2-size: var(--font-size-3xl);
-  --typography-h2-weight: var(--font-weight-semibold);
+  --typography-h2-weight: var(--font-weight-regular);
   --typography-h2-line-height: ${h2Lh};
-  --typography-h2-letter-spacing: -0.01em;
+  --typography-h2-letter-spacing: -0.04em;
 
-  /* Heading 3 - 2xl / Semibold */
+  /* Heading 3 - 2xl / Regular */
   --typography-h3-size: var(--font-size-2xl);
-  --typography-h3-weight: var(--font-weight-semibold);
+  --typography-h3-weight: var(--font-weight-regular);
   --typography-h3-line-height: ${h3Lh};
-  --typography-h3-letter-spacing: 0;
+  --typography-h3-letter-spacing: -0.035em;
 
-  /* Heading 4 - xl / Semibold */
+  /* Heading 4 - xl / Regular */
   --typography-h4-size: var(--font-size-xl);
-  --typography-h4-weight: var(--font-weight-semibold);
+  --typography-h4-weight: var(--font-weight-regular);
   --typography-h4-line-height: ${h4Lh};
-  --typography-h4-letter-spacing: 0;
+  --typography-h4-letter-spacing: -0.03em;
 
-  /* Heading 5 - lg / Medium */
+  /* Heading 5 - lg / Regular */
   --typography-h5-size: var(--font-size-lg);
-  --typography-h5-weight: var(--font-weight-medium);
+  --typography-h5-weight: var(--font-weight-regular);
   --typography-h5-line-height: ${h5Lh};
-  --typography-h5-letter-spacing: 0;
+  --typography-h5-letter-spacing: -0.025em;
 
   /* Body Large - lg / Regular */
   --typography-body-large-size: var(--font-size-lg);
   --typography-body-large-weight: var(--font-weight-regular);
   --typography-body-large-line-height: 1.6;
-  --typography-body-large-letter-spacing: 0;
+  --typography-body-large-letter-spacing: -0.025em;
 
   /* Body - base / Regular */
   --typography-body-size: var(--font-size-base);
   --typography-body-weight: var(--font-weight-regular);
   --typography-body-line-height: ${bodyLh};
-  --typography-body-letter-spacing: 0;
+  --typography-body-letter-spacing: -0.025em;
 
   /* Body Small - sm / Regular */
   --typography-body-small-size: var(--font-size-sm);
   --typography-body-small-weight: var(--font-weight-regular);
   --typography-body-small-line-height: 1.5;
-  --typography-body-small-letter-spacing: 0;
+  --typography-body-small-letter-spacing: -0.015em;
 
   /* Caption - xs / Regular */
   --typography-caption-size: var(--font-size-xs);
@@ -388,11 +511,11 @@ function buildTypographyTokens() {
   --typography-caption-line-height: 1.4;
   --typography-caption-letter-spacing: 0;
 
-  /* Overline - xs / Semibold / Uppercase */
+  /* Overline - xs / Regular / Uppercase */
   --typography-overline-size: var(--font-size-xs);
-  --typography-overline-weight: var(--font-weight-semibold);
+  --typography-overline-weight: var(--font-weight-regular);
   --typography-overline-line-height: 1.4;
-  --typography-overline-letter-spacing: 0.1em;
+  --typography-overline-letter-spacing: 0.08em;
   --typography-overline-transform: uppercase;
 
   /* Code - sm / Regular */
@@ -414,35 +537,38 @@ const COMPONENT_TOKENS = `
      ============================================ */
 
   /* Shadows */
-  /* Shadow color: gray-900 (#171717 = 23,23,23) instead of pure black for warmer, less harsh shadows */
-  --shadow-button: 0px 1px 3px 0px rgba(23, 23, 23, 0.1), 0px 1px 2px 0px rgba(23, 23, 23, 0.05);
+  /* Flat-at-Rest Rule: no drop shadow on any surface at rest. Interaction-state
+     shadows (hover lift, overlays) stay, since they respond to user action. */
+  --shadow-button: none;
   --shadow-button-hover: 0px 4px 6px -1px rgba(23, 23, 23, 0.1), 0px 2px 4px -2px rgba(23, 23, 23, 0.1);
   --shadow-inner: inset 0px 2px 4px 0px rgba(23, 23, 23, 0.06);
   --shadow-focus-ring: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-accent-alpha-50);
   --shadow-focus-ring-ghost: 0px 0px 0px 2px var(--color-accent-alpha-50);
   --shadow-focus-ring-error: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-error-alpha-50, rgba(220, 38, 38, 0.5));
-  --shadow-input: 0px 1px 2px 0px rgba(23, 23, 23, 0.05);
+  --shadow-input: none;
   --shadow-input-hover: 0px 1px 3px 0px rgba(23, 23, 23, 0.1), 0px 1px 2px -1px rgba(23, 23, 23, 0.1);
-  --shadow-card: 0px 1px 2px 0px rgba(23, 23, 23, 0.05);
+  --shadow-card: none;
   --shadow-card-hover: 0px 10px 15px -3px rgba(23, 23, 23, 0.1), 0px 4px 6px -4px rgba(23, 23, 23, 0.1);
   --shadow-dropdown: 0px 10px 15px -3px rgba(23, 23, 23, 0.1), 0px 4px 6px -4px rgba(23, 23, 23, 0.1);
   --shadow-modal: 0px 25px 50px -12px rgba(23, 23, 23, 0.25);
 
   /* Button Sizes */
+  /* Pill CTAs: radius is full on every size. Heights follow the rafaelalex.de
+     scale (md = 44px, the thumbable minimum). */
   --button-sm-padding-x: var(--spacing-3);
   --button-sm-padding-y: 4px;
-  --button-sm-radius: var(--radius-sm);
-  --button-sm-min-height: var(--spacing-8);
+  --button-sm-radius: var(--radius-full);
+  --button-sm-min-height: 2.25rem;
   --button-sm-gap: var(--spacing-1-5);
   --button-md-padding-x: var(--spacing-5);
   --button-md-padding-y: var(--spacing-2-5);
-  --button-md-radius: var(--radius-md);
-  --button-md-min-height: var(--spacing-10);
+  --button-md-radius: var(--radius-full);
+  --button-md-min-height: 2.75rem;
   --button-md-gap: var(--spacing-2);
   --button-lg-padding-x: var(--spacing-6);
   --button-lg-padding-y: var(--spacing-3);
-  --button-lg-radius: var(--radius-lg);
-  --button-lg-min-height: var(--spacing-12);
+  --button-lg-radius: var(--radius-full);
+  --button-lg-min-height: 3.25rem;
   --button-lg-gap: var(--spacing-2-5);
 
   /* Input Sizes */
@@ -463,7 +589,7 @@ const COMPONENT_TOKENS = `
   --badge-sm-gap: var(--spacing-1);
   --badge-md-padding-x: var(--spacing-2-5);
   --badge-md-padding-y: var(--spacing-1);
-  --badge-md-radius: var(--radius-default);
+  --badge-md-radius: var(--radius-md);
   --badge-md-gap: var(--spacing-1-5);
   --badge-lg-padding-x: var(--spacing-3);
   --badge-lg-padding-y: var(--spacing-1-5);
@@ -813,7 +939,7 @@ ${generateCss(darkRing, 'ring')}
   }
 
   // Write output - Main tokens file (with dark mode)
-  writeFileSync(OUTPUT_FILE, css, 'utf8');
+  writeAndVerify(OUTPUT_FILE, css);
 
   // Generate editor-only tokens (light mode only, no dark mode)
   // Semantic tokens are scoped to .editor-styles-wrapper for higher specificity
@@ -923,7 +1049,7 @@ ${generateCssImportant(lightIcon, 'icon')}
 }
 `;
 
-  writeFileSync(OUTPUT_EDITOR_FILE, editorCss, 'utf8');
+  writeAndVerify(OUTPUT_EDITOR_FILE, editorCss);
   console.log(`Editor tokens written to: ${OUTPUT_EDITOR_FILE}`);
 
   // Stats
@@ -980,8 +1106,18 @@ ${generateCssImportant(lightIcon, 'icon')}
 }
 
 // Run transformation only when invoked directly, not when imported by tests.
-// pathToFileURL handles path segments with spaces, special chars, symlinks correctly.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+// Compared via realpath on both sides so a symlinked invocation still
+// resolves to the same file instead of bypassing the guard.
+function isDirectInvocation() {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1]);
+  } catch {
+    return false;
+  }
+}
+
+if (isDirectInvocation()) {
   transform();
 }
 
@@ -993,4 +1129,11 @@ export {
   VIEWPORT_MIN,
   VIEWPORT_MAX,
   ROOT_PX,
+  flattenTokens,
+  extractColorValue,
+  extractStringValue,
+  assertSafeVarNameSegment,
+  assertSafeCssValue,
+  resolveOutputDir,
+  writeAndVerify,
 };

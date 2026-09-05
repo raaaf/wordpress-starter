@@ -38,83 +38,52 @@ class Testimonial extends AbstractPostType
     }
 
     /**
-     * Register custom admin columns for better list view UX
+     * Declarative admin list-table columns (thumbnail, author_name, rating)
      */
-    private static function registerAdminColumns(): void
+    protected static function adminColumns(): array
     {
-        // Add custom columns
-        add_filter('manage_' . self::$postType . '_posts_columns', function (array $columns): array {
-            $newColumns = [];
-            $newColumns['cb'] = $columns['cb'];
-            $newColumns['thumbnail'] = __('Foto', 'wp-starter');
-            $newColumns['title'] = $columns['title'];
-            $newColumns['author_name'] = __('Kunde', 'wp-starter');
-            $newColumns['rating'] = __('Bewertung', 'wp-starter');
-            $newColumns['date'] = $columns['date'];
-            return $newColumns;
-        });
-
-        // Populate custom columns
-        add_action('manage_' . self::$postType . '_posts_custom_column', function (string $column, int $postId): void {
-            switch ($column) {
-                case 'thumbnail':
-                    $thumbnail = get_the_post_thumbnail( $postId, [50, 50], ['style' => 'border-radius: 50%; object-fit: cover;'] );
+        return [
+            'thumbnail' => [
+                'label' => __('Foto', 'wp-starter'),
+                'before' => 'title',
+                'width' => 60,
+                'render' => function (int $postId): void {
+                    $thumbnail = get_the_post_thumbnail($postId, [50, 50], ['style' => 'border-radius: 50%; object-fit: cover;']);
                     // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_the_post_thumbnail() returns safe HTML
                     echo $thumbnail ?: '<span style="color: #999;">—</span>';
-                    break;
-                case 'author_name':
+                },
+            ],
+            'author_name' => [
+                'label' => __('Kunde', 'wp-starter'),
+                'after' => 'title',
+                'sortable' => 'author_name',
+                'sort_type' => 'meta_value',
+                'render' => function (int $postId): void {
                     $name = get_field('author_name', $postId);
                     $position = get_field('author_position', $postId);
                     echo '<strong>' . esc_html($name ?: '—') . '</strong>';
                     if ($position) {
                         echo '<br><span style="color: #666;">' . esc_html($position) . '</span>';
                     }
-                    break;
-                case 'rating':
+                },
+            ],
+            'rating' => [
+                'label' => __('Bewertung', 'wp-starter'),
+                'after' => 'title',
+                'sortable' => 'rating',
+                'sort_type' => 'meta_value_num',
+                'width' => 100,
+                'render' => function (int $postId): void {
                     $rating = get_field('rating', $postId);
                     if ($rating) {
                         $stars = str_repeat('★', (int) $rating) . str_repeat('☆', 5 - (int) $rating);
-                        echo '<span style="color: #f5a623; font-size: 14px;">' . esc_html( $stars ) . '</span>';
+                        echo '<span style="color: #f5a623; font-size: 14px;">' . esc_html($stars) . '</span>';
                     } else {
                         echo '<span style="color: #999;">—</span>';
                     }
-                    break;
-            }
-        }, 10, 2);
-
-        // Make columns sortable
-        add_filter('manage_edit-' . self::$postType . '_sortable_columns', function (array $columns): array {
-            $columns['author_name'] = 'author_name';
-            $columns['rating'] = 'rating';
-            return $columns;
-        });
-
-        // Handle sorting
-        add_action('pre_get_posts', function (\WP_Query $query): void {
-            if (!is_admin() || !$query->is_main_query()) {
-                return;
-            }
-            if ($query->get('post_type') !== self::$postType) {
-                return;
-            }
-
-            $orderby = $query->get('orderby');
-            if ($orderby === 'author_name') {
-                $query->set('meta_key', 'author_name');
-                $query->set('orderby', 'meta_value');
-            } elseif ($orderby === 'rating') {
-                $query->set('meta_key', 'rating');
-                $query->set('orderby', 'meta_value_num');
-            }
-        });
-
-        // Set thumbnail column width
-        add_action('admin_head', function (): void {
-            $screen = get_current_screen();
-            if ($screen && $screen->post_type === self::$postType) {
-                echo '<style>.column-thumbnail { width: 60px; } .column-rating { width: 100px; }</style>';
-            }
-        });
+                },
+            ],
+        ];
     }
 
     /**
@@ -328,7 +297,7 @@ class Testimonial extends AbstractPostType
      */
     public static function getRandom(): ?array
     {
-        $testimonials = self::getTestimonials(-1, 'rand');
+        $testimonials = self::getTestimonials(1, 'rand');
         return $testimonials[0] ?? null;
     }
 }

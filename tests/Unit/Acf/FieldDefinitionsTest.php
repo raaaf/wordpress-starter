@@ -117,6 +117,21 @@ final class FieldDefinitionsTest extends TestCase
     }
 
     // ==========================================
+    // passwordField() tests
+    // ==========================================
+
+    public function testPasswordFieldReturnsValidStructureWithoutADefaultValue(): void
+    {
+        $field = FieldDefinitions::passwordField('field_shared_password', 'Passwort', 'shared_password');
+
+        $this->assertSame('field_shared_password', $field['key']);
+        $this->assertSame('Passwort', $field['label']);
+        $this->assertSame('shared_password', $field['name']);
+        $this->assertSame('password', $field['type']);
+        $this->assertArrayNotHasKey('default_value', $field);
+    }
+
+    // ==========================================
     // backgroundColorField() tests
     // ==========================================
 
@@ -129,7 +144,14 @@ final class FieldDefinitionsTest extends TestCase
         $this->assertSame('background_color', $field['name']);
         $this->assertSame('select', $field['type']);
         $this->assertSame('primary', $field['default_value']);
-        $this->assertSame(FieldDefinitions::getBackgroundColors(), $field['choices']);
+        $this->assertSame([
+            'primary' => 'Standard (Weiß)',
+            'secondary' => 'Sekundär (Hellgrau)',
+            'tertiary' => 'Tertiär',
+            'brand' => 'Markenfarbe',
+            'brand-subtle' => 'Markenfarbe Dezent',
+            'inverse' => 'Dunkel (Invers)',
+        ], $field['choices']);
     }
 
     // ==========================================
@@ -418,7 +440,27 @@ final class FieldDefinitionsTest extends TestCase
     {
         $fields = FieldDefinitions::accordionFields('accordion');
 
-        $this->assertCount(12, $fields);
+        // Nicht die Feldanzahl pruefen (bricht bei jeder unbeteiligten
+        // Felderweiterung), sondern die Namen, die dieser Test tatsaechlich
+        // braucht: Sektionskopf, Akkordeon-Repeater, seine Toggles, und die
+        // Darstellungs-Felder aus displaySettingsFields().
+        $fieldNames = array_map(static fn (array $field): string => (string) ( $field['name'] ?? '' ), $fields);
+        foreach ([
+            'title',
+            'section_chip',
+            'section_alignment',
+            'section_description',
+            'accordion',
+            'first_open',
+            'allow_multiple',
+            'faq_schema',
+            'background_color',
+            'section_spacing',
+            'section_width',
+            'section_anchor',
+        ] as $expectedName) {
+            $this->assertContains($expectedName, $fieldNames, "Expected field '{$expectedName}' to be present");
+        }
 
         // Der Wiederholer steht seit dem Sektionskopf nicht mehr an erster Stelle.
         $repeaterField = array_values(array_filter(
@@ -471,18 +513,5 @@ final class FieldDefinitionsTest extends TestCase
 
         // No overlap in keys
         $this->assertEmpty(array_intersect($keys1, $keys2));
-    }
-
-    public function testAllFieldMethodsReturnArrays(): void
-    {
-        $this->assertIsArray(FieldDefinitions::backgroundColorField('test'));
-        $this->assertIsArray(FieldDefinitions::textField('k', 'l', 'n'));
-        $this->assertIsArray(FieldDefinitions::wysiwygField('k', 'l', 'n'));
-        $this->assertIsArray(FieldDefinitions::imageField('k', 'l', 'n'));
-        $this->assertIsArray(FieldDefinitions::linkField('k', 'l', 'n'));
-        $this->assertIsArray(FieldDefinitions::selectField('k', 'l', 'n', []));
-        $this->assertIsArray(FieldDefinitions::repeaterField('k', 'l', 'n', []));
-        $this->assertIsArray(FieldDefinitions::ctaBlockFields('test'));
-        $this->assertIsArray(FieldDefinitions::heroFields('test'));
     }
 }

@@ -31,7 +31,7 @@ class ContentImages
         }
 
         return (string) preg_replace_callback(
-            '/<img\s[^>]*>/i',
+            '/<img\s(?:[^>\"\']|\"[^\"]*\"|\'[^\']*\')*>/i',
             static fn (array $match): string => self::annotate($match[0]),
             $html,
         );
@@ -46,27 +46,92 @@ class ContentImages
             return $tag;
         }
 
-        if (!preg_match('/\ssrc=(["\'])(.*?)\1/i', $tag, $src)) {
+        $attributes = self::tokenizeAttributes($tag);
+        $src = self::firstAttribute($attributes, 'src');
+
+        if ($src === null) {
             return $tag;
         }
 
-        $id = self::resolveAttachmentId($src[2]);
+        $id = self::resolveAttachmentId($src['value']);
 
         if ($id === 0) {
             return $tag;
         }
 
-        // The leading whitespace is part of the match and has to be re-emitted,
-        // otherwise the attribute collapses into the tag name.
-        if (preg_match('/(\s)class=(["\'])(.*?)\2/i', $tag, $class)) {
-            return str_replace(
-                $class[0],
-                $class[1] . 'class=' . $class[2] . trim($class[3] . ' wp-image-' . $id) . $class[2],
-                $tag,
-            );
+        $class = self::firstAttribute($attributes, 'class');
+
+        if ($class !== null) {
+            $replacement = 'class=' . $class['quote'] . trim($class['value'] . ' wp-image-' . $id) . $class['quote'];
+
+            return substr_replace($tag, $replacement, $class['offset'], $class['length']);
         }
 
         return (string) preg_replace('/^<img\s/i', '<img class="wp-image-' . $id . '" ', $tag);
+    }
+
+    /**
+     * Splits a tag's attributes into name/value/quote/offset tokens.
+     *
+     * Quote-aware and offset-ordered, so a `src=` or `class=` occurring inside
+     * another attribute's quoted value (e.g. data-caption="<img src='x'>")
+     * is never mistaken for the tag's own attribute: each match consumes its
+     * whole quoted value, so the scan never re-enters it.
+     *
+     * @return list<array{name: string, value: string, quote: string, offset: int, length: int}>
+     */
+    private static function tokenizeAttributes(string $tag): array
+    {
+        preg_match_all(
+            '/([a-zA-Z_:][-\w:.]*)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'=<>`]+))/',
+            $tag,
+            $matches,
+            PREG_SET_ORDER | PREG_OFFSET_CAPTURE,
+        );
+
+        $attributes = [];
+
+        foreach ($matches as $match) {
+            $quote = '"';
+            $value = $match[2][0];
+
+            if ($match[2][1] === -1) {
+                if ($match[3][1] !== -1) {
+                    $quote = "'";
+                    $value = $match[3][0];
+                } else {
+                    $quote = '"';
+                    $value = $match[4][0];
+                }
+            }
+
+            $attributes[] = [
+                'name' => $match[1][0],
+                'value' => $value,
+                'quote' => $quote,
+                'offset' => $match[0][1],
+                'length' => strlen($match[0][0]),
+            ];
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Returns the first tokenized attribute matching a name, if any.
+     *
+     * @param list<array{name: string, value: string, quote: string, offset: int, length: int}> $attributes
+     * @return array{name: string, value: string, quote: string, offset: int, length: int}|null
+     */
+    private static function firstAttribute(array $attributes, string $name): ?array
+    {
+        foreach ($attributes as $attribute) {
+            if (strcasecmp($attribute['name'], $name) === 0) {
+                return $attribute;
+            }
+        }
+
+        return null;
     }
 
     /**

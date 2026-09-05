@@ -227,7 +227,7 @@ body.mce-content-body td {
 
 body.mce-content-body th {
   background-color: var(--bg-secondary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 400;
 }
 
 body.mce-content-body img {
@@ -350,14 +350,14 @@ body.mce-content-body a.button-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 400;
+  letter-spacing: -0.02em;
   text-decoration: none;
   cursor: pointer;
   transition:
     color 0.2s ease,
-    background 0.2s ease,
+    background-color 0.2s ease,
     border-color 0.2s ease,
-    box-shadow 0.2s ease,
     transform 0.2s ease;
   padding: var(--button-md-padding-y) var(--button-md-padding-x);
   min-height: var(--button-md-min-height);
@@ -367,23 +367,15 @@ body.mce-content-body a.button-ghost {
 }
 
 body.mce-content-body a.button-primary {
-  background-image: linear-gradient(
-    to bottom,
-    var(--gradient-primary-start),
-    var(--gradient-primary-end)
-  );
-  color: var(--text-inverse);
-  border: 1px solid var(--border-default);
-  box-shadow: var(--shadow-button);
+  background-color: var(--bg-brand-subtle);
+  color: var(--text-brand);
+  border: 1px solid var(--border-brand);
 }
 
 body.mce-content-body a.button-primary:hover {
-  background-image: linear-gradient(
-    to bottom,
-    var(--gradient-primary-hover-start),
-    var(--gradient-primary-hover-end)
-  );
-  box-shadow: var(--shadow-button-hover);
+  background-color: var(--bg-brand);
+  color: var(--text-on-accent);
+  border-color: transparent;
 }
 
 body.mce-content-body a.button-secondary {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WordpressStarter\PostTypes;
 
 use WordpressStarter\Acf\FieldDefinitions;
+use WordpressStarter\Security;
 
 class MemberDownload extends AbstractPostType
 {
@@ -22,6 +23,14 @@ class MemberDownload extends AbstractPostType
 
     protected static bool $showInRest = false;
 
+    /**
+     * Entries can hold plaintext SFTP host/username and an encrypted
+     * password ciphertext. capability_type 'post' alone maps edit_post to
+     * the primitive edit_posts, letting any Contributor/Author rewrite
+     * SFTP credentials. Restrict every capability to manage_options.
+     */
+    protected static ?string $requiredCapability = 'manage_options';
+
     protected static bool $hasArchive = false;
 
     protected static array|false $rewrite = false;
@@ -30,6 +39,18 @@ class MemberDownload extends AbstractPostType
 
     /** @var array<string> */
     protected static array $supports = ['title'];
+
+    /**
+     * WordPress admin color palette values, reused across sync status indicators
+     * in renderSyncColumn(), renderSyncNoticeMetaBox() and the inline JS in enqueueSyncScript().
+     */
+    private const COLOR_SYNCED = '#00a32a';
+
+    private const COLOR_PENDING = '#dba617';
+
+    private const COLOR_ERROR = '#d63638';
+
+    private const COLOR_INFO = '#2271b1';
 
     public static function registerAdminHooks(): void
     {
@@ -70,23 +91,23 @@ class MemberDownload extends AbstractPostType
 
         if (!empty($sftpSource)) {
             // Child entry
-            echo '<span style="color:#2271b1;">&#8618; ' . esc_html($sftpSource) . '</span>';
+            echo '<span style="color:' . esc_attr(self::COLOR_INFO) . '">&#8618; ' . esc_html($sftpSource) . '</span>';
 
             return;
         }
 
         // Parent entry
         if ($isSynced) {
-            echo '<span style="color:#00a32a;">&#10003; ' . esc_html__('Synchronisiert', 'wp-starter') . '</span>';
+            echo '<span style="color:' . esc_attr(self::COLOR_SYNCED) . '">&#10003; ' . esc_html__('Synchronisiert', 'wp-starter') . '</span>';
         } else {
-            echo '<span style="color:#dba617;">&#9733; ' . esc_html__('Ausstehend', 'wp-starter') . '</span>';
+            echo '<span style="color:' . esc_attr(self::COLOR_PENDING) . '">&#9733; ' . esc_html__('Ausstehend', 'wp-starter') . '</span>';
         }
     }
 
     public static function addSyncNoticeMetaBox(): void
     {
         global $post;
-        if (!$post instanceof \WP_Post) {
+        if (!$post instanceof \WP_Post || !current_user_can('manage_options')) {
             return;
         }
 
@@ -113,7 +134,7 @@ class MemberDownload extends AbstractPostType
         $host = get_post_meta($post->ID, 'download_sftp_host', true) ?: '—';
         $path = get_post_meta($post->ID, 'download_sftp_path', true) ?: '—';
 
-        $color = $isSynced ? '#00a32a' : '#dba617';
+        $color = $isSynced ? self::COLOR_SYNCED : self::COLOR_PENDING;
         $label = $isSynced
             ? __('Dieser Eintrag wurde bereits synchronisiert. Neue Dateien im konfigurierten Ordner werden beim nächsten Cronjob-Lauf automatisch importiert.', 'wp-starter')
             : __('Dieser Eintrag wurde noch nicht synchronisiert. Beim nächsten Cronjob-Lauf werden Dateien aus dem konfigurierten Ordner importiert.', 'wp-starter');
@@ -140,7 +161,7 @@ class MemberDownload extends AbstractPostType
     {
         global $post, $typenow;
 
-        if ($typenow !== 'member_download' || !$post instanceof \WP_Post) {
+        if ($typenow !== 'member_download' || !$post instanceof \WP_Post || !current_user_can('manage_options')) {
             return;
         }
 
@@ -151,8 +172,9 @@ class MemberDownload extends AbstractPostType
             return;
         }
 
+        $nonce = Security::getNonce();
         ?>
-        <script>
+        <script nonce="<?php echo esc_attr($nonce); ?>">
         (function () {
             var btn = document.getElementById('member-sync-now-btn');
             var status = document.getElementById('member-sync-status');
@@ -172,14 +194,14 @@ class MemberDownload extends AbstractPostType
                     .then(function (data) {
                         if (data.success) {
                             btn.textContent = '<?php echo esc_js(__('Fertig — Seite wird neu geladen…', 'wp-starter')); ?>';
-                            status.style.color = '#00a32a';
+                            status.style.color = '<?php echo esc_js(self::COLOR_SYNCED); ?>';
                             status.style.display = 'block';
                             status.textContent = data.data.message;
                             setTimeout(function () { window.location.reload(); }, 1500);
                         } else {
                             btn.disabled = false;
                             btn.textContent = '<?php echo esc_js(__('Jetzt synchronisieren', 'wp-starter')); ?>';
-                            status.style.color = '#d63638';
+                            status.style.color = '<?php echo esc_js(self::COLOR_ERROR); ?>';
                             status.style.display = 'block';
                             status.textContent = data.data.message || '<?php echo esc_js(__('Fehler beim Synchronisieren.', 'wp-starter')); ?>';
                         }
@@ -187,7 +209,7 @@ class MemberDownload extends AbstractPostType
                     .catch(function () {
                         btn.disabled = false;
                         btn.textContent = '<?php echo esc_js(__('Jetzt synchronisieren', 'wp-starter')); ?>';
-                        status.style.color = '#d63638';
+                        status.style.color = '<?php echo esc_js(self::COLOR_ERROR); ?>';
                         status.style.display = 'block';
                         status.textContent = '<?php echo esc_js(__('Verbindungsfehler.', 'wp-starter')); ?>';
                     });

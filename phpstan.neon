@@ -10,41 +10,54 @@ parameters:
         processTimeout: 300.0
     paths:
         - src
+        - config
+        - functions.php
+        - index.php
     excludePaths:
         - vendor
         - compiled (?)
-        - node_modules
-        - config/functions.php
+        - node_modules (?)
     bootstrapFiles:
         - vendor/autoload.php
     treatPhpDocTypesAsCertain: false
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         # WordPress functions are handled by the WordPress extension
-        - '#Function get_template_directory not found#'
-        - '#Function get_stylesheet_directory not found#'
-        - '#Function wp_enqueue_#'
-        - '#Function add_action not found#'
-        - '#Function add_filter not found#'
-        - '#Function is_admin not found#'
-        - '#Function wp_doing_ajax not found#'
-        - '#Function get_theme_file_#'
+        - '#^Function get_template_directory not found\.$#'
+        - '#^Function get_stylesheet_directory not found\.$#'
+        - '#^Function wp_enqueue_[A-Za-z0-9_]+ not found\.$#'
+        - '#^Function add_action not found\.$#'
+        - '#^Function add_filter not found\.$#'
+        - '#^Function is_admin not found\.$#'
+        - '#^Function wp_doing_ajax not found\.$#'
+        - '#^Function get_theme_file_[A-Za-z0-9_]+ not found\.$#'
         # ACF functions
-        - '#Function acf_#'
-        - '#Function get_field#'
-        - '#Function get_sub_field#'
-        - '#Function have_rows#'
-        - '#Function the_row#'
-        - '#Function get_row_layout#'
-        - '#Function update_field#'
+        - '#^Function acf_[A-Za-z0-9_]+ not found\.$#'
+        - '#^Function get_fields? not found\.$#'
+        - '#^Function get_sub_field not found\.$#'
+        - '#^Function have_rows not found\.$#'
+        - '#^Function the_row not found\.$#'
+        - '#^Function get_row_layout not found\.$#'
+        - '#^Function update_field not found\.$#'
         # Config helper
-        - '#Function config not found#'
+        - '#^Function config not found\.$#'
         # WordPress cache functions
-        - '#Function wp_cache_#'
+        - '#^Function wp_cache_[A-Za-z0-9_]+ not found\.$#'
         # WordPress constants defined at runtime
-        - '#Constant COOKIEPATH not found#'
-        - '#Constant COOKIE_DOMAIN not found#'
+        - '#^Constant COOKIEPATH not found\.$#'
+        - '#^Constant COOKIE_DOMAIN not found\.$#'
+        # config/functions.php checks DOING_AJAX before wp_doing_ajax() is available
+        # (this runs during bootstrap, ahead of the WordPress core load)
+        -
+            message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+            path: config/functions.php
         # Third-party library method not recognized by PHPStan
-        - '#Call to an undefined method YahnisElsts\\PluginUpdateChecker\\v5p6\\Vcs\\Api::enableReleaseAssets#'
+        # (namespace version is unpinned so a PUC bump does not silently re-enable this check)
+        - '#^Call to an undefined method YahnisElsts\\PluginUpdateChecker\\v5p\d+\\Vcs\\Api::enableReleaseAssets\(\)\.$#'
         # iThemes Security Pro — premium plugin, not installed in CI
-        - '#(Call to static method|on an unknown class) ITSEC_Modules#'
+        - '#^Call to (static method|method) [A-Za-z0-9_]+\(\) on an unknown class ITSEC_Modules\.$#'
+        # WP-Optimize — premium-adjacent cache/DB plugin, not installed in CI
+        - '#^Function WP_Optimize not found\.$#'
+        - '#^Parameter \$[A-Za-z0-9_]+ of method [A-Za-z0-9_\\]+::[A-Za-z0-9_]+\(\) has invalid type WP_Optimize_Options\.$#'
+        - '#^Call to method [A-Za-z0-9_]+\(\) on an unknown class WP_Optimize_Options\.$#'
+        - '#^Call to (static method|method) [A-Za-z0-9_]+\(\) on an unknown class WPO_Cache_Config\.$#'

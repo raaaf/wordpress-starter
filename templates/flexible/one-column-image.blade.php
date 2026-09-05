@@ -15,17 +15,9 @@
     $background = get_sub_field('background_color') ?: 'primary';
     $accordionPrefix = 'acc-oci-' . uniqid();
 
-    // Preserve numeric ID for wp_get_attachment_image; also build array fallback
-    $imageId = is_numeric($image) ? (int) $image : null;
-    if (is_numeric($image)) {
-        $imgSrc = wp_get_attachment_image_src($image, 'hero-split');
-        $image = [
-            'url' => $imgSrc ? $imgSrc[0] : wp_get_attachment_url($image),
-            'alt' => get_post_meta($image, '_wp_attachment_image_alt', true) ?: '',
-            'width' => $imgSrc ? $imgSrc[1] : '',
-            'height' => $imgSrc ? $imgSrc[2] : '',
-        ];
-    }
+    $imageData = \WordpressStarter\Helpers\ImageData::resolve($image, 'hero-split');
+    $imageId = $imageData['id'] ?? null;
+    $image = $imageData;
 @endphp
 
 @if($chip || $headline || $description || $label || $imageId || ($image && !empty($image['url'])) || $content || !empty($accordion))
@@ -35,7 +27,7 @@
         <x-card variant="outlined" padding="none" class="overflow-hidden">
             @if($label)
                 <div class="p-6 lg:p-8 pb-0 lg:pb-0">
-                    <p class="text-sm font-bold uppercase tracking-wider text-content-secondary mb-4">{{ $label }}</p>
+                    <p class="text-overline text-content-secondary mb-4">{{ $label }}</p>
                 </div>
             @endif
             @if($imageId)
@@ -43,9 +35,10 @@
                     'class' => 'w-full object-cover',
                     'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $label ?: strip_tags((string) $content)),
                     'decoding' => 'async',
+                    'sizes' => '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px',
                 ]) !!}
             @elseif($image && !empty($image['url']))
-                <img src="{{ $image['url'] }}"
+                <img src="{{ esc_url($image['url']) }}"
                      alt="{{ $image['alt'] ?? '' }}"
                      @if(!empty($image['width']) && !empty($image['height']))width="{{ $image['width'] }}" height="{{ $image['height'] }}"@endif
                      class="w-full object-cover"
@@ -54,7 +47,7 @@
             @if($content)
                 {{-- Die Lesespalte innerhalb der Karte begrenzen: die Karte ist
                      breiter als eine bequeme Zeile, gemessen 89 Zeichen. --}}
-                <div class="p-6 lg:p-8">
+                <div class="p-6 lg:p-8 {{ !empty($accordion) ? 'pb-0 lg:pb-0' : '' }}">
                     <div class="max-w-[58ch]">
                         <x-prose>@kses($content)</x-prose>
                     </div>

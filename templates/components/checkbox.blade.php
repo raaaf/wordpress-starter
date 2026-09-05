@@ -30,14 +30,29 @@
 ])
 
 @php
-    static $checkboxCounter = 0;
-    $checkboxId = $id ?? $name . '-' . (++$checkboxCounter);
+    $checkboxId = $id !== null
+        ? sanitize_html_class((string) $id, sanitize_html_class((string) $name))
+        : \WordpressStarter\Helpers\ComponentId::next(sanitize_html_class((string) $name));
     $accessibleName = $ariaLabel ?: $label;
+
+    // Same allowlist as x-input (input.blade.php), plus 'required': unlike
+    // x-input, x-checkbox has no dedicated $required prop, so it must stay
+    // reachable as a plain passthrough attribute here.
+    $passthroughAttrs = \WordpressStarter\Helpers\FormAttributes::passthrough(['required']);
+    $passthroughPrefixes = \WordpressStarter\Helpers\FormAttributes::prefixes();
     if (defined('WP_DEBUG') && WP_DEBUG && !$accessibleName) {
         trigger_error('x-checkbox requires a "label" or "ariaLabel" prop for accessibility.', E_USER_WARNING);
     }
     $hasError = $error || $errorMessage;
     $displayHint = $hasError && $errorMessage ? $errorMessage : $hint;
+
+    // aria-describedby is also rendered explicitly below (pointing at the
+    // hint/error <p>), so a caller-supplied aria-describedby (which would
+    // otherwise reach the input a second time via the aria- prefix
+    // passthrough) is merged into one value instead, hint id first.
+    $callerDescribedBy = $attributes->get('aria-describedby');
+    $describedByIds = array_filter([$displayHint ? $checkboxId . '-hint' : null, $callerDescribedBy]);
+    $describedBy = $describedByIds ? implode(' ', $describedByIds) : null;
 @endphp
 
 <div class="inline-flex flex-col gap-1.5">
@@ -53,8 +68,9 @@
                 @if($indeterminate) data-indeterminate="true" @endif
                 @if($ariaLabel && !$label) aria-label="{{ esc_attr($ariaLabel) }}" @endif
                 @if($hasError) aria-invalid="true" @endif
-                @if($displayHint) aria-describedby="{{ $checkboxId }}-hint" @endif
-                class="peer sr-only"
+                @if($describedBy) aria-describedby="{{ $describedBy }}" @endif
+                {{ $attributes->only($passthroughAttrs)->merge(['class' => 'peer sr-only']) }}
+                {{ $attributes->whereStartsWith($passthroughPrefixes)->except('aria-describedby') }}
             />
 
             {{-- Custom checkbox --}}
@@ -62,8 +78,8 @@
                 {{ $disabled
                     ? 'border-line-disabled bg-surface-disabled'
                     : ($hasError
-                        ? 'border-line-error peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
-                        : 'border-line-control hover:border-line-strong peer-focus-visible:shadow-[var(--shadow-focus-ring)]'
+                        ? 'border-line-error peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-error)]'
+                        : 'border-line-control hover:border-line-strong peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--ring-focus)]'
                     )
                 }}
                 peer-checked:bg-surface-accent peer-checked:border-surface-accent
@@ -98,6 +114,6 @@
 
 @if($indeterminate)
 <script nonce="{{ $GLOBALS['csp_nonce'] ?? '' }}">
-    document.getElementById('{{ $checkboxId }}').indeterminate = true;
+    document.getElementById({!! wp_json_encode($checkboxId) !!}).indeterminate = true;
 </script>
 @endif

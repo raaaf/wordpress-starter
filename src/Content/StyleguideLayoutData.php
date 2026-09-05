@@ -453,10 +453,10 @@ class StyleguideLayoutData
         return $this->layout('stats', [
             'title' => 'Zahlen & Fakten',
             'stats' => [
-                ['number' => 250, 'suffix' => '+', 'label' => 'Zufriedene Kunden', 'icon' => ''],
-                ['number' => 15, 'suffix' => '', 'label' => 'Jahre Erfahrung', 'icon' => ''],
-                ['number' => 500, 'suffix' => '+', 'label' => 'Projekte abgeschlossen', 'icon' => ''],
-                ['number' => 98, 'suffix' => '%', 'label' => 'Kundenzufriedenheit', 'icon' => ''],
+                ['number' => 250, 'suffix' => '+', 'label' => 'Zufriedene Kunden'],
+                ['number' => 15, 'suffix' => '', 'label' => 'Jahre Erfahrung'],
+                ['number' => 500, 'suffix' => '+', 'label' => 'Projekte abgeschlossen'],
+                ['number' => 98, 'suffix' => '%', 'label' => 'Kundenzufriedenheit'],
             ],
             'background_color' => 'secondary',
         ]);
@@ -615,7 +615,7 @@ class StyleguideLayoutData
         return $this->layout('newsletter', [
             'title' => 'Auf dem Laufenden bleiben',
             'content' => 'Viermal im Jahr ein kurzer Bericht darueber, was gefoerdert wurde.',
-            'action_url' => 'https://beispiel.us1.list-manage.com/subscribe/post?u=demo&id=demo',
+            'action_url' => 'https://example.com/newsletter',
             'email_field' => 'EMAIL',
             'button_label' => 'Anmelden',
             'note' => 'Die Anmeldung laeuft ueber unseren Versanddienst. Abmeldung jederzeit ueber den Link in jeder E-Mail.',
@@ -698,6 +698,11 @@ class StyleguideLayoutData
     private function logoId(int $index): ?int
     {
         return $this->imageIds["logo_{$index}"] ?? null;
+    }
+
+    private function videoId(): ?int
+    {
+        return $this->imageIds['video_demo'] ?? null;
     }
 
     /**
@@ -1027,7 +1032,7 @@ class StyleguideLayoutData
         // dazu ein selbst gehostetes Video, das stumm in Schleife laeuft.
         $catalog[] = $this->layout('video', [
             'source' => 'wordpress',
-            'video' => $this->imageIds['video_demo'] ?? null,
+            'video' => $this->videoId(),
             'video_url' => '',
             'poster' => $this->imageId(2),
             'aspect_ratio' => '4-3',
@@ -1038,7 +1043,7 @@ class StyleguideLayoutData
 
         $catalog[] = $this->layout('video', [
             'source' => 'wordpress',
-            'video' => $this->imageIds['video_demo'] ?? null,
+            'video' => $this->videoId(),
             'video_url' => '',
             'poster' => $this->imageId(3),
             'aspect_ratio' => '1-1',
@@ -1047,7 +1052,7 @@ class StyleguideLayoutData
 
         $catalog[] = $this->layout('video', [
             'source' => 'wordpress',
-            'video' => $this->imageIds['video_demo'] ?? null,
+            'video' => $this->videoId(),
             'video_url' => '',
             'poster' => $this->imageId(4),
             'aspect_ratio' => '21-9',
@@ -1100,7 +1105,7 @@ class StyleguideLayoutData
         $catalog[] = $this->layout('newsletter', [
             'title' => '',
             'content' => '',
-            'action_url' => 'https://beispiel.us1.list-manage.com/subscribe/post?u=demo&id=demo',
+            'action_url' => 'https://example.com/newsletter',
             'email_field' => 'EMAIL',
             'button_label' => 'Eintragen',
             'note' => 'Ohne Ueberschrift und Text bleibt nur die Leiste.',
@@ -1313,7 +1318,7 @@ class StyleguideLayoutData
 
         $catalog[] = $this->layout('video', [
             'source' => 'wordpress',
-            'video' => $this->imageIds['video_demo'] ?? null,
+            'video' => $this->videoId(),
             'video_url' => '',
             'captions_language' => 'en',
             'poster' => $this->imageId(4),
@@ -1433,7 +1438,7 @@ class StyleguideLayoutData
      */
     private function videoUrl(): string
     {
-        $id = $this->imageIds['video_demo'] ?? null;
+        $id = $this->videoId();
 
         return $id ? (string) wp_get_attachment_url( (int) $id) : '';
     }
@@ -1509,11 +1514,11 @@ class StyleguideLayoutData
             $this->layout('stats', [
                 'title' => 'Fünf Kennzahlen',
                 'stats' => [
-                    ['number' => 12, 'suffix' => '', 'label' => 'Jahre', 'icon' => ''],
-                    ['number' => 340, 'suffix' => '+', 'label' => 'Projekte', 'icon' => ''],
-                    ['number' => 98, 'suffix' => '%', 'label' => 'Zufriedenheit', 'icon' => ''],
-                    ['number' => 25, 'suffix' => '', 'label' => 'Mitarbeitende', 'icon' => ''],
-                    ['number' => 7, 'suffix' => '', 'label' => 'Standorte', 'icon' => ''],
+                    ['number' => 12, 'suffix' => '', 'label' => 'Jahre'],
+                    ['number' => 340, 'suffix' => '+', 'label' => 'Projekte'],
+                    ['number' => 98, 'suffix' => '%', 'label' => 'Zufriedenheit'],
+                    ['number' => 25, 'suffix' => '', 'label' => 'Mitarbeitende'],
+                    ['number' => 7, 'suffix' => '', 'label' => 'Standorte'],
                 ],
                 'background_color' => 'primary',
                 'section_anchor' => 'stats-zustand-letzte-zeile',
@@ -1523,10 +1528,10 @@ class StyleguideLayoutData
             $this->layout('pricing_table', [
                 'title' => 'Vier Preispläne',
                 'plans' => [
-                    ['name' => 'Basis', 'price' => '19', 'period' => 'Monat', 'features' => "Eine Position\nZweite Position", 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
-                    ['name' => 'Plus', 'price' => '39', 'period' => 'Monat', 'features' => "Eine Position\nZweite Position", 'is_featured' => true, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
-                    ['name' => 'Pro', 'price' => '79', 'period' => 'Monat', 'features' => "Eine Position\nZweite Position", 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
-                    ['name' => 'Maximal', 'price' => '149', 'period' => 'Monat', 'features' => "Eine Position\nZweite Position", 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                    ['name' => 'Basis', 'price' => '19', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                    ['name' => 'Plus', 'price' => '39', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => true, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                    ['name' => 'Pro', 'price' => '79', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                    ['name' => 'Maximal', 'price' => '149', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
                 ],
                 'background_color' => 'secondary',
                 'section_anchor' => 'pricing-table-zustand-letzte-zeile',

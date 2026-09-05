@@ -207,10 +207,7 @@ class AssetOptimizationServiceProvider extends ServiceProvider
             // a weight that is not used above the fold delays the ones that are,
             // which showed up as a 0.765 CLS on gold-investment.
             $criticalFonts = [
-                'space-grotesk-variable.woff2',  // Space Grotesk Variable (headlines)
-                'inter-v20-latin-regular.woff2', // Inter Regular (body)
-                'inter-v20-latin-500.woff2',     // Inter Medium (navigation)
-                'inter-v20-latin-600.woff2',     // Inter SemiBold (header CTA, h2-h4)
+                'ColabReg-webfont.woff2', // Colaborate Regular (headlines and body)
             ];
 
             foreach ($criticalFonts as $font) {

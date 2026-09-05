@@ -68,8 +68,13 @@ final class ApplicationTest extends TestCase
         $app = Application::getInstance();
         $app->boot();
 
-        // After boot, various actions should be registered
-        $this->assertArrayHasKey('actions', $GLOBALS['wp_mock_hooks']);
+        // SecurityServiceProvider::boot() must have registered its hooks. Asserting
+        // only that the 'actions' key exists in $GLOBALS['wp_mock_hooks'] always
+        // passes, because WordPressMocks::resetAllMocks() seeds that key empty
+        // before every test; a boot() that registers nothing would still be green.
+        $this->assertActionAddedWith('init', SecurityServiceProvider::class);
+        $this->assertActionAddedWith('send_headers', SecurityServiceProvider::class);
+        $this->assertFilterAdded('send_password_change_email');
     }
 
     public function testGetProviderReturnsNullForUnregisteredProvider(): void

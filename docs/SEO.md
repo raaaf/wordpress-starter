@@ -164,6 +164,16 @@ The theme handles:
 - Date/author archives
 - Search pages
 
+## Robots Meta Tag
+
+`SeoServiceProvider::addRobotsOverrides()` filters `wp_robots` to mark these pages `noindex`:
+
+- **404 pages:** `noindex, follow` (broken URLs should not be indexed, but crawling the rest of the site should continue)
+- **Password-protected singulars:** `noindex, nofollow` (only the password gate is public, the content is not)
+- **Styleguide page:** `noindex, nofollow`, identified by the queried page's `_wp_page_template` postmeta matching `StyleguidePage::TEMPLATE` (any page carrying that template, not only the one `StyleguidePage::find()` currently resolves to). It is an internal component reference for the team, not indexable content.
+
+When Yoast SEO is active (`defined('WPSEO_VERSION')`), the same decision is mirrored onto Yoast's own `wpseo_robots` string filter, so a published styleguide page or password-protected page stays out of search results even when Yoast recomputes the robots value separately from `wp_robots`.
+
 ## Sitemap
 
 **Note:** Sitemap generation is handled by Yoast SEO (recommended plugin).
@@ -239,11 +249,13 @@ add_action('wp_head', function () {
 
 ### Alt Text
 
-Always add descriptive alt text to images:
+Always add descriptive alt text to images. Use `\WordpressStarter\Helpers\Text::imageAlt()`, which
+falls back from the media library's stored alt text to a context string (card label, person name,
+post title) and finally to the attachment caption:
 
 ```blade
 <img src="{{ $image['url'] }}"
-     alt="{{ $image['alt'] ?: $image['title'] }}"
+     alt="{{ \WordpressStarter\Helpers\Text::imageAlt((int) $image['ID'], $contextLabel) }}"
      width="{{ $image['width'] }}"
      height="{{ $image['height'] }}">
 ```
@@ -277,7 +289,7 @@ echo wp_get_attachment_image($imageId, 'large', false, [
 The theme is optimized for Core Web Vitals:
 
 - **LCP**: Critical fonts preloaded, optimized images
-- **FID**: Minimal JavaScript, deferred loading
+- **INP**: Minimal JavaScript, deferred loading
 - **CLS**: Fixed image dimensions, layout stability
 
 ### Preloading

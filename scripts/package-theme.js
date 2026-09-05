@@ -1,3 +1,10 @@
+/**
+ * Before running this script, install production-only dependencies:
+ *   composer install --no-dev --no-scripts
+ * A dev install (with phpunit/phpstan present) ships test tooling and dev
+ * autoload maps inside the release zip, which is why this script refuses to
+ * archive vendor/ when it detects one.
+ */
 import { ZipArchive } from 'archiver';
 import { createWriteStream, existsSync, mkdirSync } from 'fs';
 import { readFile } from 'fs/promises';
@@ -15,6 +22,20 @@ async function packageTheme() {
 
   if (!existsSync(join(rootDir, 'dist/.vite/manifest.json'))) {
     console.error('Error: Build not found. Run "npm run build" first.');
+    process.exit(1);
+  }
+
+  const composerJson = JSON.parse(await readFile(join(rootDir, 'composer.json'), 'utf-8'));
+  const devPackages = Object.keys(composerJson['require-dev'] || {});
+  const installedDevPackages = devPackages.filter((name) =>
+    existsSync(join(rootDir, 'vendor', name))
+  );
+
+  if (installedDevPackages.length > 0) {
+    console.error(
+      `Error: vendor/ contains dev dependencies (${installedDevPackages.join(', ')}). ` +
+        'Run "composer install --no-dev --no-scripts" before packaging.'
+    );
     process.exit(1);
   }
 
@@ -65,6 +86,7 @@ async function packageTheme() {
       'vendor',
       'resources/css',
       'resources/img',
+      'resources/images',
       'resources/icons',
       'resources/fonts',
       'resources/favicons',
@@ -86,8 +108,15 @@ async function packageTheme() {
       const dirPath = join(rootDir, dir);
       if (existsSync(dirPath)) {
         archive.directory(dirPath, `${themeName}/${dir}`, (entryData) => {
+          const baseName = entryData.name.split('/').pop();
+
           // macOS-Muell gehoert in kein ausgeliefertes Zip.
-          if (entryData.name.split('/').pop() === '.DS_Store') {
+          if (baseName === '.DS_Store') {
+            return false;
+          }
+
+          // Source maps leak build paths and are never needed at runtime.
+          if (baseName.endsWith('.map')) {
             return false;
           }
 

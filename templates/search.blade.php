@@ -17,7 +17,7 @@
                 {{ __('Suchergebnisse', 'wp-starter') }}
             </h1>
             <p class="text-lg text-content-secondary mb-6">
-                {{ __('Ergebnisse für:', 'wp-starter') }} "{{ get_search_query() }}"
+                {{ __('Ergebnisse für:', 'wp-starter') }} „{{ get_search_query() }}“
             </p>
 
             {{-- Search Form --}}
@@ -49,10 +49,10 @@
             <div class="space-y-6">
                 @while (have_posts())
                     @php the_post(); @endphp
-                    <article class="p-6 bg-surface-secondary rounded-lg hover:shadow-md transition-shadow">
+                    <article class="group relative p-6 bg-surface-secondary surface-sheen rounded-lg hover:shadow-md transition-shadow">
                         <div class="flex items-start gap-4">
                             @if (has_post_thumbnail())
-                                <a href="{{ get_permalink() }}" class="shrink-0">
+                                <a href="{{ get_permalink() }}" class="relative z-20 shrink-0" aria-hidden="true" tabindex="-1">
                                     {!! get_the_post_thumbnail(null, 'avatar', ['class' => 'w-24 h-24 object-cover rounded-lg']) !!}
                                 </a>
                             @endif
@@ -65,10 +65,8 @@
                                 <x-badge variant="gray" size="sm" class="mb-2">{{ $post_type_label }}</x-badge>
 
                                 {{-- Title --}}
-                                <h2 class="text-h4 mb-2">
-                                    <a href="{{ get_permalink() }}" class="text-content hover:text-content-brand transition-colors">
-                                        {{ get_the_title() }}
-                                    </a>
+                                <h2 class="text-h4 mb-2 text-content transition-colors group-hover:text-content-brand">
+                                    {{ get_the_title() }}
                                 </h2>
 
                                 {{-- Meta --}}
@@ -82,10 +80,15 @@
 
                                 {{-- Excerpt --}}
                                 <p class="text-content-secondary line-clamp-2">
-                                    {!! get_the_excerpt() !!}
+                                    {!! wp_kses_post(get_the_excerpt()) !!}
                                 </p>
                             </div>
                         </div>
+
+                        {{-- Stretched link --}}
+                        <a href="{{ get_permalink() }}" class="absolute inset-0 z-10" aria-label="{{ __('Weiterlesen:', 'wp-starter') }} {{ get_the_title() }}">
+                            <span class="sr-only">{{ get_the_title() }}</span>
+                        </a>
                     </article>
                 @endwhile
             </div>
@@ -105,16 +108,13 @@
             ])
         @else
             {{-- No Results --}}
-            <div class="text-center py-12">
-                <x-icon name="smiley-sad" class="w-16 h-16 mx-auto text-content-tertiary mb-6" />
-                <h2 class="text-h3 mb-4">
-                    {{ __('Keine Ergebnisse gefunden', 'wp-starter') }}
-                </h2>
-                <p class="text-content-secondary mb-8 max-w-md mx-auto">
-                    {{ __('Für deine Suche konnten leider keine passenden Inhalte gefunden werden. Versuch es mit anderen Suchbegriffen.', 'wp-starter') }}
-                </p>
-                <x-button :url="home_url('/')" variant="primary" size="lg" iconLeft="home" :title="__('Zur Startseite', 'wp-starter')" />
-            </div>
+            @include('partials.empty-state', [
+                'icon'        => 'smiley-sad',
+                'title'       => __('Keine Ergebnisse gefunden', 'wp-starter'),
+                'text'        => __('Für deine Suche konnten leider keine passenden Inhalte gefunden werden. Versuch es mit anderen Suchbegriffen.', 'wp-starter'),
+                'buttonLabel' => __('Zur Startseite', 'wp-starter'),
+                'buttonUrl'   => home_url('/'),
+            ])
         @endif
     </x-section>
 @endsection

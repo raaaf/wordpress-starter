@@ -38,7 +38,7 @@
             <div
                 class="flex flex-wrap gap-6 mb-6 border-b border-line"
                 role="tablist"
-                aria-label="{{ $title ?: __('Tabs', 'wp-starter') }}"
+                aria-label="{{ $title ? strip_tags($title) : __('Tabs', 'wp-starter') }}"
             >
                 @foreach($tabs as $index => $tab)
                     <button
@@ -56,7 +56,7 @@
                         :tabindex="activeTab === {{ $index }} ? 0 : -1"
                         {{-- Radius nur oben: der Fokusring bleibt weich, die Unterstreichung des aktiven
                              Tabs bleibt flach. Ein umlaufender Radius rundete auch sie ab. --}}
-                        class="inline-flex items-center gap-2 px-1 py-3 font-medium border-b-2 -mb-px transition-colors cursor-pointer rounded-t-[var(--radius-sm)] focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
+                        class="inline-flex items-center gap-2 px-1 py-3 font-normal border-b-2 -mb-px transition-colors cursor-pointer rounded-t-[var(--radius-sm)] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                         role="tab"
                         aria-controls="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"
                     >
@@ -88,15 +88,16 @@
                         id="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"
                         role="tabpanel"
                         aria-labelledby="{{ esc_attr($uniqueId) }}-tab-{{ $index }}"
-                        class="prose max-w-2xl text-content"
                     >
-                        @kses($tab['content'] ?? '')
+                        <x-prose class="max-w-2xl text-content">
+                            @kses($tab['content'] ?? '')
+                        </x-prose>
                     </div>
                 @endforeach
             </div>
         </div>
     @elseif(current_user_can('edit_posts'))
-        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+        <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge mindestens einen Tab hinzu.', 'wp-starter') }}</p>
         </div>
     @endif

@@ -40,11 +40,38 @@ final class TextTest extends TestCase
     }
 
     /**
-     * lineBreaks() passes an empty attribute allowlist for <br> to wp_kses(), so an
+     * The lineBreaks() method passes an empty attribute allowlist for <br> to wp_kses(), so an
      * injected attribute must not survive - only the bare tag is allowed.
      */
     public function testLineBreaksStripsAttributesFromBr(): void
     {
         $this->assertSame('a<br>b', Text::lineBreaks('a<br onclick="x">b'));
+    }
+
+    /**
+     * Only <br> is allowlisted, so any other tag must be stripped while its
+     * inner text content is kept (wp_kses()'s documented behaviour for a
+     * disallowed tag, not just script/style).
+     */
+    public function testLineBreaksStripsDisallowedTags(): void
+    {
+        $this->assertSame('text', Text::lineBreaks('<em>text</em>'));
+    }
+
+    /**
+     * The [br] placeholder is the documented way callers request a line
+     * break; it must convert to a real <br> tag before the allowlist runs.
+     */
+    public function testLineBreaksConvertsBracketPlaceholderToBrTag(): void
+    {
+        $this->assertSame('line1<br>line2', Text::lineBreaks('line1[br]line2'));
+    }
+
+    /**
+     * A bare, unattributed <br> is the one tag the allowlist keeps.
+     */
+    public function testLineBreaksKeepsBareBrTag(): void
+    {
+        $this->assertSame('a<br>b', Text::lineBreaks('a<br>b'));
     }
 }

@@ -65,8 +65,35 @@ class FooterAlertBar
      */
     public static function demoteHeadings(string $html): string
     {
-        $html = (string) preg_replace('#<h[1-6](?:\s[^>]*)?>#i', '<p><strong>', $html);
+        // Quote-aware attribute list, so a `>` inside a quoted attribute value
+        // (e.g. `<h2 title="a > b">`) does not end the tag match early.
+        $attributes = '(?:\s(?:"[^"]*"|\'[^\']*\'|[^>"\'])*)?';
 
-        return (string) preg_replace('#</h[1-6]>#i', '</strong></p>', $html);
+        $html = (string) preg_replace_callback(
+            '#<h[1-6]' . $attributes . '>(.*?)</h[1-6]>#is',
+            static function (array $matches): string {
+                $inner = $matches[1];
+
+                // Any nested <strong> is stripped and the whole content is
+                // re-wrapped in exactly one <strong>, so a partially bold
+                // heading (e.g. `<strong>Part</strong> rest`) never ends up
+                // with a nested <strong><strong>...
+                $stripped = (string) preg_replace('#</?strong(?:\s[^>]*)?>#i', '', $inner);
+
+                return '<p><strong>' . $stripped . '</strong></p>';
+            },
+            $html
+        );
+
+        // Content pasted in from Outlook/Word can carry unclosed heading tags
+        // (e.g. `<h3>Titel<p>Text</p>`), which the pair-aware pass above never
+        // matches. Demote any surviving opening/closing heading tag on its own.
+        $html = (string) preg_replace('#<h[1-6]' . $attributes . '>#i', '<p><strong>', $html);
+        $html = (string) preg_replace('#</h[1-6]>#i', '</strong></p>', $html);
+
+        // An unmatched heading (e.g. only the opener survived) now leaves an
+        // opening <p><strong> with no closing tag; wp_kses_post() does not
+        // balance tags, so force_balance_tags() closes what is still open.
+        return force_balance_tags($html);
     }
 }

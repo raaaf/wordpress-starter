@@ -63,26 +63,24 @@ class BrandingServiceProvider extends ServiceProvider
                 return;
             }
 
-            $favicon16 = wp_get_attachment_image_url($faviconId, [16, 16]);
-            $favicon32 = wp_get_attachment_image_url($faviconId, [32, 32]);
-            $favicon180 = wp_get_attachment_image_url($faviconId, [180, 180]);
-            $favicon192 = wp_get_attachment_image_url($faviconId, [192, 192]);
-            $favicon512 = wp_get_attachment_image_url($faviconId, [512, 512]);
+            // Order and attributes preserved from the original per-size blocks: 32, 16, 180 (apple-touch-icon), 192, 512.
+            $faviconSizes = [
+                32 => ['rel' => 'icon', 'type' => 'image/png'],
+                16 => ['rel' => 'icon', 'type' => 'image/png'],
+                180 => ['rel' => 'apple-touch-icon', 'type' => null],
+                192 => ['rel' => 'icon', 'type' => 'image/png'],
+                512 => ['rel' => 'icon', 'type' => 'image/png'],
+            ];
 
-            if ($favicon32) {
-                echo '<link rel="icon" type="image/png" sizes="32x32" href="' . esc_url($favicon32) . '">' . "\n";
-            }
-            if ($favicon16) {
-                echo '<link rel="icon" type="image/png" sizes="16x16" href="' . esc_url($favicon16) . '">' . "\n";
-            }
-            if ($favicon180) {
-                echo '<link rel="apple-touch-icon" sizes="180x180" href="' . esc_url($favicon180) . '">' . "\n";
-            }
-            if ($favicon192) {
-                echo '<link rel="icon" type="image/png" sizes="192x192" href="' . esc_url($favicon192) . '">' . "\n";
-            }
-            if ($favicon512) {
-                echo '<link rel="icon" type="image/png" sizes="512x512" href="' . esc_url($favicon512) . '">' . "\n";
+            foreach ($faviconSizes as $size => $attrs) {
+                $faviconUrl = wp_get_attachment_image_url($faviconId, [$size, $size]);
+                if (!$faviconUrl) {
+                    continue;
+                }
+
+                echo '<link rel="' . esc_attr($attrs['rel']) . '"'
+                    . ( $attrs['type'] ? ' type="' . esc_attr($attrs['type']) . '"' : '' )
+                    . ' sizes="' . absint($size) . 'x' . absint($size) . '" href="' . esc_url($faviconUrl) . '">' . "\n";
             }
         }, 1);
     }
@@ -98,10 +96,16 @@ class BrandingServiceProvider extends ServiceProvider
             if (!$logoUrl) {
                 return;
             }
+            // esc_url_raw() (not esc_url()) because this URL is inside a <style> block:
+            // RAWTEXT does not decode HTML entities, so esc_url()'s "&#038;" would stay
+            // literal and break the URL. Strip characters that could close the CSS
+            // string/declaration early, including the single quote used as the
+            // url('...') delimiter below and backslash escapes that could re-introduce one.
+            $safeLogoUrl = str_replace(['"', "'", '\\', ')', ';', '}', "\n", "\r"], '', esc_url_raw($logoUrl));
             ?>
             <style type="text/css">
                 #login h1 a, .login h1 a {
-                    background-image: url('<?php echo esc_url($logoUrl); ?>');
+                    background-image: url('<?php echo $safeLogoUrl; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already sanitized above via esc_url_raw() + char stripping for CSS-string safety ?>');
                     background-size: contain;
                     background-repeat: no-repeat;
                     background-position: center;

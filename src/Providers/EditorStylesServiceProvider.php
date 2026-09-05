@@ -256,9 +256,15 @@ class EditorStylesServiceProvider extends ServiceProvider
         });
 
         add_action('wp_ajax_theme_tinymce_icon_picker', function (): void {
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public TinyMCE plugin asset
+            // Loaded as a plain <script src> by TinyMCE, so no nonce can travel
+            // with the request; the capability gate mirrors the editor screen.
+            if (!current_user_can('edit_posts')) {
+                status_header(403);
+                exit;
+            }
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Authenticated admin-ajax response, response is cacheable privately per logged-in user
             header('Content-Type: application/javascript; charset=utf-8');
-            header('Cache-Control: public, max-age=3600');
+            header('Cache-Control: private, max-age=3600');
             // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted internal JS
             echo $this->getIconPickerPluginJs();
             exit;
@@ -275,6 +281,15 @@ class EditorStylesServiceProvider extends ServiceProvider
 (function() {
     if (typeof tinymce === 'undefined') { return; }
 
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     tinymce.PluginManager.add('themeicons', function(editor) {
         editor.addButton('themeicons', {
             title: 'Icon einfügen',
@@ -288,9 +303,11 @@ class EditorStylesServiceProvider extends ServiceProvider
 
                 var html = '<div style="display:flex;flex-wrap:wrap;gap:8px;max-width:580px;padding:8px;">';
                 data.icons.forEach(function(name) {
-                    html += '<button type="button" data-icon="' + name + '" title="' + name + '" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;font-size:11px;min-width:64px;" onmouseover="this.style.background=\'#f0f0f0\'" onmouseout="this.style.background=\'#fff\'">'
-                        + '<img src="' + data.baseUrl + name + '.svg" width="24" height="24" alt="' + name + '" style="opacity:0.7;">'
-                        + name
+                    var safeName = escapeHtml(name);
+                    var iconSrc = escapeHtml(data.baseUrl + encodeURIComponent(name) + '.svg');
+                    html += '<button type="button" class="theme-icon-picker-btn" data-icon="' + safeName + '" title="' + safeName + '" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;font-size:11px;min-width:64px;">'
+                        + '<img src="' + iconSrc + '" width="24" height="24" alt="' + safeName + '" style="opacity:0.7;">'
+                        + safeName
                         + '</button>';
                 });
                 html += '</div>';
@@ -311,9 +328,26 @@ class EditorStylesServiceProvider extends ServiceProvider
                         el.addEventListener('click', function(e) {
                             var target = e.target.closest('[data-icon]');
                             if (target) {
-                                editor.insertContent('[icon name="' + target.getAttribute('data-icon') + '"]');
+                                var shortcodeName = target.getAttribute('data-icon').replace(/"/g, '&quot;');
+                                editor.insertContent('[icon name="' + shortcodeName + '"]');
                                 editor.windowManager.close();
                             }
+                        });
+                        el.addEventListener('mouseover', function(e) {
+                            var target = e.target.closest('.theme-icon-picker-btn');
+                            if (target) { target.style.background = '#f0f0f0'; }
+                        });
+                        el.addEventListener('mouseout', function(e) {
+                            var target = e.target.closest('.theme-icon-picker-btn');
+                            if (target) { target.style.background = '#fff'; }
+                        });
+                        el.addEventListener('focusin', function(e) {
+                            var target = e.target.closest('.theme-icon-picker-btn');
+                            if (target) { target.style.background = '#f0f0f0'; }
+                        });
+                        el.addEventListener('focusout', function(e) {
+                            var target = e.target.closest('.theme-icon-picker-btn');
+                            if (target) { target.style.background = '#fff'; }
                         });
                     }
                 });

@@ -12,7 +12,12 @@
     @param bool $disabled - Disabled state
     @param bool $error - Error state
     @param string $errorMessage - Error message (replaces hint when set)
-    @param string $size - sm, md, lg (default: md)
+    @param string $size - sm, md, lg (default: md), the visual scale, unrelated to $visibleRows
+    @param int $visibleRows - number of visible rows when $multiple is set (rendered as the native "size" attribute).
+           Detection covers a literal "multiple" attribute and an Alpine
+           ":multiple"/"x-bind:multiple" binding by presence only: a dynamic
+           binding's runtime value is unknown at render time, so its mere
+           presence is treated as multiple for the "size" attribute.
     @param string $class - Additional CSS classes
 
     States from Figma:
@@ -36,13 +41,35 @@
     'error' => false,
     'errorMessage' => null,
     'size' => 'md',
+    'visibleRows' => null,
     'class' => '',
 ])
 
 @php
-    $selectId = $id ?? $name;
+    $selectId = $id ?? \WordpressStarter\Helpers\ComponentId::next((string) $name);
     $hasError = $error || $errorMessage;
     $displayHint = $hasError && $errorMessage ? $errorMessage : $hint;
+
+    // Reference allowlist for x-select: plain HTML attributes must be named
+    // exactly, only x-/@/:/aria-/data- may pass through by prefix. A "form"
+    // prefix admitted formaction/formmethod too (same trap as input.blade.php).
+    $passthroughAttrs = ['autocomplete', 'form', 'multiple'];
+    $passthroughPrefixes = \WordpressStarter\Helpers\FormAttributes::prefixes();
+    // Alpine binds the native "multiple" attribute via :multiple/x-bind:multiple
+    // rather than passing it as a plain HTML attribute; has('multiple') alone
+    // misses that case, so the visibleRows "size" logic below never engaged
+    // for an Alpine-driven multi-select.
+    $isMultiple = $attributes->has('multiple')
+        || $attributes->has(':multiple')
+        || $attributes->has('x-bind:multiple');
+
+    // aria-invalid and aria-describedby are rendered explicitly below, so
+    // they are excluded from the passthrough bag to avoid a duplicated
+    // attribute; a caller-supplied aria-describedby is merged in instead of
+    // dropped, hint id first.
+    $callerDescribedBy = trim((string) $attributes->get('aria-describedby', ''));
+    $describedBy = trim(($displayHint ? $selectId . '-hint' : '') . ' ' . $callerDescribedBy);
+    $externalAttrs = $attributes->except(['aria-invalid', 'aria-describedby']);
 
     // Size classes
     $sizes = [
@@ -70,20 +97,20 @@
     $radiusClass = $radiusClasses[$size] ?? $radiusClasses['md'];
 
     // Base select classes from Figma tokens
-    $baseClasses = 'w-full border bg-surface text-content appearance-none cursor-pointer transition-[color,background,border-color,box-shadow] duration-200 focus:outline-none';
+    $baseClasses = 'w-full border bg-surface-secondary text-content appearance-none cursor-pointer transition-[color,background,border-color,box-shadow] duration-200';
 
     // State classes from Figma
     $stateClasses = match(true) {
         $disabled => 'border-line-disabled bg-surface-disabled text-content-disabled cursor-not-allowed',
-        $hasError => 'border-line-error shadow-[var(--shadow-input)] focus:border-line-error focus:shadow-[var(--shadow-focus-ring)]',
-        default => 'border-line-control shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:shadow-[var(--shadow-focus-ring)]',
+        $hasError => 'border-line-error shadow-[var(--shadow-input)] focus:border-line-error focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-error)]',
+        default => 'border-line-control shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]',
     };
 @endphp
 
 <div class="w-full">
     {{-- Label --}}
     @if($label)
-        <label for="{{ $selectId }}" class="block text-sm font-medium text-content mb-1.5">
+        <label for="{{ $selectId }}" class="block text-sm font-normal text-content mb-1.5">
             {{ $label }}
             @if($required)
                 <span class="text-content-error ml-0.5" aria-hidden="true">*</span><span class="sr-only"> ({{ __('Pflichtfeld', 'wp-starter') }})</span>
@@ -99,8 +126,10 @@
             @if($required) required @endif
             @if($disabled) disabled @endif
             @if($hasError) aria-invalid="true" @endif
-            @if($displayHint) aria-describedby="{{ $selectId }}-hint" @endif
-            {{ $attributes->whereStartsWith(['x-', '@', ':', 'aria-', 'data-']) }}
+            @if($describedBy !== '') aria-describedby="{{ $describedBy }}" @endif
+            @if($isMultiple && $visibleRows) size="{{ (int) $visibleRows }}" @endif
+            {{ $externalAttrs->only($passthroughAttrs) }}
+            {{ $externalAttrs->whereStartsWith($passthroughPrefixes) }}
             class="{{ $baseClasses }} {{ $radiusClass }} {{ $stateClasses }} {{ $sizeClass }} {{ $class }}"
         >
             @if($placeholder)

@@ -17,6 +17,8 @@ use WordpressStarter\ThemeContext;
  */
 class PluginServiceProvider extends ServiceProvider
 {
+    use AdminActionGuard;
+
     private static function setupPageSlug(): string
     {
         return ThemeContext::kebabPrefix() . '-setup';
@@ -174,17 +176,13 @@ class PluginServiceProvider extends ServiceProvider
             return;
         }
 
-        if (!isset($_GET[self::paramRerunContentSetup()])) {
+        if (!self::verifyAdminAction(
+            self::paramRerunContentSetup(),
+            self::paramRerunContentSetup(),
+            'manage_options',
+            __('Keine Berechtigung.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-        if (!wp_verify_nonce($nonce, self::paramRerunContentSetup())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
         }
 
         $this->loadSetupConfig();
@@ -204,17 +202,13 @@ class PluginServiceProvider extends ServiceProvider
             return;
         }
 
-        if (!isset($_GET[self::paramGenerateDemoPosts()])) {
+        if (!self::verifyAdminAction(
+            self::paramGenerateDemoPosts(),
+            self::paramGenerateDemoPosts(),
+            'manage_options',
+            __('Keine Berechtigung.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-        if (!wp_verify_nonce($nonce, self::paramGenerateDemoPosts())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
         }
 
         // German sample blog posts
@@ -256,7 +250,7 @@ class PluginServiceProvider extends ServiceProvider
 
         foreach ($samplePosts as $postData) {
             $postDate = gmdate('Y-m-d H:i:s', $baseTime - ( $dayOffset * DAY_IN_SECONDS ));
-            $dayOffset += rand(2, 4);
+            $dayOffset += wp_rand(2, 4);
 
             $postId = wp_insert_post([
                 'post_title' => $postData['title'],
@@ -298,17 +292,13 @@ class PluginServiceProvider extends ServiceProvider
             return;
         }
 
-        if (!isset($_GET[self::paramDeleteDemoPosts()])) {
+        if (!self::verifyAdminAction(
+            self::paramDeleteDemoPosts(),
+            self::paramDeleteDemoPosts(),
+            'manage_options',
+            __('Keine Berechtigung.', 'wp-starter'),
+        )) {
             return;
-        }
-
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-        if (!wp_verify_nonce($nonce, self::paramDeleteDemoPosts())) {
-            wp_die(esc_html__('Sicherheitsüberprüfung fehlgeschlagen.', 'wp-starter'));
-        }
-
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Keine Berechtigung.', 'wp-starter'));
         }
 
         $posts = get_posts([
@@ -485,16 +475,16 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function maybeRedirectToSetup(): void
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Core WordPress bulk activation parameter
+        if (wp_doing_ajax() || isset($_GET['activate-multi']) || !current_user_can('manage_options')) {
+            return;
+        }
+
         if (!get_transient(ThemeContext::optionKey('activation_redirect'))) {
             return;
         }
 
         delete_transient(ThemeContext::optionKey('activation_redirect'));
-
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Core WordPress bulk activation parameter
-        if (wp_doing_ajax() || isset($_GET['activate-multi'])) {
-            return;
-        }
 
         wp_safe_redirect(admin_url('themes.php?page=' . self::setupPageSlug()));
         exit;
@@ -505,8 +495,6 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function renderSetupPage(): void
     {
-        update_option(ThemeContext::optionKey('welcome_dismissed'), true);
-
         $categories = $this->getPluginsByCategory();
         $selectedPlugins = $this->getSelectedPlugins();
         $missingSelectedPlugins = array_filter($selectedPlugins, fn ($p) => !( $p['check'] )());
@@ -538,6 +526,11 @@ class PluginServiceProvider extends ServiceProvider
             wp_send_json_error(['message' => __('Keine Berechtigung.', 'wp-starter')]);
         }
 
+        // Visiting the setup page must not mutate state on its own (GET is
+        // not an admin action); the welcome notice is dismissed once the user
+        // actually acts on this page, here on the first verified install call.
+        update_option(ThemeContext::optionKey('welcome_dismissed'), true);
+
         $slug = isset($_POST['slug']) ? sanitize_text_field(wp_unslash($_POST['slug'])) : '';
 
         if (empty($slug)) {
@@ -566,6 +559,8 @@ class PluginServiceProvider extends ServiceProvider
         if (!current_user_can('install_plugins')) {
             wp_send_json_error(['message' => __('Keine Berechtigung.', 'wp-starter')]);
         }
+
+        update_option(ThemeContext::optionKey('welcome_dismissed'), true);
 
         $selectedPlugins = $this->getSelectedPlugins();
         $missingPlugins = array_filter($selectedPlugins, fn ($p) => !( $p['check'] )());
@@ -619,6 +614,10 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function displayPluginNotices(): void
     {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
         global $pagenow;
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading page parameter for display logic only
         $page = isset($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
@@ -703,17 +702,18 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function handleDismissal(): void
     {
-        if (!isset($_GET[self::paramDismissPlugins()])) {
+        if (!self::verifyAdminAction(
+            self::paramDismissPlugins(),
+            self::paramDismissPlugins(),
+            'manage_options',
+            __('Keine Berechtigung.', 'wp-starter'),
+        )) {
             return;
         }
 
-        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
-
-        if (wp_verify_nonce($nonce, self::paramDismissPlugins())) {
-            update_option(ThemeContext::optionKey('dismissed_plugin_notice'), true);
-            wp_safe_redirect(remove_query_arg([self::paramDismissPlugins(), '_wpnonce']));
-            exit;
-        }
+        update_option(ThemeContext::optionKey('dismissed_plugin_notice'), true);
+        wp_safe_redirect(remove_query_arg([self::paramDismissPlugins(), '_wpnonce']));
+        exit;
     }
 
     /**

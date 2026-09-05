@@ -7,7 +7,7 @@
 
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
-    $content = wp_kses_post(get_sub_field('content'));
+    $content = get_sub_field('content');
     $formId = get_sub_field('form_id');
     $showContactInfo = get_sub_field('show_contact_info') ?? true;
     $background = get_sub_field('background_color') ?: 'primary';
@@ -17,8 +17,12 @@
     $address = \WordpressStarter\Acf\Fields::option('address', '');
     $phone = \WordpressStarter\Acf\Fields::option('phone', '');
     $email = \WordpressStarter\Acf\Fields::option('email', '');
+
+    $hasContactInfo = $showContactInfo && ($companyName || $address || $phone || $email);
+    $hasForm = $formId && absint($formId) > 0 && shortcode_exists('contact-form-7');
 @endphp
 
+@if($title || $content || $hasContactInfo || $hasForm || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="contact-form">
     <x-grid cols="2" gap="xl" class="items-stretch">
         {{-- Left: Title, Content, Contact Info --}}
@@ -28,17 +32,17 @@
             @endif
 
             @if($content)
-                <div class="mb-8 prose text-content-secondary">
-                    {!! $content !!}
-                </div>
+                <x-prose class="mb-8 text-content-secondary">
+                    @kses($content)
+                </x-prose>
             @endif
 
-            @if($showContactInfo && ($companyName || $address || $phone || $email))
+            @if($hasContactInfo)
                 <x-card variant="filled" padding="lg">
                     <h3 class="text-h5 mb-4">{{ __('Kontaktdaten', 'wp-starter') }}</h3>
 
                     @if($companyName)
-                        <p class="mb-2 font-medium text-content">{{ $companyName }}</p>
+                        <p class="mb-2 font-normal text-content">{{ $companyName }}</p>
                     @endif
 
                     @if($address)
@@ -67,10 +71,10 @@
              Screenreader bei jeder Aenderung das ganze Formular vorlesen. Die
              Statusmeldung bringt CF7 als eigene Region mit, siehe die Regel fuer
              .wpcf7-response-output in app.css. --}}
-        <div class="p-8 rounded-lg bg-surface-secondary">
-            @if($formId && shortcode_exists('contact-form-7'))
-                {!! do_shortcode('[contact-form-7 id="' . esc_attr($formId) . '"]') !!}
-            @else
+        <div class="p-8 rounded-lg bg-surface-secondary surface-sheen">
+            @if($hasForm)
+                {!! do_shortcode('[contact-form-7 id="' . absint($formId) . '"]') !!}
+            @elseif(current_user_can('edit_posts'))
                 <p class="text-content-secondary">
                     @if(!shortcode_exists('contact-form-7'))
                         {{ __('Contact Form 7 Plugin ist nicht installiert.', 'wp-starter') }}
@@ -82,3 +86,4 @@
         </div>
     </x-grid>
 </x-section>
+@endif

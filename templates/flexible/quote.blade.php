@@ -15,6 +15,7 @@
     $imageId = (int) (get_sub_field('image') ?: 0);
     $size = get_sub_field('size') ?: 'md';
     $background = get_sub_field('background_color') ?: 'primary';
+    $imageUrl = $imageId ? wp_get_attachment_image_url($imageId, 'thumbnail') : false;
 
     $quoteClass = $size === 'lg' ? 'text-h2' : 'text-h4';
 @endphp
@@ -22,9 +23,9 @@
 @if($quote)
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="quote">
     <figure class="max-w-3xl mx-auto text-center">
-        @if($imageId)
+        @if($imageUrl)
             <img
-                src="{{ esc_url(wp_get_attachment_image_url($imageId, 'thumbnail')) }}"
+                src="{{ esc_url($imageUrl) }}"
                 alt="{{ esc_attr(\WordpressStarter\Helpers\Text::imageAlt($imageId, $author ?: '')) }}"
                 class="w-20 h-20 mx-auto mb-6 rounded-full object-cover"
                 loading="lazy"
@@ -42,7 +43,7 @@
 
         @if($author || $role)
             <figcaption class="mt-6 text-content-secondary">
-                @if($author)<span class="font-bold text-content">{{ $author }}</span>@endif
+                @if($author)<cite class="font-normal not-italic text-content">{{ $author }}</cite>@endif
                 @if($author && $role) <span aria-hidden="true">&middot;</span> @endif
                 @if($role){{ $role }}@endif
             </figcaption>

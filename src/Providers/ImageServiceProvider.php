@@ -139,8 +139,8 @@ class ImageServiceProvider extends ServiceProvider
      */
     private static function extractAttr(string $tag, string $attr): string
     {
-        preg_match('/' . preg_quote($attr, '/') . '="([^"]*)"/', $tag, $m);
-        return $m[1] ?? '';
+        preg_match('/\\s' . preg_quote($attr, '/') . '\\s*=\\s*(["\'])(.*?)\\1/is', $tag, $m);
+        return $m[2] ?? '';
     }
 
     /**
@@ -149,8 +149,8 @@ class ImageServiceProvider extends ServiceProvider
      */
     private static function extractClass(string $tag): string
     {
-        preg_match('/class="([^"]*)"/', $tag, $m);
-        $classes = preg_split('/\s+/', $m[1] ?? '', -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $classAttr = self::extractAttr($tag, 'class');
+        $classes = preg_split('/\s+/', $classAttr, -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
         // Remove WP-generated size/alignment classes; wp_get_attachment_image adds its own.
         $strip = ['alignnone', 'alignleft', 'alignright', 'aligncenter', 'size-full', 'size-medium', 'size-large'];

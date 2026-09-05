@@ -13,6 +13,9 @@
     @var string $ansicht Aktive Ansicht: 'module' oder 'design-system'
 --}}
 {{-- TemplateRenderTest rendert jedes Template einmal ohne Variablen. --}}
+@php
+    use WordpressStarter\Services\StyleguidePage;
+@endphp
 @php($ansicht = $ansicht ?? 'module')
 @php($ansichten = ['module' => __('Module', 'wp-starter'), 'design-system' => __('Design-System', 'wp-starter')])
 
@@ -26,7 +29,7 @@
             <a
                 href="{{ esc_url(add_query_arg('ansicht', $wert, get_permalink())) }}"
                 @if($aktiv) aria-current="page" @endif
-                class="px-3 py-1 text-sm font-medium no-underline transition-colors rounded-full focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)] {{ $aktiv ? 'bg-surface text-content shadow-[var(--shadow-button)]' : 'text-content-secondary hover:text-content' }}"
+                class="px-3 py-1 text-sm font-normal no-underline transition-colors rounded-full focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] {{ $aktiv ? 'bg-[var(--bg-brand-tint)] text-content-brand ring-1 ring-inset ring-[var(--border-brand)]' : 'text-content-secondary hover:text-content' }}"
             >{{ $beschriftung }}</a>
         @endforeach
     </div>
@@ -50,15 +53,15 @@
      * veralteter Anker (z. B. #cards-99) bleibt sonst ohne Ziel stehen,
      * statt in eine Ansicht umgeleitet zu werden, in der er ebenfalls fehlt.
      *
-     * Stille Kopie: 'tokens' und 'komponenten' sind identisch zu
-     * anchor="tokens" in templates/styleguide/tokens.blade.php:15 und
-     * anchor="komponenten" in templates/styleguide/components.blade.php:13.
-     * Wird einer der beiden Anker dort umbenannt, muss diese Liste hier
-     * manuell nachgezogen werden — sonst bricht die Umleitung lautlos.
+     * Einzige Quelle: WordpressStarter\Services\StyleguidePage::DESIGN_SYSTEM_ANCHORS,
+     * dieselbe Konstante, die templates/styleguide/tokens.blade.php und
+     * templates/styleguide/components.blade.php als anchor="" ausgeben. Wird
+     * einer der beiden Anker dort umbenannt, zieht diese Liste automatisch mit.
      */
     document.addEventListener('DOMContentLoaded', function () {
         var ziel = window.location.hash.slice(1);
-        var designSystemAnker = ['tokens', 'komponenten'];
+        {{-- Raw sink: json_encode() of fixed PHP-side anchor ids, no user input. --}}
+        var designSystemAnker = {!! wp_json_encode(array_values(StyleguidePage::DESIGN_SYSTEM_ANCHORS), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!};
 
         if (!ziel || document.getElementById(ziel) || designSystemAnker.indexOf(ziel) === -1) {
             return;

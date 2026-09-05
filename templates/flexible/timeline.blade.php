@@ -28,17 +28,31 @@
                         $eventTitle = $event['title'] ?? '';
                         $content = $event['content'] ?? '';
                         $imageId = $event['image'] ?? null;
+                        $eventIcon = $event['event_icon'] ?? '';
                         $isEven = $index % 2 === 0;
+                        $yearIsYear = (bool) preg_match('/^\d{4}$/', (string) $year);
                     @endphp
                     <li class="relative flex flex-col md:flex-row {{ $isEven ? '' : 'md:flex-row-reverse' }} items-center gap-8">
-                        {{-- Timeline dot (decorative) --}}
-                        <div class="absolute z-10 hidden w-4 h-4 transform -translate-x-1/2 rounded-full md:block bg-surface-brand left-1/2" aria-hidden="true"></div>
+                        {{-- Timeline dot (decorative), or the chosen event icon --}}
+                        @if($eventIcon)
+                            <div class="absolute z-10 hidden items-center justify-center w-8 h-8 transform -translate-x-1/2 rounded-full md:flex bg-surface-brand text-content-inverse left-1/2" aria-hidden="true">
+                                <x-icon :name="$eventIcon" size="sm" />
+                            </div>
+                        @else
+                            <div class="absolute z-10 hidden w-4 h-4 transform -translate-x-1/2 rounded-full md:block bg-surface-brand left-1/2" aria-hidden="true"></div>
+                        @endif
 
                         {{-- Content card --}}
                         <div class="w-full md:w-[calc(50%-2rem)] md:text-left">
                             <x-card variant="filled" padding="lg">
                                 @if($year)
-                                    <x-badge variant="accent" size="md" class="mb-3">{{ $year }}</x-badge>
+                                    <x-badge variant="accent" size="md" class="mb-3">
+                                        @if($yearIsYear)
+                                            <time datetime="{{ $year }}">{{ $year }}</time>
+                                        @else
+                                            {{ $year }}
+                                        @endif
+                                    </x-badge>
                                 @endif
 
                                 @if($eventTitle)
@@ -46,16 +60,16 @@
                                 @endif
 
                                 @if($content)
-                                    <div class="prose text-content-secondary">
+                                    <x-prose class="text-content-secondary">
                                         @kses($content)
-                                    </div>
+                                    </x-prose>
                                 @endif
 
                                 @if($imageId)
-                                    {!! wp_get_attachment_image($imageId, 'gallery-thumb', false, [
+                                    {!! wp_get_attachment_image((int) $imageId, 'gallery-thumb', false, [
                                         'class' => 'mt-4 rounded-lg',
                                         'sizes' => '(max-width: 768px) 100vw, 50vw',
-                                        'alt' => $eventTitle,
+                                        'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $eventTitle ?: strip_tags((string) $content)),
                                     ]) !!}
                                 @endif
                             </x-card>
@@ -68,7 +82,7 @@
             </ol>
         </div>
     @elseif(current_user_can('edit_posts'))
-        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+        <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge mindestens ein Ereignis hinzu.', 'wp-starter') }}</p>
         </div>
     @endif

@@ -25,7 +25,7 @@ class LogServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Register error handler for uncaught exceptions
-        if (WP_DEBUG) {
+        if (defined('WP_DEBUG') && WP_DEBUG) {
             add_action('shutdown', [$this, 'logFatalErrors']);
         }
     }

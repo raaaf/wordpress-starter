@@ -8,10 +8,19 @@
 
 @php
     $fieldId = 'pwbox-' . (int) get_the_ID();
-    // A cookie that is present while the gate still shows means the previous
-    // attempt was wrong. COOKIEHASH is guarded so the template also renders
-    // outside a full WordPress bootstrap.
-    $hasError = defined('COOKIEHASH') && isset($_COOKIE['wp-postpass_' . COOKIEHASH]);
+    // The wp-postpass_* cookie is site-wide, not per-post: a visitor who
+    // unlocked a DIFFERENT protected page still carries it here, and
+    // post_password_required() is true again for THIS post simply because
+    // that cookie doesn't match this post's password. That looks identical
+    // to "just submitted the wrong password" from this cookie check alone,
+    // and there is no reliable request signal (Referer survives the
+    // wp-login.php redirect unpredictably across browsers) to tell the two
+    // apart. So the message stays neutral instead of asserting a wrong
+    // password. COOKIEHASH is guarded so the template also renders outside
+    // a full WordPress bootstrap.
+    $hasError = defined('COOKIEHASH')
+        && isset($_COOKIE['wp-postpass_' . COOKIEHASH])
+        && post_password_required();
 @endphp
 
 <section class="section bg-surface py-20 md:py-28">
@@ -19,15 +28,11 @@
         <div class="max-w-md mx-auto">
             <x-card variant="outlined" padding="none">
                 <div class="p-8">
-                    <div class="text-center mb-8">
-                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-accent-subtle mb-4">
-                            <x-icon name="lock" class="w-8 h-8 text-icon-brand" />
-                        </div>
-                        <h1 class="text-h3 mb-2">{{ get_the_title() }}</h1>
-                        <p class="text-content-secondary">
-                            {{ __('Diese Seite ist passwortgeschützt. Bitte gib das Passwort ein.', 'wp-starter') }}
-                        </p>
-                    </div>
+                    @include('partials.gate-card', [
+                        'gateIcon' => 'lock',
+                        'gateHeading' => get_the_title(),
+                        'gateDescription' => __('Diese Seite ist passwortgeschützt. Bitte gib das Passwort ein.', 'wp-starter'),
+                    ])
 
                     @if($hasError)
                         {{-- Appears after a full page load following a server round
@@ -42,7 +47,7 @@
                             x-cloak
                         >
                             <x-alert variant="error">
-                                {{ __('Das eingegebene Passwort war nicht korrekt.', 'wp-starter') }}
+                                {{ __('Bitte geben Sie das Passwort erneut ein.', 'wp-starter') }}
                             </x-alert>
                         </div>
                     @endif
@@ -62,7 +67,7 @@
 
                         <x-button
                             type="submit"
-                            :title="__('Anzeigen', 'wp-starter')"
+                            :title="__('Inhalt anzeigen', 'wp-starter')"
                             variant="primary"
                             size="md"
                             class="w-full justify-center"

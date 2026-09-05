@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
+use ArrayAccess;
 use Tests\Support\TestCase;
 use WordpressStarter\Services\StyleguidePage;
 use WordpressStarter\ThemeContext;
@@ -20,12 +22,57 @@ final class StyleguidePageTest extends TestCase
         $GLOBALS['wp_mock_options'] = [];
         $GLOBALS['wp_mock_post_meta'] = [];
         $GLOBALS['wp_mock_posts_by_id'] = [];
+        $GLOBALS['wp_mock_current_user_can'] = ['edit_pages' => true];
+        $GLOBALS['wp_mock_doing_ajax'] = false;
         ThemeContext::reset();
     }
 
     private function candidate(int $id, string $status = 'private', int $sections = 40, bool $claimed = false): array
     {
         return ['id' => $id, 'status' => $status, 'sections' => $sections, 'claimedByOtherTheme' => $claimed];
+    }
+
+    /**
+     * Drop-in for a $GLOBALS mock-storage slot that counts writes made
+     * through it, so a test can assert "did not write again" rather than
+     * only "value still matches" (a redundant write would satisfy that too).
+     * The mock get_option()/get_post_meta()/update_option()/update_post_meta()
+     * functions in tests/bootstrap.php read and write plain array offsets,
+     * and PHP dispatches that offset syntax through ArrayAccess when the
+     * underlying value is an object implementing it — no bootstrap change
+     * needed.
+     *
+     * @return ArrayAccess<string, mixed>&object{writes: int}
+     */
+    private function countingStorageSpy(): ArrayAccess
+    {
+        return new class() implements ArrayAccess {
+            public int $writes = 0;
+
+            /** @var array<string, mixed> */
+            private array $data = [];
+
+            public function offsetExists(mixed $offset): bool
+            {
+                return isset($this->data[$offset]);
+            }
+
+            public function offsetGet(mixed $offset): mixed
+            {
+                return $this->data[$offset] ?? null;
+            }
+
+            public function offsetSet(mixed $offset, mixed $value): void
+            {
+                ++$this->writes;
+                $this->data[$offset] = $value;
+            }
+
+            public function offsetUnset(mixed $offset): void
+            {
+                unset($this->data[$offset]);
+            }
+        };
     }
 
     public function testMarkerKeyIsHiddenAndThemePrefixed(): void
@@ -120,6 +167,79 @@ final class StyleguidePageTest extends TestCase
         $this->assertSame(632, get_option(StyleguidePage::optionKey()));
     }
 
+    /**
+     * A user without edit_pages must not have the marker/option written on
+     * their behalf — this is the gate find() relies on when it opportunistically
+     * re-adopts from a read-only admin_notices render.
+     */
+    public function testGateBlocksWriteForAUserWithoutEditPages(): void
+    {
+        $GLOBALS['wp_mock_current_user_can'] = ['edit_pages' => false];
+
+        StyleguidePage::adopt(632);
+
+        $this->assertEmpty(get_post_meta(632, StyleguidePage::markerKey(), true));
+        $this->assertFalse(get_option(StyleguidePage::optionKey(), false));
+    }
+
+    /**
+     * The other half of the same gate: even a user with edit_pages must not
+     * have the marker/option written on their behalf from an AJAX request.
+     */
+    public function testGateBlocksWriteDuringAjaxEvenWithEditPages(): void
+    {
+        $GLOBALS['wp_mock_doing_ajax'] = true;
+
+        StyleguidePage::adopt(632);
+
+        $this->assertEmpty(get_post_meta(632, StyleguidePage::markerKey(), true));
+        $this->assertFalse(get_option(StyleguidePage::optionKey(), false));
+    }
+
+    /**
+     * The content-setup path (after_switch_theme / WP-CLI theme activation /
+     * the manage_options Tools rerun) runs with no logged-in user, so the
+     * ordinary gate would silently skip the write and leave the page unmarked.
+     * force: true must write regardless of capability or ajax context.
+     */
+    public function testForceWritesRegardlessOfTheGate(): void
+    {
+        $GLOBALS['wp_mock_current_user_can'] = ['edit_pages' => false];
+        $GLOBALS['wp_mock_doing_ajax'] = true;
+
+        StyleguidePage::adopt(632, force: true);
+
+        $this->assertSame('1', get_post_meta(632, StyleguidePage::markerKey(), true));
+        $this->assertSame(632, get_option(StyleguidePage::optionKey()));
+    }
+
+    /**
+     * A repeat adopt() of an already-adopted page (as find() does on every
+     * opportunistic re-resolve) must not write again — otherwise every
+     * admin_notices render on a resolved page would hit postmeta/options
+     * unconditionally. The spy objects below stand in for the option/marker
+     * storage so a no-op is observable as zero further writes, not merely as
+     * "value still matches" (a redundant write would satisfy that too).
+     */
+    public function testIdempotentSecondCallDoesNotWriteAgain(): void
+    {
+        $optionSpy = $this->countingStorageSpy();
+        $markerSpy = $this->countingStorageSpy();
+        $GLOBALS['wp_mock_options'] = $optionSpy;
+        $GLOBALS['wp_mock_post_meta'][632] = $markerSpy;
+
+        StyleguidePage::adopt(632);
+        $this->assertSame(1, $optionSpy->writes);
+        $this->assertSame(1, $markerSpy->writes);
+
+        StyleguidePage::adopt(632);
+
+        $this->assertSame(1, $optionSpy->writes);
+        $this->assertSame(1, $markerSpy->writes);
+        $this->assertSame('1', get_post_meta(632, StyleguidePage::markerKey(), true));
+        $this->assertSame(632, get_option(StyleguidePage::optionKey()));
+    }
+
     public function testNeedsMigrationWhenTemplateIsNotTheNewOne(): void
     {
         $GLOBALS['wp_mock_post_meta'][632]['_wp_page_template'] = StyleguidePage::LEGACY_TEMPLATE;
@@ -162,5 +282,81 @@ final class StyleguidePageTest extends TestCase
 
         $this->assertEmpty(get_post_meta(701, $marker, true));
         $this->assertEmpty(get_post_meta(702, $marker, true));
+    }
+
+    /**
+     * The forget() gate mirrors adopt(): forget() can also run from a read-only render
+     * path, so a user without edit_pages must not have the marker/option
+     * cleared on their behalf.
+     */
+    public function testForgetGateBlocksClearForAUserWithoutEditPages(): void
+    {
+        StyleguidePage::adopt(632);
+        $GLOBALS['wp_mock_posts']['page'] = [632];
+        $GLOBALS['wp_mock_current_user_can'] = ['edit_pages' => false];
+
+        StyleguidePage::forget();
+
+        $this->assertSame('1', get_post_meta(632, StyleguidePage::markerKey(), true));
+        $this->assertSame(632, get_option(StyleguidePage::optionKey()));
+    }
+
+    /**
+     * The other half of the same gate: even a user with edit_pages must not
+     * have the marker/option cleared on their behalf from an AJAX request.
+     */
+    public function testForgetGateBlocksClearDuringAjaxEvenWithEditPages(): void
+    {
+        StyleguidePage::adopt(632);
+        $GLOBALS['wp_mock_posts']['page'] = [632];
+        $GLOBALS['wp_mock_doing_ajax'] = true;
+
+        StyleguidePage::forget();
+
+        $this->assertSame('1', get_post_meta(632, StyleguidePage::markerKey(), true));
+        $this->assertSame(632, get_option(StyleguidePage::optionKey()));
+    }
+
+    /**
+     * The force: true flag bypasses the gate regardless of capability or ajax
+     * context, the same way it does for adopt().
+     */
+    public function testForgetForceBypassesTheGate(): void
+    {
+        StyleguidePage::adopt(632);
+        $GLOBALS['wp_mock_posts']['page'] = [632];
+        $GLOBALS['wp_mock_current_user_can'] = ['edit_pages' => false];
+        $GLOBALS['wp_mock_doing_ajax'] = true;
+
+        StyleguidePage::forget(force: true);
+
+        $this->assertEmpty(get_post_meta(632, StyleguidePage::markerKey(), true));
+        $this->assertFalse(get_option(StyleguidePage::optionKey(), false));
+    }
+
+    /**
+     * Templates/partials/styleguide-views.blade.php reads this constant to
+     * build its redirect allowlist, and templates/styleguide/tokens.blade.php
+     * and templates/styleguide/components.blade.php use it as their `anchor`
+     * value. A drift here would break the redirect silently.
+     */
+    public function testDesignSystemAnchorsMatchTheTemplates(): void
+    {
+        $this->assertSame(
+            ['tokens' => 'tokens', 'components' => 'komponenten'],
+            StyleguidePage::DESIGN_SYSTEM_ANCHORS,
+        );
+
+        $tokensTemplate = file_get_contents(__DIR__ . '/../../../templates/styleguide/tokens.blade.php');
+        $componentsTemplate = file_get_contents(__DIR__ . '/../../../templates/styleguide/components.blade.php');
+
+        $this->assertStringContainsString(
+            "StyleguidePage::DESIGN_SYSTEM_ANCHORS['tokens']",
+            (string) $tokensTemplate,
+        );
+        $this->assertStringContainsString(
+            "StyleguidePage::DESIGN_SYSTEM_ANCHORS['components']",
+            (string) $componentsTemplate,
+        );
     }
 }

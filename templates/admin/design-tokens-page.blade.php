@@ -12,7 +12,7 @@
     - string $restoreAction AJAX action name for backup restore
     - array<array{timestamp: string, date: string, types: string[]}> $backupSets Available backup sets
 --}}
-<style>
+<style nonce="{{ $GLOBALS['csp_nonce'] ?? '' }}">
     .wp-starter-loading-overlay {
         position: fixed;
         top: 0;
@@ -39,8 +39,7 @@
         animation: wp-starter-spin 1s linear infinite;
     }
     @keyframes wp-starter-spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        to { transform: rotate(360deg); }
     }
     .wp-starter-loading-text {
         font-size: 14px;
@@ -68,14 +67,14 @@
 </style>
 <div class="wp-starter-loading-overlay" id="wpStarterLoading">
     <div class="wp-starter-spinner"></div>
-    <div class="wp-starter-loading-text">{!! esc_html__('Design Tokens werden aktualisiert...', 'wp-starter') !!}</div>
-    <div class="wp-starter-loading-subtext">{!! esc_html__('Build läuft, bitte warten', 'wp-starter') !!}</div>
+    <div class="wp-starter-loading-text">{{ __('Design Tokens werden aktualisiert...', 'wp-starter') }}</div>
+    <div class="wp-starter-loading-subtext">{{ __('Build läuft, bitte warten', 'wp-starter') }}</div>
 </div>
-<script>
+<script nonce="{{ $GLOBALS['csp_nonce'] ?? '' }}">
     (function() {
         const overlay = document.getElementById('wpStarterLoading');
         const acfForm = document.getElementById('post');
-        const ajaxUrl = '{!! esc_url($ajaxUrl) !!}';
+        const ajaxUrl = {!! wp_starter_js_literal($ajaxUrl) !!};
         const uploadNonce = '{!! esc_js($uploadNonce) !!}';
         const restoreNonce = '{!! esc_js($restoreNonce) !!}';
 
@@ -84,6 +83,19 @@
             acfForm.addEventListener('submit', function() {
                 overlay.classList.add('active');
             });
+        }
+
+        // Creates a `<label>` + control row, associating the label via `for`/`id`.
+        function createLabeledField(options) {
+            const row = document.createElement('div');
+            const lbl = document.createElement('label');
+            lbl.setAttribute('style', 'display: block; margin-bottom: 5px; font-weight: 500;');
+            lbl.textContent = options.labelText;
+            lbl.htmlFor = options.id;
+            options.control.id = options.id;
+            row.appendChild(lbl);
+            row.appendChild(options.control);
+            return row;
         }
 
         // Inject AJAX-based upload UI into upload section
@@ -97,27 +109,22 @@
 
                 const uploadNotice = document.createElement('div');
                 uploadNotice.id = 'wp-starter-upload-notice';
+                uploadNotice.setAttribute('role', 'status');
+                uploadNotice.setAttribute('aria-live', 'polite');
                 uploadUi.appendChild(uploadNotice);
 
                 const grid = document.createElement('div');
                 grid.setAttribute('style', 'display: grid; gap: 15px; max-width: 500px;');
 
                 [
-                    { labelText: '{!! esc_js(__('Primitives (Basis-Farben, Spacing, etc.)', 'wp-starter')) !!}', inputId: 'wp-starter-file-primitives' },
-                    { labelText: '{!! esc_js(__('Light Mode (Semantische Tokens)', 'wp-starter')) !!}', inputId: 'wp-starter-file-light' },
-                    { labelText: '{!! esc_js(__('Dark Mode (Semantische Tokens)', 'wp-starter')) !!}', inputId: 'wp-starter-file-dark' },
+                    { labelText: {!! wp_starter_js_literal(__('Primitives (Basis-Farben, Spacing, etc.)', 'wp-starter')) !!}, inputId: 'wp-starter-file-primitives' },
+                    { labelText: {!! wp_starter_js_literal(__('Light Mode (Semantische Tokens)', 'wp-starter')) !!}, inputId: 'wp-starter-file-light' },
+                    { labelText: {!! wp_starter_js_literal(__('Dark Mode (Semantische Tokens)', 'wp-starter')) !!}, inputId: 'wp-starter-file-dark' },
                 ].forEach(function(item) {
-                    const row = document.createElement('div');
-                    const lbl = document.createElement('label');
-                    lbl.setAttribute('style', 'display: block; margin-bottom: 5px; font-weight: 500;');
-                    lbl.textContent = item.labelText;
                     const inp = document.createElement('input');
                     inp.type = 'file';
-                    inp.id = item.inputId;
                     inp.accept = '.json,application/json';
-                    row.appendChild(lbl);
-                    row.appendChild(inp);
-                    grid.appendChild(row);
+                    grid.appendChild(createLabeledField({ id: item.inputId, labelText: item.labelText, control: inp }));
                 });
                 uploadUi.appendChild(grid);
 
@@ -127,13 +134,13 @@
                 uploadBtn.type = 'button';
                 uploadBtn.id = 'wp-starter-upload-btn';
                 uploadBtn.className = 'button button-primary';
-                uploadBtn.textContent = '{!! esc_js(__('Tokens hochladen und anwenden', 'wp-starter')) !!}';
+                uploadBtn.textContent = {!! wp_starter_js_literal(__('Tokens hochladen und anwenden', 'wp-starter')) !!};
                 uploadBtnP.appendChild(uploadBtn);
                 uploadUi.appendChild(uploadBtnP);
 
                 const descP = document.createElement('p');
                 descP.className = 'description';
-                descP.textContent = '{!! esc_js(__('Du kannst einzelne Dateien oder alle drei gleichzeitig hochladen. Ein Backup wird automatisch erstellt.', 'wp-starter')) !!}';
+                descP.textContent = {!! wp_starter_js_literal(__('Du kannst einzelne Dateien oder alle drei gleichzeitig hochladen. Ein Backup wird automatisch erstellt.', 'wp-starter')) !!};
                 uploadUi.appendChild(descP);
 
                 messageDiv.appendChild(uploadUi);
@@ -145,7 +152,7 @@
                     const dark = document.getElementById('wp-starter-file-dark').files[0];
 
                     if (!primitives && !light && !dark) {
-                        showNotice('upload', 'error', '{!! esc_js(__('Bitte mindestens eine Datei auswählen.', 'wp-starter')) !!}');
+                        showNotice('upload', 'error', {!! wp_starter_js_literal(__('Bitte mindestens eine Datei auswählen.', 'wp-starter')) !!});
                         return;
                     }
 
@@ -166,7 +173,7 @@
                         const result = await response.json();
 
                         if (result.success) {
-                            showNotice('upload', 'success', result.data.message + ' {!! esc_js(__('Seite wird neu geladen...', 'wp-starter')) !!}');
+                            showNotice('upload', 'success', result.data.message + ' ' + {!! wp_starter_js_literal(__('Seite wird neu geladen...', 'wp-starter')) !!});
                             // Clear ACF dirty state to prevent "unsaved changes" warning
                             if (typeof acf !== 'undefined' && acf.unload) {
                                 acf.unload.reset();
@@ -176,10 +183,10 @@
                                 window.location.reload();
                             }, 1500);
                         } else {
-                            showNotice('upload', 'error', result.data.message || '{!! esc_js(__('Ein Fehler ist aufgetreten.', 'wp-starter')) !!}');
+                            showNotice('upload', 'error', result.data.message || {!! wp_starter_js_literal(__('Ein Fehler ist aufgetreten.', 'wp-starter')) !!});
                         }
                     } catch (error) {
-                        showNotice('upload', 'error', '{!! esc_js(__('Netzwerkfehler. Bitte erneut versuchen.', 'wp-starter')) !!}');
+                        showNotice('upload', 'error', {!! wp_starter_js_literal(__('Netzwerkfehler. Bitte erneut versuchen.', 'wp-starter')) !!});
                     } finally {
                         overlay.classList.remove('active');
                     }
@@ -192,14 +199,14 @@
         if (restoreSection) {
             const messageDiv = restoreSection.querySelector('.acf-input');
             if (messageDiv) {
-                const backupSets = {!! wp_json_encode($backupSets) !!};
+                const backupSets = {!! wp_starter_js_literal($backupSets) !!};
 
                 if (backupSets.length === 0) {
                     const emptyWrapper = document.createElement('div');
                     emptyWrapper.setAttribute('style', 'background: #f0f0f1; padding: 15px; border-radius: 4px;');
                     const emptyP = document.createElement('p');
                     emptyP.setAttribute('style', 'margin: 0; color: #666;');
-                    emptyP.textContent = '{!! esc_js(__('Keine Backups vorhanden. Backups werden automatisch erstellt, wenn Tokens geändert werden.', 'wp-starter')) !!}';
+                    emptyP.textContent = {!! wp_starter_js_literal(__('Keine Backups vorhanden. Backups werden automatisch erstellt, wenn Tokens geändert werden.', 'wp-starter')) !!};
                     emptyWrapper.appendChild(emptyP);
                     messageDiv.appendChild(emptyWrapper);
                 } else {
@@ -209,18 +216,14 @@
 
                     const noticeContainer = document.createElement('div');
                     noticeContainer.id = 'wp-starter-restore-notice';
+                    noticeContainer.setAttribute('role', 'status');
+                    noticeContainer.setAttribute('aria-live', 'polite');
                     restoreUi.appendChild(noticeContainer);
 
                     const flexRow = document.createElement('div');
                     flexRow.setAttribute('style', 'display: flex; gap: 10px; align-items: end; flex-wrap: wrap;');
 
-                    const selectWrapper = document.createElement('div');
-                    selectWrapper.setAttribute('style', 'flex: 1; min-width: 250px;');
-                    const selectLabel = document.createElement('label');
-                    selectLabel.setAttribute('style', 'display: block; margin-bottom: 5px; font-weight: 500;');
-                    selectLabel.textContent = '{!! esc_js(__('Backup-Zeitpunkt auswählen', 'wp-starter')) !!}';
                     const selectEl = document.createElement('select');
-                    selectEl.id = 'wp-starter-backup-select';
                     selectEl.setAttribute('style', 'width: 100%;');
                     backupSets.forEach(function(b) {
                         const opt = document.createElement('option');
@@ -228,15 +231,19 @@
                         opt.textContent = b.date + ' (' + b.types.join(', ') + ')';
                         selectEl.appendChild(opt);
                     });
-                    selectWrapper.appendChild(selectLabel);
-                    selectWrapper.appendChild(selectEl);
+                    const selectWrapper = createLabeledField({
+                        id: 'wp-starter-backup-select',
+                        labelText: {!! wp_starter_js_literal(__('Backup-Zeitpunkt auswählen', 'wp-starter')) !!},
+                        control: selectEl,
+                    });
+                    selectWrapper.setAttribute('style', 'flex: 1; min-width: 250px;');
 
                     const btnWrapper = document.createElement('div');
                     const restoreBtn = document.createElement('button');
                     restoreBtn.type = 'button';
                     restoreBtn.id = 'wp-starter-restore-btn';
                     restoreBtn.className = 'button';
-                    restoreBtn.textContent = '{!! esc_js(__('Wiederherstellen', 'wp-starter')) !!}';
+                    restoreBtn.textContent = {!! wp_starter_js_literal(__('Wiederherstellen', 'wp-starter')) !!};
                     btnWrapper.appendChild(restoreBtn);
 
                     flexRow.appendChild(selectWrapper);
@@ -246,7 +253,7 @@
                     const descP = document.createElement('p');
                     descP.className = 'description';
                     descP.setAttribute('style', 'margin-top: 10px;');
-                    descP.textContent = '{!! esc_js(__('Stellt alle Token-Dateien vom gewählten Zeitpunkt wieder her.', 'wp-starter')) !!}';
+                    descP.textContent = {!! wp_starter_js_literal(__('Stellt alle Token-Dateien vom gewählten Zeitpunkt wieder her.', 'wp-starter')) !!};
                     restoreUi.appendChild(descP);
 
                     messageDiv.appendChild(restoreUi);
@@ -255,7 +262,7 @@
                     restoreBtn.addEventListener('click', async function() {
                         const timestamp = document.getElementById('wp-starter-backup-select').value;
 
-                        if (!confirm('{!! esc_js(__('Backup wirklich wiederherstellen? Die aktuellen Token-Dateien werden überschrieben.', 'wp-starter')) !!}')) {
+                        if (!confirm({!! wp_starter_js_literal(__('Backup wirklich wiederherstellen? Die aktuellen Token-Dateien werden überschrieben.', 'wp-starter')) !!})) {
                             return;
                         }
 
@@ -274,7 +281,7 @@
                             const result = await response.json();
 
                             if (result.success) {
-                                showNotice('restore', 'success', result.data.message + ' {!! esc_js(__('Seite wird neu geladen...', 'wp-starter')) !!}');
+                                showNotice('restore', 'success', result.data.message + ' ' + {!! wp_starter_js_literal(__('Seite wird neu geladen...', 'wp-starter')) !!});
                                 // Clear ACF dirty state to prevent "unsaved changes" warning
                                 if (typeof acf !== 'undefined' && acf.unload) {
                                     acf.unload.reset();
@@ -284,10 +291,10 @@
                                     window.location.reload();
                                 }, 1500);
                             } else {
-                                showNotice('restore', 'error', result.data.message || '{!! esc_js(__('Ein Fehler ist aufgetreten.', 'wp-starter')) !!}');
+                                showNotice('restore', 'error', result.data.message || {!! wp_starter_js_literal(__('Ein Fehler ist aufgetreten.', 'wp-starter')) !!});
                             }
                         } catch (error) {
-                            showNotice('restore', 'error', '{!! esc_js(__('Netzwerkfehler. Bitte erneut versuchen.', 'wp-starter')) !!}');
+                            showNotice('restore', 'error', {!! wp_starter_js_literal(__('Netzwerkfehler. Bitte erneut versuchen.', 'wp-starter')) !!});
                         } finally {
                             overlay.classList.remove('active');
                         }
@@ -300,6 +307,8 @@
             const noticeDiv = document.getElementById(`wp-starter-${section}-notice`);
             if (noticeDiv) {
                 noticeDiv.textContent = '';
+                noticeDiv.setAttribute('role', type === 'error' ? 'alert' : 'status');
+                noticeDiv.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
                 const msgEl = document.createElement('div');
                 msgEl.className = 'wp-starter-ajax-notice ' + type;
                 msgEl.textContent = message;
@@ -307,9 +316,5 @@
             }
         }
 
-        async function updateBackupDropdown() {
-            // Reload page to update backup list (simpler than fetching via AJAX)
-            // The success message is already shown, user will see updated list after reload
-        }
     })();
 </script>

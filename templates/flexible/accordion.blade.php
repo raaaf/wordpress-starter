@@ -101,7 +101,7 @@
                             @keydown.end.prevent="focusItem(itemCount - 1)"
                             :aria-expanded="isOpen({{ $index }})"
                             aria-controls="accordion-content-{{ $accordionId }}-{{ $index }}"
-                            class="group flex items-center justify-between w-full py-4 px-3 mb-0 font-bold text-left cursor-pointer transition-colors rounded-[var(--radius-sm)] hover:text-content-brand focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
+                            class="group flex items-center justify-between w-full py-4 px-3 mb-0 font-normal text-left cursor-pointer transition-colors rounded-[var(--radius-sm)] hover:text-content-brand focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                             :class="{ 'text-content-brand': isOpen({{ $index }}) }">
                         <span class="flex items-center gap-3">
                             @if(!empty($item['icon']))
@@ -114,6 +114,9 @@
                     <div x-show="isOpen({{ $index }})"
                          x-collapse
                          id="accordion-content-{{ $accordionId }}-{{ $index }}"
+                         {{-- role=region nur unter 7 Eintraegen: darueber ueberladet jeder
+                              Eintrag die Landmark-Liste der Screenreader-Navigation
+                              (gleiche Schwelle wie templates/partials/inline-accordion.blade.php). --}}
                          @if(count($items) < 7) role="region" @endif
                          :aria-labelledby="'accordion-header-{{ $accordionId }}-{{ $index }}'"
                          class="px-3 pt-1 mb-6">
@@ -124,7 +127,7 @@
         </div>
 
         @if(empty($items) && current_user_can('edit_posts'))
-            <div class="p-8 text-center rounded-lg bg-surface-secondary">
+            <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
                 <p class="text-content-secondary">{{ __('Bitte füge mindestens einen Akkordeon-Eintrag hinzu.', 'wp-starter') }}</p>
             </div>
         @endif

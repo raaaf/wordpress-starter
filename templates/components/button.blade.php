@@ -11,17 +11,17 @@
     @param string $type - Button type for <button> element (submit, button, reset)
     @param array $analytics - ['event' => 'name', 'meta' => 'value'] for Rybbit
 
-    States from Figma:
-    - Default: Gradient background with shadow
-    - Hover: Darker gradient, enhanced shadow
-    - Active: Darkest gradient with inner shadow
-    - Focus: Focus ring using accent-alpha-50
+    States (rafaelalex.de design system, section 5 - pill CTAs, never boxes):
+    - Default: Hairline pill, transparent fill, brand-colour border and text
+    - Hover: Solid brand fill, no border, no shadow
+    - Active: Deeper brand fill, 97% scale
+    - Focus: 3px outline in --ring-focus, 2px offset
     - Disabled: Greyed out, no interaction
 --}}
 
 @props([
     'url' => null,
-    'title' => 'Click here',
+    'title' => null,
     'target' => '_self',
     'variant' => 'primary',
     'size' => 'md',
@@ -32,92 +32,88 @@
 ])
 
 @php
+    // Absent title (null) falls back to the default label instead of
+    // rendering a blank button (component-tag attributes can't carry an
+    // @if, so callers always pass :title). An explicit empty string is a
+    // deliberate icon-only button and must stay empty, so the fallback
+    // only fires on null, never on ''.
+    $title = $title ?? __('Mehr erfahren', 'wp-starter');
+
+    // Icon-only button (explicit empty title) without an accessible name:
+    // same guard as x-checkbox (checkbox.blade.php:36-38).
+    if (defined('WP_DEBUG') && WP_DEBUG && $title === '' && !$attributes->has('aria-label')) {
+        trigger_error('x-button requires a non-empty "title" or an "aria-label" for icon-only buttons.', E_USER_WARNING);
+    }
+
+    // Normalise target: only _self/_blank are valid link targets. Anything
+    // else, including a case variant like "_BLANK", falls back to _self so
+    // the rel/notice logic below still fires consistently.
+    $normalizedTarget = strtolower((string) $target);
+    if (!in_array($normalizedTarget, ['_self', '_blank'], true)) {
+        $normalizedTarget = '_self';
+    }
+
     // Base classes - common to all buttons
     // 'button' class is used for editor CSS overrides (prevents WordPress link styling)
-    // active:scale-[0.98] is a Tailwind v4 `scale` utility, not `transform` --
+    // active:scale-[0.97] is a Tailwind v4 `scale` utility, not `transform` --
     // the transition list has to name the property that actually animates.
     // button--<variante> traegt keine Gestaltung, sie macht die Variante nur
     // adressierbar: fuer Flaechen, die der Utility-Klasse nicht bekannt sind
     // (invers, Markenflaeche, Hero-Scrim), und fuer Messungen.
-    $baseClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-semibold transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-none active:scale-[0.98]';
+    $baseClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-normal transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] active:scale-[0.97] motion-reduce:transform-none';
 
-    // Variants matching Figma design with gradients and shadows
+    // Variants: hairline pill at rest, flat fill on hover/active, never a
+    // gradient (rafaelalex.de design system, section 5). No shadow on any
+    // state, rest or hover: the Flat-at-Rest Rule applies to buttons too.
     $variants = [
         'primary' => implode(' ', [
-            // Flaeche und Glanz stehen in app.css: eine flache Farbe laesst sich
-            // animieren, ein Verlauf nicht, und der Kontrast bleibt ueber die
-            // ganze Hoehe gleich. Der Verlauf davor fiel je nach Theme von 6.08
-            // auf 2.69 zwischen oberer und unterer Kante.
-            // Follows the fill, not the page: see --text-on-accent in app.css.
-            'text-content-on-accent',
-            // Transparent statt --border-default: eine helle Haarlinie auf der
-            // farbigen Fuellung liest sich als Ausfransung. Die Geometrie bleibt,
-            // damit der Knopf neben den umrandeten Varianten gleich hoch steht.
-            'border border-transparent',
-            'shadow-[var(--shadow-button)]',
-            // Hover und Aktiv wechseln den Verlauf nicht mehr hier, sondern ueber
-            // eine zweite Ebene in app.css: Browser interpolieren
-            // background-image nicht, der Wechsel sprang also, waehrend die
-            // Varianten mit background-color weich liefen.
-            'hover:shadow-[var(--shadow-button-hover)]',
-            'active:shadow-[var(--shadow-inner)]',
-            'focus-visible:shadow-[var(--shadow-focus-ring)]',
+            'text-content-brand',
+            'border border-line-brand',
+            'bg-[var(--bg-brand-tint)]',
+            'hover:bg-surface-brand',
+            'hover:text-content-on-accent',
+            'hover:border-transparent',
+            'active:bg-[var(--bg-brand-active)]',
+            'active:text-content-on-accent',
+            'active:border-transparent',
         ]),
         'secondary' => implode(' ', [
-            'bg-surface-secondary',
+            'bg-transparent',
             'text-content',
             'border border-line',
-            'shadow-[var(--shadow-button)]',
-            // Nur Rand und Schatten zu wechseln war als Rueckmeldung zu leise,
-            // die Flaeche geht eine Stufe mit.
-            'hover:bg-surface-tertiary',
             'hover:border-line-strong',
-            'hover:shadow-[var(--shadow-button-hover)]',
+            'hover:bg-surface-secondary',
             'active:bg-surface-tertiary',
-            'active:shadow-[var(--shadow-inner)]',
-            'focus-visible:shadow-[var(--shadow-focus-ring)]',
         ]),
         'ghost' => implode(' ', [
             'bg-transparent',
             'text-content',
             'border border-transparent',
-            // Dezent unterscheidet seine Zustaende allein ueber die Flaeche.
-            // Vorher kam im Aktiv-Zustand ein Rand dazu, den weder Ruhe noch
-            // Hover haben; nebeneinander sahen die drei Zustaende nach drei
-            // verschiedenen Knoepfen aus.
-            // Die Flaechenleiter geht primary, secondary, tertiary von hell nach
-            // dunkel. Vorher lag Hover auf tertiary und Aktiv auf secondary, das
-            // Druecken war also heller als das Ueberfahren.
-            'hover:bg-surface-secondary',
-            'active:bg-surface-tertiary',
-            'focus-visible:shadow-[var(--shadow-focus-ring-ghost)]',
+            'hover:underline',
+            'underline-offset-4',
+            'active:opacity-80',
         ]),
         'danger' => implode(' ', [
             'bg-surface-error-strong',
             // Flips with the scheme, like the content on every other fill.
             'text-content-inverse',
             'border border-transparent',
-            'shadow-[var(--shadow-button)]',
             // The status ramp has only light/base/dark and --bg-error-strong
             // already takes the end of it, so there is no token to step to.
             // --bg-error-strong-hover (app.css) mixes towards black in light
             // mode and towards white in dark mode, i.e. away from whichever
-            // text colour sits on top, same rule the primary gradient follows.
+            // text colour sits on top, same rule the primary fill follows.
             'hover:bg-[var(--bg-error-strong-hover)]',
-            'hover:shadow-[var(--shadow-button-hover)]',
-            'active:shadow-[var(--shadow-inner)]',
-            'focus-visible:shadow-[var(--shadow-focus-ring)]',
         ]),
         'inverse' => implode(' ', [
+            // Sits on the brand surface, so the page surface is the fill and
+            // the brand colour the text. The unlayered .bg-surface rule in
+            // app.css would paint the text primary again, hence the important.
             'bg-surface',
-            'text-content-brand',
-            'border border-line',
-            'shadow-[var(--shadow-button)]',
-            'hover:bg-surface-secondary',
-            'hover:shadow-[var(--shadow-button-hover)]',
-            'active:bg-surface-tertiary',
-            'active:shadow-[var(--shadow-inner)]',
-            'focus-visible:shadow-[var(--shadow-focus-ring)]',
+            'text-content-brand!',
+            'border border-line-brand',
+            'hover:bg-[var(--bg-brand-subtle)]',
+            'active:bg-[var(--bg-brand-subtle)]',
         ]),
     ];
 
@@ -150,28 +146,87 @@
             $analyticsAttrs .= ' data-rybbit-prop-key="' . esc_attr($analytics['meta']) . '"';
         }
     }
+
+    // A custom aria-label replaces the accessible name entirely, so the
+    // "opens in new tab" sr-only span (below) never gets announced. Append
+    // the notice to the label itself instead of relying on the span.
+    //
+    // Read the caller's own aria-label from the bag and render the composed
+    // value explicitly on the element ($attributes->merge() would let the
+    // caller's raw value win over this composed one, silently dropping the
+    // notice), then exclude 'aria-label' from the merged bag below.
+    // An empty-string aria-label ("" from a caller that composed one
+    // conditionally) is not a real accessible name: treat it like an absent
+    // one so the "opens in new tab" sr-only span still renders below.
+    $callerAriaLabel = $attributes->get('aria-label');
+    if ($callerAriaLabel === '') {
+        $callerAriaLabel = null;
+    }
+    $linkAriaLabel = $callerAriaLabel;
+    if ($linkAriaLabel !== null && $normalizedTarget === '_blank') {
+        $linkAriaLabel .= ' ' . __('(öffnet in neuem Tab)', 'wp-starter');
+    }
+    $linkClasses = "{$baseClasses} {$variantClass} {$sizeClass} {$class}";
+
+    // The disabled span never becomes focusable or clickable: no pointer
+    // cursor, no focus ring, no active-state transition/scale. Listed
+    // explicitly (layout/typography only) instead of stripping them back out
+    // of $baseClasses via string surgery, which silently kept whatever
+    // active/transition utilities baseClasses happened to carry.
+    $disabledSpanClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-normal select-none';
+    $disabledSpanClasses = "{$disabledSpanClasses} {$variantClass} {$sizeClass} {$class}";
+
+    // Exact-name allowlist for everything the bag may add to a rendered
+    // <a>/<button>: plain HTML attributes have to be named exactly, only
+    // x-/@/:/aria-/data- may pass through by prefix. Without this, a caller
+    // could add formaction, formmethod or an onXxx handler to either branch.
+    $allowedAttrs = ['type', 'form', 'name', 'value', 'disabled', 'id', 'title', 'class', 'tabindex', 'autofocus'];
+    $allowedPrefixes = ['x-', '@', ':', 'aria-', 'data-'];
+
+    // The disabled span never becomes interactive: it drops the handful of
+    // attributes above that only make sense on a focusable/submittable
+    // element, same exclusion x-link (link.blade.php) applies to its
+    // disabled span.
+    $disabledSpanAttrs = array_diff($allowedAttrs, ['href', 'target', 'tabindex', 'type', 'name', 'value', 'formaction']);
 @endphp
 
 @if($url)
-    {{-- Link button --}}
-    <a href="{{ $disabled ? '#' : esc_url($url) }}"
-       target="{{ esc_attr($target) }}"
-       @if($target === '_blank' && !$disabled) rel="noopener noreferrer" @endif
-       @if($disabled) aria-disabled="true" tabindex="-1" role="link" onclick="event.preventDefault(); return false;" @endif
-       {!! $analyticsAttrs !!}
-       {{ $attributes->merge(['class' => "{$baseClasses} {$variantClass} {$sizeClass} {$class}"]) }}>
-        {{ $title }}
-        {{ $slot ?? '' }}
-        @if($target === '_blank' && !$attributes->has('aria-label'))
-            <span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
-        @endif
-    </a>
+    @if($disabled)
+        {{-- Disabled link button: rendered as a span, not an <a>, so it never
+             navigates and needs no inline onclick (blocked under nonce CSP).
+             Disabled means it never opens a new tab either, so the composed
+             label here is the caller's own aria-label, without the "opens in
+             new tab" notice that $linkAriaLabel would add. --}}
+        <span aria-disabled="true"
+              @if($callerAriaLabel !== null) aria-label="{{ esc_attr($callerAriaLabel) }}" @endif
+              {{ $attributes->only($disabledSpanAttrs)->merge(['class' => $disabledSpanClasses]) }}
+              {{ $attributes->whereStartsWith($allowedPrefixes)->except('aria-label') }}>
+            {{ $title }}
+            {{ $slot ?? '' }}
+        </span>
+    @else
+        {{-- Link button --}}
+        <a href="{{ esc_url($url) }}"
+           target="{{ esc_attr($normalizedTarget) }}"
+           @if($normalizedTarget === '_blank') rel="noopener noreferrer" @endif
+           @if($linkAriaLabel !== null) aria-label="{{ esc_attr($linkAriaLabel) }}" @endif
+           {!! $analyticsAttrs !!}
+           {{ $attributes->only($allowedAttrs)->merge(['class' => $linkClasses]) }}
+           {{ $attributes->whereStartsWith($allowedPrefixes)->except('aria-label') }}>
+            {{ $title }}
+            {{ $slot ?? '' }}
+            @if($normalizedTarget === '_blank' && $callerAriaLabel === null)
+                <span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
+            @endif
+        </a>
+    @endif
 @else
     {{-- Form button --}}
     <button type="{{ $type }}"
             @if($disabled) disabled aria-disabled="true" @endif
             {!! $analyticsAttrs !!}
-            {{ $attributes->merge(['class' => "{$baseClasses} {$variantClass} {$sizeClass} {$class}"]) }}>
+            {{ $attributes->only($allowedAttrs)->merge(['class' => "{$baseClasses} {$variantClass} {$sizeClass} {$class}"]) }}
+            {{ $attributes->whereStartsWith($allowedPrefixes) }}>
         {{ $title }}
         {{ $slot ?? '' }}
     </button>

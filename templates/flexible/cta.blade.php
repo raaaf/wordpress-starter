@@ -32,7 +32,7 @@
         @if($button)
             <x-button
                 :url="$button['url']"
-                :title="$button['title']"
+                :title="$button['title'] ?: null"
                 :target="$button['target'] ?? '_self'"
                 variant="inverse"
                 size="lg"

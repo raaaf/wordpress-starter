@@ -44,7 +44,7 @@ final class FlexibleContentTabsTest extends TestCase
             $styleTab = null;
 
             foreach ($fields as $index => $field) {
-                if (($field['type'] ?? '') === 'tab' && ($field['label'] ?? '') === 'Darstellung') {
+                if (( $field['type'] ?? '' ) === 'tab' && ( $field['label'] ?? '' ) === 'Darstellung') {
                     $styleTab = $index;
                     break;
                 }
@@ -75,7 +75,7 @@ final class FlexibleContentTabsTest extends TestCase
 
         foreach (FlexibleContent::layouts() as $layout) {
             foreach ($layout['sub_fields'] ?? [] as $field) {
-                if (($field['type'] ?? '') !== 'tab') {
+                if (( $field['type'] ?? '' ) !== 'tab') {
                     continue;
                 }
 
@@ -97,7 +97,7 @@ final class FlexibleContentTabsTest extends TestCase
             $hasAccordion = false;
 
             foreach ($fields as $field) {
-                if (($field['type'] ?? '') === 'accordion') {
+                if (( $field['type'] ?? '' ) === 'accordion') {
                     $hasAccordion = true;
                     break;
                 }
@@ -128,7 +128,7 @@ final class FlexibleContentTabsTest extends TestCase
         foreach (FlexibleContent::layouts() as $layout) {
             $fields = array_values(array_filter(
                 $layout['sub_fields'] ?? [],
-                static fn (array $field): bool => ($field['type'] ?? '') !== 'tab',
+                static fn (array $field): bool => ( $field['type'] ?? '' ) !== 'tab',
             ));
 
             $split = null;
@@ -176,11 +176,11 @@ final class FlexibleContentTabsTest extends TestCase
 
         foreach (FlexibleContent::layouts() as $layout) {
             $fields = $layout['sub_fields'] ?? [];
-            $eigenerSchluessel = 'field_' . ($layout['key'] ?? '') . '_tab_style';
+            $eigenerSchluessel = 'field_' . ( $layout['key'] ?? '' ) . '_tab_style';
             $styleTab = null;
 
             foreach ($fields as $index => $field) {
-                if (($field['type'] ?? '') === 'tab' && ($field['key'] ?? '') === $eigenerSchluessel) {
+                if (( $field['type'] ?? '' ) === 'tab' && ( $field['key'] ?? '' ) === $eigenerSchluessel) {
                     $styleTab = $index;
                     break;
                 }

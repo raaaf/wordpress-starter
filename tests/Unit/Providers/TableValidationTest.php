@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Providers;
 
-use ReflectionMethod;
 use Tests\Support\TestCase;
 use WordpressStarter\Providers\AcfServiceProvider;
 
@@ -28,11 +27,8 @@ final class TableValidationTest extends TestCase
      */
     private function finde(array $baum): array
     {
-        $methode = new ReflectionMethod(AcfServiceProvider::class, 'findTableGroups');
-        $methode->setAccessible(true);
-
         /** @var array<int, array{feld: string, headers: array<mixed>, rows: array<mixed>}> $ergebnis */
-        $ergebnis = $methode->invoke(null, $baum);
+        $ergebnis = $this->invokeStaticMethod(AcfServiceProvider::class, 'findTableGroups', [$baum]);
 
         return $ergebnis;
     }
@@ -42,11 +38,8 @@ final class TableValidationTest extends TestCase
      */
     private function zaehleZellen(array $zeile): int
     {
-        $methode = new ReflectionMethod(AcfServiceProvider::class, 'countRowCells');
-        $methode->setAccessible(true);
-
         /** @var int $ergebnis */
-        $ergebnis = $methode->invoke(null, $zeile);
+        $ergebnis = $this->invokeStaticMethod(AcfServiceProvider::class, 'countRowCells', [$zeile]);
 
         return $ergebnis;
     }

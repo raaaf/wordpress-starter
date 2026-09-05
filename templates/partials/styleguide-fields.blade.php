@@ -14,25 +14,37 @@
     @var string $layout  Layout-Name, z.B. 'cards'
     @var bool   $offen   Panel vorab geoeffnet (?variants=all: alles sichtbar)
 --}}
-@php($layout = $layout ?? '')
-@php($offen = $offen ?? false)
-@php($zeilen = \WordpressStarter\Content\StyleguideFieldReference::flach($layout))
+@php
+    $layout = $layout ?? '';
+    $offen = $offen ?? false;
+    $zeilen = \WordpressStarter\Content\StyleguideFieldReference::flach($layout);
+    // Same source as styleguide-nav.blade.php: the layout label registered in
+    // FlexibleContent::layouts(), keyed by layout name. Falls back to the raw
+    // slug only when no definition (and therefore no label) is found.
+    $layoutLabel = $layout;
+    foreach (\WordpressStarter\Acf\FlexibleContent::layouts() as $definition) {
+        if (($definition['name'] ?? null) === $layout && !empty($definition['label'])) {
+            $layoutLabel = $definition['label'];
+            break;
+        }
+    }
+@endphp
 
 @if(!empty($zeilen))
     <details class="mt-2" @if($offen) open @endif>
-        <summary class="inline-flex items-center gap-1 text-sm cursor-pointer text-content-secondary hover:text-content focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]">
+        <summary class="inline-flex items-center gap-1 text-sm cursor-pointer text-content-secondary hover:text-content focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
             {{ __('Felder anzeigen', 'wp-starter') }} ({{ count($zeilen) }})
         </summary>
 
         <div class="mt-2 overflow-x-auto">
             <table class="min-w-full text-sm text-left border-collapse">
-                <caption class="sr-only">{{ sprintf(__('ACF-Felder von %s', 'wp-starter'), $layout) }}</caption>
+                <caption class="sr-only">{{ sprintf(__('ACF-Felder von %s', 'wp-starter'), $layoutLabel) }}</caption>
                 <thead>
                     <tr class="border-b border-line">
-                        <th scope="col" class="py-1 pr-4 font-medium text-content-secondary">{{ __('Feld', 'wp-starter') }}</th>
-                        <th scope="col" class="py-1 pr-4 font-medium text-content-secondary">{{ __('Typ', 'wp-starter') }}</th>
-                        <th scope="col" class="py-1 pr-4 font-medium text-content-secondary">{{ __('Pflicht', 'wp-starter') }}</th>
-                        <th scope="col" class="py-1 pr-4 font-medium text-content-secondary">{{ __('Auswahl', 'wp-starter') }}</th>
+                        <th scope="col" class="py-1 pr-4 font-normal text-content-secondary">{{ __('Feld', 'wp-starter') }}</th>
+                        <th scope="col" class="py-1 pr-4 font-normal text-content-secondary">{{ __('Typ', 'wp-starter') }}</th>
+                        <th scope="col" class="py-1 pr-4 font-normal text-content-secondary">{{ __('Pflicht', 'wp-starter') }}</th>
+                        <th scope="col" class="py-1 pr-4 font-normal text-content-secondary">{{ __('Auswahl', 'wp-starter') }}</th>
                     </tr>
                 </thead>
                 <tbody>

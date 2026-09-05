@@ -28,30 +28,145 @@ class Security
     private static ?string $nonce = null;
 
     /**
+     * Test seam for the hardening headers: when set, addHardeningHeaders()
+     * calls this instead of the real header() function, so tests can assert
+     * on the emitted header lines without triggering "headers already sent"
+     * warnings or needing a real HTTP response.
+     *
+     * FOR TESTS ONLY: production code must never call setHeaderEmitter().
+     *
+     * @var (callable(string): void)|null
+     */
+    private static $headerEmitter = null;
+
+    /**
+     * FOR TESTS ONLY. Overrides the header() call used by
+     * addHardeningHeaders() so tests can capture emitted header lines.
+     * Pass null to restore the real header() call.
+     *
+     * @param (callable(string): void)|null $emitter
+     */
+    public static function setHeaderEmitter(?callable $emitter): void
+    {
+        self::$headerEmitter = $emitter;
+    }
+
+    /**
+     * Hosts fest verdrahtet in frame-src, unabhaengig von der Admin-Option
+     * embed_allowed_hosts. Eine einzige Quelle fuer getCSPHeader() UND
+     * isAllowedEmbedHost(), damit die beiden nicht auseinanderlaufen: sonst
+     * erlaubt die CSP einen Host, den das Embed-Feld ablehnt (oder umgekehrt).
+     *
+     * @var list<string>
+     */
+    private const HARDCODED_FRAME_SRC_HOSTS = [
+        'www.youtube-nocookie.com',
+        'www.youtube.com',
+        'player.vimeo.com',
+        'www.google.com',
+        'maps.google.com',
+    ];
+
+    /**
      * Get or generate the CSP nonce for this request.
      */
     public static function getNonce(): string
     {
         if (self::$nonce === null) {
-            self::$nonce = base64_encode(random_bytes(16));
+            self::$nonce = base64_encode(random_bytes(16));  // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- CSP nonce encoding, not obfuscation
         }
+
         return self::$nonce;
     }
 
     /**
-     * Add 'unsafe-eval' to a CSP header's script-src directive.
-     * Required for Alpine.js to work in the block editor.
+     * Patch a foreign admin CSP header (set by another plugin, e.g. Solid
+     * Security) so the theme's own admin inline scripts/styles still work:
+     *
+     * - Adds 'unsafe-eval' to script-src, still required because ACF Pro's
+     *   block-preview rendering (REST API, not caught by is_admin()) evaluates
+     *   inline JavaScript.
+     * - Adds the theme's current nonce ('nonce-{value}') to script-src and
+     *   style-src, but ONLY when that directive already carries a
+     *   'nonce-...'/'sha256-...'/'sha384-...'/'sha512-...' source. Per the
+     *   CSP2+ spec, a nonce or hash source in a directive makes browsers
+     *   ignore 'unsafe-inline' in that same directive, so nothing is lost
+     *   by adding our nonce there. Injecting the nonce into a directive that
+     *   still relies on 'unsafe-inline' alone (no nonce/hash present) would
+     *   make CSP2+ browsers ignore that 'unsafe-inline' too and block every
+     *   other plugin's and WordPress core's un-nonced inline script or
+     *   style in wp-admin, so such directives are left untouched. The
+     *   theme's own admin tags remain unblocked because the foreign
+     *   'unsafe-inline' still applies to them.
+     * - A foreign header with only default-src (no script-src/style-src) is
+     *   a no-op for both patches: nothing to touch, nothing errors.
+     *
+     * Only script-src and style-src are touched. script-src-elem and
+     * script-src-attr are separate directives under CSP3 and are left alone;
+     * matching them here would also modify allowances the foreign header
+     * intentionally set apart from script-src. Directive bodies are matched
+     * up to the next ';' or ',' so a second, comma-separated policy in the
+     * same header value is never touched.
      */
     public static function addUnsafeEvalToCSP(string $csp): string
     {
-        if (!str_contains($csp, "'unsafe-eval'")) {
+        if (preg_match('/(^|;\s*)(script-src)(\s[^;,]*)/', $csp, $scriptSrcMatch) === 1
+            && !str_contains($scriptSrcMatch[3], "'unsafe-eval'")
+        ) {
             $csp = preg_replace(
-                '/(script-src[^;]*)/',
-                "$1 'unsafe-eval'",
-                $csp
+                '/(^|;\s*)(script-src)(\s[^;,]*)/',
+                '$1$2$3 \'unsafe-eval\'',
+                $csp,
+                1,
             ) ?? $csp;
         }
+
+        $nonceSource = "'nonce-" . self::getNonce() . "'";
+        foreach (['script-src', 'style-src'] as $directive) {
+            if (preg_match('/(^|;\s*)(' . $directive . ')(\s[^;,]*)/', $csp, $matches) === 1
+                && preg_match('/\'(?:nonce|sha256|sha384|sha512)-/', $matches[3]) === 1
+                && !str_contains($matches[3], $nonceSource)
+            ) {
+                $csp = preg_replace(
+                    '/(^|;\s*)(' . $directive . ')(\s[^;,]*)/',
+                    '$1$2$3 ' . $nonceSource,
+                    $csp,
+                    1,
+                ) ?? $csp;
+            }
+        }
+
         return $csp;
+    }
+
+    /**
+     * Recognize and patch a single raw "Header: value" line (as returned by
+     * headers_list()) if it is the Content-Security-Policy header.
+     *
+     * Extracted out of the admin_init header_register_callback closure in
+     * init() so the prefix-stripping and patching can be unit-tested without
+     * relying on PHP actually flushing headers.
+     *
+     * Regex-strips the "Content-Security-Policy:" prefix instead of
+     * substr(): a header value can arrive without a space after the colon
+     * (e.g. no leading space from the sending plugin), and substr() with a
+     * fixed 'Content-Security-Policy: ' length would then eat the CSP's
+     * first character. "Content-Security-Policy-Report-Only:" is a
+     * different, CSP3 header and is deliberately NOT matched here: the
+     * literal prefix check requires the colon right after "Policy".
+     *
+     * @return string|null The replacement full header line ("Content-Security-Policy: ...")
+     *                     or null when $rawHeaderValue is not a CSP header, left untouched.
+     */
+    public static function patchCspHeaderValue(string $rawHeaderValue): ?string
+    {
+        if (stripos($rawHeaderValue, 'Content-Security-Policy:') !== 0) {
+            return null;
+        }
+
+        $csp = preg_replace('/^content-security-policy:\s*/i', '', $rawHeaderValue) ?? $rawHeaderValue;
+
+        return 'Content-Security-Policy: ' . self::addUnsafeEvalToCSP($csp);
     }
 
     /**
@@ -126,6 +241,29 @@ class Security
     }
 
     /**
+     * Baue eine https-Origin aus einem geprueften Hostnamen.
+     *
+     * Gemeinsame Validierung und Aufbau fuer getAnalyticsOrigin() und
+     * getEmbedOrigins(): nur Zeichen, die in einem Hostnamen vorkommen
+     * duerfen, kein Schema, kein Pfad. Gibt null zurueck, wenn der Host
+     * nicht passt, statt eine Direktive zu zerlegen.
+     */
+    private static function httpsOriginFromHost(string $host, mixed $port = null): ?string
+    {
+        if (preg_match('/^[A-Za-z0-9.-]+$/', $host) !== 1) {
+            return null;
+        }
+
+        $origin = 'https://' . $host;
+
+        if (is_int($port) && $port > 0 && $port <= 65535) {
+            $origin .= ':' . $port;
+        }
+
+        return $origin;
+    }
+
+    /**
      * Herkunft des Analytics-Hosts fuer die CSP, aus der Plugin-Option.
      *
      * Rybbit laedt sein Skript per wp_enqueue_script von einem externen Host und
@@ -157,40 +295,33 @@ class Security
             return '';
         }
 
-        if (preg_match('/^[A-Za-z0-9.-]+$/', $host) !== 1) {
-            return '';
-        }
-
         $port = wp_parse_url($url, PHP_URL_PORT);
-        $origin = 'https://' . $host;
+        $origin = self::httpsOriginFromHost($host, $port);
 
-        if (is_int($port) && $port > 0 && $port <= 65535) {
-            $origin .= ':' . $port;
+        if ($origin === null) {
+            return '';
         }
 
         return ' ' . $origin;
     }
 
     /**
-     * Hosts, die als iframe geladen werden duerfen, aus den Theme-Einstellungen.
+     * Zulaessige Hosts aus der Admin-Option, normalisiert (Kleinschreibung,
+     * ohne Schema/Pfad). Gemeinsame Quelle fuer getEmbedOrigins() (baut die
+     * CSP-Origins) UND isAllowedEmbedHost() (prueft einen einzelnen Host),
+     * damit beide dieselbe Zulassung sehen.
      *
-     * Das Modul "Einbettung" laesst beliebige Anbieter zu, die CSP darf das aber
-     * nicht pauschal: `frame-src *` waere die Richtlinie zum Fenster hinaus. Also
-     * eine Liste, die ein Administrator pflegt, und dieselbe strenge Filterung wie
-     * bei der Analytics-Herkunft: nur Hostnamen, kein Schema, kein Pfad, kein
-     * Semikolon, das die Direktive zerlegen koennte.
-     *
-     * @return string Leerer String oder fuehrendes Leerzeichen plus Origins
+     * @return list<string>
      */
-    private static function getEmbedOrigins(): string
+    private static function getEmbedAllowedHosts(): array
     {
-        $raw = \WordpressStarter\Acf\Fields::option('embed_allowed_hosts', '');
+        $raw = Acf\Fields::option('embed_allowed_hosts', '');
 
         if (!is_string($raw) || trim($raw) === '') {
-            return '';
+            return [];
         }
 
-        $origins = [];
+        $hosts = [];
 
         foreach (preg_split('/\r\n|\r|\n/', $raw) ?: [] as $line) {
             $host = trim($line);
@@ -211,14 +342,85 @@ class Security
                 continue;
             }
 
-            $origins[] = 'https://' . $host;
+            $hosts[] = strtolower($host);
         }
+
+        return array_values(array_unique($hosts));
+    }
+
+    private static function getEmbedOrigins(): string
+    {
+        $origins = array_map(
+            static fn (string $host): string => 'https://' . $host,
+            self::getEmbedAllowedHosts(),
+        );
 
         if ($origins === []) {
             return '';
         }
 
-        return ' ' . implode(' ', array_unique($origins));
+        return ' ' . implode(' ', $origins);
+    }
+
+    /**
+     * Ist $url als Iframe-Quelle zulaessig? Dieselbe Zulassung, die
+     * getCSPHeader() in frame-src schreibt: die fest verdrahteten Hosts
+     * (HARDCODED_FRAME_SRC_HOSTS) plus die Admin-Option embed_allowed_hosts
+     * (ueber getEmbedAllowedHosts() normalisiert). Templates, die vor dem
+     * Rendern eines Iframes pruefen wollen, ob die CSP ihn ohnehin blockieren
+     * wuerde, rufen diese Methode statt die private Zulassungslogik zu
+     * duplizieren.
+     *
+     * Der eigene Host der Seite ist NIE zulaessig: ein Iframe mit
+     * allow-same-origin auf die eigene Seite wuerde den CSP-Sandkasten
+     * aushebeln, egal was in der Options-Liste steht.
+     */
+    public static function isAllowedEmbedHost(string $url): bool
+    {
+        $scheme = wp_parse_url($url, PHP_URL_SCHEME);
+
+        if (!is_string($scheme) || strtolower($scheme) !== 'https') {
+            return false;
+        }
+
+        // Ein expliziter Nicht-443-Port passiert diese Pruefung, waehrend
+        // die CSP frame-src den portlosen Origin ausgibt: der Browser
+        // blockiert den Iframe dann still. Nur der Standardport ist erlaubt.
+        $port = wp_parse_url($url, PHP_URL_PORT);
+
+        if (is_int($port) && $port !== 443) {
+            return false;
+        }
+
+        $host = wp_parse_url($url, PHP_URL_HOST);
+
+        if (!is_string($host) || $host === '') {
+            return false;
+        }
+
+        $host = strtolower($host);
+
+        $siteHost = wp_parse_url(home_url(), PHP_URL_HOST);
+
+        if (is_string($siteHost) && $siteHost !== '') {
+            $siteHost = strtolower($siteHost);
+            // www./non-www-Alias des eigenen Hosts faellt unter dieselbe
+            // Sperre, sonst reicht ein Alias in der home_url()-Option fuer
+            // ein same-origin Iframe mit allow-same-origin + allow-scripts.
+            $siteHostAlias = str_starts_with($siteHost, 'www.')
+                ? substr($siteHost, 4)
+                : 'www.' . $siteHost;
+
+            if ($host === $siteHost || $host === $siteHostAlias) {
+                return false;
+            }
+        }
+
+        if (in_array($host, self::HARDCODED_FRAME_SRC_HOSTS, true)) {
+            return true;
+        }
+
+        return in_array($host, self::getEmbedAllowedHosts(), true);
     }
 
     /**
@@ -233,10 +435,14 @@ class Security
         // Base directives
         $directives = [
             "default-src 'self'" . $localSources,
-            "font-src 'self' data: https://fonts.gstatic.com" . $localSources,
+            "font-src 'self' data:" . $localSources,
             "img-src 'self' data: https:" . $localSources,
-            "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com" . self::getEmbedOrigins(),
+            "frame-src 'self' " . implode(' ', array_map(
+                static fn (string $host): string => 'https://' . $host,
+                self::HARDCODED_FRAME_SRC_HOSTS,
+            )) . self::getEmbedOrigins(),
             "frame-ancestors 'self'",
+            "base-uri 'self'",
             "media-src 'self' https:" . $localSources,
         ];
 
@@ -246,7 +452,7 @@ class Security
         $directives[] = "script-src {$scriptSrc}";
 
         // Style sources (unsafe-inline needed for WordPress/ACF inline styles)
-        $styleSrc = "'self' 'unsafe-inline' https://fonts.googleapis.com" . $localSources;
+        $styleSrc = "'self' 'unsafe-inline'" . $localSources;
         $directives[] = "style-src {$styleSrc}";
 
         // Connect sources (API calls, WebSockets)
@@ -260,8 +466,21 @@ class Security
     }
 
     /**
-     * Initialize security features.
+     * The hardening headers as a name => value map, so tests can pin the
+     * exact set and values without triggering a real header() send.
+     *
+     * @return array<string, string>
      */
+    public static function getHardeningHeaders(): array
+    {
+        return [
+            'X-Content-Type-Options' => 'nosniff',
+            'X-Frame-Options' => 'SAMEORIGIN',
+            'Referrer-Policy' => 'strict-origin-when-cross-origin',
+            'Permissions-Policy' => 'geolocation=(), camera=(), microphone=(), payment=()',
+        ];
+    }
+
     /**
      * Send hardening headers that do not depend on the CSP.
      *
@@ -275,13 +494,19 @@ class Security
                 return;
             }
 
-            header('X-Content-Type-Options: nosniff');
-            header('X-Frame-Options: SAMEORIGIN');
-            header('Referrer-Policy: strict-origin-when-cross-origin');
-            header('Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=()');
+            $emitter = self::$headerEmitter ?? static function (string $headerLine): void {
+                header($headerLine);
+            };
+
+            foreach (self::getHardeningHeaders() as $name => $value) {
+                $emitter("{$name}: {$value}");
+            }
         });
     }
 
+    /**
+     * Initialize security features.
+     */
     public static function init(): void
     {
         self::addHardeningHeaders();
@@ -304,6 +529,7 @@ class Security
             if (is_admin() && isset($headers['Content-Security-Policy'])) {
                 $headers['Content-Security-Policy'] = self::addUnsafeEvalToCSP($headers['Content-Security-Policy']);
             }
+
             return $headers;
         });
 
@@ -315,11 +541,10 @@ class Security
                 header_register_callback(function (): void {
                     $headers = headers_list();
                     foreach ($headers as $header) {
-                        if (stripos($header, 'Content-Security-Policy:') === 0) {
-                            // Remove the old header and set a new one with unsafe-eval
-                            $csp = substr($header, strlen('Content-Security-Policy: '));
+                        $patched = Security::patchCspHeaderValue($header);
+                        if ($patched !== null) {
                             header_remove('Content-Security-Policy');
-                            header('Content-Security-Policy: ' . Security::addUnsafeEvalToCSP($csp));
+                            header($patched);
                             break;
                         }
                     }
@@ -332,17 +557,29 @@ class Security
 
         // Add nonce to script tags (preparation for removing unsafe-inline)
         add_filter('script_loader_tag', function (string $tag, string $handle): string {
-            // Skip if already has nonce
-            if (str_contains($tag, 'nonce=')) {
-                return $tag;
-            }
+            // Core can concatenate several script tags (before/main/after
+            // inline scripts) into one $tag string, so nonce each opening
+            // <script ...> tag individually instead of only the first.
             $nonce = self::getNonce();
-            return str_replace('<script ', "<script nonce=\"{$nonce}\" ", $tag);
+
+            return preg_replace_callback('/<script\b[^>]*>/i', function (array $matches) use ($nonce): string {
+                $openingTag = $matches[0];
+                // Skip if this tag already carries a nonce attribute, not
+                // merely the substring "nonce=" inside a src URL query string
+                if (preg_match('/\snonce=/i', $openingTag) === 1) {
+                    return $openingTag;
+                }
+
+                return preg_replace('/<script\b/i', "<script nonce=\"{$nonce}\"", $openingTag, 1) ?? $openingTag;
+            }, $tag) ?? $tag;
         }, 10, 2);
 
         // Add nonce to WordPress inline scripts (wp_add_inline_script)
         add_filter('wp_inline_script_attributes', function (array $attributes): array {
-            $attributes['nonce'] = self::getNonce();
+            if (!isset($attributes['nonce'])) {
+                $attributes['nonce'] = self::getNonce();
+            }
+
             return $attributes;
         });
 
@@ -351,6 +588,7 @@ class Security
             if (!isset($attributes['nonce'])) {
                 $attributes['nonce'] = self::getNonce();
             }
+
             return $attributes;
         });
     }

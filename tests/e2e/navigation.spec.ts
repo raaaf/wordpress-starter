@@ -26,26 +26,21 @@ test.describe('Navigation', () => {
     }
   });
 
-  test('mobile menu should toggle on mobile viewport', async ({ page }) => {
-    // Set mobile viewport
-    await page.setViewportSize({ width: 375, height: 667 });
+  test.describe('mobile viewport', () => {
+    test.use({ viewport: { width: 390, height: 844 } });
 
-    // Look for mobile menu button
-    const menuButton = page.locator('[x-data*="navigation"] button').first();
+    test('mobile menu should toggle', async ({ page }) => {
+      const menuButton = page.locator('[x-data*="navigation"] button').first();
+      await expect(menuButton).toBeVisible();
 
-    if (await menuButton.isVisible()) {
       // Click to open menu
       await menuButton.click();
-
-      // Check menu expanded
       await expect(menuButton).toHaveAttribute('aria-expanded', 'true');
 
       // Click to close menu
       await menuButton.click();
-
-      // Check menu collapsed
       await expect(menuButton).toHaveAttribute('aria-expanded', 'false');
-    }
+    });
   });
 
   test('navigation links should be keyboard accessible', async ({ page }) => {

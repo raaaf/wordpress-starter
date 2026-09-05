@@ -32,19 +32,31 @@ class MediaServiceProvider extends ServiceProvider
      */
     private function allowSvgUploads(): void
     {
-        // Add SVG to allowed mime types
+        // Add SVG to allowed mime types. svgz (gzipped SVG) is deliberately
+        // NOT allowed: the sanitizer below only understands plain XML, so a
+        // gzipped payload would bypass sanitization.
         add_filter('upload_mimes', function (array $mimes): array {
-            $mimes['svg'] = 'image/svg+xml';
-            $mimes['svgz'] = 'image/svg+xml';
+            // Only admins get SVG allowed at all: XML-RPC's
+            // mw_newMediaObject calls wp_upload_bits() directly, which
+            // never runs the wp_handle_upload_prefilter/sideload_prefilter
+            // sanitizer below, so an admin uploading via XML-RPC stores an
+            // unsanitised SVG; this capability gate is the only checkpoint
+            // on that path.
+            if (current_user_can('manage_options')) {
+                $mimes['svg'] = 'image/svg+xml';
+            }
 
             return $mimes;
         });
 
-        // Fix SVG file type detection
+        // Fix SVG file type detection. Relabel only when the extension is
+        // svg AND the actual file content looks like SVG, so this filter
+        // can't be tricked into declaring an unrelated file type=svg by
+        // filename alone.
         add_filter('wp_check_filetype_and_ext', function (array $data, string $file, string $filename, ?array $mimes): array {
-            $ext = pathinfo($filename, PATHINFO_EXTENSION);
+            $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-            if ($ext === 'svg') {
+            if ($ext === 'svg' && $this->looksLikeSvgContent($file)) {
                 $data['ext'] = 'svg';
                 $data['type'] = 'image/svg+xml';
             }
@@ -52,33 +64,119 @@ class MediaServiceProvider extends ServiceProvider
             return $data;
         }, 10, 4);
 
-        // Basic SVG sanitization on upload
-        add_filter('wp_handle_upload_prefilter', function (array $file): array {
-            if ($file['type'] !== 'image/svg+xml') {
-                return $file;
-            }
+        // Basic SVG sanitization on upload. Whether a file is treated as SVG
+        // is decided from the file extension alone (see isSvgUpload()), never
+        // from $file['type'] (the browser-supplied Content-Type), which an
+        // uploader fully controls. Hooked on both the regular upload path and
+        // the sideload path (importer, media_sideload_image()), which would
+        // otherwise skip the admin gate and the sanitizer entirely.
+        $sanitizeUpload = function (array $file): array {
+            return $this->sanitizeSvgUpload($file);
+        };
+        add_filter('wp_handle_upload_prefilter', $sanitizeUpload);
+        add_filter('wp_handle_sideload_prefilter', $sanitizeUpload);
+    }
 
-            // Only allow admins to upload SVGs
-            if (!current_user_can('manage_options')) {
-                $file['error'] = __('SVG uploads are only allowed for administrators.', 'wp-starter');
+    /**
+     * Gate and sanitize an uploaded or sideloaded SVG file. Non-SVG files
+     * pass through untouched. Fails closed: any read, sanitize, or write
+     * failure rejects the upload instead of storing unsanitized content.
+     * Sanitization runs on both the wp_handle_upload_prefilter and
+     * wp_handle_sideload_prefilter paths (see allowSvgUploads()); the
+     * XML-RPC path (wp_upload_bits()) is NOT covered here, see the
+     * upload_mimes filter above.
+     *
+     * The admin capability gate below only applies when a user is logged
+     * in: server-initiated imports with no current user (WP-CLI media
+     * import, cron) have no capability to check, so they skip the gate
+     * but never skip the sanitizer.
+     *
+     * @param array<string, mixed> $file
+     * @return array<string, mixed>
+     */
+    private function sanitizeSvgUpload(array $file): array
+    {
+        $name = isset($file['name']) && is_string($file['name']) ? $file['name'] : '';
+        if (!$this->isSvgUpload($name)) {
+            return $file;
+        }
 
-                return $file;
-            }
-
-            // Read and sanitize SVG content
-            $content = file_get_contents($file['tmp_name']);
-            if ($content === false) {
-                return $file;
-            }
-
-            // Remove potentially dangerous elements and attributes
-            $content = $this->sanitizeSvg($content);
-
-            // Write sanitized content back
-            file_put_contents($file['tmp_name'], $content);
+        // Only allow admins to upload SVGs. Server-initiated imports with
+        // no logged-in user (WP-CLI media import, cron) have no capability
+        // to check and are not rejected here, but still go through the
+        // sanitizer below.
+        if (is_user_logged_in() && !current_user_can('manage_options')) {
+            $file['error'] = __('SVG uploads are only allowed for administrators.', 'wp-starter');
 
             return $file;
-        });
+        }
+
+        $tmpName = isset($file['tmp_name']) && is_string($file['tmp_name']) ? $file['tmp_name'] : '';
+
+        // Read and sanitize SVG content. Fail closed: if the content
+        // can't be read or the sanitizer rejects it, reject the upload
+        // instead of storing the unsanitized original.
+        $content = $tmpName === '' ? false : file_get_contents($tmpName);
+        if ($content === false) {
+            $file['error'] = __('SVG konnte nicht gelesen werden.', 'wp-starter');
+
+            return $file;
+        }
+
+        $sanitized = $this->sanitizeSvg($content);
+        if ($sanitized === false) {
+            $file['error'] = __('SVG konnte nicht bereinigt werden.', 'wp-starter');
+
+            return $file;
+        }
+
+        // Write sanitized content back. Fail closed: if the write
+        // fails or is truncated, the tmp file may still hold the
+        // unsanitized original, so reject the upload instead of letting
+        // it proceed.
+        $written = file_put_contents($tmpName, $sanitized);
+        if ($written === false || $written < strlen($sanitized)) {
+            $file['error'] = __('SVG konnte nicht gespeichert werden.', 'wp-starter');
+
+            return $file;
+        }
+
+        return $file;
+    }
+
+    /**
+     * Determine whether an uploaded file is an SVG, independent of the
+     * browser-supplied Content-Type. Keys off the file extension alone:
+     * upload_mimes() only permits the "svg" extension in the first place, so
+     * extension is the only signal that gates this path. Content sniffing
+     * (looksLikeSvgContent()) is used separately, in the
+     * wp_check_filetype_and_ext filter, to confirm a .svg file's content
+     * before relabelling it, never to widen what counts as an SVG upload.
+     */
+    private function isSvgUpload(string $filename): bool
+    {
+        return strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'svg';
+    }
+
+    /**
+     * Sniff whether a file's content is SVG by looking for an <svg> root
+     * tag in the first bytes of the file, with or without a leading XML
+     * declaration.
+     */
+    private function looksLikeSvgContent(string $path): bool
+    {
+        if ($path === '' || !is_readable($path)) {
+            return false;
+        }
+
+        $fh = @fopen($path, 'rb');
+        if ($fh === false) {
+            return false;
+        }
+        $head = (string) fread($fh, 2048);
+        fclose($fh);
+
+        return (bool) preg_match('/<svg\b/i', $head);
     }
 
     /**
@@ -89,7 +187,7 @@ class MediaServiceProvider extends ServiceProvider
      *
      * @see https://github.com/darylldoyle/svg-sanitizer
      */
-    private function sanitizeSvg(string $content): string
+    private function sanitizeSvg(string $content): string|false
     {
         // Use the proper SVG sanitizer library
         $sanitizer = new \enshrined\svgSanitize\Sanitizer();
@@ -98,10 +196,9 @@ class MediaServiceProvider extends ServiceProvider
         $sanitizer->removeRemoteReferences(true);
         $sanitizer->removeXMLTag(false); // Keep the XML declaration
 
-        $sanitized = $sanitizer->sanitize($content);
-
-        // Return original if sanitization failed (shouldn't happen with valid SVG)
-        return $sanitized ?: $content;
+        // Fail closed: false propagates to the prefilter, which rejects
+        // the upload instead of storing unsanitized content.
+        return $sanitizer->sanitize($content);
     }
 
     /**

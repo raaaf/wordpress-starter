@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter;
 
+use WordpressStarter\Providers\LogServiceProvider;
+
 /**
  * Vite Asset Management
  *
@@ -151,10 +153,11 @@ class Vite
             'entry' => __('Eintrag', 'wp-starter'),
             'entries' => __('Einträge', 'wp-starter'),
         ];
-        $json = wp_json_encode($strings);
+        $json = wp_json_encode($strings, JSON_HEX_TAG | JSON_HEX_AMP);
         $scriptId = ThemeContext::kebabPrefix() . '-admin-strings';
+        $nonce = esc_attr(Security::getNonce());
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted internal JSON for localization
-        echo "<script id=\"{$scriptId}\">var themeAdminStrings = {$json};</script>";
+        echo "<script id=\"{$scriptId}\" nonce=\"{$nonce}\">var themeAdminStrings = {$json};</script>";
     }
 
     /**
@@ -162,8 +165,9 @@ class Vite
      */
     public static function outputAcfIconRadioCss(): void
     {
+        $nonce = esc_attr(Security::getNonce());
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted internal CSS
-        echo '<style id="acf-icon-radio-css">' . self::getAcfIconRadioCss() . '</style>';
+        echo '<style id="acf-icon-radio-css" nonce="' . $nonce . '">' . self::getAcfIconRadioCss() . '</style>';
     }
 
     /**
@@ -171,8 +175,9 @@ class Vite
      */
     public static function outputAcfIconRadioJs(): void
     {
+        $nonce = esc_attr(Security::getNonce());
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted internal JS
-        echo '<script id="acf-icon-radio-js">' . self::getAcfIconRadioJs() . '</script>';
+        echo '<script id="acf-icon-radio-js" nonce="' . $nonce . '">' . self::getAcfIconRadioJs() . '</script>';
     }
 
     /**
@@ -226,7 +231,7 @@ class Vite
     private static function getAcfIconRadioJs(): string
     {
         $icons = self::getThemeIcons();
-        $iconsJson = wp_json_encode($icons);
+        $iconsJson = wp_json_encode($icons, JSON_HEX_TAG | JSON_HEX_AMP);
 
         return <<<JS
             (function() {
@@ -392,8 +397,7 @@ class Vite
 
                 // Log warning in development mode
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-                    error_log(ThemeContext::logPrefix() . ': Vite manifest not found at ' . $manifestPath . '. Run "npm run build".');
+                    LogServiceProvider::warning('Vite manifest not found. Run "npm run build".', ['manifest_path' => $manifestPath]);
                 }
 
                 return;
@@ -403,8 +407,7 @@ class Vite
 
             if ($content === false) {
                 self::$manifest = [];
-                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-                error_log(ThemeContext::logPrefix() . ': Could not read Vite manifest at ' . $manifestPath);
+                LogServiceProvider::error('Could not read Vite manifest', ['manifest_path' => $manifestPath]);
 
                 return;
             }
@@ -413,8 +416,7 @@ class Vite
 
             if (json_last_error() !== JSON_ERROR_NONE) {
                 self::$manifest = [];
-                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-                error_log(ThemeContext::logPrefix() . ': Invalid JSON in Vite manifest: ' . json_last_error_msg());
+                LogServiceProvider::error('Invalid JSON in Vite manifest', ['error' => json_last_error_msg()]);
 
                 return;
             }
@@ -445,7 +447,7 @@ class Vite
             }
         }
 
-        self::$devServerPort = (int) config('vite.dev_server.port', 5173);
+        self::$devServerPort = (int) config('vite.dev_server.port', 5180);
 
         return self::$devServerPort;
     }

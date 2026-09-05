@@ -41,30 +41,20 @@
       and dividers keep --border-default; 1.4.11 does not apply to them.
       The export has no such role at all.
 
-   2. --ring-focus: the focus ring used a 50 percent alpha accent, which blends
-      to roughly 1.8:1 against the page. Solid, and picked per theme so it also
-      clears 3:1 against the dark background, where a near-black accent would
-      otherwise be invisible. Also absent from the export.
-
-   3. --shadow-color-*: the Tailwind theme block below builds --shadow-sm through
+   2. --shadow-color-*: the Tailwind theme block below builds --shadow-sm through
       --shadow-2xl out of these, and the export never delivered them. An
       unresolvable var() makes the whole box-shadow invalid at computed-value
       time, so every plain shadow-sm/md/lg/xl/2xl utility rendered nothing at
       all. The values follow the same rgba(23, 23, 23, a) vocabulary the
       component shadows in tokens.css already use.
 
-   4. --text-on-brand: --bg-brand is accent-500. White on it measures 2.84:1,
-      under the 3:1 floor for large text; the inherited near-black measures
-      6.32:1 on the same orange. --text-inverse is the wrong role here, it
-      follows the page, not the brand surface.
-
-   5. Primary button gradient: the only fill in the theme that does not flip
+   3. Primary button gradient: the only fill in the theme that does not flip
       with the scheme. Light gets the dark end of the ramp under white text
       (5.23:1 at rest, improving to 7.39 and 10.36 as it is pressed), dark gets
       the light end under near-black text (4.80:1 at rest, improving to 6.32
       and 7.74). Both ladders now move away from the text, not towards it.
 
-   6. The dark surfaces further down: deliberately raw hex, not a step of the
+   4. The dark surfaces further down: deliberately raw hex, not a step of the
       grey ramp. See the comment on that block.
 
    RECORDED IN THE EXPORT
@@ -140,13 +130,37 @@
      is light in BOTH schemes needs a dark mark in both. That is now a decision
      the export carries, not a line in this file. */
 
-  /* Fills, light scheme: dark end of the ramp, white content on top. */
-  --gradient-primary-start: var(--color-accent-700);
-  --gradient-primary-end: var(--color-accent-800);
-  --gradient-primary-hover-start: var(--color-accent-800);
-  --gradient-primary-hover-end: var(--color-accent-900);
-  --gradient-primary-active-start: var(--color-accent-900);
-  --gradient-primary-active-end: var(--color-accent-900);
+  /* Primary button reads as a flat fill, not a gradient (start === end):
+     rafaelalex.de design system, section 5, primary CTA is a hairline pill
+     at rest and a flat colour fill on hover/active, never a gradient. */
+  --gradient-primary-start: var(--color-accent-500);
+  --gradient-primary-end: var(--color-accent-500);
+  --gradient-primary-hover-start: var(--color-accent-600);
+  --gradient-primary-hover-end: var(--color-accent-600);
+  --gradient-primary-active-start: var(--color-accent-600);
+  --gradient-primary-active-end: var(--color-accent-600);
+
+  /* Pure Paper cards on the Warm Paper page (light mode). */
+  --card-bg: var(--bg-secondary);
+  --card-border: var(--border-default);
+
+  /* Primary button at rest: the opaque subtle brand surface (accent-50 in
+     light, the warm near-black in dark), so the pill reads as filled and the
+     brand text on top keeps its contrast on any background, images included. */
+  --bg-brand-tint: var(--bg-brand-subtle);
+
+  /* Surface sheen (rafaelalex.de ph.css): a diagonal ink wash on cards and
+     panels, a few percent at most, so a flat surface still has a direction.
+     Light: darkens towards the bottom right. Dark: lightens the top left. */
+  --surface-sheen: linear-gradient(135deg, transparent 35%, rgba(17, 24, 39, 0.035) 100%);
+  --page-sheen: linear-gradient(160deg, rgba(17, 24, 39, 0.035) 0%, transparent 50%);
+  --noise-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+
+  /* Form controls draw a hairline, not a grey frame (rafaelalex.de design
+     system, section 5). The field is told apart from the page by its paper
+     fill and its label; the boundary only firms up on focus. This trades the
+     3:1 boundary of WCAG 1.4.11 for the quieter look on purpose. */
+  --border-control: var(--border-strong);
 
   /* Danger button hover: --bg-error-strong is already the darkest of the
      three-step error ramp, so there is no further token to step to. Mixed
@@ -185,25 +199,31 @@
 
   --card-bg: var(--bg-secondary);
   --card-border: var(--border-default);
+  --surface-sheen: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.015) 45%,
+    transparent 80%
+  );
+  --page-sheen: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, transparent 50%);
 
-  /* Fills, dark scheme: light end of the ramp, near-black content on top.
-     The ladder runs the other way, so pressing still moves away from the text. */
+  /* Flat fill, same rule as the light-mode block above (start === end). */
   --gradient-primary-start: var(--color-accent-500);
-  --gradient-primary-end: var(--color-accent-600);
-  --gradient-primary-hover-start: var(--color-accent-400);
-  --gradient-primary-hover-end: var(--color-accent-500);
-  --gradient-primary-active-start: var(--color-accent-300);
-  --gradient-primary-active-end: var(--color-accent-400);
+  --gradient-primary-end: var(--color-accent-500);
+  --gradient-primary-hover-start: var(--color-accent-600);
+  --gradient-primary-hover-end: var(--color-accent-600);
+  --gradient-primary-active-start: var(--color-accent-600);
+  --gradient-primary-active-end: var(--color-accent-600);
 
   /* Here --bg-error-strong is the mid tone under near-black text (4.76:1 at
      rest, see point c above): darkening it the way light mode does would
-     push it towards the text instead of away, the same trap point 5 already
+     push it towards the text instead of away, the same trap point 3 already
      documents for the primary gradient. Mixed towards white instead
      (4.76:1 -> 5.99:1). */
   --bg-error-strong-hover: color-mix(in srgb, var(--color-error) 80%, white);
 
   /* The plain Tailwind shadow-sm..shadow-2xl scale (see the TOKEN CORRECTIONS
-     block above, point 3) is built from these --shadow-color-* custom
+     block above, point 2) is built from these --shadow-color-* custom
      properties. The :root correction only ever set the light-mode ink,
      rgba(23, 23, 23, ...), which is --bg-primary's own colour in dark mode --
      every shadow-sm/md/lg/xl/2xl utility was invisible here for the same
@@ -237,14 +257,15 @@
        silhouette alone here, since a single soft blur at low alpha just
        smears into the background. Button and input stay at two layers, they
        sit close to the surface and don't need the third. */
-  --shadow-button: 0px 1px 2px 0px rgba(4, 6, 20, 0.45), 0px 1px 3px 0px rgba(4, 6, 20, 0.3);
+  /* Flat-at-Rest Rule: no drop shadow on any surface at rest, in either
+     colour scheme. Hover/overlay shadows below are interaction state and
+     stay. */
+  --shadow-button: none;
   --shadow-button-hover:
     0px 2px 4px -1px rgba(4, 6, 20, 0.5), 0px 4px 6px -2px rgba(4, 6, 20, 0.35);
-  --shadow-input: 0px 1px 2px 0px rgba(4, 6, 20, 0.4), 0px 1px 1px 0px rgba(4, 6, 20, 0.3);
+  --shadow-input: none;
   --shadow-input-hover: 0px 1px 3px 0px rgba(4, 6, 20, 0.45), 0px 1px 2px -1px rgba(4, 6, 20, 0.35);
-  --shadow-card:
-    0px 1px 2px 0px rgba(4, 6, 20, 0.5), 0px 4px 8px 0px rgba(4, 6, 20, 0.35),
-    0px 12px 24px -4px rgba(4, 6, 20, 0.3);
+  --shadow-card: none;
   --shadow-card-hover:
     0px 2px 4px 0px rgba(4, 6, 20, 0.55), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
     0px 20px 40px -8px rgba(4, 6, 20, 0.3);
@@ -256,18 +277,6 @@
     0px 20px 40px -8px rgba(4, 6, 20, 0.3);
 
   color-scheme: dark;
-}
-
-/* Elevated cards (`x-card variant="elevated"`, e.g. the "cards" flexible
-   layout) carry no border in any colour scheme and rely on `shadow-lg` alone
-   for their silhouette. `shadow-lg` is Tailwind's own utility, built from
-   --shadow-color-lg above, which is not part of the --shadow-card family and
-   stays at the light-mode ink even in dark mode, so this variant's edge
-   vanished the same way the --shadow-card ones did. A 1px line in the same
-   colour the default/filled/outlined variants already carry as a real border
-   fixes it without touching the shadow. */
-[data-theme='dark'] .card.shadow-lg {
-  border: 1px solid var(--border-default);
 }
 
 /* Karten heben sich im Dunkelmodus ueber ihre Flaeche ab, siehe den
@@ -300,15 +309,21 @@
 
     --card-bg: var(--bg-secondary);
     --card-border: var(--border-default);
+    --surface-sheen: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.015) 45%,
+      transparent 80%
+    );
+    --page-sheen: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, transparent 50%);
 
-    /* Fills, dark scheme: light end of the ramp, near-black content on top.
-       The ladder runs the other way, so pressing still moves away from the text. */
+    /* Flat fill, same rule as the [data-theme='dark'] block above. */
     --gradient-primary-start: var(--color-accent-500);
-    --gradient-primary-end: var(--color-accent-600);
-    --gradient-primary-hover-start: var(--color-accent-400);
-    --gradient-primary-hover-end: var(--color-accent-500);
-    --gradient-primary-active-start: var(--color-accent-300);
-    --gradient-primary-active-end: var(--color-accent-400);
+    --gradient-primary-end: var(--color-accent-500);
+    --gradient-primary-hover-start: var(--color-accent-600);
+    --gradient-primary-hover-end: var(--color-accent-600);
+    --gradient-primary-active-start: var(--color-accent-600);
+    --gradient-primary-active-end: var(--color-accent-600);
 
     /* See the [data-theme='dark'] block above. */
 
@@ -330,15 +345,14 @@
 
     /* See the [data-theme='dark'] block above for the measurement and the
        reasoning behind the ink and opacity change. */
-    --shadow-button: 0px 1px 2px 0px rgba(4, 6, 20, 0.45), 0px 1px 3px 0px rgba(4, 6, 20, 0.3);
+    /* Flat-at-Rest Rule: no drop shadow on any surface at rest. */
+    --shadow-button: none;
     --shadow-button-hover:
       0px 2px 4px -1px rgba(4, 6, 20, 0.5), 0px 4px 6px -2px rgba(4, 6, 20, 0.35);
-    --shadow-input: 0px 1px 2px 0px rgba(4, 6, 20, 0.4), 0px 1px 1px 0px rgba(4, 6, 20, 0.3);
+    --shadow-input: none;
     --shadow-input-hover:
       0px 1px 3px 0px rgba(4, 6, 20, 0.45), 0px 1px 2px -1px rgba(4, 6, 20, 0.35);
-    --shadow-card:
-      0px 1px 2px 0px rgba(4, 6, 20, 0.5), 0px 4px 8px 0px rgba(4, 6, 20, 0.35),
-      0px 12px 24px -4px rgba(4, 6, 20, 0.3);
+    --shadow-card: none;
     --shadow-card-hover:
       0px 2px 4px 0px rgba(4, 6, 20, 0.55), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
       0px 20px 40px -8px rgba(4, 6, 20, 0.3);
@@ -350,10 +364,6 @@
       0px 20px 40px -8px rgba(4, 6, 20, 0.3);
 
     color-scheme: dark;
-  }
-
-  :root:not([data-theme='light']) .card.shadow-lg {
-    border: 1px solid var(--border-default);
   }
 
   /* Siehe den [data-theme='dark'] Block oben. */
@@ -385,8 +395,6 @@
    statt sich abzuheben. Eine Stufe ueber tertiary existiert nicht, daher hier
    ein eigener Zwischenwert. Nur fuer dieses Theme gemessen, Client-Themes
    leiten ihren eigenen Wert ab. Hellmodus unveraendert (siehe Regel oben). */
-[data-theme='dark'] {
-}
 
 [data-theme='dark'] .bg-surface-tertiary {
   --card-surface: var(--bg-tertiary-elevated);
@@ -394,9 +402,6 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-  }
-
   :root:not([data-theme='light']) .bg-surface-tertiary {
     --card-surface: var(--bg-tertiary-elevated);
     --card-bg: var(--bg-tertiary-elevated);
@@ -404,29 +409,8 @@
 }
 
 /* ============================================
-   SPACING SCALE GAPS
-
-   The Figma export defines 0-5, 1-5, 2-5, 3, 4, 5 and up, but skips the two
-   plainest steps of its own 4px scale. Four component tokens reference them,
-   so a medium button lost the gap between icon and label and badges lost
-   their vertical padding entirely.
+   MOTION VOCABULARY
    ============================================ */
-
-:root {
-  --spacing-1: 4px;
-  --spacing-2: 8px;
-}
-
-/* ============================================
-   CONTRAST PREFERENCE AND MOTION VOCABULARY
-   ============================================ */
-
-@media (prefers-contrast: more) {
-  :root {
-    /* Escalate one step along the roles that already exist: dividers take the
-       strength of a control border, controls take the strength of text. */
-  }
-}
 
 :root {
   /* One vocabulary for the whole theme. Entrances may take their time,
@@ -436,28 +420,6 @@
   --motion-exit-duration: 150ms;
   --motion-enter-ease: cubic-bezier(0, 0, 0.2, 1);
   --motion-exit-ease: cubic-bezier(0.4, 0, 1, 1);
-}
-
-/* ============================================
-   PLACEHOLDER COLOUR
-
-   Not part of the Figma token export. The obvious candidate, --text-tertiary,
-   only reaches 2.2:1 to 3.1:1 against the input background in every theme,
-   well under the 4.5:1 that placeholder text needs. --text-secondary would
-   pass but sits so close to the body text in some palettes that a placeholder
-   reads as an entered value. This is the lightest shade of each theme's own
-   palette that still clears 4.5:1.
-   ============================================ */
-
-:root {
-}
-
-[data-theme='dark'] {
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-  }
 }
 
 @plugin "@tailwindcss/forms";
@@ -975,6 +937,7 @@ html {
   --color-icon-success: var(--icon-success);
   --color-icon-warning: var(--icon-warning);
   --color-icon-error: var(--icon-error);
+  --color-icon-disabled: var(--icon-disabled);
 
   /* Status Colors - direct mapping */
   --color-success: var(--color-success);
@@ -1030,11 +993,51 @@ html {
     --header-height: 80px;
   }
 
+  /* Page-Frame Rule (rafaelalex.de design system, section 2): the page
+     background carries a noise-textured SVG plus two diagonal radial
+     gradients in Signal Orange, a property of the body, not a layout
+     choice. Cells sit on top transparently. */
+  /* Colaborate ships in light and regular only. Without this, every
+     <strong>, <b> and heavy utility would get a synthetic bold from the
+     browser, which is the one look the typeface must not have. */
+  html {
+    font-synthesis-weight: none;
+  }
+
   body {
     color: var(--text-primary);
-    background-color: var(--bg-primary);
+    background:
+      var(--noise-texture) repeat,
+      var(--page-sheen) no-repeat 0 0 / 100% 100vh,
+      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.04) 0%, transparent 60%) fixed,
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.03) 0%, transparent 50%)
+        fixed,
+      var(--bg-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  :root[data-theme='light'] body {
+    background:
+      var(--noise-texture) repeat,
+      var(--page-sheen) no-repeat 0 0 / 100% 100vh,
+      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.03) 0%, transparent 60%) fixed,
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.02) 0%, transparent 50%)
+        fixed,
+      var(--bg-primary);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme='dark']) body {
+      background:
+        var(--noise-texture) repeat,
+        var(--page-sheen) no-repeat 0 0 / 100% 100vh,
+        radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.03) 0%, transparent 60%)
+          fixed,
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.02) 0%, transparent 50%)
+          fixed,
+        var(--bg-primary);
+    }
   }
 
   /* ============================================
@@ -1094,10 +1097,7 @@ html {
     margin-bottom: 0.5em;
   }
 
-  /* h5 and h6 share the same size token intentionally — no --typography-h6-size exists
-     in the token scale. Add a --typography-h6-size token (between h5 and body) to differentiate. */
   h5,
-  h6,
   .text-h5 {
     font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h5-size);
@@ -1105,6 +1105,20 @@ html {
     line-height: var(--typography-h5-line-height);
     letter-spacing: var(--typography-h5-letter-spacing);
     color: var(--text-primary);
+    text-wrap: balance;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+
+  /* h6 no longer shares h5's size — it steps down to the body size so the
+     level is told apart without weight (weight is fixed at 400 theme-wide). */
+  h6 {
+    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-body-size);
+    font-weight: var(--typography-h5-weight);
+    line-height: var(--typography-h5-line-height);
+    letter-spacing: var(--typography-body-letter-spacing);
+    color: var(--text-secondary);
     text-wrap: balance;
     margin-top: 1em;
     margin-bottom: 0.5em;
@@ -1203,9 +1217,10 @@ html {
   /* Focus-visible styles - WCAG 2.1 SC 2.4.7 and 2.4.13: Visible focus indicator.
      --border-focus is accent-400 and measures 2.32:1 on the page; --ring-focus
      is the corrected token from the block at the top of this file (3.74:1) and
-     is what every component ring already uses. */
+     is what every component ring already uses. 3px/2px per the rafaelalex.de
+     focus-ring spec (section 4). */
   :focus-visible {
-    outline: 2px solid var(--ring-focus);
+    outline: 3px solid var(--ring-focus);
     outline-offset: 2px;
   }
 
@@ -1345,6 +1360,19 @@ html {
    ============================================ */
 
 @layer components {
+  .card,
+  .surface-sheen {
+    background-image: var(--surface-sheen);
+  }
+
+  /* On image cards the lit corner of the sheen sits under the opaque image and
+     the text block below falls into its transparent tail, so the card reads
+     flat. Every block after the image carries its own wash, so a text block
+     and an accordion below it do not meet at a hard edge. */
+  .card > :is(img, picture, figure, :has(> img)) ~ div {
+    background-image: var(--surface-sheen);
+  }
+
   /* --- Form Layout --- */
   /* autop is disabled (ContactForm7Configurator), so elements are direct children.
      Spacing via adjacent sibling selector works for all patterns:
@@ -1382,7 +1410,7 @@ html {
   .wpcf7-form label {
     display: block;
     font-size: var(--typography-body-small-size);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--text-primary);
   }
 
@@ -1436,7 +1464,7 @@ html {
     padding: 0 1rem;
     font-size: var(--typography-body-size);
     color: var(--text-primary);
-    background-color: var(--bg-primary);
+    background-color: var(--bg-secondary);
     border: 1px solid var(--border-control);
     border-radius: var(--input-md-radius);
     box-shadow: var(--shadow-input);
@@ -1477,9 +1505,9 @@ html {
   .wpcf7-form input[type='date']:focus,
   .wpcf7-form input[type='time']:focus,
   .wpcf7-form input[type='password']:focus {
-    outline: none;
     border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus-ring);
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
   }
 
   /* --- Textarea --- */
@@ -1490,7 +1518,7 @@ html {
     padding: var(--input-md-padding-y) var(--input-md-padding-x);
     font-size: var(--typography-body-size);
     color: var(--text-primary);
-    background-color: var(--bg-primary);
+    background-color: var(--bg-secondary);
     border: 1px solid var(--border-control);
     border-radius: var(--input-md-radius);
     box-shadow: var(--shadow-input);
@@ -1511,13 +1539,17 @@ html {
   }
 
   .wpcf7-form textarea:focus {
-    outline: none;
     border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus-ring);
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
   }
 
   /* --- Select --- */
   /* Matches: select.blade.php md size, default state */
+  /* The chevron is a data URI and cannot read var(--icon-secondary), so the
+     stroke hex below mirrors --icon-secondary's light value (gray-500
+     #737373) and must be updated by hand if that token changes. The dark
+     counterpart (gray-400 #A3A3A3) lives in the scheme blocks further down. */
   .wpcf7-form select {
     display: block;
     width: 100%;
@@ -1526,8 +1558,8 @@ html {
     padding-right: 2.5rem;
     font-size: var(--typography-body-size);
     color: var(--text-primary);
-    background-color: var(--bg-primary);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-color: var(--bg-secondary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 1rem;
@@ -1548,9 +1580,21 @@ html {
   }
 
   .wpcf7-form select:focus {
-    outline: none;
     border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus-ring);
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
+  }
+
+  /* Chevron dark-mode counterpart: mirrors --icon-secondary's dark value
+     (gray-400 #A3A3A3), see the comment on .wpcf7-form select above. */
+  [data-theme='dark'] .wpcf7-form select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A3A3A3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .wpcf7-form select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A3A3A3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    }
   }
 
   /* --- Checkbox & Radio Groups --- */
@@ -1581,16 +1625,18 @@ html {
 
   .wpcf7-form .wpcf7-list-item input[type='checkbox'],
   .wpcf7-form .wpcf7-list-item input[type='radio'] {
-    width: 1.25rem;
-    height: 1.25rem;
+    /* WCAG 2.5.8 needs a 24px hit target; see the acceptance checkbox below
+       for the same fix. */
+    width: 1.5rem;
+    height: 1.5rem;
     accent-color: var(--bg-accent);
     cursor: pointer;
   }
 
   .wpcf7-form .wpcf7-list-item input[type='checkbox']:focus-visible,
   .wpcf7-form .wpcf7-list-item input[type='radio']:focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-focus-ring);
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
   }
 
   /* --- Acceptance Checkbox --- */
@@ -1606,7 +1652,7 @@ html {
     padding: 0.5rem 1rem;
     font-size: var(--typography-body-small-size);
     color: var(--text-primary);
-    background-color: var(--bg-primary);
+    background-color: var(--bg-secondary);
     border: 1px dashed var(--border-default);
     border-radius: var(--input-md-radius);
     cursor: pointer;
@@ -1620,16 +1666,16 @@ html {
   }
 
   .wpcf7-form input[type='file']:focus {
-    outline: none;
     border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus-ring);
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
   }
 
   .wpcf7-form input[type='file']::file-selector-button {
     padding: 0.25rem 0.75rem;
     margin-right: 0.75rem;
     font-size: var(--typography-body-small-size);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--text-primary);
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-control);
@@ -1646,7 +1692,8 @@ html {
   }
 
   /* --- Submit Button --- */
-  /* Matches: button.blade.php primary variant, md size */
+  /* Matches: button.blade.php primary variant, md size (hairline pill at
+     rest, flat fill on hover/active, no shadow). */
   .wpcf7-form input[type='submit'] {
     display: inline-flex;
     align-items: center;
@@ -1654,50 +1701,49 @@ html {
     padding: var(--button-md-padding-y) var(--button-md-padding-x);
     min-height: var(--button-md-min-height);
     font-size: var(--typography-body-small-size);
-    font-weight: 600;
-    /* Mirrors button.blade.php primary: content on a fill uses --text-inverse,
-       which flips with the scheme exactly as the gradient now does. */
-    color: var(--text-inverse);
-    background: linear-gradient(
-      to bottom,
-      var(--gradient-primary-start),
-      var(--gradient-primary-end)
-    );
-    border: 1px solid var(--border-default);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--color-content-brand);
+    background-color: var(--bg-brand-tint);
+    border: 1px solid var(--color-line-brand);
     border-radius: var(--button-md-radius);
-    box-shadow: var(--shadow-button);
     cursor: pointer;
     transition:
-      color var(--motion-enter-duration) var(--motion-enter-ease),
-      background var(--motion-enter-duration) var(--motion-enter-ease),
-      border-color var(--motion-enter-duration) var(--motion-enter-ease),
-      box-shadow var(--motion-enter-duration) var(--motion-enter-ease),
-      transform var(--motion-enter-duration) var(--motion-enter-ease);
+      color 200ms ease-out,
+      background-color 200ms ease-out,
+      border-color 200ms ease-out,
+      transform 200ms ease-out;
     appearance: none;
   }
 
   .wpcf7-form input[type='submit']:hover {
-    background: linear-gradient(
-      to bottom,
-      var(--gradient-primary-hover-start),
-      var(--gradient-primary-hover-end)
-    );
-    box-shadow: var(--shadow-button-hover);
+    background-color: var(--bg-brand);
+    color: var(--text-on-accent);
+    border-color: transparent;
+  }
+
+  :root[data-theme='light'] .wpcf7-form input[type='submit']:hover {
+    background-color: var(--bg-brand-hover);
+    color: var(--text-on-accent);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme='dark']) .wpcf7-form input[type='submit']:hover {
+      background-color: var(--bg-brand-hover);
+      color: var(--text-on-accent);
+    }
   }
 
   .wpcf7-form input[type='submit']:active {
-    background: linear-gradient(
-      to bottom,
-      var(--gradient-primary-active-start),
-      var(--gradient-primary-active-end)
-    );
-    box-shadow: var(--shadow-inner);
-    transform: scale(0.98);
+    background-color: var(--bg-brand-active);
+    color: var(--text-on-accent);
+    border-color: transparent;
+    transform: scale(0.97);
   }
 
   .wpcf7-form input[type='submit']:focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-focus-ring);
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
   }
 
   /* --- Submitting State --- */
@@ -1727,14 +1773,15 @@ html {
 
   .wpcf7-form .wpcf7-not-valid:focus {
     border-color: var(--border-error) !important;
-    box-shadow: var(--shadow-focus-ring-error) !important;
+    outline: 3px solid var(--color-error) !important;
+    outline-offset: 2px;
   }
 
   /* --- Quiz Field --- */
   .wpcf7-form .wpcf7-quiz-label {
     display: block;
     font-size: var(--typography-body-small-size);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--text-primary);
     margin-bottom: 0.375rem;
   }
@@ -1761,79 +1808,61 @@ html {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-weight: 400;
+    letter-spacing: -0.02em;
     text-decoration: none;
     cursor: pointer;
     transition:
-      color var(--motion-enter-duration) var(--motion-enter-ease),
-      border-color var(--motion-enter-duration) var(--motion-enter-ease),
-      box-shadow var(--motion-enter-duration) var(--motion-enter-ease),
-      transform var(--motion-enter-duration) var(--motion-enter-ease);
+      background-color 200ms ease-out,
+      border-color 200ms ease-out,
+      color 200ms ease-out,
+      transform 200ms ease-out;
   }
 
-  /* button-primary uses an ::after cross-fade for the hover gradient so that only
-     opacity is animated (GPU-composited) instead of repainting background each frame. */
+  /* Hairline pill at rest (rafaelalex.de design system, section 5): brand
+     tint fill, brand-colour border and text, no shadow. Fills solid on
+     hover/focus, no gradient layer. */
   .prose a.button-primary,
   .button-primary {
-    position: relative;
-    /* Own stacking context, so the hover layer can sit at z-index -1: above
-       this element's own background, below its text. */
-    isolation: isolate;
-    overflow: hidden;
-    background: linear-gradient(
-      to bottom,
-      var(--gradient-primary-start),
-      var(--gradient-primary-end)
-    );
-    color: var(--color-content-inverse);
-    border: 1px solid var(--color-line);
-    box-shadow: var(--shadow-button);
-  }
-
-  /* Hover gradient layer — fades in via opacity, no background repaint */
-  .prose a.button-primary::after,
-  .button-primary::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      var(--gradient-primary-hover-start),
-      var(--gradient-primary-hover-end)
-    );
-    opacity: 0;
-    transition: opacity var(--motion-enter-duration) var(--motion-enter-ease);
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  .prose a.button-primary:hover::after,
-  .button-primary:hover::after {
-    opacity: 1;
+    background-color: var(--bg-brand-tint);
+    color: var(--color-content-brand);
+    border: 1px solid var(--color-line-brand);
   }
 
   .prose a.button-primary:hover,
-  .button-primary:hover {
-    box-shadow: var(--shadow-button-hover);
-    color: var(--color-content-inverse);
+  .prose a.button-primary:focus-visible,
+  .button-primary:hover,
+  .button-primary:focus-visible {
+    background-color: var(--bg-brand);
+    color: var(--text-on-accent);
+    border-color: transparent;
     text-decoration: none;
+  }
+
+  :root[data-theme='light'] .prose a.button-primary:hover,
+  :root[data-theme='light'] .prose a.button-primary:focus-visible,
+  :root[data-theme='light'] .button-primary:hover,
+  :root[data-theme='light'] .button-primary:focus-visible {
+    background-color: var(--bg-brand-hover);
+    color: var(--text-on-accent);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme='dark']) .prose a.button-primary:hover,
+    :root:not([data-theme='dark']) .prose a.button-primary:focus-visible,
+    :root:not([data-theme='dark']) .button-primary:hover,
+    :root:not([data-theme='dark']) .button-primary:focus-visible {
+      background-color: var(--bg-brand-hover);
+      color: var(--text-on-accent);
+    }
   }
 
   .prose a.button-primary:active,
   .button-primary:active {
-    background: linear-gradient(
-      to bottom,
-      var(--gradient-primary-active-start),
-      var(--gradient-primary-active-end)
-    );
-    box-shadow: var(--shadow-inner);
-    transform: scale(0.98);
-  }
-
-  /* Hide hover layer when active so the active gradient shows through */
-  .prose a.button-primary:active::after,
-  .button-primary:active::after {
-    opacity: 0;
+    background-color: var(--bg-brand-active);
+    color: var(--text-on-accent);
+    border-color: transparent;
+    transform: scale(0.97);
   }
 
   .prose a.button-secondary,
@@ -2028,7 +2057,7 @@ html {
     display: block;
     padding: 0.5rem 0;
     color: var(--text-secondary);
-    font-weight: 500;
+    font-weight: 400;
     transition: color var(--motion-enter-duration) var(--motion-enter-ease);
   }
 
@@ -2066,6 +2095,14 @@ html {
     transform: rotate(45deg);
     position: relative;
     top: -2px;
+    transition: transform var(--motion-enter-duration) var(--motion-enter-ease);
+  }
+
+  /* Arrow points down while the submenu is open, matching the mobile
+     chevron's rotate-on-expand behaviour. */
+  .desktop-nav .menu-item-has-children:hover > a::after,
+  .desktop-nav .menu-item-has-children:focus-within > a::after {
+    transform: rotate(225deg);
   }
 
   /* Submenu container */
@@ -2092,8 +2129,9 @@ html {
     z-index: 50;
   }
 
-  /* Show submenu on hover */
-  .desktop-nav .menu-item-has-children:hover > .sub-menu {
+  /* Show submenu on hover, and on focus-within for keyboard users */
+  .desktop-nav .menu-item-has-children:hover > .sub-menu,
+  .desktop-nav .menu-item-has-children:focus-within > .sub-menu {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
@@ -2172,7 +2210,7 @@ html {
   display: block;
   padding-right: 3rem;
   color: var(--text-secondary);
-  font-weight: 500;
+  font-weight: 400;
   transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
@@ -2265,6 +2303,9 @@ html {
 
 /* Footer nav link styles */
 .footer-nav a {
+  display: inline-block;
+  /* WCAG 2.5.8 24px target-size floor; matches .desktop-nav > ul > li > a. */
+  padding: 0.5rem 0;
   color: var(--text-secondary);
   transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
@@ -2289,6 +2330,9 @@ html {
 
 /* Legal nav link styles */
 .legal-nav a {
+  display: inline-block;
+  /* WCAG 2.5.8 24px target-size floor; matches .desktop-nav > ul > li > a. */
+  padding: 0.5rem 0;
   color: var(--text-secondary);
   transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
@@ -2581,7 +2625,7 @@ html {
   background-color: var(--bg-error-strong);
   color: var(--text-inverse);
   font-size: 0.75em;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1;
 }
 
@@ -2767,24 +2811,17 @@ html {
 
 /* Fuellung des primaeren Knopfes.
 
-   Flache Farbe statt Verlauf: nur background-color laesst sich animieren,
-   background-image nicht. Der Lichtschimmer bleibt als duenner Verlauf oben
-   liegen und aendert sich nie, so bleibt der Wechsel weich.
-
-   Die Farbstufen sind die alten Verlaufsanfaenge, das Aussehen bleibt also
-   gleich. --button-fill* ueberschreibt sie dort, wo die Tokenkette den
-   Textkontrast reissen wuerde. */
-.button--primary {
-  background-color: var(--button-fill, var(--gradient-primary-start));
-  background-image: linear-gradient(to bottom, var(--button-gloss), transparent 55%);
-}
-
+   Hairline pill statt Verlauf (rafaelalex.de Designsystem, Abschnitt 5): die
+   Flaeche bleibt in Ruhe transparent (siehe die Tailwind-Klassen in
+   button.blade.php), erst Hover/Fokus/Aktiv fuellen. --button-fill*
+   ueberschreibt die Stufe dort, wo die Tokenkette den Textkontrast reissen
+   wuerde. */
 .button--primary:hover {
-  background-color: var(--button-fill-hover, var(--gradient-primary-hover-start));
+  background-color: var(--button-fill-hover, var(--bg-brand));
 }
 
 .button--primary:active {
-  background-color: var(--button-fill-active, var(--gradient-primary-active-start));
+  background-color: var(--button-fill-active, var(--bg-brand-active));
 }
 
 .button::after {
@@ -2838,18 +2875,20 @@ html {
    aller Zustaende braucht aber alle vier nebeneinander. Diese Regeln greifen auf
    dieselben Tokens zu wie die Komponente, kopieren also keine Farbwerte. */
 .zeige-hover .button--primary {
-  background-color: var(--button-fill-hover, var(--gradient-primary-hover-start));
-  box-shadow: var(--shadow-button-hover);
+  background-color: var(--bg-brand);
+  border-color: transparent;
+  color: var(--text-on-accent);
 }
 
 .zeige-hover .button--secondary {
-  background-color: var(--bg-tertiary);
+  background-color: var(--bg-secondary);
   border-color: var(--border-strong);
 }
 
-/* Dezent wechselt nur die Flaeche, keinen Rand. */
+/* Ghost underlines its label on hover, the surface stays untouched. */
 .zeige-hover .button--ghost {
-  background-color: var(--bg-secondary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .zeige-hover .button--danger {
@@ -2857,36 +2896,32 @@ html {
 }
 
 .zeige-hover .button--inverse {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-brand-subtle);
 }
 
 .zeige-fokus .button {
-  box-shadow: var(--shadow-focus-ring);
+  outline: 3px solid var(--ring-focus);
+  outline-offset: 2px;
 }
 
 .zeige-aktiv .button {
-  scale: 0.98;
+  scale: 0.97;
 }
 
-/* Den Innenschatten setzt die Komponente nur auf den gefuellten Varianten.
-   Dezent bekommt ihn nicht, sonst zeichnet der Aktiv-Zustand einen Rand, den
-   Ruhe und Hover nicht haben. */
-.zeige-aktiv :is(.button--primary, .button--secondary, .button--danger, .button--inverse) {
-  box-shadow: var(--shadow-inner);
-}
-
-.zeige-aktiv :is(.button--secondary, .button--ghost) {
+.zeige-aktiv :is(.button--secondary) {
   background-color: var(--bg-tertiary);
 }
 
-.zeige-aktiv .button--primary {
-  background-color: var(--button-fill-active, var(--gradient-primary-active-start));
+.zeige-aktiv .button--ghost {
+  opacity: 0.8;
 }
 
-/* Glanz des primaeren Knopfes.
+.zeige-aktiv .button--inverse {
+  background-color: var(--bg-brand-subtle);
+}
 
-   Heller Text auf der Marke: der Glanz muss abdunkeln, sonst
-   verliert die obere Kante Kontrast (gemessen 5.23 auf 3.90 mit hellem Glanz). */
-:root {
-  --button-gloss: rgb(0 0 0 / 0.1);
+.zeige-aktiv .button--primary {
+  background-color: var(--bg-brand-active);
+  border-color: transparent;
+  color: var(--text-on-accent);
 }

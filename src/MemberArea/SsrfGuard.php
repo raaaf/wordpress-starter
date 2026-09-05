@@ -25,10 +25,16 @@ use RuntimeException;
  * attacker-supplied from the outside: it comes from `download_sftp_host` post
  * meta on a download entry (FileHandler::129, FolderSync::155), so exploiting
  * this needs editor capability already — it is an escalation from editor to
- * internal-network access, not an anonymous request. Second, pinning the
- * connection to the validated IP would break SFTP host-key verification and
- * virtual-hosted endpoints, so the fix would weaken one security check to close
- * another. Tracked as issue #9; revisit if either fact changes.
+ * internal-network access, not an anonymous request. Second, the endpoints
+ * involved are virtual-hosted, so pinning the connection to the IP validated
+ * here is not a simple substitution. Host-key pinning now exists: SftpClient::
+ * connect() pins each server's host key on first connection, trust-on-first-use,
+ * keyed by host:port, and verifies it against the stored value before the
+ * password is sent on every later connection. That does not close the gap
+ * above, since the pin is bound to host:port rather than to the IP validated
+ * here: a low-TTL DNS rebind still reaches SftpClient::connect() with a
+ * different IP than this check saw, and host-key pinning does not catch that.
+ * Tracked as issue #9; revisit if either bounding fact changes.
  */
 final class SsrfGuard
 {
@@ -42,8 +48,8 @@ final class SsrfGuard
      * Assert that a bare hostname/IP is not in a blocked range.
      *
      * After checking the literal value, if the host is not already an IP address
-     * the method resolves it via gethostbyname() and validates the resolved IP
-     * against the blocked ranges too.
+     * the method resolves both its A and AAAA records and validates every
+     * resolved IP against the blocked ranges too.
      *
      * @throws RuntimeException if the host is blocked.
      */
@@ -56,8 +62,8 @@ final class SsrfGuard
     /**
      * Assert that a URL uses an allowed protocol and that its host is safe.
      *
-     * If the URL host is not already an IP, the method resolves it and validates
-     * the resolved IP too. Unresolvable hosts are blocked.
+     * If the URL host is not already an IP, the method resolves its A and AAAA
+     * records and validates every resolved IP too. Unresolvable hosts are blocked.
      *
      * @throws InvalidArgumentException on invalid URL / disallowed protocol.
      * @throws RuntimeException if the host is blocked or unresolvable.
@@ -77,23 +83,64 @@ final class SsrfGuard
     }
 
     /**
-     * If the host is not already an IP address, resolve it via gethostbyname()
-     * and validate the resolved IP against the blocked ranges too. Shared by
-     * assertSafeHost() and assertSafeUrl() so a future SSRF fix only needs to
-     * land in one place.
+     * If the host is not already an IP address, resolve its A and AAAA records
+     * and validate every resolved IP against the blocked ranges too. Checking
+     * only the A record would let a host with a public A record and an AAAA
+     * record pointing at a private/reserved address (e.g. ::1) pass while the
+     * connection may prefer IPv6. Shared by assertSafeHost() and assertSafeUrl()
+     * so a future SSRF fix only needs to land in one place.
      *
-     * @throws RuntimeException if the host cannot be resolved or the resolved IP is blocked.
+     * @throws RuntimeException if the host cannot be resolved or any resolved IP is blocked.
      */
     private static function assertResolvedHostNotBlocked(string $host, string $unresolvableMessage): void
     {
         if (filter_var($host, FILTER_VALIDATE_IP) === false) {
-            $resolved = gethostbyname($host);
-            // gethostbyname() returns the original string on failure — treat as blocked.
-            if ($resolved === $host) {
+            $addresses = self::resolveHost($host);
+
+            if ($addresses === []) {
                 throw new RuntimeException($unresolvableMessage . $host); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
             }
-            self::assertHostNotBlocked($resolved);
+
+            foreach ($addresses as $address) {
+                self::assertHostNotBlocked($address);
+            }
         }
+    }
+
+    /**
+     * Resolve a hostname to all of its A and AAAA addresses.
+     *
+     * Uses dns_get_record() with DNS_A | DNS_AAAA so an IPv6-only or dual-stack
+     * rebind cannot slip past a check that only ever looked at the A record.
+     * Falls back to gethostbyname() (A records only) if dns_get_record() fails
+     * or returns nothing, so hosts on a DNS setup where only the legacy lookup
+     * works still resolve.
+     *
+     * @return string[] resolved IP addresses, empty if the host could not be resolved.
+     */
+    private static function resolveHost(string $host): array
+    {
+        $records = dns_get_record($host, DNS_A | DNS_AAAA);
+
+        if (is_array($records) && $records !== []) {
+            $addresses = [];
+            foreach ($records as $record) {
+                if (isset($record['ip'])) {
+                    $addresses[] = $record['ip'];
+                } elseif (isset($record['ipv6'])) {
+                    $addresses[] = $record['ipv6'];
+                }
+            }
+
+            if ($addresses !== []) {
+                return $addresses;
+            }
+        }
+
+        $resolved = gethostbyname($host);
+
+        // gethostbyname() returns the original string on failure.
+        return $resolved === $host ? [] : [$resolved];
     }
 
     /**

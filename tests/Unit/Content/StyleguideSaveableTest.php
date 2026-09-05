@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Content;
 
-use ReflectionMethod;
 use Tests\Support\TestCase;
 use WordpressStarter\Acf\FlexibleContent;
 use WordpressStarter\Content\StyleguideLayoutData;
@@ -90,11 +89,8 @@ final class StyleguideSaveableTest extends TestCase
      */
     private function blockierendeRepeater(): array
     {
-        $method = new ReflectionMethod(FlexibleContent::class, 'getLayouts');
-        $method->setAccessible(true);
-
         /** @var array<int, array<string, mixed>> $layouts */
-        $layouts = $method->invoke(null);
+        $layouts = $this->invokeStaticMethod(FlexibleContent::class, 'getLayouts');
 
         $result = [];
         foreach ($layouts as $layout) {
@@ -108,7 +104,7 @@ final class StyleguideSaveableTest extends TestCase
                     continue;
                 }
 
-                if ((int) ( $feld['min'] ?? 0 ) < 1) {
+                if ( (int) ( $feld['min'] ?? 0 ) < 1) {
                     continue;
                 }
 
@@ -125,7 +121,7 @@ final class StyleguideSaveableTest extends TestCase
                 }
 
                 if ($pflicht !== []) {
-                    $result[$name][(string) ( $feld['name'] ?? '' )] = $pflicht;
+                    $result[$name][ (string) ( $feld['name'] ?? '' )] = $pflicht;
                 }
             }
         }

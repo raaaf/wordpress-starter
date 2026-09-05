@@ -58,12 +58,36 @@ Recommended plugins (auto-install via `composer install`):
 
 | Requirement         | Version              |
 | ------------------- | -------------------- |
-| PHP                 | 8.3+                 |
+| PHP                 | 8.2+                 |
 | MySQL               | 5.7+ / MariaDB 10.3+ |
 | WordPress           | 6.8+                 |
 | Memory Limit        | 256M                 |
 | Max Execution Time  | 60s                  |
 | Upload Max Filesize | 64M                  |
+
+Production runs on PHP 8.2+. The dev test toolchain (PHPUnit) requires PHP
+8.4+ locally and in CI; it is a `require-dev` dependency, so it is not
+installed on a `composer install --no-dev` production build and does not
+raise the server's PHP requirement. Package the deploy/build step with
+`composer install --no-dev --no-scripts` (or `--optimize-autoloader` as
+below) on PHP >= 8.2.
+
+### PHP-Versionen
+
+Die Dev-Toolchain (PHPUnit, php-cs-fixer) läuft auf PHP 8.4, die Produktion
+auf PHP 8.2.31. Die Unit-Test-Suite läuft nur auf 8.4, deckt PHP-8.2-Verhalten
+also nicht ab. Wächter dafür ist der CI-Job `php-compat-82`
+(`.github/workflows/ci.yml`): er installiert die Produktions-Dependencies auf
+PHP 8.2, prüft Syntax und läuft PHPCompatibility gegen `src/`, `config/`,
+`functions.php` und `index.php`. Diese Aufteilung ist eine akzeptierte
+Entscheidung (2026-09-05), kein offener Punkt.
+
+`theme.json` bleibt Teil des Themes, obwohl die globalen Styles ausgehängt
+sind (Gutenberg ist deaktiviert): WordPress liest die Datei weiterhin für
+Editor-Einstellungen, ein Entfernen würde nichts gewinnen.
+
+`npm audit`-Hinweise betreffen ausschließlich Dev-/Release-Tooling und werden
+bei jedem Dependency-Durchgang geprüft.
 
 ### Recommended PHP Extensions
 
@@ -93,7 +117,7 @@ max_input_vars = 3000
 
 ```bash
 cd /path/to/wp-content/themes
-git clone https://github.com/raaaf/starter.git starter
+git clone https://github.com/raaaf/wordpress-starter.git starter
 cd starter
 ```
 
@@ -400,6 +424,6 @@ ersetzt sie vollstaendig und ist der vorgesehene Weg.
 
 For issues, check:
 
-1. [GitHub Issues](https://github.com/raaaf/starter/issues)
+1. [GitHub Issues](https://github.com/raaaf/wordpress-starter/issues)
 2. WordPress Debug Log
 3. Server error logs

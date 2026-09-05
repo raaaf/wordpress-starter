@@ -24,7 +24,7 @@
                 <x-card :variant="$cardStyle" padding="lg" class="h-full">
                     {{-- Icon --}}
                     @if(!empty($card['icon']))
-                        <div class="flex items-center justify-center w-16 h-16 mb-6 rounded-lg bg-surface-brand-subtle text-content-brand">
+                        <div class="flex items-center justify-center w-16 h-16 mb-6 rounded-lg bg-[var(--bg-brand-tint)] border border-line-brand text-content-brand [&_svg]:text-content-brand">
                             <x-icon :name="$card['icon']" size="xl" />
                         </div>
                     @endif
@@ -57,7 +57,7 @@
             @endforeach
         </x-grid>
     @elseif(current_user_can('edit_posts'))
-        <div class="p-8 text-center rounded-lg bg-surface-secondary">
+        <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge mindestens eine Karte hinzu.', 'wp-starter') }}</p>
         </div>
     @endif

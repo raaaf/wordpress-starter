@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\PostTypes;
 
+use WordpressStarter\Providers\LogServiceProvider;
+
 /**
  * Abstract base class for Custom Post Types
  *
@@ -86,6 +88,18 @@ abstract class AbstractPostType
      * @var array<string>
      */
     protected static array $taxonomies = [];
+
+    /**
+     * When set, this post type's edit, delete, publish, create, and
+     * read-private-posts capability checks (including their "others'"
+     * and "published" variants) map to this single WordPress capability
+     * instead of the default post capability_type. Ordinary "read" of a
+     * published post stays unaffected, and there is no "list" meta cap
+     * in WordPress. Use this when the post type holds data more
+     * sensitive than an ordinary post (e.g. stored credentials), so
+     * Contributors/Authors with plain edit_posts cannot touch it.
+     */
+    protected static ?string $requiredCapability = null;
 
     /**
      * Register the custom post type
@@ -203,6 +217,24 @@ abstract class AbstractPostType
             'taxonomies' => static::$taxonomies,
         ];
 
+        if (static::$requiredCapability !== null) {
+            $cap = static::$requiredCapability;
+            $args['map_meta_cap'] = true;
+            $args['capabilities'] = [
+                'edit_posts' => $cap,
+                'edit_others_posts' => $cap,
+                'publish_posts' => $cap,
+                'read_private_posts' => $cap,
+                'delete_posts' => $cap,
+                'delete_private_posts' => $cap,
+                'delete_published_posts' => $cap,
+                'delete_others_posts' => $cap,
+                'edit_private_posts' => $cap,
+                'edit_published_posts' => $cap,
+                'create_posts' => $cap,
+            ];
+        }
+
         // Set rewrite rules
         if (static::$rewrite !== false) {
             $args['rewrite'] = array_merge(
@@ -224,6 +256,129 @@ abstract class AbstractPostType
     public static function registerFields(): void
     {
         // Override in child class
+    }
+
+    /**
+     * Declarative admin list-table columns for this post type.
+     *
+     * Override in child classes. Each entry:
+     *   'label'    => string column header
+     *   'render'   => callable(int $postId): void
+     *   'sortable' => string|null meta key to sort by (null/omitted = not sortable)
+     *   'sort_type' => 'meta_value'|'meta_value_num' (default 'meta_value')
+     *   'width'    => int|null column width in px (null/omitted = no forced width)
+     *   'before'   => string|null existing column key to insert this column before
+     *   'after'    => string|null existing column key to insert this column after
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    protected static function adminColumns(): array
+    {
+        return [];
+    }
+
+    /**
+     * Wire the four admin-column hooks (columns, render, sortable, width)
+     * from the declarative adminColumns() definition.
+     */
+    protected static function registerAdminColumns(): void
+    {
+        $definitions = static::adminColumns();
+        if ($definitions === []) {
+            return;
+        }
+
+        add_filter('manage_' . static::$postType . '_posts_columns', function (array $columns) use ($definitions): array {
+            $newColumns = [];
+            foreach ($columns as $key => $value) {
+                foreach ($definitions as $columnKey => $definition) {
+                    if (( $definition['before'] ?? null ) === $key) {
+                        $newColumns[$columnKey] = $definition['label'];
+                    }
+                }
+                $newColumns[$key] = $value;
+                foreach ($definitions as $columnKey => $definition) {
+                    if (( $definition['after'] ?? null ) === $key) {
+                        $newColumns[$columnKey] = $definition['label'];
+                    }
+                }
+            }
+
+            // A 'before'/'after' anchor that names a column key which never
+            // appears in $columns would otherwise silently drop the column.
+            // Append it at the end instead, so it always renders.
+            foreach ($definitions as $columnKey => $definition) {
+                if (isset($newColumns[$columnKey])) {
+                    continue;
+                }
+
+                $newColumns[$columnKey] = $definition['label'];
+
+                LogServiceProvider::warning('Admin column anchor not found, appended at the end', [
+                    'post_type' => static::$postType,
+                    'column' => $columnKey,
+                    'anchor' => $definition['before'] ?? $definition['after'] ?? null,
+                ]);
+            }
+
+            return $newColumns;
+        });
+
+        add_action('manage_' . static::$postType . '_posts_custom_column', function (string $column, int $postId) use ($definitions): void {
+            if (isset($definitions[$column]['render'])) {
+                ( $definitions[$column]['render'] )($postId);
+            }
+        }, 10, 2);
+
+        add_filter('manage_edit-' . static::$postType . '_sortable_columns', function (array $columns) use ($definitions): array {
+            foreach ($definitions as $columnKey => $definition) {
+                if (!empty($definition['sortable'])) {
+                    $columns[$columnKey] = $columnKey;
+                }
+            }
+
+            return $columns;
+        });
+
+        add_action('pre_get_posts', function (\WP_Query $query) use ($definitions): void {
+            if (!is_admin() || !$query->is_main_query()) {
+                return;
+            }
+            if ($query->get('post_type') !== static::$postType) {
+                return;
+            }
+
+            $orderby = $query->get('orderby');
+            foreach ($definitions as $columnKey => $definition) {
+                if (!empty($definition['sortable']) && $orderby === $columnKey) {
+                    $query->set('meta_key', $definition['sortable']); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+                    $query->set('orderby', $definition['sort_type'] ?? 'meta_value');
+                }
+            }
+        });
+
+        $widths = [];
+        foreach ($definitions as $columnKey => $definition) {
+            if (!empty($definition['width'])) {
+                $widths[$columnKey] = $definition['width'];
+            }
+        }
+
+        if ($widths !== []) {
+            add_action('admin_head', function () use ($widths): void {
+                $screen = get_current_screen();
+                if (!$screen || $screen->post_type !== static::$postType) {
+                    return;
+                }
+
+                $css = '';
+                foreach ($widths as $columnKey => $width) {
+                    $css .= '.column-' . $columnKey . ' { width: ' . $width . 'px; } ';
+                }
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static column keys/widths, not user input
+                echo '<style>' . trim($css) . '</style>';
+            });
+        }
     }
 
     /**

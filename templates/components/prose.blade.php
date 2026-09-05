@@ -4,6 +4,10 @@
     @param string $size - sm, base, lg (default: lg)
     @param string $class - Additional CSS classes
     @param bool $inherit - Inherit text color from parent (default: false)
+
+    The slot is rendered unescaped (raw HTML). Callers must pass content that
+    is already sanitised, e.g. via @kses(...) or wp_kses_post() upstream --
+    this component does not sanitise it itself.
 --}}
 
 @props([
@@ -24,6 +28,6 @@
     $inheritClass = $inherit ? 'prose-inherit-colors' : '';
 @endphp
 
-<div class="prose {{ $sizeClass }} max-w-none {{ $inheritClass }} {{ $class }}">
+<div {{ $attributes->merge(['class' => "prose {$sizeClass} max-w-none {$inheritClass} {$class}"]) }}>
     {{ $slot }}
 </div>
