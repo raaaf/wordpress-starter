@@ -2,7 +2,41 @@
 
 // Ensure functions are loaded so that getBladeViewFactory() exists
 if (!function_exists('getBladeViewFactory')) {
-    require_once get_stylesheet_directory() . '/config/functions.php';
+    require_once get_template_directory() . '/config/functions.php';
+}
+
+// Resolve a real PHP fallback template for $templateName, excluding this
+// file's own gateway (get_template_directory() . '/index.php') so a missing
+// Blade view can never fall back onto itself and produce a silent HTTP 200.
+if (!function_exists('wpStarterResolveFallbackTemplate')) {
+    function wpStarterResolveFallbackTemplate(string $templateName): ?string
+    {
+        $fallbackTemplate = locate_template($templateName . '.php', false);
+        if (empty($fallbackTemplate)) {
+            $fallbackTemplate = locate_template('index.php', false);
+        }
+
+        if (empty($fallbackTemplate) || realpath($fallbackTemplate) === realpath(get_template_directory() . '/index.php')) {
+            return null;
+        }
+
+        return $fallbackTemplate;
+    }
+}
+
+// Send a 500 response when no usable fallback template exists, so a missing
+// Blade view never falls through to a blank HTTP 200 body.
+if (!function_exists('wpStarterSendRenderFailure')) {
+    function wpStarterSendRenderFailure(?Throwable $e = null): void
+    {
+        status_header(500);
+        nocache_headers();
+        $message = 'Diese Seite kann gerade nicht angezeigt werden.';
+        if ($e && defined('WP_DEBUG') && WP_DEBUG && defined('WP_DEBUG_DISPLAY') && WP_DEBUG_DISPLAY) {
+            $message .= ' (' . $e->getMessage() . ')';
+        }
+        echo '<p>' . esc_html($message) . '</p>';
+    }
 }
 
 // Determine the template to load – fallback to 'index' if not defined
@@ -27,17 +61,28 @@ try {
 } catch (Throwable $e) {
     // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Intentional error logging for debugging
     error_log('Blade rendering error: ' . $e->getMessage());
+
+    $fallbackTemplate = wpStarterResolveFallbackTemplate($templateName);
+    if ($fallbackTemplate) {
+        require $fallbackTemplate;
+
+        return;
+    }
+
+    // No PHP fallback template exists either (this file is the gateway itself),
+    // so falling through would just return HTTP 200 with an empty body.
+    wpStarterSendRenderFailure($e);
+
+    return;
 }
 
 // Fallback: try to load a PHP template
-$fallbackTemplate = locate_template($templateName . '.php', false);
-if (empty($fallbackTemplate)) {
-    $fallbackTemplate = locate_template('index.php', false);
-}
+$fallbackTemplate = wpStarterResolveFallbackTemplate($templateName);
 
-if (!empty($fallbackTemplate)) {
+if ($fallbackTemplate) {
     require $fallbackTemplate;
 } else {
-    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-    echo '<p>No template found for: ' . esc_html($templateName) . '</p>';
+    // No PHP fallback template exists either (this file is the gateway itself),
+    // so falling through would just return HTTP 200 with an empty body.
+    wpStarterSendRenderFailure();
 }

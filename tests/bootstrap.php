@@ -9,35 +9,11 @@ declare(strict_types=1);
  * It sets up WordPress constants and mock functions.
  */
 
-// Define our own env() function BEFORE loading the autoloader
-// This prevents Laravel's illuminate/support from overriding it
-if (!function_exists('env')) {
-    function env(string $key, mixed $default = null): mixed
-    {
-        $value = $_ENV[$key] ?? getenv($key);
-
-        if ($value === false) {
-            return $default;
-        }
-
-        switch (strtolower($value)) {
-            case 'true':
-            case '(true)':
-                return true;
-            case 'false':
-            case '(false)':
-                return false;
-            case 'empty':
-            case '(empty)':
-                return '';
-            case 'null':
-            case '(null)':
-                return null;
-        }
-
-        return $value;
-    }
-}
+// Load env() from src/helpers.php BEFORE the autoloader, so Laravel's
+// illuminate/support never gets a chance to define its own env(). helpers.php
+// only declares function_exists()-guarded functions at the top level, so it
+// loads cleanly without a WordPress runtime.
+require_once __DIR__ . '/../src/helpers.php';
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -64,6 +40,7 @@ $GLOBALS['wp_mock_options'] = [];
 $GLOBALS['wp_mock_cache'] = [];
 $GLOBALS['wp_mock_hooks'] = ['actions' => [], 'filters' => []];
 $GLOBALS['wp_mock_enqueued'] = ['scripts' => [], 'styles' => []];
+$GLOBALS['wp_mock_have_rows_cursor'] = [];
 
 // WordPress path functions
 if (!function_exists('get_template')) {
@@ -164,24 +141,83 @@ if (!function_exists('get_body_class')) {
 }
 
 // WordPress escaping functions
+if (!function_exists('wp_kses_test_double_check_scheme')) {
+    /**
+     * Shared allowed-scheme check for esc_url()/esc_url_raw() and the
+     * href/src/action filtering inside wp_kses(). Not core's implementation,
+     * only the decision whether a URL's scheme is allowed: http, https,
+     * mailto, tel, ftp, or no scheme at all (relative/anchor/query URL).
+     */
+    function wp_kses_test_double_check_scheme(string $url): bool
+    {
+        // Strip control characters and whitespace, and decode HTML entities,
+        // BEFORE reading the scheme: otherwise "java\tscript:" or
+        // "&#106;avascript:" pass as if they had no scheme. Repeat until the
+        // value stops changing (capped at 3 rounds) so a nested encoding like
+        // "jav&#x0A;ascript:" (control char inside an entity) cannot survive
+        // a single decode+strip pass.
+        $url = trim($url);
+
+        for ($i = 0; $i < 3; $i++) {
+            $previous = $url;
+            $url = preg_replace('/[\x00-\x20\x7f]/', '', $url) ?? $url;
+            $url = html_entity_decode($url, ENT_QUOTES, 'UTF-8');
+
+            if ($url === $previous) {
+                break;
+            }
+        }
+
+        if ($url === '' || $url[0] === '#' || $url[0] === '/' || $url[0] === '?') {
+            return true;
+        }
+
+        if (!preg_match('/^([a-zA-Z][a-zA-Z0-9+.\-]*):/', $url, $matches)) {
+            return true;
+        }
+
+        return in_array(strtolower($matches[1]), ['http', 'https', 'mailto', 'tel', 'ftp'], true);
+    }
+}
+
 if (!function_exists('esc_url')) {
     function esc_url(?string $url): string
     {
-        return htmlspecialchars($url ?? '', ENT_QUOTES, 'UTF-8');
+        $url = $url ?? '';
+
+        if (!wp_kses_test_double_check_scheme($url)) {
+            return '';
+        }
+
+        $url = preg_replace('/[\x00-\x1F\x7F\s]/', '', $url);
+
+        // Core treats a schemeless, non-relative value as a bare host and
+        // prepends http://, unless it looks like a local .php path.
+        if (
+            $url !== ''
+            && !str_contains($url, ':')
+            && !in_array($url[0], ['/', '#', '?'], true)
+            && !preg_match('/^[a-z0-9-]+?\.php/i', $url)
+        ) {
+            $url = 'http://' . $url;
+        }
+
+        // Core encodes & as the numeric entity &#038;, not &amp;.
+        return str_replace('&amp;', '&#038;', htmlspecialchars($url, ENT_QUOTES, 'UTF-8'));
     }
 }
 
 if (!function_exists('esc_html')) {
-    function esc_html(string $text): string
+    function esc_html(?string $text): string
     {
-        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8');
     }
 }
 
 if (!function_exists('esc_attr')) {
-    function esc_attr(string $text): string
+    function esc_attr(?string $text): string
     {
-        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8');
     }
 }
 
@@ -394,23 +430,22 @@ if (!function_exists('get_sub_field')) {
 if (!function_exists('have_rows')) {
     function have_rows(string $field, mixed $postId = false): bool
     {
-        static $index = [];
         $key = "{$field}:{$postId}";
 
-        if (!isset($index[$key])) {
-            $index[$key] = 0;
+        if (!isset($GLOBALS['wp_mock_have_rows_cursor'][$key])) {
+            $GLOBALS['wp_mock_have_rows_cursor'][$key] = 0;
         }
 
         $rows = $GLOBALS['wp_mock_repeater_rows'][$field] ?? [];
 
-        if ($index[$key] < count($rows)) {
-            $GLOBALS['wp_mock_current_row'] = $rows[$index[$key]];
-            ++$index[$key];
+        if ($GLOBALS['wp_mock_have_rows_cursor'][$key] < count($rows)) {
+            $GLOBALS['wp_mock_current_row'] = $rows[$GLOBALS['wp_mock_have_rows_cursor'][$key]];
+            ++$GLOBALS['wp_mock_have_rows_cursor'][$key];
 
             return true;
         }
 
-        $index[$key] = 0;
+        $GLOBALS['wp_mock_have_rows_cursor'][$key] = 0;
 
         return false;
     }
@@ -555,8 +590,32 @@ if (!function_exists('wp_add_inline_script')) {
 }
 
 // Sanitization functions
+if (!function_exists('wp_kses_test_double_safecss')) {
+    /**
+     * Minimal safecss test double for the `style` attribute: rejects values
+     * that carry a known script-execution vector (url(), expression(),
+     * javascript:, a backslash escape, or a stray angle bracket). Not a full
+     * CSS parser or property allowlist.
+     */
+    function wp_kses_test_double_safecss(string $value): string
+    {
+        if (str_contains($value, '\\') || preg_match('/url\s*\(|expression\s*\(|javascript:|</i', $value)) {
+            return '';
+        }
+
+        return $value;
+    }
+}
+
 if (!function_exists('wp_kses')) {
     /**
+     * Test-double, not a full port of core's wp_kses: it works with a regex
+     * pass over tags/attributes instead of core's HTML parser, but it does
+     * enforce what security assertions rely on: a per-tag allowlist, per-tag
+     * attribute allowlists (including the `data-*`/`aria-*` wildcards core
+     * uses), unconditional removal of any `on*` event-handler attribute, and
+     * a scheme check on href/src/action via wp_kses_test_double_check_scheme().
+     *
      * @param array<string, array<string, mixed>> $allowedTags
      */
     function wp_kses(?string $content, array $allowedTags = []): string
@@ -565,29 +624,183 @@ if (!function_exists('wp_kses')) {
             return '';
         }
 
-        $erlaubt = array_keys($allowedTags);
+        // Core does not preserve HTML comments through kses; strip them
+        // before tag matching so nothing hides inside one.
+        $content = preg_replace('/<!--.*?-->/s', '', $content) ?? $content;
 
-        $ergebnis = $erlaubt === []
-            ? strip_tags($content)
-            : strip_tags($content, '<' . implode('><', $erlaubt) . '>');
+        $allowedTags = array_change_key_case($allowedTags, CASE_LOWER);
 
-        // Test-Double, kein vollstaendiges wp_kses: bildet nur nach, dass ein Tag mit LEERER
-        // Attribut-Allowlist keine Attribute behalten darf. Es prueft NICHT Attribut-Werte,
-        // URL-Protokolle oder Escaping - ein gruener Test hier ist kein Beweis fuer echtes wp_kses-Verhalten.
-        foreach ($allowedTags as $tag => $attributes) {
-            if ($attributes === []) {
-                $ergebnis = preg_replace('/<' . preg_quote((string) $tag, '/') . '\b[^>]*>/i', '<' . $tag . '>', $ergebnis);
-            }
-        }
+        // Built replacement tags are parked behind a placeholder and spliced
+        // back in only after stray '<' characters have been escaped, so a
+        // malformed/unmatched tag can never smuggle markup through.
+        $builtTags = [];
 
-        return $ergebnis;
+        $filtered = preg_replace_callback(
+            '/<(\/?)([a-zA-Z][a-zA-Z0-9-]*)((?:\s+(?:"[^"]*"|\'[^\']*\'|[^"\'<>])*)?)\s*(\/?)>/',
+            function (array $matches) use ($allowedTags, &$builtTags) {
+                $closing = $matches[1] === '/';
+                $tag = strtolower($matches[2]);
+                $attrString = $matches[3];
+                $selfClosing = $matches[4] === '/';
+
+                if (!array_key_exists($tag, $allowedTags)) {
+                    // Core strips a disallowed tag entirely and keeps only the
+                    // inner text (wp_kses_post('<script>alert(1)</script>')
+                    // returns 'alert(1)', not escaped tag markup) - it does
+                    // not turn it into visible entities.
+                    return '';
+                }
+
+                if ($closing) {
+                    $builtTags[] = '</' . $tag . '>';
+
+                    return "\x01" . (count($builtTags) - 1) . "\x02";
+                }
+
+                $allowedAttrs = is_array($allowedTags[$tag]) ? array_change_key_case($allowedTags[$tag], CASE_LOWER) : [];
+                $keptAttrs = '';
+
+                preg_match_all(
+                    '/([a-zA-Z_:][-\w:.]*)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'=<>`]+)))?/',
+                    $attrString,
+                    $attrMatches,
+                    PREG_SET_ORDER
+                );
+
+                foreach ($attrMatches as $attrMatch) {
+                    $name = strtolower($attrMatch[1]);
+                    $value = '';
+
+                    foreach ([2, 3, 4] as $groupIndex) {
+                        if (isset($attrMatch[$groupIndex]) && $attrMatch[$groupIndex] !== '') {
+                            $value = $attrMatch[$groupIndex];
+
+                            break;
+                        }
+                    }
+
+                    if (str_starts_with($name, 'on')) {
+                        continue;
+                    }
+
+                    $isAllowed = isset($allowedAttrs[$name])
+                        || (str_starts_with($name, 'data-') && isset($allowedAttrs['data-*']))
+                        || (str_starts_with($name, 'aria-') && isset($allowedAttrs['aria-*']));
+
+                    if (!$isAllowed) {
+                        continue;
+                    }
+
+                    if (in_array($name, ['href', 'src', 'action'], true) && !wp_kses_test_double_check_scheme($value)) {
+                        continue;
+                    }
+
+                    if ($name === 'style') {
+                        $value = wp_kses_test_double_safecss($value);
+
+                        if ($value === '') {
+                            continue;
+                        }
+                    }
+
+                    $keptAttrs .= ' ' . $name . '="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"';
+                }
+
+                $builtTags[] = '<' . $tag . $keptAttrs . ($selfClosing ? ' /' : '') . '>';
+
+                return "\x01" . (count($builtTags) - 1) . "\x02";
+            },
+            $content
+        );
+
+        $filtered = $filtered ?? $content;
+
+        // Anything still starting with '<' at this point is a stray/malformed
+        // angle bracket that never matched a full tag; escape it like core
+        // does rather than leaving it as unescaped markup.
+        $filtered = str_replace('<', '&lt;', $filtered);
+
+        $filtered = preg_replace_callback(
+            '/\x01(\d+)\x02/',
+            static fn (array $m) => $builtTags[(int) $m[1]],
+            $filtered
+        );
+
+        return $filtered ?? $content;
     }
 }
 
 if (!function_exists('wp_kses_post')) {
+    /**
+     * Test-double allowlist mirroring core's post-context kses list closely
+     * enough for tests: common inline/structural tags, `<img>`, tables. Core
+     * does not carry `<form>` in the base post allowlist either; it and its
+     * form-control tags only appear here through the `wp_kses_allowed_html`
+     * filter added by AcfServiceProvider::allowFormControlTags() for `<form
+     * action>` support in post content (see docs/CLAUDE.md "Audit Context").
+     */
     function wp_kses_post(?string $content): string
     {
-        // Simplified - just return the content in tests (core accepts null)
+        $common = [
+            'class' => true,
+            'id' => true,
+            'style' => true,
+            'title' => true,
+            'role' => true,
+            'dir' => true,
+            'lang' => true,
+            'tabindex' => true,
+            'data-*' => true,
+            'aria-*' => true,
+        ];
+
+        $tags = [
+            'p' => $common,
+            'br' => [],
+            'a' => array_merge($common, ['href' => true, 'target' => true, 'rel' => true]),
+            'strong' => $common,
+            'em' => $common,
+            'b' => $common,
+            'i' => $common,
+            'u' => $common,
+            'ul' => $common,
+            'ol' => $common,
+            'li' => $common,
+            'h1' => $common,
+            'h2' => $common,
+            'h3' => $common,
+            'h4' => $common,
+            'h5' => $common,
+            'h6' => $common,
+            'blockquote' => $common,
+            'code' => $common,
+            'pre' => $common,
+            'img' => array_merge($common, ['src' => true, 'alt' => true, 'width' => true, 'height' => true, 'srcset' => true, 'sizes' => true, 'loading' => true, 'decoding' => true]),
+            'span' => $common,
+            'div' => $common,
+            'table' => $common,
+            'thead' => $common,
+            'tbody' => $common,
+            'tr' => $common,
+            'th' => $common,
+            'td' => $common,
+        ];
+
+        $tags = apply_filters('wp_kses_allowed_html', $tags, 'post');
+
+        return wp_kses($content ?? '', $tags);
+    }
+}
+
+if (!function_exists('wp_filter_content_tags')) {
+    /**
+     * Passthrough test-double. Real core adds loading/width/height attributes
+     * to <img> tags found in content; nothing in this project's tests
+     * exercises that behaviour, they only need the function to exist so
+     * @kses-compiled views (AcfServiceProvider.php:174) can render.
+     */
+    function wp_filter_content_tags(?string $content, string $context = 'content'): string
+    {
         return $content ?? '';
     }
 }
@@ -764,7 +977,7 @@ if (!function_exists('wp_create_nonce')) {
 if (!function_exists('wp_verify_nonce')) {
     function wp_verify_nonce(string $nonce, string $action = '-1'): int|false
     {
-        return str_starts_with($nonce, 'mock_nonce_') ? 1 : false;
+        return $nonce === 'mock_nonce_' . $action ? 1 : false;
     }
 }
 
@@ -942,7 +1155,11 @@ if (!function_exists('wp_unslash')) {
 if (!function_exists('esc_url_raw')) {
     function esc_url_raw(string $url): string
     {
-        return $url;
+        if (!wp_kses_test_double_check_scheme($url)) {
+            return '';
+        }
+
+        return preg_replace('/[\x00-\x1F\x7F\s]/', '', $url);
     }
 }
 

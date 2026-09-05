@@ -18,8 +18,8 @@ final class IconShortcodeServiceProviderTest extends TestCase
         parent::setUp();
         $this->provider = new IconShortcodeServiceProvider();
 
-        $this->tempDir = sys_get_temp_dir() . '/wp-starter-icon-test-' . uniqid();
-        mkdir($this->tempDir . '/resources/icons', 0o777, true);
+        $this->tempDir = sys_get_temp_dir() . '/wp-starter-test-icon-' . bin2hex(random_bytes(4));
+        mkdir($this->tempDir . '/resources/icons', 0o700, true);
         file_put_contents(
             $this->tempDir . '/resources/icons/test.svg',
             '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" /></svg>',

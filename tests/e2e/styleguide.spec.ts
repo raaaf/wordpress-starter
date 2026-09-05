@@ -53,9 +53,13 @@ test.describe('Styleguide', () => {
   });
 
   test('renders without a PHP error', async () => {
-    const body = await page.locator('body').innerText();
+    // Full response markup, not just rendered text: a PHP error emitted
+    // before headers/HTML structure form (or inside an attribute, a
+    // <script>/<style> block, or an HTML comment) never reaches innerText
+    // but is still a broken response.
+    const html = await page.content();
 
-    expect(body).not.toMatch(/Fatal error|Warning:|Notice:|Uncaught/);
+    expect(html).not.toMatch(/Fatal error|Warning:|Notice:|Deprecated:|Uncaught/);
     expect(await page.locator('section').count()).toBeGreaterThan(50);
   });
 
@@ -73,7 +77,11 @@ test.describe('Styleguide', () => {
     expect(targets.length).toBeGreaterThan(25);
 
     const dead = await page.evaluate(
-      (hrefs: string[]) => hrefs.filter((href) => !document.querySelector(href)),
+      (hrefs: string[]) =>
+        hrefs.filter(
+          (href) =>
+            !(href.startsWith('#') && href.length > 1 && document.getElementById(href.slice(1)))
+        ),
       targets
     );
 
@@ -186,7 +194,9 @@ test.describe('Styleguide', () => {
     expect(await eigene.locator('.styleguide-module').count()).toBeGreaterThan(25);
     await expect(eigene.locator('#tokens')).toHaveCount(0);
     await expect(eigene.locator('#komponenten')).toHaveCount(0);
-    await expect(eigene.locator('nav[aria-label="Ansicht"] a[aria-current="page"]')).toHaveText('Module');
+    await expect(eigene.locator('nav[aria-label="Ansicht"] a[aria-current="page"]')).toHaveText(
+      'Module'
+    );
 
     await eigene.getByRole('link', { name: 'Design-System', exact: true }).click();
 

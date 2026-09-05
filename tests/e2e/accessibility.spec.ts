@@ -33,11 +33,9 @@ test.describe('Accessibility', () => {
 
     // Nicht auf "opacity ist 0 oder 1" pruefen: der Logolauf blendet seine Logos
     // dauerhaft auf 0.5, die Bedingung waere nie wahr.
-    await page.waitForFunction(
-      () => document.querySelectorAll('.opacity-0').length === 0,
-      null,
-      { timeout: 10000 }
-    );
+    await page.waitForFunction(() => document.querySelectorAll('.opacity-0').length === 0, null, {
+      timeout: 10000,
+    });
     await page.waitForTimeout(300);
   }
 
@@ -70,20 +68,25 @@ test.describe('Accessibility', () => {
   });
 
   test('blog page should be accessible', async ({ page }) => {
-    // Try to navigate to blog - may or may not exist
     const response = await page.goto('/blog');
 
-    if (response?.ok()) {
-      const accessibilityScanResults = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa'])
-        .analyze();
+    // The theme has no dedicated /blog template; the route only exists when
+    // a WordPress install has a "Posts page" configured at that slug, which
+    // is a site setting, not something the theme guarantees. Skip with a
+    // reason instead of silently passing on a 404, so a broken route on an
+    // install that DOES expose /blog still shows up as a SKIP-to-investigate
+    // rather than a green check.
+    test.skip(!response?.ok(), `/blog did not respond ok (status ${response?.status()})`);
 
-      const criticalViolations = accessibilityScanResults.violations.filter(
-        (v) => v.impact === 'critical' || v.impact === 'serious'
-      );
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa'])
+      .analyze();
 
-      expect(criticalViolations).toHaveLength(0);
-    }
+    const criticalViolations = accessibilityScanResults.violations.filter(
+      (v) => v.impact === 'critical' || v.impact === 'serious'
+    );
+
+    expect(criticalViolations).toHaveLength(0);
   });
 
   test('all pages should have proper document structure', async ({ page }) => {
@@ -109,6 +112,9 @@ test.describe('Accessibility', () => {
     const images = page.locator('img');
     const imageCount = await images.count();
 
+    // A page with no images would pass the loop below trivially.
+    expect(imageCount).toBeGreaterThan(0);
+
     for (let i = 0; i < imageCount; i++) {
       const img = images.nth(i);
       const alt = await img.getAttribute('alt');
@@ -127,19 +133,25 @@ test.describe('Accessibility', () => {
     );
     const inputCount = await inputs.count();
 
+    // A page with no labelable inputs would pass the loop below trivially.
+    expect(inputCount).toBeGreaterThan(0);
+
     for (let i = 0; i < inputCount; i++) {
       const input = inputs.nth(i);
       const id = await input.getAttribute('id');
       const ariaLabel = await input.getAttribute('aria-label');
       const ariaLabelledBy = await input.getAttribute('aria-labelledby');
+      const hasAriaLabel = ariaLabel !== null || ariaLabelledBy !== null;
 
       // Input must have either a label, aria-label, or aria-labelledby
       if (id) {
         const label = page.locator(`label[for="${id}"]`);
         const hasLabel = (await label.count()) > 0;
-        const hasAriaLabel = ariaLabel !== null || ariaLabelledBy !== null;
 
         expect(hasLabel || hasAriaLabel).toBeTruthy();
+      } else {
+        // No id means a <label for> is impossible; aria-label(ledby) is mandatory.
+        expect(hasAriaLabel).toBeTruthy();
       }
     }
   });
@@ -163,26 +175,46 @@ test.describe('Accessibility', () => {
     expect(colorViolations).toHaveLength(0);
   });
 
-  test('interactive elements should be keyboard accessible', async ({ page }) => {
+  test('interactive elements should have a visible focus indicator', async ({ page }) => {
     await page.goto('/');
 
-    // Get all interactive elements
+    // Reading tabindex only proves an attribute exists, not that a sighted
+    // keyboard user can see where focus is. Focus each sampled element and
+    // read its computed style instead: a real outline/box-shadow must appear
+    // that was not there before focus.
     const interactiveElements = page.locator('a, button, input, select, textarea, [tabindex]');
     const count = await interactiveElements.count();
+    const sampleSize = Math.min(count, 10);
 
-    // Check that at least some elements are focusable
-    let focusableCount = 0;
+    expect(sampleSize).toBeGreaterThan(0);
 
-    for (let i = 0; i < Math.min(count, 10); i++) {
+    for (let i = 0; i < sampleSize; i++) {
       const el = interactiveElements.nth(i);
       const tabindex = await el.getAttribute('tabindex');
 
-      // Element is focusable if tabindex is not -1
-      if (tabindex !== '-1') {
-        focusableCount++;
+      // tabindex="-1" removes the element from the tab order by design
+      // (e.g. a roving-tabindex sibling); it is not a focus-indicator defect.
+      if (tabindex === '-1') {
+        continue;
       }
-    }
 
-    expect(focusableCount).toBeGreaterThan(0);
+      const before = await el.evaluate((node) => {
+        const style = getComputedStyle(node);
+        return { outline: style.outlineStyle, width: style.outlineWidth, shadow: style.boxShadow };
+      });
+
+      await el.focus();
+
+      const after = await el.evaluate((node) => {
+        const style = getComputedStyle(node);
+        return { outline: style.outlineStyle, width: style.outlineWidth, shadow: style.boxShadow };
+      });
+
+      const hasVisibleOutline =
+        after.outline !== 'none' && after.width !== '0px' && after.outline !== before.outline;
+      const hasVisibleShadow = after.shadow !== 'none' && after.shadow !== before.shadow;
+
+      expect(hasVisibleOutline || hasVisibleShadow).toBeTruthy();
+    }
   });
 });

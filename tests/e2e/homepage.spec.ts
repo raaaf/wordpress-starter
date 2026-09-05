@@ -28,9 +28,9 @@ test.describe('Homepage', () => {
     const h1 = page.locator('h1').first();
     await expect(h1).toBeVisible();
 
-    // Ensure there's only one h1
+    // Ensure there's exactly one h1
     const h1Count = await page.locator('h1').count();
-    expect(h1Count).toBeLessThanOrEqual(1);
+    expect(h1Count).toBe(1);
   });
 
   test('should have meta viewport tag', async ({ page }) => {
@@ -42,5 +42,21 @@ test.describe('Homepage', () => {
     const html = page.locator('html');
     const lang = await html.getAttribute('lang');
     expect(lang).toBeTruthy();
+  });
+
+  test('should send security headers unconditionally on the frontend response', async ({
+    page,
+  }) => {
+    // Both headers are emitted by src/Security.php for every non-admin,
+    // non-AJAX request, independent of site configuration, so they can be
+    // asserted directly instead of guarded behind an `if`.
+    const response = await page.goto('/');
+    const headers = response?.headers() ?? {};
+
+    expect(headers['x-content-type-options']).toBe('nosniff');
+
+    const csp = headers['content-security-policy'];
+    expect(csp).toBeTruthy();
+    expect(csp).toMatch(/script-src[^;]*'nonce-[^']+'/);
   });
 });

@@ -451,8 +451,27 @@ final class FieldsTest extends TestCase
 
         $result = Fields::linkHtml('xss_link');
 
-        $this->assertStringContainsString('&amp;', $result);
+        // Core's esc_url() encodes '&' as the numeric entity &#038;, not
+        // &amp; - matching that quirk here, not weakening the assertion.
+        $this->assertStringContainsString('&#038;', $result);
         $this->assertStringContainsString('&lt;script&gt;', $result);
         $this->assertStringNotContainsString('<script>', $result);
+    }
+
+    public function testLinkHtmlStripsJavascriptScheme(): void
+    {
+        $linkData = [
+            'url' => 'javascript:alert(1)',
+            'title' => 'Malicious',
+            'target' => '_self',
+        ];
+        $this->setMockField('js_link', $linkData);
+
+        $result = Fields::linkHtml('js_link');
+
+        // esc_url() rejects the javascript: scheme and returns '', so the
+        // href attribute is still rendered but empty, never the raw scheme.
+        $this->assertStringContainsString('href=""', $result);
+        $this->assertStringNotContainsString('javascript:', $result);
     }
 }

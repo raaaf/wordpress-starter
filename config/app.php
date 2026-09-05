@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
     'theme' => [
         'name' => 'WP Starter',
-        'version' => '0.0.2',
+        'version' => function_exists('wp_get_theme') ? (string) wp_get_theme()->get('Version') : '',
         'text_domain' => 'wp-starter',
         'author' => 'Rafael Alex',
         'author_uri' => 'https://rafaelalex.de',
