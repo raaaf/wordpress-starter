@@ -1552,9 +1552,9 @@ html {
   .wpcf7-form input[type='date']:focus,
   .wpcf7-form input[type='time']:focus,
   .wpcf7-form input[type='password']:focus {
-    outline: none;
     border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus-ring);
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
   }
 
   /* --- Textarea --- */
@@ -1586,9 +1586,9 @@ html {
   }
 
   .wpcf7-form textarea:focus {
-    outline: none;
     border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus-ring);
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
   }
 
   /* --- Select --- */
@@ -1623,9 +1623,9 @@ html {
   }
 
   .wpcf7-form select:focus {
-    outline: none;
     border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus-ring);
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
   }
 
   /* --- Checkbox & Radio Groups --- */
@@ -1666,8 +1666,8 @@ html {
 
   .wpcf7-form .wpcf7-list-item input[type='checkbox']:focus-visible,
   .wpcf7-form .wpcf7-list-item input[type='radio']:focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-focus-ring);
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
   }
 
   /* --- Acceptance Checkbox --- */
@@ -1697,9 +1697,9 @@ html {
   }
 
   .wpcf7-form input[type='file']:focus {
-    outline: none;
     border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus-ring);
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
   }
 
   .wpcf7-form input[type='file']::file-selector-button {
@@ -1804,7 +1804,8 @@ html {
 
   .wpcf7-form .wpcf7-not-valid:focus {
     border-color: var(--border-error) !important;
-    box-shadow: var(--shadow-focus-ring-error) !important;
+    outline: 3px solid var(--color-error) !important;
+    outline-offset: 2px;
   }
 
   /* --- Quiz Field --- */
