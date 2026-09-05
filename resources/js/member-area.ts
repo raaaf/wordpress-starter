@@ -159,6 +159,17 @@ interface DownloadTableState extends AlpineMagics {
   pageNumbers(): (number | string)[];
 }
 
+// Only allow same-origin or http(s) URLs through to the download link;
+// anything else (javascript:, data:, etc.) is dropped so the template renders no link.
+function safeUrl(value: string): string {
+  try {
+    const url = new URL(value, window.location.origin);
+    return url.protocol === 'https:' || url.protocol === 'http:' ? value : '';
+  } catch {
+    return '';
+  }
+}
+
 function createDownloadTableComponent(): DownloadTableState {
   return {
     // Alpine magic properties ($el, $watch, etc.) are injected at runtime
@@ -251,7 +262,10 @@ function createDownloadTableComponent(): DownloadTableState {
         const data = await response.json();
 
         if (data.success) {
-          this.items = data.data.items;
+          this.items = (data.data.items as DownloadItem[]).map((item) => ({
+            ...item,
+            download_url: safeUrl(item.download_url),
+          }));
           this.total = data.data.total;
           this.pages = data.data.pages;
           this.currentPage = data.data.current_page;

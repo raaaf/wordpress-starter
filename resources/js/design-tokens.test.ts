@@ -262,6 +262,9 @@ const TEXT_PAIRS: [string, string, string][] = [
   ['--text-inverse', '--bg-success-strong', 'solid success badge label'],
   ['--text-inverse', '--bg-warning-strong', 'solid warning badge label'],
   ['--text-on-accent', '--bg-accent', 'checkbox mark on the checked fill'],
+  ['--text-brand', '--bg-brand-tint', 'primary button at rest (tint)'],
+  ['--text-on-accent', '--bg-brand', 'primary button on hover (solid fill)'],
+  ['--text-on-accent', '--bg-brand-active', 'primary button when pressed'],
 ];
 
 const UI_PAIRS: [string, string, string][] = [
@@ -278,12 +281,15 @@ const UI_PAIRS: [string, string, string][] = [
 ];
 
 /**
- * The primary button is the one fill built from a gradient, so a single pair
- * cannot describe it: the label has to clear 4.5:1 against BOTH stops, in every
- * interaction state and both schemes. It is also the place the export got wrong
- * — the gradient was declared once and never flipped with the scheme, so in dark
- * mode the fill darkened while --text-inverse was already near-black, and the
- * button lost contrast the more it was used.
+ * The primary button is no longer a gradient fill (rafaelalex.de design
+ * system, section 5): it is a pill, so a single foreground/background pair
+ * describes each state and lives in TEXT_PAIRS above ('primary button at
+ * rest (tint)', 'on hover (solid fill)', 'when pressed').
+ *
+ * These gradient tokens still exist in the export and are still used outside
+ * the button, e.g. the current-page fill in the member-area downloads
+ * pagination (templates/member-area/downloads.blade.php), so the pairs below
+ * keep covering those legacy fills, not the button pill.
  */
 const BUTTON_GRADIENTS: [string, string, string][] = [
   ['--gradient-primary-start', '--gradient-primary-end', 'primary button at rest'],

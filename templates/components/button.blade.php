@@ -53,6 +53,8 @@
             'hover:text-content-on-accent',
             'hover:border-transparent',
             'active:bg-[var(--bg-brand-active)]',
+            'active:text-content-on-accent',
+            'active:border-transparent',
         ]),
         'secondary' => implode(' ', [
             'bg-transparent',
