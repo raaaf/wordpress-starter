@@ -230,7 +230,10 @@ class DownloadQuery
         $termLabels = [];
         if (!is_wp_error($terms)) {
             foreach ($terms as $term) {
-                $termLabels[$term->slug] = $term->name;
+                // Term names are stored HTML-encoded ("Bilder &amp; Logos"); this
+                // JSON goes into Alpine x-text (textContent), which does not decode
+                // entities, so decode here instead of leaving them literal on screen.
+                $termLabels[$term->slug] = wp_specialchars_decode($term->name, ENT_QUOTES);
             }
         }
 
@@ -242,6 +245,14 @@ class DownloadQuery
             $termSlug = ( !is_wp_error($postTerms) && !empty($postTerms) ) ? $postTerms[0]->slug : '';
             $lastModified = get_field('download_last_modified', $postId) ?: '';
             $available = (bool) ( get_field('download_available', $postId) ?? true );
+
+            $sourceType = get_field('download_source_type', $postId) ?: 'upload';
+            if ($available && $sourceType === 'upload') {
+                $downloadFile = get_field('download_file', $postId);
+                if (!is_array($downloadFile) || empty($downloadFile['url']) || empty($downloadFile['filename'])) {
+                    $available = false;
+                }
+            }
 
             $fileExt = self::getPostExt($postId);
             $extVariant = DownloadFileTypes::variantFor($fileExt);
@@ -372,7 +383,7 @@ class DownloadQuery
             $terms = get_the_terms($postId, 'download_category');
             if (!is_wp_error($terms) && !empty($terms)) {
                 foreach ($terms as $term) {
-                    $categoryCounts[$term->slug] ??= ['label' => $term->name, 'count' => 0];
+                    $categoryCounts[$term->slug] ??= ['label' => wp_specialchars_decode($term->name, ENT_QUOTES), 'count' => 0];
                     ++$categoryCounts[$term->slug]['count'];
                 }
             }

@@ -78,6 +78,8 @@ trait WordPressMocks
             'wp_mock_excerpt' => '',
             'wp_mock_archive_description' => '',
             'wp_mock_bloginfo' => [],
+            'wp_mock_terms' => [],
+            'wp_mock_post_terms' => [],
             'wp_mock_have_rows_cursor' => [],
             'wp_mock_loop_posts' => [],
             'wp_mock_loop_cursor' => 0,

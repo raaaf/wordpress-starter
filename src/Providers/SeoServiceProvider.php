@@ -171,7 +171,30 @@ class SeoServiceProvider extends ServiceProvider
 
                 return $robots;
             });
+
+            $this->addYoastDescriptionGate();
         }
+    }
+
+    /**
+     * Yoast builds its own description/og:description/twitter:description from
+     * the post content, bypassing getMetaDescription()'s protected-page gate.
+     * Without this, an anonymous visitor sees the protected page's content in
+     * the og:description meta tag even though the page itself is gated.
+     */
+    private function addYoastDescriptionGate(): void
+    {
+        $gate = function (string $value): string {
+            if (Access::isProtectedForCurrentVisitor( (int) get_queried_object_id())) {
+                return (string) get_bloginfo('description');
+            }
+
+            return $value;
+        };
+
+        add_filter('wpseo_metadesc', $gate);
+        add_filter('wpseo_opengraph_desc', $gate);
+        add_filter('wpseo_twitter_description', $gate);
     }
 
     /**

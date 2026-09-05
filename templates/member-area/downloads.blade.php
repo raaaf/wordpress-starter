@@ -134,7 +134,7 @@
                                  announces "opens in new tab" to assistive tech). --}}
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-2 flex-wrap">
-                                    <template x-if="item.download_url">
+                                    <template x-if="item.available && item.download_url">
                                         <a
                                             :href="item.download_url"
                                             target="_blank"
@@ -142,7 +142,7 @@
                                             class="font-normal text-content hover:text-content-accent transition-colors"
                                         ><span x-text="item.title"></span><span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
                                     </template>
-                                    <template x-if="!item.download_url">
+                                    <template x-if="!item.available || !item.download_url">
                                         <span class="font-normal text-content" x-text="item.title"></span>
                                     </template>
                                     {{-- x-badge never echoes $attributes, so x-show has to sit on a

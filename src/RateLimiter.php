@@ -196,7 +196,9 @@ class RateLimiter
      */
     private function usingExternalObjectCache(): bool
     {
-        return wp_using_ext_object_cache();
+        // Returns null (not false) until wp_start_object_cache() ran, and some
+        // cache plugins leave it null on admin-ajax; treat null as "no cache".
+        return (bool) wp_using_ext_object_cache();
     }
 
     /**

@@ -160,6 +160,46 @@ final class SeoServiceProviderTest extends TestCase
         $this->assertStringContainsString('nofollow', $robots);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
+    public function testWpseoDescriptionFiltersReturnTaglineForProtectedPageAndAnonymousVisitor(): void
+    {
+        if (!defined('WPSEO_VERSION')) {
+            define('WPSEO_VERSION', '1.0');
+        }
+
+        $GLOBALS['wp_mock_bloginfo']['description'] = 'Die Standard-Tagline';
+        $GLOBALS['wp_mock_queried_object_id'] = 55;
+        $this->setMockField('page_is_protected', true, 55);
+        $GLOBALS['wp_mock_current_user_id'] = 0;
+
+        $this->provider->boot();
+
+        $this->assertSame('Die Standard-Tagline', apply_filters('wpseo_metadesc', 'Geschuetzter Seiteninhalt'));
+        $this->assertSame('Die Standard-Tagline', apply_filters('wpseo_opengraph_desc', 'Geschuetzter Seiteninhalt'));
+        $this->assertSame('Die Standard-Tagline', apply_filters('wpseo_twitter_description', 'Geschuetzter Seiteninhalt'));
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testWpseoDescriptionFiltersPassThroughForAuthenticatedMember(): void
+    {
+        if (!defined('WPSEO_VERSION')) {
+            define('WPSEO_VERSION', '1.0');
+        }
+
+        $GLOBALS['wp_mock_queried_object_id'] = 55;
+        $this->setMockField('page_is_protected', true, 55);
+        $GLOBALS['wp_mock_current_user_id'] = 1;
+        $GLOBALS['wp_mock_current_user_can']['manage_options'] = true;
+
+        $this->provider->boot();
+
+        $this->assertSame('Original description', apply_filters('wpseo_metadesc', 'Original description'));
+    }
+
     public function testAiCrawlerListIsFilterable(): void
     {
         add_filter('wp_starter_ai_crawlers', function (array $crawlers): array {

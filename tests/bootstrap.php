@@ -1370,6 +1370,43 @@ if (!function_exists('get_the_category')) {
     }
 }
 
+if (!function_exists('get_terms')) {
+    /**
+     * Faithful enough double: reads a flat list of term-like stdClass objects
+     * (slug, name) registered per taxonomy via $GLOBALS['wp_mock_terms'], core
+     * returns those objects or a WP_Error, never false.
+     *
+     * @param array<string, mixed> $args
+     *
+     * @return list<object>
+     */
+    function get_terms(array $args = []): array
+    {
+        $taxonomy = $args['taxonomy'] ?? '';
+
+        return $GLOBALS['wp_mock_terms'][$taxonomy] ?? [];
+    }
+}
+
+if (!function_exists('get_the_terms')) {
+    /**
+     * @return list<object>|false
+     */
+    function get_the_terms(int|object|null $post = null, string $taxonomy = ''): array|false
+    {
+        $id = is_object($post) ? ( $post->ID ?? 0 ) : (int) ( $post ?? 0 );
+
+        return $GLOBALS['wp_mock_post_terms'][$id][$taxonomy] ?? false;
+    }
+}
+
+if (!function_exists('wp_specialchars_decode')) {
+    function wp_specialchars_decode(string $text, int $quoteStyle = ENT_NOQUOTES): string
+    {
+        return htmlspecialchars_decode($text, $quoteStyle);
+    }
+}
+
 if (!function_exists('wp_trim_words')) {
     function wp_trim_words(string $text, int $numWords = 55, ?string $more = null): string
     {
@@ -1726,9 +1763,11 @@ if (!function_exists('wp_send_json_success')) {
 }
 
 if (!function_exists('wp_using_ext_object_cache')) {
-    function wp_using_ext_object_cache(): bool
+    // Core returns the raw global, which is null until wp_start_object_cache()
+    // set it; a bool-typed double hid a TypeError in RateLimiter (2026-09-05).
+    function wp_using_ext_object_cache(): ?bool
     {
-        return $GLOBALS['wp_mock_using_ext_object_cache'] ?? false;
+        return $GLOBALS['wp_mock_using_ext_object_cache'] ?? null;
     }
 }
 
