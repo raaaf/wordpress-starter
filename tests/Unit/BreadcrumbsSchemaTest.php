@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use Tests\Support\TestCase;
-use WordpressStarter\Application;
 
 /**
  * Tests for the breadcrumb JSON-LD schema output.
@@ -28,7 +27,7 @@ final class BreadcrumbsSchemaTest extends TestCase
         $GLOBALS['wp_mock_is_front_page'] = false;
         $GLOBALS['wp_mock_is_singular'] = false;
         $GLOBALS['wp_mock_is_page'] = false;
-        $GLOBALS['wp_mock_titles'][0] = 'Angebot </script><script>alert(1)</script>';
+        $GLOBALS['wp_mock_titles'][0] = 'Angebot & Nachfrage </script><script>alert(1)</script>';
 
         $output = $this->renderBreadcrumbs();
 
@@ -38,17 +37,25 @@ final class BreadcrumbsSchemaTest extends TestCase
         $ldJsonBlock = substr($output, $ldJsonStart, $ldJsonEnd - $ldJsonStart);
 
         $this->assertStringNotContainsString('</script><script>', $ldJsonBlock);
+        // JSON_HEX_TAG (set in breadcrumbs.blade.php) hex-escapes < and >
+        // to \u003C/\u003E; JSON_UNESCAPED_SLASHES leaves the slash literal,
+        // so a dropped flag would fail this assertion.
+        $this->assertStringContainsString('\u003C/script\u003E\u003Cscript\u003E', $ldJsonBlock);
         $this->assertStringContainsString('</script>', $output);
+
+        // JSON_HEX_AMP (also set in breadcrumbs.blade.php) hex-escapes "&" to
+        // \u0026; a raw "&" inside the ld+json block would mean the flag was
+        // dropped.
+        $this->assertStringContainsString('\u0026', $ldJsonBlock);
+        // Forbidding every "&" in the whole block would also fail on an
+        // ordinary URL query string; only the hostile payload's own "&" is
+        // the regression to catch, so assert that raw substring specifically,
+        // not the character in general.
+        $this->assertStringNotContainsString('Angebot & Nachfrage', $ldJsonBlock);
     }
 
     private function renderBreadcrumbs(): string
     {
-        $app = Application::getInstance();
-        $app->boot();
-
-        $factory = blade();
-        $factory->getFinder()->addLocation(dirname(__DIR__, 2) . '/templates');
-
-        return $factory->make('partials.breadcrumbs')->render();
+        return $this->renderTemplate('partials.breadcrumbs');
     }
 }

@@ -6,7 +6,6 @@ namespace Tests\Unit\Acf;
 
 use Tests\Support\TestCase;
 use WordpressStarter\Acf\PageSettings;
-use WordpressStarter\Application;
 
 /**
  * Tests for the "Als Landingpage anzeigen" page switch.
@@ -82,22 +81,27 @@ final class PageSettingsTest extends TestCase
         $this->assertStringContainsString('mobile-navigation', $html);
     }
 
-    public function testHeaderMenuHidesCtaOnLandingPageButShowsItOtherwise(): void
+    public function testHeaderMenuHidesCtaOnLandingPage(): void
     {
         $GLOBALS['wp_mock_fields']['header_cta_show:option'] = true;
         $GLOBALS['wp_mock_fields']['header_cta:option'] = ['url' => 'https://example.com/kontakt', 'title' => 'Kontakt'];
-
         $GLOBALS['wp_mock_is_page'] = true;
         $GLOBALS['wp_mock_fields']['page_is_landing_page'] = true;
-        $htmlLandingOn = $this->renderHeaderMenu();
-        $this->assertStringNotContainsString('href="', $htmlLandingOn);
 
-        $this->resetAllMocks();
+        $html = $this->renderHeaderMenu();
+
+        $this->assertStringNotContainsString('href="', $html);
+    }
+
+    public function testHeaderMenuShowsCtaWhenNotLandingPage(): void
+    {
         $GLOBALS['wp_mock_fields']['header_cta_show:option'] = true;
         $GLOBALS['wp_mock_fields']['header_cta:option'] = ['url' => 'https://example.com/kontakt', 'title' => 'Kontakt'];
         $GLOBALS['wp_mock_is_page'] = false;
-        $htmlLandingOff = $this->renderHeaderMenu();
-        $this->assertStringContainsString('https://example.com/kontakt', $htmlLandingOff);
+
+        $html = $this->renderHeaderMenu();
+
+        $this->assertStringContainsString('https://example.com/kontakt', $html);
     }
 
     public function testHeaderNavLandmarkOmittedOnLandingPage(): void
@@ -122,23 +126,11 @@ final class PageSettingsTest extends TestCase
 
     private function renderHeaderMenu(): string
     {
-        $app = Application::getInstance();
-        $app->boot();
-
-        $factory = blade();
-        $factory->getFinder()->addLocation(dirname(__DIR__, 3) . '/templates');
-
-        return $factory->make('partials.header-menu')->render();
+        return $this->renderTemplate('partials.header-menu');
     }
 
     private function renderHeader(): string
     {
-        $app = Application::getInstance();
-        $app->boot();
-
-        $factory = blade();
-        $factory->getFinder()->addLocation(dirname(__DIR__, 3) . '/templates');
-
-        return $factory->make('partials.header')->render();
+        return $this->renderTemplate('partials.header');
     }
 }

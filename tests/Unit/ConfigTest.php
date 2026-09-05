@@ -14,11 +14,32 @@ final class ConfigTest extends TestCase
 {
     private string $tempDir = '';
 
+    /** @var array<int, string> */
+    private array $envKeysBeforeTest = [];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->envKeysBeforeTest = array_keys(getenv());
+    }
+
     protected function tearDown(): void
     {
         if ($this->tempDir !== '' && is_dir($this->tempDir)) {
             $this->cleanupTempDir($this->tempDir);
         }
+
+        // Config::loadEnvironmentVariables() exports every parsed .env key via
+        // putenv()/$_ENV, not just a single known key; any test that loads a
+        // temp .env file can add an arbitrary set of keys that would otherwise
+        // leak into every test that runs after it in the same process.
+        $addedKeys = array_diff(array_keys(getenv()), $this->envKeysBeforeTest);
+        foreach ($addedKeys as $key) {
+            putenv($key);
+            unset($_ENV[$key]);
+        }
+
         parent::tearDown();
     }
 
@@ -93,7 +114,7 @@ final class ConfigTest extends TestCase
     public function testEnvFileCommentsAreIgnored(): void
     {
         $this->tempDir = $this->createTempEnvFile(
-            "# This is a comment\nVALID_KEY=valid_value\n# Another comment"
+            "# This is a comment\nVALID_KEY=valid_value\n# Another comment",
         );
 
         $result = Config::get('VALID_KEY');
@@ -138,5 +159,61 @@ final class ConfigTest extends TestCase
         $result = Config::get('string_value.nested', 'default');
 
         $this->assertSame('default', $result);
+    }
+
+    public function testValueContainingAnEqualsSignIsKeptIntact(): void
+    {
+        // explode(..., 2) must split only on the first "=", otherwise a DSN-style
+        // value like "mysql://user@host?opt=1" would lose everything after its
+        // own first "=".
+        $this->tempDir = $this->createTempEnvFile('CONNECTION_STRING=driver=mysql;host=localhost');
+
+        $result = Config::get('CONNECTION_STRING');
+
+        $this->assertSame('driver=mysql;host=localhost', $result);
+    }
+
+    public function testQuotedValueWithAnEmbeddedQuoteKeepsTheInnerQuote(): void
+    {
+        // trim() only strips the outer quote characters; a quote of the other
+        // style inside the value must survive.
+        $this->tempDir = $this->createTempEnvFile('MESSAGE="it\'s fine"');
+
+        $result = Config::get('MESSAGE');
+
+        $this->assertSame("it's fine", $result);
+    }
+
+    public function testMalformedLineWithoutEqualsSignIsIgnoredWithoutError(): void
+    {
+        $this->tempDir = $this->createTempEnvFile(
+            "NOT_A_VALID_ASSIGNMENT\nVALID_KEY=valid_value",
+        );
+
+        $this->assertNull(Config::get('NOT_A_VALID_ASSIGNMENT'));
+        $this->assertSame('valid_value', Config::get('VALID_KEY'));
+    }
+
+    public function testParsedEnvKeyIsExportedToPutenvAndSuperglobal(): void
+    {
+        $this->tempDir = $this->createTempEnvFile('EXPORTED_KEY=exported_value');
+
+        Config::get('EXPORTED_KEY');
+
+        $this->assertSame('exported_value', getenv('EXPORTED_KEY'));
+        $this->assertSame('exported_value', $_ENV['EXPORTED_KEY']);
+    }
+
+    public function testIndentedCommentLineIsNotParsedAsAssignment(): void
+    {
+        // A commented-out line with leading whitespace must never become a
+        // config key, no matter how it is indented. str_starts_with($line, '#')
+        // only catches the unindented form.
+        $this->tempDir = $this->createTempEnvFile(
+            "  # comment=1\nVALID_KEY=valid_value",
+        );
+
+        $this->assertNull(Config::get('# comment'));
+        $this->assertSame('valid_value', Config::get('VALID_KEY'));
     }
 }

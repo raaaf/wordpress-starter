@@ -21,7 +21,30 @@ final class FooterAlertBarTest extends TestCase
 
         $this->assertStringNotContainsString('<h3', $result);
         $this->assertStringNotContainsString('</h3>', $result);
-        $this->assertStringContainsString('<p><strong><strong>Wichtiger Hinweis:</strong></strong></p>', $result);
+        $this->assertStringContainsString('<p><strong>Wichtiger Hinweis:</strong></p>', $result);
+    }
+
+    public function testDoesNotDoubleWrapAlreadyBoldHeadingContent(): void
+    {
+        $html = '<h3><strong>Wichtiger Hinweis:</strong></h3>';
+
+        $this->assertSame('<p><strong>Wichtiger Hinweis:</strong></p>', FooterAlertBar::demoteHeadings($html));
+    }
+
+    public function testWrapsPlainHeadingContentInStrong(): void
+    {
+        $html = '<h3>Wichtiger Hinweis:</h3>';
+
+        $this->assertSame('<p><strong>Wichtiger Hinweis:</strong></p>', FooterAlertBar::demoteHeadings($html));
+    }
+
+    public function testTreatsBTagAsPlainTextNotAsExistingBold(): void
+    {
+        // <b> is left as-is, not recognised as an existing bold wrapper: the heading
+        // content still gets wrapped in <strong>, producing <strong><b>...</b></strong>.
+        $html = '<h3><b>Wichtiger Hinweis:</b></h3>';
+
+        $this->assertSame('<p><strong><b>Wichtiger Hinweis:</b></strong></p>', FooterAlertBar::demoteHeadings($html));
     }
 
     public function testDemotesEveryHeadingLevelAndKeepsAttributes(): void
@@ -33,10 +56,268 @@ final class FooterAlertBarTest extends TestCase
         }
     }
 
+    public function testDemotesUnclosedHeadingViaTheFallbackPass(): void
+    {
+        // Content pasted in from Outlook/Word can carry an unclosed heading tag.
+        // The pair-aware first pass never matches it (no closing </h*> to pair
+        // with), so the fallback pass demotes only the opening tag; this pins
+        // the current fallback behaviour: no closing </strong></p> is added.
+        $html = '<h2>Titel';
+
+        $this->assertSame('<p><strong>Titel', FooterAlertBar::demoteHeadings($html));
+    }
+
+    public function testDemotesUnclosedHeadingWhoseClosingTagIsMissingBeforeNextTag(): void
+    {
+        // Same fallback case, but followed by unrelated markup instead of end
+        // of string. There is no </h3> anywhere in the string, so the
+        // pair-aware pass still cannot match it.
+        $html = '<h3>Titel<p>Text</p>';
+
+        $this->assertSame('<p><strong>Titel<p>Text</p>', FooterAlertBar::demoteHeadings($html));
+    }
+
+    public function testGreaterThanInsideAQuotedHeadingAttributeDoesNotTruncateTheMatch(): void
+    {
+        // Regression test: the heading regex is quote-aware, so a ">" inside
+        // a quoted attribute value does not end the <h*> tag match early and
+        // leak the attribute tail into the rendered text.
+        $html = '<h2 title="a > b">Text</h2>';
+
+        $this->assertSame('<p><strong>Text</strong></p>', FooterAlertBar::demoteHeadings($html));
+    }
+
+    public function testPartiallyBoldHeadingContentIsNotDoubleWrapped(): void
+    {
+        // Regression test: a heading that is only partially wrapped in
+        // <strong> (not "already bold" as a whole) must still end up with
+        // exactly one <strong> around the whole text, never a nested
+        // <strong><strong>...
+        $html = '<h2><strong>Part</strong> rest</h2>';
+
+        $this->assertSame('<p><strong>Part rest</strong></p>', FooterAlertBar::demoteHeadings($html));
+    }
+
     public function testLeavesTextWithoutHeadingsUntouched(): void
     {
         $html = '<p>Nur ein <strong>Absatz</strong> mit <a href="/x">Link</a>.</p>';
 
         $this->assertSame($html, FooterAlertBar::demoteHeadings($html));
+    }
+
+    public function testAlertVisibleOnAllPagesByDefault(): void
+    {
+        $GLOBALS['wp_mock_queried_object_id'] = 42;
+        $this->setMockField('footer_alerts', [
+            [
+                'active' => true,
+                'text' => 'Hinweis',
+                'visibility' => 'all',
+                'pages' => [],
+                'dismissible' => false,
+            ],
+        ], 'option');
+
+        $result = FooterAlertBar::getVisibleAlerts();
+
+        $this->assertCount(1, $result);
+        $this->assertSame('Hinweis', $result[0]['text']);
+    }
+
+    public function testOnlyVisibilityShowsAlertWhenCurrentPageInList(): void
+    {
+        $GLOBALS['wp_mock_queried_object_id'] = 5;
+        $this->setMockField('footer_alerts', [
+            [
+                'active' => true,
+                'text' => 'Nur hier',
+                'visibility' => 'only',
+                'pages' => [5, 9],
+                'dismissible' => false,
+            ],
+        ], 'option');
+
+        $result = FooterAlertBar::getVisibleAlerts();
+
+        $this->assertCount(1, $result);
+        $this->assertSame('Nur hier', $result[0]['text']);
+    }
+
+    public function testOnlyVisibilityHidesAlertWhenCurrentPageNotInList(): void
+    {
+        $GLOBALS['wp_mock_queried_object_id'] = 3;
+        $this->setMockField('footer_alerts', [
+            [
+                'active' => true,
+                'text' => 'Nur hier',
+                'visibility' => 'only',
+                'pages' => [5, 9],
+                'dismissible' => false,
+            ],
+        ], 'option');
+
+        $result = FooterAlertBar::getVisibleAlerts();
+
+        $this->assertSame([], $result);
+    }
+
+    public function testExceptVisibilityHidesAlertWhenCurrentPageInList(): void
+    {
+        $GLOBALS['wp_mock_queried_object_id'] = 5;
+        $this->setMockField('footer_alerts', [
+            [
+                'active' => true,
+                'text' => 'Ueberall ausser hier',
+                'visibility' => 'except',
+                'pages' => [5, 9],
+                'dismissible' => false,
+            ],
+        ], 'option');
+
+        $result = FooterAlertBar::getVisibleAlerts();
+
+        $this->assertSame([], $result);
+    }
+
+    public function testExceptVisibilityShowsAlertWhenCurrentPageNotInList(): void
+    {
+        $GLOBALS['wp_mock_queried_object_id'] = 3;
+        $this->setMockField('footer_alerts', [
+            [
+                'active' => true,
+                'text' => 'Ueberall ausser hier',
+                'visibility' => 'except',
+                'pages' => [5, 9],
+                'dismissible' => false,
+            ],
+        ], 'option');
+
+        $result = FooterAlertBar::getVisibleAlerts();
+
+        $this->assertCount(1, $result);
+        $this->assertSame('Ueberall ausser hier', $result[0]['text']);
+    }
+
+    public function testEmptyPagesListWithOnlyVisibilityHidesAlert(): void
+    {
+        $GLOBALS['wp_mock_queried_object_id'] = 5;
+        $this->setMockField('footer_alerts', [
+            [
+                'active' => true,
+                'text' => 'Nur hier',
+                'visibility' => 'only',
+                'pages' => [],
+                'dismissible' => false,
+            ],
+        ], 'option');
+
+        $result = FooterAlertBar::getVisibleAlerts();
+
+        $this->assertSame([], $result);
+    }
+
+    public function testEmptyPagesListWithExceptVisibilityShowsAlert(): void
+    {
+        $GLOBALS['wp_mock_queried_object_id'] = 5;
+        $this->setMockField('footer_alerts', [
+            [
+                'active' => true,
+                'text' => 'Ueberall',
+                'visibility' => 'except',
+                'pages' => [],
+                'dismissible' => false,
+            ],
+        ], 'option');
+
+        $result = FooterAlertBar::getVisibleAlerts();
+
+        $this->assertCount(1, $result);
+    }
+
+    public function testInactiveAlertIsHidden(): void
+    {
+        $GLOBALS['wp_mock_queried_object_id'] = 5;
+        $this->setMockField('footer_alerts', [
+            [
+                'active' => false,
+                'text' => 'Versteckter Hinweis',
+                'visibility' => 'all',
+                'pages' => [],
+                'dismissible' => false,
+            ],
+        ], 'option');
+
+        $result = FooterAlertBar::getVisibleAlerts();
+
+        $this->assertSame([], $result);
+    }
+
+    public function testEmptyTextIsSkipped(): void
+    {
+        $GLOBALS['wp_mock_queried_object_id'] = 5;
+        $this->setMockField('footer_alerts', [
+            [
+                'active' => true,
+                'text' => '',
+                'visibility' => 'all',
+                'pages' => [],
+                'dismissible' => false,
+            ],
+        ], 'option');
+
+        $result = FooterAlertBar::getVisibleAlerts();
+
+        $this->assertSame([], $result);
+    }
+
+    public function testWhitespaceOnlyTextIsSkipped(): void
+    {
+        $GLOBALS['wp_mock_queried_object_id'] = 5;
+        $this->setMockField('footer_alerts', [
+            [
+                'active' => true,
+                'text' => "   \n\t  ",
+                'visibility' => 'all',
+                'pages' => [],
+                'dismissible' => false,
+            ],
+        ], 'option');
+
+        $result = FooterAlertBar::getVisibleAlerts();
+
+        $this->assertSame([], $result);
+    }
+
+    public function testMultipleAlertsAreFilteredIndependently(): void
+    {
+        $GLOBALS['wp_mock_queried_object_id'] = 5;
+        $this->setMockField('footer_alerts', [
+            [
+                'active' => true,
+                'text' => 'Immer sichtbar',
+                'visibility' => 'all',
+                'pages' => [],
+                'dismissible' => false,
+            ],
+            [
+                'active' => true,
+                'text' => 'Nur auf Seite 9',
+                'visibility' => 'only',
+                'pages' => [9],
+                'dismissible' => false,
+            ],
+            [
+                'active' => true,
+                'text' => 'Ausser auf Seite 5',
+                'visibility' => 'except',
+                'pages' => [5],
+                'dismissible' => false,
+            ],
+        ], 'option');
+
+        $result = FooterAlertBar::getVisibleAlerts();
+
+        $texts = array_column($result, 'text');
+        $this->assertSame(['Immer sichtbar'], $texts);
     }
 }

@@ -15,6 +15,13 @@ namespace WordpressStarter\Acf;
 class FieldDefinitions
 {
     /**
+     * Memoized icon choices, see getThemeIcons(). Reset via resetIconCache().
+     *
+     * @var array<string, string>|null
+     */
+    private static ?array $iconCache = null;
+
+    /**
      * Get background color choices that map to design tokens
      *
      * @return array<string, string>
@@ -43,24 +50,26 @@ class FieldDefinitions
      */
     public static function getThemeIcons(): array
     {
-        static $choices = null;
-
-        if ($choices !== null) {
-            return $choices;
+        if (self::$iconCache !== null) {
+            return self::$iconCache;
         }
 
         $choices = ['' => __('— Kein Icon —', 'wp-starter')];
         $configPath = get_template_directory() . '/config/icons.json';
 
         if (!file_exists($configPath)) {
-            return $choices;
+            self::$iconCache = $choices;
+
+            return self::$iconCache;
         }
 
         $raw = (string) file_get_contents($configPath);
         $config = json_decode($raw, true);
 
         if (!is_array($config) || !isset($config['icons']) || !is_array($config['icons'])) {
-            return $choices;
+            self::$iconCache = $choices;
+
+            return self::$iconCache;
         }
 
         foreach ($config['icons'] as $slug => $spec) {
@@ -71,7 +80,18 @@ class FieldDefinitions
             $choices[$slug] = is_string($label) ? $label : $slug;
         }
 
-        return $choices;
+        self::$iconCache = $choices;
+
+        return self::$iconCache;
+    }
+
+    /**
+     * Drop the cached icon list. Only needed where one request reads the icon
+     * choices more than once, which in practice means the test suite.
+     */
+    public static function resetIconCache(): void
+    {
+        self::$iconCache = null;
     }
 
     /**
