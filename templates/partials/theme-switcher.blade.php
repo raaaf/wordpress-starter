@@ -64,8 +64,8 @@
                 x-bind:aria-checked="mode === '{{ $value }}' ? 'true' : 'false'"
                 x-bind:tabindex="mode === '{{ $value }}' ? '0' : '-1'"
                 x-on:click="apply('{{ $value }}')"
-                x-bind:class="mode === '{{ $value }}' ? 'bg-surface text-content shadow-[var(--shadow-button)]' : 'text-content-secondary hover:text-content'"
-                class="px-3 py-1 text-sm font-normal transition-colors rounded-full cursor-pointer focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
+                x-bind:class="mode === '{{ $value }}' ? 'bg-[var(--bg-brand-tint)] text-content-brand ring-1 ring-inset ring-[var(--border-brand)]' : 'text-content-secondary hover:text-content'"
+                class="px-3 py-1 text-sm font-normal transition-colors rounded-full cursor-pointer focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
             >{{ $label }}</button>
         @endforeach
     </div>

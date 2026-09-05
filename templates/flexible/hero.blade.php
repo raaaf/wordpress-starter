@@ -182,7 +182,7 @@
                                 :target="$cta_secondary['target'] ?? '_self'"
                                 variant="secondary"
                                 size="lg"
-                                class="bg-transparent! border-white/60! text-white! shadow-none! hover:bg-white/10! hover:border-white!"
+                                class="bg-transparent! border-content-on-color/60! text-content-on-color! shadow-none! hover:bg-content-on-color/10! hover:border-content-on-color!"
                             />
                         @endif
                     </div>

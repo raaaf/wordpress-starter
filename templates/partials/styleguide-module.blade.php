@@ -125,9 +125,9 @@
                             x-on:click="waehlen({{ $index }}, true)"
                             @if(!empty($variantenTitel[$index]) && $variantenTitel[$index] !== ($varianten[$index] ?? '')) title="{{ $variantenTitel[$index] }}" @endif
                             x-bind:class="aktiv === {{ $index }}
-                                ? 'bg-surface text-content border-line shadow-[var(--shadow-button)]'
+                                ? 'bg-[var(--bg-brand-tint)] text-content-brand border-line-brand'
                                 : 'border-transparent text-content-secondary hover:text-content'"
-                            class="px-3 py-1 text-sm font-normal border rounded-full cursor-pointer transition-colors focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
+                            class="px-3 py-1 text-sm font-normal border rounded-full cursor-pointer transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                         >{{ $varianten[$index] ?? '' }}</button>
                     @endforeach
                 </div>

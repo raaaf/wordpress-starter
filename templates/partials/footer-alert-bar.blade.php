@@ -30,7 +30,7 @@
                                 @click="localStorage.setItem('{{ $alert['storage_key'] }}', JSON.stringify({t: Date.now()})); dismissed = true"
                                 {{-- 44x44 Mindest-Trefferfläche wie bei den Social-Buttons in
                                      team.blade.php, inline-flex zentriert das 16px-Icon darin. --}}
-                                class="inline-flex shrink-0 cursor-pointer items-center justify-center rounded p-2 min-h-11 min-w-11 text-content-tertiary transition-colors hover:bg-surface-tertiary hover:text-content-secondary focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring-ghost)]"
+                                class="inline-flex shrink-0 cursor-pointer items-center justify-center rounded p-2 min-h-11 min-w-11 text-content-tertiary transition-colors hover:bg-surface-tertiary hover:text-content-secondary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                                 aria-label="{{ __('Hinweis schließen', 'wp-starter') }}"
                             >
                                 <x-icon name="close" class="h-4 w-4" />

@@ -43,14 +43,14 @@
                             @click="yearly = false"
                             :aria-pressed="!yearly"
                             :class="yearly ? 'bg-surface text-content-secondary' : 'bg-surface-brand text-content-on-brand'"
-                            class="px-5 py-2 cursor-pointer transition-colors focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]">
+                            class="px-5 py-2 cursor-pointer transition-colors focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--ring-focus)]">
                         {{ __('Monatlich', 'wp-starter') }}
                     </button>
                     <button type="button"
                             @click="yearly = true"
                             :aria-pressed="yearly"
                             :class="yearly ? 'bg-surface-brand text-content-on-brand' : 'bg-surface text-content-secondary'"
-                            class="px-5 py-2 cursor-pointer transition-colors focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]">
+                            class="px-5 py-2 cursor-pointer transition-colors focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--ring-focus)]">
                         {{ __('Jährlich', 'wp-starter') }}
                     </button>
                 </div>

@@ -164,6 +164,22 @@ Details zur Herleitung: `.claude/plans/logs/2026-04-16-fluid-typography-scale.md
 - `icon-secondary` - Gedämpft
 - `icon-brand` - Markenfarbe
 
+## Neu hinzugekommene Tokens
+
+Tokens nur in `resources/css/app.css`, vom Figma-Export nicht geliefert (Begründung in `docs/DESIGN-TOKEN-GAPS.md` Abschnitt B):
+
+- `--bg-brand-tint` - Ruhezustand-Füllung des Primary-Buttons, gleich `--bg-brand-subtle`
+- `--surface-sheen` - 135°-Tuscheverlauf auf Cards und Panels (Hell-/Dunkelwert), über `.card` und die `surface-sheen`-Utility
+- `--page-sheen` - 160°-Verlauf über der Seite, deckt die erste Bildschirmhöhe des Body ab
+- `--noise-texture` - Noise-SVG im Body-Hintergrund
+- `--border-control` - überschreibt den Figma-Wert bewusst mit `var(--border-strong)`
+- `--color-icon-disabled` - Alias auf `--icon-disabled` im Tailwind-`@theme`-Block
+
+Neue Primitives aus dem Figma-Export, generiert in `resources/css/tokens.css`:
+
+- `--color-ash-lifted`, `--color-white-alpha-10`, `--color-black-alpha-8` - zusätzliche Grundfarben
+- `--font-weight-light` (300) - zusätzliche Schriftstärke
+
 ## Dark Mode
 
 Dark Mode wird automatisch unterstützt:

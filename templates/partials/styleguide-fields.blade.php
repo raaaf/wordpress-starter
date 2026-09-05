@@ -20,7 +20,7 @@
 
 @if(!empty($zeilen))
     <details class="mt-2" @if($offen) open @endif>
-        <summary class="inline-flex items-center gap-1 text-sm cursor-pointer text-content-secondary hover:text-content focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]">
+        <summary class="inline-flex items-center gap-1 text-sm cursor-pointer text-content-secondary hover:text-content focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
             {{ __('Felder anzeigen', 'wp-starter') }} ({{ count($zeilen) }})
         </summary>
 

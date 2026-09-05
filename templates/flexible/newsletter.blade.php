@@ -62,13 +62,13 @@
                             required
                             autocomplete="email"
                             placeholder="{{ esc_attr__('deine@adresse.de', 'wp-starter') }}"
-                            class="w-full px-4 py-3 rounded-[var(--radius-md)] border border-[var(--border-control)] bg-surface text-content placeholder:text-content-tertiary focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
+                            class="w-full px-4 py-3 rounded-[var(--radius-md)] border border-[var(--border-control)] bg-surface text-content placeholder:text-content-tertiary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                         />
                     </div>
 
                     <button
                         type="submit"
-                        class="px-6 py-3 rounded-[var(--radius-md)] bg-surface-brand text-content-on-brand font-normal cursor-pointer transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
+                        class="px-6 py-3 rounded-[var(--radius-md)] bg-surface-brand text-content-on-brand font-normal cursor-pointer transition-opacity hover:opacity-90 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                     >
                         {{ $buttonLabel }}
                     </button>

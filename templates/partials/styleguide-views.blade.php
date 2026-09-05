@@ -26,7 +26,7 @@
             <a
                 href="{{ esc_url(add_query_arg('ansicht', $wert, get_permalink())) }}"
                 @if($aktiv) aria-current="page" @endif
-                class="px-3 py-1 text-sm font-normal no-underline transition-colors rounded-full focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)] {{ $aktiv ? 'bg-surface text-content shadow-[var(--shadow-button)]' : 'text-content-secondary hover:text-content' }}"
+                class="px-3 py-1 text-sm font-normal no-underline transition-colors rounded-full focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] {{ $aktiv ? 'bg-[var(--bg-brand-tint)] text-content-brand ring-1 ring-inset ring-[var(--border-brand)]' : 'text-content-secondary hover:text-content' }}"
             >{{ $beschriftung }}</a>
         @endforeach
     </div>

@@ -9,7 +9,7 @@
     @if($colorScheme === 'system')
         {{-- Gespeicherte Auswahl setzen, bevor das erste Pixel gemalt wird. Ohne
              das blitzt bei jedem Laden kurz der andere Modus auf. --}}
-        <script>
+        <script nonce="{{ $GLOBALS['csp_nonce'] ?? '' }}">
             (function () {
                 try {
                     var m = localStorage.getItem('wp-starter-theme');

@@ -86,7 +86,7 @@
             'transition-[color,background,border-color,box-shadow,scale] duration-200 cursor-pointer',
             'hover:border-line-brand hover:shadow-[var(--shadow-card-hover)]',
             'active:shadow-[var(--shadow-inner)] active:scale-[0.99]',
-            'focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]',
+            'focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--ring-focus)]',
         ])
         : '';
 

@@ -153,13 +153,6 @@
   /* Pure Paper cards on the Warm Paper page (light mode). */
   --card-bg: var(--bg-secondary);
   --card-border: var(--border-default);
-  --surface-sheen: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.015) 45%,
-    transparent 80%
-  );
-  --page-sheen: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, transparent 50%);
 
   /* Primary button at rest: the opaque subtle brand surface (accent-50 in
      light, the warm near-black in dark), so the pill reads as filled and the
@@ -171,6 +164,7 @@
      Light: darkens towards the bottom right. Dark: lightens the top left. */
   --surface-sheen: linear-gradient(135deg, transparent 35%, rgba(17, 24, 39, 0.035) 100%);
   --page-sheen: linear-gradient(160deg, rgba(17, 24, 39, 0.035) 0%, transparent 50%);
+  --noise-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 
   /* Form controls draw a hairline, not a grey frame (rafaelalex.de design
      system, section 5). The field is told apart from the page by its paper
@@ -1071,8 +1065,7 @@ html {
   body {
     color: var(--text-primary);
     background:
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")
-        repeat,
+      var(--noise-texture) repeat,
       var(--page-sheen) no-repeat 0 0 / 100% 100vh,
       radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.04) 0%, transparent 60%) fixed,
       radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.03) 0%, transparent 50%)
@@ -1084,8 +1077,7 @@ html {
 
   :root[data-theme='light'] body {
     background:
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")
-        repeat,
+      var(--noise-texture) repeat,
       var(--page-sheen) no-repeat 0 0 / 100% 100vh,
       radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.03) 0%, transparent 60%) fixed,
       radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.02) 0%, transparent 50%)
@@ -1096,8 +1088,7 @@ html {
   @media (prefers-color-scheme: light) {
     :root:not([data-theme='dark']) body {
       background:
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")
-          repeat,
+        var(--noise-texture) repeat,
         var(--page-sheen) no-repeat 0 0 / 100% 100vh,
         radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.03) 0%, transparent 60%)
           fixed,
@@ -1418,6 +1409,14 @@ html {
 @layer components {
   .card,
   .surface-sheen {
+    background-image: var(--surface-sheen);
+  }
+
+  /* On image cards the lit corner of the sheen sits under the opaque image and
+     the text block below falls into its transparent tail, so the card reads
+     flat. Every block after the image carries its own wash, so a text block
+     and an accordion below it do not meet at a hard edge. */
+  .card > :is(img, picture, figure, :has(> img)) ~ div {
     background-image: var(--surface-sheen);
   }
 
@@ -2897,18 +2896,20 @@ html {
    aller Zustaende braucht aber alle vier nebeneinander. Diese Regeln greifen auf
    dieselben Tokens zu wie die Komponente, kopieren also keine Farbwerte. */
 .zeige-hover .button--primary {
-  background-color: var(--button-fill-hover, var(--bg-brand));
-  box-shadow: var(--shadow-button-hover);
+  background-color: var(--bg-brand);
+  border-color: transparent;
+  color: var(--text-on-accent);
 }
 
 .zeige-hover .button--secondary {
-  background-color: var(--bg-tertiary);
+  background-color: var(--bg-secondary);
   border-color: var(--border-strong);
 }
 
-/* Dezent wechselt nur die Flaeche, keinen Rand. */
+/* Ghost underlines its label on hover, the surface stays untouched. */
 .zeige-hover .button--ghost {
-  background-color: var(--bg-secondary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .zeige-hover .button--danger {
@@ -2916,28 +2917,32 @@ html {
 }
 
 .zeige-hover .button--inverse {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-brand-subtle);
 }
 
 .zeige-fokus .button {
-  box-shadow: var(--shadow-focus-ring);
+  outline: 3px solid var(--ring-focus);
+  outline-offset: 2px;
 }
 
 .zeige-aktiv .button {
-  scale: 0.98;
+  scale: 0.97;
 }
 
-/* Den Innenschatten setzt die Komponente nur auf den gefuellten Varianten.
-   Dezent bekommt ihn nicht, sonst zeichnet der Aktiv-Zustand einen Rand, den
-   Ruhe und Hover nicht haben. */
-.zeige-aktiv :is(.button--primary, .button--secondary, .button--danger, .button--inverse) {
-  box-shadow: var(--shadow-inner);
-}
-
-.zeige-aktiv :is(.button--secondary, .button--ghost) {
+.zeige-aktiv :is(.button--secondary) {
   background-color: var(--bg-tertiary);
 }
 
+.zeige-aktiv .button--ghost {
+  opacity: 0.8;
+}
+
+.zeige-aktiv .button--inverse {
+  background-color: var(--bg-brand-subtle);
+}
+
 .zeige-aktiv .button--primary {
-  background-color: var(--button-fill-active, var(--bg-brand-active));
+  background-color: var(--bg-brand-active);
+  border-color: transparent;
+  color: var(--text-on-accent);
 }

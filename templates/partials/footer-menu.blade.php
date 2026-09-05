@@ -131,7 +131,7 @@
                                    {{-- 44px Klickflaeche wie bei den Team-Icons. Das sichtbare Symbol bleibt
                                         24px, nur der anklickbare Bereich waechst; der negative Rand
                                         haelt den optischen Abstand. --}}
-                                   class="inline-flex items-center justify-center w-11 h-11 -m-2 text-content-secondary hover:text-content transition-colors rounded-full focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]"
+                                   class="inline-flex items-center justify-center w-11 h-11 -m-2 text-content-secondary hover:text-content transition-colors rounded-full focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                                    aria-label="{{ ($social['platform'] ?? 'Social Media') . ' ' . __('(öffnet in neuem Tab)', 'wp-starter') }}">
                                     @switch($social['platform'] ?? '')
                                         @case('facebook')

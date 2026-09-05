@@ -51,7 +51,7 @@
 
 @if(!empty($sprungziele))
     <details class="group sticky z-30 mx-auto mb-8 max-w-7xl px-4 sm:px-6 lg:px-8 top-[calc(var(--header-height,80px)+0.5rem)]">
-        <summary class="inline-flex items-center gap-2 px-4 py-2 text-sm font-normal border rounded-full cursor-pointer select-none border-line bg-surface text-content shadow-[var(--shadow-button)] hover:bg-surface-secondary focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]">
+        <summary class="inline-flex items-center gap-2 px-4 py-2 text-sm font-normal border rounded-full cursor-pointer select-none border-line bg-surface text-content shadow-[var(--shadow-button)] hover:bg-surface-secondary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
             {{ __('Springe zu', 'wp-starter') }}
             {{-- Dreht mit dem Aufklappzustand: vorher zeigte der Pfeil auch bei
                  offener Liste nach unten und behauptete damit das Gegenteil des
@@ -93,7 +93,7 @@
                            data-anchor="{{ $anchor }}"
                            :aria-current="aktiv === '{{ $anchor }}' ? 'true' : null"
                            :class="aktiv === '{{ $anchor }}' ? 'font-normal text-content' : 'text-content-secondary'"
-                           class="block py-1.5 text-sm no-underline hover:text-content focus-visible:outline-none focus-visible:text-content focus-visible:shadow-[var(--shadow-focus-ring)]">{{ $label }}</a>
+                           class="block py-1.5 text-sm no-underline hover:text-content focus-visible:text-content focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">{{ $label }}</a>
                     </li>
                 @endforeach
             </ul>
