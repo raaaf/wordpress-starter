@@ -6,7 +6,6 @@ namespace WordpressStarter\PostTypes;
 
 use WordpressStarter\Acf\FieldDefinitions;
 use WP_Post;
-use WP_Query;
 
 /**
  * Team Member Custom Post Type
@@ -39,6 +38,13 @@ class Team extends AbstractPostType
      */
     protected static bool $public = false;
 
+    /**
+     * Matches $public = false above: no REST reach for anonymous
+     * requests. Gutenberg is disabled and ACF fields are defined in PHP,
+     * so REST is not needed for editing.
+     */
+    protected static bool $showInRest = false;
+
     /** @var array<string> */
     protected static array $supports = ['title', 'thumbnail'];
 
@@ -55,83 +61,49 @@ class Team extends AbstractPostType
     }
 
     /**
-     * Register custom admin columns for better list view UX
+     * Declarative admin list-table columns (thumbnail, position, email, display_order)
      */
-    private static function registerAdminColumns(): void
+    protected static function adminColumns(): array
     {
-        // Add custom columns
-        add_filter('manage_' . self::$postType . '_posts_columns', function (array $columns): array {
-            $newColumns = [];
-            foreach ($columns as $key => $value) {
-                if ($key === 'title') {
-                    $newColumns['thumbnail'] = __('Foto', 'wp-starter');
-                }
-                $newColumns[$key] = $value;
-                if ($key === 'title') {
-                    $newColumns['position'] = __('Position', 'wp-starter');
-                    $newColumns['email'] = __('E-Mail', 'wp-starter');
-                    $newColumns['display_order'] = __('Reihenfolge', 'wp-starter');
-                }
-            }
-
-            return $newColumns;
-        });
-
-        // Populate custom columns
-        add_action('manage_' . self::$postType . '_posts_custom_column', function (string $column, int $postId): void {
-            switch ($column) {
-                case 'thumbnail':
+        return [
+            'thumbnail' => [
+                'label' => __('Foto', 'wp-starter'),
+                'before' => 'title',
+                'width' => 60,
+                'render' => function (int $postId): void {
                     $thumbnail = get_the_post_thumbnail($postId, [50, 50], ['style' => 'border-radius: 50%; object-fit: cover;']);
                     // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_the_post_thumbnail() returns safe HTML
                     echo $thumbnail ?: '<span style="color: #999;">—</span>';
-                    break;
-                case 'position':
+                },
+            ],
+            'position' => [
+                'label' => __('Position', 'wp-starter'),
+                'after' => 'title',
+                'sortable' => 'position',
+                'sort_type' => 'meta_value',
+                'render' => function (int $postId): void {
                     echo esc_html(get_field('position', $postId) ?: '—');
-                    break;
-                case 'email':
+                },
+            ],
+            'email' => [
+                'label' => __('E-Mail', 'wp-starter'),
+                'after' => 'title',
+                'render' => function (int $postId): void {
                     $email = get_field('email', $postId);
                     echo $email ? '<a href="mailto:' . esc_attr($email) . '">' . esc_html($email) . '</a>' : '—';
-                    break;
-                case 'display_order':
+                },
+            ],
+            'display_order' => [
+                'label' => __('Reihenfolge', 'wp-starter'),
+                'after' => 'title',
+                'sortable' => 'display_order',
+                'sort_type' => 'meta_value_num',
+                'width' => 100,
+                'render' => function (int $postId): void {
                     echo esc_html(get_field('display_order', $postId) ?: '0');
-                    break;
-            }
-        }, 10, 2);
-
-        // Make columns sortable
-        add_filter('manage_edit-' . self::$postType . '_sortable_columns', function (array $columns): array {
-            $columns['display_order'] = 'display_order';
-            $columns['position'] = 'position';
-
-            return $columns;
-        });
-
-        // Handle sorting
-        add_action('pre_get_posts', function (WP_Query $query): void {
-            if (!is_admin() || !$query->is_main_query()) {
-                return;
-            }
-            if ($query->get('post_type') !== self::$postType) {
-                return;
-            }
-
-            $orderby = $query->get('orderby');
-            if ($orderby === 'display_order') {
-                $query->set('meta_key', 'display_order');
-                $query->set('orderby', 'meta_value_num');
-            } elseif ($orderby === 'position') {
-                $query->set('meta_key', 'position');
-                $query->set('orderby', 'meta_value');
-            }
-        });
-
-        // Set thumbnail column width
-        add_action('admin_head', function (): void {
-            $screen = get_current_screen();
-            if ($screen && $screen->post_type === self::$postType) {
-                echo '<style>.column-thumbnail { width: 60px; } .column-display_order { width: 100px; }</style>';
-            }
-        });
+                },
+            ],
+        ];
     }
 
     /**

@@ -12,7 +12,8 @@ class TransientCleanupService
     /**
      * Delete all expired transients from the options table.
      *
-     * Removes both the transient value row and the orphaned timeout row.
+     * First removes matched value+timeout pairs, then any remaining expired
+     * timeout row regardless of whether a value row still matches it.
      */
     public function deleteExpiredTransients(): void
     {
@@ -31,7 +32,8 @@ class TransientCleanupService
             ),
         );
 
-        // Delete orphaned transient timeout rows (no matching value row)
+        // Delete every expired transient timeout row, whether or not a
+        // matching value row still exists (site-wide, not scoped to orphans).
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $wpdb->query(
             $wpdb->prepare(
@@ -60,7 +62,7 @@ class TransientCleanupService
                 FROM {$wpdb->posts}
                 WHERE post_type = %s
                 GROUP BY post_parent
-                HAVING revision_count > %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                HAVING revision_count > %d",
                 'revision',
                 $keep,
             ),

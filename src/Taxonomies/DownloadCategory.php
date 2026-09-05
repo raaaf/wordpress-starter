@@ -14,4 +14,5 @@ class DownloadCategory extends AbstractTaxonomy
     protected static bool $public           = false;
     protected static bool $showInRest       = false;
     protected static array|false $rewrite     = false;
+    protected static ?string $requiredCapability = 'manage_options';
 }

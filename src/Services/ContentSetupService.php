@@ -6,9 +6,7 @@ namespace WordpressStarter\Services;
 
 use WordpressStarter\Providers\LogServiceProvider;
 use WordpressStarter\Providers\WelcomeServiceProvider;
-use WordpressStarter\Services\StyleguidePage;
 use WordpressStarter\ThemeContext;
-use WP_Query;
 
 /**
  * Content setup service.
@@ -27,19 +25,31 @@ class ContentSetupService
     private const DEFAULT_SETUP_OPTIONS = [
         'create_pages' => true,
         'pages' => [
-            'home' => ['title' => 'Startseite', 'template' => 'page-home'],
+            self::SLUG_HOME => ['title' => 'Startseite', 'template' => 'page-home'],
             'about' => ['title' => 'Über uns', 'template' => ''],
             'services' => ['title' => 'Leistungen', 'template' => ''],
             'contact' => ['title' => 'Kontakt', 'template' => ''],
-            'privacy' => ['title' => 'Datenschutz', 'template' => ''],
-            'imprint' => ['title' => 'Impressum', 'template' => ''],
+            self::SLUG_PRIVACY => ['title' => 'Datenschutz', 'template' => ''],
+            self::SLUG_IMPRINT => ['title' => 'Impressum', 'template' => ''],
         ],
         'menu_assignments' => [
             'header-menu' => ['about', 'services', 'contact'],
-            'legal-menu' => ['privacy', 'imprint'],
+            'legal-menu' => [self::SLUG_PRIVACY, self::SLUG_IMPRINT],
             'footer-menu' => ['about', 'services', 'contact'],
         ],
     ];
+
+    /**
+     * Blade template file suffix, matching the convention used across the theme
+     * (see StyleguidePage::TEMPLATE and ThemeServiceProvider's page-*.blade.php lookup).
+     */
+    private const BLADE_TEMPLATE_SUFFIX = '.blade.php';
+
+    private const SLUG_HOME = 'home';
+    private const SLUG_PRIVACY = 'privacy';
+    private const SLUG_IMPRINT = 'imprint';
+    private const SLUG_STYLEGUIDE = 'styleguide';
+    private const SLUG_MEMBER_AREA = 'member-area';
 
     /**
      * Run content setup once on first activation.
@@ -206,7 +216,7 @@ class ContentSetupService
                 // Tools panel unable to find "its" styleguide (option/marker were
                 // never written) while the page still ended up in the menu, so a
                 // "create" click there would spawn a second styleguide page.
-                if ($slug === 'styleguide' && StyleguidePage::isClaimedByOtherTheme($existing->ID)) {
+                if ($slug === self::SLUG_STYLEGUIDE && StyleguidePage::isClaimedByOtherTheme($existing->ID)) {
                     LogServiceProvider::info('Content setup: styleguide page already claimed by another theme, skipping adoption', [
                         'page_id' => $existing->ID,
                     ]);
@@ -215,8 +225,12 @@ class ContentSetupService
 
                 $createdPages[$slug] = $existing->ID;
 
-                if ($slug === 'styleguide') {
-                    StyleguidePage::adopt($existing->ID);
+                if ($slug === self::SLUG_STYLEGUIDE) {
+                    // force: true — this path runs during content setup (after_switch_theme,
+                    // WP-CLI theme activation, or the manage_options Tools rerun), which has
+                    // no logged-in user; the ordinary gate in adopt() would silently skip the
+                    // write and leave this page unmarked. See StyleguidePage::adopt().
+                    StyleguidePage::adopt($existing->ID, force: true);
                 }
                 continue;
             }
@@ -235,10 +249,10 @@ class ContentSetupService
                 $createdPages[$slug] = $pageId;
 
                 if (!empty($pageData['template'])) {
-                    update_post_meta($pageId, '_wp_page_template', $pageData['template'] . '.blade.php');
+                    update_post_meta($pageId, '_wp_page_template', $pageData['template'] . self::BLADE_TEMPLATE_SUFFIX);
                 }
 
-                if ($slug === 'home') {
+                if ($slug === self::SLUG_HOME) {
                     $homePageId = $pageId;
                 }
 
@@ -246,7 +260,7 @@ class ContentSetupService
                     update_field('field_page_is_protected', true, $pageId);
                 }
 
-                if ($slug !== 'styleguide' && $slug !== 'member-area' && function_exists('update_field')) {
+                if ($slug !== self::SLUG_STYLEGUIDE && $slug !== self::SLUG_MEMBER_AREA && function_exists('update_field')) {
                     $heroLayout = [
                         [
                             'acf_fc_layout' => 'hero',
@@ -256,16 +270,17 @@ class ContentSetupService
                     update_field('page_sections', $heroLayout, $pageId);
                 }
 
-                if ($slug === 'styleguide') {
-                    StyleguidePage::adopt($pageId);
+                if ($slug === self::SLUG_STYLEGUIDE) {
+                    // force: true — see the adoption call above for why.
+                    StyleguidePage::adopt($pageId, force: true);
                     update_option(ThemeContext::optionKey('welcome_dismissed'), true);
                 }
 
                 if (function_exists('update_field')) {
-                    if ($slug === 'privacy') {
+                    if ($slug === self::SLUG_PRIVACY) {
                         update_field('datenschutz_seite', $pageId, 'option');
                         update_option('wp_page_for_privacy_policy', $pageId);
-                    } elseif ($slug === 'imprint') {
+                    } elseif ($slug === self::SLUG_IMPRINT) {
                         update_field('impressum_seite', $pageId, 'option');
                     }
                 }
@@ -311,6 +326,17 @@ class ContentSetupService
 
             $menuLocations[$location] = $menuId;
 
+            $existingItems = wp_get_nav_menu_items($menuId);
+            $menuPageIds = [];
+
+            if ($existingItems) {
+                foreach ($existingItems as $item) {
+                    if ($item->object === 'page') {
+                        $menuPageIds[ (int) $item->object_id] = true;
+                    }
+                }
+            }
+
             $position = 0;
             foreach ($pageSlugs as $pageSlug) {
                 if (!isset($pageIds[$pageSlug])) {
@@ -324,19 +350,7 @@ class ContentSetupService
                     continue;
                 }
 
-                $existingItems = wp_get_nav_menu_items($menuId);
-                $alreadyInMenu = false;
-
-                if ($existingItems) {
-                    foreach ($existingItems as $item) {
-                        if ( (int) $item->object_id === $pageId && $item->object === 'page') {
-                            $alreadyInMenu = true;
-                            break;
-                        }
-                    }
-                }
-
-                if ($alreadyInMenu) {
+                if (isset($menuPageIds[$pageId])) {
                     continue;
                 }
 
@@ -350,6 +364,8 @@ class ContentSetupService
                     'menu-item-title' => $page->post_title,
                     'menu-item-position' => $position,
                 ]);
+
+                $menuPageIds[$pageId] = true;
             }
         }
 
@@ -366,14 +382,17 @@ class ContentSetupService
         $baseTime = time();
         $dayOffset = 0;
 
+        $existingTitles = [];
+        foreach (get_posts([
+            'post_type' => 'post',
+            'post_status' => 'any',
+            'posts_per_page' => -1,
+        ]) as $existingPost) {
+            $existingTitles[$existingPost->post_title] = true;
+        }
+
         foreach ($posts as $postData) {
-            $existingQuery = new WP_Query([
-                'post_type' => 'post',
-                'title' => $postData['title'],
-                'posts_per_page' => 1,
-                'fields' => 'ids',
-            ]);
-            if ($existingQuery->have_posts()) {
+            if (isset($existingTitles[$postData['title']])) {
                 continue;
             }
 
@@ -391,6 +410,10 @@ class ContentSetupService
             ]);
 
             if (is_wp_error($postId)) {
+                LogServiceProvider::warning('Default post could not be created', [
+                    'title' => $postData['title'],
+                    'error' => $postId->get_error_message(),
+                ]);
                 continue;
             }
         }

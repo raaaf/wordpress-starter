@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Support;
 
+use ReflectionClass;
+
 /**
  * Trait providing WordPress mock utilities for tests.
  *
@@ -32,6 +34,9 @@ trait WordPressMocks
         $GLOBALS['wp_mock_theme_support'] = [];
         $GLOBALS['wp_mock_nav_menus'] = [];
         $GLOBALS['wp_mock_is_admin'] = false;
+        $GLOBALS['wp_mock_queried_object_id'] = 0;
+        $GLOBALS['wp_mock_post_types'] = [];
+        $GLOBALS['wp_mock_taxonomies'] = [];
         $GLOBALS['wp_mock_template_directory'] = __DIR__ . '/../fixtures';
         $GLOBALS['wp_mock_template_directory_uri'] = 'https://example.com/wp-content/themes/wp-starter';
         $GLOBALS['blade'] = null;
@@ -43,6 +48,12 @@ trait WordPressMocks
         // there): otherwise a cached page ID from one test class can silently
         // survive into the next without any test noticing.
         $this->resetStyleguidePageCache();
+
+        // Reset FieldDefinitions::getThemeIcons() memoization: otherwise a
+        // fallback icon list read against a fixture template dir (no
+        // config/icons.json) freezes before a later test sets the real
+        // theme directory.
+        \WordpressStarter\Acf\FieldDefinitions::resetIconCache();
     }
 
     /**
@@ -50,7 +61,7 @@ trait WordPressMocks
      */
     protected function resetConfigState(): void
     {
-        $reflection = new \ReflectionClass(\WordpressStarter\Config::class);
+        $reflection = new ReflectionClass(\WordpressStarter\Config::class);
 
         $configProperty = $reflection->getProperty('config');
         $configProperty->setAccessible(true);
@@ -66,7 +77,7 @@ trait WordPressMocks
      */
     protected function resetStyleguidePageCache(): void
     {
-        $reflection = new \ReflectionClass(\WordpressStarter\Services\StyleguidePage::class);
+        $reflection = new ReflectionClass(\WordpressStarter\Services\StyleguidePage::class);
 
         $cachedResultsProperty = $reflection->getProperty('cachedResults');
         $cachedResultsProperty->setAccessible(true);
@@ -129,6 +140,7 @@ trait WordPressMocks
     protected function getMockCache(string $key, string $group = 'default'): mixed
     {
         $cacheKey = "{$group}:{$key}";
+
         return $GLOBALS['wp_mock_cache'][$cacheKey] ?? null;
     }
 
@@ -171,7 +183,7 @@ trait WordPressMocks
         $this->assertArrayHasKey(
             $hook,
             $GLOBALS['wp_mock_hooks']['actions'],
-            "Action '{$hook}' was not registered"
+            "Action '{$hook}' was not registered",
         );
     }
 
@@ -183,7 +195,7 @@ trait WordPressMocks
         $this->assertArrayHasKey(
             $hook,
             $GLOBALS['wp_mock_hooks']['filters'],
-            "Filter '{$hook}' was not registered"
+            "Filter '{$hook}' was not registered",
         );
     }
 
@@ -211,7 +223,7 @@ trait WordPressMocks
         $this->assertArrayHasKey(
             $handle,
             $GLOBALS['wp_mock_enqueued']['scripts'],
-            "Script '{$handle}' was not enqueued"
+            "Script '{$handle}' was not enqueued",
         );
     }
 
@@ -223,7 +235,7 @@ trait WordPressMocks
         $this->assertArrayHasKey(
             $handle,
             $GLOBALS['wp_mock_enqueued']['styles'],
-            "Style '{$handle}' was not enqueued"
+            "Style '{$handle}' was not enqueued",
         );
     }
 
@@ -257,9 +269,10 @@ trait WordPressMocks
     protected function createTempEnvFile(string $content): string
     {
         $tempDir = sys_get_temp_dir() . '/wp-starter-test-' . uniqid();
-        mkdir($tempDir, 0777, true);
+        mkdir($tempDir, 0o777, true);
         file_put_contents($tempDir . '/.env', $content);
         $this->setTemplateDirectory($tempDir);
+
         return $tempDir;
     }
 
@@ -271,9 +284,10 @@ trait WordPressMocks
         $tempDir = $GLOBALS['wp_mock_template_directory'];
         $configDir = $tempDir . '/config';
         if (!is_dir($configDir)) {
-            mkdir($configDir, 0777, true);
+            mkdir($configDir, 0o777, true);
         }
         file_put_contents($configDir . '/app.php', $content);
+
         return $configDir . '/app.php';
     }
 

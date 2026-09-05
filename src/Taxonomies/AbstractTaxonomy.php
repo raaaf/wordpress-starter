@@ -77,6 +77,15 @@ abstract class AbstractTaxonomy
     protected static array|false $rewrite = [];
 
     /**
+     * When set, every term capability (manage, edit, delete, assign) maps
+     * to this single WordPress capability instead of the taxonomy's
+     * default (manage_categories/assign_categories). Use this when terms
+     * gate access to data more sensitive than an ordinary taxonomy, so
+     * Editors with plain manage_categories cannot touch them.
+     */
+    protected static ?string $requiredCapability = null;
+
+    /**
      * Register the custom taxonomy
      */
     public static function register(): void
@@ -165,6 +174,16 @@ abstract class AbstractTaxonomy
             'show_admin_column' => static::$showAdminColumn,
             'query_var' => true,
         ];
+
+        if (static::$requiredCapability !== null) {
+            $cap = static::$requiredCapability;
+            $args['capabilities'] = [
+                'manage_terms' => $cap,
+                'edit_terms' => $cap,
+                'delete_terms' => $cap,
+                'assign_terms' => $cap,
+            ];
+        }
 
         // Set rewrite rules
         if (static::$rewrite !== false) {

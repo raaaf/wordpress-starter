@@ -129,16 +129,48 @@ final class StyleguidePage
     /**
      * Record a page as this theme's styleguide, in both places.
      *
+     * Gated to editors (not an anonymous ajax request) because find() calls this
+     * on its common resolve path, including from read-only admin_notices
+     * rendering — without the gate, viewing wp-admin would write on every
+     * request. A no-op when marker and option already match keeps a repeat
+     * find() from writing again once adopted.
+     *
+     * $force skips that gate for the content-setup path (after_switch_theme /
+     * WP-CLI theme activation / the manage_options Tools rerun), which runs
+     * with no logged-in user and would otherwise create the styleguide page
+     * without its marker, making find() unable to locate it afterwards. Only
+     * ContentSetupService may pass true; every other caller keeps the gate.
+     *
      * Invalidates the find() cache: adopting a different page changes the answer.
      */
-    public static function adopt(int $pageId): void
+    public static function adopt(int $pageId, bool $force = false): void
     {
         if ($pageId <= 0) {
             return;
         }
 
-        update_post_meta($pageId, self::markerKey(), '1');
-        update_option(self::optionKey(), $pageId);
+        if (!$force && ( wp_doing_ajax() || !current_user_can('edit_pages') )) {
+            return;
+        }
+
+        $markerKey = self::markerKey();
+        $optionKey = self::optionKey();
+
+        $markerCurrent = (string) get_post_meta($pageId, $markerKey, true) === '1';
+        $optionCurrent = (int) get_option($optionKey) === $pageId;
+
+        if ($markerCurrent && $optionCurrent) {
+            return;
+        }
+
+        if (!$markerCurrent) {
+            update_post_meta($pageId, $markerKey, '1');
+        }
+
+        if (!$optionCurrent) {
+            update_option($optionKey, $pageId);
+        }
+
         unset(self::$cachedResults[get_current_blog_id()]);
     }
 

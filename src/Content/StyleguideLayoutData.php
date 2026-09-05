@@ -615,7 +615,7 @@ class StyleguideLayoutData
         return $this->layout('newsletter', [
             'title' => 'Auf dem Laufenden bleiben',
             'content' => 'Viermal im Jahr ein kurzer Bericht darueber, was gefoerdert wurde.',
-            'action_url' => 'https://beispiel.us1.list-manage.com/subscribe/post?u=demo&id=demo',
+            'action_url' => 'https://example.com/newsletter',
             'email_field' => 'EMAIL',
             'button_label' => 'Anmelden',
             'note' => 'Die Anmeldung laeuft ueber unseren Versanddienst. Abmeldung jederzeit ueber den Link in jeder E-Mail.',
@@ -698,6 +698,11 @@ class StyleguideLayoutData
     private function logoId(int $index): ?int
     {
         return $this->imageIds["logo_{$index}"] ?? null;
+    }
+
+    private function videoId(): ?int
+    {
+        return $this->imageIds['video_demo'] ?? null;
     }
 
     /**
@@ -1027,7 +1032,7 @@ class StyleguideLayoutData
         // dazu ein selbst gehostetes Video, das stumm in Schleife laeuft.
         $catalog[] = $this->layout('video', [
             'source' => 'wordpress',
-            'video' => $this->imageIds['video_demo'] ?? null,
+            'video' => $this->videoId(),
             'video_url' => '',
             'poster' => $this->imageId(2),
             'aspect_ratio' => '4-3',
@@ -1038,7 +1043,7 @@ class StyleguideLayoutData
 
         $catalog[] = $this->layout('video', [
             'source' => 'wordpress',
-            'video' => $this->imageIds['video_demo'] ?? null,
+            'video' => $this->videoId(),
             'video_url' => '',
             'poster' => $this->imageId(3),
             'aspect_ratio' => '1-1',
@@ -1047,7 +1052,7 @@ class StyleguideLayoutData
 
         $catalog[] = $this->layout('video', [
             'source' => 'wordpress',
-            'video' => $this->imageIds['video_demo'] ?? null,
+            'video' => $this->videoId(),
             'video_url' => '',
             'poster' => $this->imageId(4),
             'aspect_ratio' => '21-9',
@@ -1100,7 +1105,7 @@ class StyleguideLayoutData
         $catalog[] = $this->layout('newsletter', [
             'title' => '',
             'content' => '',
-            'action_url' => 'https://beispiel.us1.list-manage.com/subscribe/post?u=demo&id=demo',
+            'action_url' => 'https://example.com/newsletter',
             'email_field' => 'EMAIL',
             'button_label' => 'Eintragen',
             'note' => 'Ohne Ueberschrift und Text bleibt nur die Leiste.',
@@ -1313,7 +1318,7 @@ class StyleguideLayoutData
 
         $catalog[] = $this->layout('video', [
             'source' => 'wordpress',
-            'video' => $this->imageIds['video_demo'] ?? null,
+            'video' => $this->videoId(),
             'video_url' => '',
             'captions_language' => 'en',
             'poster' => $this->imageId(4),
@@ -1433,7 +1438,7 @@ class StyleguideLayoutData
      */
     private function videoUrl(): string
     {
-        $id = $this->imageIds['video_demo'] ?? null;
+        $id = $this->videoId();
 
         return $id ? (string) wp_get_attachment_url( (int) $id) : '';
     }
