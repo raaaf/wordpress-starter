@@ -464,6 +464,71 @@ export function createBeforeAfterComponent(): BeforeAfterComponent {
 }
 
 // ============================================
+// Styleguide Modul Component
+// ============================================
+
+export interface StyleguideModulComponent extends AlpineMagics {
+  aktiv: number;
+  waehlen(index: number, schreibeHash?: boolean): void;
+  init(): void;
+}
+
+/**
+ * Umschalter fuer die Instanzen eines Styleguide-Moduls (siehe
+ * templates/partials/styleguide-module.blade.php). Die Pfeiltasten-Navigation
+ * bleibt im Blade-Template, weil sie die serverseitig bekannte Anzahl der
+ * Instanzen braucht, die dieser Komponente nicht vorliegt.
+ */
+export function createStyleguideModulComponent(): StyleguideModulComponent {
+  return {
+    // Alpine magic properties ($el, $refs, etc.) are injected at runtime
+    ...({} as AlpineMagics),
+    aktiv: 0,
+
+    waehlen(index: number, schreibeHash = false): void {
+      this.aktiv = index;
+      // Der aria-hidden Trenner-Span zaehlt in children mit, darum ueber die
+      // role=radio-Elemente indizieren statt ueber children.
+      (this.$refs.chips as HTMLElement)
+        .querySelectorAll<HTMLElement>('[role=radio]')
+        [index].focus();
+
+      if (!schreibeHash) return;
+
+      const anker = (this.$el as HTMLElement).querySelectorAll<HTMLElement>('[data-variant]')[index]
+        ?.dataset.variant;
+      if (anker) {
+        // Safari drosselt replaceState (~100 Aufrufe je 30s) und wirft dann
+        // SecurityError. Bewusst still verschluckt: der Hash ist rein
+        // kosmetisch, ein Fehlschlag bleibt folgenlos.
+        try {
+          history.replaceState(null, '', '#' + anker);
+        } catch {
+          // ignored, see comment above
+        }
+      }
+    },
+
+    init(): void {
+      // Deep-Link: der Browser springt auf einen Anker, dessen Instanz
+      // ausgeblendet sein kann. Dann diese aktivieren und erneut anspringen,
+      // weil der erste Sprung ins Leere lief.
+      const ziel = window.location.hash.slice(1);
+      if (!ziel) return;
+
+      const index = Array.from(
+        (this.$el as HTMLElement).querySelectorAll<HTMLElement>('[data-variant]')
+      ).findIndex((panel) => panel.dataset.variant === ziel);
+
+      if (index < 1) return;
+
+      this.aktiv = index;
+      this.$nextTick(() => document.getElementById(ziel)?.scrollIntoView());
+    },
+  };
+}
+
+// ============================================
 // Initialize Application
 // ============================================
 
@@ -478,6 +543,7 @@ Alpine.plugin(intersect);
 Alpine.data('navigation', createNavigationComponent);
 Alpine.data('statsCounter', (target: number) => createStatsCounterComponent(target));
 Alpine.data('beforeAfterSlider', createBeforeAfterComponent);
+Alpine.data('styleguideModul', createStyleguideModulComponent);
 
 /**
  * Positionsanzeige der Styleguide-Sprungnavigation.

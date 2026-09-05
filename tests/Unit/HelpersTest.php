@@ -164,4 +164,11 @@ final class HelpersTest extends TestCase
 
         $this->assertNull($result);
     }
+
+    public function testJsLiteralEscapesForScriptContext(): void
+    {
+        $result = wp_starter_js_literal('<script>&\'"ä');
+
+        $this->assertSame('"\u003Cscript\u003E\u0026\u0027\u0022\u00e4"', $result);
+    }
 }

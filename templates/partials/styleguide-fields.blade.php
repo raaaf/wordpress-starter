@@ -17,6 +17,18 @@
 @php($layout = $layout ?? '')
 @php($offen = $offen ?? false)
 @php($zeilen = \WordpressStarter\Content\StyleguideFieldReference::flach($layout))
+@php
+    // Same source as styleguide-nav.blade.php: the layout label registered in
+    // FlexibleContent::layouts(), keyed by layout name. Falls back to the raw
+    // slug only when no definition (and therefore no label) is found.
+    $layoutLabel = $layout;
+    foreach (\WordpressStarter\Acf\FlexibleContent::layouts() as $definition) {
+        if (($definition['name'] ?? null) === $layout && !empty($definition['label'])) {
+            $layoutLabel = $definition['label'];
+            break;
+        }
+    }
+@endphp
 
 @if(!empty($zeilen))
     <details class="mt-2" @if($offen) open @endif>
@@ -26,7 +38,7 @@
 
         <div class="mt-2 overflow-x-auto">
             <table class="min-w-full text-sm text-left border-collapse">
-                <caption class="sr-only">{{ sprintf(__('ACF-Felder von %s', 'wp-starter'), $layout) }}</caption>
+                <caption class="sr-only">{{ sprintf(__('ACF-Felder von %s', 'wp-starter'), $layoutLabel) }}</caption>
                 <thead>
                     <tr class="border-b border-line">
                         <th scope="col" class="py-1 pr-4 font-normal text-content-secondary">{{ __('Feld', 'wp-starter') }}</th>

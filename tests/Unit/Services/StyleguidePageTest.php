@@ -333,4 +333,30 @@ final class StyleguidePageTest extends TestCase
         $this->assertEmpty(get_post_meta(632, StyleguidePage::markerKey(), true));
         $this->assertFalse(get_option(StyleguidePage::optionKey(), false));
     }
+
+    /**
+     * Templates/partials/styleguide-views.blade.php reads this constant to
+     * build its redirect allowlist, and templates/styleguide/tokens.blade.php
+     * and templates/styleguide/components.blade.php use it as their `anchor`
+     * value. A drift here would break the redirect silently.
+     */
+    public function testDesignSystemAnchorsMatchTheTemplates(): void
+    {
+        $this->assertSame(
+            ['tokens' => 'tokens', 'components' => 'komponenten'],
+            StyleguidePage::DESIGN_SYSTEM_ANCHORS,
+        );
+
+        $tokensTemplate = file_get_contents(__DIR__ . '/../../../templates/styleguide/tokens.blade.php');
+        $componentsTemplate = file_get_contents(__DIR__ . '/../../../templates/styleguide/components.blade.php');
+
+        $this->assertStringContainsString(
+            "StyleguidePage::DESIGN_SYSTEM_ANCHORS['tokens']",
+            (string) $tokensTemplate,
+        );
+        $this->assertStringContainsString(
+            "StyleguidePage::DESIGN_SYSTEM_ANCHORS['components']",
+            (string) $componentsTemplate,
+        );
+    }
 }

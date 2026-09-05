@@ -41,6 +41,21 @@ final class StyleguidePage
     /** Returned by find() when several pages could be the styleguide. */
     public const AMBIGUOUS = -1;
 
+    /**
+     * Anchor ids of the design-system view, shared by
+     * templates/partials/styleguide-views.blade.php (redirect allowlist),
+     * templates/styleguide/tokens.blade.php and
+     * templates/styleguide/components.blade.php (the anchors themselves).
+     * Single source of truth so renaming an anchor cannot silently break the
+     * redirect.
+     *
+     * @var array<string, string>
+     */
+    public const DESIGN_SYSTEM_ANCHORS = [
+        'tokens' => 'tokens',
+        'components' => 'komponenten',
+    ];
+
     private function __construct()
     {
     }

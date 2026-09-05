@@ -6,11 +6,15 @@
     sich <x-button>, ändert sich diese Seite mit, ohne dass jemand daran denken muss.
 
     Die Vorgängerlösung schrieb HTML-Strings in ein WYSIWYG-Feld und ist genau daran
-    auseinandergelaufen — die Badge-Demo zeigte eine solide Variante, die die
+    auseinandergelaufen, die Badge-Demo zeigte eine solide Variante, die die
     Komponente nie hatte, und die Formular-Demo zeigte native Inputs.
 --}}
 
-<x-section anchor="komponenten" background="secondary" padding="lg" class="styleguide-components">
+@php
+    use WordpressStarter\Services\StyleguidePage;
+@endphp
+
+<x-section anchor="{{ StyleguidePage::DESIGN_SYSTEM_ANCHORS['components'] }}" background="secondary" padding="lg" class="styleguide-components">
     <x-section-header
         chip="Design System"
         headline="Komponenten"

@@ -59,7 +59,7 @@ src/                    # PHP source code
 ├── Providers/         # Service providers
 ├── Services/          # StyleguidePage.php
 ├── Content/           # Styleguide reference/data classes
-├── Helpers/           # Text.php, SectionHeader.php (used across templates/flexible/)
+├── Helpers/           # Text.php, SectionHeader.php, ComponentId.php (request-scoped ids + anchor slugs), FormAttributes.php (shared form-attribute allowlist)
 ├── RateLimiter.php    # AJAX rate limiting
 templates/             # Blade templates
 ├── layouts/          # Base layouts
@@ -283,10 +283,12 @@ Registered via `Alpine.data()` in `resources/js/app.ts`:
 - `beforeAfterSlider` - Image comparison slider
 - `memberLogin` - Member area login form
 - `downloadTable` - Member area download table
+- `styleguideSprungnavigation` - Styleguide jump navigation (active-section highlighting)
+- `styleguideModul` - Switches between the instances of a styleguide gallery module
 
 `memberLogin` and `downloadTable` are registered in `resources/js/member-area.ts` and wired in via `registerMemberAreaComponents(Alpine)` in `resources/js/app.ts`.
 
-Components using inline `x-data` (not registered via `Alpine.data`): `tabs`, `accordion`. The logo slider (`templates/flexible/logo-slider.blade.php`) uses inline `x-data` plus a CSS animation, pausing on hover and focus and honouring `prefers-reduced-motion`. The gallery uses medium-zoom directly, not Alpine.
+Components using inline `x-data` (not registered via `Alpine.data`): `tabs`, `accordion`, `theme-switcher` (`templates/partials/theme-switcher.blade.php`), `footer-alert-bar` (`templates/partials/footer-alert-bar.blade.php`). The logo slider (`templates/flexible/logo-slider.blade.php`) uses inline `x-data` plus a CSS animation, pausing on hover and focus and honouring `prefers-reduced-motion`. The gallery uses medium-zoom directly, not Alpine.
 
 ## Adding New Layouts
 

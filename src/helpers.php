@@ -117,6 +117,20 @@ if (!function_exists('wp_starter_consent_banner')) {
     }
 }
 
+if (!function_exists('wp_starter_js_literal')) {
+    /**
+     * Encode a value as a JSON literal for embedding inside a `<script>` block.
+     *
+     * Escapes `<`, `&`, `'` and `"` so the literal is safe next to a
+     * surrounding HTML/script context. For use inside `<script>` blocks only,
+     * never for attribute context (use `esc_attr()`/`esc_js()` there instead).
+     */
+    function wp_starter_js_literal(mixed $value): string
+    {
+        return wp_json_encode($value, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+    }
+}
+
 if (!function_exists('blade')) {
     /**
      * Get the Blade service or render a view.

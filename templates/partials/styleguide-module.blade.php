@@ -33,43 +33,7 @@
 <div
     class="styleguide-module"
     @if($umschaltbar)
-        x-data="{
-            aktiv: 0,
-            waehlen(index, schreibeHash = false) {
-                this.aktiv = index;
-                {{-- Der aria-hidden Trenner-Span zaehlt in children mit, darum
-                     ueber die role=radio-Elemente indizieren statt ueber children. --}}
-                this.$refs.chips.querySelectorAll('[role=radio]')[index].focus();
-
-                if (!schreibeHash) return;
-
-                const anker = this.$el.querySelectorAll('[data-variant]')[index]?.dataset.variant;
-                if (anker) {
-                    {{-- Safari drosselt replaceState (~100 Aufrufe je 30s) und
-                         wirft dann SecurityError. Bewusst still verschluckt:
-                         der Hash ist rein kosmetisch, ein Fehlschlag bleibt
-                         folgenlos. --}}
-                    try {
-                        history.replaceState(null, '', '#' + anker);
-                    } catch (e) {}
-                }
-            },
-            init() {
-                {{-- Deep-Link: der Browser springt auf einen Anker, dessen Instanz
-                     ausgeblendet sein kann. Dann diese aktivieren und erneut
-                     anspringen, weil der erste Sprung ins Leere lief. --}}
-                const ziel = window.location.hash.slice(1);
-                if (!ziel) return;
-
-                const index = Array.from(this.$el.querySelectorAll('[data-variant]'))
-                    .findIndex((panel) => panel.dataset.variant === ziel);
-
-                if (index < 1) return;
-
-                this.aktiv = index;
-                this.$nextTick(() => document.getElementById(ziel)?.scrollIntoView());
-            }
-        }"
+        x-data="styleguideModul()"
     @endif
 >
     {{-- Die Leiste trug dieselbe Fläche, die ein Modul mit Hintergrund
@@ -80,13 +44,13 @@
          als Rahmen, unabhängig davon, welche Fläche das Modul darunter wählt. --}}
     <div class="border-b-2 border-l-4 bg-surface-secondary border-line border-l-line-brand">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <p class="flex flex-wrap items-baseline gap-2 m-0 text-body-small text-content-secondary">
-                <span class="font-normal text-content">{{ $modul['label'] }}</span>
+            <div class="flex flex-wrap items-baseline gap-2 m-0 text-body-small text-content-secondary">
+                <h3 class="font-normal text-content m-0">{{ $modul['label'] }}</h3>
                 <span class="text-code">{{ $layout }}</span>
                 @if($anzahl > 1 && $alleVarianten)
                     <span>{{ sprintf(_n('%d Variante', '%d Varianten', $anzahl, 'wp-starter'), $anzahl) }}</span>
                 @endif
-            </p>
+            </div>
 
             @if($umschaltbar)
                 {{-- Pfeiltasten rufen waehlen() ohne schreibeHash auf und
@@ -110,7 +74,7 @@
                              die Abnahme, keine Einstellungen, die ein Redakteur
                              waehlen wuerde. Ohne die Trennung liest sich "Ohne Bild"
                              wie eine dritte Spaltenvariante. --}}
-                        @if($istZustand[$index] && !($istZustand[$index - 1] ?? true))
+                        @if(($istZustand[$index] ?? false) && !($istZustand[$index - 1] ?? true))
                             <span class="self-center mx-2 text-body-small text-content-tertiary" aria-hidden="true">{{ __('Zustände', 'wp-starter') }}</span>
                         @endif
                         <button
@@ -138,6 +102,8 @@
     </div>
 
     @foreach($modul['instanzen'] as $index => $instanz)
+        {{-- Raw sink: $instanz['html'] is Blade output rendered by
+             StyleguidePage from seeded layout data, not field input. --}}
         <div
             data-variant="{{ $instanz['anchor'] }}"
             @if($umschaltbar)

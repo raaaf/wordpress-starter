@@ -97,7 +97,7 @@
                     <li class="break-inside-avoid">
                         <a href="#{{ $anchor }}"
                            data-anchor="{{ $anchor }}"
-                           :aria-current="aktiv === '{{ $anchor }}' ? 'true' : null"
+                           :aria-current="aktiv === '{{ $anchor }}' ? 'location' : null"
                            :class="aktiv === '{{ $anchor }}' ? 'font-normal text-content' : 'text-content-secondary'"
                            class="block py-1.5 text-sm no-underline hover:text-content focus-visible:text-content focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">{{ $label }}</a>
                     </li>

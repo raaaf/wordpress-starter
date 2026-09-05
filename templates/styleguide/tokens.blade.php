@@ -10,9 +10,10 @@
 
 @php
     use WordpressStarter\Content\StyleguideReference;
+    use WordpressStarter\Services\StyleguidePage;
 @endphp
 
-<x-section anchor="tokens" background="primary" padding="lg" class="styleguide-tokens">
+<x-section anchor="{{ StyleguidePage::DESIGN_SYSTEM_ANCHORS['tokens'] }}" background="primary" padding="lg" class="styleguide-tokens">
     <x-section-header
         chip="Design System"
         headline="Tokens"

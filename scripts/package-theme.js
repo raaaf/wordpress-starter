@@ -86,6 +86,7 @@ async function packageTheme() {
       'vendor',
       'resources/css',
       'resources/img',
+      'resources/images',
       'resources/icons',
       'resources/fonts',
       'resources/favicons',
