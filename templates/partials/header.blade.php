@@ -2,7 +2,10 @@
 @php
     $colorScheme = \WordpressStarter\Acf\Fields::option('color_scheme', 'system');
 @endphp
-<html {!! get_language_attributes() !!} class="no-js"@if($colorScheme !== 'system') data-theme="{{ esc_attr($colorScheme) }}"@endif>
+{{-- data-theme-storage-key: single source for the localStorage key, read by
+     the inline script below and by theme-switcher.blade.php, so the two never
+     drift apart. --}}
+<html {!! get_language_attributes() !!} class="no-js" data-theme-storage-key="wp-starter-theme"@if($colorScheme !== 'system') data-theme="{{ esc_attr($colorScheme) }}"@endif>
 
 <head>
     <meta charset="{{ get_bloginfo('charset') }}">
@@ -12,7 +15,7 @@
         <script nonce="{{ $GLOBALS['csp_nonce'] ?? '' }}">
             (function () {
                 try {
-                    var m = localStorage.getItem('wp-starter-theme');
+                    var m = localStorage.getItem(document.documentElement.dataset.themeStorageKey || 'wp-starter-theme');
                     if (m === 'light' || m === 'dark') {
                         document.documentElement.setAttribute('data-theme', m);
                     }
@@ -21,6 +24,11 @@
         </script>
     @endif
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{-- Browser chrome colour per scheme. Values are --bg-primary from
+         resources/css/tokens.css (light: --color-gray-100 #F5F5F5, dark:
+         --color-black #000000), the same token bg-surface resolves to. --}}
+    <meta name="theme-color" content="#F5F5F5" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
     <link rel="pingback" href="{{ esc_url(get_bloginfo('pingback_url')) }}">
 
     {{-- Preload critical assets. Font preloads are emitted by AssetOptimizationServiceProvider::addResourcePreloading. --}}

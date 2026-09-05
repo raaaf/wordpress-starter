@@ -520,14 +520,16 @@ if (!function_exists('wp_get_attachment_image_src')) {
 }
 
 if (!function_exists('wp_get_attachment_image')) {
-    function wp_get_attachment_image(int $attachmentId, string $size = 'thumbnail'): string
+    function wp_get_attachment_image(int $attachmentId, string $size = 'thumbnail', bool $icon = false, array $attr = []): string
     {
         $src = wp_get_attachment_image_src($attachmentId, $size);
         if (!$src) {
             return '';
         }
 
-        return sprintf('<img src="%s" width="%d" height="%d" />', $src[0], $src[1], $src[2]);
+        $alt = isset($attr['alt']) ? ' alt="' . esc_attr($attr['alt']) . '"' : '';
+
+        return sprintf('<img src="%s" width="%d" height="%d"%s />', $src[0], $src[1], $src[2], $alt);
     }
 }
 
@@ -850,6 +852,62 @@ if (!function_exists('wp_kses_post')) {
         $tags = apply_filters('wp_kses_allowed_html', $tags, 'post');
 
         return wp_kses($content ?? '', $tags);
+    }
+}
+
+if (!function_exists('force_balance_tags')) {
+    /**
+     * Minimal stack-based re-implementation of core's tag balancer: closes
+     * any still-open tags at the end of the string and drops closing tags
+     * that have no matching opener. Good enough for the unclosed-heading
+     * demotion pass in FooterAlertBar::demoteHeadings() (does not attempt
+     * core's HTML-comment/CDATA edge cases).
+     */
+    function force_balance_tags(string $text): string
+    {
+        $voidTags = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+        $stack = [];
+        $offset = 0;
+
+        $result = (string) preg_replace_callback(
+            '#<(/?)([a-zA-Z][a-zA-Z0-9]*)[^>]*>#',
+            static function (array $matches) use (&$stack, $voidTags): string {
+                $isClosing = $matches[1] === '/';
+                $tagName = strtolower($matches[2]);
+
+                if (in_array($tagName, $voidTags, true)) {
+                    return $matches[0];
+                }
+
+                if ($isClosing) {
+                    if (!in_array($tagName, $stack, true)) {
+                        return '';
+                    }
+
+                    $closed = '';
+                    while ($stack) {
+                        $open = array_pop($stack);
+                        $closed .= '</' . $open . '>';
+                        if ($open === $tagName) {
+                            break;
+                        }
+                    }
+
+                    return $closed;
+                }
+
+                $stack[] = $tagName;
+
+                return $matches[0];
+            },
+            $text
+        );
+
+        while ($stack) {
+            $result .= '</' . array_pop($stack) . '>';
+        }
+
+        return $result;
     }
 }
 
@@ -1423,7 +1481,7 @@ if (!function_exists('sanitize_title')) {
         $title = preg_replace_callback(
             '/[^\x00-\x7f]+/',
             static fn (array $matches): string => strtolower(rawurlencode($matches[0])),
-            $title
+            $title,
         ) ?? '';
         $title = str_replace('.', '-', $title);
         $title = preg_replace('/[^a-z0-9%_\s-]/', '', $title) ?? '';

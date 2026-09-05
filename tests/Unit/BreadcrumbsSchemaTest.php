@@ -7,7 +7,13 @@ namespace Tests\Unit;
 use Tests\Support\TestCase;
 
 /**
- * Tests for the breadcrumb JSON-LD schema output.
+ * Tests for the breadcrumbs partial's visual trail.
+ *
+ * The partial used to also render its own BreadcrumbList JSON-LD in the
+ * non-Yoast branch. That duplicated SeoServiceProvider::addBreadcrumbSchema(),
+ * which already emits a BreadcrumbList (including page ancestors) on wp_head
+ * regardless of Yoast. The JSON-LD sink was removed from the partial; only
+ * the visual <ol> trail remains here.
  */
 final class BreadcrumbsSchemaTest extends TestCase
 {
@@ -22,7 +28,7 @@ final class BreadcrumbsSchemaTest extends TestCase
         parent::tearDown();
     }
 
-    public function testJsonLdEscapesScriptTagsInTitle(): void
+    public function testVisualTrailEscapesHostileTitle(): void
     {
         $GLOBALS['wp_mock_is_front_page'] = false;
         $GLOBALS['wp_mock_is_singular'] = false;
@@ -31,27 +37,23 @@ final class BreadcrumbsSchemaTest extends TestCase
 
         $output = $this->renderBreadcrumbs();
 
-        $ldJsonStart = strpos($output, '<script type="application/ld+json"');
-        $this->assertNotFalse($ldJsonStart, 'ld+json script block not found');
-        $ldJsonEnd = strpos($output, '</script>', $ldJsonStart);
-        $ldJsonBlock = substr($output, $ldJsonStart, $ldJsonEnd - $ldJsonStart);
+        $this->assertStringNotContainsString('<script>alert(1)</script>', $output);
+        $this->assertStringContainsString('aria-current="page"', $output);
+        $this->assertStringContainsString('&amp; Nachfrage', $output);
+    }
 
-        $this->assertStringNotContainsString('</script><script>', $ldJsonBlock);
-        // JSON_HEX_TAG (set in breadcrumbs.blade.php) hex-escapes < and >
-        // to \u003C/\u003E; JSON_UNESCAPED_SLASHES leaves the slash literal,
-        // so a dropped flag would fail this assertion.
-        $this->assertStringContainsString('\u003C/script\u003E\u003Cscript\u003E', $ldJsonBlock);
-        $this->assertStringContainsString('</script>', $output);
+    public function testPartialNoLongerEmitsItsOwnJsonLd(): void
+    {
+        $GLOBALS['wp_mock_is_front_page'] = false;
+        $GLOBALS['wp_mock_is_singular'] = false;
+        $GLOBALS['wp_mock_is_page'] = false;
 
-        // JSON_HEX_AMP (also set in breadcrumbs.blade.php) hex-escapes "&" to
-        // \u0026; a raw "&" inside the ld+json block would mean the flag was
-        // dropped.
-        $this->assertStringContainsString('\u0026', $ldJsonBlock);
-        // Forbidding every "&" in the whole block would also fail on an
-        // ordinary URL query string; only the hostile payload's own "&" is
-        // the regression to catch, so assert that raw substring specifically,
-        // not the character in general.
-        $this->assertStringNotContainsString('Angebot & Nachfrage', $ldJsonBlock);
+        $output = $this->renderBreadcrumbs();
+
+        // Regression guard: BreadcrumbList JSON-LD comes from
+        // SeoServiceProvider::addBreadcrumbSchema() alone now.
+        $this->assertStringNotContainsString('application/ld+json', $output);
+        $this->assertStringNotContainsString('BreadcrumbList', $output);
     }
 
     private function renderBreadcrumbs(): string

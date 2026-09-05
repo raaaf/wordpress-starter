@@ -89,7 +89,11 @@ class FooterAlertBar
         // (e.g. `<h3>Titel<p>Text</p>`), which the pair-aware pass above never
         // matches. Demote any surviving opening/closing heading tag on its own.
         $html = (string) preg_replace('#<h[1-6]' . $attributes . '>#i', '<p><strong>', $html);
+        $html = (string) preg_replace('#</h[1-6]>#i', '</strong></p>', $html);
 
-        return (string) preg_replace('#</h[1-6]>#i', '</strong></p>', $html);
+        // An unmatched heading (e.g. only the opener survived) now leaves an
+        // opening <p><strong> with no closing tag; wp_kses_post() does not
+        // balance tags, so force_balance_tags() closes what is still open.
+        return force_balance_tags($html);
     }
 }

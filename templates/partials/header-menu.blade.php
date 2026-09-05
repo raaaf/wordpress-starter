@@ -7,26 +7,17 @@
     $showCta = $showCta && !$isLandingPage;
 @endphp
 
-<div x-data="navigation" x-init="init()" @keydown.window="handleKeydown($event)" class="relative">
+<div x-data="navigation" @keydown.window="handleKeydown($event)" class="relative">
     <div class="flex items-center justify-between py-6">
         {{-- Left side: Logo + Desktop Navigation --}}
         <div class="flex items-center gap-8">
             @php
-                // ACF option first, then Customizer, then default (see Fields::siteLogoId)
-                $logo_id = \WordpressStarter\Acf\Fields::siteLogoId();
-
-                $logoMarkup = $logo_id
-                    ? wp_get_attachment_image($logo_id, 'logo', false, [
-                        'alt'   => esc_attr(get_bloginfo('name')),
-                        'class' => 'h-12 w-auto',
-                        'sizes' => '(max-width: 768px) 128px, 256px',
-                        'loading' => 'eager',
-                        'fetchpriority' => 'high',
-                    ])
-                    : '<img src="' . esc_url(get_template_directory_uri() . '/resources/img/default-logo.png') . '" alt="' . esc_attr(get_bloginfo('name')) . '" class="h-12 w-auto" width="50" height="50">';
+                // ACF option first, then Customizer, then default (see Fields::siteLogoMarkup)
+                $logoMarkup = \WordpressStarter\Acf\Fields::siteLogoMarkup('header');
             @endphp
 
             @if($isLandingPage)
+                {{-- $logoMarkup is escaped inside Fields::siteLogoMarkup(). --}}
                 <span class="inline-block">{!! $logoMarkup !!}</span>
             @else
                 <a href="{{ esc_url(get_bloginfo('url')) }}"
@@ -55,7 +46,7 @@
             <button @click="toggle()"
                     data-nav-toggle
                     class="md:hidden p-2 rounded-[var(--button-md-radius)] hover:bg-surface-secondary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] transition-all duration-200"
-                    :aria-label="isOpen ? '{{ __('Menü schließen', 'wp-starter') }}' : '{{ __('Menü öffnen', 'wp-starter') }}'"
+                    :aria-label="isOpen ? '{{ esc_js(__('Menü schließen', 'wp-starter')) }}' : '{{ esc_js(__('Menü öffnen', 'wp-starter')) }}'"
                     :aria-expanded="isOpen"
 
                     aria-controls="mobile-navigation">
@@ -87,10 +78,10 @@
     {{-- Mobile navigation --}}
     @unless($isLandingPage)
         <div x-show="isOpen"
-             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter="transition ease-[var(--motion-enter-ease)] duration-[var(--motion-enter-duration)]"
              x-transition:enter-start="opacity-0 transform scale-95"
              x-transition:enter-end="opacity-100 transform scale-100"
-             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave="transition ease-[var(--motion-exit-ease)] duration-[var(--motion-exit-duration)]"
              x-transition:leave-start="opacity-100 transform scale-100"
              x-transition:leave-end="opacity-0 transform scale-95"
              @click.away="close()"

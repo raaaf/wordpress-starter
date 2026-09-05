@@ -257,6 +257,47 @@ describe('member-area.ts', () => {
     });
   });
 
+  describe('memberLogin redirect resolution (R2-S10)', () => {
+    async function submitWithRedirect(redirect: string): Promise<string> {
+      fetchMock.mockImplementation((input: RequestInfo | URL) => {
+        const url = typeof input === 'string' ? input : input.toString();
+        if (url.includes('action=member_get_nonces')) {
+          return Promise.resolve(jsonResponse({ success: true, data: NONCES }));
+        }
+        return Promise.resolve(jsonResponse({ success: true, data: { redirect } }));
+      });
+
+      const { memberLogin } = await captureComponents();
+      const component = memberLogin() as {
+        password: string;
+        submit(): Promise<void>;
+      };
+      component.password = 'secret';
+      await component.submit();
+      return window.location.href;
+    }
+
+    afterEach(() => {
+      window.history.replaceState(null, '', '/');
+    });
+
+    it('resolves a relative same-origin redirect against the current origin', async () => {
+      const href = await submitWithRedirect('/member/downloads');
+      expect(href).toBe(`${window.location.origin}/member/downloads`);
+    });
+
+    it('resolves a protocol-relative same-origin redirect against the current origin', async () => {
+      const href = await submitWithRedirect(`//${window.location.host}/member/downloads`);
+      expect(href).toBe(`${window.location.origin}/member/downloads`);
+    });
+
+    it('rejects a foreign-origin redirect and stays on the current page', async () => {
+      const before = window.location.href;
+      const href = await submitWithRedirect('https://evil.example.com/phish');
+      expect(href).toBe(before);
+    });
+  });
+
   describe('memberLogin nonce rejection (R2-C1/S2)', () => {
     it('does not auto-retry on a 403 and shows a German session-expired error instead', async () => {
       let nonceRequests = 0;

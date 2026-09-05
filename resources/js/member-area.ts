@@ -129,8 +129,9 @@ function createMemberLoginComponent(): MemberLoginState {
           let destination = window.location.href;
           if (typeof redirect === 'string') {
             try {
-              if (new URL(redirect, window.location.origin).origin === window.location.origin) {
-                destination = redirect;
+              const resolved = new URL(redirect, window.location.origin);
+              if (resolved.origin === window.location.origin) {
+                destination = resolved.href;
               }
             } catch {
               // Malformed URL — stay on current page

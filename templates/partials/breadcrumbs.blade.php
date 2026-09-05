@@ -7,6 +7,23 @@
 
     $isMemberArea = is_page() && function_exists('get_field') && get_field('page_is_member_area');
     $isAuthenticated = $isMemberArea && \WordpressStarter\MemberArea\Auth::isAuthenticated();
+
+    // Ancestor pages, same order as SeoServiceProvider::getBreadcrumbItems(), so
+    // the visual trail below matches the BreadcrumbList JSON-LD that provider
+    // already emits on wp_head. Only that one schema exists now; this partial
+    // used to render its own second, non-ancestor-aware one.
+    $breadcrumbAncestors = [];
+    if ($showBreadcrumbs && !$hasYoast && is_page()) {
+        $currentPost = get_queried_object();
+        if ($currentPost instanceof \WP_Post && $currentPost->post_parent) {
+            foreach (array_reverse(get_post_ancestors($currentPost->ID)) as $ancestorId) {
+                $breadcrumbAncestors[] = [
+                    'title' => get_the_title($ancestorId),
+                    'url' => get_permalink($ancestorId),
+                ];
+            }
+        }
+    }
 @endphp
 
 @if($showBreadcrumbs)
@@ -16,37 +33,16 @@
                 @if($hasYoast)
                     <?php yoast_breadcrumb(); ?>
                 @else
-                    @php
-                        $breadcrumbItems = [
-                            [
-                                '@type'    => 'ListItem',
-                                'position' => 1,
-                                'name'     => __('Startseite', 'wp-starter'),
-                                'item'     => home_url('/'),
-                            ],
-                        ];
-                        if (!is_front_page()) {
-                            $breadcrumbItems[] = [
-                                '@type'    => 'ListItem',
-                                'position' => 2,
-                                'name'     => get_the_title(),
-                                'item'     => get_permalink() ?: home_url('/'),
-                            ];
-                        }
-                        $breadcrumbSchema = [
-                            '@context'        => 'https://schema.org',
-                            '@type'           => 'BreadcrumbList',
-                            'itemListElement' => $breadcrumbItems,
-                        ];
-                        $nonce = $GLOBALS['csp_nonce'] ?? '';
-                    @endphp
-                    <script type="application/ld+json" @if($nonce) nonce="{{ $nonce }}" @endif>
-                        {!! wp_json_encode($breadcrumbSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HEX_AMP) !!}
-                    </script>
                     <ol class="flex items-center gap-1 text-sm text-content-secondary">
                         <li>
-                            <a href="{{ home_url('/') }}" class="hover:text-content transition-colors">{{ __('Startseite', 'wp-starter') }}</a>
+                            <a href="{{ esc_url(home_url('/')) }}" class="hover:text-content transition-colors">{{ __('Startseite', 'wp-starter') }}</a>
                         </li>
+                        @foreach($breadcrumbAncestors as $ancestor)
+                            <li aria-hidden="true" class="text-content-tertiary">»</li>
+                            <li>
+                                <a href="{{ esc_url($ancestor['url']) }}" class="hover:text-content transition-colors">{{ $ancestor['title'] }}</a>
+                            </li>
+                        @endforeach
                         @if(!is_front_page())
                             <li aria-hidden="true" class="text-content-tertiary">»</li>
                             <li>

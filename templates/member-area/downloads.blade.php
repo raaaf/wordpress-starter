@@ -8,7 +8,10 @@
     $instanceId = uniqid('downloads-');
 @endphp
 
-<div x-data="downloadTable" x-init="init()">
+{{-- Alpine calls init() on Alpine.data components automatically; an
+     explicit x-init="init()" here would run it a second time (double
+     fetch, double $watch registration). --}}
+<div x-data="downloadTable">
 
     {{-- Toolbar --}}
     <div class="flex flex-col sm:flex-row gap-3 mb-5">
@@ -26,42 +29,30 @@
             />
         </div>
 
-        {{-- Category filter — dynamic from facets --}}
+        {{-- Category filter, dynamic from facets --}}
         <div class="sm:w-52">
-            <div class="select relative">
-                <select
-                    x-model="category"
-                    aria-label="{{ __('Kategorie filtern', 'wp-starter') }}"
-                    class="w-full border bg-surface-secondary text-content appearance-none cursor-pointer transition-[color,background,border-color] duration-200 h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line-control hover:border-line-strong focus:border-line-focus focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
-                >
-                    <option value="">{{ __('Alle Kategorien', 'wp-starter') }}</option>
-                    <template x-for="cat in categories" :key="cat.slug">
-                        <option :value="cat.slug" x-text="cat.label + ' (' + cat.count + ')'"></option>
-                    </template>
-                </select>
-                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-icon-secondary">
-                    <x-icon name="chevron-down" class="w-4 h-4" />
-                </div>
-            </div>
+            @include('partials.member-area-filter-select', [
+                'xModel' => 'category',
+                'optionsVar' => 'categories',
+                'ariaLabel' => __('Kategorie filtern', 'wp-starter'),
+                'placeholder' => __('Alle Kategorien', 'wp-starter'),
+                'valueExpr' => 'opt.slug',
+                'textExpr' => "opt.label + ' (' + opt.count + ')'",
+                'keyExpr' => 'opt.slug',
+            ])
         </div>
 
-        {{-- Extension filter — dynamic from facets --}}
+        {{-- Extension filter, dynamic from facets --}}
         <div class="sm:w-40">
-            <div class="select relative">
-                <select
-                    x-model="ext"
-                    aria-label="{{ __('Dateityp filtern', 'wp-starter') }}"
-                    class="w-full border bg-surface-secondary text-content appearance-none cursor-pointer transition-[color,background,border-color] duration-200 h-10 text-base pl-4 pr-10 rounded-[var(--input-md-radius)] border-line-control hover:border-line-strong focus:border-line-focus focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
-                >
-                    <option value="">{{ __('Alle Typen', 'wp-starter') }}</option>
-                    <template x-for="e in extensions" :key="e.value">
-                        <option :value="e.value" x-text="e.label + ' (' + e.count + ')'"></option>
-                    </template>
-                </select>
-                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-icon-secondary">
-                    <x-icon name="chevron-down" class="w-4 h-4" />
-                </div>
-            </div>
+            @include('partials.member-area-filter-select', [
+                'xModel' => 'ext',
+                'optionsVar' => 'extensions',
+                'ariaLabel' => __('Dateityp filtern', 'wp-starter'),
+                'placeholder' => __('Alle Typen', 'wp-starter'),
+                'valueExpr' => 'opt.value',
+                'textExpr' => "opt.label + ' (' + opt.count + ')'",
+                'keyExpr' => 'opt.value',
+            ])
         </div>
 
         {{-- Per-page --}}
@@ -97,6 +88,15 @@
             <div class="text-center py-8 text-content-secondary">
                 <x-icon name="download" class="w-12 h-12 mx-auto mb-3 text-icon-tertiary" />
                 <p>{{ __('Keine Dokumente gefunden.', 'wp-starter') }}</p>
+                <div x-show="search || category || ext" class="mt-4">
+                    <x-button
+                        type="button"
+                        x-on:click="search = ''; category = ''; ext = ''"
+                        :title="__('Filter zurücksetzen', 'wp-starter')"
+                        variant="secondary"
+                        size="sm"
+                    />
+                </div>
             </div>
         </x-card>
     </div>
@@ -127,15 +127,24 @@
                     <template x-for="item in items" :key="item.id">
                         <tr class="border-t border-line hover:bg-surface-secondary transition-colors">
 
-                            {{-- Title + "Neu"-Badge --}}
+                            {{-- Title + "Neu"-Badge. safeUrl() (member-area.ts) returns an empty
+                                 string for rejected URLs; a rejected URL renders the title as
+                                 plain text instead of a dead link (template x-if keeps the unused
+                                 branch out of the DOM, so no anchor without a working href ever
+                                 announces "opens in new tab" to assistive tech). --}}
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-2 flex-wrap">
-                                    <a
-                                        :href="item.download_url"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="font-normal text-content hover:text-content-accent transition-colors"
-                                    ><span x-text="item.title"></span><span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
+                                    <template x-if="item.download_url">
+                                        <a
+                                            :href="item.download_url"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="font-normal text-content hover:text-content-accent transition-colors"
+                                        ><span x-text="item.title"></span><span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
+                                    </template>
+                                    <template x-if="!item.download_url">
+                                        <span class="font-normal text-content" x-text="item.title"></span>
+                                    </template>
                                     {{-- x-badge never echoes $attributes, so x-show has to sit on a
                                          wrapping span; the badge itself stays a plain static x-badge. --}}
                                     <span x-show="item.is_updated">
@@ -159,19 +168,25 @@
                             <td class="px-4 py-3 text-content-secondary" x-text="item.category_label"></td>
                             <td class="px-4 py-3 text-content-secondary tabular-nums" x-text="item.last_modified"></td>
 
-                            {{-- Download button (ghost) --}}
+                            {{-- Download button (ghost, not <x-button>: needs a per-row dynamic
+                                 :href/x-if that the component's static props cannot express).
+                                 safeUrl() (member-area.ts) returns an empty string for rejected
+                                 URLs; item.available alone is not enough (a rejected URL can still
+                                 be "available"), so the link branch requires both, and the
+                                 "Nicht verfügbar" branch covers either failing. template x-if
+                                 keeps the unused branch out of the DOM. --}}
                             <td class="px-4 py-3 text-right">
-                                <a
-                                    x-show="item.available"
-                                    :href="item.download_url"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="button inline-flex items-center justify-center font-normal transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none active:scale-[0.98] bg-transparent text-content border border-transparent hover:bg-surface-tertiary active:bg-surface-secondary active:border-line focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] px-[var(--button-sm-padding-x)] py-[var(--button-sm-padding-y)] text-xs min-h-[var(--button-sm-min-height)] gap-[var(--button-sm-gap)] rounded-[var(--button-sm-radius)]"
-                                >{{ __('Herunterladen', 'wp-starter') }}<span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
-                                <span
-                                    x-show="!item.available"
-                                    class="text-xs text-content-disabled"
-                                >{{ __('Nicht verfügbar', 'wp-starter') }}</span>
+                                <template x-if="item.available && item.download_url">
+                                    <a
+                                        :href="item.download_url"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="button inline-flex items-center justify-center font-normal transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none active:scale-[0.98] bg-transparent text-content border border-transparent hover:bg-surface-tertiary active:bg-surface-secondary active:border-line focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] px-[var(--button-sm-padding-x)] py-[var(--button-sm-padding-y)] text-xs min-h-[var(--button-sm-min-height)] gap-[var(--button-sm-gap)] rounded-[var(--button-sm-radius)]"
+                                    >{{ __('Herunterladen', 'wp-starter') }}<span class="sr-only">{{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span></a>
+                                </template>
+                                <template x-if="!item.available || !item.download_url">
+                                    <span class="text-xs text-content-disabled">{{ __('Nicht verfügbar', 'wp-starter') }}</span>
+                                </template>
                             </td>
 
                         </tr>
@@ -210,7 +225,13 @@
                                 ? 'bg-surface-brand text-content-on-brand border-line'
                                 : 'text-content-secondary hover:bg-surface-secondary border-line'"
                             class="inline-flex items-center justify-center min-h-11! min-w-11! rounded-md border text-sm font-normal transition-colors"
-                            :aria-label="`{{ __('Seite', 'wp-starter') }} ${n}`"
+                            {{-- Raw sink: wp_json_encode() with the JSON_HEX_* flags produces a
+                                 JS string literal whose internal quotes/tags/amp are all
+                                 \u-escaped, so it is safe both as JS and inside this
+                                 single-quoted HTML attribute; esc_js() alone only targets
+                                 single-quoted strings and broke inside the previous backtick
+                                 template literal. --}}
+                            :aria-label='{!! wp_json_encode(__('Seite', 'wp-starter'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!} + " " + n'
                             :aria-current="n === currentPage ? 'page' : false"
                             x-text="n"
                         ></button>
@@ -251,7 +272,7 @@
          neben der Fehlermeldung im Alert faelschlich "0 Dokumente" angesagt --
          die Fehlermeldung selbst uebernimmt die Ansage. --}}
     <p class="text-sm text-content-secondary mt-4" aria-live="polite" aria-atomic="true">
-        <span x-text="(loading || error) ? '' : total + ' ' + '{{ __('Dokumente', 'wp-starter') }}'"></span>
+        <span x-text="(loading || error) ? '' : total + ' ' + '{{ esc_js(__('Dokumente', 'wp-starter')) }}'"></span>
     </p>
 
 </div>

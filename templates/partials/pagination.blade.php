@@ -13,7 +13,9 @@
         $baseClasses = 'inline-flex items-center justify-center min-h-11! min-w-11! px-4 py-2 rounded-lg border border-line text-content hover:bg-surface-secondary transition-colors';
         $currentClasses = 'bg-surface-brand text-content-on-brand border-surface-brand hover:bg-surface-brand';
         $dotsClasses = 'inline-flex items-center justify-center min-h-11! min-w-11! px-4 py-2 text-content-tertiary';
-        $pageLabel = __('Seite ', 'wp-starter');
+        // Trailing space added outside the string so the msgid itself never
+        // ends in whitespace.
+        $srOnlyPagePrefix = '<span class="sr-only">' . __('Seite', 'wp-starter') . ' </span>';
     @endphp
     <nav class="{{ $navClass ?? 'mt-16' }}" aria-label="{{ $ariaLabel ?? __('Navigation', 'wp-starter') }}">
         <ul class="flex flex-wrap justify-center gap-2">
@@ -21,11 +23,23 @@
                 @php
                     // Accessible name first, against paginate_links()'s untouched markup:
                     // bare page numbers get an sr-only "Seite " prefix so they read "Seite 2".
-                    $link = preg_replace('/(<a class="page-numbers" href="[^"]*">)/', '$1<span class="sr-only">' . $pageLabel . '</span>', $link);
-                    $link = preg_replace('/(<span aria-current="page" class="page-numbers current">)/', '$1<span class="sr-only">' . $pageLabel . '</span>', $link);
+                    // preg_replace_callback, not preg_replace: a plain preg_replace treats
+                    // $/\ sequences in the replacement as backreferences, so the label
+                    // would corrupt the injected markup if the translation ever contained
+                    // one. The callback's return value is used verbatim.
+                    $link = preg_replace_callback(
+                        '/(<a class="page-numbers" href="[^"]*">)/',
+                        static fn (array $matches): string => $matches[1] . $srOnlyPagePrefix,
+                        $link
+                    );
+                    $link = preg_replace_callback(
+                        '/(<span aria-current="page" class="page-numbers current">)/',
+                        static fn (array $matches): string => $matches[1] . $srOnlyPagePrefix,
+                        $link
+                    );
 
                     // Styling via exact class-attribute matches, never the loose word
-                    // "current" — that also matches inside "aria-current" and corrupts it.
+                    // "current", which also matches inside "aria-current" and corrupts it.
                     $link = str_replace('class="page-numbers current"', 'class="' . $baseClasses . ' ' . $currentClasses . '"', $link);
                     $link = str_replace('class="page-numbers dots"', 'class="' . $dotsClasses . ' dots"', $link);
                     $link = str_replace('class="prev page-numbers"', 'class="prev ' . $baseClasses . '"', $link);

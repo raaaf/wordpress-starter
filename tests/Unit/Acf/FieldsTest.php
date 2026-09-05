@@ -474,4 +474,55 @@ final class FieldsTest extends TestCase
         $this->assertStringContainsString('href=""', $result);
         $this->assertStringNotContainsString('javascript:', $result);
     }
+
+    // ==========================================
+    // siteLogoMarkup() method tests
+    // ==========================================
+
+    protected function tearDownSiteLogoMarkupGlobals(): void
+    {
+        unset($GLOBALS['wp_mock_bloginfo']);
+    }
+
+    public function testSiteLogoMarkupUsesAttachmentImageWhenLogoIsSet(): void
+    {
+        $this->setMockField('site_logo', ['ID' => 42, 'url' => 'https://example.com/logo.png'], 'option');
+        $this->setMockAttachment(42, 'logo', ['https://example.com/logo.png', 200, 80]);
+
+        $result = Fields::siteLogoMarkup('header');
+
+        $this->assertStringContainsString('https://example.com/logo.png', $result);
+    }
+
+    public function testSiteLogoMarkupEscapesHostileTitleForTextFallback(): void
+    {
+        $GLOBALS['wp_mock_bloginfo'] = ['name' => 'Acme" onerror="alert(1)'];
+        $this->setMockField('site_logo', null, 'option');
+
+        $result = Fields::siteLogoMarkup('footer');
+
+        $this->assertStringNotContainsString('onerror="alert(1)"', $result);
+        $this->assertStringContainsString('&quot;', $result);
+        $this->assertStringContainsString('h-10 w-auto', $result);
+
+        $this->tearDownSiteLogoMarkupGlobals();
+    }
+
+    public function testSiteLogoMarkupEscapesHostileTitleOnceForAttachmentImage(): void
+    {
+        $GLOBALS['wp_mock_bloginfo'] = ['name' => 'Acme & Söhne " onerror="alert(1)'];
+        $this->setMockField('site_logo', ['ID' => 42, 'url' => 'https://example.com/logo.png'], 'option');
+        $this->setMockAttachment(42, 'logo', ['https://example.com/logo.png', 200, 80]);
+
+        $result = Fields::siteLogoMarkup('header');
+
+        // Escaped exactly once: "&" becomes "&amp;", not "&amp;amp;".
+        $this->assertStringContainsString('Acme &amp; S', $result);
+        $this->assertStringNotContainsString('&amp;amp;', $result);
+        $this->assertStringContainsString('&quot;', $result);
+        $this->assertStringNotContainsString('&quot;&quot;', $result);
+        $this->assertStringNotContainsString('onerror="alert(1)"', $result);
+
+        $this->tearDownSiteLogoMarkupGlobals();
+    }
 }

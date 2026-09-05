@@ -60,21 +60,45 @@ final class FooterAlertBarTest extends TestCase
     {
         // Content pasted in from Outlook/Word can carry an unclosed heading tag.
         // The pair-aware first pass never matches it (no closing </h*> to pair
-        // with), so the fallback pass demotes only the opening tag; this pins
-        // the current fallback behaviour: no closing </strong></p> is added.
+        // with), so the fallback pass demotes only the opening tag, leaving an
+        // unmatched <p><strong>; force_balance_tags() then closes both.
         $html = '<h2>Titel';
 
-        $this->assertSame('<p><strong>Titel', FooterAlertBar::demoteHeadings($html));
+        $this->assertSame('<p><strong>Titel</strong></p>', FooterAlertBar::demoteHeadings($html));
     }
 
     public function testDemotesUnclosedHeadingWhoseClosingTagIsMissingBeforeNextTag(): void
     {
         // Same fallback case, but followed by unrelated markup instead of end
         // of string. There is no </h3> anywhere in the string, so the
-        // pair-aware pass still cannot match it.
+        // pair-aware pass still cannot match it; force_balance_tags() still
+        // closes every tag left open by the fallback pass.
         $html = '<h3>Titel<p>Text</p>';
 
-        $this->assertSame('<p><strong>Titel<p>Text</p>', FooterAlertBar::demoteHeadings($html));
+        $result = FooterAlertBar::demoteHeadings($html);
+
+        $this->assertStringNotContainsString('<h3', $result);
+        // Balanced: no dangling opening tag without a matching close.
+        $this->assertSame(
+            substr_count($result, '<p>') + substr_count($result, '<strong>'),
+            substr_count($result, '</p>') + substr_count($result, '</strong>')
+        );
+    }
+
+    public function testUnclosedHeadingProducesBalancedMarkup(): void
+    {
+        // Regression test for R2-S6: an unbalanced pasted <h2> must not leave
+        // an opening <strong>/<p> without its closing tag, since
+        // wp_kses_post() does not balance tags on its own.
+        $html = '<h2>Titel<p>Weiterer Text ohne schliessendes Tag';
+
+        $result = FooterAlertBar::demoteHeadings($html);
+
+        $this->assertStringEndsWith('</strong></p>', $result);
+        $this->assertSame(
+            substr_count($result, '<p>') + substr_count($result, '<strong>'),
+            substr_count($result, '</p>') + substr_count($result, '</strong>')
+        );
     }
 
     public function testGreaterThanInsideAQuotedHeadingAttributeDoesNotTruncateTheMatch(): void

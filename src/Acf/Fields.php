@@ -346,6 +346,44 @@ class Fields
     }
 
     /**
+     * Render the site logo as ready-to-use HTML: the ACF site_logo / Customizer
+     * logo via wp_get_attachment_image(), or an escaped <img> text fallback when
+     * none is set. Single source of truth for the fallback chain shared by the
+     * header and footer partials (previously duplicated with diverging fallback
+     * order between them).
+     *
+     * $context only selects the size class and, for 'header', the LCP hints
+     * (eager loading, high fetchpriority) that the header logo carries.
+     */
+    public static function siteLogoMarkup(string $context = 'header'): string
+    {
+        $isHeader = $context === 'header';
+        $sizeClass = $isHeader ? 'h-12 w-auto' : 'h-10 w-auto';
+        $logoId = self::siteLogoId();
+
+        if ($logoId) {
+            $attrs = [
+                // Raw value: wp_get_attachment_image() escapes attributes itself,
+                // pre-escaping here would double-encode "&" and quotes.
+                'alt' => get_bloginfo('name'),
+                'class' => $sizeClass,
+                'sizes' => '(max-width: 768px) 128px, 256px',
+            ];
+            if ($isHeader) {
+                $attrs['loading'] = 'eager';
+                $attrs['fetchpriority'] = 'high';
+            }
+
+            $markup = wp_get_attachment_image($logoId, 'logo', false, $attrs);
+            if ($markup) {
+                return $markup;
+            }
+        }
+
+        return '<img src="' . esc_url(get_template_directory_uri() . '/resources/img/default-logo.png') . '" alt="' . esc_attr(get_bloginfo('name')) . '" class="' . esc_attr($sizeClass) . '" width="50" height="50">';
+    }
+
+    /**
      * Output link HTML
      */
     public static function linkHtml(string $field, string $class = '', mixed $postId = null): string

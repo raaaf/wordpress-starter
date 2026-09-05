@@ -35,10 +35,6 @@
     // Get social links
     $socialLinks = \WordpressStarter\Acf\Fields::option('social_links', []);
 
-    // Get logo (same fallback order as header, see Fields::siteLogoUrl)
-    $logo_url = $showLogo ? \WordpressStarter\Acf\Fields::siteLogoUrl() : null;
-    $logo_id = $showLogo ? \WordpressStarter\Acf\Fields::siteLogoId() : null;
-
     // Replace {year} placeholder
     $copyrightText = str_replace('{year}', wp_date('Y'), $copyrightText);
 @endphp
@@ -48,15 +44,11 @@
         <div class="grid grid-cols-1 md:grid-cols-2 {{ $isLandingPage ? 'lg:grid-cols-2' : 'lg:grid-cols-4' }} gap-8 lg:gap-12">
             {{-- Logo / Company Info / Footer Text --}}
             <div class="lg:col-span-1">
-                @if($showLogo && ($logo_id || $logo_url))
+                @if($showLogo)
                     @php
-                        $footerLogoMarkup = $logo_id
-                            ? wp_get_attachment_image($logo_id, 'logo', false, [
-                                'alt' => esc_attr(get_bloginfo('name')),
-                                'class' => 'h-10 w-auto',
-                                'sizes' => '(max-width: 768px) 128px, 256px',
-                            ])
-                            : '<img src="' . esc_url($logo_url) . '" alt="' . esc_attr(get_bloginfo('name')) . '" class="h-10 w-auto">';
+                        // Same fallback chain as the header (custom logo, Customizer, text
+                        // fallback), see Fields::siteLogoMarkup. Escaped inside that method.
+                        $footerLogoMarkup = \WordpressStarter\Acf\Fields::siteLogoMarkup('footer');
                     @endphp
                     @if($isLandingPage)
                         <span class="inline-block mb-4">{!! $footerLogoMarkup !!}</span>
@@ -109,7 +101,7 @@
                         @endif
                         @if($email)
                             <p>
-                                <a href="mailto:{{ $email }}" class="hover:text-content transition-colors">
+                                <a href="{{ esc_url('mailto:' . $email) }}" class="hover:text-content transition-colors">
                                     {{ $email }}
                                 </a>
                             </p>
