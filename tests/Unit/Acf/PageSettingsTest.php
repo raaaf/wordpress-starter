@@ -25,7 +25,7 @@ final class PageSettingsTest extends TestCase
         $groups = $GLOBALS['wp_mock_registered_field_groups'] ?? [];
         $group = null;
         foreach ($groups as $candidate) {
-            if (($candidate['key'] ?? null) === 'group_page_settings') {
+            if (( $candidate['key'] ?? null ) === 'group_page_settings') {
                 $group = $candidate;
                 break;
             }

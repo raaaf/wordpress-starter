@@ -154,7 +154,7 @@ test.describe('Styleguide', () => {
     await chips.first().click();
   });
 
-  test('a deep link opens the variant it points at', async ({ browser }) => {
+  test('a deep link opens the variant it points at', async () => {
     // Eigene Seite: der Anker muss beim Laden gesetzt sein, ein Sprung im
     // laufenden Dokument startet Alpine nicht neu.
     const eigene = await context.newPage();

@@ -204,7 +204,7 @@ final class StyleguideFieldReferenceTest extends TestCase
         $mitKindern = 0;
         $rekursivZaehlen = function (array $felder) use (&$mitKindern, &$rekursivZaehlen): void {
             foreach ($felder as $feld) {
-                $mitKindern++;
+                ++$mitKindern;
                 $rekursivZaehlen($feld['children']);
             }
         };

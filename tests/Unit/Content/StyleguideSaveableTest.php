@@ -104,7 +104,7 @@ final class StyleguideSaveableTest extends TestCase
                     continue;
                 }
 
-                if ((int) ( $feld['min'] ?? 0 ) < 1) {
+                if ( (int) ( $feld['min'] ?? 0 ) < 1) {
                     continue;
                 }
 
@@ -121,7 +121,7 @@ final class StyleguideSaveableTest extends TestCase
                 }
 
                 if ($pflicht !== []) {
-                    $result[$name][(string) ( $feld['name'] ?? '' )] = $pflicht;
+                    $result[$name][ (string) ( $feld['name'] ?? '' )] = $pflicht;
                 }
             }
         }

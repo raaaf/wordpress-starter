@@ -18,7 +18,7 @@ Gutenberg is disabled. Content model: Classic Editor + ACF Flexible Content.
 
 ## Requirements
 
-- PHP 8.2+
+- PHP 8.2+ (runtime), PHP 8.4+ for the test toolchain (PHPUnit)
 - Composer
 - Node.js 20.19+ / 22.12+
 - WordPress 6.8+
@@ -28,7 +28,7 @@ Gutenberg is disabled. Content model: Classic Editor + ACF Flexible Content.
 ## Create a new client project
 
 ```bash
-git clone https://github.com/raaaf/starter.git theme-name
+git clone https://github.com/raaaf/wordpress-starter.git theme-name
 cd theme-name
 php bin/setup.php
 ```
@@ -96,6 +96,8 @@ npm run dev
 ## Development
 
 ```bash
+composer install     # PHP dependencies
+npm install           # JS dependencies
 npm run dev          # Vite dev server with HMR (localhost:5180)
 npm run build        # Production build
 npm run tokens       # Generate resources/css/tokens.css from Figma export
@@ -103,11 +105,17 @@ npm run tokens:watch # Watch Figma export and regenerate tokens.css
 npm run lint         # ESLint
 composer lint        # PHPCS + PHPStan
 composer test        # PHPUnit
+npm test              # Vitest (JS unit tests)
+npm run test:watch    # Vitest in watch mode
+npm run test:coverage # Vitest with coverage report
 npm run test:e2e     # Playwright E2E tests
 npm run test:a11y    # Accessibility tests
 npm run test:styleguide # Styleguide page E2E test
 npm run icons         # Sync resources/icons/ from config/icons.json
+npm run package       # Package the theme as a .zip (requires `composer install --no-dev --no-scripts` first)
 ```
+
+The Vite dev server binds to `localhost` by default. Set `VITE_HOST=true` to opt in to listening on all interfaces (e.g. testing from another device on the LAN).
 
 ## Service providers
 

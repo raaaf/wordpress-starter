@@ -68,11 +68,11 @@ final class TemplateRenderTest extends TestCase
 
             // Standalone component renders produce undefined-variable warnings;
             // only Throwables are relevant here.
-            $level = error_reporting(E_ERROR | E_PARSE);
+            $level = error_reporting(E_ERROR | E_PARSE);  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting,WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- deliberately silences undefined-variable noise while probing mock-gap templates
 
             try {
                 $factory->make($view, $viewData)->render();
-                $rendered++;
+                ++$rendered;
             } catch (Throwable $e) {
                 $root = $e;
                 while ($root->getPrevious() !== null) {
@@ -80,12 +80,12 @@ final class TemplateRenderTest extends TestCase
                 }
 
                 if ($this->isMockGap($root->getMessage())) {
-                    $tolerated++;
+                    ++$tolerated;
                 } else {
                     $failures[] = $path . ' — ' . $root->getMessage();
                 }
             } finally {
-                error_reporting($level);
+                error_reporting($level);  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting,WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- restores prior error_reporting level after the probe
                 $factory->flushState();
             }
         }
@@ -246,11 +246,11 @@ final class TemplateRenderTest extends TestCase
                 continue;
             }
 
-            $level = error_reporting(E_ERROR | E_PARSE);
+            $level = error_reporting(E_ERROR | E_PARSE);  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting,WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- deliberately silences undefined-variable noise while probing mock-gap templates
 
             try {
                 $renderedOutput = $factory->make($view, $viewData)->render();
-                $rendered++;
+                ++$rendered;
 
                 if (str_contains($renderedOutput, '<script>alert(1)</script>')) {
                     $offenders[] = $path;
@@ -265,12 +265,12 @@ final class TemplateRenderTest extends TestCase
                 }
 
                 if (str_contains($renderedOutput, self::ESCAPED_MARKER)) {
-                    $escaped++;
+                    ++$escaped;
                 }
             } catch (Throwable) {
                 $thrown[] = $view;
             } finally {
-                error_reporting($level);
+                error_reporting($level);  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting,WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- restores prior error_reporting level after the probe
                 $factory->flushState();
             }
         }
@@ -305,6 +305,7 @@ final class TemplateRenderTest extends TestCase
      * Renders one of the RAW_OUTPUT_TEMPLATES (which intentionally echo part
      * of their content via {!! !!}) and asserts that the value each of them
      * sanitizes before that raw echo (Text::lineBreaks(), wp_kses_post(),
+     *
      * @kses) actually strips the hostile payload's script tag and any event
      * handler, while the benign remainder of the payload text still renders.
      * A template that emits the raw payload unescaped is a real XSS, reported
@@ -321,7 +322,7 @@ final class TemplateRenderTest extends TestCase
         array &$offenders,
         array &$thrown,
     ): void {
-        $level = error_reporting(E_ERROR | E_PARSE);
+        $level = error_reporting(E_ERROR | E_PARSE);  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting,WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- deliberately silences undefined-variable noise while probing mock-gap templates
 
         try {
             $renderedOutput = $factory->make($view, $viewData)->render();
@@ -330,7 +331,7 @@ final class TemplateRenderTest extends TestCase
 
             return;
         } finally {
-            error_reporting($level);
+            error_reporting($level);  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting,WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- restores prior error_reporting level after the probe
             $factory->flushState();
         }
 

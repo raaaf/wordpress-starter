@@ -550,7 +550,7 @@ final class SecurityTest extends TestCase
         $result = apply_filters('script_loader_tag', $tag, 'a');
 
         $needle = '<script nonce="' . $nonce . '"';
-        $this->assertSame(3, substr_count((string) $result, $needle));
+        $this->assertSame(3, substr_count( (string) $result, $needle));
     }
 
     public function testScriptLoaderTagLeavesExistingNonceUnchanged(): void

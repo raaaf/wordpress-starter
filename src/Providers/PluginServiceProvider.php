@@ -250,7 +250,7 @@ class PluginServiceProvider extends ServiceProvider
 
         foreach ($samplePosts as $postData) {
             $postDate = gmdate('Y-m-d H:i:s', $baseTime - ( $dayOffset * DAY_IN_SECONDS ));
-            $dayOffset += rand(2, 4);
+            $dayOffset += wp_rand(2, 4);
 
             $postId = wp_insert_post([
                 'post_title' => $postData['title'],

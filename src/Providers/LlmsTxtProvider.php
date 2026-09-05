@@ -45,7 +45,7 @@ class LlmsTxtProvider extends ServiceProvider
         $requestUri = isset($_SERVER['REQUEST_URI'])
             ? sanitize_text_field(wp_unslash( (string) $_SERVER['REQUEST_URI']))
             : '';
-        $path = strtolower(parse_url($requestUri, PHP_URL_PATH) ?: '');
+        $path = strtolower(wp_parse_url($requestUri, PHP_URL_PATH) ?: '');
 
         if ($path === '/llms.txt') {
             $this->send($this->getIndexBody());

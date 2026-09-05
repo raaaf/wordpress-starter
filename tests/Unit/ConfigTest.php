@@ -201,6 +201,7 @@ final class ConfigTest extends TestCase
         Config::get('EXPORTED_KEY');
 
         $this->assertSame('exported_value', getenv('EXPORTED_KEY'));
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- reads back the key this test exported
         $this->assertSame('exported_value', $_ENV['EXPORTED_KEY']);
     }
 

@@ -33,7 +33,7 @@ class Crypto
 
         sodium_memzero($key);
 
-        return self::PREFIX . base64_encode($nonce . $box);
+        return self::PREFIX . base64_encode($nonce . $box);  // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- symmetric-crypto payload encoding, not obfuscation
     }
 
     /**
@@ -49,7 +49,7 @@ class Crypto
         }
 
         $encoded = substr($value, strlen(self::PREFIX));
-        $raw     = base64_decode($encoded, strict: true);
+        $raw     = base64_decode($encoded, strict: true);  // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- symmetric-crypto payload decoding, not obfuscation
 
         if ($raw === false || strlen($raw) < SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES) {
             return null;

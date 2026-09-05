@@ -16,9 +16,16 @@
     <source>
         <include>
             <directory>src</directory>
+            <directory>config</directory>
+            <file>functions.php</file>
+            <file>index.php</file>
         </include>
         <exclude>
             <directory>src/types</directory>
+            <!-- config/index.php is a template gateway that executes (renders
+                 output) on load rather than being called through functions;
+                 it is never required directly by the test suite. -->
+            <file>config/index.php</file>
         </exclude>
     </source>
     <php>

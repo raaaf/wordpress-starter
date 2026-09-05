@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 // Suppress deprecation warnings during AJAX/REST requests to prevent JSON parse errors
 // (ACF Pro block previews fail if PHP warnings are output before JSON responses)
 if (

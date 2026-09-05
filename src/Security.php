@@ -33,7 +33,7 @@ class Security
     public static function getNonce(): string
     {
         if (self::$nonce === null) {
-            self::$nonce = base64_encode(random_bytes(16));
+            self::$nonce = base64_encode(random_bytes(16));  // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- CSP nonce encoding, not obfuscation
         }
 
         return self::$nonce;

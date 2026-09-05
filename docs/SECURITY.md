@@ -259,6 +259,11 @@ echo esc_url($url);
 {!! $trusted_html !!}  // Raw output (use carefully)
 ```
 
+`phpcs.xml` excludes `*.blade.php` because Blade syntax cannot be parsed by phpcs, so the
+WordPress.Security escaping sniffs never run against `templates/`. Escaping in Blade
+templates is instead verified by `tests/Unit/TemplateRenderTest.php` (a hostile-payload
+render pass across all templates) and by the `@kses` Blade directive, not by phpcs.
+
 ## File Security
 
 ### Sensitive Files

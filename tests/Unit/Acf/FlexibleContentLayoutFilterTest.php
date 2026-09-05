@@ -112,13 +112,15 @@ final class FlexibleContentLayoutFilterTest extends TestCase
     public function testFilterCanInsertALayoutAtAGivenPosition(): void
     {
         add_filter($this->filterName(), static function (array $layouts): array {
-            array_splice($layouts, 1, 0, [[
-                'key' => 'layout_precious_metals',
-                'name' => 'precious_metals',
-                'label' => 'Edelmetalle',
-                'display' => 'block',
-                'sub_fields' => [],
-            ]]);
+            array_splice($layouts, 1, 0, [
+                [
+                    'key' => 'layout_precious_metals',
+                    'name' => 'precious_metals',
+                    'label' => 'Edelmetalle',
+                    'display' => 'block',
+                    'sub_fields' => [],
+                ],
+            ]);
 
             return $layouts;
         });

@@ -107,6 +107,8 @@ git push -u origin feature/team-block
    ```bash
    npm run lint
    composer lint
+   composer test
+   npm test
    ```
 4. Erstelle einen Pull Request mit:
    - Klarer Beschreibung was und warum

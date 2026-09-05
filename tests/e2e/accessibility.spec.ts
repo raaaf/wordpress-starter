@@ -6,7 +6,7 @@ test.describe('Accessibility', () => {
   // steht dann auf opacity 0 bis 1, und axe rechnet die Mischfarbe aus. Gemessen
   // wurden so 2.14:1 fuer Fliesstext, der im fertigen Zustand 7:1 hat. Das Theme
   // schaltet die Animation bei prefers-reduced-motion selbst ab.
-  test.use({ reducedMotion: 'reduce' });
+  test.use({ contextOptions: { reducedMotion: 'reduce' } });
 
   /**
    * Wartet, bis keine Sektion mehr halb eingeblendet ist.

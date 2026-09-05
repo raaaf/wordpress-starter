@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * PHPUnit Bootstrap File
  *
  * This file is loaded before any tests run.
  * It sets up WordPress constants and mock functions.
  */
+
+declare(strict_types=1);
 
 // Load env() from src/helpers.php BEFORE the autoloader, so Laravel's
 // illuminate/support never gets a chance to define its own env(). helpers.php
@@ -74,9 +74,10 @@ if (!function_exists('get_template_directory_uri')) {
 if (!function_exists('wp_nav_menu')) {
     function wp_nav_menu(array $args = []): ?string
     {
-        $output = '<ul id="mock-nav-menu" class="' . ($args['menu_class'] ?? '') . '"></ul>';
+        $output = '<ul id="mock-nav-menu" class="' . ( $args['menu_class'] ?? '' ) . '"></ul>';
 
         if (!empty($args['echo']) || !isset($args['echo'])) {
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- test double echoes the menu markup the test supplied
             echo $output;
 
             return null;
@@ -103,14 +104,14 @@ if (!function_exists('has_nav_menu')) {
 if (!function_exists('get_theme_file_path')) {
     function get_theme_file_path(string $file = ''): string
     {
-        return get_template_directory() . ($file ? '/' . ltrim($file, '/') : '');
+        return get_template_directory() . ( $file ? '/' . ltrim($file, '/') : '' );
     }
 }
 
 if (!function_exists('get_theme_file_uri')) {
     function get_theme_file_uri(string $file = ''): string
     {
-        return get_template_directory_uri() . ($file ? '/' . ltrim($file, '/') : '');
+        return get_template_directory_uri() . ( $file ? '/' . ltrim($file, '/') : '' );
     }
 }
 
@@ -246,7 +247,7 @@ if (!function_exists('wp_cache_set')) {
 if (!function_exists('attachment_url_to_postid')) {
     function attachment_url_to_postid(string $url): int
     {
-        return (int) ($GLOBALS['wp_mock_attachments'][$url] ?? 0);
+        return (int) ( $GLOBALS['wp_mock_attachments'][$url] ?? 0 );
     }
 }
 
@@ -530,7 +531,7 @@ if (!function_exists('get_current_blog_id')) {
 if (!function_exists('get_queried_object_id')) {
     function get_queried_object_id(): int
     {
-        return (int) ($GLOBALS['wp_mock_queried_object_id'] ?? 0);
+        return (int) ( $GLOBALS['wp_mock_queried_object_id'] ?? 0 );
     }
 }
 
@@ -575,7 +576,15 @@ if (!function_exists('wp_mkdir_p')) {
 if (!function_exists('wp_json_encode')) {
     function wp_json_encode(mixed $data, int $options = 0, int $depth = 512): string|false
     {
-        return json_encode($data, $options, $depth);
+        return json_encode($data, $options, $depth);  // phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- test double mirrors the core implementation
+    }
+}
+
+// Randomness functions
+if (!function_exists('wp_rand')) {
+    function wp_rand(int $min = 0, int $max = PHP_INT_MAX): int
+    {
+        return random_int($min, $max);
     }
 }
 
@@ -654,7 +663,7 @@ if (!function_exists('wp_kses')) {
                 if ($closing) {
                     $builtTags[] = '</' . $tag . '>';
 
-                    return "\x01" . (count($builtTags) - 1) . "\x02";
+                    return "\x01" . ( count($builtTags) - 1 ) . "\x02";
                 }
 
                 $allowedAttrs = is_array($allowedTags[$tag]) ? array_change_key_case($allowedTags[$tag], CASE_LOWER) : [];
@@ -684,8 +693,8 @@ if (!function_exists('wp_kses')) {
                     }
 
                     $isAllowed = isset($allowedAttrs[$name])
-                        || (str_starts_with($name, 'data-') && isset($allowedAttrs['data-*']))
-                        || (str_starts_with($name, 'aria-') && isset($allowedAttrs['aria-*']));
+                        || ( str_starts_with($name, 'data-') && isset($allowedAttrs['data-*']) )
+                        || ( str_starts_with($name, 'aria-') && isset($allowedAttrs['aria-*']) );
 
                     if (!$isAllowed) {
                         continue;
@@ -706,9 +715,9 @@ if (!function_exists('wp_kses')) {
                     $keptAttrs .= ' ' . $name . '="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"';
                 }
 
-                $builtTags[] = '<' . $tag . $keptAttrs . ($selfClosing ? ' /' : '') . '>';
+                $builtTags[] = '<' . $tag . $keptAttrs . ( $selfClosing ? ' /' : '' ) . '>';
 
-                return "\x01" . (count($builtTags) - 1) . "\x02";
+                return "\x01" . ( count($builtTags) - 1 ) . "\x02";
             },
             $content
         );
@@ -722,7 +731,7 @@ if (!function_exists('wp_kses')) {
 
         $filtered = preg_replace_callback(
             '/\x01(\d+)\x02/',
-            static fn (array $m) => $builtTags[(int) $m[1]],
+            static fn (array $m) => $builtTags[ (int) $m[1]],
             $filtered
         );
 
@@ -797,6 +806,7 @@ if (!function_exists('wp_filter_content_tags')) {
      * Passthrough test-double. Real core adds loading/width/height attributes
      * to <img> tags found in content; nothing in this project's tests
      * exercises that behaviour, they only need the function to exist so
+     *
      * @kses-compiled views (AcfServiceProvider.php:174) can render.
      */
     function wp_filter_content_tags(?string $content, string $context = 'content'): string
@@ -808,7 +818,7 @@ if (!function_exists('wp_filter_content_tags')) {
 if (!function_exists('wp_strip_all_tags')) {
     function wp_strip_all_tags(string $text): string
     {
-        return strip_tags($text);
+        return strip_tags($text);  // phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags -- test double mirrors the core implementation
     }
 }
 
@@ -875,7 +885,7 @@ if (!function_exists('get_the_ID')) {
 if (!function_exists('wp_get_theme')) {
     function wp_get_theme(): object
     {
-        return new class () {
+        return new class() {
             public function get(string $header): string
             {
                 return match ($header) {
@@ -892,7 +902,7 @@ if (!function_exists('wp_get_theme')) {
 if (!function_exists('wp_parse_url')) {
     function wp_parse_url(string $url, int $component = -1): mixed
     {
-        return $component === -1 ? parse_url($url) : parse_url($url, $component);
+        return $component === -1 ? parse_url($url) : parse_url($url, $component);  // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- test double mirrors the core implementation
     }
 }
 
@@ -948,21 +958,21 @@ if (!function_exists('wp_get_attachment_image_url')) {
 if (!function_exists('home_url')) {
     function home_url(string $path = ''): string
     {
-        return 'https://example.com' . ($path ? '/' . ltrim($path, '/') : '');
+        return 'https://example.com' . ( $path ? '/' . ltrim($path, '/') : '' );
     }
 }
 
 if (!function_exists('site_url')) {
     function site_url(string $path = ''): string
     {
-        return 'https://example.com' . ($path ? '/' . ltrim($path, '/') : '');
+        return 'https://example.com' . ( $path ? '/' . ltrim($path, '/') : '' );
     }
 }
 
 if (!function_exists('admin_url')) {
     function admin_url(string $path = ''): string
     {
-        return 'https://example.com/wp-admin' . ($path ? '/' . ltrim($path, '/') : '');
+        return 'https://example.com/wp-admin' . ( $path ? '/' . ltrim($path, '/') : '' );
     }
 }
 
@@ -1069,25 +1079,25 @@ if (!function_exists('get_posts')) {
 if (!function_exists('get_permalink')) {
     function get_permalink(int|object|null $post = null): string|false
     {
-        $id = is_object($post) ? ($post->ID ?? 0) : (int) ($post ?? 0);
+        $id = is_object($post) ? ( $post->ID ?? 0 ) : (int) ( $post ?? 0 );
 
-        return $GLOBALS['wp_mock_permalinks'][$id] ?? ('https://example.com/?p=' . $id);
+        return $GLOBALS['wp_mock_permalinks'][$id] ?? ( 'https://example.com/?p=' . $id );
     }
 }
 
 if (!function_exists('get_the_title')) {
     function get_the_title(int|object|null $post = null): string
     {
-        $id = is_object($post) ? ($post->ID ?? 0) : (int) ($post ?? 0);
+        $id = is_object($post) ? ( $post->ID ?? 0 ) : (int) ( $post ?? 0 );
 
-        return $GLOBALS['wp_mock_titles'][$id] ?? ('Post ' . $id);
+        return $GLOBALS['wp_mock_titles'][$id] ?? ( 'Post ' . $id );
     }
 }
 
 if (!function_exists('get_post_field')) {
     function get_post_field(string $field, int|object $post): string
     {
-        $id = is_object($post) ? ($post->ID ?? 0) : (int) $post;
+        $id = is_object($post) ? ( $post->ID ?? 0 ) : (int) $post;
 
         return $GLOBALS['wp_mock_post_fields'][$id][$field] ?? '';
     }
@@ -1104,7 +1114,7 @@ if (!function_exists('get_bloginfo')) {
 if (!function_exists('sanitize_text_field')) {
     function sanitize_text_field(string $str): string
     {
-        return trim(strip_tags($str));
+        return trim(strip_tags($str));  // phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags -- test double mirrors the core implementation
     }
 }
 

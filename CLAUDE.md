@@ -13,16 +13,24 @@ Guidance for Claude Code when working with this WordPress starter theme.
 ## Essential Commands
 
 ```bash
+composer install    # PHP dependencies
+npm install          # JS dependencies
 npm run dev        # Development with HMR
 npm run build      # Production build
 npm run lint       # JS/TS linting
 npm run icons      # Sync resources/icons/ from config/icons.json
+npm test            # Vitest (JS unit tests)
+npm run test:watch  # Vitest in watch mode
+npm run test:coverage # Vitest with coverage report
 npm run test:e2e   # Playwright E2E tests
 npm run test:a11y  # Accessibility tests
 npm run test:styleguide  # Styleguide-Seite (braucht WP_USER + WP_PASSWORD, siehe unten)
 composer lint      # PHP linting (phpcs + phpstan)
 composer test      # PHPUnit tests
 ```
+
+Der Vite-Dev-Server bindet standardmäßig nur an `localhost`. `VITE_HOST=true` bindet
+zusätzlich an alle Interfaces (z. B. zum Testen von einem anderen Gerät im LAN).
 
 ### E2E gegen die Styleguide-Seite
 

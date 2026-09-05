@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 // Ensure functions are loaded so that getBladeViewFactory() exists
 if (!function_exists('getBladeViewFactory')) {
     require_once get_template_directory() . '/config/functions.php';

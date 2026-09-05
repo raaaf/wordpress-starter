@@ -397,7 +397,7 @@ class ContentSetupService
             }
 
             $postDate = gmdate('Y-m-d H:i:s', $baseTime - ( $dayOffset * DAY_IN_SECONDS ));
-            $dayOffset += rand(3, 5);
+            $dayOffset += wp_rand(3, 5);
 
             $postId = wp_insert_post([
                 'post_title' => $postData['title'],

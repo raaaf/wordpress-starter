@@ -2,7 +2,7 @@
   "name": "raaaf/starter",
   "description": "A WordPress theme implementing Tailwind CSS and Alpine JS, and removing jQuery once and for all.",
   "type": "wordpress-theme",
-  "license": "MIT",
+  "license": "GPL-2.0-or-later",
   "authors": [
     {
       "name": "Rafael Alex",
@@ -69,9 +69,6 @@
     }
   },
   "scripts": {
-    "post-install-cmd": [
-      "npm install"
-    ],
     "test": "phpunit",
     "phpcs": "phpcs --runtime-set ignore_warnings_on_exit 1",
     "phpcs:fix": "phpcbf",

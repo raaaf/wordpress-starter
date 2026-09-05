@@ -5,6 +5,11 @@
  * the top. It is responsible for enqueuing our styles (such as Tailwind CSS),
  * script files (including Alpine), and enabling Blade templating support.
  */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 require_once __DIR__ . '/config/functions.php';
 
 /**

@@ -117,7 +117,7 @@ final class LlmsTxtProviderTest extends TestCase
 
     public function testRenderPostLinksExcludesPasswordProtectedPost(): void
     {
-        $GLOBALS['wp_mock_posts']['post'] = [(object) ['ID' => 77]];
+        $GLOBALS['wp_mock_posts']['post'] = [ (object) ['ID' => 77]];
         $GLOBALS['wp_mock_post_fields'][77] = ['post_status' => 'publish', 'post_password' => 'secret'];
         $GLOBALS['wp_mock_titles'][77] = 'Protected Post';
         $GLOBALS['wp_mock_permalinks'][77] = 'https://example.com/protected/';
@@ -127,10 +127,10 @@ final class LlmsTxtProviderTest extends TestCase
         $this->assertSame([], $lines);
     }
 
-    /** get_posts() only queries by post_status/has_password; linkLineForPost() enforces the guard itself, so a non-public post reaching renderPostLinks() must still be dropped. */
+    /** The get_posts() call only queries by post_status/has_password; linkLineForPost() enforces the guard itself, so a non-public post reaching renderPostLinks() must still be dropped. */
     public function testRenderPostLinksExcludesNonPublicPost(): void
     {
-        $GLOBALS['wp_mock_posts']['post'] = [(object) ['ID' => 88]];
+        $GLOBALS['wp_mock_posts']['post'] = [ (object) ['ID' => 88]];
         $GLOBALS['wp_mock_post_fields'][88] = ['post_status' => 'draft', 'post_password' => ''];
         $GLOBALS['wp_mock_titles'][88] = 'Draft Post';
         $GLOBALS['wp_mock_permalinks'][88] = 'https://example.com/draft/';
@@ -142,7 +142,7 @@ final class LlmsTxtProviderTest extends TestCase
 
     public function testRenderPostLinksIncludesPublishedPublicPost(): void
     {
-        $GLOBALS['wp_mock_posts']['post'] = [(object) ['ID' => 99]];
+        $GLOBALS['wp_mock_posts']['post'] = [ (object) ['ID' => 99]];
         $GLOBALS['wp_mock_post_fields'][99] = [
             'post_status' => 'publish',
             'post_password' => '',

@@ -17,7 +17,7 @@ final class ThemeUpdateProvider extends ServiceProvider
     /**
      * GitHub repository URL for update checks.
      */
-    private const GITHUB_REPO = 'https://github.com/raaaf/starter/';
+    private const GITHUB_REPO = 'https://github.com/raaaf/wordpress-starter/';
 
     /**
      * Theme slug used for identification.

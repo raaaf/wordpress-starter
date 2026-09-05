@@ -40,7 +40,7 @@ final class TextTest extends TestCase
     }
 
     /**
-     * lineBreaks() passes an empty attribute allowlist for <br> to wp_kses(), so an
+     * The lineBreaks() method passes an empty attribute allowlist for <br> to wp_kses(), so an
      * injected attribute must not survive - only the bare tag is allowed.
      */
     public function testLineBreaksStripsAttributesFromBr(): void

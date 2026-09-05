@@ -46,7 +46,7 @@ final class StyleguidePageTest extends TestCase
      */
     private function countingStorageSpy(): ArrayAccess
     {
-        return new class () implements ArrayAccess {
+        return new class() implements ArrayAccess {
             public int $writes = 0;
 
             /** @var array<string, mixed> */
