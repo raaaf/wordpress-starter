@@ -278,6 +278,9 @@ class LlmsTxtProvider extends ServiceProvider
      */
     private function send(string $body): void
     {
+        // The request matched no WordPress query, so WP has already decided on
+        // a 404; the file exists as far as crawlers are concerned.
+        status_header(200);
         nocache_headers();
         header('Content-Type: text/plain; charset=UTF-8');
         header('X-Robots-Tag: noindex, follow');

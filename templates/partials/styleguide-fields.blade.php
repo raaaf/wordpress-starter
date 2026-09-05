@@ -14,10 +14,10 @@
     @var string $layout  Layout-Name, z.B. 'cards'
     @var bool   $offen   Panel vorab geoeffnet (?variants=all: alles sichtbar)
 --}}
-@php($layout = $layout ?? '')
-@php($offen = $offen ?? false)
-@php($zeilen = \WordpressStarter\Content\StyleguideFieldReference::flach($layout))
 @php
+    $layout = $layout ?? '';
+    $offen = $offen ?? false;
+    $zeilen = \WordpressStarter\Content\StyleguideFieldReference::flach($layout);
     // Same source as styleguide-nav.blade.php: the layout label registered in
     // FlexibleContent::layouts(), keyed by layout name. Falls back to the raw
     // slug only when no definition (and therefore no label) is found.
