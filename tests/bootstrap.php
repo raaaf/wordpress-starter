@@ -184,7 +184,7 @@ if (!function_exists('wp_kses_test_double_check_scheme')) {
 if (!function_exists('esc_url')) {
     function esc_url(?string $url): string
     {
-        $url = $url ?? '';
+        $url ??= '';
 
         if (!wp_kses_test_double_check_scheme($url)) {
             return '';
@@ -211,14 +211,46 @@ if (!function_exists('esc_url')) {
 if (!function_exists('esc_html')) {
     function esc_html(?string $text): string
     {
-        return htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8', false);
     }
 }
 
 if (!function_exists('esc_attr')) {
     function esc_attr(?string $text): string
     {
-        return htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8', false);
+    }
+}
+
+if (!function_exists('esc_js')) {
+    /**
+     * Mirrors core esc_js() (wp-includes/formatting.php): entity-encode
+     * &, <, >, " (ENT_COMPAT, so a bare apostrophe is left alone), then
+     * unwrap an already-encoded apostrophe entity back to a literal ' so a
+     * value round-tripped through esc_html() first is not double-encoded,
+     * strip \r, and finally addslashes() (escapes ', ", \, NUL) before
+     * turning literal \n into the two-character sequence \n. No
+     * apply_filters('js_escape', ...): the mock env registers no such
+     * filter, so it would be a no-op.
+     */
+    function esc_js(?string $text): string
+    {
+        $safeText = htmlspecialchars($text ?? '', ENT_COMPAT, 'UTF-8', false);
+        $safeText = preg_replace('/&#(x)?0*(?(1)27|39);?/i', "'", stripslashes($safeText)) ?? $safeText;
+        $safeText = str_replace("\r", '', $safeText);
+
+        return str_replace("\n", '\\n', addslashes($safeText));
+    }
+}
+
+if (!function_exists('esc_html_e')) {
+    function esc_html_e(string $text, string $domain = 'default'): void
+    {
+        // The mock __() below is an identity function, so translating first
+        // adds nothing here; mirrors esc_html__() right above, which skips
+        // it for the same reason.
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- test double echoes the already-escaped value, same as core's esc_html_e()
+        echo esc_html($text);
     }
 }
 
@@ -460,6 +492,24 @@ if (!function_exists('the_row')) {
 }
 
 // WordPress attachment functions
+if (!function_exists('wp_get_attachment_metadata')) {
+    /**
+     * Minimal wp_get_attachment_metadata() stub, reusing the same
+     * $GLOBALS['wp_mock_attachments'][$id]['logo'] triple (url, width,
+     * height) tests already seed for wp_get_attachment_image_url().
+     */
+    function wp_get_attachment_metadata(int $attachmentId, bool $unfiltered = false): array|false
+    {
+        foreach ($GLOBALS['wp_mock_attachments'][$attachmentId] ?? [] as $sizeData) {
+            if (is_array($sizeData) && isset($sizeData[1], $sizeData[2])) {
+                return ['width' => $sizeData[1], 'height' => $sizeData[2]];
+            }
+        }
+
+        return false;
+    }
+}
+
 if (!function_exists('wp_get_attachment_image_src')) {
     function wp_get_attachment_image_src(int $attachmentId, string $size = 'thumbnail'): array|false
     {
@@ -673,7 +723,7 @@ if (!function_exists('wp_kses')) {
                     '/([a-zA-Z_:][-\w:.]*)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'=<>`]+)))?/',
                     $attrString,
                     $attrMatches,
-                    PREG_SET_ORDER
+                    PREG_SET_ORDER,
                 );
 
                 foreach ($attrMatches as $attrMatch) {
@@ -719,10 +769,10 @@ if (!function_exists('wp_kses')) {
 
                 return "\x01" . ( count($builtTags) - 1 ) . "\x02";
             },
-            $content
+            $content,
         );
 
-        $filtered = $filtered ?? $content;
+        $filtered ??= $content;
 
         // Anything still starting with '<' at this point is a stray/malformed
         // angle bracket that never matched a full tag; escape it like core
@@ -732,7 +782,7 @@ if (!function_exists('wp_kses')) {
         $filtered = preg_replace_callback(
             '/\x01(\d+)\x02/',
             static fn (array $m) => $builtTags[ (int) $m[1]],
-            $filtered
+            $filtered,
         );
 
         return $filtered ?? $content;
@@ -906,6 +956,39 @@ if (!function_exists('wp_parse_url')) {
     }
 }
 
+if (!function_exists('wp_parse_str')) {
+    function wp_parse_str(string $string, mixed &$array): void
+    {
+        parse_str($string, $array);  // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_str_parse_str -- test double mirrors the core implementation
+    }
+}
+
+if (!function_exists('wp_check_filetype')) {
+    /**
+     * Minimal wp_check_filetype() double: extension -> [ext, type] for the
+     * types used across theme uploads (video, audio, image), false for
+     * anything else, mirroring the shape core returns.
+     */
+    function wp_check_filetype(string $filename, ?array $mimes = null): array
+    {
+        $types = [
+            'mp4' => 'video/mp4',
+            'webm' => 'video/webm',
+            'ogg' => 'video/ogg',
+            'ogv' => 'video/ogg',
+            'mp3' => 'audio/mpeg',
+            'jpg' => 'image/jpeg',
+            'png' => 'image/png',
+            'svg' => 'image/svg+xml',
+        ];
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+        return isset($types[$ext])
+            ? ['ext' => $ext, 'type' => $types[$ext]]
+            : ['ext' => false, 'type' => false];
+    }
+}
+
 if (!function_exists('get_option')) {
     function get_option(string $option, mixed $default = false): mixed
     {
@@ -959,6 +1042,13 @@ if (!function_exists('home_url')) {
     function home_url(string $path = ''): string
     {
         return 'https://example.com' . ( $path ? '/' . ltrim($path, '/') : '' );
+    }
+}
+
+if (!function_exists('get_privacy_policy_url')) {
+    function get_privacy_policy_url(): string
+    {
+        return $GLOBALS['wp_mock_privacy_policy_url'] ?? '';
     }
 }
 
@@ -1028,6 +1118,13 @@ if (!function_exists('get_current_user_id')) {
     }
 }
 
+if (!function_exists('is_user_logged_in')) {
+    function is_user_logged_in(): bool
+    {
+        return ( $GLOBALS['wp_mock_current_user_id'] ?? 0 ) > 0;
+    }
+}
+
 // Posts / permalinks
 if (!function_exists('get_post')) {
     /**
@@ -1076,6 +1173,62 @@ if (!function_exists('get_posts')) {
     }
 }
 
+if (!function_exists('get_post_types')) {
+    /**
+     * Minimal get_post_types() stub, filtering the same
+     * $GLOBALS['wp_mock_post_types'] map register_post_type()/
+     * post_type_exists() already use. Only the 'names' output (an array of
+     * slug => slug, core's default) is needed by callers in this theme.
+     */
+    function get_post_types(array $args = [], string $output = 'names'): array
+    {
+        $postTypes = $GLOBALS['wp_mock_post_types'] ?? [];
+        $matching = array_filter($postTypes, static function (array $registeredArgs) use ($args): bool {
+            foreach ($args as $key => $value) {
+                if (( $registeredArgs[$key] ?? null ) !== $value) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        $names = array_keys($matching);
+
+        return array_combine($names, $names);
+    }
+}
+
+// phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed -- test double needs a class alongside the function mocks in this single bootstrap file
+if (!class_exists('WP_Query')) {
+    /**
+     * Minimal WP_Query double: no post data, always empty. Templates that
+     * need the query to actually return posts are out of scope for the
+     * render smoke test, which only proves the query can be constructed and
+     * the empty-result branch renders without throwing.
+     */
+    class WP_Query
+    {
+        /** @var list<mixed> */
+        public array $posts = [];
+
+        /** @param array<string, mixed> $args */
+        public function __construct(array $args = [])
+        {
+            $GLOBALS['wp_mock_last_query_args'] = $args;
+        }
+
+        public function have_posts(): bool
+        {
+            return false;
+        }
+
+        public function the_post(): void
+        {
+        }
+    }
+}
+
 if (!function_exists('get_permalink')) {
     function get_permalink(int|object|null $post = null): string|false
     {
@@ -1111,6 +1264,13 @@ if (!function_exists('get_bloginfo')) {
 }
 
 // URL escaping / sanitization
+if (!function_exists('absint')) {
+    function absint(mixed $maybeint): int
+    {
+        return abs( (int) $maybeint);
+    }
+}
+
 if (!function_exists('sanitize_text_field')) {
     function sanitize_text_field(string $str): string
     {

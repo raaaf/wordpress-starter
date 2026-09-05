@@ -237,6 +237,10 @@ Configuration in `src/Acf/AcfExtended.php`.
 - `@group('name')...@endgroup` - Conditional block around an ACF group field
 - `@kses(...)` - Sanitize HTML via `wp_kses_post()`
 
+**Escaping (`{{ }}`):**
+
+`{{ }}` matches WordPress `esc_html()` semantics: it escapes `<>"'&`, but does not double-encode a value that already contains valid entities (`BladeServiceProvider::boot()` calls `$compiler->withoutDoubleEncoding()`). Pass raw values into `{{ }}`, never pre-escaped ones. A value already run through `esc_html()`/`wp_kses_post()` before reaching the view keeps its entities as entities instead of being re-encoded, and a raw `<` or `&` in the value is still escaped exactly once, as expected. Covered by `tests/Unit/Providers/BladeServiceProviderTest.php`.
+
 ## ACF Field Definitions
 
 Single source of truth in `src/Acf/FieldDefinitions.php`:

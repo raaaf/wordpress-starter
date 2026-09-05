@@ -100,7 +100,7 @@
                     type="button"
                     x-on:click="pausedByUser = !pausedByUser"
                     x-bind:aria-pressed="pausedByUser ? 'true' : 'false'"
-                    class="absolute z-20 p-2 transition-colors border rounded-full right-2 top-2 bg-surface border-line text-content hover:bg-surface-secondary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
+                    class="absolute z-20 flex items-center justify-center min-h-11 min-w-11 p-2 transition-colors border rounded-full right-2 top-2 bg-surface border-line text-content hover:bg-surface-secondary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                 >
                     <span class="sr-only" x-text="pausedByUser ? '{{ esc_js(__('Logolauf fortsetzen', 'wp-starter')) }}' : '{{ esc_js(__('Logolauf anhalten', 'wp-starter')) }}'">{{ __('Logolauf anhalten', 'wp-starter') }}</span>
                     <span class="relative block w-4 h-4">
@@ -167,7 +167,7 @@
                                     aria-label="{{ $logo['name'] ? $logo['name'] . ' ' : '' }}{{ __('(öffnet in neuem Tab)', 'wp-starter') }}"
                                 >
                                     <img
-                                        src="{{ $logo['url'] }}"
+                                        src="{{ esc_url($logo['url']) }}"
                                         alt=""
                                         class="object-contain w-full h-12 dark:invert"
                                         loading="lazy"
@@ -180,7 +180,7 @@
                                      hover/transition classes either. --}}
                                 <div class="opacity-70 grayscale">
                                     <img
-                                        src="{{ $logo['url'] }}"
+                                        src="{{ esc_url($logo['url']) }}"
                                         alt="{{ $logo['name'] }}"
                                         class="object-contain w-full h-12 dark:invert"
                                         loading="lazy"

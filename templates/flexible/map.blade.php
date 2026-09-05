@@ -10,19 +10,27 @@
     $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $address = get_sub_field('address') ?: '';
     $embedUrl = get_sub_field('embed_url') ?: '';
-    $height = get_sub_field('height') ?: 400;
+    // Clamp to the field's own min/max (FieldDefinitions: 200-800, default
+    // 400) so a hand-edited postmeta value cannot produce a broken layout.
+    $height = (int) (get_sub_field('height') ?: 400);
+    $height = max(200, min(800, $height));
     $showDirections = get_sub_field('show_directions_link') ?? true;
     $background = get_sub_field('background_color') ?: 'primary';
+
+    // Same host allowlist as Security::getCSPHeader() (which writes the same
+    // check into frame-src) and embed.blade.php: an address the CSP would
+    // block anyway must not even be attempted as an iframe.
+    $isAllowedHost = $embedUrl !== '' && \WordpressStarter\Security::isAllowedEmbedHost($embedUrl);
 
     // Generate directions URL
     $directionsUrl = $address ? 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode($address) : '';
 @endphp
 
-@if($embedUrl || $title || current_user_can('edit_posts'))
+@if(($embedUrl && $isAllowedHost) || $title || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="map">
     <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
-    @if($embedUrl)
+    @if($embedUrl && $isAllowedHost)
         <div
             class="relative overflow-hidden rounded-lg"
             x-data="{ loaded: false, iframeLoaded: false, iframeError: false }"
@@ -35,33 +43,24 @@
                 class="sr-only"
                 role="status"
                 aria-live="polite"
-                x-text="iframeError ? '{{ __('Die Karte konnte nicht geladen werden.', 'wp-starter') }}' : (loaded && !iframeLoaded ? '{{ __('Karte wird geladen...', 'wp-starter') }}' : '')"
+                x-text="iframeError ? '{{ esc_js(__('Die Karte konnte nicht geladen werden.', 'wp-starter')) }}' : (loaded && !iframeLoaded ? '{{ esc_js(__('Karte wird geladen...', 'wp-starter')) }}' : '')"
             ></div>
 
-            {{-- Consent notice for GDPR compliance --}}
-            <div
-                x-show="!loaded"
-                {{-- Wie beim strukturell identischen Overlay in video.blade.php:
-                     ohne Leave-Transition verschwindet der Hinweis in einem Frame. --}}
-                x-transition:leave="transition duration-[var(--motion-exit-duration)] ease-[var(--motion-exit-ease)]"
-                x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0"
-                class="flex flex-col items-center justify-center p-8 text-center bg-surface-secondary map-consent-notice"
-                style="height: {{ esc_attr($height) }}px;"
-            >
-                <x-icon name="map-pin" class="w-16 h-16 mb-4 text-content-secondary" />
-                <p class="mb-4 text-content-secondary">
-                    {{ __('Zum Anzeigen der Karte wird Google Maps geladen.', 'wp-starter') }}<br>
-                    {{ __('Es gelten die', 'wp-starter') }} <x-link url="https://policies.google.com/privacy" target="_blank">{{ __('Datenschutzbestimmungen von Google', 'wp-starter') }}</x-link>.
-                </p>
-                <x-button
-                    :title="__('Karte laden', 'wp-starter')"
-                    variant="primary"
-                    size="md"
-                    x-on:click="loaded = true; $nextTick(() => $refs.mapContainer.focus())"
-                    class="map-consent-btn"
-                />
-            </div>
+            {{-- Consent notice for GDPR compliance. Geteiltes Markup wie in
+                 embed.blade.php und video.blade.php, siehe
+                 partials/consent-gate.blade.php. --}}
+            @include('partials.consent-gate', [
+                'containerRef' => 'mapContainer',
+                'icon' => 'map-pin',
+                'iconClass' => 'text-content-secondary',
+                'wrapperClass' => 'bg-surface-secondary map-consent-notice',
+                'textClass' => 'text-content-secondary',
+                'message' => __('Zum Anzeigen der Karte wird Google Maps geladen.', 'wp-starter'),
+                'buttonLabel' => __('Karte laden', 'wp-starter'),
+                'buttonClass' => 'map-consent-btn',
+                'providerName' => __('Google', 'wp-starter'),
+                'privacyLink' => 'https://policies.google.com/privacy',
+            ])
 
             {{-- Loading indicator --}}
             <div
@@ -99,7 +98,13 @@
                     style="border:0;"
                     allowfullscreen=""
                     loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    {{-- allow-scripts + allow-same-origin: the Google Maps embed
+                         needs its own JS runtime and same-origin storage/cookies
+                         to render the map; without allow-same-origin it shows a
+                         blank frame. allow-popups: "Open in Google Maps" opens a
+                         new tab from inside the iframe. --}}
+                    sandbox="allow-scripts allow-same-origin allow-popups"
                     class="rounded-lg"
                     title="{{ __('Google Maps Karte', 'wp-starter') }}{{ $address ? ': ' . esc_attr($address) : '' }}"
                     x-on:load="iframeLoaded = true"
@@ -120,6 +125,12 @@
                 </x-link>
             </div>
         @endif
+    @elseif($embedUrl && current_user_can('edit_posts'))
+        <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
+            <p class="text-content-secondary">
+                {{ __('Nur für dich sichtbar: Diese Google-Maps-Adresse ist nicht in den Theme-Einstellungen freigegeben. Trage den Host dort ein, sonst bleibt die Fläche für Besucher leer.', 'wp-starter') }}
+            </p>
+        </div>
     @elseif(current_user_can('edit_posts'))
         <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge eine Google Maps Embed-URL ein.', 'wp-starter') }}</p>

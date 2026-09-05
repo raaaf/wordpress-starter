@@ -43,17 +43,18 @@
                             @click="yearly = false"
                             :aria-pressed="!yearly"
                             :class="yearly ? 'text-content-secondary hover:text-content' : 'bg-[var(--bg-brand-tint)] text-content-brand ring-1 ring-inset ring-[var(--border-brand)]'"
-                            class="px-3 py-1 text-sm font-normal transition-colors duration-200 rounded-full cursor-pointer focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
+                            class="inline-flex items-center justify-center min-h-11 px-3 py-1 text-sm font-normal transition-colors duration-200 rounded-full cursor-pointer focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
                         {{ __('Monatlich', 'wp-starter') }}
                     </button>
                     <button type="button"
                             @click="yearly = true"
                             :aria-pressed="yearly"
                             :class="yearly ? 'bg-[var(--bg-brand-tint)] text-content-brand ring-1 ring-inset ring-[var(--border-brand)]' : 'text-content-secondary hover:text-content'"
-                            class="px-3 py-1 text-sm font-normal transition-colors duration-200 rounded-full cursor-pointer focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
+                            class="inline-flex items-center justify-center min-h-11 px-3 py-1 text-sm font-normal transition-colors duration-200 rounded-full cursor-pointer focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
                         {{ __('Jährlich', 'wp-starter') }}
                     </button>
                 </div>
+                <span class="sr-only" aria-live="polite" x-text="yearly ? '{{ esc_js(__('Preise jährlich', 'wp-starter')) }}' : '{{ esc_js(__('Preise monatlich', 'wp-starter')) }}'"></span>
             </div>
         @endif
 

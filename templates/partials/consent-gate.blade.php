@@ -66,6 +66,6 @@
         :class="$buttonClass"
         {{-- scrollIntoView nur ohne reduced-motion-Praeferenz: sonst laeuft
              nach focus() eine zweite, ungewollte Bewegung. --}}
-        x-on:click="loaded = true; $nextTick(() => { $refs.{{ $containerRef }}.focus(); if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) { $refs.{{ $containerRef }}.scrollIntoView({ behavior: 'smooth', block: 'center' }) } })"
+        x-on:click="loaded = true; $nextTick(() => { if (!$refs.{{ $containerRef }}) { return } $refs.{{ $containerRef }}.focus(); if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) { $refs.{{ $containerRef }}.scrollIntoView({ behavior: 'smooth', block: 'center' }) } })"
     />
 </div>

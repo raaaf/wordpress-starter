@@ -453,10 +453,10 @@ class StyleguideLayoutData
         return $this->layout('stats', [
             'title' => 'Zahlen & Fakten',
             'stats' => [
-                ['number' => 250, 'suffix' => '+', 'label' => 'Zufriedene Kunden', 'icon' => ''],
-                ['number' => 15, 'suffix' => '', 'label' => 'Jahre Erfahrung', 'icon' => ''],
-                ['number' => 500, 'suffix' => '+', 'label' => 'Projekte abgeschlossen', 'icon' => ''],
-                ['number' => 98, 'suffix' => '%', 'label' => 'Kundenzufriedenheit', 'icon' => ''],
+                ['number' => 250, 'suffix' => '+', 'label' => 'Zufriedene Kunden'],
+                ['number' => 15, 'suffix' => '', 'label' => 'Jahre Erfahrung'],
+                ['number' => 500, 'suffix' => '+', 'label' => 'Projekte abgeschlossen'],
+                ['number' => 98, 'suffix' => '%', 'label' => 'Kundenzufriedenheit'],
             ],
             'background_color' => 'secondary',
         ]);
@@ -1514,11 +1514,11 @@ class StyleguideLayoutData
             $this->layout('stats', [
                 'title' => 'Fünf Kennzahlen',
                 'stats' => [
-                    ['number' => 12, 'suffix' => '', 'label' => 'Jahre', 'icon' => ''],
-                    ['number' => 340, 'suffix' => '+', 'label' => 'Projekte', 'icon' => ''],
-                    ['number' => 98, 'suffix' => '%', 'label' => 'Zufriedenheit', 'icon' => ''],
-                    ['number' => 25, 'suffix' => '', 'label' => 'Mitarbeitende', 'icon' => ''],
-                    ['number' => 7, 'suffix' => '', 'label' => 'Standorte', 'icon' => ''],
+                    ['number' => 12, 'suffix' => '', 'label' => 'Jahre'],
+                    ['number' => 340, 'suffix' => '+', 'label' => 'Projekte'],
+                    ['number' => 98, 'suffix' => '%', 'label' => 'Zufriedenheit'],
+                    ['number' => 25, 'suffix' => '', 'label' => 'Mitarbeitende'],
+                    ['number' => 7, 'suffix' => '', 'label' => 'Standorte'],
                 ],
                 'background_color' => 'primary',
                 'section_anchor' => 'stats-zustand-letzte-zeile',
@@ -1528,10 +1528,10 @@ class StyleguideLayoutData
             $this->layout('pricing_table', [
                 'title' => 'Vier Preispläne',
                 'plans' => [
-                    ['name' => 'Basis', 'price' => '19', 'period' => 'Monat', 'features' => "Eine Position\nZweite Position", 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
-                    ['name' => 'Plus', 'price' => '39', 'period' => 'Monat', 'features' => "Eine Position\nZweite Position", 'is_featured' => true, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
-                    ['name' => 'Pro', 'price' => '79', 'period' => 'Monat', 'features' => "Eine Position\nZweite Position", 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
-                    ['name' => 'Maximal', 'price' => '149', 'period' => 'Monat', 'features' => "Eine Position\nZweite Position", 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                    ['name' => 'Basis', 'price' => '19', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                    ['name' => 'Plus', 'price' => '39', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => true, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                    ['name' => 'Pro', 'price' => '79', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                    ['name' => 'Maximal', 'price' => '149', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
                 ],
                 'background_color' => 'secondary',
                 'section_anchor' => 'pricing-table-zustand-letzte-zeile',

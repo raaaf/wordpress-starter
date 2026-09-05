@@ -25,56 +25,23 @@
     // vor dem ersten Speichern von der Einstellung ab.
     $overlay_opacity = is_numeric($overlay_opacity) ? (int) $overlay_opacity : 80;
 
-    // Convert 0-100 to 0-1 for CSS opacity
-    $overlay_opacity_css = $overlay_opacity / 100;
+    $scrimCss = \WordpressStarter\Helpers\HeroScrim::gradient($overlay_opacity);
 
-    // Der Scrim dunkelt immer ab, in beiden Farbschemata. Ein heller Schleier
-    // ueber dem Bild zieht jedes Motiv ins Pastellige und garantiert trotzdem
-    // keine Lesbarkeit, weil sie vom hellsten Fleck des Bildes abhaengt.
-    // Abdunkeln plus helle Schrift ist die uebliche Loesung (NN/g, Smashing):
-    // 40 bis 60 Prozent Schwarz fuer weisse Schrift.
-    //
-    // Kein flaechiger Schleier, sondern ein Verlauf, der hinter dem Text am
-    // staerksten deckt und zu den Ecken hin nachlaesst. Das Bild behaelt dort
-    // seine Farbe, wo kein Text steht.
-    $scrimMitte = min(0.85, $overlay_opacity_css * 0.75);
-    $scrimAussen = round($scrimMitte * 0.55, 2);
-    $scrimCss = sprintf(
-        'radial-gradient(ellipse 90%% 75%% at 50%% 50%%, rgba(0,0,0,%s) 0%%, rgba(0,0,0,%s) 55%%, rgba(0,0,0,%s) 100%%)',
-        round($scrimMitte, 2),
-        round($scrimMitte * 0.8, 2),
-        $scrimAussen,
-    );
+    // Normalize ID vs ACF-array vs URL-string image formats via the shared
+    // helper (same three shapes handled by one-column-image.blade.php).
+    $imageData = \WordpressStarter\Helpers\ImageData::resolve($image, 'hero-split');
+    $imageId = $imageData['id'] ?? null;
+    $image = $imageData;
 
-    // Handle ID vs array format for images - preserve ID for wp_get_attachment_image()
-    $imageId = null;
-    if (is_numeric($image)) {
-        $imageId = (int) $image;
-        $imageSrc = wp_get_attachment_image_src($imageId, 'hero-split');
-        $image = [
-            'ID' => $imageId,
-            'url' => $imageSrc ? $imageSrc[0] : wp_get_attachment_url($imageId),
-            'alt' => get_post_meta($imageId, '_wp_attachment_image_alt', true) ?: '',
-            'width' => $imageSrc ? $imageSrc[1] : '',
-            'height' => $imageSrc ? $imageSrc[2] : '',
-        ];
-    } elseif (is_array($image) && !empty($image['ID'])) {
-        $imageId = (int) $image['ID'];
-    }
+    $backgroundImageData = \WordpressStarter\Helpers\ImageData::resolve($background_image, 'hero-background');
+    $background_image = $backgroundImageData;
 
-    if (is_numeric($background_image)) {
-        $bgId = (int) $background_image;
-        $bgSrc = wp_get_attachment_image_src($bgId, 'hero-background');
-        $background_image = [
-            'ID' => $bgId,
-            'url' => $bgSrc ? $bgSrc[0] : wp_get_attachment_url($bgId),
-            'alt' => get_post_meta($bgId, '_wp_attachment_image_alt', true) ?: '',
-            'width' => $bgSrc ? $bgSrc[1] : '',
-            'height' => $bgSrc ? $bgSrc[2] : '',
-        ];
-    } elseif (is_array($background_image) && !empty($background_image['ID'])) {
-        $background_image['ID'] = (int) $background_image['ID'];
-    }
+    // Only the first hero rendered on the page carries fetchpriority/eager
+    // loading (the LCP candidate); later heroes get lazy loading instead.
+    // $layoutCounters is the section-index the flexible loop in page.blade.php
+    // already maintains per layout name, same source the heading-tag logic
+    // above uses.
+    $isFirstHero = ($layoutCounters['hero'] ?? 1) === 1;
 
     // A hero is worth rendering if it has any text/CTA content, or, per variant,
     // an image that carries the section on its own (background image, split image).
@@ -100,7 +67,7 @@
     // Inhalt aus der Mitte schieben.
     $heroHeightClass = 'hero--height-' . $height
         . ($isTitleOnly && $height === 'auto' ? ' hero--compact' : '');
-    $hasBackgroundImage = $background_image && (!empty($background_image['ID']) || !empty($background_image['url']));
+    $hasBackgroundImage = $background_image && !empty($background_image['url']);
     $hasSplitImage = $imageId || ($image && !empty($image['url']));
 @endphp
 
@@ -120,23 +87,22 @@
         @if($sectionAnchor) id="{{ esc_attr($sectionAnchor) }}" @endif
         class="hero hero--background {{ $heroHeightClass }} @if($shouldAnimate) hero--reveal @endif relative overflow-hidden flex items-center"
     >
-        @if($background_image && (!empty($background_image['ID']) || !empty($background_image['url'])))
+        @if($background_image && !empty($background_image['url']))
             <div class="absolute inset-0">
-                @if(!empty($background_image['ID']))
-                    {!! wp_get_attachment_image($background_image['ID'], 'hero-background', false, [
+                @if(!empty($background_image['id']))
+                    {!! wp_get_attachment_image($background_image['id'], 'hero-background', false, [
                         'class' => 'w-full h-full object-cover',
-                        'loading' => 'eager',
-                        'fetchpriority' => 'high',
+                        'loading' => $isFirstHero ? 'eager' : 'lazy',
+                        'fetchpriority' => $isFirstHero ? 'high' : 'auto',
                         'sizes' => '100vw',
                         'alt' => '',
                     ]) !!}
                 @else
-                    <img src="{{ $background_image['url'] }}"
+                    <img src="{{ esc_url($background_image['url']) }}"
                          alt="{{ $background_image['alt'] ?? '' }}"
                          @if(!empty($background_image['width']) && !empty($background_image['height']))width="{{ $background_image['width'] }}" height="{{ $background_image['height'] }}"@endif
                          class="w-full h-full object-cover"
-                         loading="eager"
-                         fetchpriority="high">
+                         @if($isFirstHero) loading="eager" fetchpriority="high" @else loading="lazy" @endif>
                 @endif
                 {{-- Scrim, siehe Berechnung oben --}}
                 <div class="absolute inset-0" style="background-image: {{ $scrimCss }};"></div>
@@ -166,7 +132,7 @@
                         @if($cta_primary)
                             <x-button
                                 :url="$cta_primary['url']"
-                                :title="$cta_primary['title']"
+                                :title="$cta_primary['title'] ?: null"
                                 :target="$cta_primary['target'] ?? '_self'"
                                 variant="primary"
                                 size="lg"
@@ -178,7 +144,7 @@
                                  zog die Hierarchie zu sich. --}}
                             <x-button
                                 :url="$cta_secondary['url']"
-                                :title="$cta_secondary['title']"
+                                :title="$cta_secondary['title'] ?: null"
                                 :target="$cta_secondary['target'] ?? '_self'"
                                 variant="secondary"
                                 size="lg"
@@ -218,7 +184,7 @@
                         @if($cta_primary)
                             <x-button
                                 :url="$cta_primary['url']"
-                                :title="$cta_primary['title']"
+                                :title="$cta_primary['title'] ?: null"
                                 :target="$cta_primary['target'] ?? '_self'"
                                 variant="primary"
                                 size="lg"
@@ -227,7 +193,7 @@
                         @if($cta_secondary)
                             <x-button
                                 :url="$cta_secondary['url']"
-                                :title="$cta_secondary['title']"
+                                :title="$cta_secondary['title'] ?: null"
                                 :target="$cta_secondary['target'] ?? '_self'"
                                 variant="secondary"
                                 size="lg"
@@ -241,20 +207,19 @@
                 <div class="relative">
                     {!! wp_get_attachment_image($imageId, 'hero-split', false, [
                         'class' => 'w-full h-auto rounded-[var(--card-radius)] border border-line',
-                        'loading' => 'eager',
-                        'fetchpriority' => 'high',
+                        'loading' => $isFirstHero ? 'eager' : 'lazy',
+                        'fetchpriority' => $isFirstHero ? 'high' : 'auto',
                         'sizes' => '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px',
                     ]) !!}
                 </div>
             @elseif($image && !empty($image['url']))
                 {{-- Fallback for URL-only images --}}
                 <div class="relative">
-                    <img src="{{ $image['url'] }}"
+                    <img src="{{ esc_url($image['url']) }}"
                          alt="{{ $image['alt'] ?? '' }}"
                          @if(!empty($image['width']) && !empty($image['height']))width="{{ $image['width'] }}" height="{{ $image['height'] }}"@endif
                          class="w-full h-auto rounded-[var(--card-radius)] border border-line"
-                         loading="eager"
-                         fetchpriority="high">
+                         @if($isFirstHero) loading="eager" fetchpriority="high" @else loading="lazy" @endif>
                 </div>
             @endif
         </div>
@@ -295,7 +260,7 @@
                     @if($cta_primary)
                         <x-button
                             :url="$cta_primary['url']"
-                            :title="$cta_primary['title']"
+                            :title="$cta_primary['title'] ?: null"
                             :target="$cta_primary['target'] ?? '_self'"
                             variant="primary"
                             size="lg"
@@ -305,7 +270,7 @@
                     @if($cta_secondary)
                         <x-button
                             :url="$cta_secondary['url']"
-                            :title="$cta_secondary['title']"
+                            :title="$cta_secondary['title'] ?: null"
                             :target="$cta_secondary['target'] ?? '_self'"
                             variant="secondary"
                             size="lg"

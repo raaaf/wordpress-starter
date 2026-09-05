@@ -20,6 +20,7 @@
     $buttonLabel = (string) (get_sub_field('button_label') ?: __('Anmelden', 'wp-starter'));
     $note = get_sub_field('note');
     $background = get_sub_field('background_color') ?: 'primary';
+    $privacyPolicyUrl = (string) get_privacy_policy_url();
 
     $isHttps = $actionUrl !== '' && wp_parse_url($actionUrl, PHP_URL_SCHEME) === 'https';
     $inputId = 'newsletter-email-' . uniqid();
@@ -51,27 +52,26 @@
                     method="post"
                     target="_blank"
                     rel="noopener"
-                    class="flex flex-col gap-3 sm:flex-row sm:items-start md:shrink-0"
+                    class="flex flex-col gap-3 sm:flex-row sm:items-end md:shrink-0"
                 >
                     <div class="sm:w-72">
-                        <label for="{{ $inputId }}" class="sr-only">{{ __('E-Mail-Adresse', 'wp-starter') }}</label>
-                        <input
+                        <x-input
                             type="email"
                             id="{{ $inputId }}"
-                            name="{{ esc_attr($emailField) }}"
-                            required
+                            name="{{ $emailField }}"
+                            :label="__('E-Mail-Adresse', 'wp-starter')"
+                            :required="true"
                             autocomplete="email"
-                            placeholder="{{ esc_attr__('deine@adresse.de', 'wp-starter') }}"
-                            class="w-full px-4 py-3 rounded-[var(--radius-md)] border border-[var(--border-control)] bg-surface text-content placeholder:text-content-tertiary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
+                            :placeholder="__('deine@adresse.de', 'wp-starter')"
                         />
                     </div>
 
-                    <button
+                    <x-button
                         type="submit"
-                        class="px-6 py-3 rounded-[var(--radius-md)] bg-surface-brand text-content-on-brand font-normal cursor-pointer transition-opacity hover:opacity-90 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
-                    >
-                        {{ $buttonLabel }}
-                    </button>
+                        :title="$buttonLabel"
+                        variant="primary"
+                        class="shrink-0"
+                    />
                 </form>
             @elseif(current_user_can('edit_posts'))
                 <div class="p-6 rounded-[var(--card-radius)] bg-surface-secondary surface-sheen">
@@ -80,8 +80,19 @@
             @endif
         </div>
 
-        @if($note && $isHttps)
-            <p class="mt-4 max-w-[60ch] text-body-small text-content-secondary">{{ $note }}</p>
+        @if($isHttps)
+            <p class="mt-4 max-w-[60ch] text-body-small text-content-secondary">
+                @if($note)
+                    {{ $note }}
+                @else
+                    {{ __('Mit dem Absenden stimmst du der Verarbeitung deiner E-Mail-Adresse zu.', 'wp-starter') }}
+                    @if($privacyPolicyUrl)
+                        <a href="{{ esc_url($privacyPolicyUrl) }}" class="underline hover:no-underline">{{ __('Hinweise in der Datenschutzerklärung.', 'wp-starter') }}</a>
+                    @else
+                        {{ __('Es gilt unsere Datenschutzerklärung.', 'wp-starter') }}
+                    @endif
+                @endif
+            </p>
         @endif
     </div>
 </x-section>

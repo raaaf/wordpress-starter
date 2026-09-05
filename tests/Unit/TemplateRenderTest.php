@@ -99,6 +99,60 @@ final class TemplateRenderTest extends TestCase
     }
 
     /**
+     * Catches a failure class testAllTemplatesRenderWithoutRealErrors() cannot
+     * see: a Blade component tag (<x-...>) whose attribute list contains a
+     * directive (e.g. @if(...) attr=... @endif) never gets recognised as a
+     * component tag by the compiler, so it is emitted verbatim as literal
+     * text instead of throwing. No exception, no bare-output pattern — the
+     * output just silently contains the uncompiled source. Any of these
+     * markers surviving into rendered HTML means a component tag or
+     * directive failed to compile (real incident: templates/partials/
+     * consent-gate.blade.php and templates/flexible/cta.blade.php,
+     * templates/flexible/button.blade.php, 2026-09-05).
+     */
+    public function testNoUncompiledBladeArtifactsInOutput(): void
+    {
+        $app = Application::getInstance();
+        $app->boot();
+
+        $factory = blade();
+        $factory->getFinder()->addLocation($this->templatesDir());
+
+        $viewData = self::VIEW_DATA + ['slot' => new \Illuminate\View\ComponentSlot()];
+        $offenders = [];
+
+        foreach ($this->templateFiles() as $path) {
+            $view = $this->viewName($path);
+
+            // Templates that throw here are already reported by
+            // testAllTemplatesRenderWithoutRealErrors(); this test only
+            // inspects output that actually rendered.
+            $level = error_reporting(E_ERROR | E_PARSE);  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting,WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- deliberately silences undefined-variable noise while probing mock-gap templates
+
+            try {
+                $renderedOutput = $factory->make($view, $viewData)->render();
+            } catch (Throwable) {
+                continue;
+            } finally {
+                error_reporting($level);  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting,WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- restores prior error_reporting level after the probe
+                $factory->flushState();
+            }
+
+            foreach (['<x-', '@if(', '@endif', '{{'] as $artifact) {
+                if (str_contains($renderedOutput, $artifact)) {
+                    $offenders[] = $view . ' — uncompiled Blade artifact in output: ' . $artifact;
+                }
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $offenders,
+            "Templates emitted uncompiled Blade syntax (component tag or directive failed to compile):\n" . implode("\n", $offenders),
+        );
+    }
+
+    /**
      * Templates that emit part of their sub-field content as raw, unescaped
      * HTML (via {!! !!}) instead of the default Blade escaping. Each of these
      * sanitizes the raw-echoed value itself before output (Text::lineBreaks()
@@ -115,6 +169,24 @@ final class TemplateRenderTest extends TestCase
         'flexible.two-columns-images',
         'flexible.three-columns-images',
         'flexible.four-columns-images',
+    ];
+
+    /**
+     * Templates whose iframe only appears inside an Alpine `<template
+     * x-if>` consent gate (partials/consent-gate.blade.php): no network
+     * request or third-party cookie happens until the visitor clicks the
+     * button, because a `<template>` element's content is inert markup to
+     * the browser until Alpine clones it into the live DOM. Verified below
+     * by asserting the literal `<iframe` tag is nested directly inside the
+     * `<template x-if="...">` wrapper rather than emitted bare. Maps view
+     * name to the expected consent button label.
+     *
+     * @var array<string, string>
+     */
+    private const CONSENT_GATED_IFRAME_TEMPLATES = [
+        'flexible.map' => 'Karte laden',
+        'flexible.embed' => 'Inhalt laden',
+        'flexible.video' => 'Video laden',
     ];
 
     private const HOSTILE_PAYLOAD = '<script>alert(1)</script>"&\'"><img src=x onerror=alert(1)> javascript:alert(1)';
@@ -145,16 +217,13 @@ final class TemplateRenderTest extends TestCase
      */
     private const ALLOWED_THROWING_TEMPLATES = [
         '404', // wp_date() not mocked
-        'admin.design-tokens-page', // esc_js() not mocked
-        'admin.setup-page', // esc_html_e() not mocked
         'archive', // is_category() not mocked
         'flexible.contact-form', // shortcode_exists() not mocked
-        'flexible.posts', // WP_Query class not mocked
         'home', // have_posts() not mocked
         'index', // have_posts() not mocked
         'layouts.app', // wp_date() not mocked
         'member-area.login-page', // wp_date() not mocked
-        'page-member-area', // WordpressStarter\MemberArea\is_user_logged_in() not mocked
+        'page-member-area', // wp_date() not mocked (partials.footer-menu)
         'page-styleguide', // sanitize_key() not mocked
         'page', // have_posts() not mocked
         'partials.footer-menu', // wp_date() not mocked
@@ -226,16 +295,64 @@ final class TemplateRenderTest extends TestCase
         $GLOBALS['wp_mock_sub_fields'] = array_fill_keys($acfKeys, $hostile);
         $GLOBALS['wp_mock_fields'] = array_fill_keys($acfKeys, $hostile);
 
+        // flexible.map, flexible.embed and flexible.video gate their iframe
+        // behind Security::isAllowedEmbedHost(): a hostile-payload string is
+        // not a valid https URL on an allowed host, so it would fail that
+        // check before ever reaching the consent-gate/iframe markup the
+        // CONSENT_GATED_IFRAME_TEMPLATES assertions below rely on, and the
+        // gate would never actually be exercised. Seed each field with a
+        // real allowed-host URL instead (www.google.com and
+        // www.youtube-nocookie.com are both in
+        // Security::HARDCODED_FRAME_SRC_HOSTS).
+        $GLOBALS['wp_mock_sub_fields']['embed_url'] = 'https://www.google.com/maps/embed?pb=x';
+        $GLOBALS['wp_mock_sub_fields']['url'] = 'https://www.youtube-nocookie.com/embed/x?a=1&b=2';
+        // flexible.video only reaches its consent-gated iframe branch for
+        // source=external with a video_url matching the YouTube/Vimeo regex
+        // in the template itself; 'source' is also read by
+        // flexible.team/flexible.testimonials, where it merely selects
+        // their unrelated 'manual' repeater path (anything other than
+        // 'cpt'), so this does not change their behaviour.
+        $GLOBALS['wp_mock_sub_fields']['source'] = 'external';
+        $GLOBALS['wp_mock_sub_fields']['video_url'] = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+
         // flexible.newsletter gates its whole raw-output block behind
         // ($isHttps || current_user_can('edit_posts')); its own action_url
         // sub-field is not in $acfKeys, so without this the gate stays
         // closed and the hostile payload never reaches its sink at all.
         $GLOBALS['wp_mock_current_user_can']['edit_posts'] = true;
+        // $isHttps also gates the privacy-policy-link branch (line 83-96);
+        // without a real https action_url that branch, and the
+        // get_privacy_policy_url() link inside it, never render at all.
+        $GLOBALS['wp_mock_sub_fields']['action_url'] = 'https://newsletter.example.test/subscribe';
+        $GLOBALS['wp_mock_privacy_policy_url'] = 'https://example.test/datenschutz';
+
+        // flexible.logo-slider's esc_js()-escaped pause-button labels only
+        // render once $logoData is non-empty, which needs a resolvable
+        // attachment image URL, not just a repeater row.
+        $GLOBALS['wp_mock_sub_fields']['logos'] = [
+            ['logo' => 501, 'link' => $hostile, 'name' => $hostile],
+        ];
+        $GLOBALS['wp_mock_attachments'][501]['logo'] = ['https://example.test/logo.png', 100, 50];
+
+        // flexible.pricing-table's @js()-escaped yearly/monthly price swap
+        // only renders with billing_toggle on and a plan whose yearly price
+        // differs from its monthly one.
+        $GLOBALS['wp_mock_sub_fields']['billing_toggle'] = true;
+        $GLOBALS['wp_mock_sub_fields']['plans'] = [
+            [
+                'name' => $hostile,
+                'price' => $hostile,
+                'period' => $hostile,
+                'price_yearly' => $hostile,
+                'features' => $hostile,
+            ],
+        ];
 
         $offenders = [];
         $thrown = [];
         $rendered = 0;
         $escaped = 0;
+        $capturedOutputs = [];
 
         foreach ($this->templateFiles() as $path) {
             $view = $this->viewName($path);
@@ -266,6 +383,22 @@ final class TemplateRenderTest extends TestCase
 
                 if (str_contains($renderedOutput, self::ESCAPED_MARKER)) {
                     ++$escaped;
+                }
+
+                if (in_array($view, ['flexible.logo-slider', 'flexible.pricing-table'], true)) {
+                    $capturedOutputs[$view] = $renderedOutput;
+                }
+
+                if (array_key_exists($view, self::CONSENT_GATED_IFRAME_TEMPLATES)) {
+                    $buttonLabel = self::CONSENT_GATED_IFRAME_TEMPLATES[$view];
+
+                    if (!str_contains($renderedOutput, $buttonLabel)) {
+                        $offenders[] = $path . " (consent button \"{$buttonLabel}\" missing)";
+                    }
+
+                    if (!preg_match('/<template\s+x-if="[^"]*"\s*>\s*<iframe\b/s', $renderedOutput)) {
+                        $offenders[] = $path . ' (iframe not gated inside <template x-if>)';
+                    }
                 }
             } catch (Throwable) {
                 $thrown[] = $view;
@@ -298,6 +431,17 @@ final class TemplateRenderTest extends TestCase
             self::MIN_ESCAPED,
             $escaped,
             'Fewer templates than expected proved actual escaping of the hostile payload, the payload may no longer be reaching output sinks.',
+        );
+
+        $this->assertStringContainsString(
+            self::ESCAPED_MARKER,
+            $capturedOutputs['flexible.logo-slider'] ?? '',
+            'flexible.logo-slider did not exercise its esc_js()-escaped code path (empty $logoData?).',
+        );
+        $this->assertStringContainsString(
+            self::ESCAPED_MARKER,
+            $capturedOutputs['flexible.pricing-table'] ?? '',
+            'flexible.pricing-table did not exercise its @js()-escaped code path (empty $plans or switchesPrice false?).',
         );
     }
 
@@ -347,6 +491,208 @@ final class TemplateRenderTest extends TestCase
 
         if (!str_contains($renderedOutput, 'alert(1)')) {
             $offenders[] = $view . ' (raw output template stripped the benign remainder of the payload too, not just the tag)';
+        }
+    }
+
+    /**
+     * Flexible.member-downloads gates its whole download table behind
+     * Auth::isAuthenticated() (templates/flexible/member-downloads.blade.php:17),
+     * which was never exercised by the other render passes above (they never
+     * seed a logged-in user), so the gate itself was untested.
+     */
+    public function testMemberDownloadsGatesOnAuthentication(): void
+    {
+        $app = Application::getInstance();
+        $app->boot();
+
+        $factory = blade();
+        $factory->getFinder()->addLocation($this->templatesDir());
+
+        $viewData = self::VIEW_DATA + ['slot' => new \Illuminate\View\ComponentSlot(), 'sectionAnchor' => null];
+
+        $GLOBALS['wp_mock_fields']['page_is_member_area'] = true;
+        $GLOBALS['wp_mock_current_user_id'] = 0;
+        $GLOBALS['wp_mock_current_user_can'] = [];
+
+        try {
+            $loggedOutOutput = $factory->make('flexible.member-downloads', $viewData)->render();
+            $factory->flushState();
+
+            $this->assertStringNotContainsString(
+                'x-data="downloadTable"',
+                $loggedOutOutput,
+                'Download table rendered for a logged-out visitor.',
+            );
+
+            // Auth::isAuthenticated() grants access unconditionally to a
+            // logged-in administrator (manage_options), regardless of the
+            // configured member-area auth mode - the simplest logged-in path.
+            $GLOBALS['wp_mock_current_user_id'] = 1;
+            $GLOBALS['wp_mock_current_user_can']['manage_options'] = true;
+
+            $loggedInOutput = $factory->make('flexible.member-downloads', $viewData)->render();
+            $factory->flushState();
+
+            $this->assertStringContainsString(
+                'x-data="downloadTable"',
+                $loggedInOutput,
+                'Download table did not render for an authenticated administrator.',
+            );
+        } finally {
+            unset(
+                $GLOBALS['wp_mock_fields']['page_is_member_area'],
+                $GLOBALS['wp_mock_current_user_id'],
+                $GLOBALS['wp_mock_current_user_can'],
+            );
+        }
+    }
+
+    /**
+     * Flexible.video (templates/flexible/video.blade.php) derives the
+     * <source type="..."> attribute from the uploaded file's extension and
+     * the external-video branch from a host-anchored URL parse. Covers the
+     * two regressions fixed alongside R2-S3/R2-S1: an .ogg upload getting a
+     * <source> without a type (wp_check_filetype() reports audio/ogg for
+     * .ogg), and youtu.be/an unrelated host bypassing the old
+     * youtube.com|youtu.be-only pattern.
+     */
+    public function testVideoLayoutSourceTypesAndFileExtensions(): void
+    {
+        $app = Application::getInstance();
+        $app->boot();
+
+        $factory = blade();
+        $factory->getFinder()->addLocation($this->templatesDir());
+
+        $viewData = self::VIEW_DATA + ['slot' => new \Illuminate\View\ComponentSlot(), 'sectionAnchor' => null];
+
+        try {
+            // Self-hosted upload, .webm.
+            $GLOBALS['wp_mock_sub_fields'] = [
+                'source' => 'wordpress',
+                'video' => 'https://example.test/movie.webm',
+                'poster' => 601,
+                'captions' => 'https://example.test/captions.vtt',
+            ];
+            $GLOBALS['wp_mock_attachments'][601]['hero-background'] = ['https://example.test/poster.jpg', 1200, 675];
+
+            $webmOutput = $factory->make('flexible.video', $viewData)->render();
+            $factory->flushState();
+
+            $this->assertStringContainsString(
+                '<source src="https://example.test/movie.webm" type="video/webm">',
+                $webmOutput,
+                'Self-hosted .webm upload did not get a type="video/webm" <source> tag.',
+            );
+
+            // Self-hosted upload, .ogg — the regression: wp_check_filetype()
+            // reports audio/ogg for this extension, so the old code either
+            // skipped the type or mistyped it.
+            $GLOBALS['wp_mock_sub_fields']['video'] = 'https://example.test/movie.ogg';
+
+            $oggOutput = $factory->make('flexible.video', $viewData)->render();
+            $factory->flushState();
+
+            $this->assertStringContainsString(
+                '<source src="https://example.test/movie.ogg" type="video/ogg">',
+                $oggOutput,
+                '.ogg upload did not resolve to type="video/ogg".',
+            );
+
+            // External youtu.be short link — the old pattern already matched
+            // this form, but only via string search, not a host-anchored
+            // parse; keep it green as the anchored replacement's baseline.
+            $GLOBALS['wp_mock_sub_fields'] = [
+                'source' => 'external',
+                'video_url' => 'https://youtu.be/dQw4w9WgXcQ',
+            ];
+
+            $youtuBeOutput = $factory->make('flexible.video', $viewData)->render();
+            $factory->flushState();
+
+            $this->assertStringContainsString(
+                'youtube-nocookie.com/embed/dQw4w9WgXcQ',
+                $youtuBeOutput,
+                'youtu.be short link did not resolve to a YouTube-nocookie embed.',
+            );
+
+            // Unrelated host must never be detected as a video provider —
+            // the template falls back to $video_type = 'self', which for
+            // source=external with no matching branch renders no iframe.
+            $GLOBALS['wp_mock_sub_fields']['video_url'] = 'https://example.test/youtube.com/watch?v=dQw4w9WgXcQ';
+
+            $unrelatedHostOutput = $factory->make('flexible.video', $viewData)->render();
+            $factory->flushState();
+
+            $this->assertStringNotContainsString(
+                '<iframe',
+                $unrelatedHostOutput,
+                'An unrelated host produced a video iframe.',
+            );
+        } finally {
+            unset(
+                $GLOBALS['wp_mock_sub_fields'],
+                $GLOBALS['wp_mock_attachments'][601],
+            );
+        }
+    }
+
+    /**
+     * Flexible.posts (templates/flexible/posts.blade.php:15-19) checks the
+     * backend-supplied post_type sub-field against get_post_types(['public'
+     * => true]) and silently falls back to 'post' for anything not in that
+     * allowlist. Never exercised before: WP_Query was unmocked, so the
+     * template threw before reaching WP_Query::__construct(), which is where
+     * the resolved $postType lands in the 'post_type' arg.
+     */
+    public function testPostsLayoutFiltersPostTypeAgainstAllowlist(): void
+    {
+        $app = Application::getInstance();
+        $app->boot();
+
+        $factory = blade();
+        $factory->getFinder()->addLocation($this->templatesDir());
+
+        $viewData = self::VIEW_DATA + ['slot' => new \Illuminate\View\ComponentSlot(), 'sectionAnchor' => null];
+
+        $GLOBALS['wp_mock_post_types'] = ['page' => ['public' => true]];
+
+        try {
+            // Not in the public-post-types allowlist (and not the hardcoded
+            // 'post' addition in the template) -> falls back to 'post'.
+            $GLOBALS['wp_mock_sub_fields']['post_type'] = 'member_download';
+            $factory->make('flexible.posts', $viewData)->render();
+            $factory->flushState();
+            $this->assertSame(
+                'post',
+                $GLOBALS['wp_mock_last_query_args']['post_type'] ?? null,
+                'A non-public post type should fall back to "post".',
+            );
+
+            $GLOBALS['wp_mock_sub_fields']['post_type'] = 'attachment';
+            $factory->make('flexible.posts', $viewData)->render();
+            $factory->flushState();
+            $this->assertSame(
+                'post',
+                $GLOBALS['wp_mock_last_query_args']['post_type'] ?? null,
+                '"attachment" is explicitly unset from the allowlist and must fall back to "post".',
+            );
+
+            // A public post type in the allowlist passes through unchanged.
+            $GLOBALS['wp_mock_sub_fields']['post_type'] = 'page';
+            $factory->make('flexible.posts', $viewData)->render();
+            $factory->flushState();
+            $this->assertSame(
+                'page',
+                $GLOBALS['wp_mock_last_query_args']['post_type'] ?? null,
+                'A public post type in the allowlist should pass through unchanged.',
+            );
+        } finally {
+            unset(
+                $GLOBALS['wp_mock_post_types'],
+                $GLOBALS['wp_mock_sub_fields']['post_type'],
+                $GLOBALS['wp_mock_last_query_args'],
+            );
         }
     }
 
@@ -492,12 +838,21 @@ final class TemplateRenderTest extends TestCase
     }
 
     /**
-     * First naming segment (e.g. "esc_", "have_", "sanitize_") of every
-     * mocked function, derived from mockedFunctionNames(). A function that
-     * shares one of these prefixes belongs to a WordPress/ACF naming family
-     * the bootstrap already partially covers, so an unmocked sibling
-     * (esc_js() next to the mocked esc_url()) is a legitimate mock gap
-     * rather than a theme bug.
+     * First naming segment (e.g. "have_", "sanitize_") of every mocked
+     * function, derived from mockedFunctionNames(). A function that shares
+     * one of these prefixes belongs to a WordPress/ACF naming family the
+     * bootstrap already partially covers, so an unmocked sibling is a
+     * legitimate mock gap rather than a theme bug.
+     *
+     * "esc_" is excluded on purpose: every esc_* function is a small,
+     * self-contained WordPress escaping helper the bootstrap can always
+     * mock faithfully, never a "genuinely unmockable" core internal like
+     * wp_date() or have_posts(). Blanket-tolerating the whole "esc_"
+     * family let esc_js() and esc_html_e() go unmocked for months while
+     * every template calling them silently counted as passing (real
+     * incident, 2026-09-05): an unmocked esc_* function is now a real
+     * failure here, exactly like an unmocked non-WordPress function, and
+     * must be added to the bootstrap by exact name instead.
      *
      * @return list<string>
      */
@@ -512,6 +867,7 @@ final class TemplateRenderTest extends TestCase
                     $prefixes[$match[1]] = true;
                 }
             }
+            unset($prefixes['esc_']);
             $prefixes = array_keys($prefixes);
         }
 

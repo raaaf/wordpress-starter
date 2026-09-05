@@ -77,6 +77,16 @@ class BladeServiceProvider extends ServiceProvider
         $filesystem = new Filesystem();
         $compiler = new BladeCompiler($filesystem, $this->getCompiledPath());
 
+        // WordPress's own escapers (esc_url(), esc_attr(), ...) already return
+        // HTML entities and never double-encode themselves. Blade's default
+        // echo format calls e($value, true), which re-encodes those entities
+        // (esc_url()'s "&#038;" becomes "&amp;#038;", and the browser then
+        // resolves the literal "#" as a URL fragment, corrupting the query
+        // string). withoutDoubleEncoding() switches the echo format to
+        // e($value, false), matching WordPress escaping semantics for every
+        // {{ }} in this theme.
+        $compiler->withoutDoubleEncoding();
+
         $viewResolver = new EngineResolver();
         $viewResolver->register('blade', fn () => new CompilerEngine($compiler));
         $viewResolver->register('php', fn () => new PhpEngine($filesystem));
