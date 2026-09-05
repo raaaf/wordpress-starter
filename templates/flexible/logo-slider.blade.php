@@ -103,11 +103,40 @@
                     class="absolute z-20 p-2 transition-colors border rounded-full right-2 top-2 bg-surface border-line text-content hover:bg-surface-secondary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                 >
                     <span class="sr-only" x-text="pausedByUser ? '{{ esc_js(__('Logolauf fortsetzen', 'wp-starter')) }}' : '{{ esc_js(__('Logolauf anhalten', 'wp-starter')) }}'">{{ __('Logolauf anhalten', 'wp-starter') }}</span>
-                    <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                        <rect x="4" y="3" width="3" height="10" rx="1" x-show="!pausedByUser"></rect>
-                        <rect x="9" y="3" width="3" height="10" rx="1" x-show="!pausedByUser"></rect>
-                        <path d="M5 3.5v9l8-4.5-8-4.5z" x-show="pausedByUser" x-cloak></path>
-                    </svg>
+                    <span class="relative block w-4 h-4">
+                        <svg
+                            class="absolute inset-0 w-4 h-4"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                            aria-hidden="true"
+                            x-show="!pausedByUser"
+                            x-transition:enter="transition-opacity duration-150 motion-reduce:transition-none"
+                            x-transition:enter-start="opacity-0"
+                            x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition-opacity duration-100 motion-reduce:transition-none"
+                            x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0"
+                        >
+                            <rect x="4" y="3" width="3" height="10" rx="1"></rect>
+                            <rect x="9" y="3" width="3" height="10" rx="1"></rect>
+                        </svg>
+                        <svg
+                            class="absolute inset-0 w-4 h-4"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                            aria-hidden="true"
+                            x-show="pausedByUser"
+                            x-cloak
+                            x-transition:enter="transition-opacity duration-150 motion-reduce:transition-none"
+                            x-transition:enter-start="opacity-0"
+                            x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition-opacity duration-100 motion-reduce:transition-none"
+                            x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0"
+                        >
+                            <path d="M5 3.5v9l8-4.5-8-4.5z"></path>
+                        </svg>
+                    </span>
                 </button>
             @endif
             {{-- Gradient overlays for seamless edges --}}

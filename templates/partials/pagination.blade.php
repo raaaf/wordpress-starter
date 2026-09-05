@@ -12,6 +12,7 @@
         // in team.blade.php, vorher lag die Hoehe ohne festes Mass bei ca. 40px.
         $baseClasses = 'inline-flex items-center justify-center min-h-11! min-w-11! px-4 py-2 rounded-lg border border-line text-content hover:bg-surface-secondary transition-colors';
         $currentClasses = 'bg-surface-brand text-content-on-brand border-surface-brand hover:bg-surface-brand';
+        $dotsClasses = 'inline-flex items-center justify-center min-h-11! min-w-11! px-4 py-2 text-content-tertiary';
         $pageLabel = __('Seite ', 'wp-starter');
     @endphp
     <nav class="{{ $navClass ?? 'mt-16' }}" aria-label="{{ $ariaLabel ?? __('Navigation', 'wp-starter') }}">
@@ -26,7 +27,7 @@
                     // Styling via exact class-attribute matches, never the loose word
                     // "current" — that also matches inside "aria-current" and corrupts it.
                     $link = str_replace('class="page-numbers current"', 'class="' . $baseClasses . ' ' . $currentClasses . '"', $link);
-                    $link = str_replace('class="page-numbers dots"', 'class="' . $baseClasses . ' dots"', $link);
+                    $link = str_replace('class="page-numbers dots"', 'class="' . $dotsClasses . ' dots"', $link);
                     $link = str_replace('class="prev page-numbers"', 'class="prev ' . $baseClasses . '"', $link);
                     $link = str_replace('class="next page-numbers"', 'class="next ' . $baseClasses . '"', $link);
                     $link = str_replace('class="page-numbers"', 'class="' . $baseClasses . '"', $link);

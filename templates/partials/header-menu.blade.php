@@ -30,7 +30,7 @@
                 <span class="inline-block">{!! $logoMarkup !!}</span>
             @else
                 <a href="{{ esc_url(get_bloginfo('url')) }}"
-                    class="inline-block transition-opacity duration-300 hover:opacity-75">{!! $logoMarkup !!}</a>
+                    class="inline-block transition-opacity duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] hover:opacity-75">{!! $logoMarkup !!}</a>
             @endif
 
             {{-- Desktop navigation (landmark provided by outer nav in header.blade.php) --}}

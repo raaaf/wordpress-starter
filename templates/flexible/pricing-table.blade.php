@@ -38,19 +38,19 @@
         <div @if($billingToggle) x-data="{ yearly: false }" @endif>
         @if($billingToggle)
             <div class="flex justify-center mb-8">
-                <div class="inline-flex rounded-[var(--radius-md)] border border-line overflow-hidden" role="group" aria-label="{{ __('Abrechnungszeitraum', 'wp-starter') }}">
+                <div class="inline-flex items-center gap-1 p-1 border rounded-full border-line bg-surface-secondary" role="group" aria-label="{{ __('Abrechnungszeitraum', 'wp-starter') }}">
                     <button type="button"
                             @click="yearly = false"
                             :aria-pressed="!yearly"
-                            :class="yearly ? 'bg-surface text-content-secondary' : 'bg-surface-brand text-content-on-brand'"
-                            class="px-5 py-2 cursor-pointer transition-colors focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--ring-focus)]">
+                            :class="yearly ? 'text-content-secondary hover:text-content' : 'bg-[var(--bg-brand-tint)] text-content-brand ring-1 ring-inset ring-[var(--border-brand)]'"
+                            class="px-3 py-1 text-sm font-normal transition-colors duration-200 rounded-full cursor-pointer focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
                         {{ __('Monatlich', 'wp-starter') }}
                     </button>
                     <button type="button"
                             @click="yearly = true"
                             :aria-pressed="yearly"
-                            :class="yearly ? 'bg-surface-brand text-content-on-brand' : 'bg-surface text-content-secondary'"
-                            class="px-5 py-2 cursor-pointer transition-colors focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--ring-focus)]">
+                            :class="yearly ? 'bg-[var(--bg-brand-tint)] text-content-brand ring-1 ring-inset ring-[var(--border-brand)]' : 'text-content-secondary hover:text-content'"
+                            class="px-3 py-1 text-sm font-normal transition-colors duration-200 rounded-full cursor-pointer focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
                         {{ __('Jährlich', 'wp-starter') }}
                     </button>
                 </div>

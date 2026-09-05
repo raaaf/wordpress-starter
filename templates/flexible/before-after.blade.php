@@ -73,7 +73,7 @@
                 aria-valuemin="0"
                 aria-valuemax="100"
                 aria-label="{{ __('Bildvergleich: Nutze die Pfeiltasten, um zwischen Vorher und Nachher zu wechseln', 'wp-starter') }}"
-                class="absolute inset-y-0 w-12 -translate-x-1/2 cursor-ew-resize before-after-handle focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] rounded-full"
+                class="group absolute inset-y-0 w-12 -translate-x-1/2 cursor-ew-resize before-after-handle focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] rounded-full"
                 :style="'left: ' + position + '%'"
                 @mousedown="handleMouseDown($event)"
                 @touchstart="handleTouchStart($event)"
@@ -90,7 +90,7 @@
                 <span class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1 bg-surface opacity-80 pointer-events-none" aria-hidden="true"></span>
 
                 {{-- Handle circle --}}
-                <div class="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 bg-surface rounded-full top-1/2 left-1/2 flex items-center justify-center border border-line-strong pointer-events-none">
+                <div class="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 bg-surface rounded-full top-1/2 left-1/2 flex items-center justify-center border border-line-strong group-hover:border-line-brand group-active:scale-95 transition-[border-color,transform] duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] motion-reduce:transition-none pointer-events-none">
                     <x-icon name="chevron-left" class="w-6 h-6 text-content-secondary" />
                     <x-icon name="chevron-right" class="w-6 h-6 text-content-secondary -ml-2" />
                 </div>

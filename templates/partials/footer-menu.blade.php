@@ -65,7 +65,7 @@
                     @endif
                 @endif
                 @if($showCompany && $company)
-                    <h2 class="text-h5 mb-4">{{ $company }}</h2>
+                    <h2 class="text-overline text-content-secondary mb-4">{{ $company }}</h2>
                 @endif
                 @if($footerText)
                     <div class="footer-prose text-content-secondary text-sm prose prose-sm">
@@ -77,7 +77,7 @@
             {{-- Footer Navigation --}}
             @if($showNav)
                 <div>
-                    <h2 class="text-h5 mb-4">{{ $navTitle }}</h2>
+                    <h2 class="text-overline text-content-secondary mb-4">{{ $navTitle }}</h2>
                     <nav class="footer-nav" aria-label="{{ __('Fußnavigation', 'wp-starter') }}">
                         <?php
                         wp_nav_menu([
@@ -95,7 +95,7 @@
             {{-- Contact Info --}}
             @if($showContact && ($address || $phone || $email))
                 <div>
-                    <h2 class="text-h5 mb-4">{{ $contactTitle }}</h2>
+                    <h2 class="text-overline text-content-secondary mb-4">{{ $contactTitle }}</h2>
                     <address class="not-italic text-content-secondary text-sm space-y-2">
                         @if($address)
                             <p>{!! nl2br(esc_html($address)) !!}</p>
@@ -121,7 +121,7 @@
             {{-- Social Links --}}
             @if($showSocial && !empty($socialLinks))
                 <div>
-                    <h2 class="text-h5 mb-4">{{ $socialTitle }}</h2>
+                    <h2 class="text-overline text-content-secondary mb-4">{{ $socialTitle }}</h2>
                     <div class="flex gap-4">
                         @foreach($socialLinks as $social)
                             @if(!empty($social['url']))

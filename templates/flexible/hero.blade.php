@@ -148,7 +148,7 @@
         <div class="hero-reveal relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center text-center w-full">
             <div class="max-w-3xl">
                 @if($badge)
-                    <x-badge variant="brand" size="md" class="mb-8">{{ $badge }}</x-badge>
+                    <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
                 @endif
 
                 @if($title)

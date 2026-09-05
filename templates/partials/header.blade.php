@@ -43,7 +43,7 @@
 
     {{-- Skip Link for Accessibility --}}
     <a href="#main-content"
-        class="absolute top-0 left-0 p-2 text-content-inverse no-underline transform -translate-y-full bg-surface-inverse focus-visible:translate-y-0 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] rounded">
+        class="absolute top-0 left-0 p-2 text-content-inverse no-underline transform -translate-y-full bg-surface-inverse transition-transform duration-150 ease-[var(--motion-enter-ease)] motion-reduce:transition-none focus-visible:translate-y-0 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] rounded">
         {{ __('Zum Inhalt springen', 'wp-starter') }}
     </a>
 

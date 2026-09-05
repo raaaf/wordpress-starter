@@ -21,7 +21,7 @@
                 </svg>
 
                 {{-- Testimonial Content --}}
-                <blockquote class="text-xl md:text-2xl text-content leading-relaxed mb-8">
+                <blockquote class="text-h4 text-content mb-8">
                     {{ $content }}
                 </blockquote>
 

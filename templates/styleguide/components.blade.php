@@ -29,7 +29,8 @@
          Die Zustandsspalten sind keine echten Pseudoklassen, die lassen sich nicht
          erzwingen. Die Demo-Klassen in app.css greifen auf dieselben Tokens zu wie
          die Komponente, kopieren also keine Werte, nur die Struktur. --}}
-    <div class="p-6 mb-6 overflow-x-auto bg-surface rounded-[var(--card-radius)] border border-line">
+    <x-card variant="outlined" padding="none" class="p-6 mb-6">
+        <div class="overflow-x-auto">
         <table class="w-full text-left">
             <thead>
                 <tr>
@@ -56,10 +57,11 @@
                 @endforeach
             </tbody>
         </table>
-    </div>
+        </div>
+    </x-card>
 
     {{-- Groessen --}}
-    <div class="p-6 mb-6 bg-surface rounded-[var(--card-radius)] border border-line">
+    <x-card variant="outlined" padding="none" class="p-6 mb-6">
         <p class="mb-4 text-body-small text-content-secondary">Größen. Sichtbar 32, 40 und 48 Pixel hoch; die Trefferfläche misst am Finger überall mindestens 44 Pixel.</p>
         <div class="flex flex-wrap items-center gap-4">
             <x-button url="#" title="Klein" size="sm" />
@@ -67,7 +69,7 @@
             <x-button url="#" title="Groß" size="lg" />
             <x-button url="#" title="Über die Breite" size="md" class="w-full sm:w-auto" />
         </div>
-    </div>
+    </x-card>
 
     {{-- Auf fremden Flaechen --}}
     <div class="grid gap-4 mb-16 md:grid-cols-2">
@@ -91,21 +93,21 @@
 
     {{-- Badges --}}
     <h3 class="mb-6">Badges</h3>
-    <div class="p-6 mb-6 bg-surface rounded-[var(--card-radius)] border border-line">
+    <x-card variant="outlined" padding="none" class="p-6 mb-6">
         <div class="flex flex-wrap items-center gap-3">
             @foreach(['gray', 'brand', 'accent', 'success', 'warning', 'error'] as $variant)
                 <x-badge :variant="$variant">{{ ucfirst($variant) }}</x-badge>
             @endforeach
         </div>
-    </div>
-    <div class="p-6 mb-16 bg-surface rounded-[var(--card-radius)] border border-line">
+    </x-card>
+    <x-card variant="outlined" padding="none" class="p-6 mb-16">
         <div class="flex flex-wrap items-center gap-3">
             <x-badge variant="brand" style="outline">Outline</x-badge>
             <x-badge variant="success" :dot="true">Mit Punkt</x-badge>
             <x-badge variant="gray" size="sm">Small</x-badge>
             <x-badge variant="gray" size="lg">Large</x-badge>
         </div>
-    </div>
+    </x-card>
 
     {{-- Alerts --}}
     <h3 class="mb-6">Hinweise</h3>
@@ -118,7 +120,7 @@
 
     {{-- Formular --}}
     <h3 class="mb-6">Formular-Elemente</h3>
-    <div class="p-6 mb-16 bg-surface rounded-[var(--card-radius)] border border-line">
+    <x-card variant="outlined" padding="none" class="p-6 mb-16">
         <x-grid cols="2" gap="lg">
             <div class="space-y-6">
                 <x-input name="sg_text" label="Textfeld" placeholder="Beispieltext" hint="Ein Hinweis unter dem Feld." />
@@ -148,7 +150,7 @@
                 </div>
             </div>
         </x-grid>
-    </div>
+    </x-card>
 
     {{-- Karten --}}
     <h3 class="mb-6">Karten</h3>
@@ -172,15 +174,15 @@
 
     {{-- Links und Icons --}}
     <h3 class="mb-6">Links und Icons</h3>
-    <div class="p-6 mb-6 bg-surface rounded-[var(--card-radius)] border border-line">
+    <x-card variant="outlined" padding="none" class="p-6 mb-6">
         <div class="flex flex-wrap items-center gap-6">
             <x-link url="#" variant="accent">Akzent-Link</x-link>
             <x-link url="#" variant="dark">Dunkler Link</x-link>
             <x-link url="#" variant="accent" iconRight="chevron-right">Mit Icon</x-link>
             <x-link url="#" :disabled="true">Deaktiviert</x-link>
         </div>
-    </div>
-    <div class="p-6 mb-16 bg-surface rounded-[var(--card-radius)] border border-line">
+    </x-card>
+    <x-card variant="outlined" padding="none" class="p-6 mb-16">
         <div class="flex flex-wrap items-center gap-6 text-icon-primary">
             @foreach(['calendar', 'check', 'close', 'download', 'eye', 'info', 'lock', 'mail', 'phone', 'search', 'user', 'warning'] as $icon)
                 <span class="flex flex-col items-center gap-2">
@@ -189,11 +191,11 @@
                 </span>
             @endforeach
         </div>
-    </div>
+    </x-card>
 
     {{-- Layout-Helfer --}}
     <h3 class="mb-6">Layout-Helfer</h3>
-    <div class="p-6 bg-surface rounded-[var(--card-radius)] border border-line">
+    <x-card variant="outlined" padding="none" class="p-6">
         <p class="text-body-small text-content-secondary">
             <code>x-grid</code> mit vier Spalten. <code>x-section</code> rahmt jeden Abschnitt dieser
             Seite, <code>x-prose</code> die Fliesstextbereiche der Flexible-Layouts weiter unten.
@@ -205,5 +207,5 @@
                 </div>
             @endfor
         </x-grid>
-    </div>
+    </x-card>
 </x-section>

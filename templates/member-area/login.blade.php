@@ -9,7 +9,7 @@
     <div class="max-w-md mx-auto">
         <x-card variant="elevated" padding="lg">
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-accent-subtle mb-4">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--bg-brand-tint)] border border-line-brand text-content-brand [&_svg]:text-content-brand mb-4">
                     <x-icon name="lock" class="w-8 h-8 text-icon-brand" />
                 </div>
                 <h1 class="text-h3 mb-2">{{ $loginTitle }}</h1>

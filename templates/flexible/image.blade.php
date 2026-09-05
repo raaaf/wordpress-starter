@@ -58,7 +58,7 @@
         ]) !!}
 
         @if($showCaption && ($caption || $alt))
-            <figcaption class="mt-4 text-sm text-content-secondary text-center">
+            <figcaption class="mt-4 text-body-small text-content-secondary text-center">
                 {{ $caption ?: $alt }}
             </figcaption>
         @endif

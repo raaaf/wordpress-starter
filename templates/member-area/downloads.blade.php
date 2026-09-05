@@ -207,7 +207,7 @@
                             type="button"
                             x-on:click="setPage(n)"
                             :class="n === currentPage
-                                ? 'bg-gradient-to-b from-[var(--gradient-primary-start)] to-[var(--gradient-primary-end)] text-content-inverse border-line'
+                                ? 'bg-surface-brand text-content-on-brand border-line'
                                 : 'text-content-secondary hover:bg-surface-secondary border-line'"
                             class="inline-flex items-center justify-center min-h-11! min-w-11! rounded-md border text-sm font-normal transition-colors"
                             :aria-label="`{{ __('Seite', 'wp-starter') }} ${n}`"
