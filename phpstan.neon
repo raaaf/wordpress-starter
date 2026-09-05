@@ -16,7 +16,7 @@ parameters:
     excludePaths:
         - vendor
         - compiled (?)
-        - node_modules
+        - node_modules (?)
     bootstrapFiles:
         - vendor/autoload.php
     treatPhpDocTypesAsCertain: false
