@@ -127,7 +127,8 @@ jobs:
         if: steps.semantic.outputs.released == 'true'
         run: |
           ZIP=$(ls wp-theme/*.zip | head -1)
-          shasum -a 256 "${ZIP}" > "${ZIP}.sha256"
+          # Bare filename in the checksum line, so `shasum -c` works from the download folder.
+          (cd "$(dirname "${ZIP}")" && shasum -a 256 "$(basename "${ZIP}")" > "$(basename "${ZIP}").sha256")
 
       - name: Upload release asset
         if: steps.semantic.outputs.released == 'true'
