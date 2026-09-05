@@ -16,6 +16,9 @@ class Access
         add_filter('rest_post_search_query', [self::class, 'excludeFromRestSearch'], 10, 2);
     }
 
+    /** @var array<int, array{is_member_area: mixed, is_protected: mixed}> */
+    private static array $flagCache = [];
+
     /**
      * Read page_is_member_area and page_is_protected once per post ID and cache the result.
      *
@@ -23,16 +26,23 @@ class Access
      */
     private static function getPageFlags(int $postId): array
     {
-        static $cache = [];
-
-        if (!isset($cache[$postId])) {
-            $cache[$postId] = [
+        if (!isset(self::$flagCache[$postId])) {
+            self::$flagCache[$postId] = [
                 'is_member_area' => get_field('page_is_member_area', $postId),
                 'is_protected'   => get_field('page_is_protected', $postId),
             ];
         }
 
-        return $cache[$postId];
+        return self::$flagCache[$postId];
+    }
+
+    /**
+     * Drop the per-request flag cache. Tests reuse post IDs across cases with
+     * different flags; production never needs this.
+     */
+    public static function resetFlagCache(): void
+    {
+        self::$flagCache = [];
     }
 
     /**

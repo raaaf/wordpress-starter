@@ -114,6 +114,7 @@ trait WordPressMocks
         // x-toggle/x-checkbox/x-radio/x-section in one test would keep
         // incrementing into the next.
         \WordpressStarter\Helpers\ComponentId::reset();
+        \WordpressStarter\MemberArea\Access::resetFlagCache();
 
         // Reset Security's test-only header emitter seam: otherwise a test
         // that calls Security::setHeaderEmitter() would leak its closure into

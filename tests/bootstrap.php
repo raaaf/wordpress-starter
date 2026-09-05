@@ -1334,10 +1334,23 @@ if (!class_exists('WP_Query')) {
         /** @var list<mixed> */
         public array $posts = [];
 
+        /**
+         * Core defaults both to false; tests configure them per instance to
+         * exercise Access::excludeFromSearch(), which checks both before
+         * touching the query args.
+         */
+        public bool $is_search = false;
+
+        public bool $is_main_query = false;
+
+        /** @var array<string, mixed> */
+        private array $queryVars = [];
+
         /** @param array<string, mixed> $args */
         public function __construct(array $args = [])
         {
             $GLOBALS['wp_mock_last_query_args'] = $args;
+            $this->queryVars = $args;
         }
 
         public function have_posts(): bool
@@ -1347,6 +1360,138 @@ if (!class_exists('WP_Query')) {
 
         public function the_post(): void
         {
+        }
+
+        public function is_search(): bool
+        {
+            return $this->is_search;
+        }
+
+        public function is_main_query(): bool
+        {
+            return $this->is_main_query;
+        }
+
+        public function get(string $key, mixed $default = ''): mixed
+        {
+            return $this->queryVars[$key] ?? $default;
+        }
+
+        public function set(string $key, mixed $value): void
+        {
+            $this->queryVars[$key] = $value;
+        }
+    }
+}
+
+// phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed -- test double needs a class alongside the function mocks in this single bootstrap file
+if (!class_exists('WP_Post')) {
+    /**
+     * Minimal WP_Post double: the properties Access::restrictRestPage() and
+     * its callers read, constructible from an array or object of properties
+     * like core's WP_Post::__construct() (which accepts an object, but tests
+     * find array literals more convenient to write).
+     */
+    class WP_Post // phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound -- test double needs a class alongside the function mocks in this single bootstrap file
+    {
+        public int $ID = 0;
+
+        public string $post_type = 'post';
+
+        public string $post_status = 'publish';
+
+        public string $post_password = '';
+
+        public string $post_title = '';
+
+        public string $post_content = '';
+
+        /** @param array<string, mixed>|object $post */
+        public function __construct(array|object $post = [])
+        {
+            foreach ( (array) $post as $key => $value) {
+                if (property_exists($this, $key)) {
+                    $this->$key = $value;
+                }
+            }
+        }
+    }
+}
+
+if (!class_exists('WP_REST_Response')) {
+    /**
+     * Minimal WP_REST_Response double: the constructor and accessors
+     * Access::restrictRestPage() uses to read and rewrite response data.
+     */
+    class WP_REST_Response // phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound -- test double needs a class alongside the function mocks in this single bootstrap file
+    {
+        private mixed $data;
+
+        private int $status;
+
+        public function __construct(mixed $data = null, int $status = 200)
+        {
+            $this->data = $data;
+            $this->status = $status;
+        }
+
+        public function get_data(): mixed
+        {
+            return $this->data;
+        }
+
+        public function set_data(mixed $data): void
+        {
+            $this->data = $data;
+        }
+
+        public function get_status(): int
+        {
+            return $this->status;
+        }
+    }
+}
+
+if (!class_exists('WP_REST_Request')) {
+    /**
+     * Minimal WP_REST_Request double: enough for
+     * Access::excludeFromRestSearch(), which receives one but does not read
+     * anything off it, plus the accessors tests need to build one.
+     */
+    class WP_REST_Request // phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound -- test double needs a class alongside the function mocks in this single bootstrap file
+    {
+        private string $method;
+
+        private string $route;
+
+        /** @var array<string, mixed> */
+        private array $params = [];
+
+        public function __construct(string $method = '', string $route = '')
+        {
+            $this->method = $method;
+            $this->route = $route;
+        }
+
+        public function get_param(string $key): mixed
+        {
+            return $this->params[$key] ?? null;
+        }
+
+        public function set_param(string $key, mixed $value): void
+        {
+            $this->params[$key] = $value;
+        }
+
+        /** @return array<string, mixed> */
+        public function get_params(): array
+        {
+            return $this->params;
+        }
+
+        public function get_route(): string
+        {
+            return $this->route;
         }
     }
 }
