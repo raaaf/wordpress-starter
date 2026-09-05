@@ -13,14 +13,14 @@ Built by `Security::getCSPHeader()` in `src/Security.php`:
 ```php
 $directives = [
     "default-src 'self'" . $localSources,
-    "font-src 'self' data: https://fonts.gstatic.com" . $localSources,
+    "font-src 'self' data:" . $localSources,
     "img-src 'self' data: https:" . $localSources,
     "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com" . self::getEmbedOrigins(),
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "media-src 'self' https:" . $localSources,
     "script-src 'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'" . $analyticsOrigin . $localSources,
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com" . $localSources,
+    "style-src 'self' 'unsafe-inline'" . $localSources,
     "connect-src 'self'" . $analyticsOrigin . $localSources,
     "worker-src 'self' blob:",
 ];
@@ -144,6 +144,10 @@ add_filter('acf/update_value/type=url', function ($value) {
 | URL            | `filter_var($value, FILTER_VALIDATE_URL)` |
 | Email          | `is_email()`                              |
 | HTML (WYSIWYG) | `wp_kses_post()`                          |
+
+### Member Area Shared Password
+
+`Acf::registerPasswordHashing()` (`src/MemberArea/Acf.php`) validates the shared-password field on save via `acf/validate_value/key=field_member_shared_password`, rejecting `<`, `>`, `&` and leading/trailing whitespace before the value is hashed with `wp_hash_password()`. This keeps the hashed value consistent with what `Auth::getSharedPassword()` receives at login: without the check, users without `unfiltered_html` have their input run through `wp_kses_post_deep` on the ACF save path (encoding `&` to `&amp;` and stripping `<`/`>`) before hashing, while the login form submits the raw value, so the hash would never match.
 
 ## Nonce Verification
 

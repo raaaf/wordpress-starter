@@ -19,11 +19,8 @@ let cachedNonces: NonceSet | null = null;
 let cachedAt = 0;
 const NONCE_CACHE_MS = 60_000;
 
-async function fetchNonces(): Promise<NonceSet> {
+async function requestNonces(): Promise<NonceSet> {
   const now = Date.now();
-  if (cachedNonces && now - cachedAt < NONCE_CACHE_MS) {
-    return cachedNonces;
-  }
   const url = `${memberAreaConfig.ajaxUrl}?action=member_get_nonces&_=${now}`;
   const response = await fetch(url, {
     credentials: 'same-origin',
@@ -36,6 +33,32 @@ async function fetchNonces(): Promise<NonceSet> {
   cachedNonces = data.data as NonceSet;
   cachedAt = now;
   return cachedNonces;
+}
+
+async function fetchNonces(): Promise<NonceSet> {
+  const now = Date.now();
+  if (cachedNonces && now - cachedAt < NONCE_CACHE_MS) {
+    return cachedNonces;
+  }
+  return requestNonces();
+}
+
+// A cached nonce can be rejected by the server (e.g. it expired between
+// requests, ahead of the client-side TTL). The AJAX endpoints answer such a
+// rejection with HTTP 403 ("Ungültige Anfrage."). On that response, drop the
+// cache and retry the call once with freshly fetched nonces, so the user
+// does not have to reload the page to recover from a stale nonce.
+async function fetchWithNonceRetry(
+  buildRequest: (nonces: NonceSet) => Promise<Response>
+): Promise<Response> {
+  const nonces = await fetchNonces();
+  const response = await buildRequest(nonces);
+  if (response.status === 403) {
+    cachedNonces = null;
+    const freshNonces = await requestNonces();
+    return buildRequest(freshNonces);
+  }
+  return response;
 }
 
 // ============================================
@@ -69,8 +92,12 @@ function createMemberLoginComponent(): MemberLoginState {
       }
 
       try {
+        // No auto-retry here (unlike fetchWithNonceRetry, used for the
+        // read-only calls below): the server rate-limits member_login before
+        // checking the nonce, so a stale-nonce click that silently re-POSTs
+        // burns two of the user's five attempts for one click. On a rejected
+        // nonce, drop the cache and ask the user to submit again instead.
         const nonces = await fetchNonces();
-
         const body = new FormData();
         body.append('action', 'member_login');
         body.append('nonce', nonces.login);
@@ -88,6 +115,12 @@ function createMemberLoginComponent(): MemberLoginState {
           credentials: 'same-origin',
           body,
         });
+
+        if (response.status === 403) {
+          cachedNonces = null;
+          this.error = 'Sitzung abgelaufen, bitte erneut anmelden.';
+          return;
+        }
 
         const data = await response.json();
 
@@ -159,12 +192,17 @@ interface DownloadTableState extends AlpineMagics {
   pageNumbers(): (number | string)[];
 }
 
-// Only allow same-origin or http(s) URLs through to the download link;
-// anything else (javascript:, data:, etc.) is dropped so the template renders no link.
+// Only allow same-origin http(s) URLs through to the download link; anything
+// else (javascript:, data:, a cross-origin or protocol-relative URL, etc.)
+// is dropped so the template renders no link. Returning url.toString() (the
+// resolved value) rather than the original string closes a bypass where a
+// protocol-relative or otherwise-resolvable cross-origin value passed the
+// protocol check while `value` itself still pointed off-origin.
 function safeUrl(value: string): string {
   try {
     const url = new URL(value, window.location.origin);
-    return url.protocol === 'https:' || url.protocol === 'http:' ? value : '';
+    if (url.origin !== window.location.origin) return '';
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.toString() : '';
   } catch {
     return '';
   }
@@ -215,14 +253,15 @@ function createDownloadTableComponent(): DownloadTableState {
       if (!config) return;
 
       try {
-        const nonces = await fetchNonces();
-        const params = new URLSearchParams({
-          action: 'member_downloads_query',
-          nonce: nonces.downloads,
-          facets: '1',
-        });
-        const response = await fetch(`${config.ajaxUrl}?${params}`, {
-          credentials: 'same-origin',
+        const response = await fetchWithNonceRetry((nonces) => {
+          const params = new URLSearchParams({
+            action: 'member_downloads_query',
+            nonce: nonces.downloads,
+            facets: '1',
+          });
+          return fetch(`${config.ajaxUrl}?${params}`, {
+            credentials: 'same-origin',
+          });
         });
         const data = await response.json();
         if (data.success) {
@@ -235,6 +274,20 @@ function createDownloadTableComponent(): DownloadTableState {
     },
 
     async fetch() {
+      // The table re-render (items replaced below) drops focus if it was on
+      // a now-removed row, and nothing is announced. If focus was inside the
+      // table before this fetch, move it to the results status line
+      // afterwards; the announcement itself already happens via that line's
+      // aria-live binding in downloads.blade.php (:total etc.), so no
+      // separate status string is introduced here.
+      const focusedBeforeFetch = document.activeElement as HTMLElement | null;
+      const tableBeforeFetch = this.$el?.querySelector('table');
+      const shouldRestoreFocus = !!(
+        tableBeforeFetch &&
+        focusedBeforeFetch &&
+        tableBeforeFetch.contains(focusedBeforeFetch)
+      );
+
       this.loading = true;
       this.error = '';
 
@@ -246,18 +299,19 @@ function createDownloadTableComponent(): DownloadTableState {
       }
 
       try {
-        const nonces = await fetchNonces();
-        const params = new URLSearchParams({
-          action: 'member_downloads_query',
-          nonce: nonces.downloads,
-          page: String(this.currentPage),
-          per_page: String(this.perPage),
-          search: this.search,
-          category: this.category,
-          ext: this.ext,
-        });
-        const response = await fetch(`${config.ajaxUrl}?${params}`, {
-          credentials: 'same-origin',
+        const response = await fetchWithNonceRetry((nonces) => {
+          const params = new URLSearchParams({
+            action: 'member_downloads_query',
+            nonce: nonces.downloads,
+            page: String(this.currentPage),
+            per_page: String(this.perPage),
+            search: this.search,
+            category: this.category,
+            ext: this.ext,
+          });
+          return fetch(`${config.ajaxUrl}?${params}`, {
+            credentials: 'same-origin',
+          });
         });
         const data = await response.json();
 
@@ -279,6 +333,15 @@ function createDownloadTableComponent(): DownloadTableState {
         this.items = [];
       } finally {
         this.loading = false;
+        if (shouldRestoreFocus) {
+          this.$nextTick(() => {
+            const statusRegion = this.$el?.querySelector<HTMLElement>('[aria-live="polite"]');
+            if (statusRegion) {
+              statusRegion.setAttribute('tabindex', '-1');
+              statusRegion.focus();
+            }
+          });
+        }
       }
     },
 

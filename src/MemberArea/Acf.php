@@ -221,6 +221,21 @@ class Acf
             return $value;
         }, 10, 1);
 
+        // Reject characters that acf/update_value_shared_password's save path
+        // (wp_kses_post_deep, for users without unfiltered_html) would strip or
+        // encode before hashing, so the hash always matches the raw login input.
+        add_filter('acf/validate_value/key=field_member_shared_password', function ($valid, $value, $field) {
+            if (!$valid || empty($value) || !is_string($value)) {
+                return $valid;
+            }
+
+            if (preg_match('/[<>&]/', $value) || $value !== trim($value)) {
+                return __('Das Passwort darf keine spitzen Klammern oder & enthalten.', 'wp-starter');
+            }
+
+            return $valid;
+        }, 10, 3);
+
         // Hash password before saving to ACF options
         add_filter('acf/update_value/key=field_member_shared_password', function ($value) {
             if (empty($value)) {

@@ -8,12 +8,29 @@ import { createStatsCounterCore, type StatsCounterCore } from './stats-counter';
 import { initColumnHeadingAlignment } from './column-headings';
 
 // Declare localized strings from WordPress (object name is fixed as 'themeStrings' for all themes)
-declare const themeStrings: {
-  submenuOpen: string;
-  submenuClose: string;
-  image: string;
-  imageZoomInstruction: string;
+declare const themeStrings:
+  | {
+      submenuOpen: string;
+      submenuClose: string;
+      image: string;
+      imageZoomInstruction: string;
+    }
+  | undefined;
+
+// German fallback labels, mirroring src/Vite.php:getFrontendStrings(), used
+// when wp_localize_script has not run (e.g. a cached page fragment served
+// without the script data). Without this guard initMobileSubmenus() throws
+// and the whole mobile navigation stays inert.
+const FALLBACK_STRINGS = {
+  submenuOpen: 'Untermenü öffnen',
+  submenuClose: 'Untermenü schließen',
+  image: 'Bild',
+  imageZoomInstruction: 'Klicken oder Enter zum Vergrößern',
 };
+
+function getThemeStrings(): typeof FALLBACK_STRINGS {
+  return typeof themeStrings !== 'undefined' ? themeStrings : FALLBACK_STRINGS;
+}
 
 // ============================================
 // Navigation Component
@@ -58,7 +75,8 @@ export function createNavigationComponent(): NavigationComponent {
         const toggle = document.createElement('button');
         toggle.className = 'submenu-toggle';
         toggle.setAttribute('aria-expanded', 'false');
-        toggle.setAttribute('aria-label', themeStrings.submenuOpen);
+        const strings = getThemeStrings();
+        toggle.setAttribute('aria-label', strings.submenuOpen);
         // Gleiches Chevron wie resources/icons/chevron-down.svg. Hier inline und
         // nicht ueber <x-icon>, weil der Umschalter erst im Browser entsteht.
         // Gezeichnet statt gefuellt war der letzte Rest der zweiten Ikonografie:
@@ -71,7 +89,7 @@ export function createNavigationComponent(): NavigationComponent {
           toggle.setAttribute('aria-expanded', String(isExpanded));
           toggle.setAttribute(
             'aria-label',
-            isExpanded ? themeStrings.submenuClose : themeStrings.submenuOpen
+            isExpanded ? strings.submenuClose : strings.submenuOpen
           );
         };
 
@@ -174,14 +192,42 @@ export function createStatsCounterComponent(target: number): StatsCounterCompone
 // Rybbit Analytics Tracking
 // ============================================
 
-export const CONTENT_SELECTORS =
-  '.prose a, .one-column a, .two-columns a, .three-columns a, .four-columns a, .two-columns-images a, .one-third-columns a';
+// Layout classes shared by the content-link selector, the block-type selector
+// and the block-type regex below. Kept in one array so the three stay in sync
+// when a layout is renamed. `two-columns-images` MUST stay before `two-columns`:
+// regex alternation matches the first successful alternative at a position, not
+// the longest, so the shorter class would otherwise truncate the match.
+export const TRACKED_LAYOUT_CLASSES = [
+  'two-columns-images',
+  'one-column',
+  'two-columns',
+  'three-columns',
+  'four-columns',
+  'one-third-two-thirds',
+  'two-thirds-one-third',
+] as const;
 
-export const BLOCK_TYPE_SELECTOR =
-  '[class*="-column"], .hero, .cta-block, .video, .accordion, .two-columns-images, .one-third-columns';
+// Block types with no content-link tracking selector of their own but still
+// recognized as a distinct block type for analytics.
+export const NON_COLUMN_BLOCK_CLASSES = ['hero', 'cta-block', 'video', 'accordion'] as const;
 
-export const BLOCK_TYPE_REGEX =
-  /(one|two|three|four)-column(?:s)?(?:-images)?|one-third-columns|hero|cta-block|video|accordion/;
+function escapeRegExpChar(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+export const CONTENT_SELECTORS = ['.prose', ...TRACKED_LAYOUT_CLASSES.map((c) => `.${c}`)]
+  .map((selector) => `${selector} a`)
+  .join(', ');
+
+export const BLOCK_TYPE_SELECTOR = [
+  '[class*="-column"]',
+  ...NON_COLUMN_BLOCK_CLASSES.map((c) => `.${c}`),
+  ...TRACKED_LAYOUT_CLASSES.map((c) => `.${c}`),
+].join(', ');
+
+export const BLOCK_TYPE_REGEX = new RegExp(
+  [...TRACKED_LAYOUT_CLASSES, ...NON_COLUMN_BLOCK_CLASSES].map(escapeRegExpChar).join('|')
+);
 
 export function extractBlockType(element: Element): string | null {
   const parentBlock = element.closest(BLOCK_TYPE_SELECTOR);
@@ -204,7 +250,10 @@ function applyAnalyticsLinkAttrs(link: HTMLAnchorElement, linkText?: string): vo
     return;
   }
 
-  link.setAttribute('data-rybbit-prop-link-url', link.href);
+  // Forward origin + pathname only: the query string and hash can carry
+  // tracking tokens, search terms or other user-entered data that should not
+  // end up in analytics.
+  link.setAttribute('data-rybbit-prop-link-url', link.origin + link.pathname);
   if (linkText !== undefined) {
     link.setAttribute('data-rybbit-prop-link-text', linkText);
   }
@@ -213,12 +262,17 @@ function applyAnalyticsLinkAttrs(link: HTMLAnchorElement, linkText?: string): vo
 export function addContentLinkTracking(link: HTMLAnchorElement): void {
   if (link.hasAttribute('data-rybbit-event')) return;
 
+  const isContactLink = PERSONAL_DATA_PROTOCOLS.has(link.protocol);
   const isExternal = link.hostname && link.hostname !== window.location.hostname;
   const linkText = link.textContent?.trim() || 'Unknown';
 
   link.setAttribute(
     'data-rybbit-event',
-    isExternal ? 'External_Link_Click' : 'Internal_Link_Click'
+    isContactLink
+      ? 'Contact_Link_Click'
+      : isExternal
+        ? 'External_Link_Click'
+        : 'Internal_Link_Click'
   );
   link.setAttribute('data-rybbit-prop-key', 'content_link');
   applyAnalyticsLinkAttrs(link, linkText);
@@ -329,9 +383,10 @@ export async function initGalleryZoom(): Promise<void> {
     // Bild ohne umgebenden Button: dann traegt es die Rolle selbst.
     el.setAttribute('role', 'button');
     el.setAttribute('tabindex', '0');
+    const strings = getThemeStrings();
     el.setAttribute(
       'aria-label',
-      (el.getAttribute('alt') || themeStrings.image) + ' - ' + themeStrings.imageZoomInstruction
+      (el.getAttribute('alt') || strings.image) + ' - ' + strings.imageZoomInstruction
     );
     el.addEventListener('keydown', (e) => {
       if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') {

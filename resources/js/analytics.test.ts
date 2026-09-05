@@ -5,7 +5,10 @@ import {
   addImageLinkTracking,
   extractBlockType,
   CONTENT_SELECTORS,
+  BLOCK_TYPE_SELECTOR,
   BLOCK_TYPE_REGEX,
+  TRACKED_LAYOUT_CLASSES,
+  NON_COLUMN_BLOCK_CLASSES,
   initVideoConsent,
 } from './app';
 
@@ -144,6 +147,7 @@ describe('Rybbit Analytics Tracking', () => {
       expect(link.hasAttribute('data-rybbit-prop-link-url')).toBe(false);
       expect(link.hasAttribute('data-rybbit-prop-link-text')).toBe(false);
       expect(link.getAttribute('data-rybbit-prop-link-type')).toBe('mailto');
+      expect(link.getAttribute('data-rybbit-event')).toBe('Contact_Link_Click');
     });
 
     it('does not forward a tel number as an analytics property, even when the visible text is the number itself', () => {
@@ -155,6 +159,7 @@ describe('Rybbit Analytics Tracking', () => {
       expect(link.hasAttribute('data-rybbit-prop-link-url')).toBe(false);
       expect(link.hasAttribute('data-rybbit-prop-link-text')).toBe(false);
       expect(link.getAttribute('data-rybbit-prop-link-type')).toBe('tel');
+      expect(link.getAttribute('data-rybbit-event')).toBe('Contact_Link_Click');
     });
 
     it('does not forward an sms number as an analytics property, even when the visible text is the number itself', () => {
@@ -166,6 +171,7 @@ describe('Rybbit Analytics Tracking', () => {
       expect(link.hasAttribute('data-rybbit-prop-link-url')).toBe(false);
       expect(link.hasAttribute('data-rybbit-prop-link-text')).toBe(false);
       expect(link.getAttribute('data-rybbit-prop-link-type')).toBe('sms');
+      expect(link.getAttribute('data-rybbit-event')).toBe('Contact_Link_Click');
     });
 
     it('keeps url and text for a normal https link', () => {
@@ -177,6 +183,15 @@ describe('Rybbit Analytics Tracking', () => {
       expect(link.getAttribute('data-rybbit-prop-link-url')).toBe('https://example.com/page');
       expect(link.getAttribute('data-rybbit-prop-link-text')).toBe('Read more');
       expect(link.hasAttribute('data-rybbit-prop-link-type')).toBe(false);
+    });
+
+    it('strips the query string and hash from the tracked link url', () => {
+      document.body.innerHTML = `<a href="https://example.com/page?foo=bar&secret=1#section">Test</a>`;
+      const link = document.querySelector('a')!;
+
+      addContentLinkTracking(link);
+
+      expect(link.getAttribute('data-rybbit-prop-link-url')).toBe('https://example.com/page');
     });
   });
 
@@ -262,7 +277,8 @@ describe('Rybbit Analytics Tracking', () => {
         { className: 'three-columns', expected: 'three-columns' },
         { className: 'four-columns', expected: 'four-columns' },
         { className: 'two-columns-images', expected: 'two-columns-images' },
-        { className: 'one-third-columns', expected: 'one-third-columns' },
+        { className: 'one-third-two-thirds', expected: 'one-third-two-thirds' },
+        { className: 'two-thirds-one-third', expected: 'two-thirds-one-third' },
       ];
 
       testCases.forEach(({ className, expected }) => {
@@ -288,6 +304,11 @@ describe('Rybbit Analytics Tracking', () => {
       expect('four-columns'.match(BLOCK_TYPE_REGEX)?.[0]).toBe('four-columns');
     });
 
+    it('matches the third/two-thirds layout classes', () => {
+      expect('one-third-two-thirds'.match(BLOCK_TYPE_REGEX)?.[0]).toBe('one-third-two-thirds');
+      expect('two-thirds-one-third'.match(BLOCK_TYPE_REGEX)?.[0]).toBe('two-thirds-one-third');
+    });
+
     it('matches special block types', () => {
       expect('hero'.match(BLOCK_TYPE_REGEX)?.[0]).toBe('hero');
       expect('cta-block'.match(BLOCK_TYPE_REGEX)?.[0]).toBe('cta-block');
@@ -303,6 +324,28 @@ describe('Rybbit Analytics Tracking', () => {
       expect(CONTENT_SELECTORS).toContain('.two-columns a');
       expect(CONTENT_SELECTORS).toContain('.three-columns a');
       expect(CONTENT_SELECTORS).toContain('.four-columns a');
+    });
+  });
+
+  describe('TRACKED_LAYOUT_CLASSES', () => {
+    it('every tracked layout class is matched by both the selector and the regex', () => {
+      TRACKED_LAYOUT_CLASSES.forEach((className) => {
+        document.body.innerHTML = `<div class="${className}"><a href="/page">Link</a></div>`;
+        const block = document.querySelector(`.${className}`)!;
+
+        expect(block.matches(BLOCK_TYPE_SELECTOR)).toBe(true);
+        expect(className.match(BLOCK_TYPE_REGEX)?.[0]).toBe(className);
+      });
+    });
+
+    it('every non-column block class is matched by both the selector and the regex', () => {
+      NON_COLUMN_BLOCK_CLASSES.forEach((className) => {
+        document.body.innerHTML = `<div class="${className}"><a href="/page">Link</a></div>`;
+        const block = document.querySelector(`.${className}`)!;
+
+        expect(block.matches(BLOCK_TYPE_SELECTOR)).toBe(true);
+        expect(className.match(BLOCK_TYPE_REGEX)?.[0]).toBe(className);
+      });
     });
   });
 

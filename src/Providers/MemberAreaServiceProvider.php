@@ -127,7 +127,7 @@ class MemberAreaServiceProvider extends ServiceProvider
             wp_send_json_error(['message' => __('Ungültige Anfrage.', 'wp-starter')], 403);
         }
 
-        $credential = sanitize_text_field(wp_unslash($_POST['credential'] ?? ''));
+        $credential = self::normaliseCredential($_POST['credential'] ?? ''); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- unslashed/sanitized inside normaliseCredential() depending on auth mode
         // Passwords must not be sanitized — sanitize_text_field strips characters that
         // may be part of a valid password (e.g. <, >, &, multiple spaces).
         $password = isset($_POST['password']) ? wp_unslash($_POST['password']) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -161,6 +161,24 @@ class MemberAreaServiceProvider extends ServiceProvider
         $redirectUrl = wp_validate_redirect(sanitize_url(wp_unslash($_POST['redirect'] ?? '')), home_url('/'));
 
         wp_send_json_success(['redirect' => $redirectUrl]);
+    }
+
+    /**
+     * In WordPress mode, credential is a username/e-mail — safe to sanitize.
+     * In shared-password mode, credential IS the password itself, so it must
+     * not be sanitized (same reasoning as $password above: sanitize_text_field
+     * strips characters like <, >, & and collapses whitespace that may be
+     * part of a valid password).
+     */
+    private static function normaliseCredential(mixed $raw): string
+    {
+        $raw = is_string($raw) ? $raw : '';
+
+        if (strtolower(Auth::getAuthMode()) === 'wordpress') { // phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText
+            return sanitize_text_field(wp_unslash($raw));
+        }
+
+        return wp_unslash($raw); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
     }
 
     public function handleLogout(): void

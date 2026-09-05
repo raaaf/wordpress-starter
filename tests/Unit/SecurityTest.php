@@ -42,7 +42,7 @@ final class SecurityTest extends TestCase
         $nonce = Security::getNonce();
 
         // Security::getNonce() generates random_bytes(16), base64-encoded.
-        $decoded = base64_decode($nonce, true);
+        $decoded = base64_decode($nonce, true); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- decodes the generated nonce to assert its byte length
 
         $this->assertNotFalse($decoded, 'nonce must be valid base64');
         $this->assertSame(16, strlen($decoded));
@@ -240,12 +240,17 @@ final class SecurityTest extends TestCase
         $this->assertStringContainsString('https://player.vimeo.com', $header);
     }
 
-    public function testGetCSPHeaderIncludesGoogleFonts(): void
+    /**
+     * All font faces are self-hosted (resources/css/fonts.css), so the CSP
+     * must not carry the Google Fonts origins: an origin present here is
+     * attack surface the theme does not need.
+     */
+    public function testGetCSPHeaderExcludesGoogleFontsOrigins(): void
     {
         $header = Security::getCSPHeader();
 
-        $this->assertStringContainsString('https://fonts.gstatic.com', $header);
-        $this->assertStringContainsString('https://fonts.googleapis.com', $header);
+        $this->assertStringNotContainsString('fonts.gstatic.com', $header);
+        $this->assertStringNotContainsString('fonts.googleapis.com', $header);
     }
 
     public function testGetCSPHeaderIncludesUnsafeInlineForStyles(): void
@@ -527,6 +532,33 @@ final class SecurityTest extends TestCase
         $this->assertSame(1, preg_match_all('/(?:^|;\s*)frame-src /', $header));
         $this->assertStringContainsString('https://calendly.com', $this->directive($header, 'frame-src'));
         $this->assertStringNotContainsString('evil.test', $header);
+    }
+
+    /**
+     * The isAllowedEmbedHost() method is the shared gate templates use before
+     * rendering an iframe; it must accept exactly what getCSPHeader() writes
+     * into frame-src, no more and no less.
+     */
+    #[DataProvider('embedHostAllowance')]
+    public function testIsAllowedEmbedHost(string $url, bool $expected, string $warum): void
+    {
+        $this->setMockField('embed_allowed_hosts', 'calendly.com', 'option');
+
+        $this->assertSame($expected, Security::isAllowedEmbedHost($url), $warum);
+    }
+
+    /** @return array<string, array{0: string, 1: bool, 2: string}> */
+    public static function embedHostAllowance(): array
+    {
+        return [
+            'hartkodierter Host erlaubt' => ['https://www.youtube-nocookie.com/embed/x', true, 'in HARDCODED_FRAME_SRC_HOSTS und in der CSP'],
+            'Options-Host erlaubt' => ['https://calendly.com/meeting', true, 'aus der embed_allowed_hosts Option'],
+            'Subdomain des Options-Hosts abgelehnt' => ['https://sub.calendly.com/meeting', false, 'heutige Semantik: nur exakte Eintraege, keine Subdomains'],
+            'eigener Host abgelehnt' => ['https://' . (string) wp_parse_url(home_url(), PHP_URL_HOST) . '/x', false, 'allow-same-origin darf den Sandkasten nicht aushebeln'],
+            'Userinfo-Trick abgelehnt' => ['https://calendly.com@evil.test/x', false, 'wp_parse_url liest den echten Host (evil.test), nicht das Userinfo-Feld'],
+            'Grossschreibung im Schema akzeptiert' => ['HTTPS://calendly.com/meeting', true, 'Schema-Vergleich ist case-insensitiv'],
+            'http abgelehnt' => ['http://calendly.com/meeting', false, 'nur https ist zulaessig'],
+        ];
     }
 
     public function testScriptLoaderTagAddsNonceToSingleTag(): void

@@ -161,20 +161,10 @@ describe('Navigation Component init()', () => {
 });
 
 /**
- * app.ts declares `themeStrings` as an ambient global (`declare const
- * themeStrings`) but never guards a read of it: init() -> initMobileSubmenus()
- * reads `themeStrings.submenuOpen` directly while building a toggle for every
- * `.menu-item-has-children`, with no fallback string and no try/catch.
- *
- * That means the "falls back sanely" behaviour this fix was briefed to assume
- * does not exist in the current code: a missing themeStrings throws instead
- * of degrading to a default label or skipping the toggle. Adding that
- * fallback would be a change to resources/js/app.ts, which is out of scope
- * for this fix (test files only). Instead, this test pins down the actual
- * behaviour as a regression guard: it fails loudly if a future change makes
- * the crash silent (e.g. `undefined` rendered into the label) instead of
- * throwing, which would be a worse regression than the one this suite
- * replaces.
+ * app.ts declares `themeStrings` as an ambient global that WordPress injects
+ * via wp_localize_script. A cached page fragment can be served without that
+ * script data, so init() -> initMobileSubmenus() falls back to German
+ * default labels instead of throwing when `themeStrings` is missing.
  */
 describe('Navigation Component init() without themeStrings', () => {
   let root: HTMLElement;
@@ -190,7 +180,7 @@ describe('Navigation Component init() without themeStrings', () => {
     root.remove();
   });
 
-  it('throws instead of silently producing a menu without labels', () => {
+  it('falls back to German default labels instead of throwing', () => {
     const navigation = createNavigationComponent() as TestableNavigationComponent;
     navigation.$nextTick = (callback?: () => void) => {
       callback?.();
@@ -198,6 +188,9 @@ describe('Navigation Component init() without themeStrings', () => {
     };
     navigation.$el = root;
 
-    expect(() => navigation.init()).toThrow();
+    expect(() => navigation.init()).not.toThrow();
+
+    const toggle = root.querySelector<HTMLButtonElement>('.submenu-toggle')!;
+    expect(toggle.getAttribute('aria-label')).toBe('Untermenü öffnen');
   });
 });

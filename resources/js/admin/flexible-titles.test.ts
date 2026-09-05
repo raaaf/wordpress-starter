@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
-import { stripTags } from './flexible-titles';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getLayoutPreview, stripTags } from './flexible-titles';
 
 /**
  * Die Zeilenvorschau im Editor ist das einzige, was eine eingeklappte Sektion
@@ -30,6 +30,12 @@ describe('stripTags', () => {
     expect(stripTags('<p></p>')).toBe('');
   });
 
+  it('entfernt script- und style-Inhalte aus dem Vorschautext', () => {
+    expect(stripTags('<p>Text</p><script>alert(1)</script><style>.x{color:red}</style>')).toBe(
+      'Text'
+    );
+  });
+
   it('fuehrt kein Skript aus einem eingebetteten <img onerror> aus', () => {
     const createElementSpy = vi.spyOn(document, 'createElement');
 
@@ -43,5 +49,37 @@ describe('stripTags', () => {
     expect(createElementSpy).not.toHaveBeenCalledWith('img');
 
     createElementSpy.mockRestore();
+  });
+});
+
+/**
+ * getLayoutPreview's WYSIWYG "visual mode" branch reads the iframe's live
+ * body content. It used to read `body.textContent` directly, which — unlike
+ * the other branches — never went through stripTags and so lost the
+ * block-element word boundary (see the "setzt ein Leerzeichen..." test
+ * above).
+ */
+describe('getLayoutPreview WYSIWYG visual-mode branch', () => {
+  let layout: HTMLElement;
+
+  beforeEach(() => {
+    layout = document.createElement('div');
+    layout.innerHTML = `
+      <div data-name="content">
+        <iframe></iframe>
+      </div>
+    `;
+    document.body.appendChild(layout);
+  });
+
+  afterEach(() => {
+    layout.remove();
+  });
+
+  it('inserts a space between block elements from the iframe body, like the source-mode branches', () => {
+    const iframe = layout.querySelector('iframe')!;
+    iframe.contentDocument!.body.innerHTML = '<p>Zeile eins</p><p>Zeile zwei</p>';
+
+    expect(getLayoutPreview(layout)).toBe('Zeile eins Zeile zwei');
   });
 });

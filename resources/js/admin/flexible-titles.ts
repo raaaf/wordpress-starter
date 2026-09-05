@@ -83,13 +83,21 @@ export function stripTags(html: string): string {
 
   const doc = new DOMParser().parseFromString(withBreaks, 'text/html');
 
+  // script/style/template/noscript bodies are not visible text, but
+  // `textContent` includes them verbatim — a WYSIWYG value containing
+  // `<script>alert(1)</script>` would otherwise leak the script source into
+  // the layout preview.
+  doc.body.querySelectorAll('script, style, template, noscript').forEach((el) => el.remove());
+
   return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
 }
 
 /**
  * Get preview text from a layout element
+ *
+ * Exported for tests only (not used outside this module).
  */
-function getLayoutPreview(layout: HTMLElement): string | null {
+export function getLayoutPreview(layout: HTMLElement): string | null {
   // Try title fields first
   for (const fieldName of TITLE_FIELDS) {
     const field = layout.querySelector<HTMLInputElement | HTMLTextAreaElement>(
@@ -124,7 +132,10 @@ function getLayoutPreview(layout: HTMLElement): string | null {
       try {
         const body = wysiwyg.contentDocument?.body;
         if (body && body.textContent && body.textContent.trim()) {
-          return truncate(body.textContent, MAX_LENGTH);
+          // Route through stripTags (not raw textContent) so block elements
+          // get the same word-boundary space as the source-mode branches
+          // above, instead of running together.
+          return truncate(stripTags(body.innerHTML), MAX_LENGTH);
         }
       } catch {
         // Cross-origin iframe, skip
@@ -137,8 +148,10 @@ function getLayoutPreview(layout: HTMLElement): string | null {
   if (repeater) {
     const rows = repeater.querySelectorAll(':scope > table > tbody > tr.acf-row:not(.acf-clone)');
     if (rows.length > 0) {
-      const singularLabel = themeAdminStrings?.entry || 'Entry';
-      const pluralLabel = themeAdminStrings?.entries || 'Entries';
+      // German fallbacks mirror src/Vite.php:153-154, used when
+      // themeAdminStrings has not been localized (e.g. a screen without ACF).
+      const singularLabel = themeAdminStrings?.entry || 'Eintrag';
+      const pluralLabel = themeAdminStrings?.entries || 'Einträge';
       const label = rows.length === 1 ? singularLabel : pluralLabel;
       return `${rows.length} ${label}`;
     }

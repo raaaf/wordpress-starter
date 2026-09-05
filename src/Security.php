@@ -28,6 +28,22 @@ class Security
     private static ?string $nonce = null;
 
     /**
+     * Hosts fest verdrahtet in frame-src, unabhaengig von der Admin-Option
+     * embed_allowed_hosts. Eine einzige Quelle fuer getCSPHeader() UND
+     * isAllowedEmbedHost(), damit die beiden nicht auseinanderlaufen: sonst
+     * erlaubt die CSP einen Host, den das Embed-Feld ablehnt (oder umgekehrt).
+     *
+     * @var list<string>
+     */
+    private const HARDCODED_FRAME_SRC_HOSTS = [
+        'www.youtube-nocookie.com',
+        'www.youtube.com',
+        'player.vimeo.com',
+        'www.google.com',
+        'maps.google.com',
+    ];
+
+    /**
      * Get or generate the CSP nonce for this request.
      */
     public static function getNonce(): string
@@ -266,25 +282,22 @@ class Security
     }
 
     /**
-     * Hosts, die als iframe geladen werden duerfen, aus den Theme-Einstellungen.
+     * Zulaessige Hosts aus der Admin-Option, normalisiert (Kleinschreibung,
+     * ohne Schema/Pfad). Gemeinsame Quelle fuer getEmbedOrigins() (baut die
+     * CSP-Origins) UND isAllowedEmbedHost() (prueft einen einzelnen Host),
+     * damit beide dieselbe Zulassung sehen.
      *
-     * Das Modul "Einbettung" laesst beliebige Anbieter zu, die CSP darf das aber
-     * nicht pauschal: `frame-src *` waere die Richtlinie zum Fenster hinaus. Also
-     * eine Liste, die ein Administrator pflegt, und dieselbe strenge Filterung wie
-     * bei der Analytics-Herkunft: nur Hostnamen, kein Schema, kein Pfad, kein
-     * Semikolon, das die Direktive zerlegen koennte.
-     *
-     * @return string Leerer String oder fuehrendes Leerzeichen plus Origins
+     * @return list<string>
      */
-    private static function getEmbedOrigins(): string
+    private static function getEmbedAllowedHosts(): array
     {
         $raw = Acf\Fields::option('embed_allowed_hosts', '');
 
         if (!is_string($raw) || trim($raw) === '') {
-            return '';
+            return [];
         }
 
-        $origins = [];
+        $hosts = [];
 
         foreach (preg_split('/\r\n|\r|\n/', $raw) ?: [] as $line) {
             $host = trim($line);
@@ -301,24 +314,70 @@ class Security
 
             $host = strtok($host, '/');
 
-            if (!is_string($host)) {
+            if (!is_string($host) || preg_match('/^[A-Za-z0-9.-]+$/', $host) !== 1) {
                 continue;
             }
 
-            $origin = self::httpsOriginFromHost($host);
-
-            if ($origin === null) {
-                continue;
-            }
-
-            $origins[] = $origin;
+            $hosts[] = strtolower($host);
         }
+
+        return array_values(array_unique($hosts));
+    }
+
+    private static function getEmbedOrigins(): string
+    {
+        $origins = array_map(
+            static fn (string $host): string => 'https://' . $host,
+            self::getEmbedAllowedHosts(),
+        );
 
         if ($origins === []) {
             return '';
         }
 
-        return ' ' . implode(' ', array_unique($origins));
+        return ' ' . implode(' ', $origins);
+    }
+
+    /**
+     * Ist $url als Iframe-Quelle zulaessig? Dieselbe Zulassung, die
+     * getCSPHeader() in frame-src schreibt: die fest verdrahteten Hosts
+     * (HARDCODED_FRAME_SRC_HOSTS) plus die Admin-Option embed_allowed_hosts
+     * (ueber getEmbedAllowedHosts() normalisiert). Templates, die vor dem
+     * Rendern eines Iframes pruefen wollen, ob die CSP ihn ohnehin blockieren
+     * wuerde, rufen diese Methode statt die private Zulassungslogik zu
+     * duplizieren.
+     *
+     * Der eigene Host der Seite ist NIE zulaessig: ein Iframe mit
+     * allow-same-origin auf die eigene Seite wuerde den CSP-Sandkasten
+     * aushebeln, egal was in der Options-Liste steht.
+     */
+    public static function isAllowedEmbedHost(string $url): bool
+    {
+        $scheme = wp_parse_url($url, PHP_URL_SCHEME);
+
+        if (!is_string($scheme) || strtolower($scheme) !== 'https') {
+            return false;
+        }
+
+        $host = wp_parse_url($url, PHP_URL_HOST);
+
+        if (!is_string($host) || $host === '') {
+            return false;
+        }
+
+        $host = strtolower($host);
+
+        $siteHost = wp_parse_url(home_url(), PHP_URL_HOST);
+
+        if (is_string($siteHost) && $siteHost !== '' && $host === strtolower($siteHost)) {
+            return false;
+        }
+
+        if (in_array($host, self::HARDCODED_FRAME_SRC_HOSTS, true)) {
+            return true;
+        }
+
+        return in_array($host, self::getEmbedAllowedHosts(), true);
     }
 
     /**
@@ -333,9 +392,12 @@ class Security
         // Base directives
         $directives = [
             "default-src 'self'" . $localSources,
-            "font-src 'self' data: https://fonts.gstatic.com" . $localSources,
+            "font-src 'self' data:" . $localSources,
             "img-src 'self' data: https:" . $localSources,
-            "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com" . self::getEmbedOrigins(),
+            "frame-src 'self' " . implode(' ', array_map(
+                static fn (string $host): string => 'https://' . $host,
+                self::HARDCODED_FRAME_SRC_HOSTS,
+            )) . self::getEmbedOrigins(),
             "frame-ancestors 'self'",
             "base-uri 'self'",
             "media-src 'self' https:" . $localSources,
@@ -347,7 +409,7 @@ class Security
         $directives[] = "script-src {$scriptSrc}";
 
         // Style sources (unsafe-inline needed for WordPress/ACF inline styles)
-        $styleSrc = "'self' 'unsafe-inline' https://fonts.googleapis.com" . $localSources;
+        $styleSrc = "'self' 'unsafe-inline'" . $localSources;
         $directives[] = "style-src {$styleSrc}";
 
         // Connect sources (API calls, WebSockets)
