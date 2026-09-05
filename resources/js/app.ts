@@ -191,6 +191,25 @@ export function extractBlockType(element: Element): string | null {
   return match?.[0] || 'unknown';
 }
 
+const PERSONAL_DATA_PROTOCOLS = new Set(['mailto:', 'tel:', 'sms:']);
+
+// mailto:/tel:/sms: hrefs carry personal data (an email address or phone
+// number), and their visible link text is often that same address or number.
+// Forward only the scheme in that case, never the url or the text, so
+// neither ends up in analytics. Shared by content-link and image-link
+// tracking so both redact the same way.
+function applyAnalyticsLinkAttrs(link: HTMLAnchorElement, linkText?: string): void {
+  if (PERSONAL_DATA_PROTOCOLS.has(link.protocol)) {
+    link.setAttribute('data-rybbit-prop-link-type', link.protocol.replace(':', ''));
+    return;
+  }
+
+  link.setAttribute('data-rybbit-prop-link-url', link.href);
+  if (linkText !== undefined) {
+    link.setAttribute('data-rybbit-prop-link-text', linkText);
+  }
+}
+
 export function addContentLinkTracking(link: HTMLAnchorElement): void {
   if (link.hasAttribute('data-rybbit-event')) return;
 
@@ -202,8 +221,7 @@ export function addContentLinkTracking(link: HTMLAnchorElement): void {
     isExternal ? 'External_Link_Click' : 'Internal_Link_Click'
   );
   link.setAttribute('data-rybbit-prop-key', 'content_link');
-  link.setAttribute('data-rybbit-prop-link-text', linkText);
-  link.setAttribute('data-rybbit-prop-link-url', link.href);
+  applyAnalyticsLinkAttrs(link, linkText);
 
   const blockType = extractBlockType(link);
   if (blockType) {
@@ -216,7 +234,7 @@ export function addImageLinkTracking(link: HTMLAnchorElement): void {
 
   link.setAttribute('data-rybbit-event', 'Image_Link_Click');
   link.setAttribute('data-rybbit-prop-key', 'image_block');
-  link.setAttribute('data-rybbit-prop-link-url', link.href);
+  applyAnalyticsLinkAttrs(link);
 }
 
 export function initRybbitTracking(): void {

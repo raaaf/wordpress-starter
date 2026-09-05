@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   initRybbitTracking,
   addContentLinkTracking,
@@ -6,6 +6,7 @@ import {
   extractBlockType,
   CONTENT_SELECTORS,
   BLOCK_TYPE_REGEX,
+  initVideoConsent,
 } from './app';
 
 /**
@@ -133,6 +134,50 @@ describe('Rybbit Analytics Tracking', () => {
       expect(link.getAttribute('data-rybbit-event')).toBe('Existing');
       expect(link.hasAttribute('data-rybbit-prop-key')).toBe(false);
     });
+
+    it('does not forward a mailto address as an analytics property, even when the visible text is the address itself', () => {
+      document.body.innerHTML = `<a href="mailto:jane.doe@example.com">jane.doe@example.com</a>`;
+      const link = document.querySelector('a')!;
+
+      addContentLinkTracking(link);
+
+      expect(link.hasAttribute('data-rybbit-prop-link-url')).toBe(false);
+      expect(link.hasAttribute('data-rybbit-prop-link-text')).toBe(false);
+      expect(link.getAttribute('data-rybbit-prop-link-type')).toBe('mailto');
+    });
+
+    it('does not forward a tel number as an analytics property, even when the visible text is the number itself', () => {
+      document.body.innerHTML = `<a href="tel:+491234567890">+491234567890</a>`;
+      const link = document.querySelector('a')!;
+
+      addContentLinkTracking(link);
+
+      expect(link.hasAttribute('data-rybbit-prop-link-url')).toBe(false);
+      expect(link.hasAttribute('data-rybbit-prop-link-text')).toBe(false);
+      expect(link.getAttribute('data-rybbit-prop-link-type')).toBe('tel');
+    });
+
+    it('does not forward an sms number as an analytics property, even when the visible text is the number itself', () => {
+      document.body.innerHTML = `<a href="sms:+491234567890">+491234567890</a>`;
+      const link = document.querySelector('a')!;
+
+      addContentLinkTracking(link);
+
+      expect(link.hasAttribute('data-rybbit-prop-link-url')).toBe(false);
+      expect(link.hasAttribute('data-rybbit-prop-link-text')).toBe(false);
+      expect(link.getAttribute('data-rybbit-prop-link-type')).toBe('sms');
+    });
+
+    it('keeps url and text for a normal https link', () => {
+      document.body.innerHTML = `<a href="https://example.com/page">Read more</a>`;
+      const link = document.querySelector('a')!;
+
+      addContentLinkTracking(link);
+
+      expect(link.getAttribute('data-rybbit-prop-link-url')).toBe('https://example.com/page');
+      expect(link.getAttribute('data-rybbit-prop-link-text')).toBe('Read more');
+      expect(link.hasAttribute('data-rybbit-prop-link-type')).toBe(false);
+    });
   });
 
   describe('addImageLinkTracking', () => {
@@ -170,6 +215,16 @@ describe('Rybbit Analytics Tracking', () => {
       addImageLinkTracking(link);
 
       expect(link.getAttribute('data-rybbit-event')).toBe('Custom');
+    });
+
+    it('does not forward the address for an image wrapped in a mailto link', () => {
+      document.body.innerHTML = `<a href="mailto:jane.doe@example.com"><img src="/img.jpg" /></a>`;
+      const link = document.querySelector('a')!;
+
+      addImageLinkTracking(link);
+
+      expect(link.hasAttribute('data-rybbit-prop-link-url')).toBe(false);
+      expect(link.getAttribute('data-rybbit-prop-link-type')).toBe('mailto');
     });
   });
 
@@ -248,6 +303,73 @@ describe('Rybbit Analytics Tracking', () => {
       expect(CONTENT_SELECTORS).toContain('.two-columns a');
       expect(CONTENT_SELECTORS).toContain('.three-columns a');
       expect(CONTENT_SELECTORS).toContain('.four-columns a');
+    });
+  });
+
+  describe('initVideoConsent', () => {
+    let stderrWriteSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      // Prevents happy-dom from actually fetching the iframe src over the
+      // network once it is set; only the attribute value matters for these
+      // tests, not the real page load.
+      const happyDOM = (window as unknown as { happyDOM?: { settings?: Record<string, boolean> } })
+        .happyDOM;
+      if (happyDOM?.settings) {
+        happyDOM.settings.disableIframePageLoading = true;
+      }
+
+      // happy-dom reports the loading-disabled setting above via its own
+      // internal console reference, which writes straight to process.stderr
+      // and bypasses vitest's per-test console capture (spying on `console`
+      // here has no effect on it). That output is expected fallout of
+      // disabling iframe loading in this fixture, not a real test failure,
+      // so swallow only that specific message; anything else still reaches
+      // the real stderr.
+      const originalWrite = process.stderr.write.bind(process.stderr);
+      stderrWriteSpy = vi
+        .spyOn(process.stderr, 'write')
+        .mockImplementation((chunk: unknown, ...rest: unknown[]) => {
+          if (typeof chunk === 'string' && chunk.includes('Iframe page loading is disabled')) {
+            return true;
+          }
+          return (originalWrite as (...args: unknown[]) => boolean)(chunk, ...rest);
+        });
+    });
+
+    afterEach(() => {
+      stderrWriteSpy.mockRestore();
+    });
+
+    it('does not load the embed before consent is given', () => {
+      document.body.innerHTML = `
+        <div class="video">
+          <button class="video-consent-btn">Consent</button>
+          <iframe data-src="https://example.com/embed"></iframe>
+        </div>
+      `;
+
+      initVideoConsent();
+
+      const iframe = document.querySelector('iframe')!;
+      expect(iframe.getAttribute('src')).toBeNull();
+    });
+
+    it('loads the embed only after the consent button is clicked', () => {
+      document.body.innerHTML = `
+        <div class="video">
+          <button class="video-consent-btn">Consent</button>
+          <iframe data-src="https://example.com/embed"></iframe>
+        </div>
+      `;
+
+      initVideoConsent();
+
+      const btn = document.querySelector<HTMLButtonElement>('.video-consent-btn')!;
+      btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+      const iframe = document.querySelector('iframe')!;
+      expect(iframe.getAttribute('src')).toBe('https://example.com/embed');
     });
   });
 });

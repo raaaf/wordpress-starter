@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createNavigationComponent, type NavigationComponent } from './app';
 
 /**
@@ -97,6 +97,14 @@ describe('Mobile navigation focus trap', () => {
 
   beforeEach(() => {
     navigation = mount();
+  });
+
+  afterEach(() => {
+    // stubThemeStrings() sets this on every mount(); without removing it, a
+    // missing themeStrings in production code can never turn this suite red,
+    // because the stub from the previous test (or a prior test file) is still
+    // sitting on globalThis.
+    delete (globalThis as Record<string, unknown>).themeStrings;
   });
 
   describe('init', () => {

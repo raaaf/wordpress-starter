@@ -10,17 +10,73 @@
  * Output: resources/css/tokens.css (auto-generated)
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { readFileSync, writeFileSync, realpathSync } from 'fs';
+import { dirname, join, resolve, relative, isAbsolute } from 'path';
+import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
 // Input/output paths
 const TOKENS_DIR = join(ROOT, 'config/design-tokens');
-const OUTPUT_FILE = join(ROOT, 'resources/css/tokens.css');
-const OUTPUT_EDITOR_FILE = join(ROOT, 'resources/css/tokens-editor.css');
+
+/**
+ * Resolve the directory tokens.css/tokens-editor.css are written to.
+ *
+ * Defaults to resources/css and is verified to stay inside it, since this
+ * file is auto-generated and DELETES/overwrites whatever is at OUTPUT_FILE.
+ * `TOKENS_OUT_DIR` (env) or an explicit `overrideDir` argument opt out of
+ * that containment check deliberately, so tests can point this at a temp
+ * directory instead of the real resources/css.
+ */
+function resolveOutputDir(overrideDir = process.env.TOKENS_OUT_DIR) {
+  if (overrideDir) {
+    const resolvedOverride = resolve(overrideDir);
+    console.log(`transform-tokens: TOKENS_OUT_DIR set, writing to "${resolvedOverride}"`);
+    return resolvedOverride;
+  }
+
+  // No override: the write target is resources/css, but resources/css could
+  // itself be a symlink pointing outside the project. `resolve()` does not
+  // follow symlinks, so comparing the un-resolved path against itself would
+  // always pass trivially. Resolve the real (symlink-followed) path and
+  // check THAT for containment under the real project root.
+  const resourcesCss = resolve(ROOT, 'resources/css');
+  const realRoot = realpathSync(ROOT);
+  const realResourcesCss = realpathSync(resourcesCss);
+  const rel = relative(join(realRoot, 'resources', 'css'), realResourcesCss);
+  if (rel.startsWith('..') || isAbsolute(rel)) {
+    throw new Error(
+      `transform-tokens: resolved output dir "${realResourcesCss}" is not resources/css`
+    );
+  }
+  return resourcesCss;
+}
+
+const OUTPUT_DIR = resolveOutputDir();
+const OUTPUT_FILE = join(OUTPUT_DIR, 'tokens.css');
+const OUTPUT_EDITOR_FILE = join(OUTPUT_DIR, 'tokens-editor.css');
+
+/**
+ * Write generated CSS and read it back to confirm the file on disk actually
+ * matches what was generated (a full disk, a permissions error swallowed by
+ * a race, or a symlinked output path can all make writeFileSync succeed while
+ * the persisted bytes differ).
+ *
+ * `readImpl` defaults to the real `readFileSync` and exists only so a test can
+ * inject a stub that returns mismatched content, to exercise the mismatch
+ * branch without needing a real full-disk/permissions failure.
+ */
+function writeAndVerify(path, content, readImpl = readFileSync) {
+  writeFileSync(path, content, 'utf8');
+  const readBack = readImpl(path, 'utf8');
+  if (readBack !== content) {
+    console.error(
+      `transform-tokens: write verification failed for ${path} (content mismatch after write)`
+    );
+    process.exit(1);
+  }
+}
 
 // Fluid typography configuration
 // Mobile min values (at VIEWPORT_MIN). Max values come from Figma primitives.fontSize.
@@ -95,6 +151,54 @@ function fluidLineHeight(sizeKey, mobileLh, desktopLh, minVw = VIEWPORT_MIN, max
 }
 
 /**
+ * Guard against Figma-sourced strings being interpolated raw into generated CSS.
+ * Token names/paths must only ever produce `--foo-bar` style identifiers;
+ * anything else could break out of the declaration it is placed in.
+ */
+function assertSafeVarNameSegment(raw, context) {
+  if (!/^[a-zA-Z0-9-]+$/.test(raw)) {
+    throw new Error(
+      `transform-tokens: unsafe variable name "${raw}" in ${context} (allowed: a-z A-Z 0-9 -)`
+    );
+  }
+  return raw;
+}
+
+/**
+ * Decode CSS escape sequences (`\XX` hex or `\` + any char) so a value that
+ * spells out a dangerous token via CSS escaping (e.g. `\75rl(` for `url(`)
+ * cannot slip past the plain-text checks below.
+ */
+function decodeCssEscapes(str) {
+  return str
+    .replace(/\\([0-9a-f]{1,6})\s?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\\(.)/g, '$1');
+}
+
+/**
+ * Guard against Figma-sourced values that could inject additional CSS
+ * declarations or break out into surrounding markup when interpolated.
+ */
+function assertSafeCssValue(value, context) {
+  // Primitives like fontWeight/opacity are extracted as raw numbers (unit '').
+  // A number has no .includes()/regex methods, but it also can't carry an
+  // injection payload, so stringify it before running the checks below.
+  const str = decodeCssEscapes(String(value));
+  if (
+    /[;{}]/.test(str) ||
+    str.includes('</') ||
+    str.includes('*/') ||
+    str.includes('/*') ||
+    str.includes('@') ||
+    /url\s*\(/i.test(str) ||
+    /expression\s*\(/i.test(str)
+  ) {
+    throw new Error(`transform-tokens: unsafe CSS value in ${context}: "${str}"`);
+  }
+  return value;
+}
+
+/**
  * Extract CSS var() reference from Figma token alias data.
  * Converts aliasData.targetVariableName (e.g. "color/accent/500")
  * to var(--color-accent-500). Falls back to resolved hex value.
@@ -104,7 +208,10 @@ function extractColorAsReference(token) {
 
   const aliasData = token.$extensions?.['com.figma.aliasData'];
   if (aliasData?.targetVariableName) {
-    const varName = aliasData.targetVariableName.replace(/\//g, '-');
+    const varName = assertSafeVarNameSegment(
+      aliasData.targetVariableName.replace(/\//g, '-'),
+      'aliasData.targetVariableName'
+    );
     return `var(--${varName})`;
   }
 
@@ -166,8 +273,13 @@ function extractNumericValue(token, unit = 'px') {
  */
 function extractStringValue(token) {
   if (!token || token.$type !== 'string') return null;
-  // Wrap font family names in quotes for CSS
-  return `"${token.$value}"`;
+  const raw = String(token.$value);
+  assertSafeCssValue(raw, 'fontFamily value');
+  // Escape backslashes first, then double quotes, before wrapping in CSS
+  // quotes. Reversing the order lets a trailing backslash in the source value
+  // escape the closing quote instead of itself.
+  const escaped = raw.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `"${escaped}"`;
 }
 
 /**
@@ -182,7 +294,7 @@ function extractColorOrAlias(token) {
   // Handle alias references like "{color.accent.500}"
   if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
     const path = value.slice(1, -1); // Remove braces
-    const varName = path.replace(/\./g, '-'); // dots to dashes
+    const varName = assertSafeVarNameSegment(path.replace(/\./g, '-'), 'gradient alias path'); // dots to dashes
     return `var(--${varName})`;
   }
 
@@ -198,10 +310,9 @@ function flattenTokens(obj, prefix = '', processor = extractColorValue) {
   const result = {};
 
   for (const [key, value] of Object.entries(obj)) {
-    // Skip metadata keys
-    if (key.startsWith('$')) continue;
-
-    // Handle $root special case (Figma uses this for base values in nested objects)
+    // Handle $root special case (Figma uses this for base values in nested objects).
+    // MUST run before the generic "$"-prefixed metadata skip below, since "$root"
+    // itself starts with "$" and would otherwise never be reached.
     if (key === '$root') {
       const processed = processor(value);
       if (processed !== null) {
@@ -209,6 +320,9 @@ function flattenTokens(obj, prefix = '', processor = extractColorValue) {
       }
       continue;
     }
+
+    // Skip metadata keys
+    if (key.startsWith('$')) continue;
 
     const newPrefix = prefix ? `${prefix}-${key}` : key;
 
@@ -232,7 +346,10 @@ function flattenTokens(obj, prefix = '', processor = extractColorValue) {
  * e.g., "gray-50" -> "--color-gray-50"
  */
 function toCssVarName(name, prefix = '') {
-  const varName = name.toLowerCase().replace(/\s+/g, '-');
+  const varName = assertSafeVarNameSegment(
+    name.toLowerCase().replace(/\s+/g, '-'),
+    `token name "${name}"`
+  );
   return prefix ? `--${prefix}-${varName}` : `--${varName}`;
 }
 
@@ -241,7 +358,10 @@ function toCssVarName(name, prefix = '') {
  */
 function generateCss(tokens, prefix = '') {
   return Object.entries(tokens)
-    .map(([name, value]) => `  ${toCssVarName(name, prefix)}: ${value};`)
+    .map(([name, value]) => {
+      assertSafeCssValue(value, `token "${name}"`);
+      return `  ${toCssVarName(name, prefix)}: ${value};`;
+    })
     .join('\n');
 }
 
@@ -251,7 +371,10 @@ function generateCss(tokens, prefix = '') {
  */
 function generateCssImportant(tokens, prefix = '') {
   return Object.entries(tokens)
-    .map(([name, value]) => `    ${toCssVarName(name, prefix)}: ${value} !important;`)
+    .map(([name, value]) => {
+      assertSafeCssValue(value, `token "${name}"`);
+      return `    ${toCssVarName(name, prefix)}: ${value} !important;`;
+    })
     .join('\n');
 }
 
@@ -816,7 +939,7 @@ ${generateCss(darkRing, 'ring')}
   }
 
   // Write output - Main tokens file (with dark mode)
-  writeFileSync(OUTPUT_FILE, css, 'utf8');
+  writeAndVerify(OUTPUT_FILE, css);
 
   // Generate editor-only tokens (light mode only, no dark mode)
   // Semantic tokens are scoped to .editor-styles-wrapper for higher specificity
@@ -926,7 +1049,7 @@ ${generateCssImportant(lightIcon, 'icon')}
 }
 `;
 
-  writeFileSync(OUTPUT_EDITOR_FILE, editorCss, 'utf8');
+  writeAndVerify(OUTPUT_EDITOR_FILE, editorCss);
   console.log(`Editor tokens written to: ${OUTPUT_EDITOR_FILE}`);
 
   // Stats
@@ -983,8 +1106,18 @@ ${generateCssImportant(lightIcon, 'icon')}
 }
 
 // Run transformation only when invoked directly, not when imported by tests.
-// pathToFileURL handles path segments with spaces, special chars, symlinks correctly.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+// Compared via realpath on both sides so a symlinked invocation still
+// resolves to the same file instead of bypassing the guard.
+function isDirectInvocation() {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1]);
+  } catch {
+    return false;
+  }
+}
+
+if (isDirectInvocation()) {
   transform();
 }
 
@@ -996,4 +1129,11 @@ export {
   VIEWPORT_MIN,
   VIEWPORT_MAX,
   ROOT_PX,
+  flattenTokens,
+  extractColorValue,
+  extractStringValue,
+  assertSafeVarNameSegment,
+  assertSafeCssValue,
+  resolveOutputDir,
+  writeAndVerify,
 };

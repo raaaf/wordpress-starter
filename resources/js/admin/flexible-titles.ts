@@ -65,6 +65,15 @@ function truncate(text: string, maxLength: number): string {
  * Wortgrenzen und macht aus `<h2>Layout & Text</h2><p>Verschiedene Spalten...`
  * ein zusammengeklebtes `Layout & TextVerschiedene Spalten...`, das in der
  * Zeilenvorschau des Editors als ein Wort erscheint.
+ *
+ * Geparst wird ueber `DOMParser` statt ueber `innerHTML` auf einem
+ * angehaengten oder losgeloesten Element: ein `DOMParser`-Dokument hat keinen
+ * Browsing-Context, daher laedt es keine Ressourcen und fuehrt keine
+ * Event-Handler aus. Ein per `innerHTML` erzeugtes `<img src=x
+ * onerror="...">` feuert seinen Handler dagegen auch losgeloest vom
+ * Dokumentenbaum, sobald das Attribut geparst wird - das haette jeder
+ * bearbeitenden Rolle erlaubt, Skript im Admin-Browser eines anderen
+ * Nutzers auszufuehren.
  */
 export function stripTags(html: string): string {
   const withBreaks = html.replace(
@@ -72,10 +81,9 @@ export function stripTags(html: string): string {
     ' '
   );
 
-  const tmp = document.createElement('div');
-  tmp.innerHTML = withBreaks;
+  const doc = new DOMParser().parseFromString(withBreaks, 'text/html');
 
-  return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
+  return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
 }
 
 /**

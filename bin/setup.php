@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+
 /**
  * WP-Starter Theme Setup Script
  *
@@ -8,6 +9,8 @@
  *
  * @package WP-Starter
  */
+
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI wizard, terminal output only.
 
 declare(strict_types=1);
 
@@ -25,12 +28,19 @@ chdir(dirname(__DIR__));
 class ThemeSetup
 {
     private string $themeDir;
+
     private array $config = [];
+
     private array $pluginSelections = [];
+
     private array $blockSelections = [];
+
     private array $socialLinks = [];
+
     private bool $dependenciesInstalled = false;
+
     private ?string $detectedSiteName = null;
+
     private bool $quickSetup = false;
 
     private array $defaults = [
@@ -203,7 +213,7 @@ class ThemeSetup
     /** @var array<string, string[]> Menu assignments: menu location => page slugs */
     private array $menuAssignments = [
         'header-menu' => ['about', 'services', 'contact'],
-        'legal-menu'  => ['privacy', 'imprint'],
+        'legal-menu' => ['privacy', 'imprint'],
         'footer-menu' => ['about', 'services', 'contact'],
     ];
 
@@ -257,6 +267,7 @@ class ThemeSetup
                 $appDir = dirname($publicDir);
                 if (basename($appDir) === 'app') {
                     $siteDir = dirname($appDir);
+
                     return basename($siteDir);
                 }
             }
@@ -287,8 +298,8 @@ class ThemeSetup
         echo "\n";
         echo $this->color("╔══════════════════════════════════════════════════════════════════╗\n", 'cyan');
         echo $this->color("║                                                                  ║\n", 'cyan');
-        echo $this->color("║   ", 'cyan') . $this->color("WP-Starter Theme Setup Wizard", 'white', true) . $this->color("                            ║\n", 'cyan');
-        echo $this->color("║   ", 'cyan') . "Configure your theme for your new project" . $this->color("                  ║\n", 'cyan');
+        echo $this->color('║   ', 'cyan') . $this->color('WP-Starter Theme Setup Wizard', 'white', true) . $this->color("                            ║\n", 'cyan');
+        echo $this->color('║   ', 'cyan') . 'Configure your theme for your new project' . $this->color("                  ║\n", 'cyan');
         echo $this->color("║                                                                  ║\n", 'cyan');
         echo $this->color("╚══════════════════════════════════════════════════════════════════╝\n", 'cyan');
         echo "\n";
@@ -296,35 +307,35 @@ class ThemeSetup
         // Show detected info
         $detections = [];
         if ($this->detectedSiteName) {
-            $detections[] = "Site: " . $this->color($this->detectedSiteName, 'green');
+            $detections[] = 'Site: ' . $this->color($this->detectedSiteName, 'green');
         }
         if ($this->defaults['author'] !== 'Rafael Alex') {
-            $detections[] = "Author: " . $this->color($this->defaults['author'], 'green');
+            $detections[] = 'Author: ' . $this->color($this->defaults['author'], 'green');
         }
         if (!empty($detections)) {
-            echo "  " . $this->color("✓ Auto-detected: ", 'gray') . implode(', ', $detections) . "\n\n";
+            echo '  ' . $this->color('✓ Auto-detected: ', 'gray') . implode(', ', $detections) . "\n\n";
         }
 
         echo "Choose setup mode:\n\n";
-        echo "  " . $this->color("[q]", 'yellow') . " " . $this->color("Quick Setup", 'white', true) . " - Just theme name, uses smart defaults\n";
-        echo "      " . $this->color("(Standard blocks, recommended plugins, skip optional config)", 'gray') . "\n\n";
-        echo "  " . $this->color("[f]", 'yellow') . " " . $this->color("Full Setup", 'white', true) . "  - Configure everything step by step\n";
-        echo "      " . $this->color("(All options, block selection, social media, analytics)", 'gray') . "\n\n";
+        echo '  ' . $this->color('[q]', 'yellow') . ' ' . $this->color('Quick Setup', 'white', true) . " - Just theme name, uses smart defaults\n";
+        echo '      ' . $this->color('(Standard blocks, recommended plugins, skip optional config)', 'gray') . "\n\n";
+        echo '  ' . $this->color('[f]', 'yellow') . ' ' . $this->color('Full Setup', 'white', true) . "  - Configure everything step by step\n";
+        echo '      ' . $this->color('(All options, block selection, social media, analytics)', 'gray') . "\n\n";
 
         $mode = strtolower($this->prompt('Setup mode', 'q', '[q]uick or [f]ull'));
-        $this->quickSetup = ($mode !== 'f' && $mode !== 'full');
+        $this->quickSetup = ( $mode !== 'f' && $mode !== 'full' );
 
         if ($this->quickSetup) {
-            echo "\n  " . $this->color("→ Quick Setup selected", 'green') . "\n";
+            echo "\n  " . $this->color('→ Quick Setup selected', 'green') . "\n";
         } else {
-            echo "\n  " . $this->color("→ Full Setup selected", 'cyan') . "\n";
+            echo "\n  " . $this->color('→ Full Setup selected', 'cyan') . "\n";
         }
         echo "\n";
     }
 
     private function collectThemeInfo(): void
     {
-        $this->printSection("Step 1: Theme Information");
+        $this->printSection('Step 1: Theme Information');
 
         // Use detected Local site name as default if available
         $defaultThemeName = $this->detectedSiteName ?? $this->defaults['theme_name'];
@@ -332,13 +343,13 @@ class ThemeSetup
         $this->config['theme_name'] = $this->prompt(
             'Theme Name',
             $defaultThemeName,
-            'The display name of your theme'
+            'The display name of your theme',
         );
 
         // Auto-derive other values from theme name
         $this->config['theme_slug'] = $this->slugify($this->config['theme_name']);
-        $this->config['text_domain'] = $this->config['theme_slug'];
-        $this->config['namespace'] = $this->pascalCase($this->config['theme_name']);
+        $this->config['text_domain'] = $this->deriveTextDomain($this->config['theme_name']);
+        $this->config['namespace'] = $this->deriveNamespace($this->config['theme_name']);
         $this->config['description'] = 'WordPress theme for ' . $this->config['theme_name'];
         $this->config['version'] = '1.0.0';
 
@@ -350,10 +361,10 @@ class ThemeSetup
             $this->config['theme_uri'] = '';
             $this->config['package_name'] = strtolower($this->slugify($this->config['author']) . '/' . $this->config['theme_slug']);
 
-            echo "\n  " . $this->color("Using defaults:", 'gray') . "\n";
-            echo "  • Slug: " . $this->color($this->config['theme_slug'], 'cyan') . "\n";
-            echo "  • Author: " . $this->color($this->config['author'], 'cyan') . "\n";
-            echo "  • Email: " . $this->color($this->config['author_email'], 'cyan') . "\n";
+            echo "\n  " . $this->color('Using defaults:', 'gray') . "\n";
+            echo '  • Slug: ' . $this->color($this->config['theme_slug'], 'cyan') . "\n";
+            echo '  • Author: ' . $this->color($this->config['author'], 'cyan') . "\n";
+            echo '  • Email: ' . $this->color($this->config['author_email'], 'cyan') . "\n";
         } else {
             // Full mode: ask everything
             echo $this->color("(Press Enter to keep default value shown in brackets)\n\n", 'gray');
@@ -361,62 +372,65 @@ class ThemeSetup
             $this->config['theme_slug'] = $this->prompt(
                 'Theme Slug',
                 $this->config['theme_slug'],
-                'Lowercase with hyphens'
+                'Lowercase with hyphens',
             );
 
-            $this->config['text_domain'] = $this->prompt(
+            $this->config['text_domain'] = $this->promptWithValidation(
                 'Text Domain',
                 $this->config['theme_slug'],
-                'For translations'
+                'text_domain',
+                'For translations',
             );
 
-            $this->config['namespace'] = $this->prompt(
+            $this->config['namespace'] = $this->promptWithValidation(
                 'PHP Namespace',
                 $this->config['namespace'],
-                'PascalCase'
+                'namespace',
+                'PascalCase',
             );
 
             $this->config['description'] = $this->prompt(
                 'Description',
-                $this->config['description']
+                $this->config['description'],
             );
 
             echo "\n";
-            $this->printSubSection("Author Information");
+            $this->printSubSection('Author Information');
 
             $this->config['author'] = $this->prompt(
                 'Author Name',
-                $this->defaults['author']
+                $this->defaults['author'],
             );
 
             $this->config['author_email'] = $this->promptWithValidation(
                 'Author Email',
                 $this->defaults['author_email'],
                 'email',
-                'Valid email address'
+                'Valid email address',
             );
 
             $this->config['author_uri'] = $this->promptWithValidation(
                 'Author Website',
                 $this->defaults['author_uri'],
                 'url',
-                'https://...'
+                'https://...',
             );
 
             echo "\n";
-            $this->printSubSection("Repository & Version");
+            $this->printSubSection('Repository & Version');
 
             $this->config['theme_uri'] = $this->collectRepositoryUrl();
+            $this->setRepoInfoFromUrl($this->config['theme_uri']);
 
             $this->config['version'] = $this->prompt(
                 'Initial Version',
-                '1.0.0'
+                '1.0.0',
             );
 
             $this->config['package_name'] = $this->prompt(
                 'Composer Package',
                 strtolower($this->slugify($this->config['author']) . '/' . $this->config['theme_slug']),
-                'vendor/package'
+                'vendor/package',
             );
         }
     }
@@ -431,12 +445,13 @@ class ThemeSetup
                     $this->pluginSelections[$slug] = in_array($slug, $recommendedPlugins, true);
                 }
             }
-            echo "\n  " . $this->color("Using recommended plugins:", 'gray') . " Yoast SEO, Contact Form 7, WP Mail SMTP, Admin Enhancements\n";
+            echo "\n  " . $this->color('Using recommended plugins:', 'gray') . " Yoast SEO, Contact Form 7, WP Mail SMTP, Admin Enhancements\n";
+
             return;
         }
 
-        $this->printSection("Step 2: Plugin Selection");
-        echo "Select which plugins should be " . $this->color("auto-installed", 'green') . " when you first\n";
+        $this->printSection('Step 2: Plugin Selection');
+        echo 'Select which plugins should be ' . $this->color('auto-installed', 'green') . " when you first\n";
         echo "activate the theme in WordPress.\n\n";
         echo $this->color("Note: ACF PRO (required) must be installed manually (premium plugin).\n\n", 'yellow');
 
@@ -448,7 +463,7 @@ class ThemeSetup
                 $answer = $this->prompt(
                     "Install {$plugin['name']}?",
                     $default,
-                    $plugin['description'] . ' (y/n)'
+                    $plugin['description'] . ' (y/n)',
                 );
 
                 $this->pluginSelections[$slug] = strtolower($answer) === 'y' || strtolower($answer) === 'yes';
@@ -471,51 +486,52 @@ class ThemeSetup
             $this->config['set_permalink_structure'] = true;
             $this->config['color_scheme'] = 'system';
 
-            echo "\n  " . $this->color("Content options:", 'gray') . " Standardseiten + 3 Blog-Beiträge werden erstellt, pretty permalinks aktiviert\n";
+            echo "\n  " . $this->color('Content options:', 'gray') . " Standardseiten + 3 Blog-Beiträge werden erstellt, pretty permalinks aktiviert\n";
+
             return;
         }
 
-        $this->printSection("Step 4: Content Options");
+        $this->printSection('Step 4: Content Options');
         echo "Configure what should happen when WordPress is set up.\n\n";
 
-        $this->printSubSection("Company Information");
-        echo "  " . $this->color("These values will be used for contact info, footer, and copyright.\n\n", 'gray');
+        $this->printSubSection('Company Information');
+        echo '  ' . $this->color("These values will be used for contact info, footer, and copyright.\n\n", 'gray');
 
         $this->config['company_name'] = $this->prompt(
             'Company Name',
             $this->config['theme_name'],
-            'For contact info and legal pages'
+            'For contact info and legal pages',
         );
 
         $this->config['company_address'] = $this->prompt(
             'Address',
             '',
-            'Street, City (optional)'
+            'Street, City (optional)',
         );
 
         $this->config['company_phone'] = $this->prompt(
             'Phone',
             '',
-            '+49 123 456789 (optional)'
+            '+49 123 456789 (optional)',
         );
 
         $this->config['company_email'] = $this->prompt(
             'Email',
             $this->config['author_email'] ?? $this->defaults['author_email'],
-            'Contact email address'
+            'Contact email address',
         );
 
         echo "\n";
-        $this->printSubSection("Page Setup");
+        $this->printSubSection('Page Setup');
 
         $this->config['create_pages'] = strtolower($this->prompt(
             'Create default pages?',
             'y',
-            'Startseite, Über uns, Kontakt, etc. (y/n)'
+            'Startseite, Über uns, Kontakt, etc. (y/n)',
         )) === 'y';
 
         if ($this->config['create_pages']) {
-            echo "\n  " . $this->color("Pages to create:", 'gray') . "\n";
+            echo "\n  " . $this->color('Pages to create:', 'gray') . "\n";
             foreach ($this->samplePages as $key => $page) {
                 echo "    - {$page['title']}\n";
             }
@@ -525,11 +541,11 @@ class ThemeSetup
         $this->config['create_posts'] = strtolower($this->prompt(
             'Create sample blog posts?',
             'y',
-            '3 example posts for the blog (y/n)'
+            '3 example posts for the blog (y/n)',
         )) === 'y';
 
         if ($this->config['create_posts']) {
-            echo "\n  " . $this->color("Posts to create:", 'gray') . "\n";
+            echo "\n  " . $this->color('Posts to create:', 'gray') . "\n";
             foreach ($this->samplePosts as $post) {
                 echo "    - {$post['title']}\n";
             }
@@ -539,22 +555,22 @@ class ThemeSetup
         $this->config['delete_default_content'] = strtolower($this->prompt(
             'Delete WordPress default content?',
             'y',
-            'Removes "Hello World" post and sample page (y/n)'
+            'Removes "Hello World" post and sample page (y/n)',
         )) === 'y';
 
         $this->config['set_permalink_structure'] = strtolower($this->prompt(
             'Set pretty permalinks?',
             'y',
-            'Changes to /%postname%/ structure (y/n)'
+            'Changes to /%postname%/ structure (y/n)',
         )) === 'y';
 
         echo "\n";
-        $this->printSubSection("Darstellung");
+        $this->printSubSection('Darstellung');
 
         $colorSchemeChoice = $this->prompt(
             'Farbschema',
             's',
-            '[s]ystem (empfohlen), [l]ight, [d]ark'
+            '[s]ystem (empfohlen), [l]ight, [d]ark',
         );
 
         $this->config['color_scheme'] = match (strtolower($colorSchemeChoice)) {
@@ -578,26 +594,27 @@ class ThemeSetup
             // Quick mode: use standard preset
             $this->applyBlockPreset('standard', $allBlockSlugs);
             $keptCount = count(array_filter($this->blockSelections));
-            echo "\n  " . $this->color("Using standard blocks:", 'gray') . " {$keptCount} blocks selected\n";
+            echo "\n  " . $this->color('Using standard blocks:', 'gray') . " {$keptCount} blocks selected\n";
+
             return;
         }
 
-        $this->printSection("Step 3: Block Selection");
-        echo "Das Theme enthält " . $this->color("28 ACF Blocks", 'cyan') . ". Wähle ein Preset oder einzeln:\n\n";
+        $this->printSection('Step 3: Block Selection');
+        echo 'Das Theme enthält ' . $this->color('28 ACF Blocks', 'cyan') . ". Wähle ein Preset oder einzeln:\n\n";
 
-        echo "  " . $this->color("[m]", 'yellow') . " Minimal    - 6 Blocks  (Hero, Spalten, Bild, CTA, Kontakt)\n";
-        echo "  " . $this->color("[s]", 'yellow') . " Standard   - 23 Blocks (Alle außer Pricing, Timeline, Map, Before/After, Table)\n";
-        echo "  " . $this->color("[f]", 'yellow') . " Full       - 28 Blocks (Alle behalten)\n";
-        echo "  " . $this->color("[c]", 'yellow') . " Custom     - Einzeln auswählen\n\n";
+        echo '  ' . $this->color('[m]', 'yellow') . " Minimal    - 6 Blocks  (Hero, Spalten, Bild, CTA, Kontakt)\n";
+        echo '  ' . $this->color('[s]', 'yellow') . " Standard   - 23 Blocks (Alle außer Pricing, Timeline, Map, Before/After, Table)\n";
+        echo '  ' . $this->color('[f]', 'yellow') . " Full       - 28 Blocks (Alle behalten)\n";
+        echo '  ' . $this->color('[c]', 'yellow') . " Custom     - Einzeln auswählen\n\n";
 
         $choice = strtolower($this->prompt('Block-Auswahl', 's', '[m]inimal, [s]tandard, [f]ull, [c]ustom'));
 
         if ($choice === 'm' || $choice === 'minimal') {
             $this->applyBlockPreset('minimal', $allBlockSlugs);
-            echo "  " . $this->color("✓ Minimal: 6 Blocks ausgewählt.", 'green') . "\n";
+            echo '  ' . $this->color('✓ Minimal: 6 Blocks ausgewählt.', 'green') . "\n";
         } elseif ($choice === 'f' || $choice === 'full') {
             $this->applyBlockPreset('full', $allBlockSlugs);
-            echo "  " . $this->color("✓ Full: Alle 28 Blocks behalten.", 'green') . "\n";
+            echo '  ' . $this->color('✓ Full: Alle 28 Blocks behalten.', 'green') . "\n";
         } elseif ($choice === 'c' || $choice === 'custom') {
             echo "\n";
             foreach ($this->availableBlocks as $categoryKey => $category) {
@@ -607,7 +624,7 @@ class ThemeSetup
                     $answer = $this->prompt(
                         $name,
                         'y',
-                        'behalten? (y/n)'
+                        'behalten? (y/n)',
                     );
                     $this->blockSelections[$slug] = strtolower($answer) === 'y' || strtolower($answer) === 'yes';
                 }
@@ -616,7 +633,7 @@ class ThemeSetup
         } else {
             // Default to standard
             $this->applyBlockPreset('standard', $allBlockSlugs);
-            echo "  " . $this->color("✓ Standard: 23 Blocks ausgewählt.", 'green') . "\n";
+            echo '  ' . $this->color('✓ Standard: 23 Blocks ausgewählt.', 'green') . "\n";
         }
     }
 
@@ -640,11 +657,12 @@ class ThemeSetup
     {
         if ($this->quickSetup) {
             // Skip in quick mode
-            echo "\n  " . $this->color("Social Media:", 'gray') . " Übersprungen (kann später in Theme-Einstellungen konfiguriert werden)\n";
+            echo "\n  " . $this->color('Social Media:', 'gray') . " Übersprungen (kann später in Theme-Einstellungen konfiguriert werden)\n";
+
             return;
         }
 
-        $this->printSection("Step 5: Social Media");
+        $this->printSection('Step 5: Social Media');
         echo "Füge deine Social Media Profile hinzu (erscheinen im Footer).\n";
         echo $this->color("Leer lassen um zu überspringen.\n\n", 'gray');
 
@@ -652,13 +670,13 @@ class ThemeSetup
             $url = $this->prompt(
                 $name,
                 '',
-                "URL zu deinem {$name} Profil"
+                "URL zu deinem {$name} Profil",
             );
 
             if (!empty($url)) {
                 // Validate URL
                 if (!$this->isValidUrl($url)) {
-                    echo "  " . $this->color("⚠ Ungültige URL, übersprungen.", 'yellow') . "\n";
+                    echo '  ' . $this->color('⚠ Ungültige URL, übersprungen.', 'yellow') . "\n";
                     continue;
                 }
                 $this->socialLinks[] = [
@@ -669,9 +687,9 @@ class ThemeSetup
         }
 
         if (empty($this->socialLinks)) {
-            echo "\n  " . $this->color("Keine Social Media Links konfiguriert.", 'gray') . "\n";
+            echo "\n  " . $this->color('Keine Social Media Links konfiguriert.', 'gray') . "\n";
         } else {
-            echo "\n  " . $this->color("✓ " . count($this->socialLinks) . " Social Media Links konfiguriert.", 'green') . "\n";
+            echo "\n  " . $this->color('✓ ' . count($this->socialLinks) . ' Social Media Links konfiguriert.', 'green') . "\n";
         }
     }
 
@@ -680,24 +698,25 @@ class ThemeSetup
         if ($this->quickSetup) {
             // Skip in quick mode
             $this->config['rybbit_site_id'] = '';
-            echo "\n  " . $this->color("Analytics:", 'gray') . " Übersprungen (kann später in Theme-Einstellungen konfiguriert werden)\n";
+            echo "\n  " . $this->color('Analytics:', 'gray') . " Übersprungen (kann später in Theme-Einstellungen konfiguriert werden)\n";
+
             return;
         }
 
-        $this->printSection("Step 6: Analytics");
-        echo "Das Theme unterstützt " . $this->color("Rybbit Analytics", 'cyan') . " - DSGVO-konform & cookie-frei.\n";
+        $this->printSection('Step 6: Analytics');
+        echo 'Das Theme unterstützt ' . $this->color('Rybbit Analytics', 'cyan') . " - DSGVO-konform & cookie-frei.\n";
         echo $this->color("Analytics wird ueber das Rybbit WordPress Plugin konfiguriert.\n\n", 'gray');
 
         $this->config['rybbit_site_id'] = $this->prompt(
             'Rybbit Site ID',
             '',
-            'Aus Rybbit Dashboard (oder leer lassen)'
+            'Aus Rybbit Dashboard (oder leer lassen)',
         );
 
         if (empty($this->config['rybbit_site_id'])) {
-            echo "  " . $this->color("Kein Analytics konfiguriert. Kann später hinzugefügt werden.", 'gray') . "\n";
+            echo '  ' . $this->color('Kein Analytics konfiguriert. Kann später hinzugefügt werden.', 'gray') . "\n";
         } else {
-            echo "  " . $this->color("✓ Rybbit Analytics wird aktiviert.", 'green') . "\n";
+            echo '  ' . $this->color('✓ Rybbit Analytics wird aktiviert.', 'green') . "\n";
         }
     }
 
@@ -706,33 +725,34 @@ class ThemeSetup
         if ($this->quickSetup) {
             // Quick mode: minimal summary, auto-confirm
             echo "\n";
-            $this->printSection("Quick Setup Summary");
-            echo "  Theme:   " . $this->color($this->config['theme_name'], 'green') . "\n";
-            echo "  Slug:    " . $this->color($this->config['theme_slug'], 'cyan') . "\n";
+            $this->printSection('Quick Setup Summary');
+            echo '  Theme:   ' . $this->color($this->config['theme_name'], 'green') . "\n";
+            echo '  Slug:    ' . $this->color($this->config['theme_slug'], 'cyan') . "\n";
             echo "  Author:  {$this->config['author']}\n";
-            echo "  Blocks:  " . $this->color(count(array_filter($this->blockSelections)) . " (standard)", 'cyan') . "\n";
-            echo "  Plugins: " . $this->color(count(array_filter($this->pluginSelections)) . " (recommended)", 'cyan') . "\n";
+            echo '  Blocks:  ' . $this->color(count(array_filter($this->blockSelections)) . ' (standard)', 'cyan') . "\n";
+            echo '  Plugins: ' . $this->color(count(array_filter($this->pluginSelections)) . ' (recommended)', 'cyan') . "\n";
             echo "\n";
 
             $confirm = $this->prompt(
                 $this->color('Apply?', 'yellow'),
                 'y',
-                '(y/n)'
+                '(y/n)',
             );
 
             if (strtolower($confirm) !== 'y' && strtolower($confirm) !== 'yes') {
-                echo "\n" . $this->color("Setup cancelled.", 'red') . "\n";
+                echo "\n" . $this->color('Setup cancelled.', 'red') . "\n";
                 exit(1);
             }
+
             return;
         }
 
-        $this->printSection("Configuration Summary");
+        $this->printSection('Configuration Summary');
 
         echo $this->color("Theme Settings:\n", 'white', true);
-        echo "  Name:        " . $this->color($this->config['theme_name'], 'green') . "\n";
-        echo "  Slug:        " . $this->color($this->config['theme_slug'], 'cyan') . "\n";
-        echo "  Namespace:   " . $this->color($this->config['namespace'], 'cyan') . "\n";
+        echo '  Name:        ' . $this->color($this->config['theme_name'], 'green') . "\n";
+        echo '  Slug:        ' . $this->color($this->config['theme_slug'], 'cyan') . "\n";
+        echo '  Namespace:   ' . $this->color($this->config['namespace'], 'cyan') . "\n";
         echo "  Author:      {$this->config['author']} <{$this->config['author_email']}>\n";
         echo "  Version:     {$this->config['version']}\n";
         echo "\n";
@@ -740,81 +760,81 @@ class ThemeSetup
         echo $this->color("Plugins to Auto-Install:\n", 'white', true);
         $selectedPlugins = array_filter($this->pluginSelections);
         if (empty($selectedPlugins)) {
-            echo "  " . $this->color("None selected", 'yellow') . "\n";
+            echo '  ' . $this->color('None selected', 'yellow') . "\n";
         } else {
             foreach ($selectedPlugins as $slug => $enabled) {
                 $pluginName = $this->getPluginName($slug);
-                echo "  " . $this->color("✓", 'green') . " {$pluginName}\n";
+                echo '  ' . $this->color('✓', 'green') . " {$pluginName}\n";
             }
         }
         echo "\n";
 
         echo $this->color("Blocks:\n", 'white', true);
         $selectedBlocks = array_filter($this->blockSelections);
-        $removedBlocks = array_filter($this->blockSelections, fn($v) => !$v);
-        echo "  " . $this->color(count($selectedBlocks) . " behalten", 'green');
+        $removedBlocks = array_filter($this->blockSelections, fn ($v) => !$v);
+        echo '  ' . $this->color(count($selectedBlocks) . ' behalten', 'green');
         if (!empty($removedBlocks)) {
-            echo ", " . $this->color(count($removedBlocks) . " entfernen", 'yellow');
+            echo ', ' . $this->color(count($removedBlocks) . ' entfernen', 'yellow');
         }
         echo "\n\n";
 
         echo $this->color("Content Options:\n", 'white', true);
-        echo "  Create pages:          " . ($this->config['create_pages'] ? $this->color('Yes', 'green') : $this->color('No', 'red')) . "\n";
-        echo "  Delete default content: " . ($this->config['delete_default_content'] ? $this->color('Yes', 'green') : $this->color('No', 'red')) . "\n";
-        echo "  Pretty permalinks:     " . ($this->config['set_permalink_structure'] ? $this->color('Yes', 'green') : $this->color('No', 'red')) . "\n";
-        echo "  Farbschema:            " . $this->color($this->config['color_scheme'] ?? 'system', 'cyan') . "\n";
+        echo '  Create pages:          ' . ( $this->config['create_pages'] ? $this->color('Yes', 'green') : $this->color('No', 'red') ) . "\n";
+        echo '  Delete default content: ' . ( $this->config['delete_default_content'] ? $this->color('Yes', 'green') : $this->color('No', 'red') ) . "\n";
+        echo '  Pretty permalinks:     ' . ( $this->config['set_permalink_structure'] ? $this->color('Yes', 'green') : $this->color('No', 'red') ) . "\n";
+        echo '  Farbschema:            ' . $this->color($this->config['color_scheme'] ?? 'system', 'cyan') . "\n";
         echo "\n";
 
         echo $this->color("Social Media:\n", 'white', true);
         if (empty($this->socialLinks)) {
-            echo "  " . $this->color("Nicht konfiguriert", 'gray') . "\n";
+            echo '  ' . $this->color('Nicht konfiguriert', 'gray') . "\n";
         } else {
             foreach ($this->socialLinks as $link) {
-                echo "  " . $this->color("✓", 'green') . " {$this->socialPlatforms[$link['platform']]}\n";
+                echo '  ' . $this->color('✓', 'green') . " {$this->socialPlatforms[$link['platform']]}\n";
             }
         }
         echo "\n";
 
         echo $this->color("Analytics:\n", 'white', true);
         if (empty($this->config['rybbit_site_id'])) {
-            echo "  " . $this->color("Nicht konfiguriert", 'gray') . "\n";
+            echo '  ' . $this->color('Nicht konfiguriert', 'gray') . "\n";
         } else {
-            echo "  " . $this->color("✓", 'green') . " Rybbit Analytics\n";
+            echo '  ' . $this->color('✓', 'green') . " Rybbit Analytics\n";
         }
         echo "\n";
 
         $confirm = $this->prompt(
             $this->color('Apply these changes?', 'yellow'),
             'yes',
-            'yes/no'
+            'yes/no',
         );
 
         if (strtolower($confirm) !== 'yes' && strtolower($confirm) !== 'y') {
-            echo "\n" . $this->color("Setup cancelled.", 'red') . "\n";
+            echo "\n" . $this->color('Setup cancelled.', 'red') . "\n";
             exit(0);
         }
     }
 
     private function applyChanges(): void
     {
-        $this->printSection("Applying Changes");
+        $this->printSection('Applying Changes');
 
-        $this->task('Updating style.css', fn() => $this->updateStyleCss());
-        $this->task('Updating package.json', fn() => $this->updatePackageJson());
-        $this->task('Updating composer.json + plugins', fn() => $this->updateComposerJson());
-        $this->task('Updating PHP namespaces', fn() => $this->updatePhpFiles());
-        $this->task('Updating Blade templates', fn() => $this->updateBladeTemplates());
-        $this->task('Updating block.json files', fn() => $this->updateBlockJsonFiles());
-        $this->task('Updating hardcoded references', fn() => $this->updateHardcodedReferences());
-        $this->task('Updating CLAUDE.md', fn() => $this->updateClaudeMd());
-        $this->task('Updating theme-updater.php mu-plugin', fn() => $this->updateThemeUpdaterPlugin());
-        $this->task('Updating documentation files', fn() => $this->updateDocumentation());
-        $this->task('Cleaning up old plugin config', fn() => $this->savePluginPreferences());
-        $this->task('Saving content options', fn() => $this->saveContentOptions());
-        $this->task('Saving ACF options (prefill)', fn() => $this->saveAcfOptions());
-        $this->task('Removing unused blocks', fn() => $this->removeUnusedBlocks());
-        $this->task('Creating .env file', fn() => $this->createEnvFile());
-        $this->task('Removing old setup script', fn() => $this->removeOldSetupScript());
+        $this->task('Updating style.css', fn () => $this->updateStyleCss());
+        $this->task('Updating package.json', fn () => $this->updatePackageJson());
+        $this->task('Updating composer.json + plugins', fn () => $this->updateComposerJson());
+        $this->task('Updating PHP namespaces', fn () => $this->updatePhpFiles());
+        $this->task('Updating Blade templates', fn () => $this->updateBladeTemplates());
+        $this->task('Updating block.json files', fn () => $this->updateBlockJsonFiles());
+        $this->task('Updating hardcoded references', fn () => $this->updateHardcodedReferences());
+        $this->task('Updating CLAUDE.md', fn () => $this->updateClaudeMd());
+        $this->task('Updating theme-updater.php mu-plugin', fn () => $this->updateThemeUpdaterPlugin());
+        $this->task('Updating documentation files', fn () => $this->updateDocumentation());
+        $this->task('Cleaning up old plugin config', fn () => $this->savePluginPreferences());
+        $this->task('Saving content options', fn () => $this->saveContentOptions());
+        $this->task('Saving ACF options (prefill)', fn () => $this->saveAcfOptions());
+        $this->task('Removing unused blocks', fn () => $this->removeUnusedBlocks());
+        $this->task('Creating .env file', fn () => $this->createEnvFile());
+        $this->task('Removing old setup script', fn () => $this->removeOldSetupScript());
     }
 
     private function removeOldSetupScript(): void
@@ -827,20 +847,21 @@ class ThemeSetup
 
     private function runInstallCommands(): void
     {
-        $this->printSection("Step 7: Installing Dependencies");
+        $this->printSection('Step 7: Installing Dependencies');
 
         echo "The theme requires dependencies to be installed before it can be used.\n\n";
 
         $runInstall = strtolower($this->prompt(
             'Run install commands automatically?',
             'y',
-            'composer update, npm install, npm run build (y/n)'
+            'composer update, npm install, npm run build (y/n)',
         )) === 'y';
 
         if (!$runInstall) {
-            echo "\n" . $this->color("Skipped. Run these commands manually:", 'yellow') . "\n";
-            echo "  " . $this->color("composer dump-autoload && composer update", 'cyan') . "\n";
-            echo "  " . $this->color("npm install && npm run build", 'cyan') . "\n";
+            echo "\n" . $this->color('Skipped. Run these commands manually:', 'yellow') . "\n";
+            echo '  ' . $this->color('composer dump-autoload && composer update', 'cyan') . "\n";
+            echo '  ' . $this->color('npm install && npm run build', 'cyan') . "\n";
+
             return;
         }
 
@@ -851,13 +872,13 @@ class ThemeSetup
         $hasNpm = $this->commandExists('npm');
 
         if (!$hasComposer) {
-            echo $this->color("⚠ Composer not found. Please install Composer first.", 'yellow') . "\n";
-            echo "  " . $this->color("https://getcomposer.org/download/", 'cyan') . "\n\n";
+            echo $this->color('⚠ Composer not found. Please install Composer first.', 'yellow') . "\n";
+            echo '  ' . $this->color('https://getcomposer.org/download/', 'cyan') . "\n\n";
         }
 
         if (!$hasNpm) {
-            echo $this->color("⚠ npm not found. Please install Node.js first.", 'yellow') . "\n";
-            echo "  " . $this->color("https://nodejs.org/", 'cyan') . "\n\n";
+            echo $this->color('⚠ npm not found. Please install Node.js first.', 'yellow') . "\n";
+            echo '  ' . $this->color('https://nodejs.org/', 'cyan') . "\n\n";
         }
 
         if (!$hasComposer && !$hasNpm) {
@@ -878,7 +899,7 @@ class ThemeSetup
             $buildAssets = strtolower($this->prompt(
                 'Build production assets now?',
                 'y',
-                'npm run build (y/n)'
+                'npm run build (y/n)',
             )) === 'y';
 
             if ($buildAssets) {
@@ -898,7 +919,8 @@ class ThemeSetup
     private function commandExists(string $command): bool
     {
         $check = strncasecmp(PHP_OS, 'WIN', 3) === 0 ? 'where' : 'which';
-        $result = shell_exec("{$check} {$command} 2>/dev/null");
+        $result = shell_exec($check . ' ' . escapeshellarg($command) . ' 2>/dev/null');
+
         return !empty(trim($result ?? ''));
     }
 
@@ -908,6 +930,7 @@ class ThemeSetup
             return false;
         }
         $result = shell_exec('gh auth status 2>&1');
+
         return str_contains($result ?? '', 'Logged in to');
     }
 
@@ -916,12 +939,12 @@ class ThemeSetup
         $hasGh = $this->isGhAuthenticated();
 
         if ($hasGh) {
-            echo "  " . $this->color("GitHub CLI detected and authenticated.", 'green') . "\n\n";
+            echo '  ' . $this->color('GitHub CLI detected and authenticated.', 'green') . "\n\n";
 
             $choice = $this->prompt(
                 'GitHub Repository',
                 'c',
-                '[c]reate new, [e]xisting URL, [s]kip'
+                '[c]reate new, [e]xisting URL, [s]kip',
             );
 
             $choice = strtolower($choice);
@@ -932,23 +955,42 @@ class ThemeSetup
                 return $this->prompt(
                     'Repository URL',
                     '',
-                    'https://github.com/username/repo'
+                    'https://github.com/username/repo',
                 );
             } else {
-                echo "  " . $this->color("Skipped. You can add a repository later.", 'gray') . "\n";
+                echo '  ' . $this->color('Skipped. You can add a repository later.', 'gray') . "\n";
+
                 return '';
             }
         } else {
-            echo "  " . $this->color("Tip: Install GitHub CLI (gh) to create repos automatically.", 'gray') . "\n";
-            echo "  " . $this->color("https://cli.github.com/", 'cyan') . "\n\n";
+            echo '  ' . $this->color('Tip: Install GitHub CLI (gh) to create repos automatically.', 'gray') . "\n";
+            echo '  ' . $this->color('https://cli.github.com/', 'cyan') . "\n\n";
 
             $choice = $this->prompt(
                 'Repository URL',
                 '',
-                'Enter URL or leave empty to skip'
+                'Enter URL or leave empty to skip',
             );
 
             return $choice;
+        }
+    }
+
+    /**
+     * Derive repo_name (owner/repo) and repo_url from a full repository URL.
+     * Leaves config unset when the URL is empty or unparseable, so callers
+     * relying on repo_name/repo_url can skip cleanly.
+     */
+    private function setRepoInfoFromUrl(string $url): void
+    {
+        $url = rtrim(trim($url), '/');
+        if ($url === '') {
+            return;
+        }
+
+        if (preg_match('#^(?:https?://(?:www\.)?github\.com/|git@github\.com:)([^/]+/[^/]+?)(?:\.git)?$#', $url, $matches)) {
+            $this->config['repo_name'] = $matches[1];
+            $this->config['repo_url'] = $url;
         }
     }
 
@@ -957,13 +999,13 @@ class ThemeSetup
         $repoName = $this->prompt(
             'Repository name',
             $this->config['theme_slug'],
-            'Will be created on GitHub'
+            'Will be created on GitHub',
         );
 
         $visibility = $this->prompt(
             'Visibility',
             'private',
-            '[private] or [public]'
+            '[private] or [public]',
         );
         $visibility = strtolower($visibility) === 'public' ? 'public' : 'private';
 
@@ -975,36 +1017,38 @@ class ThemeSetup
         $existingOrigin = trim(shell_exec('git remote get-url origin 2>/dev/null') ?? '');
         if (!empty($existingOrigin)) {
             shell_exec('git remote remove origin 2>/dev/null');
-            echo "  " . $this->color("Removed old origin: {$existingOrigin}", 'gray') . "\n";
+            echo '  ' . $this->color("Removed old origin: {$existingOrigin}", 'gray') . "\n";
         }
 
         $command = sprintf(
             'gh repo create %s --description %s --%s --source=. --remote=origin 2>&1',
             escapeshellarg($repoName),
             escapeshellarg($description),
-            $visibility
+            $visibility,
         );
 
-        $output = shell_exec($command);
+        $output = shell_exec($command) ?? '';
 
         // Extract repo URL from output
         if (preg_match('/https:\/\/github\.com\/[^\s]+/', $output, $matches)) {
             $repoUrl = rtrim($matches[0], '/');
-            echo "  " . $this->color("✓ Repository created: {$repoUrl}", 'green') . "\n\n";
+            echo '  ' . $this->color("✓ Repository created: {$repoUrl}", 'green') . "\n\n";
+
             return $repoUrl;
         } else {
-            echo "  " . $this->color("⚠ Could not create repository: {$output}", 'yellow') . "\n";
+            echo '  ' . $this->color("⚠ Could not create repository: {$output}", 'yellow') . "\n";
+
             return $this->prompt(
                 'Enter repository URL manually',
                 '',
-                'Or leave empty to skip'
+                'Or leave empty to skip',
             );
         }
     }
 
     private function runCommand(string $description, string $command): void
     {
-        echo "  " . str_pad($description . "...", 40);
+        echo '  ' . str_pad($description . '...', 40);
 
         $output = [];
         $returnCode = 0;
@@ -1013,44 +1057,57 @@ class ThemeSetup
         exec("{$command} 2>&1", $output, $returnCode);
 
         if ($returnCode === 0) {
-            echo $this->color("Done", 'green') . "\n";
+            echo $this->color('Done', 'green') . "\n";
         } else {
-            echo $this->color("Failed", 'red') . "\n";
+            echo $this->color('Failed', 'red') . "\n";
             // Show first few lines of error output
             $errorLines = array_slice($output, 0, 3);
             foreach ($errorLines as $line) {
-                echo "     " . $this->color($line, 'gray') . "\n";
+                echo '     ' . $this->color($line, 'gray') . "\n";
             }
         }
     }
 
     private function task(string $name, callable $callback): void
     {
-        echo "  " . str_pad($name . "...", 35);
+        echo '  ' . str_pad($name . '...', 35);
+
         try {
             $callback();
-            echo $this->color("Done", 'green') . "\n";
-        } catch (Exception $e) {
-            echo $this->color("Error: " . $e->getMessage(), 'red') . "\n";
+            echo $this->color('Done', 'green') . "\n";
+        } catch (Throwable $e) {
+            echo $this->color('Error: ' . $e->getMessage(), 'red') . "\n";
         }
     }
 
     private function updateStyleCss(): void
     {
-        $content = <<<CSS
-/*
-Theme Name: {$this->config['theme_name']}
-Theme URI: {$this->config['theme_uri']}
-Author: {$this->config['author']}
-Author URI: {$this->config['author_uri']}
-Description: {$this->config['description']}
-Version: {$this->config['version']}
-License: GNU GPL version 2
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Text Domain: {$this->config['text_domain']}
-*/
+        // Values are user-provided prompt input; strip "*/" so they cannot close
+        // the comment block early and inject content into the CSS file.
+        $stripCommentClose = fn (string $value): string => str_replace('*/', '', $value);
 
-CSS;
+        $themeName = $stripCommentClose($this->config['theme_name']);
+        $themeUri = $stripCommentClose($this->config['theme_uri']);
+        $author = $stripCommentClose($this->config['author']);
+        $authorUri = $stripCommentClose($this->config['author_uri']);
+        $description = $stripCommentClose($this->config['description']);
+        $version = $stripCommentClose($this->config['version']);
+        $textDomain = $stripCommentClose($this->config['text_domain']);
+
+        $content = <<<CSS
+            /*
+            Theme Name: {$themeName}
+            Theme URI: {$themeUri}
+            Author: {$author}
+            Author URI: {$authorUri}
+            Description: {$description}
+            Version: {$version}
+            License: GNU GPL version 2
+            License URI: https://www.gnu.org/licenses/gpl-2.0.html
+            Text Domain: {$textDomain}
+            */
+
+            CSS;
 
         file_put_contents($this->themeDir . '/style.css', $content);
     }
@@ -1071,7 +1128,7 @@ CSS;
 
         file_put_contents(
             $packagePath,
-            json_encode($package, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n"
+            json_encode($package, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n",
         );
     }
 
@@ -1086,7 +1143,7 @@ CSS;
             [
                 'name' => $this->config['author'],
                 'email' => $this->config['author_email'],
-            ]
+            ],
         ];
 
         // Update namespace in autoload PSR-4
@@ -1112,14 +1169,50 @@ CSS;
             $packageName = 'wpackagist-plugin/' . $pluginSlug;
             // Only add if not already present
             if (!isset($composer['require'][$packageName])) {
-                $composer['require'][$packageName] = '*';
+                $composer['require'][$packageName] = $this->resolvePluginVersionConstraint($packageName);
             }
         }
 
         file_put_contents(
             $composerPath,
-            json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n"
+            json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n",
         );
+    }
+
+    /**
+     * Resolve a caret version constraint for a newly added plugin dependency.
+     * Prefers a version already known from composer.lock (re-runs), otherwise
+     * queries Packagist via `composer show`. Falls back to '*' with a warning
+     * when neither source is available (e.g. no network access).
+     */
+    private function resolvePluginVersionConstraint(string $packageName): string
+    {
+        $lockPath = $this->themeDir . '/composer.lock';
+        if (file_exists($lockPath)) {
+            $lock = json_decode(file_get_contents($lockPath), true) ?? [];
+            $packages = array_merge($lock['packages'] ?? [], $lock['packages-dev'] ?? []);
+            foreach ($packages as $package) {
+                if (( $package['name'] ?? '' ) === $packageName && !empty($package['version'])) {
+                    return '^' . ltrim($package['version'], 'v');
+                }
+            }
+        }
+
+        if ($this->commandExists('composer')) {
+            $output = shell_exec('composer show -a ' . escapeshellarg($packageName) . ' --format=json 2>/dev/null') ?? '';
+            $data = json_decode($output, true);
+            $versions = $data['versions'] ?? [];
+            // Skip dev branches (e.g. "dev-main") and pick the first release-shaped version.
+            foreach ($versions as $version) {
+                if (is_string($version) && preg_match('/^v?\d+\.\d+(\.\d+)?$/', $version) === 1) {
+                    return '^' . ltrim($version, 'v');
+                }
+            }
+        }
+
+        echo '  ' . $this->color("⚠ Could not resolve a version for {$packageName}, using '*'. Please pin a version manually.", 'yellow') . "\n";
+
+        return '*';
     }
 
     private function updatePhpFiles(): void
@@ -1137,7 +1230,7 @@ CSS;
         $phpFiles = array_merge(
             $this->findFiles($this->themeDir . '/src', '*.php'),
             $this->findFiles($this->themeDir . '/tests', '*.php'),
-            glob($this->themeDir . '/config/*.php') ?: []
+            glob($this->themeDir . '/config/*.php') ?: [],
         );
 
         // Also check for root-level PHP files (excluding bin/setup.php itself)
@@ -1185,7 +1278,7 @@ CSS;
 
         $bladeFiles = array_merge(
             $this->findFiles($this->themeDir . '/templates', '*.blade.php'),
-            $this->findFiles($this->themeDir . '/blocks', '*.blade.php')
+            $this->findFiles($this->themeDir . '/blocks', '*.blade.php'),
         );
 
         foreach ($bladeFiles as $file) {
@@ -1305,33 +1398,33 @@ CSS;
         $content = str_replace(
             'Guidance for Claude Code when working with this WordPress starter theme.',
             'Guidance for Claude Code when working with this WordPress theme.',
-            $content
+            $content,
         );
 
         // Update namespace in Quick Reference
         $content = str_replace(
             '- **Namespace:** `WordpressStarter\`',
             "- **Namespace:** `{$this->config['namespace']}\\`",
-            $content
+            $content,
         );
 
         // Update text domain in Quick Reference
         $content = str_replace(
             '- **Text Domain:** `wp-starter`',
             "- **Text Domain:** `{$this->config['text_domain']}`",
-            $content
+            $content,
         );
 
         // Update namespace in code examples
         $content = str_replace(
             'use WordpressStarter\\',
             "use {$this->config['namespace']}\\",
-            $content
+            $content,
         );
         $content = str_replace(
             'namespace WordpressStarter\\',
             "namespace {$this->config['namespace']}\\",
-            $content
+            $content,
         );
 
         file_put_contents($claudePath, $content);
@@ -1344,35 +1437,44 @@ CSS;
             return;
         }
 
-        $slug      = basename($this->themeDir);
-        $repo      = $this->config['repo_name'] ?? '';
-        $repoUrl   = $this->config['repo_url'] ?? "https://github.com/{$repo}";
+        $slug = basename($this->themeDir);
+        $repo = $this->config['repo_name'] ?? '';
+        $repoUrl = $this->config['repo_url'] ?? '';
+
+        // Skip before touching the file at all - adding the slug to $ourThemes without
+        // a matching $themes entry would leave a half-written updater config.
+        if ($repo === '' || $repoUrl === '') {
+            echo '  ' . $this->color("No repository configured, skipping theme-updater entry for '{$slug}'.", 'gray') . "\n";
+
+            return;
+        }
 
         $content = file_get_contents($pluginPath);
 
         // Add slug to $ourThemes array if not already present
         if (!str_contains($content, "'{$slug}'")) {
             $content = preg_replace(
-                "/(\\\$ourThemes\s*=\s*\[)([^\]]+?)(\];)/s",
+                '/(\\$ourThemes\s*=\s*\[)([^\]]+?)(\];)/s',
                 "$1$2    '{$slug}',\n$3",
-                $content
+                $content,
             );
         }
 
         // Add entry to $themes array if not already present
-        if (!str_contains($content, "'{$slug}'")) {
+        if (!str_contains($content, "'{$slug}' => [")) {
+            $repoPath = var_export($repoUrl . '/', true);
             $themeEntry = <<<PHP
 
-        '{$slug}' => [
-            'repo' => '{$repoUrl}/',
-            'path' => WP_CONTENT_DIR . '/themes/{$slug}/style.css',
-        ],
-PHP;
+                        '{$slug}' => [
+                            'repo' => {$repoPath},
+                            'path' => WP_CONTENT_DIR . '/themes/{$slug}/style.css',
+                        ],
+                PHP;
             $content = preg_replace(
                 '/(\s*\];)(\s*\n\s*foreach)/s',
                 "{$themeEntry}\n$1$2",
                 $content,
-                1
+                1,
             );
         }
 
@@ -1387,43 +1489,43 @@ PHP;
     private function writeClientReadme(): void
     {
         $readmePath = $this->themeDir . '/README.md';
-        $name       = $this->config['theme_name'] ?? basename($this->themeDir);
-        $namespace  = $this->config['namespace'] ?? 'MyTheme';
-        $domain     = $this->config['text_domain'] ?? basename($this->themeDir);
-        $repo       = $this->config['repo_name'] ?? '';
-        $slug       = basename($this->themeDir);
+        $name = $this->config['theme_name'] ?? basename($this->themeDir);
+        $namespace = $this->config['namespace'] ?? 'MyTheme';
+        $domain = $this->config['text_domain'] ?? basename($this->themeDir);
+        $repo = $this->config['repo_name'] ?? '';
+        $slug = basename($this->themeDir);
 
         $content = <<<MD
-# {$name} Theme
+            # {$name} Theme
 
-Client-Theme für {$name}. Basiert auf dem wordpress-starter-theme.
+            Client-Theme für {$name}. Basiert auf dem wordpress-starter-theme.
 
-## Kenndaten
+            ## Kenndaten
 
-- **Namespace:** `{$namespace}\\`
-- **Text Domain:** `{$domain}`
-- **Version:** siehe `style.css`
-- **Repo:** `{$repo}`
+            - **Namespace:** `{$namespace}\\`
+            - **Text Domain:** `{$domain}`
+            - **Version:** siehe `style.css`
+            - **Repo:** `{$repo}`
 
-## Stack
+            ## Stack
 
-Blade, TailwindCSS v4.1, Alpine.js, ACF Pro + ACF Extended, Vite 8, PHP 8.2+. Kein Gutenberg.
+            Blade, TailwindCSS v4.1, Alpine.js, ACF Pro + ACF Extended, Vite 8, PHP 8.2+. Kein Gutenberg.
 
-## Entwicklung
+            ## Entwicklung
 
-```bash
-cd app/public/wp-content/themes/{$slug}
-npm run dev        # Vite Dev Server (localhost:5180)
-npm run build      # Production Build
-composer lint      # PHPCS + PHPStan
-composer test      # PHPUnit
-npm run test:e2e   # Playwright E2E
-```
+            ```bash
+            cd app/public/wp-content/themes/{$slug}
+            npm run dev        # Vite Dev Server (localhost:5180)
+            npm run build      # Production Build
+            composer lint      # PHPCS + PHPStan
+            composer test      # PHPUnit
+            npm run test:e2e   # Playwright E2E
+            ```
 
-## Plugins
+            ## Plugins
 
-Composer-verwaltet via wpackagist. ACF Pro manuell installieren.
-MD;
+            Composer-verwaltet via wpackagist. ACF Pro manuell installieren.
+            MD;
 
         file_put_contents($readmePath, $content);
     }
@@ -1446,22 +1548,16 @@ MD;
             'delete_default_content' => $this->config['delete_default_content'],
             'set_permalink_structure' => $this->config['set_permalink_structure'],
             'pages' => $this->config['create_pages'] ? $this->samplePages : [],
-            'posts' => ($this->config['create_posts'] ?? false) ? $this->samplePosts : [],
+            'posts' => ( $this->config['create_posts'] ?? false ) ? $this->samplePosts : [],
             'menu_assignments' => $this->config['create_pages'] ? $this->menuAssignments : [],
             'color_scheme' => $this->config['color_scheme'] ?? 'system',
         ];
 
-        $configContent = "<?php\n\n";
-        $configContent .= "declare(strict_types=1);\n\n";
-        $configContent .= "/**\n";
-        $configContent .= " * Auto-generated by setup script - " . date('Y-m-d H:i:s') . "\n";
-        $configContent .= " * Content options for first-time setup\n";
-        $configContent .= " *\n";
-        $configContent .= " * @return array<string, mixed>\n";
-        $configContent .= " */\n";
-        $configContent .= "return " . var_export($options, true) . ";\n";
-
-        file_put_contents($this->themeDir . '/config/setup-options.php', $configContent);
+        $this->writeGeneratedConfig(
+            $this->themeDir . '/config/setup-options.php',
+            $options,
+            'Content options for first-time setup',
+        );
     }
 
     /**
@@ -1478,7 +1574,7 @@ MD;
             'color_scheme' => $this->config['color_scheme'] ?? 'system',
 
             // Footer copyright
-            'copyright_text' => '© {year} ' . ($this->config['company_name'] ?? $this->config['theme_name']) . '. Alle Rechte vorbehalten.',
+            'copyright_text' => '© {year} ' . ( $this->config['company_name'] ?? $this->config['theme_name'] ) . '. Alle Rechte vorbehalten.',
 
             // Social links
             'social_links' => $this->socialLinks,
@@ -1487,17 +1583,36 @@ MD;
             'rybbit_site_id' => $this->config['rybbit_site_id'] ?? '',
         ];
 
+        $this->writeGeneratedConfig(
+            $this->themeDir . '/config/acf-options.php',
+            $acfOptions,
+            'ACF options to pre-fill on theme activation',
+        );
+    }
+
+    /**
+     * Write an auto-generated PHP config file that returns an array.
+     *
+     * Restricts permissions at creation time (umask) so the file is never
+     * briefly world-readable (it can contain client data); chmod covers
+     * the case where it already existed.
+     */
+    private function writeGeneratedConfig(string $path, array $data, string $comment): void
+    {
         $configContent = "<?php\n\n";
         $configContent .= "declare(strict_types=1);\n\n";
         $configContent .= "/**\n";
-        $configContent .= " * Auto-generated by setup script - " . date('Y-m-d H:i:s') . "\n";
-        $configContent .= " * ACF options to pre-fill on theme activation\n";
+        $configContent .= ' * Auto-generated by setup script - ' . date('Y-m-d H:i:s') . "\n"; // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- CLI script, comment timestamp only, no timezone-sensitive logic
+        $configContent .= " * {$comment}\n";
         $configContent .= " *\n";
         $configContent .= " * @return array<string, mixed>\n";
         $configContent .= " */\n";
-        $configContent .= "return " . var_export($acfOptions, true) . ";\n";
+        $configContent .= 'return ' . var_export($data, true) . ";\n";
 
-        file_put_contents($this->themeDir . '/config/acf-options.php', $configContent);
+        $previousUmask = umask(0o177);
+        file_put_contents($path, $configContent);
+        umask($previousUmask);
+        chmod($path, 0o600);
     }
 
     /**
@@ -1506,7 +1621,7 @@ MD;
     private function removeUnusedBlocks(): void
     {
         $blocksDir = $this->themeDir . '/blocks';
-        $removedBlocks = array_keys(array_filter($this->blockSelections, fn($v) => !$v));
+        $removedBlocks = array_keys(array_filter($this->blockSelections, fn ($v) => !$v));
 
         foreach ($removedBlocks as $blockSlug) {
             $blockPath = $blocksDir . '/' . $blockSlug;
@@ -1538,37 +1653,39 @@ MD;
      */
     private function initGitRepo(): void
     {
-        $this->printSection("Step 8: Git Repository");
+        $this->printSection('Step 8: Git Repository');
 
         // Check if already a git repo
         if (is_dir($this->themeDir . '/.git')) {
-            echo "  " . $this->color("Git repository already exists.", 'gray') . "\n";
+            echo '  ' . $this->color('Git repository already exists.', 'gray') . "\n";
 
             $makeCommit = strtolower($this->prompt(
                 'Create initial commit with setup changes?',
                 'y',
-                '(y/n)'
+                '(y/n)',
             )) === 'y';
 
             if ($makeCommit) {
                 $this->runCommand('Staging all changes', 'git add .');
                 $commitMsg = 'Initial theme setup: ' . $this->config['theme_name'];
-                $this->runCommand('Creating commit', "git commit -m " . escapeshellarg($commitMsg));
+                $this->runCommand('Creating commit', 'git commit -m ' . escapeshellarg($commitMsg));
 
                 // Check if remote exists and offer to push
                 $this->offerToPush();
             }
+
             return;
         }
 
         $initGit = strtolower($this->prompt(
             'Initialize git repository?',
             'y',
-            '(y/n)'
+            '(y/n)',
         )) === 'y';
 
         if (!$initGit) {
-            echo "  " . $this->color("Skipped.", 'gray') . "\n";
+            echo '  ' . $this->color('Skipped.', 'gray') . "\n";
+
             return;
         }
 
@@ -1576,9 +1693,9 @@ MD;
         $this->runCommand('Staging all files', 'git add .');
 
         $commitMsg = 'Initial theme setup: ' . $this->config['theme_name'];
-        $this->runCommand('Creating initial commit', "git commit -m " . escapeshellarg($commitMsg));
+        $this->runCommand('Creating initial commit', 'git commit -m ' . escapeshellarg($commitMsg));
 
-        echo "\n  " . $this->color("✓ Git repository initialized with initial commit.", 'green') . "\n";
+        echo "\n  " . $this->color('✓ Git repository initialized with initial commit.', 'green') . "\n";
 
         // Check if remote exists and offer to push
         $this->offerToPush();
@@ -1595,20 +1712,21 @@ MD;
         // If remote points to starter template, offer to set up own repo
         if (empty($remoteUrl) || $this->isStarterRepo($remoteUrl)) {
             $this->offerToSetupRemote($remoteUrl);
+
             return;
         }
 
-        echo "\n  " . $this->color("Remote found: ", 'gray') . $this->color($remoteUrl, 'cyan') . "\n";
+        echo "\n  " . $this->color('Remote found: ', 'gray') . $this->color($remoteUrl, 'cyan') . "\n";
 
         $doPush = strtolower($this->prompt(
             'Push to remote?',
             'y',
-            '(y/n)'
+            '(y/n)',
         )) === 'y';
 
         if ($doPush) {
             $this->runCommand('Pushing to remote', 'git push -u origin HEAD');
-            echo "\n  " . $this->color("✓ Pushed to remote repository.", 'green') . "\n";
+            echo "\n  " . $this->color('✓ Pushed to remote repository.', 'green') . "\n";
         }
     }
 
@@ -1620,16 +1738,17 @@ MD;
         // Check if we already collected a repo URL in step 1 (full mode)
         $collectedUrl = $this->config['theme_uri'] ?? '';
         if (!empty($collectedUrl) && !$this->isStarterRepo($collectedUrl)) {
-            echo "\n  " . $this->color("Using repository from setup: ", 'gray') . $this->color($collectedUrl, 'cyan') . "\n";
+            echo "\n  " . $this->color('Using repository from setup: ', 'gray') . $this->color($collectedUrl, 'cyan') . "\n";
             $this->setRemoteAndPush($collectedUrl, $currentRemote);
+
             return;
         }
 
         if (!empty($currentRemote)) {
-            echo "\n  " . $this->color("⚠ Remote still points to starter template:", 'yellow') . "\n";
-            echo "  " . $this->color($currentRemote, 'gray') . "\n\n";
+            echo "\n  " . $this->color('⚠ Remote still points to starter template:', 'yellow') . "\n";
+            echo '  ' . $this->color($currentRemote, 'gray') . "\n\n";
         } else {
-            echo "\n  " . $this->color("No remote repository configured.", 'gray') . "\n\n";
+            echo "\n  " . $this->color('No remote repository configured.', 'gray') . "\n\n";
         }
 
         $hasGh = $this->isGhAuthenticated();
@@ -1638,7 +1757,7 @@ MD;
             $choice = $this->prompt(
                 'Set up your own repository?',
                 'c',
-                '[c]reate GitHub repo, [e]nter URL, [s]kip'
+                '[c]reate GitHub repo, [e]nter URL, [s]kip',
             );
 
             $choice = strtolower($choice);
@@ -1648,40 +1767,40 @@ MD;
                 if (!empty($repoUrl)) {
                     // Push to the new repo
                     $this->runCommand('Pushing to new repository', 'git push -u origin HEAD');
-                    echo "\n  " . $this->color("✓ Pushed to new repository.", 'green') . "\n";
+                    echo "\n  " . $this->color('✓ Pushed to new repository.', 'green') . "\n";
                 } else {
-                    echo "  " . $this->color("⚠ Repository creation failed. Try manually:", 'yellow') . "\n";
-                    echo "  " . $this->color("git remote set-url origin <your-repo-url>", 'cyan') . "\n";
+                    echo '  ' . $this->color('⚠ Repository creation failed. Try manually:', 'yellow') . "\n";
+                    echo '  ' . $this->color('git remote set-url origin <your-repo-url>', 'cyan') . "\n";
                 }
             } elseif ($choice === 'e' || $choice === 'existing') {
                 $newUrl = $this->prompt(
                     'Repository URL',
                     '',
-                    'https://github.com/username/repo'
+                    'https://github.com/username/repo',
                 );
 
                 if (!empty($newUrl)) {
                     $this->setRemoteAndPush($newUrl, $currentRemote);
                 }
             } else {
-                echo "  " . $this->color("Skipped. You can set up a remote later with:", 'gray') . "\n";
-                echo "  " . $this->color("git remote set-url origin <your-repo-url>", 'cyan') . "\n";
+                echo '  ' . $this->color('Skipped. You can set up a remote later with:', 'gray') . "\n";
+                echo '  ' . $this->color('git remote set-url origin <your-repo-url>', 'cyan') . "\n";
             }
         } else {
-            echo "  " . $this->color("Tip: Install GitHub CLI (gh) to create repos automatically.", 'gray') . "\n";
-            echo "  " . $this->color("https://cli.github.com/", 'cyan') . "\n\n";
+            echo '  ' . $this->color('Tip: Install GitHub CLI (gh) to create repos automatically.', 'gray') . "\n";
+            echo '  ' . $this->color('https://cli.github.com/', 'cyan') . "\n\n";
 
             $newUrl = $this->prompt(
                 'Enter repository URL',
                 '',
-                'Leave empty to skip'
+                'Leave empty to skip',
             );
 
             if (!empty($newUrl)) {
                 $this->setRemoteAndPush($newUrl, $currentRemote);
             } else {
-                echo "  " . $this->color("Skipped. You can set up a remote later with:", 'gray') . "\n";
-                echo "  " . $this->color("git remote set-url origin <your-repo-url>", 'cyan') . "\n";
+                echo '  ' . $this->color('Skipped. You can set up a remote later with:', 'gray') . "\n";
+                echo '  ' . $this->color('git remote set-url origin <your-repo-url>', 'cyan') . "\n";
             }
         }
     }
@@ -1701,16 +1820,17 @@ MD;
         exec('git remote add origin ' . escapeshellarg($newUrl) . ' 2>&1', $output, $returnCode);
 
         if ($returnCode !== 0) {
-            echo "  " . $this->color("⚠ Failed to set remote: " . implode("\n", $output), 'yellow') . "\n";
+            echo '  ' . $this->color('⚠ Failed to set remote: ' . implode("\n", $output), 'yellow') . "\n";
+
             return;
         }
-        echo "  " . $this->color("✓ Remote set to: {$newUrl}", 'green') . "\n";
+        echo '  ' . $this->color("✓ Remote set to: {$newUrl}", 'green') . "\n";
 
         // Push
         $doPush = strtolower($this->prompt(
             'Push to remote?',
             'y',
-            '(y/n)'
+            '(y/n)',
         )) === 'y';
 
         if ($doPush) {
@@ -1723,18 +1843,42 @@ MD;
      */
     private function isStarterRepo(string $url): bool
     {
-        $starterPatterns = [
-            'raaaf/starter',
+        $normalized = $this->normalizeRepoUrl($url);
+
+        $starterRepos = [
+            'github.com/raaaf/wordpress-starter',
             'github.com/raaaf/starter',
         ];
 
-        foreach ($starterPatterns as $pattern) {
-            if (str_contains(strtolower($url), strtolower($pattern))) {
-                return true;
-            }
+        return in_array($normalized, $starterRepos, true);
+    }
+
+    /**
+     * Normalise a repository URL/reference down to "host/owner/repo".
+     *
+     * Handles https://, http://, ssh://, scp-like (git@host:owner/repo) and
+     * bare "owner/repo" forms (assumed to be on github.com).
+     */
+    private function normalizeRepoUrl(string $url): string
+    {
+        $normalized = strtolower(trim($url));
+        // Strip a URL scheme (https://, http://, ssh://, ...)
+        $normalized = preg_replace('#^[a-z][a-z0-9+.-]*://#', '', $normalized);
+        // Strip a "user@" prefix (e.g. git@), whether or not a scheme preceded it
+        $normalized = preg_replace('#^[^/@]+@#', '', $normalized);
+        // Only the first ":" (the scp-like host:owner/repo separator) becomes a slash;
+        // anything after that is already owner/repo and must stay untouched.
+        $normalized = preg_replace('#^([^/:]+):#', '$1/', $normalized, 1);
+        $normalized = preg_replace('#^www\.#', '', $normalized);
+        $normalized = preg_replace('#\.git/?$#', '', $normalized);
+        $normalized = rtrim($normalized, '/');
+
+        // Bare "owner/repo" with no host segment: assume github.com
+        if ($normalized !== '' && substr_count($normalized, '/') === 1 && !str_contains($normalized, '.')) {
+            $normalized = 'github.com/' . $normalized;
         }
 
-        return false;
+        return $normalized;
     }
 
     private function createEnvFile(): void
@@ -1742,7 +1886,14 @@ MD;
         $envExample = $this->themeDir . '/.env.example';
         $envFile = $this->themeDir . '/.env';
 
-        if (!file_exists($envExample) || file_exists($envFile)) {
+        if (!file_exists($envExample)) {
+            return;
+        }
+
+        if (file_exists($envFile)) {
+            // Restrict permissions on a pre-existing .env too, not just the freshly created one.
+            chmod($envFile, 0o600);
+
             return;
         }
 
@@ -1774,7 +1925,12 @@ MD;
             $content = str_replace($search, $replace, $content);
         }
 
+        // Restrict permissions at creation time (umask) so the file is never
+        // briefly world-readable; chmod covers the case where it already existed.
+        $previousUmask = umask(0o177);
         file_put_contents($envFile, $content);
+        umask($previousUmask);
+        chmod($envFile, 0o600);
     }
 
     private function printSuccess(): void
@@ -1782,7 +1938,7 @@ MD;
         echo "\n";
         echo $this->color("╔══════════════════════════════════════════════════════════════════╗\n", 'green');
         echo $this->color("║                                                                  ║\n", 'green');
-        echo $this->color("║   ", 'green') . $this->color("Setup Complete!", 'white', true) . $this->color("                                            ║\n", 'green');
+        echo $this->color('║   ', 'green') . $this->color('Setup Complete!', 'white', true) . $this->color("                                            ║\n", 'green');
         echo $this->color("║                                                                  ║\n", 'green');
         echo $this->color("╚══════════════════════════════════════════════════════════════════╝\n", 'green');
         echo "\n";
@@ -1793,30 +1949,30 @@ MD;
             echo "\n";
             echo $this->color("Next Steps:\n", 'white', true);
             echo "\n";
-            echo "  " . $this->color("1.", 'yellow') . " Activate the theme in WordPress\n";
-            echo "     Go to: " . $this->color("Design → Themes", 'cyan') . "\n";
+            echo '  ' . $this->color('1.', 'yellow') . " Activate the theme in WordPress\n";
+            echo '     Go to: ' . $this->color('Design → Themes', 'cyan') . "\n";
             echo "\n";
-            echo "  " . $this->color("2.", 'yellow') . " Complete the Theme Setup\n";
+            echo '  ' . $this->color('2.', 'yellow') . " Complete the Theme Setup\n";
             echo "     The wizard will guide you through plugin installation.\n";
             echo "\n";
-            echo "  " . $this->color("3.", 'yellow') . " For development with hot reload:\n";
-            echo "     " . $this->color("npm run dev", 'cyan') . "\n";
+            echo '  ' . $this->color('3.', 'yellow') . " For development with hot reload:\n";
+            echo '     ' . $this->color('npm run dev', 'cyan') . "\n";
             echo "\n";
         } else {
             // Dependencies were not installed - show manual steps
             echo $this->color("Next Steps:\n", 'white', true);
             echo "\n";
-            echo "  " . $this->color("1.", 'yellow') . " Update Composer autoloading:\n";
-            echo "     " . $this->color("composer dump-autoload", 'cyan') . "\n";
+            echo '  ' . $this->color('1.', 'yellow') . " Update Composer autoloading:\n";
+            echo '     ' . $this->color('composer dump-autoload', 'cyan') . "\n";
             echo "\n";
-            echo "  " . $this->color("2.", 'yellow') . " Install dependencies:\n";
-            echo "     " . $this->color("composer update && npm install && npm run build", 'cyan') . "\n";
+            echo '  ' . $this->color('2.', 'yellow') . " Install dependencies:\n";
+            echo '     ' . $this->color('composer update && npm install && npm run build', 'cyan') . "\n";
             echo "\n";
-            echo "  " . $this->color("3.", 'yellow') . " Activate the theme in WordPress\n";
-            echo "     Go to: " . $this->color("Design → Themes", 'cyan') . "\n";
+            echo '  ' . $this->color('3.', 'yellow') . " Activate the theme in WordPress\n";
+            echo '     Go to: ' . $this->color('Design → Themes', 'cyan') . "\n";
             echo "\n";
-            echo "  " . $this->color("4.", 'yellow') . " For development with hot reload:\n";
-            echo "     " . $this->color("npm run dev", 'cyan') . "\n";
+            echo '  ' . $this->color('4.', 'yellow') . " For development with hot reload:\n";
+            echo '     ' . $this->color('npm run dev', 'cyan') . "\n";
             echo "\n";
         }
 
@@ -1827,12 +1983,12 @@ MD;
             echo "\n";
         }
 
-        echo $this->color("💡 Tip: ", 'yellow') . "Add this to your " . $this->color("wp-config.php", 'cyan') . " for auto-debug when Vite runs:\n";
-        echo $this->color("   \$vite_dev = @fsockopen('localhost', 5173, \$e, \$m, 0.1) !== false;\n", 'gray');
+        echo $this->color('💡 Tip: ', 'yellow') . 'Add this to your ' . $this->color('wp-config.php', 'cyan') . " for auto-debug when Vite runs:\n";
+        echo $this->color("   \$vite_dev = @fsockopen('localhost', 5180, \$e, \$m, 0.1) !== false;\n", 'gray');
         echo $this->color("   define('WP_DEBUG', \$vite_dev);\n", 'gray');
         echo "\n";
 
-        echo $this->color("To revert all changes: ", 'gray') . $this->color("git checkout .", 'cyan') . "\n";
+        echo $this->color('To revert all changes: ', 'gray') . $this->color('git checkout .', 'cyan') . "\n";
         echo "\n";
     }
 
@@ -1845,7 +2001,13 @@ MD;
 
         echo "  {$question}{$hintDisplay}{$defaultDisplay}: ";
 
-        $input = trim(fgets(STDIN));
+        $line = fgets(STDIN);
+        if ($line === false) {
+            return $default;
+        }
+
+        $input = trim($line);
+
         return $input !== '' ? $input : $default;
     }
 
@@ -1854,10 +2016,14 @@ MD;
      */
     private function promptWithValidation(string $question, string $default, string $type, string $hint = ''): string
     {
+        // Auto-derived defaults (e.g. PascalCase namespace from theme name) can be invalid
+        // themselves (e.g. start with a digit) - repair the default before prompting with it.
+        $default = $this->sanitizeDefault($default, $type);
+
         while (true) {
             $value = $this->prompt($question, $default, $hint);
 
-            // Empty value uses default, which we assume is valid
+            // Empty value uses default, which we have just sanitized above
             if ($value === $default) {
                 return $value;
             }
@@ -1866,6 +2032,8 @@ MD;
             $isValid = match ($type) {
                 'email' => $this->isValidEmail($value),
                 'url' => $this->isValidUrl($value),
+                'namespace' => $this->isValidNamespace($value),
+                'text_domain' => $this->isValidTextDomain($value),
                 default => true,
             };
 
@@ -1877,10 +2045,51 @@ MD;
             $errorMsg = match ($type) {
                 'email' => 'Ungültige E-Mail-Adresse. Bitte erneut eingeben.',
                 'url' => 'Ungültige URL (muss mit http:// oder https:// beginnen). Bitte erneut eingeben.',
+                'namespace' => 'Ungültiger PHP-Namespace (PascalCase, z.B. MeinTheme). Bitte erneut eingeben.',
+                'text_domain' => 'Ungültige Text Domain (nur Kleinbuchstaben, Ziffern, Bindestriche). Bitte erneut eingeben.',
                 default => 'Ungültige Eingabe. Bitte erneut eingeben.',
             };
-            echo "  " . $this->color("⚠ {$errorMsg}", 'yellow') . "\n";
+            echo '  ' . $this->color("⚠ {$errorMsg}", 'yellow') . "\n";
         }
+    }
+
+    /**
+     * Repair an auto-derived default that fails its own type's validation
+     * (e.g. a PascalCase namespace derived from a theme name starting with a digit).
+     */
+    private function sanitizeDefault(string $default, string $type): string
+    {
+        if ($default === '') {
+            return $default;
+        }
+
+        $isValid = match ($type) {
+            'email' => $this->isValidEmail($default),
+            'url' => $this->isValidUrl($default),
+            'namespace' => $this->isValidNamespace($default),
+            'text_domain' => $this->isValidTextDomain($default),
+            default => true,
+        };
+
+        if ($isValid) {
+            return $default;
+        }
+
+        if ($type === 'namespace') {
+            try {
+                return $this->deriveNamespace($default);
+            } catch (RuntimeException) {
+                echo '  ' . $this->color("⚠ Could not derive a valid namespace from '{$default}', falling back to 'ThemeNamespace'.", 'yellow') . "\n";
+
+                return 'ThemeNamespace';
+            }
+        }
+
+        if ($type === 'text_domain') {
+            return $this->deriveTextDomain($default);
+        }
+
+        return $default;
     }
 
     /**
@@ -1899,23 +2108,33 @@ MD;
         return filter_var($url, FILTER_VALIDATE_URL) !== false;
     }
 
-    private function pressEnterToContinue(): void
+    /**
+     * Validate PHP namespace (PascalCase segments separated by backslashes)
+     */
+    private function isValidNamespace(string $namespace): bool
     {
-        echo $this->color("Press Enter to continue...", 'gray');
-        fgets(STDIN);
+        return preg_match('/^[A-Z][A-Za-z0-9]*(\\\\[A-Z][A-Za-z0-9]*)*$/', $namespace) === 1;
+    }
+
+    /**
+     * Validate text domain (lowercase letters, digits, hyphens)
+     */
+    private function isValidTextDomain(string $textDomain): bool
+    {
+        return preg_match('/^[a-z0-9-]+$/', $textDomain) === 1;
     }
 
     private function printSection(string $title): void
     {
         echo "\n";
-        echo $this->color("┌─ ", 'cyan') . $this->color($title, 'white', true) . $this->color(" ", 'cyan');
-        echo str_repeat("─", max(0, 50 - strlen($title))) . "\n";
+        echo $this->color('┌─ ', 'cyan') . $this->color($title, 'white', true) . $this->color(' ', 'cyan');
+        echo str_repeat('─', max(0, 50 - strlen($title))) . "\n";
         echo "\n";
     }
 
     private function printSubSection(string $title): void
     {
-        echo "  " . $this->color("▸ {$title}", 'yellow') . "\n\n";
+        echo '  ' . $this->color("▸ {$title}", 'yellow') . "\n\n";
     }
 
     private function clearScreen(): void
@@ -1958,14 +2177,58 @@ MD;
         $text = preg_replace('/[\s_]+/', '-', $text);
         $text = preg_replace('/[^a-z0-9-]/', '', $text);
         $text = preg_replace('/-+/', '-', $text);
+
         return trim($text, '-');
     }
 
-    private function pascalCase(string $text): string
+    /**
+     * Derive a valid PHP namespace from a free-form theme name.
+     *
+     * Strips every character outside [A-Za-z0-9] per word, then joins the
+     * words PascalCase. Prefixes "Theme" when the result would start with a
+     * digit or be empty (e.g. "5 Star" -> "Theme5Star").
+     *
+     * @throws RuntimeException If no valid namespace could be derived.
+     */
+    private function deriveNamespace(string $themeName): string
     {
-        $words = preg_split('/[\s\-_]+/', $text);
-        $words = array_map('ucfirst', $words);
-        return implode('', $words);
+        $words = preg_split('/[\s\-_]+/', trim($themeName));
+        $words = array_filter(array_map(function (string $word): string {
+            if (function_exists('iconv')) {
+                $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT', $word);
+                if ($ascii !== false) {
+                    $word = $ascii;
+                }
+            }
+
+            return preg_replace('/[^A-Za-z0-9]/', '', $word);
+        }, $words), fn (string $word): bool => $word !== '');
+
+        $namespace = implode('', array_map('ucfirst', $words));
+
+        if ($namespace === '' || preg_match('/^[0-9]/', $namespace) === 1) {
+            $namespace = 'Theme' . $namespace;
+        }
+
+        if (!$this->isValidNamespace($namespace)) {
+            throw new RuntimeException("Could not derive a valid PHP namespace from theme name '{$themeName}'."); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI script, exception message shown on terminal only
+        }
+
+        return $namespace;
+    }
+
+    /**
+     * Derive a valid text domain (lowercase, digits, hyphens) from a free-form theme name.
+     */
+    private function deriveTextDomain(string $themeName): string
+    {
+        $textDomain = $this->slugify($themeName);
+
+        if ($textDomain === '' || !$this->isValidTextDomain($textDomain)) {
+            $textDomain = 'theme';
+        }
+
+        return $textDomain;
     }
 
     private function getPluginName(string $slug): string
@@ -1975,6 +2238,7 @@ MD;
                 return $category['plugins'][$slug]['name'];
             }
         }
+
         return $slug;
     }
 
@@ -1987,7 +2251,7 @@ MD;
         }
 
         $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS)
+            new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS),
         );
 
         foreach ($iterator as $file) {

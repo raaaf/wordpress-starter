@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { stripTags } from './flexible-titles';
 
 /**
@@ -28,5 +28,20 @@ describe('stripTags', () => {
 
   it('gibt bei leerem HTML einen leeren String zurueck', () => {
     expect(stripTags('<p></p>')).toBe('');
+  });
+
+  it('fuehrt kein Skript aus einem eingebetteten <img onerror> aus', () => {
+    const createElementSpy = vi.spyOn(document, 'createElement');
+
+    const result = stripTags('<img src=x onerror="window.__pwned=1">');
+
+    expect(result).not.toContain('onerror');
+    expect(result).not.toContain('<img');
+    expect((window as unknown as { __pwned?: number }).__pwned).toBeUndefined();
+    // Der Fix parst ueber DOMParser statt ueber document.createElement('div').innerHTML,
+    // deshalb entsteht hier kein <img>-Element im Live-Dokument.
+    expect(createElementSpy).not.toHaveBeenCalledWith('img');
+
+    createElementSpy.mockRestore();
   });
 });

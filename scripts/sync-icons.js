@@ -21,6 +21,7 @@ import {
   unlinkSync,
   existsSync,
   mkdirSync,
+  realpathSync,
 } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -42,10 +43,60 @@ const SOURCES = {
  * - fill="currentColor" on the root: simple-icons ships no fill at all and would
  *   otherwise render black regardless of the text colour around it.
  * - <title> out: the component sets aria-hidden, a title would be read out anyway.
+ *
+ * Source SVGs come from trusted npm packages (@phosphor-icons/core,
+ * simple-icons), not user upload, so this is a simple regex pass rather than
+ * a full sanitizer. It strips the shapes that would execute script if a
+ * source file were ever tampered with: <script> elements, event-handler
+ * attributes (onload, onclick, ...), <foreignObject> (can embed arbitrary
+ * HTML/script inside an SVG), and javascript: URLs in href/xlink:href.
  */
+/**
+ * Decode the small set of HTML entities relevant to bypassing the javascript:
+ * URL check below (e.g. "&#106;avascript:" or "&#x6a;avascript:").
+ */
+function decodeHtmlEntities(str) {
+  return str
+    .replace(/&#x([0-9a-f]+);?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);?/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;|&#39;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>');
+}
+
 function normalise(svg) {
   let out = svg.trim();
   out = out.replace(/<title>[\s\S]*?<\/title>/gi, '');
+  // <script>/<foreignObject> can appear as a matched pair or self-closing. The
+  // closing tag allows whitespace before ">" (e.g. "</script >"), which still
+  // parses as a valid closing tag in browsers.
+  out = out.replace(/<script\b[^>]*\/>/gi, '');
+  out = out.replace(/<script[\s\S]*?<\/\s*script\s*>/gi, '');
+  out = out.replace(/<foreignObject\b[^>]*\/>/gi, '');
+  out = out.replace(/<foreignObject[\s\S]*?<\/\s*foreignObject\s*>/gi, '');
+  // SMIL animation elements (<animate>, <set>, <animateTransform>,
+  // <animateMotion>) can set attributeName to "onload"/"href"/"xlink:href" and
+  // fire script on their own, so they are stripped entirely rather than
+  // inspected — icons from simple-icons/phosphor never legitimately animate.
+  out = out.replace(/<(?:animate|animateTransform|animateMotion|set)\b[^>]*\/>/gi, '');
+  out = out.replace(/<(animate|animateTransform|animateMotion|set)\b[\s\S]*?<\/\s*\1\s*>/gi, '');
+  // Event-handler attributes: double-quoted, single-quoted, or bare (unquoted, no
+  // whitespace), case-insensitive attribute name. Preceded by whitespace OR "/"
+  // (e.g. "<svg/onload=x>", a slash-separated attribute with no space).
+  out = out.replace(/[\s/]on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+  // javascript: URLs in href/xlink:href, decoding HTML entities first so an
+  // entity-encoded "javascript:" (e.g. "&#106;avascript:") is still caught.
+  // Control characters and whitespace are stripped after decoding so an
+  // entity-encoded tab/newline inside the scheme (e.g. "&#9;javascript:")
+  // does not survive the scheme check.
+  out = out.replace(/\s(?:xlink:href|href)\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, (full, quoted) => {
+    const raw = quoted.replace(/^["']|["']$/g, '');
+    // eslint-disable-next-line no-control-regex -- deliberately stripping control chars/whitespace, not matching them for other purposes
+    const decoded = decodeHtmlEntities(raw).replace(/[\x00-\x20]/g, '');
+    return /^javascript:/i.test(decoded) ? '' : full;
+  });
   out = out.replace(/\s(width|height)="[^"]*"/gi, '');
   out = out.replace(/\srole="[^"]*"/gi, '');
 
@@ -145,4 +196,20 @@ function main() {
   }
 }
 
-main();
+// Run only when invoked directly, not when imported by tests. Compared via
+// realpath on both sides so a symlinked invocation (e.g. through a package
+// bin shim) still resolves to the same file instead of bypassing the guard.
+function isDirectInvocation() {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1]);
+  } catch {
+    return false;
+  }
+}
+
+if (isDirectInvocation()) {
+  main();
+}
+
+export { normalise };

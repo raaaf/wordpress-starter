@@ -12,14 +12,10 @@ Figma exportiert `var(--x)`, exportiert `--x` aber nicht. Ohne Fallback fällt d
 
 | Token                                                             | wird gebraucht von                                       | Wirkung ohne Fix                                           |
 | ----------------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------- |
-| `--spacing-1` (4px)                                               | `--badge-sm-gap`, `--badge-md-padding-y`                 | Badges vertikal ohne Innenabstand                          |
-| `--spacing-2` (8px)                                               | `--button-md-gap`, `--badge-lg-gap`                      | Icon klebt am Beschriftungstext                            |
 | `--color-error-alpha-50`                                          | `--shadow-focus-ring-error`                              | greift auf einen Inline-Wert zurück                        |
 | `--shadow-color-sm` / `-default` / `-md` / `-lg` / `-xl` / `-2xl` | `--shadow-sm` bis `--shadow-2xl` im Tailwind-Theme-Block | jede blanke `shadow-*`-Utility rendert gar keinen Schatten |
 
-Die Spacing-Skala definiert `0-5, 1-5, 2-5, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24`, überspringt also ausgerechnet die beiden geradesten Stufen ihrer eigenen 4px-Logik.
-
-Der `--spacing-1`/`--spacing-2`-Patch in `app.css` (Zeile 445-448) schließt die Lücke nur im Frontend. `resources/css/tokens-editor.css` wird vom selben `scripts/transform-tokens.js` geschrieben, lädt im TinyMCE-Editor (`editor-style.css`) aber kein `app.css` — dort bleiben `--button-md-gap`, `--badge-sm-gap`, `--badge-md-padding-y` und `--badge-lg-gap` unaufgelöst, Icon-Abstand und Badge-Innenabstand fehlen weiterhin in der Editor-Vorschau.
+`--spacing-1` (4px) und `--spacing-2` (8px) standen bis 2026-09-05 fälschlich hier: der Export liefert beide über `$root`-Einträge in `config/design-tokens/primitives.tokens.json` (`spacing.1.$root`, `spacing.2.$root`), aber `scripts/transform-tokens.js` prüfte `key.startsWith('$')` vor der `$root`-Sonderbehandlung, sodass der `$root`-Zweig nie erreicht wurde und beide Werte beim Bauen von `tokens.css`/`tokens-editor.css` verschluckt wurden. Der Fehler war im Transform, nicht im Figma-Export. Nach dem nächsten `npm run tokens` landen `--spacing-0`, `--spacing-1` und `--spacing-2` in beiden Dateien, der Editor-Gap oben schließt sich damit ebenfalls. Der `--spacing-1`/`--spacing-2`-Patch in `app.css` (Zeile ~436-437) wird dadurch redundant und kann im nächsten Design-Durchgang entfernt werden.
 
 Die Schatten-Lücke stand ausserhalb des Vertrags, weil der Vollständigkeitstest `app.css` nur bis zum Tailwind-Theme-Block gelesen hat und die kaputten Referenzen genau darin liegen. Der Test deckt den Block jetzt mit ab. Die Werte folgen der `rgba(23, 23, 23, a)`-Systematik, die die Komponenten-Schatten in `tokens.css` schon nutzen.
 
