@@ -300,26 +300,6 @@ export function initRybbitTracking(): void {
 }
 
 // ============================================
-// Video Consent Handler
-// ============================================
-
-export function initVideoConsent(): void {
-  document.querySelectorAll<HTMLElement>('.video-consent-btn').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const container = btn.closest('.video');
-      const iframe = container?.querySelector<HTMLIFrameElement>('iframe[data-src]');
-      if (iframe) {
-        const src = iframe.getAttribute('data-src');
-        if (src) {
-          iframe.setAttribute('src', src);
-        }
-      }
-    });
-  });
-}
-
-// ============================================
 // Gallery Lightbox
 // ============================================
 
@@ -625,6 +605,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   initHeaderHeight();
   initColumnHeadingAlignment();
   initRybbitTracking();
-  initVideoConsent();
   await initGalleryZoom();
 });

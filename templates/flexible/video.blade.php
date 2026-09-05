@@ -178,7 +178,6 @@
                         'textClass' => $posterUrl ? 'text-white' : 'text-content-secondary',
                         'message' => __('Zum Abspielen des Videos wird ein externer Dienst geladen.', 'wp-starter'),
                         'buttonLabel' => __('Video laden', 'wp-starter'),
-                        'buttonClass' => 'video-consent-btn',
                         'providerName' => $providerName,
                         'privacyLink' => $privacyLink,
                     ])

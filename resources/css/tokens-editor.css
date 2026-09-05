@@ -12,7 +12,7 @@
  * than dark mode rules in app.css
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-09-04T22:17:40.935Z
+ * Generated: 2026-09-05T19:12:33.351Z
  */
 
 /* ============================================
@@ -93,6 +93,9 @@
   --color-accent-900: #742406;
 
   /* Spacing */
+  --spacing-0: 0px;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
   --spacing-3: 12px;
   --spacing-4: 16px;
   --spacing-5: 20px;

@@ -41,30 +41,20 @@
       and dividers keep --border-default; 1.4.11 does not apply to them.
       The export has no such role at all.
 
-   2. --ring-focus: the focus ring used a 50 percent alpha accent, which blends
-      to roughly 1.8:1 against the page. Solid, and picked per theme so it also
-      clears 3:1 against the dark background, where a near-black accent would
-      otherwise be invisible. Also absent from the export.
-
-   3. --shadow-color-*: the Tailwind theme block below builds --shadow-sm through
+   2. --shadow-color-*: the Tailwind theme block below builds --shadow-sm through
       --shadow-2xl out of these, and the export never delivered them. An
       unresolvable var() makes the whole box-shadow invalid at computed-value
       time, so every plain shadow-sm/md/lg/xl/2xl utility rendered nothing at
       all. The values follow the same rgba(23, 23, 23, a) vocabulary the
       component shadows in tokens.css already use.
 
-   4. --text-on-brand: --bg-brand is accent-500. White on it measures 2.84:1,
-      under the 3:1 floor for large text; the inherited near-black measures
-      6.32:1 on the same orange. --text-inverse is the wrong role here, it
-      follows the page, not the brand surface.
-
-   5. Primary button gradient: the only fill in the theme that does not flip
+   3. Primary button gradient: the only fill in the theme that does not flip
       with the scheme. Light gets the dark end of the ramp under white text
       (5.23:1 at rest, improving to 7.39 and 10.36 as it is pressed), dark gets
       the light end under near-black text (4.80:1 at rest, improving to 6.32
       and 7.74). Both ladders now move away from the text, not towards it.
 
-   6. The dark surfaces further down: deliberately raw hex, not a step of the
+   4. The dark surfaces further down: deliberately raw hex, not a step of the
       grey ramp. See the comment on that block.
 
    RECORDED IN THE EXPORT
@@ -227,13 +217,13 @@
 
   /* Here --bg-error-strong is the mid tone under near-black text (4.76:1 at
      rest, see point c above): darkening it the way light mode does would
-     push it towards the text instead of away, the same trap point 5 already
+     push it towards the text instead of away, the same trap point 3 already
      documents for the primary gradient. Mixed towards white instead
      (4.76:1 -> 5.99:1). */
   --bg-error-strong-hover: color-mix(in srgb, var(--color-error) 80%, white);
 
   /* The plain Tailwind shadow-sm..shadow-2xl scale (see the TOKEN CORRECTIONS
-     block above, point 3) is built from these --shadow-color-* custom
+     block above, point 2) is built from these --shadow-color-* custom
      properties. The :root correction only ever set the light-mode ink,
      rgba(23, 23, 23, ...), which is --bg-primary's own colour in dark mode --
      every shadow-sm/md/lg/xl/2xl utility was invisible here for the same
@@ -405,8 +395,6 @@
    statt sich abzuheben. Eine Stufe ueber tertiary existiert nicht, daher hier
    ein eigener Zwischenwert. Nur fuer dieses Theme gemessen, Client-Themes
    leiten ihren eigenen Wert ab. Hellmodus unveraendert (siehe Regel oben). */
-[data-theme='dark'] {
-}
 
 [data-theme='dark'] .bg-surface-tertiary {
   --card-surface: var(--bg-tertiary-elevated);
@@ -414,9 +402,6 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-  }
-
   :root:not([data-theme='light']) .bg-surface-tertiary {
     --card-surface: var(--bg-tertiary-elevated);
     --card-bg: var(--bg-tertiary-elevated);
@@ -424,29 +409,8 @@
 }
 
 /* ============================================
-   SPACING SCALE GAPS
-
-   The Figma export defines 0-5, 1-5, 2-5, 3, 4, 5 and up, but skips the two
-   plainest steps of its own 4px scale. Four component tokens reference them,
-   so a medium button lost the gap between icon and label and badges lost
-   their vertical padding entirely.
+   MOTION VOCABULARY
    ============================================ */
-
-:root {
-  --spacing-1: 4px;
-  --spacing-2: 8px;
-}
-
-/* ============================================
-   CONTRAST PREFERENCE AND MOTION VOCABULARY
-   ============================================ */
-
-@media (prefers-contrast: more) {
-  :root {
-    /* Escalate one step along the roles that already exist: dividers take the
-       strength of a control border, controls take the strength of text. */
-  }
-}
 
 :root {
   /* One vocabulary for the whole theme. Entrances may take their time,
@@ -456,28 +420,6 @@
   --motion-exit-duration: 150ms;
   --motion-enter-ease: cubic-bezier(0, 0, 0.2, 1);
   --motion-exit-ease: cubic-bezier(0.4, 0, 1, 1);
-}
-
-/* ============================================
-   PLACEHOLDER COLOUR
-
-   Not part of the Figma token export. The obvious candidate, --text-tertiary,
-   only reaches 2.2:1 to 3.1:1 against the input background in every theme,
-   well under the 4.5:1 that placeholder text needs. --text-secondary would
-   pass but sits so close to the body text in some palettes that a placeholder
-   reads as an entered value. This is the lightest shade of each theme's own
-   palette that still clears 4.5:1.
-   ============================================ */
-
-:root {
-}
-
-[data-theme='dark'] {
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-  }
 }
 
 @plugin "@tailwindcss/forms";
