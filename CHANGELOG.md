@@ -1,3 +1,53 @@
+# [2.34.0](https://github.com/raaaf/wordpress-starter/compare/v2.33.1...v2.34.0) (2026-09-05)
+
+### Bug Fixes
+
+- **audit:** admin page hardening and a11y, styleguide anchors and headings, index guards, layout thumbnails in the release package (batch 13) ([0d2754f](https://github.com/raaaf/wordpress-starter/commit/0d2754f298dd3c8994e932a5106ea82ed6044f61))
+- **audit:** audit round 1 fixes and styleguide state polish ([6d004c5](https://github.com/raaaf/wordpress-starter/commit/6d004c58130a3bd365ea03d95fbdb20fa9198715))
+- **audit:** Blade no longer double-encodes, consent-gated map, hero LCP priority, escaping and a11y fixes in flexible layouts B (batch 08) ([379cbc9](https://github.com/raaaf/wordpress-starter/commit/379cbc99f734d214471fe081c77876c8762ad634))
+- **audit:** CF7 form controls use the outline focus ring ([d028787](https://github.com/raaaf/wordpress-starter/commit/d028787fdf9614a768aba8e573200dfab81ab3fe))
+- **audit:** component contracts, attribute allowlists, stable ids and anchor slugs for Blade components A (batch 10) ([fca6d58](https://github.com/raaaf/wordpress-starter/commit/fca6d58ed133511033adaf94e99e7172328f4173))
+- **audit:** consent-gated embeds, shared embed host check, escaping and a11y fixes in flexible layouts A (batch 07) ([9413f4b](https://github.com/raaaf/wordpress-starter/commit/9413f4b5218d607b72af63b4551bb6ca9856a529))
+- **audit:** cross-reference fixes ([f9607e3](https://github.com/raaaf/wordpress-starter/commit/f9607e39a3b669ae669c553622a9c376a718f066))
+- **audit:** escape icon shortcode classes, validate token colours, gate llms.txt and rate-limit token handlers (full-audit batch 02) ([d93d300](https://github.com/raaaf/wordpress-starter/commit/d93d300e40a541340530bbca4cb0e1750783bbbb))
+- **audit:** escape JSON-LD, gate SVG uploads and admin_init handlers, centralise admin action guards (full-audit batch 03) ([6152807](https://github.com/raaaf/wordpress-starter/commit/61528072d5d1885f1ebc9192ba1824b3422ecfb9))
+- **audit:** faithful test doubles, fail-safe template loader, hardened CI workflows (batch 18) ([87eca32](https://github.com/raaaf/wordpress-starter/commit/87eca321fd0a94b92e4a8e92bbad8d6a5112a30a))
+- **audit:** gate options pages and member layout, write real plugin settings, dedupe ACF field tails (full-audit batch 05) ([f104ecc](https://github.com/raaaf/wordpress-starter/commit/f104ecc443a14dcdc06800af400cb049c9442a78))
+- **audit:** harden admin and member-area JavaScript, icon picker and CSP (batch 14) ([f9598d3](https://github.com/raaaf/wordpress-starter/commit/f9598d39b492f6fa72446bc6fcc1af8b392482ef))
+- **audit:** harden CSP patching, rate limiter, palette validation and sync docs (full-audit batch 01) ([2280d04](https://github.com/raaaf/wordpress-starter/commit/2280d04553839e06a0d53e5b702509fd12b97419))
+- **audit:** harden post types, taxonomies and content services (batch 06) ([f27594d](https://github.com/raaaf/wordpress-starter/commit/f27594dc71d6c71cdbafe35bce9cc8c8b00f464d))
+- **audit:** harden setup wizard, build scripts and admin JS, add token-transform and icon-sync tests (batch 15) ([771ebab](https://github.com/raaaf/wordpress-starter/commit/771ebabaa3881b9df619080a7a0657df5ec3483f))
+- **audit:** honest lint scopes, fail-safe bootstrap, consistent manifests and tooling configs (batch 19) ([6357a2f](https://github.com/raaaf/wordpress-starter/commit/6357a2f5b1beae8aa2cfe57c3563e4b2063f5c81))
+- **audit:** keep protected page text out of meta descriptions and llms.txt, close rejected-role sessions, member-area active guards (cross-reference round) ([923d912](https://github.com/raaaf/wordpress-starter/commit/923d912e87a737a003e65a3a36f1e0a0ccb4db8a))
+- **audit:** member area works again on a real site, Yoast description gate, honest availability and labels (browser verification) ([d9d09d0](https://github.com/raaaf/wordpress-starter/commit/d9d09d0f515f4e6cfb2528629d3f8ae75983f7e9))
+- **audit:** password gates, shared page and post-loop partials, styleguide noindex by template and form component allowlists (batch 11) ([7823712](https://github.com/raaaf/wordpress-starter/commit/7823712b3e949140365a50aab5088217aa5e5d58))
+- **audit:** pin SFTP host keys, close member-area leaks and search-clause precedence (full-audit batch 04) ([0c517bb](https://github.com/raaaf/wordpress-starter/commit/0c517bba99b6180cc2da6f48f0e793e622e1451d))
+- **audit:** quote-aware attribute parsing, env parser comment trim, stronger unit tests (batch 16) ([c10a801](https://github.com/raaaf/wordpress-starter/commit/c10a801d8c817ceb9bed56c07b0205a56f13a666))
+- **audit:** release checksum verification, cache-proof CF7 spam trap, setup page without GET writes, RateLimiter and header tests (issues [#28](https://github.com/raaaf/wordpress-starter/issues/28)-[#34](https://github.com/raaaf/wordpress-starter/issues/34)) ([73b4fef](https://github.com/raaaf/wordpress-starter/commit/73b4fef041999d1760fcefdd4d94cade9ac2c09d))
+- **audit:** shared logo markup, single Alpine init, safe download links, breadcrumb schema dedup and member-area a11y in partials (batch 12) ([2152fab](https://github.com/raaaf/wordpress-starter/commit/2152fab9bb1345b349fd7d59628cc56f382ea9e8))
+- **audit:** styleguide field reference compiles again, llms.txt answers 200 (browser verification) ([273b1f3](https://github.com/raaaf/wordpress-starter/commit/273b1f3ac8c3c87fa56adfd4f007f42eaed11219))
+- **audit:** testable CSP seams, gated styleguide forget, facade reset on re-boot, stronger unit tests (batch 17) ([5c918ab](https://github.com/raaaf/wordpress-starter/commit/5c918ab4842cf7b76fb62b3986f698e622f0061d))
+- **audit:** video source handling, timeline icons, column layouts and component contracts for flexible layouts C (batch 09) ([cc57eb5](https://github.com/raaaf/wordpress-starter/commit/cc57eb5cb65ba8082bb1723c9b946a155f081f65))
+- **ci:** node_modules is an optional phpstan exclude, the PHP job runs without npm ci ([cf4bd57](https://github.com/raaaf/wordpress-starter/commit/cf4bd5733e2db7d7c004319ee844682f0617182e))
+- **design:** card icon box styled like the primary pill ([44755f6](https://github.com/raaaf/wordpress-starter/commit/44755f6d3803ece7f7c5fd59c171ba2a3bc2aec3))
+- **design:** dark tertiary surface stays near black ([9d4526e](https://github.com/raaaf/wordpress-starter/commit/9d4526e1b20b54ce3b8120a953cbb64aa6de96b0)), closes [#0f0f0f](https://github.com/raaaf/wordpress-starter/issues/0f0f0f) [#0a0a0a](https://github.com/raaaf/wordpress-starter/issues/0a0a0a)
+- **design:** dark-mode page sheen token ([ea9254a](https://github.com/raaaf/wordpress-starter/commit/ea9254aab23505880276dc7424538dbf15b0bf8f))
+- **design:** dark-mode pass ([25d57cf](https://github.com/raaaf/wordpress-starter/commit/25d57cf8b3d14406cb2a08837d59d0825fe7b22c))
+- **design:** design-audit fixes, 15 important findings ([76ffdf4](https://github.com/raaaf/wordpress-starter/commit/76ffdf450cdacd6bf3889f2a9b1b4d4762e25387))
+- **design:** design-audit minor findings and elevations ([07ceb9b](https://github.com/raaaf/wordpress-starter/commit/07ceb9bb54750b9615065d941eca0586ba9f8fdf))
+- **design:** hairline control borders, collapsed table borders ([123f115](https://github.com/raaaf/wordpress-starter/commit/123f1154c8b0e5871e52988005769594574afac8))
+- **design:** inputs on paper surface, label-style table head, toggle track border ([b8ee9dd](https://github.com/raaaf/wordpress-starter/commit/b8ee9ddcde8be3f92642e5d6f9799fa47e49ee63))
+- **design:** inverse button with brand text and visible hover, featured badge inverted ([f9aab25](https://github.com/raaaf/wordpress-starter/commit/f9aab254bf2ae66020b94ad35a5a5c9168f11ecc))
+- **design:** opaque primary tint, lighter tertiary surface, accordion spacing ([2ce6b1b](https://github.com/raaaf/wordpress-starter/commit/2ce6b1b4904c09597895c9e96ff3c5b023bbc03d))
+- **member-area:** one nonce request per load, table stays visible while searching, padded classic content ([a4915ed](https://github.com/raaaf/wordpress-starter/commit/a4915ed7781669b4f540f228b0494550e8dd11e9))
+
+### Features
+
+- **design:** apply rafaelalex.de design system ([28bce2a](https://github.com/raaaf/wordpress-starter/commit/28bce2ac4efdbd2ef15e57581b9841d3cb57681a))
+- **design:** page sheen and sheen on every filled panel ([d20ff68](https://github.com/raaaf/wordpress-starter/commit/d20ff681b32938d6b4712437cc057816b8b24c74))
+- **design:** surface sheen on cards and panels ([cd04539](https://github.com/raaaf/wordpress-starter/commit/cd0453923229b7d282b096a2d4edc0bc462510f4))
+- **design:** tinted primary pill, Colaborate without bold ([337e74c](https://github.com/raaaf/wordpress-starter/commit/337e74c15bebf1338a82beebaf47a185622f1edb))
+
 ## [2.33.1](https://github.com/raaaf/wordpress-starter/compare/v2.33.0...v2.33.1) (2026-09-04)
 
 ### Bug Fixes
