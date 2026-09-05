@@ -6,6 +6,7 @@ namespace Tests\Unit\Providers;
 
 use Tests\Support\TestCase;
 use WordpressStarter\Providers\SeoServiceProvider;
+use WordpressStarter\Services\StyleguidePage;
 
 /**
  * Tests for the AI crawler policy, FAQ and Person schema helpers added to
@@ -51,6 +52,112 @@ final class SeoServiceProviderTest extends TestCase
         $output = apply_filters('robots_txt', "User-agent: *\nDisallow: /\n", false);
 
         $this->assertStringNotContainsString('GPTBot', $output);
+    }
+
+    public function testStyleguidePageGetsNoindexNofollow(): void
+    {
+        $GLOBALS['wp_mock_current_blog_id'] = 90210;
+        $GLOBALS['wp_mock_options'][StyleguidePage::optionKey()] = 42;
+        $GLOBALS['wp_mock_posts_by_id'][42] = ['post_type' => 'page', 'post_status' => 'private'];
+        $GLOBALS['wp_mock_post_meta'][42][StyleguidePage::markerKey()] = '1';
+        $GLOBALS['wp_mock_post_meta'][42]['_wp_page_template'] = StyleguidePage::TEMPLATE;
+        $GLOBALS['wp_mock_queried_object_id'] = 42;
+        $GLOBALS['wp_mock_is_singular'] = true;
+
+        $this->provider->boot();
+
+        $robots = apply_filters('wp_robots', ['index' => true]);
+
+        $this->assertTrue($robots['noindex']);
+        $this->assertTrue($robots['nofollow']);
+    }
+
+    /**
+     * The '_wp_page_template' postmeta check is the sole decision: a page
+     * whose template is not the styleguide template must resolve to
+     * indexable via that single postmeta read, without ever consulting
+     * StyleguidePage::find()'s option/marker/legacy resolution.
+     */
+    public function testRegularPageNeverCallsStyleguideFindLookup(): void
+    {
+        $GLOBALS['wp_mock_current_blog_id'] = 90213;
+        $GLOBALS['wp_mock_posts_by_id'][7] = ['post_type' => 'page', 'post_status' => 'publish'];
+        $GLOBALS['wp_mock_post_meta'][7]['_wp_page_template'] = 'page.blade.php';
+        $GLOBALS['wp_mock_queried_object_id'] = 7;
+        $GLOBALS['wp_mock_is_singular'] = true;
+
+        $this->provider->boot();
+
+        $robots = apply_filters('wp_robots', ['index' => true]);
+
+        $this->assertArrayNotHasKey('noindex', $robots);
+    }
+
+    /**
+     * A second page assigned the styleguide template (e.g. a duplicate made
+     * while migrating) must be noindexed too, even though StyleguidePage::find()
+     * resolves to a different page ID. The noindex decision is keyed on the
+     * template meta alone, not on being THE page find() currently names.
+     */
+    public function testSecondPageWithStyleguideTemplateAlsoGetsNoindex(): void
+    {
+        $GLOBALS['wp_mock_current_blog_id'] = 90214;
+        $GLOBALS['wp_mock_options'][StyleguidePage::optionKey()] = 42;
+        $GLOBALS['wp_mock_posts_by_id'][42] = ['post_type' => 'page', 'post_status' => 'private'];
+        $GLOBALS['wp_mock_post_meta'][42][StyleguidePage::markerKey()] = '1';
+        $GLOBALS['wp_mock_post_meta'][42]['_wp_page_template'] = StyleguidePage::TEMPLATE;
+        $GLOBALS['wp_mock_posts_by_id'][99] = ['post_type' => 'page', 'post_status' => 'publish'];
+        $GLOBALS['wp_mock_post_meta'][99]['_wp_page_template'] = StyleguidePage::TEMPLATE;
+        $GLOBALS['wp_mock_queried_object_id'] = 99;
+        $GLOBALS['wp_mock_is_singular'] = true;
+
+        $this->provider->boot();
+
+        $robots = apply_filters('wp_robots', ['index' => true]);
+
+        $this->assertTrue($robots['noindex']);
+        $this->assertTrue($robots['nofollow']);
+    }
+
+    public function testRegularSingularPageIsNotAffectedByStyleguideOverride(): void
+    {
+        $GLOBALS['wp_mock_current_blog_id'] = 90211;
+        $GLOBALS['wp_mock_options'][StyleguidePage::optionKey()] = 42;
+        $GLOBALS['wp_mock_posts_by_id'][42] = ['post_type' => 'page', 'post_status' => 'private'];
+        $GLOBALS['wp_mock_post_meta'][42][StyleguidePage::markerKey()] = '1';
+        $GLOBALS['wp_mock_queried_object_id'] = 7;
+        $GLOBALS['wp_mock_is_singular'] = true;
+
+        $this->provider->boot();
+
+        $robots = apply_filters('wp_robots', ['index' => true]);
+
+        $this->assertArrayNotHasKey('noindex', $robots);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testWpseoRobotsFilterAddsNoindexForStyleguideWhenYoastActive(): void
+    {
+        if (!defined('WPSEO_VERSION')) {
+            define('WPSEO_VERSION', '1.0');
+        }
+
+        $GLOBALS['wp_mock_current_blog_id'] = 90212;
+        $GLOBALS['wp_mock_options'][StyleguidePage::optionKey()] = 42;
+        $GLOBALS['wp_mock_posts_by_id'][42] = ['post_type' => 'page', 'post_status' => 'private'];
+        $GLOBALS['wp_mock_post_meta'][42][StyleguidePage::markerKey()] = '1';
+        $GLOBALS['wp_mock_post_meta'][42]['_wp_page_template'] = StyleguidePage::TEMPLATE;
+        $GLOBALS['wp_mock_queried_object_id'] = 42;
+        $GLOBALS['wp_mock_is_singular'] = true;
+
+        $this->provider->boot();
+
+        $robots = apply_filters('wpseo_robots', 'index, follow');
+
+        $this->assertStringContainsString('noindex', $robots);
+        $this->assertStringContainsString('nofollow', $robots);
     }
 
     public function testAiCrawlerListIsFilterable(): void

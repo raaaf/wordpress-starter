@@ -38,15 +38,15 @@
             <div class="flex flex-wrap justify-center gap-4">
                 <x-button :url="home_url('/')" variant="primary" size="lg" iconLeft="home" :title="__('Zur Startseite', 'wp-starter')" />
 
-                <x-button
-                    x-data
-                    x-show="window.history.length > 1"
-                    @click.prevent="window.history.back()"
-                    variant="secondary"
-                    size="lg"
-                    iconLeft="arrow-left"
-                    :title="__('Zurück', 'wp-starter')"
-                />
+                <div x-data x-cloak x-show="window.history.length > 1">
+                    <x-button
+                        @click.prevent="window.history.back()"
+                        variant="secondary"
+                        size="lg"
+                        iconLeft="arrow-left"
+                        :title="__('Zurück', 'wp-starter')"
+                    />
+                </div>
             </div>
         </div>
     </x-section>

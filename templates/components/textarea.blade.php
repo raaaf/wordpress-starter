@@ -40,7 +40,7 @@
 ])
 
 @php
-    $textareaId = $id ?? $name;
+    $textareaId = $id ?? \WordpressStarter\Helpers\ComponentId::next((string) $name);
     $hasError = $error || $errorMessage;
     $displayHint = $hasError && $errorMessage ? $errorMessage : $hint;
 
@@ -63,14 +63,30 @@
     $sizeConfig = $sizes[$size] ?? $sizes['md'];
     $actualRows = $rows ?? $sizeConfig['rows'];
 
+    // Same allowlist mechanism as x-input/x-checkbox/x-radio: plain HTML
+    // attributes must be named exactly, only x-/@/:/aria-/data- may pass
+    // through by prefix. Mixing 'form' into the prefix list (as before) also
+    // admitted formaction/formmethod/formnovalidate/formtarget, which are not
+    // textarea attributes.
+    $passthroughAttrs = \WordpressStarter\Helpers\FormAttributes::passthrough(['cols', 'wrap', 'spellcheck']);
+    $passthroughPrefixes = \WordpressStarter\Helpers\FormAttributes::prefixes();
+
+    // aria-invalid and aria-describedby are rendered explicitly below (state
+    // + hint id), so they are excluded from the passthrough bag to avoid a
+    // duplicated attribute; a caller-supplied aria-describedby is merged in
+    // instead of dropped, hint id first.
+    $callerDescribedBy = trim((string) $attributes->get('aria-describedby', ''));
+    $describedBy = trim(($displayHint ? $textareaId . '-hint' : '') . ' ' . $callerDescribedBy);
+    $externalAttrs = $attributes->except(['aria-invalid', 'aria-describedby']);
+
     // Base textarea classes from Figma
     $baseClasses = 'textarea w-full border bg-surface-secondary text-content placeholder:text-content-placeholder resize-y transition-[color,background,border-color,box-shadow] duration-200';
 
     // State classes from Figma
     $stateClasses = match(true) {
         $disabled => 'border-line-disabled bg-surface-disabled text-content-disabled cursor-not-allowed resize-none',
-        $hasError => 'border-line-error shadow-[var(--shadow-input)] focus:border-line-error focus:outline-3 focus:outline-offset-2 focus:outline-[var(--color-error)]',
-        default => 'border-line-control shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:outline-3 focus:outline-offset-2 focus:outline-[var(--ring-focus)]',
+        $hasError => 'border-line-error shadow-[var(--shadow-input)] focus:border-line-error focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-error)]',
+        default => 'border-line-control shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]',
     };
 @endphp
 
@@ -95,7 +111,9 @@
         @if($required) required @endif
         @if($disabled) disabled @endif
         @if($hasError) aria-invalid="true" @endif
-        @if($displayHint) aria-describedby="{{ $textareaId }}-hint" @endif
+        @if($describedBy !== '') aria-describedby="{{ $describedBy }}" @endif
+        {{ $externalAttrs->only($passthroughAttrs) }}
+        {{ $externalAttrs->whereStartsWith($passthroughPrefixes) }}
         class="{{ $baseClasses }} {{ $stateClasses }} {{ $sizeConfig['textarea'] }} {{ $class }}"
     >{{ $value }}</textarea>
 

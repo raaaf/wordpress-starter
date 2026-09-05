@@ -4,26 +4,30 @@
     @if (have_posts())
         @while (have_posts()) @php the_post(); @endphp
             <article class="single-post container mx-auto max-w-3xl px-4 py-16 md:py-24">
-                <header class="mb-8">
-                    <x-link :url="get_post_type_archive_link('post')" variant="dark" iconLeft="chevron-left" size="sm" class="mb-4">
-                        {{ __('Zurück zur Übersicht', 'wp-starter') }}
-                    </x-link>
-                    <h1 class="mb-4">{{ get_the_title() }}</h1>
-                    <div class="flex items-center gap-3">
-                        <x-badge variant="gray" style="outline">{{ get_the_date() }}</x-badge>
-                        <x-badge variant="gray" style="outline">{{ get_reading_time() }}</x-badge>
-                    </div>
-                </header>
+                @if (post_password_required())
+                    @include('partials.password-form')
+                @else
+                    <header class="mb-8">
+                        <x-link :url="get_post_type_archive_link('post')" variant="dark" iconLeft="chevron-left" size="sm" class="mb-4">
+                            {{ __('Zurück zur Übersicht', 'wp-starter') }}
+                        </x-link>
+                        <h1 class="mb-4">{{ get_the_title() }}</h1>
+                        <div class="flex items-center gap-3">
+                            <x-badge variant="gray" style="outline">{{ get_the_date() }}</x-badge>
+                            <x-badge variant="gray" style="outline">{{ get_reading_time() }}</x-badge>
+                        </div>
+                    </header>
 
-                @if (has_post_thumbnail())
-                    <figure class="mb-8">
-                        {!! get_the_post_thumbnail(null, 'content', ['class' => 'w-full h-auto rounded-lg']) !!}
-                    </figure>
+                    @if (has_post_thumbnail())
+                        <figure class="mb-8">
+                            {!! get_the_post_thumbnail(null, 'content', ['class' => 'w-full h-auto rounded-lg']) !!}
+                        </figure>
+                    @endif
+
+                    <x-prose>
+                        @php the_content(); @endphp
+                    </x-prose>
                 @endif
-
-                <x-prose>
-                    @php the_content(); @endphp
-                </x-prose>
             </article>
 
             {{-- Post Navigation --}}

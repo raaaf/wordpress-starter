@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\Services\StyleguidePage;
 use WP_Post;
 use WP_Post_Type;
 
@@ -148,26 +149,75 @@ class SeoServiceProvider extends ServiceProvider
      *
      * 404 pages: noindex, follow (broken URLs should not be indexed)
      * Password-protected pages: noindex, nofollow (only the gate is public)
+     * Styleguide page: noindex, nofollow (internal reference, not content)
      */
     private function addRobotsOverrides(): void
     {
         add_filter('wp_robots', function (array $robots): array {
-            if (is_404()) {
-                $robots['noindex'] = true;
-                unset($robots['nofollow']);
+            return $this->applyRobotsOverrides($robots);
+        });
+
+        // Yoast filters its own robots string separately from wp_robots on
+        // some versions, so without this the styleguide/password overrides
+        // above are silently overridden back to indexable when Yoast is active.
+        if (defined('WPSEO_VERSION')) {
+            add_filter('wpseo_robots', function (string $robots): string {
+                $overridden = $this->applyRobotsOverrides(['index' => true]);
+
+                if (!empty($overridden['noindex'])) {
+                    return 'noindex, ' . ( empty($overridden['nofollow']) ? 'follow' : 'nofollow' );
+                }
 
                 return $robots;
-            }
+            });
+        }
+    }
 
-            // Without this the password form itself gets indexed, which puts an
-            // unlisted page into the search results under its own title.
-            if (is_singular() && post_password_required()) {
-                $robots['noindex'] = true;
-                $robots['nofollow'] = true;
-            }
+    /**
+     * Shared decision logic for both the wp_robots and wpseo_robots filters.
+     *
+     * @param array<string, bool> $robots
+     *
+     * @return array<string, bool>
+     */
+    private function applyRobotsOverrides(array $robots): array
+    {
+        if (is_404()) {
+            $robots['noindex'] = true;
+            unset($robots['nofollow']);
 
             return $robots;
-        });
+        }
+
+        // Without this the password form itself gets indexed, which puts an
+        // unlisted page into the search results under its own title.
+        if (is_singular() && post_password_required()) {
+            $robots['noindex'] = true;
+            $robots['nofollow'] = true;
+
+            return $robots;
+        }
+
+        // The styleguide is an internal reference for the team, not content
+        // meant for search results, and carries no canonical-worthy value.
+        // The '_wp_page_template' postmeta match alone decides this: a second
+        // page assigned the styleguide template (e.g. a duplicate created
+        // while migrating) must stay noindexed too, not only the one page
+        // StyleguidePage::find() currently resolves to. find() answers "which
+        // page is THE styleguide" for admin/migration purposes; this check
+        // answers "does this page render the styleguide template", which is
+        // the actual reason it must not be indexed.
+        $queriedId = get_queried_object_id();
+        if (
+            is_singular()
+            && $queriedId > 0
+            && (string) get_post_meta($queriedId, '_wp_page_template', true) === StyleguidePage::TEMPLATE
+        ) {
+            $robots['noindex'] = true;
+            $robots['nofollow'] = true;
+        }
+
+        return $robots;
     }
 
     /**

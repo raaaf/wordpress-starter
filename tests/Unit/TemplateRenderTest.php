@@ -48,6 +48,12 @@ final class TemplateRenderTest extends TestCase
         'title' => 'test',
         'text' => 'test',
         'svgPath' => '',
+        // components.rotating-chevron has no default for its required $active
+        // prop; a standalone render otherwise leaves it undefined/empty,
+        // which now fails the closed Alpine-expression grammar in
+        // rotating-chevron.blade.php by design. 'active' alone is a valid
+        // bare identifier under that grammar.
+        'active' => 'active',
     ];
 
     public function testAllTemplatesRenderWithoutRealErrors(): void
@@ -229,7 +235,6 @@ final class TemplateRenderTest extends TestCase
         'partials.footer-menu', // wp_date() not mocked
         'partials.footer', // wp_date() not mocked
         'partials.styleguide-views', // add_query_arg() not mocked
-        'partials.the_loop', // have_posts() not mocked
         'search', // get_search_query() not mocked
         'single-testimonial', // wp_date() not mocked
         'single', // have_posts() not mocked
@@ -274,6 +279,11 @@ final class TemplateRenderTest extends TestCase
             'title' => $hostile,
             'text' => $hostile,
             'svgPath' => '',
+            // Not part of the hostile-payload seed: rotating-chevron rejects
+            // anything outside its closed Alpine-expression grammar by
+            // design (see components/rotating-chevron.blade.php), so it
+            // needs a valid literal here instead, same as self::VIEW_DATA.
+            'active' => 'active',
             'slot' => new \Illuminate\View\ComponentSlot(),
         ];
 
@@ -420,6 +430,18 @@ final class TemplateRenderTest extends TestCase
             $unexpectedThrows,
             "Templates threw during the hostile-payload pass and are not in ALLOWED_THROWING_TEMPLATES:\n"
                 . implode("\n", $unexpectedThrows),
+        );
+
+        // The reverse direction: an entry that has stopped throwing (e.g.
+        // because a bootstrap mock landed later that closes the gap it was
+        // added for) must be removed, or this allowlist only ever grows and
+        // silently stops proving anything.
+        $staleAllowlistEntries = array_diff(self::ALLOWED_THROWING_TEMPLATES, $thrown);
+        $this->assertSame(
+            [],
+            $staleAllowlistEntries,
+            "ALLOWED_THROWING_TEMPLATES entries that no longer throw and must be removed:\n"
+                . implode("\n", $staleAllowlistEntries),
         );
 
         $this->assertGreaterThanOrEqual(

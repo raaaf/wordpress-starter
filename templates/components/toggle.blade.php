@@ -1,15 +1,16 @@
 {{--
     Toggle Component - Based on Figma Design System
 
-    @param string $name - Input name
-    @param string $id - Input ID (defaults to name)
-    @param string $label - Label text
-    @param bool $checked - Checked/On state
-    @param bool $disabled - Disabled state
-    @param bool $error - Error state
-    @param string $errorMessage - Error message (shown below, replaces hint when set)
-    @param string $hint - Hint text below control (optional)
-    @param string $class - Additional CSS classes
+    @param string $name - Input name (required, no default)
+    @param string|null $id - Input ID (default: null, falls back to a generated id from $name)
+    @param string|null $label - Label text (default: null)
+    @param string|null $ariaLabel - Accessible name when there is no visible $label (default: null)
+    @param bool $checked - Checked/On state (default: false)
+    @param bool $disabled - Disabled state (default: false)
+    @param bool $error - Error state (default: false)
+    @param string|null $errorMessage - Error message, shown below, replaces hint when set (default: null)
+    @param string|null $hint - Hint text below control (default: null)
+    @param string $class - Additional CSS classes (default: '')
 --}}
 
 @props([
@@ -26,13 +27,27 @@
 ])
 
 @php
-    $toggleId = $id ?? $name;
+    $toggleId = $id ?? \WordpressStarter\Helpers\ComponentId::next((string) $name);
     $accessibleName = $ariaLabel ?: $label;
     if (defined('WP_DEBUG') && WP_DEBUG && !$accessibleName) {
         trigger_error('x-toggle requires a "label" or "ariaLabel" prop for accessibility.', E_USER_WARNING);
     }
     $hasError = $error || $errorMessage;
     $displayHint = $hasError && $errorMessage ? $errorMessage : $hint;
+
+    // Same allowlist mechanism as x-input/x-checkbox/x-radio: plain HTML
+    // attributes must be named exactly, only x-/@/:/aria-/data- may pass
+    // through by prefix.
+    $passthroughAttrs = \WordpressStarter\Helpers\FormAttributes::passthrough(['value', 'required']);
+    $passthroughPrefixes = \WordpressStarter\Helpers\FormAttributes::prefixes();
+
+    // aria-label, aria-invalid and aria-describedby are rendered explicitly
+    // below, so they are excluded from the passthrough bag to avoid a
+    // duplicated attribute; a caller-supplied aria-describedby is merged in
+    // instead of dropped, hint id first.
+    $callerDescribedBy = trim((string) $attributes->get('aria-describedby', ''));
+    $describedBy = trim(($displayHint ? $toggleId . '-hint' : '') . ' ' . $callerDescribedBy);
+    $externalAttrs = $attributes->except(['aria-label', 'aria-invalid', 'aria-describedby']);
 @endphp
 
 <div class="inline-flex flex-col gap-1.5">
@@ -45,9 +60,11 @@
                 id="{{ $toggleId }}"
                 @if($checked) checked @endif
                 @if($disabled) disabled @endif
-                @if($ariaLabel && !$label) aria-label="{{ esc_attr($ariaLabel) }}" @endif
+                @if($ariaLabel && !$label) aria-label="{{ $ariaLabel }}" @endif
                 @if($hasError) aria-invalid="true" @endif
-                @if($displayHint) aria-describedby="{{ $toggleId }}-hint" @endif
+                @if($describedBy !== '') aria-describedby="{{ $describedBy }}" @endif
+                {{ $externalAttrs->only($passthroughAttrs) }}
+                {{ $externalAttrs->whereStartsWith($passthroughPrefixes) }}
                 class="peer sr-only"
             />
 
@@ -71,7 +88,7 @@
             {{-- Knob --}}
             <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface-secondary transition-[translate,background-color] duration-200
                 peer-checked:translate-x-5
-                {{ $disabled ? 'bg-surface-secondary' : '' }}
+                {{ $disabled ? 'opacity-50' : '' }}
             "></span>
         </span>
 

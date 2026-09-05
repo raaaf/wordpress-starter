@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+    @if(post_password_required())
+        @include('partials.password-form')
+    @else
     @php
         $authorName = get_field('author_name');
         $authorPosition = get_field('author_position');
@@ -49,7 +52,7 @@
                             ]) !!}
                         @else
                             <img
-                                src="{{ $authorImage['sizes']['thumbnail'] ?? $authorImage['url'] }}"
+                                src="{{ esc_url($authorImage['sizes']['thumbnail'] ?? $authorImage['url']) }}"
                                 alt="{{ $authorName }}"
                                 class="w-16 h-16 rounded-full object-cover"
                                 width="64"
@@ -100,4 +103,5 @@
             </div>
         </article>
     </x-section>
+    @endif
 @endsection
