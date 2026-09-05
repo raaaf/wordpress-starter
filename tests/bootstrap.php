@@ -1585,6 +1585,153 @@ if (!function_exists('is_search')) {
     }
 }
 
+// Member-area auth doubles: wp_signon()/wp_check_password()/wp_set_current_user()/
+// wp_clear_auth_cookie()/wp_logout()/wp_get_current_user()/wp_salt()/is_ssl(), plus a
+// minimal WP_Error class and is_wp_error(), all needed to exercise
+// WordpressStarter\MemberArea\Auth without a real WordPress runtime.
+if (!defined('COOKIEPATH')) {
+    define('COOKIEPATH', '/');
+}
+
+if (!defined('COOKIE_DOMAIN')) {
+    define('COOKIE_DOMAIN', '');
+}
+
+if (!class_exists('WP_Error')) {
+    /**
+     * Minimal WP_Error double: a single code/message/data triple, enough for
+     * the codes this theme's WP_Error usage actually branches on.
+     */
+    class WP_Error // phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound -- test double needs a class alongside the function mocks in this single bootstrap file
+    {
+        private string $code;
+        private string $message;
+        private mixed $data;
+
+        public function __construct(string $code = '', string $message = '', mixed $data = '')
+        {
+            $this->code = $code;
+            $this->message = $message;
+            $this->data = $data;
+        }
+
+        public function get_error_code(): string
+        {
+            return $this->code;
+        }
+
+        public function get_error_message(string $code = ''): string
+        {
+            return $this->message;
+        }
+
+        public function get_error_data(string $code = ''): mixed
+        {
+            return $this->data;
+        }
+    }
+}
+
+if (!function_exists('is_wp_error')) {
+    function is_wp_error(mixed $thing): bool
+    {
+        return $thing instanceof WP_Error;
+    }
+}
+
+if (!function_exists('is_ssl')) {
+    function is_ssl(): bool
+    {
+        return $GLOBALS['wp_mock_is_ssl'] ?? false;
+    }
+}
+
+if (!function_exists('wp_salt')) {
+    function wp_salt(string $scheme = 'auth'): string
+    {
+        return 'test-salt-' . $scheme;
+    }
+}
+
+if (!function_exists('wp_signon')) {
+    /**
+     * Tests seed $GLOBALS['wp_mock_signon_result'] with either a WP_Error or
+     * an object carrying an ->ID property (mirrors a WP_User).
+     */
+    function wp_signon(array $credentials = [], bool $secureCookie = false): object
+    {
+        return $GLOBALS['wp_mock_signon_result'] ?? new WP_Error('invalid_username', 'Invalid username.');
+    }
+}
+
+if (!function_exists('wp_check_password')) {
+    function wp_check_password(string $password, string $hash, int|string $userId = ''): bool
+    {
+        return $GLOBALS['wp_mock_check_password_result'] ?? false;
+    }
+}
+
+if (!function_exists('wp_set_current_user')) {
+    function wp_set_current_user(int $id): void
+    {
+        $GLOBALS['wp_mock_current_user_id'] = $id;
+    }
+}
+
+if (!function_exists('wp_clear_auth_cookie')) {
+    function wp_clear_auth_cookie(): void
+    {
+        $GLOBALS['wp_mock_clear_auth_cookie_called'] = true;
+    }
+}
+
+if (!function_exists('wp_logout')) {
+    function wp_logout(): void
+    {
+        $GLOBALS['wp_mock_logout_called'] = true;
+        $GLOBALS['wp_mock_current_user_id'] = 0;
+    }
+}
+
+if (!function_exists('wp_get_current_user')) {
+    function wp_get_current_user(): object
+    {
+        return (object) ['roles' => $GLOBALS['wp_mock_current_user_roles'] ?? []];
+    }
+}
+
+if (!function_exists('wp_send_json_error')) {
+    /**
+     * Real core's wp_send_json_error() JSON-encodes the payload and calls
+     * wp_die(), which terminates the request. Throws instead, so a test can
+     * assert the payload/status of an AJAX handler without ending the PHP
+     * process (see Tests\Support\WpJsonResponseException).
+     *
+     * @throws \Tests\Support\WpJsonResponseException always
+     */
+    function wp_send_json_error(mixed $data = null, ?int $statusCode = null): never
+    {
+        throw new \Tests\Support\WpJsonResponseException($data, $statusCode, false); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- test double, not real output
+    }
+}
+
+if (!function_exists('wp_send_json_success')) {
+    /**
+     * @throws \Tests\Support\WpJsonResponseException always
+     */
+    function wp_send_json_success(mixed $data = null, ?int $statusCode = null): never
+    {
+        throw new \Tests\Support\WpJsonResponseException($data, $statusCode, true); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- test double, not real output
+    }
+}
+
+if (!function_exists('wp_using_ext_object_cache')) {
+    function wp_using_ext_object_cache(): bool
+    {
+        return $GLOBALS['wp_mock_using_ext_object_cache'] ?? false;
+    }
+}
+
 if (!function_exists('is_singular')) {
     function is_singular(string|array $type = ''): bool
     {

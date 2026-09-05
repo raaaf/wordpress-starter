@@ -118,6 +118,22 @@ class Access
     }
 
     /**
+     * Whether the current visitor must not see the content of the given post:
+     * either it is password-protected (WordPress core mechanism) or it is a
+     * member-area/protected page (this theme's own gate) and the visitor is
+     * not authenticated. Used by consumers outside checkAccess() (SEO meta
+     * tags, etc.) that need the same trust decision without duplicating it.
+     */
+    public static function isProtectedForCurrentVisitor(int $postId): bool
+    {
+        if (post_password_required($postId)) {
+            return true;
+        }
+
+        return !self::isVisitorAllowed($postId);
+    }
+
+    /**
      * Add noindex to member area and protected pages so they are excluded from search engines.
      *
      * @param array<string, bool|string> $robots

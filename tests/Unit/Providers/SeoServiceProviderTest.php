@@ -313,6 +313,46 @@ final class SeoServiceProviderTest extends TestCase
         $this->assertSame('»', apply_filters('wpseo_breadcrumb_separator', ' > '));
     }
 
+    // =====================================================================
+    // Member-area / protected pages: getMetaDescription() must not leak
+    // section content to an anonymous visitor, mirroring the existing
+    // password-protection guard covered by SeoMetaDescriptionTest.
+    // =====================================================================
+
+    public function testProtectedPageFallsBackToTaglineForAnonymousVisitor(): void
+    {
+        $GLOBALS['wp_mock_is_singular'] = true;
+        $GLOBALS['wp_mock_password_required'] = false;
+        $GLOBALS['wp_mock_post_id'] = 601;
+        $GLOBALS['wp_mock_bloginfo'] = ['description' => 'Die Standard-Beschreibung der Website'];
+        $GLOBALS['wp_mock_fields']['page_is_protected:601'] = true;
+        $GLOBALS['wp_mock_fields']['page_sections:601'] = [
+            ['acf_fc_layout' => 'one_column', 'content' => 'Interne Zahlen für das laufende Quartal.'],
+        ];
+
+        $description = $this->invokeMethod($this->provider, 'getMetaDescription');
+
+        $this->assertStringNotContainsString('Interne Zahlen', $description);
+        $this->assertSame('Die Standard-Beschreibung der Website', $description);
+    }
+
+    public function testProtectedPageIsUnchangedForAuthenticatedMember(): void
+    {
+        $GLOBALS['wp_mock_is_singular'] = true;
+        $GLOBALS['wp_mock_password_required'] = false;
+        $GLOBALS['wp_mock_post_id'] = 602;
+        $GLOBALS['wp_mock_current_user_id'] = 7;
+        $GLOBALS['wp_mock_current_user_can'] = ['manage_options' => true];
+        $GLOBALS['wp_mock_fields']['page_is_protected:602'] = true;
+        $GLOBALS['wp_mock_fields']['page_sections:602'] = [
+            ['acf_fc_layout' => 'one_column', 'content' => 'Für Mitglieder sichtbarer Text.'],
+        ];
+
+        $description = $this->invokeMethod($this->provider, 'getMetaDescription');
+
+        $this->assertSame('Für Mitglieder sichtbarer Text.', $description);
+    }
+
     /**
      * Slices out the <script type="application/ld+json"> block, matching the
      * pattern BreadcrumbsSchemaTest uses, so hex-escape assertions run

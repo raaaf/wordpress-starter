@@ -113,4 +113,20 @@ final class ImageDataTest extends TestCase
     {
         $this->assertNull(ImageData::resolve('//evil.test/img.jpg', 'hero-split'));
     }
+
+    public function testStringUrlWithEmbeddedTabResolvesToStrippedValue(): void
+    {
+        $result = ImageData::resolve("/wp-content/uploads/man\tual.jpg", 'hero-split');
+
+        $this->assertSame('/wp-content/uploads/manual.jpg', $result['url']);
+    }
+
+    public function testArrayUrlFallbackWithEmbeddedTabResolvesToStrippedValue(): void
+    {
+        $result = ImageData::resolve([
+            'url' => "https://example.test/man\tual.jpg",
+        ], 'hero-split');
+
+        $this->assertSame('https://example.test/manual.jpg', $result['url']);
+    }
 }

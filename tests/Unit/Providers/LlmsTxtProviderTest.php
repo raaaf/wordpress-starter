@@ -159,6 +159,48 @@ final class LlmsTxtProviderTest extends TestCase
         );
     }
 
+    /** The page_is_protected flag has neither a non-publish post_status nor a post_password, so only the member-area guard in linkLineForPost() catches it. */
+    public function testRenderPostLinksExcludesProtectedPage(): void
+    {
+        $GLOBALS['wp_mock_posts']['page'] = [ (object) ['ID' => 111]];
+        $GLOBALS['wp_mock_post_fields'][111] = ['post_status' => 'publish', 'post_password' => ''];
+        $GLOBALS['wp_mock_titles'][111] = 'Protected Page';
+        $GLOBALS['wp_mock_permalinks'][111] = 'https://example.com/protected-page/';
+        $GLOBALS['wp_mock_fields']['page_is_protected:111'] = true;
+
+        $lines = $this->invokeMethod($this->provider, 'renderPostLinks', ['page']);
+
+        $this->assertSame([], $lines);
+    }
+
+    public function testRenderPostLinksExcludesMemberAreaPage(): void
+    {
+        $GLOBALS['wp_mock_posts']['page'] = [ (object) ['ID' => 112]];
+        $GLOBALS['wp_mock_post_fields'][112] = ['post_status' => 'publish', 'post_password' => ''];
+        $GLOBALS['wp_mock_titles'][112] = 'Member Area';
+        $GLOBALS['wp_mock_permalinks'][112] = 'https://example.com/member-area/';
+        $GLOBALS['wp_mock_fields']['page_is_member_area:112'] = true;
+
+        $lines = $this->invokeMethod($this->provider, 'renderPostLinks', ['page']);
+
+        $this->assertSame([], $lines);
+    }
+
+    public function testRenderPostLinksIncludesProtectedPageForAuthenticatedMember(): void
+    {
+        $GLOBALS['wp_mock_posts']['page'] = [ (object) ['ID' => 113]];
+        $GLOBALS['wp_mock_post_fields'][113] = ['post_status' => 'publish', 'post_password' => ''];
+        $GLOBALS['wp_mock_titles'][113] = 'Protected Page';
+        $GLOBALS['wp_mock_permalinks'][113] = 'https://example.com/protected-page/';
+        $GLOBALS['wp_mock_fields']['page_is_protected:113'] = true;
+        $GLOBALS['wp_mock_current_user_id'] = 7;
+        $GLOBALS['wp_mock_current_user_can'] = ['manage_options' => true];
+
+        $lines = $this->invokeMethod($this->provider, 'renderPostLinks', ['page']);
+
+        $this->assertSame(['- [Protected Page](https://example.com/protected-page/)'], $lines);
+    }
+
     /**
      * @return string[]
      */

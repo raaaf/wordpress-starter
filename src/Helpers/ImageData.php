@@ -29,13 +29,14 @@ class ImageData
             }
 
             $url = (string) ( $value['url'] ?? '' );
-            if ($url === '' || !self::isSafeUrl($url)) {
+            $normalizedUrl = self::normalizeUrl($url);
+            if ($normalizedUrl === '' || !self::isSafeUrl($normalizedUrl)) {
                 return null;
             }
 
             return [
                 'id' => null,
-                'url' => $url,
+                'url' => $normalizedUrl,
                 'alt' => (string) ( $value['alt'] ?? '' ),
                 'width' => $value['width'] ?? '',
                 'height' => $value['height'] ?? '',
@@ -47,13 +48,14 @@ class ImageData
         }
 
         if (is_string($value) && $value !== '') {
-            if (!self::isSafeUrl($value)) {
+            $normalizedUrl = self::normalizeUrl($value);
+            if (!self::isSafeUrl($normalizedUrl)) {
                 return null;
             }
 
             return [
                 'id' => null,
-                'url' => $value,
+                'url' => $normalizedUrl,
                 'alt' => '',
                 'width' => '',
                 'height' => '',
@@ -88,23 +90,33 @@ class ImageData
     }
 
     /**
+     * Browsers (WHATWG URL spec) strip ASCII tab/newline wherever they
+     * appear in the URL, then trim leading/trailing C0 control chars and
+     * space, before parsing it. "/\tevil.test" survives our own
+     * str_starts_with() checks below as a root-relative path, but a
+     * browser sees "//evil.test" - a protocol-relative link to a foreign
+     * host. Normalize the same way before checking, and return the
+     * normalized value so resolve() cannot hand the caller a URL that
+     * differs from the one the safety check actually ran against
+     * (esc_url() at the call sites strips the same characters, so this
+     * changes nothing for a URL that was already valid).
+     */
+    private static function normalizeUrl(string $url): string
+    {
+        $url = str_replace(["\t", "\n", "\r"], '', $url);
+
+        return ltrim($url, "\x00..\x20");
+    }
+
+    /**
      * Manual URL fields (ACF array without an ID, or a plain string) can carry
      * any scheme an editor types in. Only http(s) and root-relative paths are
      * a real image src; everything else (javascript:, data:, vbscript:) is
      * rejected here rather than passed through to esc_url() at the call site.
+     * Expects an already-normalized $url (see normalizeUrl()).
      */
     private static function isSafeUrl(string $url): bool
     {
-        // Browsers (WHATWG URL spec) strip ASCII tab/newline wherever they
-        // appear in the URL, then trim leading/trailing C0 control chars and
-        // space, before parsing it. "/\tevil.test" survives our own
-        // str_starts_with() checks below as a root-relative path, but a
-        // browser sees "//evil.test" - a protocol-relative link to a foreign
-        // host. Normalize the same way before checking, or the check runs
-        // against a string the browser never actually sees.
-        $url = str_replace(["\t", "\n", "\r"], '', $url);
-        $url = ltrim($url, "\x00..\x20");
-
         if (str_starts_with($url, '/') && !str_starts_with($url, '//')) {
             return true;
         }

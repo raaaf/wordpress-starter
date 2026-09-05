@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\MemberArea\Access;
+
 /**
  * Llms.txt provider.
  *
@@ -224,11 +226,17 @@ class LlmsTxtProvider extends ServiceProvider
         // Callers may pass IDs from get_option() (front page, posts page) that
         // bypass the has_password/post_status filters used by the get_posts()
         // calls above, so the guard is enforced here, once, for every caller.
+        // This also covers member-area/protected pages (this theme's own
+        // gate), which have neither has_password nor a non-publish status.
         if (get_post_field('post_status', $postId) !== 'publish') {
             return '';
         }
 
         if (get_post_field('post_password', $postId) !== '') {
+            return '';
+        }
+
+        if (Access::isProtectedForCurrentVisitor($postId)) {
             return '';
         }
 

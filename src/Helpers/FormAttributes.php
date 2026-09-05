@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace WordpressStarter\Helpers;
 
 /**
- * Shared attribute allowlists for x-input, x-checkbox and x-radio
- * (templates/components/{input,checkbox,radio}.blade.php). All three exposed
- * the exact same 11-item exact-name allowlist and the exact same
- * prefix-matched list before this was extracted; checkbox and radio each add
- * 'required' as their own extra since, unlike x-input, they have no
- * dedicated $required prop.
+ * Shared attribute allowlists for the form components
+ * (templates/components/{input,checkbox,radio,textarea,toggle}.blade.php).
+ * input, checkbox and radio exposed the exact same 11-item exact-name
+ * allowlist and the same prefix list before this was extracted; textarea and
+ * toggle pass their own extras (cols/wrap/spellcheck, value/required);
+ * checkbox and radio add 'required' since they have no $required prop.
+ * select keeps a deliberately smaller inline exact-name list.
  */
 class FormAttributes
 {

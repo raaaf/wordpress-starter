@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\MemberArea\Access;
 use WordpressStarter\Services\StyleguidePage;
 use WP_Post;
 use WP_Post_Type;
@@ -682,13 +683,13 @@ class SeoServiceProvider extends ServiceProvider
             return $this->normalizeDescription($archive !== '' ? $archive : (string) get_bloginfo('description'));
         }
 
-        // Password-protected posts describe nothing. get_the_excerpt() returns
-        // WordPress' "there is no excerpt because this is a protected post"
-        // placeholder, and the ACF sections are readable even while the
-        // password gate is up, because they bypass the_content(). Deriving a
-        // description from either would publish protected content in a meta
-        // tag that every crawler reads.
-        if (post_password_required()) {
+        // Protected posts describe nothing: password-protected posts (core
+        // mechanism) and member-area/protected pages (this theme's own gate)
+        // both bypass the_content(), so get_the_excerpt() and the ACF sections
+        // stay readable while the gate is up. Deriving a description from
+        // either would publish protected content in a meta tag that every
+        // crawler reads.
+        if (Access::isProtectedForCurrentVisitor( (int) get_the_ID())) {
             return $this->normalizeDescription( (string) get_bloginfo('description'));
         }
 

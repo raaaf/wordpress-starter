@@ -256,6 +256,12 @@ class EditorStylesServiceProvider extends ServiceProvider
         });
 
         add_action('wp_ajax_theme_tinymce_icon_picker', function (): void {
+            // Loaded as a plain <script src> by TinyMCE, so no nonce can travel
+            // with the request; the capability gate mirrors the editor screen.
+            if (!current_user_can('edit_posts')) {
+                status_header(403);
+                exit;
+            }
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Authenticated admin-ajax response, response is cacheable privately per logged-in user
             header('Content-Type: application/javascript; charset=utf-8');
             header('Cache-Control: private, max-age=3600');

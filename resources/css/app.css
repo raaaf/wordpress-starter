@@ -2187,8 +2187,9 @@ html {
     z-index: 50;
   }
 
-  /* Show submenu on hover */
-  .desktop-nav .menu-item-has-children:hover > .sub-menu {
+  /* Show submenu on hover, and on focus-within for keyboard users */
+  .desktop-nav .menu-item-has-children:hover > .sub-menu,
+  .desktop-nav .menu-item-has-children:focus-within > .sub-menu {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);

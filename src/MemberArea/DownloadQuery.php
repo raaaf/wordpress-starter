@@ -16,6 +16,10 @@ class DownloadQuery
 
     public static function handle(): void
     {
+        if (!Auth::isMemberAreaActive()) {
+            wp_send_json_error(['message' => __('Interner Bereich ist deaktiviert.', 'wp-starter')], 404);
+        }
+
         if (!Auth::isAuthenticated()) {
             wp_send_json_error(['message' => __('Nicht authentifiziert.', 'wp-starter')], 401);
         }
