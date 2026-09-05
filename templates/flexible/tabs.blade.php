@@ -38,7 +38,7 @@
             <div
                 class="flex flex-wrap gap-6 mb-6 border-b border-line"
                 role="tablist"
-                aria-label="{{ $title ?: __('Tabs', 'wp-starter') }}"
+                aria-label="{{ $title ? strip_tags($title) : __('Tabs', 'wp-starter') }}"
             >
                 @foreach($tabs as $index => $tab)
                     <button

@@ -32,10 +32,26 @@
 ])
 
 @php
-    // Empty/absent title falls back to the default label instead of
+    // Absent title (null) falls back to the default label instead of
     // rendering a blank button (component-tag attributes can't carry an
-    // @if, so callers always pass :title, even when it may be empty).
-    $title = $title ?: __('Mehr erfahren', 'wp-starter');
+    // @if, so callers always pass :title). An explicit empty string is a
+    // deliberate icon-only button and must stay empty, so the fallback
+    // only fires on null, never on ''.
+    $title = $title ?? __('Mehr erfahren', 'wp-starter');
+
+    // Icon-only button (explicit empty title) without an accessible name:
+    // same guard as x-checkbox (checkbox.blade.php:36-38).
+    if (defined('WP_DEBUG') && WP_DEBUG && $title === '' && !$attributes->has('aria-label')) {
+        trigger_error('x-button requires a non-empty "title" or an "aria-label" for icon-only buttons.', E_USER_WARNING);
+    }
+
+    // Normalise target: only _self/_blank are valid link targets. Anything
+    // else, including a case variant like "_BLANK", falls back to _self so
+    // the rel/notice logic below still fires consistently.
+    $normalizedTarget = strtolower((string) $target);
+    if (!in_array($normalizedTarget, ['_self', '_blank'], true)) {
+        $normalizedTarget = '_self';
+    }
 
     // Base classes - common to all buttons
     // 'button' class is used for editor CSS overrides (prevents WordPress link styling)
@@ -44,7 +60,7 @@
     // button--<variante> traegt keine Gestaltung, sie macht die Variante nur
     // adressierbar: fuer Flaechen, die der Utility-Klasse nicht bekannt sind
     // (invers, Markenflaeche, Hero-Scrim), und fuer Messungen.
-    $baseClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-normal transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] active:scale-[0.97]';
+    $baseClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-normal transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] active:scale-[0.97] motion-reduce:transform-none';
 
     // Variants: hairline pill at rest, flat fill on hover/active, never a
     // gradient (rafaelalex.de design system, section 5). No shadow on any
@@ -130,22 +146,47 @@
             $analyticsAttrs .= ' data-rybbit-prop-key="' . esc_attr($analytics['meta']) . '"';
         }
     }
+
+    // A custom aria-label replaces the accessible name entirely, so the
+    // "opens in new tab" sr-only span (below) never gets announced. Append
+    // the notice to the label itself instead of relying on the span.
+    //
+    // Read the caller's own aria-label from the bag and render the composed
+    // value explicitly on the element ($attributes->merge() would let the
+    // caller's raw value win over this composed one, silently dropping the
+    // notice), then exclude 'aria-label' from the merged bag below.
+    $callerAriaLabel = $attributes->get('aria-label');
+    $linkAriaLabel = $callerAriaLabel;
+    if ($linkAriaLabel !== null && $normalizedTarget === '_blank') {
+        $linkAriaLabel .= ' ' . __('(öffnet in neuem Tab)', 'wp-starter');
+    }
+    $linkClasses = "{$baseClasses} {$variantClass} {$sizeClass} {$class}";
 @endphp
 
 @if($url)
-    {{-- Link button --}}
-    <a href="{{ $disabled ? '#' : esc_url($url) }}"
-       target="{{ esc_attr($target) }}"
-       @if($target === '_blank' && !$disabled) rel="noopener noreferrer" @endif
-       @if($disabled) aria-disabled="true" tabindex="-1" role="link" onclick="event.preventDefault(); return false;" @endif
-       {!! $analyticsAttrs !!}
-       {{ $attributes->merge(['class' => "{$baseClasses} {$variantClass} {$sizeClass} {$class}"]) }}>
-        {{ $title }}
-        {{ $slot ?? '' }}
-        @if($target === '_blank' && !$attributes->has('aria-label'))
-            <span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
-        @endif
-    </a>
+    @if($disabled)
+        {{-- Disabled link button: rendered as a span, not an <a>, so it never
+             navigates and needs no inline onclick (blocked under nonce CSP). --}}
+        <span aria-disabled="true"
+              {{ $attributes->except('aria-label')->merge(['class' => $linkClasses]) }}>
+            {{ $title }}
+            {{ $slot ?? '' }}
+        </span>
+    @else
+        {{-- Link button --}}
+        <a href="{{ esc_url($url) }}"
+           target="{{ esc_attr($normalizedTarget) }}"
+           @if($normalizedTarget === '_blank') rel="noopener noreferrer" @endif
+           @if($linkAriaLabel !== null) aria-label="{{ esc_attr($linkAriaLabel) }}" @endif
+           {!! $analyticsAttrs !!}
+           {{ $attributes->except('aria-label')->merge(['class' => $linkClasses]) }}>
+            {{ $title }}
+            {{ $slot ?? '' }}
+            @if($normalizedTarget === '_blank' && $callerAriaLabel === null)
+                <span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
+            @endif
+        </a>
+    @endif
 @else
     {{-- Form button --}}
     <button type="{{ $type }}"

@@ -58,14 +58,14 @@
                     {{-- Author --}}
                     <div class="flex items-center gap-4 mt-auto">
                         @if(!empty($testimonial['image']))
-                            {!! wp_get_attachment_image($testimonial['image'], 'avatar', false, [
+                            {!! wp_get_attachment_image((int) $testimonial['image'], 'avatar', false, [
                                 'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $testimonial['image'], $testimonial['author'] ?? ''),
                                 'class' => 'object-cover w-12 h-12 rounded-full',
                                 'sizes' => '48px',
                             ]) !!}
                         @endif
                         <div>
-                            <div class="font-normal text-content">{{ $testimonial['author'] ?? '' }}</div>
+                            <span class="not-italic font-normal text-content">{{ $testimonial['author'] ?? '' }}</span>
                             @if(!empty($testimonial['role']))
                                 <div class="text-body-small text-content-secondary">{{ $testimonial['role'] }}</div>
                             @endif

@@ -37,13 +37,30 @@
     $video_id = '';
 
     if ($source === 'external' && $video_url) {
-        // Check for YouTube
-        if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/', $video_url, $matches)) {
+        $videoUrlParts = wp_parse_url($video_url);
+        // www./m. abschneiden, damit youtube.com und m.youtube.com denselben Host treffen.
+        $videoUrlHost = isset($videoUrlParts['host']) ? preg_replace('/^(?:www|m)\./', '', strtolower($videoUrlParts['host'])) : '';
+        $videoUrlPath = $videoUrlParts['path'] ?? '';
+        $videoUrlQuery = [];
+        if (!empty($videoUrlParts['query'])) {
+            wp_parse_str($videoUrlParts['query'], $videoUrlQuery);
+        }
+
+        if (in_array($videoUrlHost, ['youtube.com', 'youtube-nocookie.com'], true)) {
+            if (!empty($videoUrlQuery['v']) && preg_match('/^[A-Za-z0-9_-]{11}$/', $videoUrlQuery['v'])) {
+                $video_type = 'youtube';
+                $video_id = $videoUrlQuery['v'];
+            } elseif (preg_match('#^/(?:embed|shorts|live)/([A-Za-z0-9_-]{11})#', $videoUrlPath, $matches)) {
+                $video_type = 'youtube';
+                $video_id = $matches[1];
+            }
+        } elseif ($videoUrlHost === 'youtu.be' && preg_match('#^/([A-Za-z0-9_-]{11})#', $videoUrlPath, $matches)) {
             $video_type = 'youtube';
             $video_id = $matches[1];
-        }
-        // Check for Vimeo
-        elseif (preg_match('/vimeo\.com\/(\d+)/', $video_url, $matches)) {
+        } elseif ($videoUrlHost === 'vimeo.com' && preg_match('#^/(?:channels/[^/]+/|video/)?(\d+)/?$#', $videoUrlPath, $matches)) {
+            $video_type = 'vimeo';
+            $video_id = $matches[1];
+        } elseif ($videoUrlHost === 'player.vimeo.com' && preg_match('#/video/(\d+)#', $videoUrlPath, $matches)) {
             $video_type = 'vimeo';
             $video_id = $matches[1];
         }
@@ -78,10 +95,31 @@
     $posterId = (int) (get_sub_field('poster') ?: 0);
     $posterUrl = $posterId > 0 ? wp_get_attachment_image_url($posterId, 'hero-background') : '';
 
+    // Das Feld erlaubt mp4/webm/ogg, "video/mp4" war unabhaengig vom
+    // hochgeladenen Format immer fest. Eigene Endungs-Zuordnung fuer genau die
+    // im Feld erlaubten Formate, unabhaengig von der Extension-zu-MIME-Zuordnung
+    // des Servers; bei unbekanntem Typ bleibt type leer statt eine falsche
+    // Angabe zu machen.
+    $videoMimeTypes = [
+        'mp4' => 'video/mp4',
+        'webm' => 'video/webm',
+        'ogg' => 'video/ogg',
+        'ogv' => 'video/ogg',
+    ];
+    $videoExtension = static fn ($url) => strtolower(pathinfo(wp_parse_url($url, PHP_URL_PATH) ?: $url, PATHINFO_EXTENSION));
+    $videoMimeType = $video ? ($videoMimeTypes[$videoExtension($video)] ?? '') : '';
+    $videoFileUrlMimeType = $video_file_url ? ($videoMimeTypes[$videoExtension($video_file_url)] ?? '') : '';
+
     // Check if we have a valid video
     $hasVideo = ($source === 'external' && $video_id) ||
                 ($source === 'wordpress' && $video) ||
                 ($source === 'url' && $video_file_url);
+
+    // Editor-only Hinweis: eine externe URL wurde eingetragen, aber keiner
+    // der beiden Anbieter-Muster hat gegriffen. Ohne diesen Sonderfall zeigt
+    // der generische Hinweis unten faelschlich "keine URL eingefuegt" an,
+    // obwohl eine drinsteht, die der Parser nur nicht erkennt.
+    $unrecognizedExternalUrl = $source === 'external' && $video_url && !$video_id;
 @endphp
 
 @if($hasVideo || current_user_can('edit_posts'))
@@ -101,7 +139,7 @@
                         class="sr-only"
                         role="status"
                         aria-live="polite"
-                        x-text="iframeError ? '{{ __('Das Video konnte nicht geladen werden.', 'wp-starter') }}' : (loaded && !iframeLoaded ? '{{ __('Video wird geladen…', 'wp-starter') }}' : '')"
+                        x-text="iframeError ? @js(__('Das Video konnte nicht geladen werden.', 'wp-starter')) : (loaded && !iframeLoaded ? @js(__('Video wird geladen…', 'wp-starter')) : '')"
                     ></div>
 
                     {{-- Standbild hinter der Einwilligung. Ohne es steht hier bis zum
@@ -179,7 +217,7 @@
                             <iframe
                                 src="https://www.youtube-nocookie.com/embed/{{ $video_id }}?dnt=1&autoplay=0"
                                 frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allow="autoplay; fullscreen; picture-in-picture"
                                 allowfullscreen
                                 loading="lazy"
                                 class="absolute inset-0 w-full h-full"
@@ -202,57 +240,45 @@
                         @endif
                     </template>
                 @elseif($source === 'wordpress' && $video)
-                    {{-- Self-hosted video - no consent needed --}}
-                    <video
-                        controls
-                        @if($autoplay) autoplay muted playsinline @endif
-                        @if($loop) loop @endif
-                        preload="metadata"
-                        aria-label="{{ $video_title ? sprintf(__('Video: %s', 'wp-starter'), $video_title) : __('Video', 'wp-starter') }}"
-                        class="w-full {{ $aspectClass }} object-cover rounded-lg"
-                        @if($posterUrl) poster="{{ esc_url($posterUrl) }}" @endif
-                    >
-                        <source src="{{ esc_url($video) }}" type="video/mp4">
-                        @if($captions)
-                            <track
-                                kind="captions"
-                                src="{{ esc_url($captions) }}"
-                                srclang="{{ esc_attr($captionsLanguage) }}"
-                                label="{{ esc_attr($captionsLabel) }}"
-                                default
-                            >
-                        @endif
-                        Ihr Browser unterstützt das Video-Tag nicht.
-                    </video>
+                    {{-- Self-hosted video - no consent needed. Geteiltes Markup in
+                         partials/video-player.blade.php. --}}
+                    @include('partials.video-player', [
+                        'url' => $video,
+                        'mimeType' => $videoMimeType,
+                        'poster' => $posterUrl,
+                        'captions' => $captions,
+                        'captionsLanguage' => $captionsLanguage,
+                        'captionsLabel' => $captionsLabel,
+                        'autoplay' => $autoplay,
+                        'loop' => $loop,
+                        'ariaLabel' => $video_title ? sprintf(__('Video: %s', 'wp-starter'), $video_title) : __('Video', 'wp-starter'),
+                        'aspectClass' => $aspectClass,
+                    ])
                 @elseif($source === 'url' && $video_file_url)
-                    {{-- External file URL - no consent needed --}}
-                    <video
-                        controls
-                        @if($autoplay) autoplay muted playsinline @endif
-                        @if($loop) loop @endif
-                        preload="metadata"
-                        aria-label="{{ $video_title ? sprintf(__('Video: %s', 'wp-starter'), $video_title) : __('Video', 'wp-starter') }}"
-                        class="w-full {{ $aspectClass }} object-cover rounded-lg"
-                        @if($posterUrl) poster="{{ esc_url($posterUrl) }}" @endif
-                    >
-                        <source src="{{ esc_url($video_file_url) }}">
-                        @if($captions)
-                            <track
-                                kind="captions"
-                                src="{{ esc_url($captions) }}"
-                                srclang="{{ esc_attr($captionsLanguage) }}"
-                                label="{{ esc_attr($captionsLabel) }}"
-                                default
-                            >
-                        @endif
-                        Ihr Browser unterstützt das Video-Tag nicht.
-                    </video>
+                    {{-- External file URL - no consent needed. Geteiltes Markup in
+                         partials/video-player.blade.php. --}}
+                    @include('partials.video-player', [
+                        'url' => $video_file_url,
+                        'mimeType' => $videoFileUrlMimeType,
+                        'poster' => $posterUrl,
+                        'captions' => $captions,
+                        'captionsLanguage' => $captionsLanguage,
+                        'captionsLabel' => $captionsLabel,
+                        'autoplay' => $autoplay,
+                        'loop' => $loop,
+                        'ariaLabel' => $video_title ? sprintf(__('Video: %s', 'wp-starter'), $video_title) : __('Video', 'wp-starter'),
+                        'aspectClass' => $aspectClass,
+                    ])
                 @endif
             </div>
         </div>
     @elseif(current_user_can('edit_posts'))
         <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
-            <p class="text-content-secondary">{{ __('Bitte füge eine Video-URL ein oder lade eine Videodatei hoch.', 'wp-starter') }}</p>
+            @if($unrecognizedExternalUrl)
+                <p class="text-content-secondary">{{ __('Video-URL nicht erkannt. Unterstützt werden YouTube und Vimeo.', 'wp-starter') }}</p>
+            @else
+                <p class="text-content-secondary">{{ __('Bitte füge eine Video-URL ein oder lade eine Videodatei hoch.', 'wp-starter') }}</p>
+            @endif
         </div>
     @endif
 </x-section>

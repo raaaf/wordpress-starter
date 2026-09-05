@@ -54,12 +54,14 @@
         : 'cursor-pointer ' . ($variants[$variant] ?? $variants['accent']);
 @endphp
 
-<a href="{{ $disabled ? '#' : esc_url($url) }}"
-   target="{{ esc_attr($target) }}"
+{{-- Disabled link: rendered as a span, not an <a>, so it never navigates. --}}
+<{{ $disabled ? 'span' : 'a' }}
+   @if(!$disabled) href="{{ esc_url($url) }}" @endif
+   @if(!$disabled) target="{{ esc_attr($target) }}" @endif
    @if($target === '_blank' && !$disabled) rel="noopener noreferrer" @endif
-   @if($disabled) aria-disabled="true" tabindex="-1" @endif
+   @if($disabled) aria-disabled="true" @endif
    @if($ariaLabel) aria-label="{{ esc_attr($ariaLabel) }}" @endif
-   {{ $disabled ? $attributes->except('tabindex') : $attributes }}
+   {{ $disabled ? $attributes->except(['tabindex', 'href', 'target']) : $attributes }}
    class="link inline-flex items-center font-normal underline underline-offset-4 transition-colors duration-200 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] {{ $variantClass }} {{ $sizeClass }} {{ $class }}">
     @if($iconLeft)
         <x-icon name="{{ $iconLeft }}" class="{{ $iconSize }}" />
@@ -85,4 +87,4 @@
     @if($target === '_blank' && !$ariaLabel)
         <span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
     @endif
-</a>
+</{{ $disabled ? 'span' : 'a' }}>

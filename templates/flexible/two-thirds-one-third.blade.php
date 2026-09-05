@@ -18,9 +18,13 @@
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     <x-grid cols="2/3-1/3" gap="lg" align="items-center">
         <x-card variant="outlined" padding="lg">
-            <x-prose>@kses($column_1)</x-prose>
+            <div class="max-w-[58ch]">
+                <x-prose>@kses($column_1)</x-prose>
+            </div>
         </x-card>
-        <x-prose>@kses($column_2)</x-prose>
+        <div class="max-w-[58ch]">
+            <x-prose>@kses($column_2)</x-prose>
+        </div>
     </x-grid>
 </x-section>
 @endif

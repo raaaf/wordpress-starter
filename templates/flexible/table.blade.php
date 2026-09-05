@@ -25,6 +25,7 @@
     $wrapperClass = $stickyHeader ? 'overflow-auto max-h-[70vh]' : 'overflow-x-auto';
     $headClass = $stickyHeader ? 'sticky top-0 z-10' : '';
     $background = get_sub_field('background_color') ?: 'primary';
+    $captionId = 'table-caption-' . uniqid();
 @endphp
 
 @if($title || !empty($rows) || current_user_can('edit_posts'))
@@ -33,9 +34,9 @@
 
     @if(!empty($rows))
         {{-- tabindex, damit der scrollende Bereich auch per Tastatur erreichbar ist (WCAG 2.1.1) --}}
-        <div class="{{ $wrapperClass }} rounded-lg" tabindex="0" role="group" aria-label="{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}">
+        <div class="{{ $wrapperClass }} rounded-lg" tabindex="0" role="group" aria-labelledby="{{ esc_attr($captionId) }}">
             <table class="w-full border-collapse {{ $bordered ? 'border border-line' : '' }}">
-                <caption class="sr-only">{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}</caption>
+                <caption class="sr-only" id="{{ esc_attr($captionId) }}">{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}</caption>
                 @if(!empty($headers))
                     <thead class="bg-surface-tertiary {{ $headClass }}">
                         <tr>

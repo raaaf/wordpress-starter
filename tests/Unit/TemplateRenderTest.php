@@ -629,6 +629,56 @@ final class TemplateRenderTest extends TestCase
                 $unrelatedHostOutput,
                 'An unrelated host produced a video iframe.',
             );
+
+            // Host-confusion bypasses: a dotted suffix and userinfo-prefixed
+            // host must never be read as youtube.com itself.
+            $GLOBALS['wp_mock_sub_fields']['video_url'] = 'https://www.youtube.com.evil.test/watch?v=dQw4w9WgXcQ';
+
+            $dottedSuffixOutput = $factory->make('flexible.video', $viewData)->render();
+            $factory->flushState();
+
+            $this->assertStringNotContainsString(
+                '<iframe',
+                $dottedSuffixOutput,
+                'A dotted-suffix host (youtube.com.evil.test) produced a video iframe.',
+            );
+
+            $GLOBALS['wp_mock_sub_fields']['video_url'] = 'https://youtube.com@evil.test/watch?v=dQw4w9WgXcQ';
+
+            $userinfoHostOutput = $factory->make('flexible.video', $viewData)->render();
+            $factory->flushState();
+
+            $this->assertStringNotContainsString(
+                '<iframe',
+                $userinfoHostOutput,
+                'A userinfo-prefixed host (youtube.com@evil.test) produced a video iframe.',
+            );
+
+            // Vimeo channel URL — the anchored pattern must still accept the
+            // legitimate channels/{name}/{id} shape.
+            $GLOBALS['wp_mock_sub_fields']['video_url'] = 'https://vimeo.com/channels/staff/123456';
+
+            $vimeoChannelOutput = $factory->make('flexible.video', $viewData)->render();
+            $factory->flushState();
+
+            $this->assertStringContainsString(
+                'player.vimeo.com/video/123456',
+                $vimeoChannelOutput,
+                'A vimeo.com channels URL did not resolve to a Vimeo embed.',
+            );
+
+            // Vimeo path with traversal must not slip past the anchored
+            // pattern to a numeric-looking suffix.
+            $GLOBALS['wp_mock_sub_fields']['video_url'] = 'https://vimeo.com/foo/../123456';
+
+            $vimeoTraversalOutput = $factory->make('flexible.video', $viewData)->render();
+            $factory->flushState();
+
+            $this->assertStringNotContainsString(
+                '<iframe',
+                $vimeoTraversalOutput,
+                'A vimeo.com path with traversal produced a video iframe.',
+            );
         } finally {
             unset(
                 $GLOBALS['wp_mock_sub_fields'],

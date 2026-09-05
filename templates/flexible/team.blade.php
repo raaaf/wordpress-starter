@@ -46,15 +46,9 @@
     <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if(!empty($members))
-        @php
-            $gridClass = match((int) $columns) {
-                2 => 'md:grid-cols-2',
-                3 => 'md:grid-cols-3',
-                4 => 'md:grid-cols-4',
-                default => 'md:grid-cols-3',
-            };
-        @endphp
-        <div class="grid gap-8 {{ $gridClass }}">
+        {{-- gap="lg" waere responsiv (gap-8 lg:gap-12), gewuenscht ist ein fester
+             32px-Abstand auf jeder Breite, deshalb die Klasse statt der Prop. --}}
+        <x-grid :cols="$columns" class="gap-8!">
             @foreach($members as $member)
                 @php
                     $imageId = $member['image'] ?? null;
@@ -73,7 +67,7 @@
                              Spalten rendert das Bild sonst 384x384 und die Sektion
                              wird zur Wand aus Gesichtern. --}}
                         <div class="relative mx-auto mb-6 overflow-hidden rounded-[var(--card-radius)] aspect-[4/5] max-w-[260px]">
-                            {!! wp_get_attachment_image($imageId, 'team-portrait', false, [
+                            {!! wp_get_attachment_image((int) $imageId, 'team-portrait', false, [
                                 'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $name),
                                 'class' => 'object-cover w-full h-full',
                                 'sizes' => '260px',
@@ -132,7 +126,7 @@
                     @endif
                 </div>
             @endforeach
-        </div>
+        </x-grid>
     @elseif(current_user_can('edit_posts'))
         <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge Teammitglieder hinzu oder wähle eine Quelle mit Einträgen.', 'wp-starter') }}</p>
