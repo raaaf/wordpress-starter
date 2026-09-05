@@ -147,6 +147,11 @@ class WpOptimizeConfigurator extends AbstractPluginConfigurator
         $options->update_option('lossy_compression', true);
         $options->update_option('image_quality', 85);
         $options->update_option('autosmush', true);
+
+        // EXIF is dropped deliberately (2026-09-05): none of this theme's
+        // frontend code reads image EXIF, so keeping it only costs bytes.
+        // Originals stay recoverable via back_up_original, so this is not
+        // a one-way loss if that decision changes later.
         $options->update_option('preserve_exif', false);
         $options->update_option('back_up_original', true);
     }

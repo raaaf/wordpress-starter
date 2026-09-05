@@ -19,6 +19,10 @@ const USER = process.env.WP_USER;
 const PASSWORD = process.env.WP_PASSWORD;
 const PATH = process.env.WP_STYLEGUIDE_PATH || '/styleguide/';
 
+// Login in beforeAll types WP_PASSWORD into #user_pass; with trace
+// 'on-first-retry' a retry would record that value in the trace archive.
+test.use({ trace: 'off' });
+
 test.describe('Flexible Content Layouts', () => {
   test.skip(
     !USER || !PASSWORD,

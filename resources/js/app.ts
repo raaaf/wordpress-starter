@@ -600,10 +600,42 @@ export function initHeaderHeight(): void {
   observer.observe(header);
 }
 
+// ============================================
+// CF7 Spam Trap: JS Token
+// ============================================
+
+/** Hidden field name, mirrors ContactForm7Configurator::JS_TOKEN_FIELD. */
+const CF7_JS_TOKEN_FIELD = '_wpcf7_js_token';
+
+/**
+ * Fills the CF7 JS-token field on the first interaction with a form.
+ *
+ * The field starts empty and only a browser running this script, with a
+ * visitor who actually touches the form, ever fills it. detectSpam() in
+ * ContactForm7Configurator flags submissions where it is still empty. A
+ * constant value is enough: the point is presence, not entropy.
+ */
+export function initCf7SpamTrapTokens(): void {
+  const forms = document.querySelectorAll<HTMLFormElement>('.wpcf7-form');
+
+  forms.forEach((form) => {
+    const tokenField = form.elements.namedItem(CF7_JS_TOKEN_FIELD) as HTMLInputElement | null;
+    if (!tokenField) return;
+
+    const fillToken = (): void => {
+      tokenField.value = 'ok';
+    };
+
+    form.addEventListener('focusin', fillToken, { once: true });
+    form.addEventListener('input', fillToken, { once: true });
+  });
+}
+
 // Initialize features on DOM ready
 document.addEventListener('DOMContentLoaded', async () => {
   initHeaderHeight();
   initColumnHeadingAlignment();
   initRybbitTracking();
+  initCf7SpamTrapTokens();
   await initGalleryZoom();
 });

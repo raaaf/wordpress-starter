@@ -34,7 +34,7 @@ final class SecurityTest extends TestCase
 
     private function resetSecurityState(): void
     {
-        $this->resetStaticProperties(Security::class, ['nonce' => null]);
+        $this->resetStaticProperties(Security::class, ['nonce' => null, 'headerEmitter' => null]);
     }
 
     public function testGetNonceGeneratesBase64StringOfTheGeneratedByteLength(): void
@@ -664,6 +664,50 @@ final class SecurityTest extends TestCase
             ],
             Security::getHardeningHeaders(),
         );
+    }
+
+    /** The addHardeningHeaders() callback emits exactly the pinned header lines through the test seam, never a real header() call. */
+    public function testAddHardeningHeadersEmitsThePinnedHeaderLinesThroughTheSeam(): void
+    {
+        $emitted = [];
+        Security::setHeaderEmitter(function (string $headerLine) use (&$emitted): void {
+            $emitted[] = $headerLine;
+        });
+
+        Security::init();
+        $callback = $GLOBALS['wp_mock_hooks']['actions']['send_headers'][0]['callback'];
+        $callback();
+
+        $this->assertSame(
+            [
+                'X-Content-Type-Options: nosniff',
+                'X-Frame-Options: SAMEORIGIN',
+                'Referrer-Policy: strict-origin-when-cross-origin',
+                'Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=()',
+            ],
+            $emitted,
+        );
+    }
+
+    /** The addHardeningHeaders() callback must not emit anything on admin or AJAX requests, even through the seam. */
+    public function testAddHardeningHeadersSkipsAdminAndAjaxRequestsThroughTheSeam(): void
+    {
+        $emitted = [];
+        Security::setHeaderEmitter(function (string $headerLine) use (&$emitted): void {
+            $emitted[] = $headerLine;
+        });
+
+        Security::init();
+        $callback = $GLOBALS['wp_mock_hooks']['actions']['send_headers'][0]['callback'];
+
+        $GLOBALS['wp_mock_is_admin'] = true;
+        $callback();
+        $this->assertSame([], $emitted);
+
+        $GLOBALS['wp_mock_is_admin'] = false;
+        $GLOBALS['wp_mock_doing_ajax'] = true;
+        $callback();
+        $this->assertSame([], $emitted);
     }
 
     /** The init() method registers the CSP send_headers hook and makes the nonce available globally. */

@@ -151,6 +151,14 @@ add_filter('acf/update_value/type=url', function ($value) {
 
 `Acf::registerPasswordHashing()` (`src/MemberArea/Acf.php`) validates the shared-password field on save via `acf/validate_value/key=field_member_shared_password`, rejecting `<`, `>`, `&` and leading/trailing whitespace before the value is hashed with `wp_hash_password()`. This keeps the hashed value consistent with what `Auth::getSharedPassword()` receives at login: without the check, users without `unfiltered_html` have their input run through `wp_kses_post_deep` on the ACF save path (encoding `&` to `&amp;` and stripping `<`/`>`) before hashing, while the login form submits the raw value, so the hash would never match.
 
+### Seitenpasswort und Mitgliederbereich
+
+Ein WordPress-Seitenpasswort auf einer Mitgliederbereich-Seite ist nur eine
+Anzeigesperre für diese eine Seite. Die Download-Endpunkte prüfen dagegen
+gegen den Mitgliederbereich-Login (`Auth`/`Access`), nicht gegen das
+Seitenpasswort. Empfohlenes Setup ist ausschließlich der Mitgliederbereich-Login,
+ohne zusätzliches Seitenpasswort (Entscheidung 2026-09-05).
+
 ## Nonce Verification
 
 All state-changing actions verify WordPress nonces:
@@ -291,6 +299,21 @@ These files should not be web-accessible:
 </FilesMatch>
 ```
 
+## Update-Integritaet
+
+Theme-Updates kommen ueber `ThemeUpdateProvider` (`src/Providers/ThemeUpdateProvider.php`)
+per plugin-update-checker aus GitHub-Releases. Die Release-Pipeline
+(`.github/workflows/release.yml`) legt neben der Release-Zip eine `.sha256`-Datei
+als zweiten Release-Asset ab (`shasum -a 256`-Ausgabe).
+
+Vor der Installation haengt sich `ThemeUpdateProvider::verifyPackageChecksum()` in
+den WordPress-Kernfilter `upgrader_pre_download` ein, laedt die Zip selbst
+herunter und vergleicht ihren Hash gegen die zugehoerige `.sha256`-Datei desselben
+Release. Stimmt die Pruefsumme nicht ueberein, wird die Installation mit einem
+`WP_Error` abgebrochen. Fehlt die `.sha256`-Datei (aeltere Releases vor dieser
+Aenderung), wird das Update nicht blockiert, aber als Warnung ueber
+`LogServiceProvider::warning()` protokolliert.
+
 ## Contact Form Spam Protection
 
 Contact Form 7 submissions pass through server-side heuristics registered in
@@ -301,10 +324,12 @@ no admin configuration, GDPR-clean.
 
 1. **Honeypot** -- a hidden field (`your-website`) is injected into every form.
    Real users never see it; bots that fill every field are flagged.
-2. **Time-trap** -- a signed render timestamp (HMAC, `wp_salt`) is injected.
-   Submissions arriving in under `MIN_SUBMIT_SECONDS` (3s) are flagged. Fails
-   open when the timestamp is missing or its signature mismatches (page cache),
-   so legitimate users are never blocked.
+2. **JS token** -- a hidden field (`_wpcf7_js_token`) starts empty and is only
+   filled client-side on the first interaction with the form. A submission
+   without JavaScript or without any interaction never fills it and is
+   flagged. Replaces an earlier signed-timestamp time-trap, which was inert
+   in production: the timestamp got baked into the cached HTML under
+   full-page caching, so every visitor's form looked "old".
 3. **Link limit** -- submissions with more than `MAX_URLS` (2) URLs across all
    fields are flagged.
 4. **Keyword filter** -- a conservative, high-confidence list (pharma, gambling,

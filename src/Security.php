@@ -28,6 +28,30 @@ class Security
     private static ?string $nonce = null;
 
     /**
+     * Test seam for the hardening headers: when set, addHardeningHeaders()
+     * calls this instead of the real header() function, so tests can assert
+     * on the emitted header lines without triggering "headers already sent"
+     * warnings or needing a real HTTP response.
+     *
+     * FOR TESTS ONLY: production code must never call setHeaderEmitter().
+     *
+     * @var (callable(string): void)|null
+     */
+    private static $headerEmitter = null;
+
+    /**
+     * FOR TESTS ONLY. Overrides the header() call used by
+     * addHardeningHeaders() so tests can capture emitted header lines.
+     * Pass null to restore the real header() call.
+     *
+     * @param (callable(string): void)|null $emitter
+     */
+    public static function setHeaderEmitter(?callable $emitter): void
+    {
+        self::$headerEmitter = $emitter;
+    }
+
+    /**
      * Hosts fest verdrahtet in frame-src, unabhaengig von der Admin-Option
      * embed_allowed_hosts. Eine einzige Quelle fuer getCSPHeader() UND
      * isAllowedEmbedHost(), damit die beiden nicht auseinanderlaufen: sonst
@@ -470,8 +494,12 @@ class Security
                 return;
             }
 
+            $emitter = self::$headerEmitter ?? static function (string $headerLine): void {
+                header($headerLine);
+            };
+
             foreach (self::getHardeningHeaders() as $name => $value) {
-                header("{$name}: {$value}");
+                $emitter("{$name}: {$value}");
             }
         });
     }

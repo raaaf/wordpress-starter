@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createStyleguideModulComponent, type StyleguideModulComponent } from './app';
+import {
+  createStyleguideModulComponent,
+  type StyleguideModulComponent,
+  initCf7SpamTrapTokens,
+} from './app';
 
 /**
  * Tests for the styleguide module switcher (registered as Alpine.data
@@ -72,5 +76,44 @@ describe('Styleguide Modul Component', () => {
     window.location.hash = '';
     modul.init();
     expect(modul.aktiv).toBe(0);
+  });
+});
+
+/**
+ * Tests for the CF7 spam-trap JS token (mirrors
+ * ContactForm7Configurator::JS_TOKEN_FIELD / detectSpam()).
+ */
+describe('CF7 Spam Trap Token', () => {
+  let form: HTMLFormElement;
+  let tokenField: HTMLInputElement;
+
+  beforeEach(() => {
+    form = document.createElement('form');
+    form.className = 'wpcf7-form';
+    form.innerHTML = `
+      <input type="text" name="your-name">
+      <input type="hidden" name="_wpcf7_js_token" value="">
+    `;
+    document.body.appendChild(form);
+    tokenField = form.elements.namedItem('_wpcf7_js_token') as HTMLInputElement;
+  });
+
+  afterEach(() => {
+    form.remove();
+  });
+
+  it('leaves the token field empty until the visitor interacts with the form', () => {
+    initCf7SpamTrapTokens();
+
+    expect(tokenField.value).toBe('');
+  });
+
+  it('fills the token field on the first interaction with the form', () => {
+    initCf7SpamTrapTokens();
+
+    const nameField = form.elements.namedItem('your-name') as HTMLInputElement;
+    nameField.dispatchEvent(new Event('focusin', { bubbles: true }));
+
+    expect(tokenField.value).toBe('ok');
   });
 });

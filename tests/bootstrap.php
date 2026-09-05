@@ -295,6 +295,39 @@ if (!function_exists('wp_cache_delete')) {
     }
 }
 
+if (!function_exists('wp_cache_add')) {
+    // Core's wp_cache_add() is a no-op (returns false) if the key already
+    // exists; RateLimiter relies on that to seed a window exactly once.
+    function wp_cache_add(string $key, mixed $data, string $group = 'default', int $expire = 0): bool
+    {
+        $cacheKey = "{$group}:{$key}";
+        if (isset($GLOBALS['wp_mock_cache']) && array_key_exists($cacheKey, $GLOBALS['wp_mock_cache'])) {
+            return false;
+        }
+
+        $GLOBALS['wp_mock_cache'][$cacheKey] = $data;
+
+        return true;
+    }
+}
+
+if (!function_exists('wp_cache_incr')) {
+    // Core returns false if the key does not exist (e.g. it expired between
+    // wp_cache_add() and wp_cache_incr()); RateLimiter treats that as a fresh
+    // first attempt.
+    function wp_cache_incr(string $key, int $offset = 1, string $group = 'default'): int|false
+    {
+        $cacheKey = "{$group}:{$key}";
+        if (!isset($GLOBALS['wp_mock_cache']) || !array_key_exists($cacheKey, $GLOBALS['wp_mock_cache'])) {
+            return false;
+        }
+
+        $GLOBALS['wp_mock_cache'][$cacheKey] = (int) $GLOBALS['wp_mock_cache'][$cacheKey] + $offset;
+
+        return $GLOBALS['wp_mock_cache'][$cacheKey];
+    }
+}
+
 // WordPress hook functions
 if (!function_exists('add_action')) {
     function add_action(string $hook, mixed $callback, int $priority = 10, int $args = 1): bool
@@ -900,7 +933,7 @@ if (!function_exists('force_balance_tags')) {
 
                 return $matches[0];
             },
-            $text
+            $text,
         );
 
         while ($stack) {
@@ -1642,7 +1675,9 @@ if (!class_exists('WP_Error')) {
     class WP_Error // phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound -- test double needs a class alongside the function mocks in this single bootstrap file
     {
         private string $code;
+
         private string $message;
+
         private mixed $data;
 
         public function __construct(string $code = '', string $message = '', mixed $data = '')
@@ -1680,6 +1715,53 @@ if (!function_exists('is_ssl')) {
     function is_ssl(): bool
     {
         return $GLOBALS['wp_mock_is_ssl'] ?? false;
+    }
+}
+
+if (!function_exists('download_url')) {
+    /**
+     * Tests seed $GLOBALS['wp_mock_download_url_result'] with either a
+     * WP_Error or a local file path string.
+     */
+    function download_url(string $url, int $timeout = 300): WP_Error|string
+    {
+        return $GLOBALS['wp_mock_download_url_result'] ?? new WP_Error('http_request_failed', 'No mock result set.');
+    }
+}
+
+if (!function_exists('wp_remote_get')) {
+    /**
+     * Tests seed $GLOBALS['wp_mock_remote_responses'][$url] with either a
+     * WP_Error or a response array (['response' => ['code' => int], 'body' => string]).
+     *
+     * @param array<string, mixed> $args
+     *
+     * @return WP_Error|array<string, mixed>
+     */
+    function wp_remote_get(string $url, array $args = []): WP_Error|array
+    {
+        return $GLOBALS['wp_mock_remote_responses'][$url]
+            ?? new WP_Error('http_request_failed', 'No mock response set for ' . $url);
+    }
+}
+
+if (!function_exists('wp_remote_retrieve_response_code')) {
+    /**
+     * @param WP_Error|array<string, mixed> $response
+     */
+    function wp_remote_retrieve_response_code(WP_Error|array $response): int|string
+    {
+        return is_array($response) ? ( $response['response']['code'] ?? '' ) : '';
+    }
+}
+
+if (!function_exists('wp_remote_retrieve_body')) {
+    /**
+     * @param WP_Error|array<string, mixed> $response
+     */
+    function wp_remote_retrieve_body(WP_Error|array $response): string
+    {
+        return is_array($response) ? (string) ( $response['body'] ?? '' ) : '';
     }
 }
 
@@ -1744,21 +1826,21 @@ if (!function_exists('wp_send_json_error')) {
      * assert the payload/status of an AJAX handler without ending the PHP
      * process (see Tests\Support\WpJsonResponseException).
      *
-     * @throws \Tests\Support\WpJsonResponseException always
+     * @throws Tests\Support\WpJsonResponseException always
      */
     function wp_send_json_error(mixed $data = null, ?int $statusCode = null): never
     {
-        throw new \Tests\Support\WpJsonResponseException($data, $statusCode, false); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- test double, not real output
+        throw new Tests\Support\WpJsonResponseException($data, $statusCode, false); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- test double, not real output
     }
 }
 
 if (!function_exists('wp_send_json_success')) {
     /**
-     * @throws \Tests\Support\WpJsonResponseException always
+     * @throws Tests\Support\WpJsonResponseException always
      */
     function wp_send_json_success(mixed $data = null, ?int $statusCode = null): never
     {
-        throw new \Tests\Support\WpJsonResponseException($data, $statusCode, true); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- test double, not real output
+        throw new Tests\Support\WpJsonResponseException($data, $statusCode, true); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- test double, not real output
     }
 }
 

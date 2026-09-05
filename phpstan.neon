@@ -52,7 +52,8 @@ parameters:
             message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
             path: config/functions.php
         # Third-party library method not recognized by PHPStan
-        - '#^Call to an undefined method YahnisElsts\\PluginUpdateChecker\\v5p6\\Vcs\\Api::enableReleaseAssets\(\)\.$#'
+        # (namespace version is unpinned so a PUC bump does not silently re-enable this check)
+        - '#^Call to an undefined method YahnisElsts\\PluginUpdateChecker\\v5p\d+\\Vcs\\Api::enableReleaseAssets\(\)\.$#'
         # iThemes Security Pro — premium plugin, not installed in CI
         - '#^Call to (static method|method) [A-Za-z0-9_]+\(\) on an unknown class ITSEC_Modules\.$#'
         # WP-Optimize — premium-adjacent cache/DB plugin, not installed in CI

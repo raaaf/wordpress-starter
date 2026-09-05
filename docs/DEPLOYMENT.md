@@ -72,6 +72,23 @@ raise the server's PHP requirement. Package the deploy/build step with
 `composer install --no-dev --no-scripts` (or `--optimize-autoloader` as
 below) on PHP >= 8.2.
 
+### PHP-Versionen
+
+Die Dev-Toolchain (PHPUnit, php-cs-fixer) läuft auf PHP 8.4, die Produktion
+auf PHP 8.2.31. Die Unit-Test-Suite läuft nur auf 8.4, deckt PHP-8.2-Verhalten
+also nicht ab. Wächter dafür ist der CI-Job `php-compat-82`
+(`.github/workflows/ci.yml`): er installiert die Produktions-Dependencies auf
+PHP 8.2, prüft Syntax und läuft PHPCompatibility gegen `src/`, `config/`,
+`functions.php` und `index.php`. Diese Aufteilung ist eine akzeptierte
+Entscheidung (2026-09-05), kein offener Punkt.
+
+`theme.json` bleibt Teil des Themes, obwohl die globalen Styles ausgehängt
+sind (Gutenberg ist deaktiviert): WordPress liest die Datei weiterhin für
+Editor-Einstellungen, ein Entfernen würde nichts gewinnen.
+
+`npm audit`-Hinweise betreffen ausschließlich Dev-/Release-Tooling und werden
+bei jedem Dependency-Durchgang geprüft.
+
 ### Recommended PHP Extensions
 
 - `mbstring`

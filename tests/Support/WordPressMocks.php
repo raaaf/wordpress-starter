@@ -75,6 +75,7 @@ trait WordPressMocks
             'wp_mock_shortcodes' => [],
             'wp_mock_titles' => [],
             'wp_mock_transients' => [],
+            'wp_mock_using_ext_object_cache' => null,
             'wp_mock_excerpt' => '',
             'wp_mock_archive_description' => '',
             'wp_mock_bloginfo' => [],
@@ -84,6 +85,8 @@ trait WordPressMocks
             'wp_mock_loop_posts' => [],
             'wp_mock_loop_cursor' => 0,
             'wp_mock_the_date' => '',
+            'wp_mock_download_url_result' => null,
+            'wp_mock_remote_responses' => [],
         ];
 
         foreach ($defaults as $key => $default) {
@@ -111,6 +114,11 @@ trait WordPressMocks
         // x-toggle/x-checkbox/x-radio/x-section in one test would keep
         // incrementing into the next.
         \WordpressStarter\Helpers\ComponentId::reset();
+
+        // Reset Security's test-only header emitter seam: otherwise a test
+        // that calls Security::setHeaderEmitter() would leak its closure into
+        // later tests that never expect header() to be intercepted.
+        $this->resetStaticProperties(\WordpressStarter\Security::class, ['headerEmitter' => null]);
     }
 
     /**

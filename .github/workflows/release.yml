@@ -123,6 +123,12 @@ jobs:
         if: steps.semantic.outputs.released == 'true'
         run: npm run package
 
+      - name: Checksum release zip
+        if: steps.semantic.outputs.released == 'true'
+        run: |
+          ZIP=$(ls wp-theme/*.zip | head -1)
+          shasum -a 256 "${ZIP}" > "${ZIP}.sha256"
+
       - name: Upload release asset
         if: steps.semantic.outputs.released == 'true'
         env:
@@ -130,4 +136,4 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           ZIP=$(ls wp-theme/*.zip | head -1)
-          gh release upload "v${VERSION}" "${ZIP}" --clobber
+          gh release upload "v${VERSION}" "${ZIP}" "${ZIP}.sha256" --clobber

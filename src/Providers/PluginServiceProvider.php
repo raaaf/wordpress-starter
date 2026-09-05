@@ -495,8 +495,6 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function renderSetupPage(): void
     {
-        update_option(ThemeContext::optionKey('welcome_dismissed'), true);
-
         $categories = $this->getPluginsByCategory();
         $selectedPlugins = $this->getSelectedPlugins();
         $missingSelectedPlugins = array_filter($selectedPlugins, fn ($p) => !( $p['check'] )());
@@ -528,6 +526,11 @@ class PluginServiceProvider extends ServiceProvider
             wp_send_json_error(['message' => __('Keine Berechtigung.', 'wp-starter')]);
         }
 
+        // Visiting the setup page must not mutate state on its own (GET is
+        // not an admin action); the welcome notice is dismissed once the user
+        // actually acts on this page, here on the first verified install call.
+        update_option(ThemeContext::optionKey('welcome_dismissed'), true);
+
         $slug = isset($_POST['slug']) ? sanitize_text_field(wp_unslash($_POST['slug'])) : '';
 
         if (empty($slug)) {
@@ -556,6 +559,8 @@ class PluginServiceProvider extends ServiceProvider
         if (!current_user_can('install_plugins')) {
             wp_send_json_error(['message' => __('Keine Berechtigung.', 'wp-starter')]);
         }
+
+        update_option(ThemeContext::optionKey('welcome_dismissed'), true);
 
         $selectedPlugins = $this->getSelectedPlugins();
         $missingPlugins = array_filter($selectedPlugins, fn ($p) => !( $p['check'] )());
