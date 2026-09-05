@@ -93,6 +93,38 @@ describe('member-area.ts', () => {
       );
       expect(nonceCalls).toHaveLength(1);
     });
+
+    it('shares one in-flight nonce request between concurrent callers', async () => {
+      const gate: { resolve?: (value: Response) => void } = {};
+      fetchMock.mockImplementation((input: RequestInfo | URL) => {
+        const url = typeof input === 'string' ? input : input.toString();
+        if (url.includes('action=member_get_nonces')) {
+          return new Promise<Response>((resolve) => {
+            gate.resolve = resolve;
+          });
+        }
+        return Promise.resolve(
+          jsonResponse({ success: true, data: { categories: [], extensions: [] } })
+        );
+      });
+
+      const { downloadTable } = await captureComponents();
+      const component = withNoop$watch(downloadTable()) as {
+        loadFacets(): Promise<void>;
+      };
+
+      // Both calls start before the nonce response arrives, like facets and
+      // the first page do on load.
+      const pending = Promise.all([component.loadFacets(), component.loadFacets()]);
+      await Promise.resolve();
+      gate.resolve?.(jsonResponse({ success: true, data: NONCES }));
+      await pending;
+
+      const nonceCalls = fetchMock.mock.calls.filter((call) =>
+        urlOf(call).includes('action=member_get_nonces')
+      );
+      expect(nonceCalls).toHaveLength(1);
+    });
   });
 
   describe('nonce invalidation on rejection', () => {

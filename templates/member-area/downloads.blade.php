@@ -68,8 +68,10 @@
 
     </div>
 
-    {{-- Loading state --}}
-    <div x-show="loading" x-cloak class="space-y-2" role="status" aria-label="{{ __('Dokumente werden geladen...', 'wp-starter') }}">
+    {{-- Loading state: skeleton only before the first result set. Later
+         fetches (typing, filters, paging) keep the table in place and dim it,
+         so the layout does not jump on every keystroke. --}}
+    <div x-show="loading && items.length === 0" x-cloak class="space-y-2" role="status" aria-label="{{ __('Dokumente werden geladen...', 'wp-starter') }}">
         @foreach(range(1, 6) as $i)
             <div class="h-12 bg-surface-secondary rounded-lg animate-pulse"></div>
         @endforeach
@@ -102,7 +104,13 @@
     </div>
 
     {{-- Table --}}
-    <div x-show="!loading && !error && items.length > 0" x-cloak>
+    <div
+        x-show="!error && items.length > 0"
+        x-cloak
+        :aria-busy="loading ? 'true' : 'false'"
+        :class="{ 'opacity-60 pointer-events-none': loading }"
+        class="transition-opacity duration-[var(--motion-exit-duration)] motion-reduce:transition-none"
+    >
         <div class="overflow-x-auto rounded-lg border border-line">
             <table class="w-full text-sm">
                 <caption class="sr-only">{{ __('Verfügbare Dokumente', 'wp-starter') }}</caption>
@@ -271,7 +279,16 @@
          die echte Zahl liefert. Waehrend error ebenfalls leer, sonst wuerde
          neben der Fehlermeldung im Alert faelschlich "0 Dokumente" angesagt --
          die Fehlermeldung selbst uebernimmt die Ansage. --}}
-    <p class="text-sm text-content-secondary mt-4" aria-live="polite" aria-atomic="true">
+    <p class="text-sm text-content-secondary mt-4 flex items-center gap-2" aria-live="polite" aria-atomic="true">
+        <span
+            x-show="loading && items.length > 0"
+            x-cloak
+            class="inline-block w-4 h-4 rounded-full border-2 border-line-strong border-t-transparent animate-spin motion-reduce:animate-none"
+            aria-hidden="true"
+        ></span>
+        {{-- Visual only: the live region stays silent while loading (see above),
+             so typing is not interrupted by a "loading" announcement per keystroke. --}}
+        <span x-show="loading && items.length > 0" x-cloak aria-hidden="true">{{ __('Wird geladen …', 'wp-starter') }}</span>
         <span x-text="(loading || error) ? '' : total + ' ' + '{{ esc_js(__('Dokumente', 'wp-starter')) }}'"></span>
     </p>
 

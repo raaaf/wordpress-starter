@@ -17,6 +17,9 @@ interface NonceSet {
 
 let cachedNonces: NonceSet | null = null;
 let cachedAt = 0;
+// Callers that start together (facets + first page on load) share one
+// in-flight request instead of each asking the server for nonces.
+let inflightNonces: Promise<NonceSet> | null = null;
 const NONCE_CACHE_MS = 60_000;
 
 async function requestNonces(): Promise<NonceSet> {
@@ -40,7 +43,12 @@ async function fetchNonces(): Promise<NonceSet> {
   if (cachedNonces && now - cachedAt < NONCE_CACHE_MS) {
     return cachedNonces;
   }
-  return requestNonces();
+  if (!inflightNonces) {
+    inflightNonces = requestNonces().finally(() => {
+      inflightNonces = null;
+    });
+  }
+  return inflightNonces;
 }
 
 // A cached nonce can be rejected by the server (e.g. it expired between

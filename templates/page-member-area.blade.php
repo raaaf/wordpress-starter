@@ -19,7 +19,7 @@
 
                 {{-- Render standard WordPress content if available --}}
                 @if(get_the_content())
-                    <div class="page-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="page-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
                         <x-prose>
                             @php(the_content())
                         </x-prose>
