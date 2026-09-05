@@ -35,6 +35,7 @@ class Security
         if (self::$nonce === null) {
             self::$nonce = base64_encode(random_bytes(16));
         }
+
         return self::$nonce;
     }
 
@@ -76,7 +77,7 @@ class Security
                 '/(^|;\s*)(script-src)(\s[^;,]*)/',
                 '$1$2$3 \'unsafe-eval\'',
                 $csp,
-                1
+                1,
             ) ?? $csp;
         }
 
@@ -90,12 +91,42 @@ class Security
                     '/(^|;\s*)(' . $directive . ')(\s[^;,]*)/',
                     '$1$2$3 ' . $nonceSource,
                     $csp,
-                    1
+                    1,
                 ) ?? $csp;
             }
         }
 
         return $csp;
+    }
+
+    /**
+     * Recognize and patch a single raw "Header: value" line (as returned by
+     * headers_list()) if it is the Content-Security-Policy header.
+     *
+     * Extracted out of the admin_init header_register_callback closure in
+     * init() so the prefix-stripping and patching can be unit-tested without
+     * relying on PHP actually flushing headers.
+     *
+     * Regex-strips the "Content-Security-Policy:" prefix instead of
+     * substr(): a header value can arrive without a space after the colon
+     * (e.g. no leading space from the sending plugin), and substr() with a
+     * fixed 'Content-Security-Policy: ' length would then eat the CSP's
+     * first character. "Content-Security-Policy-Report-Only:" is a
+     * different, CSP3 header and is deliberately NOT matched here: the
+     * literal prefix check requires the colon right after "Policy".
+     *
+     * @return string|null The replacement full header line ("Content-Security-Policy: ...")
+     *                     or null when $rawHeaderValue is not a CSP header, left untouched.
+     */
+    public static function patchCspHeaderValue(string $rawHeaderValue): ?string
+    {
+        if (stripos($rawHeaderValue, 'Content-Security-Policy:') !== 0) {
+            return null;
+        }
+
+        $csp = preg_replace('/^content-security-policy:\s*/i', '', $rawHeaderValue) ?? $rawHeaderValue;
+
+        return 'Content-Security-Policy: ' . self::addUnsafeEvalToCSP($csp);
     }
 
     /**
@@ -247,7 +278,7 @@ class Security
      */
     private static function getEmbedOrigins(): string
     {
-        $raw = \WordpressStarter\Acf\Fields::option('embed_allowed_hosts', '');
+        $raw = Acf\Fields::option('embed_allowed_hosts', '');
 
         if (!is_string($raw) || trim($raw) === '') {
             return '';
@@ -330,6 +361,22 @@ class Security
     }
 
     /**
+     * The hardening headers as a name => value map, so tests can pin the
+     * exact set and values without triggering a real header() send.
+     *
+     * @return array<string, string>
+     */
+    public static function getHardeningHeaders(): array
+    {
+        return [
+            'X-Content-Type-Options' => 'nosniff',
+            'X-Frame-Options' => 'SAMEORIGIN',
+            'Referrer-Policy' => 'strict-origin-when-cross-origin',
+            'Permissions-Policy' => 'geolocation=(), camera=(), microphone=(), payment=()',
+        ];
+    }
+
+    /**
      * Send hardening headers that do not depend on the CSP.
      *
      * Registered before the CSP guard so disabling the CSP does not silently
@@ -342,10 +389,9 @@ class Security
                 return;
             }
 
-            header('X-Content-Type-Options: nosniff');
-            header('X-Frame-Options: SAMEORIGIN');
-            header('Referrer-Policy: strict-origin-when-cross-origin');
-            header('Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=()');
+            foreach (self::getHardeningHeaders() as $name => $value) {
+                header("{$name}: {$value}");
+            }
         });
     }
 
@@ -374,6 +420,7 @@ class Security
             if (is_admin() && isset($headers['Content-Security-Policy'])) {
                 $headers['Content-Security-Policy'] = self::addUnsafeEvalToCSP($headers['Content-Security-Policy']);
             }
+
             return $headers;
         });
 
@@ -385,16 +432,10 @@ class Security
                 header_register_callback(function (): void {
                     $headers = headers_list();
                     foreach ($headers as $header) {
-                        if (stripos($header, 'Content-Security-Policy:') === 0) {
-                            // Remove the old header and set a new one with unsafe-eval.
-                            // Regex-strip the prefix instead of substr(): a header value can
-                            // arrive without a space after the colon (e.g. no leading space
-                            // from the sending plugin), and substr() with a fixed 'Content-
-                            // Security-Policy: ' length would then eat the CSP's first
-                            // character.
-                            $csp = preg_replace('/^content-security-policy:\s*/i', '', $header) ?? $header;
+                        $patched = Security::patchCspHeaderValue($header);
+                        if ($patched !== null) {
                             header_remove('Content-Security-Policy');
-                            header('Content-Security-Policy: ' . Security::addUnsafeEvalToCSP($csp));
+                            header($patched);
                             break;
                         }
                     }
@@ -411,6 +452,7 @@ class Security
             // inline scripts) into one $tag string, so nonce each opening
             // <script ...> tag individually instead of only the first.
             $nonce = self::getNonce();
+
             return preg_replace_callback('/<script\b[^>]*>/i', function (array $matches) use ($nonce): string {
                 $openingTag = $matches[0];
                 // Skip if this tag already carries a nonce attribute, not
@@ -418,6 +460,7 @@ class Security
                 if (preg_match('/\snonce=/i', $openingTag) === 1) {
                     return $openingTag;
                 }
+
                 return preg_replace('/<script\b/i', "<script nonce=\"{$nonce}\"", $openingTag, 1) ?? $openingTag;
             }, $tag) ?? $tag;
         }, 10, 2);
@@ -427,6 +470,7 @@ class Security
             if (!isset($attributes['nonce'])) {
                 $attributes['nonce'] = self::getNonce();
             }
+
             return $attributes;
         });
 
@@ -435,6 +479,7 @@ class Security
             if (!isset($attributes['nonce'])) {
                 $attributes['nonce'] = self::getNonce();
             }
+
             return $attributes;
         });
     }

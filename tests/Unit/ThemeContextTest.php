@@ -13,7 +13,6 @@ final class ThemeContextTest extends TestCase
         parent::setUp();
         $GLOBALS['wp_mock_template'] = 'wordpress-starter-theme';
         $GLOBALS['wp_mock_options'] = [];
-        $GLOBALS['wp_mock_transients'] = [];
         ThemeContext::reset();
     }
 

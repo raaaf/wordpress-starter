@@ -58,6 +58,18 @@ class BladeServiceProvider extends ServiceProvider
         Container::setInstance($this->container);
         /** @phpstan-ignore argument.type */
         Facade::setFacadeApplication($this->container);
+
+        // Application::getInstance()->boot() can run more than once in one
+        // PHP process (e.g. each test that calls renderTemplate()). Facades
+        // cache their resolved instance (Facade::$resolvedInstance) across
+        // that, so without clearing it here the Blade facade keeps serving
+        // the PREVIOUS boot's compiler even though a fresh one was just
+        // bound above. Custom directives (@kses, @field, ...) then get
+        // registered on the new compiler while views render through the
+        // stale one, so the directives silently never fire.
+        // Safe to clear unconditionally: this theme is the only illuminate/support
+        // facade user in the process, so no other component's resolved facade is lost.
+        Facade::clearResolvedInstances();
     }
 
     private function registerBladeEngine(): void

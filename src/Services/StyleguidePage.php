@@ -188,9 +188,18 @@ final class StyleguidePage
      * names no page at all. Clearing markers by option alone would delete
      * nothing, leave both marked pages marked, and hand the next find() the same
      * AMBIGUOUS answer forever, with no route out through the Tools panel.
+     *
+     * Gated the same way as adopt(): not an anonymous ajax request and only for
+     * a user who can edit_pages, since this too can run from a read-only
+     * render path. $force skips that gate for the same kind of caller adopt()
+     * exempts (no logged-in user).
      */
-    public static function forget(): void
+    public static function forget(bool $force = false): void
     {
+        if (!$force && ( wp_doing_ajax() || !current_user_can('edit_pages') )) {
+            return;
+        }
+
         $pageId = (int) get_option(self::optionKey());
         if ($pageId > 0) {
             delete_post_meta($pageId, self::markerKey());

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use Tests\Support\TestCase;
-use WordpressStarter\Vite;
 use WordpressStarter\Config;
+use WordpressStarter\Vite;
 
 /**
  * Tests for Vite class.
@@ -28,23 +28,15 @@ final class ViteTest extends TestCase
 
     private function resetViteState(): void
     {
-        $reflection = new \ReflectionClass(Vite::class);
-
-        $manifestProperty = $reflection->getProperty('manifest');
-        $manifestProperty->setAccessible(true);
-        $manifestProperty->setValue(null, null);
-
-        $isDevProperty = $reflection->getProperty('isDev');
-        $isDevProperty->setAccessible(true);
-        $isDevProperty->setValue(null, false);
+        $this->resetStaticProperties(Vite::class, [
+            'manifest' => null,
+            'isDev' => false,
+        ]);
     }
 
     private function setViteDevMode(bool $isDev): void
     {
-        $reflection = new \ReflectionClass(Vite::class);
-        $isDevProperty = $reflection->getProperty('isDev');
-        $isDevProperty->setAccessible(true);
-        $isDevProperty->setValue(null, $isDev);
+        $this->resetStaticProperties(Vite::class, ['isDev' => $isDev]);
     }
 
     public function testIsDevServerRunningReturnsFalseWhenServerDown(): void

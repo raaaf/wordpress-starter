@@ -46,7 +46,7 @@ final class StyleguidePageTest extends TestCase
      */
     private function countingStorageSpy(): ArrayAccess
     {
-        return new class() implements ArrayAccess {
+        return new class () implements ArrayAccess {
             public int $writes = 0;
 
             /** @var array<string, mixed> */
@@ -282,5 +282,55 @@ final class StyleguidePageTest extends TestCase
 
         $this->assertEmpty(get_post_meta(701, $marker, true));
         $this->assertEmpty(get_post_meta(702, $marker, true));
+    }
+
+    /**
+     * The forget() gate mirrors adopt(): forget() can also run from a read-only render
+     * path, so a user without edit_pages must not have the marker/option
+     * cleared on their behalf.
+     */
+    public function testForgetGateBlocksClearForAUserWithoutEditPages(): void
+    {
+        StyleguidePage::adopt(632);
+        $GLOBALS['wp_mock_posts']['page'] = [632];
+        $GLOBALS['wp_mock_current_user_can'] = ['edit_pages' => false];
+
+        StyleguidePage::forget();
+
+        $this->assertSame('1', get_post_meta(632, StyleguidePage::markerKey(), true));
+        $this->assertSame(632, get_option(StyleguidePage::optionKey()));
+    }
+
+    /**
+     * The other half of the same gate: even a user with edit_pages must not
+     * have the marker/option cleared on their behalf from an AJAX request.
+     */
+    public function testForgetGateBlocksClearDuringAjaxEvenWithEditPages(): void
+    {
+        StyleguidePage::adopt(632);
+        $GLOBALS['wp_mock_posts']['page'] = [632];
+        $GLOBALS['wp_mock_doing_ajax'] = true;
+
+        StyleguidePage::forget();
+
+        $this->assertSame('1', get_post_meta(632, StyleguidePage::markerKey(), true));
+        $this->assertSame(632, get_option(StyleguidePage::optionKey()));
+    }
+
+    /**
+     * The force: true flag bypasses the gate regardless of capability or ajax
+     * context, the same way it does for adopt().
+     */
+    public function testForgetForceBypassesTheGate(): void
+    {
+        StyleguidePage::adopt(632);
+        $GLOBALS['wp_mock_posts']['page'] = [632];
+        $GLOBALS['wp_mock_current_user_can'] = ['edit_pages' => false];
+        $GLOBALS['wp_mock_doing_ajax'] = true;
+
+        StyleguidePage::forget(force: true);
+
+        $this->assertEmpty(get_post_meta(632, StyleguidePage::markerKey(), true));
+        $this->assertFalse(get_option(StyleguidePage::optionKey(), false));
     }
 }

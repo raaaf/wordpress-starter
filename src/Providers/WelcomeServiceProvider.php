@@ -531,7 +531,9 @@ class WelcomeServiceProvider extends ServiceProvider
         if ($existingPageId > 0) {
             wp_delete_post($existingPageId, true);
         }
-        StyleguidePage::forget();
+        // force: true, this handler already authorized on delete_pages (verifyAdminAction() above),
+        // but forget()'s own gate requires edit_pages, so without force the option/marker would survive.
+        StyleguidePage::forget(force: true);
 
         wp_safe_redirect(admin_url('admin.php?page=theme-options-tools'));
         exit;

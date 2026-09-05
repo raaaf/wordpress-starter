@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Providers;
 
 use Tests\Support\TestCase;
+use WordpressStarter\Application;
 use WordpressStarter\Providers\AcfServiceProvider;
 
 /**
@@ -86,5 +87,73 @@ final class AcfServiceProviderTest extends TestCase
 
         $this->assertSame($input, $tags);
         $this->assertArrayNotHasKey('form', $tags);
+    }
+
+    public function testAllowFormControlTagsNeverAddsOnHandlersOrFormaction(): void
+    {
+        // The filter lists attributes explicitly (see docblock); on* handlers
+        // and formaction must never appear in the resulting allow-list, since
+        // core's own allowlist merge would otherwise let a script back in.
+        $tags = AcfServiceProvider::allowFormControlTags([], 'post');
+
+        foreach (['form', 'input'] as $tag) {
+            $this->assertArrayNotHasKey('onclick', $tags[$tag], "<{$tag}> must not allow onclick");
+            $this->assertArrayNotHasKey('onsubmit', $tags[$tag], "<{$tag}> must not allow onsubmit");
+            $this->assertArrayNotHasKey('formaction', $tags[$tag], "<{$tag}> must not allow formaction");
+        }
+    }
+
+    public function testAllowFormControlTagsIsIdempotentWhenAppliedTwice(): void
+    {
+        $once = AcfServiceProvider::allowFormControlTags([], 'post');
+        $twice = AcfServiceProvider::allowFormControlTags($once, 'post');
+
+        $this->assertSame($once, $twice);
+    }
+
+    public function testAllowMediaSourceTagReturnsInputUnchangedForNonStringContext(): void
+    {
+        $input = ['video' => ['src' => true]];
+
+        $tags = AcfServiceProvider::allowMediaSourceTag($input, '');
+
+        $this->assertSame($input, $tags);
+        $this->assertArrayNotHasKey('source', $tags);
+    }
+
+    /**
+     * Renders the real @kses directive through a temp Blade view. A
+     * compileString()-only check (no eval) was tried first and rejected:
+     * phpcs forbids eval() project-wide (Security.eval sniff), so executing
+     * the compiled directive output without a real Blade render is not
+     * available here. The temp file is scoped to a per-run unique name under
+     * a mode-0700 directory in the system temp dir and removed immediately
+     * after the render.
+     */
+    public function testKsesDirectiveSanitizesHostilePayloadAndKeepsAllowedMarkup(): void
+    {
+        Application::getInstance()->boot();
+
+        $factory = blade();
+        $dir = sys_get_temp_dir() . '/wp-starter-test-' . bin2hex(random_bytes(8));
+        mkdir($dir, 0700);
+        file_put_contents($dir . '/kses-probe.blade.php', '@kses($html)');
+        chmod($dir . '/kses-probe.blade.php', 0600);
+        $factory->getFinder()->addLocation($dir);
+
+        try {
+            $out = $factory->make('kses-probe', [
+                'html' => '<script>alert(1)</script><img src="x" onerror="alert(1)">'
+                    . '<a href="javascript:alert(1)">link</a><strong>ok</strong>',
+            ])->render();
+        } finally {
+            unlink($dir . '/kses-probe.blade.php');
+            rmdir($dir);
+        }
+
+        $this->assertStringNotContainsString('<script', $out);
+        $this->assertStringNotContainsString('onerror', $out);
+        $this->assertStringNotContainsString('javascript:', $out);
+        $this->assertStringContainsString('<strong>ok</strong>', $out);
     }
 }

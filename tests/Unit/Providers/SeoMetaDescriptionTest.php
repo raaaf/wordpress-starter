@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Providers;
 
-use ReflectionMethod;
 use Tests\Support\TestCase;
 use WordpressStarter\Providers\SeoServiceProvider;
 
@@ -50,10 +49,7 @@ final class SeoMetaDescriptionTest extends TestCase
 
     private function call(string $method, mixed ...$args): mixed
     {
-        $reflection = new ReflectionMethod(SeoServiceProvider::class, $method);
-        $reflection->setAccessible(true);
-
-        return $reflection->invoke($this->provider, ...$args);
+        return $this->invokeMethod($this->provider, $method, $args);
     }
 
     /**

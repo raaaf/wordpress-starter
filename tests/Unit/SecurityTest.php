@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use PHPUnit\Framework\Attributes\DataProvider;
-use ReflectionClass;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Tests\Support\TestCase;
+use WordpressStarter\Config;
 use WordpressStarter\Security;
 
 /**
@@ -14,33 +16,36 @@ use WordpressStarter\Security;
  */
 final class SecurityTest extends TestCase
 {
+    private bool $enableCspBefore;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->resetSecurityState();
+        $this->enableCspBefore = (bool) Config::get('security.enable_csp');
     }
 
     protected function tearDown(): void
     {
         $this->resetSecurityState();
+        Config::set('security.enable_csp', $this->enableCspBefore);
         parent::tearDown();
     }
 
     private function resetSecurityState(): void
     {
-        $reflection = new ReflectionClass(Security::class);
-        $nonceProperty = $reflection->getProperty('nonce');
-        $nonceProperty->setAccessible(true);
-        $nonceProperty->setValue(null, null);
+        $this->resetStaticProperties(Security::class, ['nonce' => null]);
     }
 
-    public function testGetNonceGeneratesBase64String(): void
+    public function testGetNonceGeneratesBase64StringOfTheGeneratedByteLength(): void
     {
         $nonce = Security::getNonce();
 
-        // Base64 encoded 16 bytes should be 24 chars with padding, or 22 without padding
-        // PHP's base64_encode includes padding, so it's typically 24 chars for 16 bytes
-        $this->assertMatchesRegularExpression('/^[A-Za-z0-9+\/=]+$/', $nonce);
+        // Security::getNonce() generates random_bytes(16), base64-encoded.
+        $decoded = base64_decode($nonce, true);
+
+        $this->assertNotFalse($decoded, 'nonce must be valid base64');
+        $this->assertSame(16, strlen($decoded));
     }
 
     public function testGetNonceReturnsSameValueOnMultipleCalls(): void
@@ -82,6 +87,8 @@ final class SecurityTest extends TestCase
         $this->assertStringContainsString("img-src 'self'", $header);
         $this->assertStringContainsString("connect-src 'self'", $header);
         $this->assertStringContainsString("base-uri 'self'", $header);
+        $this->assertStringContainsString("frame-ancestors 'self'", $header);
+        $this->assertStringContainsString("worker-src 'self'", $header);
     }
 
     /**
@@ -105,6 +112,33 @@ final class SecurityTest extends TestCase
 
         $this->assertStringContainsString('https://tracking.example.com', $scriptSrc);
         $this->assertStringContainsString('https://tracking.example.com', $connectSrc);
+
+        // Checked against the FULL header, not only the sliced directives
+        // above: a hostile value that escaped its host-only sanitization
+        // could otherwise land in an unrelated directive that the slice
+        // above never looks at, and still pass the two checks above.
+        $this->assertSame(2, substr_count($header, 'https://tracking.example.com'), 'origin must appear exactly once per directive, twice total');
+        $this->assertStringEndsWith(' https://tracking.example.com', $scriptSrc, 'script-src must end with the analytics origin, nothing appended after it');
+    }
+
+    /**
+     * Both admin-settable origins must land in the right directives at the
+     * same time: analytics in script-src/connect-src, embed hosts in
+     * frame-src. Guards against a change to one option's handling silently
+     * clobbering the other's directive.
+     */
+    public function testCSPCarriesBothAnalyticsAndEmbedOriginsSimultaneously(): void
+    {
+        update_option('rybbit_script_url', 'https://tracking.example.com/api/script.js');
+        $this->setMockField('embed_allowed_hosts', 'calendly.com', 'option');
+
+        $header = Security::getCSPHeader();
+
+        $this->assertStringContainsString('https://tracking.example.com', $this->directive($header, 'script-src'));
+        $this->assertStringContainsString('https://tracking.example.com', $this->directive($header, 'connect-src'));
+        $this->assertStringContainsString('https://calendly.com', $this->directive($header, 'frame-src'));
+        $this->assertStringNotContainsString('https://calendly.com', $this->directive($header, 'script-src'));
+        $this->assertStringNotContainsString('https://tracking.example.com', $this->directive($header, 'frame-src'));
     }
 
     /** Ohne eigene Option gilt der Standard des Plugins, nicht gar nichts. */
@@ -131,12 +165,18 @@ final class SecurityTest extends TestCase
     public function testCSPRejectsUnusableOrigins(string $url, ?string $erwarteterHost, string $warum): void
     {
         update_option('rybbit_script_url', $url);
-        $scriptSrc = $this->directive(Security::getCSPHeader(), 'script-src');
+        $header = Security::getCSPHeader();
+        $scriptSrc = $this->directive($header, 'script-src');
 
-        // Struktur haelt immer: eine Direktive, kein Semikolon, kein Komma.
-        $this->assertSame(1, preg_match_all('/script-src/', $scriptSrc), $warum);
-        $this->assertStringNotContainsString(';', $scriptSrc, $warum);
-        $this->assertStringNotContainsString(',', $scriptSrc, $warum);
+        // Gegen den GANZEN Header pruefen, nicht nur gegen das erste Segment,
+        // das directive() herausschneidet: eine durchgerutschte "; script-src *"
+        // wuerde im Header ein zweites "script-src" erzeugen, das directive()
+        // (nimmt nur den ersten Treffer) nie zu Gesicht bekaeme.
+        $this->assertSame(1, preg_match_all('/(?:^|;\s*)script-src /', $header), $warum);
+        $this->assertStringNotContainsString('script-src *', $header, $warum);
+        if ($url !== '') {
+            $this->assertStringNotContainsString($url, $header, $warum);
+        }
 
         if ($erwarteterHost === null) {
             $this->assertStringNotContainsString('https://', $scriptSrc, $warum);
@@ -145,7 +185,6 @@ final class SecurityTest extends TestCase
         }
 
         $this->assertStringContainsString($erwarteterHost, $scriptSrc, $warum);
-        $this->assertStringNotContainsString('script-src *', $scriptSrc, $warum);
     }
 
     /** @return array<string, array{0: string, 1: string|null, 2: string}> */
@@ -220,12 +259,23 @@ final class SecurityTest extends TestCase
         $this->assertStringContainsString("'unsafe-inline'", $styleSrc);
     }
 
-    public function testGetCSPHeaderDirectivesAreSemicolonSeparated(): void
+    public function testGetCSPHeaderContainsEachRequiredDirectiveExactlyOnce(): void
     {
         $header = Security::getCSPHeader();
 
-        // All directives should be separated by semicolons
-        $this->assertGreaterThan(5, substr_count($header, ';'));
+        $directiveNames = [
+            'default-src', 'script-src', 'style-src', 'img-src', 'font-src',
+            'frame-src', 'frame-ancestors', 'base-uri', 'connect-src',
+            'worker-src', 'media-src',
+        ];
+
+        foreach ($directiveNames as $name) {
+            $this->assertSame(
+                1,
+                preg_match_all('/\b' . preg_quote($name, '/') . ' /', $header),
+                "{$name} must appear exactly once",
+            );
+        }
     }
 
     /**
@@ -246,7 +296,7 @@ final class SecurityTest extends TestCase
     }
 
     /**
-     * script-src already carries a nonce: our own nonce is added there (a
+     * Script-src already carries a nonce: our own nonce is added there (a
      * nonce source already makes the browser ignore 'unsafe-inline' in that
      * directive, so nothing is lost), plus 'unsafe-eval'. style-src has no
      * nonce/hash, so it is left untouched.
@@ -288,7 +338,7 @@ final class SecurityTest extends TestCase
     }
 
     /**
-     * script-src-elem is a separate CSP3 directive and must not be matched by
+     * Script-src-elem is a separate CSP3 directive and must not be matched by
      * the "script-src" patch; only the real script-src is touched.
      */
     public function testAddUnsafeEvalToCSPDoesNotMatchScriptSrcElem(): void
@@ -300,7 +350,7 @@ final class SecurityTest extends TestCase
         $this->assertSame("script-src-elem 'self'; script-src 'self' 'unsafe-eval'", $result);
     }
 
-    /** 'unsafe-eval' already present in script-src: it must not be appended twice. */
+    /** Unsafe-eval already present in script-src: it must not be appended twice. */
     public function testAddUnsafeEvalToCSPDoesNotDuplicateExistingUnsafeEval(): void
     {
         $csp = "script-src 'self' 'unsafe-eval'";
@@ -308,5 +358,332 @@ final class SecurityTest extends TestCase
         $result = Security::addUnsafeEvalToCSP($csp);
 
         $this->assertSame("script-src 'self' 'unsafe-eval'", $result);
+    }
+
+    /**
+     * Style-src already carries a nonce: our own nonce is added there too,
+     * mirroring the script-src case, plus 'unsafe-eval' in script-src.
+     */
+    public function testAddUnsafeEvalToCSPAddsNonceToStyleSrcWhenItAlreadyHasOne(): void
+    {
+        $nonce = Security::getNonce();
+        $csp = "script-src 'self'; style-src 'self' 'nonce-xyz'";
+
+        $result = Security::addUnsafeEvalToCSP($csp);
+
+        $this->assertSame(
+            "script-src 'self' 'unsafe-eval'; style-src 'self' 'nonce-xyz' 'nonce-{$nonce}'",
+            $result,
+        );
+    }
+
+    /** A hash source (sha256/384/512) triggers the nonce injection just like a nonce source does. */
+    public function testAddUnsafeEvalToCSPAddsNonceWhenScriptSrcCarriesAHash(): void
+    {
+        $nonce = Security::getNonce();
+        $csp = "script-src 'self' 'sha256-abc123='; style-src 'self'";
+
+        $result = Security::addUnsafeEvalToCSP($csp);
+
+        $this->assertSame(
+            "script-src 'self' 'sha256-abc123=' 'unsafe-eval' 'nonce-{$nonce}'; style-src 'self'",
+            $result,
+        );
+    }
+
+    /** A second call on an already-patched header must not add the nonce twice. */
+    public function testAddUnsafeEvalToCSPDoesNotDuplicateNonceOnSecondCall(): void
+    {
+        $csp = "script-src 'self' 'nonce-abc'; style-src 'self'";
+
+        $first = Security::addUnsafeEvalToCSP($csp);
+        $second = Security::addUnsafeEvalToCSP($first);
+
+        $this->assertSame($first, $second);
+    }
+
+    /**
+     * The getLocalSources() gate ties development-only CSP sources to
+     * WP_ENVIRONMENT_TYPE === 'local'. Runs in a separate process: the
+     * constant, once defined, cannot be reset for a later test in the same
+     * process, and other tests in this file rely on it being undefined
+     * (production-like).
+     */
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testGetLocalSourcesOmittedInProduction(): void
+    {
+        define('WP_ENVIRONMENT_TYPE', 'production');
+
+        $header = Security::getCSPHeader();
+
+        $this->assertStringNotContainsString('http://localhost:', $header);
+        $this->assertStringNotContainsString('ws://localhost:', $header);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testGetLocalSourcesIncludedInLocalEnvironment(): void
+    {
+        define('WP_ENVIRONMENT_TYPE', 'local');
+
+        $header = Security::getCSPHeader();
+
+        $this->assertStringContainsString('http://localhost:5180', $header);
+        $this->assertStringContainsString('ws://localhost:5180', $header);
+    }
+
+    /**
+     * The getLocalSources() method also reads the dynamic port from .vite-port. 5180 is
+     * already a hardcoded default port, so the two tests above would still
+     * pass even if that dynamic-port read were entirely broken. This test
+     * points get_template_directory() at a fixture carrying a port that is
+     * NOT in the hardcoded list, so only a real read of the file can produce
+     * it, and asserts it appears in local but not in production.
+     */
+    private function withVitePortFixture(string $port, callable $assert): void
+    {
+        $tempDir = sys_get_temp_dir() . '/wp-starter-vite-port-test-' . uniqid();
+        mkdir($tempDir);
+        file_put_contents($tempDir . '/.vite-port', $port);
+        $GLOBALS['wp_mock_template_directory'] = $tempDir;
+
+        try {
+            $assert(Security::getCSPHeader());
+        } finally {
+            unlink($tempDir . '/.vite-port');
+            rmdir($tempDir);
+        }
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testGetLocalSourcesOmitsTheDynamicVitePortInProduction(): void
+    {
+        define('WP_ENVIRONMENT_TYPE', 'production');
+
+        $this->withVitePortFixture('6123', function (string $header): void {
+            $this->assertStringNotContainsString(':6123', $header);
+        });
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testGetLocalSourcesIncludesTheDynamicVitePortInLocalEnvironment(): void
+    {
+        define('WP_ENVIRONMENT_TYPE', 'local');
+
+        $this->withVitePortFixture('6123', function (string $header): void {
+            $this->assertStringContainsString('http://localhost:6123', $header);
+            $this->assertStringContainsString('ws://localhost:6123', $header);
+        });
+    }
+
+    /** @return array<string, array{0: string, 1: string}> */
+    public static function embedHostRohwerte(): array
+    {
+        return [
+            'zwei gueltige Hosts' => ["calendly.com\ncore.example.com", ' https://calendly.com https://core.example.com'],
+            'mit Schema' => ['https://calendly.com/booking', ' https://calendly.com'],
+            'mit Pfad' => ['example.com/pfad/zu/etwas', ' https://example.com'],
+            // Deliberate divergence from getAnalyticsOrigin(), which DOES keep
+            // a port (see "mit Port bleibt erhalten" in unbrauchbareHerkuenfte()):
+            // that origin comes from wp_parse_url()'s PHP_URL_PORT, while embed
+            // hosts are entered as plain "host[:port]" text without a scheme,
+            // so httpsOriginFromHost()'s host-only character check rejects the
+            // colon and drops the whole entry rather than stripping just the port.
+            'mit Port wird verworfen' => ['example.com:8443', ''],
+            'leere Zeilen werden uebersprungen' => ["\ncalendly.com\n\n", ' https://calendly.com'],
+            'Semikolon wird verworfen' => ['evil.test; script-src *', ''],
+            'Leerzeichen wird verworfen' => ['evil test', ''],
+        ];
+    }
+
+    /** The getEmbedOrigins() method reads the admin-maintained multiline host list and builds the frame-src suffix. */
+    #[DataProvider('embedHostRohwerte')]
+    public function testGetEmbedOriginsFiltersRawAdminInput(string $raw, string $expected): void
+    {
+        $this->setMockField('embed_allowed_hosts', $raw, 'option');
+
+        $result = $this->invokeStaticMethod(Security::class, 'getEmbedOrigins');
+
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * The embed-hosts option feeds frame-src the same way the analytics
+     * option feeds script-src/connect-src: checked against the FULL header
+     * here, not a directive slice, so an escape into a second directive
+     * would not slip past unnoticed.
+     */
+    public function testGetEmbedOriginsInjectionDoesNotEscapeIntoFullCSPHeader(): void
+    {
+        $this->setMockField('embed_allowed_hosts', "evil.test; script-src *\ncalendly.com", 'option');
+
+        $header = Security::getCSPHeader();
+
+        $this->assertStringNotContainsString('script-src *', $header);
+        $this->assertSame(1, preg_match_all('/(?:^|;\s*)script-src /', $header));
+        $this->assertSame(1, preg_match_all('/(?:^|;\s*)frame-src /', $header));
+        $this->assertStringContainsString('https://calendly.com', $this->directive($header, 'frame-src'));
+        $this->assertStringNotContainsString('evil.test', $header);
+    }
+
+    public function testScriptLoaderTagAddsNonceToSingleTag(): void
+    {
+        Security::init();
+        $nonce = Security::getNonce();
+
+        $tag = "<script src='foo.js'></script>\n"; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- test fixture string, never rendered
+        $result = apply_filters('script_loader_tag', $tag, 'foo');
+
+        $this->assertSame('<script nonce="' . $nonce . '" src=\'foo.js\'></script>' . "\n", $result);
+    }
+
+    /** Core can concatenate several script tags into one string; every one of them gets its own nonce. */
+    public function testScriptLoaderTagNoncesEveryTagInAConcatenatedString(): void
+    {
+        Security::init();
+        $nonce = Security::getNonce();
+
+        $tag = "<script id='a-before'>var a=1;</script>\n<script src='a.js' id='a'></script>\n<script id='a-after'>var b=2;</script>\n"; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- test fixture string, never rendered
+        $result = apply_filters('script_loader_tag', $tag, 'a');
+
+        $needle = '<script nonce="' . $nonce . '"';
+        $this->assertSame(3, substr_count((string) $result, $needle));
+    }
+
+    public function testScriptLoaderTagLeavesExistingNonceUnchanged(): void
+    {
+        Security::init();
+
+        $tag = "<script nonce=\"existing-nonce\" src='foo.js'></script>\n"; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- test fixture string, never rendered
+        $result = apply_filters('script_loader_tag', $tag, 'foo');
+
+        $this->assertSame($tag, $result);
+    }
+
+    /** A "nonce=" substring inside the src query string must not be mistaken for an existing nonce attribute. */
+    public function testScriptLoaderTagAddsNonceWhenSrcHasNonceQueryParam(): void
+    {
+        Security::init();
+        $nonce = Security::getNonce();
+
+        $tag = "<script src='foo.js?nonce=1'></script>\n"; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- test fixture string, never rendered
+        $result = apply_filters('script_loader_tag', $tag, 'foo');
+
+        $expected = '<script nonce="' . $nonce . '" src=\'foo.js?nonce=1\'></script>' . "\n";
+        $this->assertSame($expected, $result);
+    }
+
+    public function testScriptLoaderTagAddsNonceToTagWithoutAttributes(): void
+    {
+        Security::init();
+        $nonce = Security::getNonce();
+
+        $tag = '<script></script>';
+        $result = apply_filters('script_loader_tag', $tag, 'foo');
+
+        $this->assertSame('<script nonce="' . $nonce . '"></script>', $result);
+    }
+
+    /**
+     * The patchCspHeaderValue() method is the pure logic extracted from the admin_init
+     * header_register_callback closure, tested without relying on PHP
+     * actually flushing headers.
+     */
+    #[DataProvider('cspHeaderLines')]
+    public function testPatchCspHeaderValue(string $rawHeaderValue, bool $isCsp, ?string $expected = null): void
+    {
+        $result = Security::patchCspHeaderValue($rawHeaderValue);
+
+        if (!$isCsp) {
+            $this->assertNull($result, 'non-CSP header lines must be left untouched (null)');
+
+            return;
+        }
+
+        $this->assertSame($expected, $result);
+    }
+
+    /** @return array<string, array{0: string, 1: bool, 2?: string}> */
+    public static function cspHeaderLines(): array
+    {
+        return [
+            'standard header with space' => ["Content-Security-Policy: script-src 'self'", true, "Content-Security-Policy: script-src 'self' 'unsafe-eval'"],
+            'no space after colon (the past defect)' => ["content-security-policy:script-src 'self'", true, "Content-Security-Policy: script-src 'self' 'unsafe-eval'"],
+            'no CSP prefix at all' => ['X-Frame-Options: SAMEORIGIN', false],
+            'report-only is a different header and must not be patched as CSP' => ["Content-Security-Policy-Report-Only: script-src 'self'", false],
+        ];
+    }
+
+    /** The getHardeningHeaders() method pins the exact header names and values sent by addHardeningHeaders(). */
+    public function testGetHardeningHeadersReturnsThePinnedMap(): void
+    {
+        $this->assertSame(
+            [
+                'X-Content-Type-Options' => 'nosniff',
+                'X-Frame-Options' => 'SAMEORIGIN',
+                'Referrer-Policy' => 'strict-origin-when-cross-origin',
+                'Permissions-Policy' => 'geolocation=(), camera=(), microphone=(), payment=()',
+            ],
+            Security::getHardeningHeaders(),
+        );
+    }
+
+    /** The init() method registers the CSP send_headers hook and makes the nonce available globally. */
+    public function testInitRegistersCspHookAndExposesNonceGlobal(): void
+    {
+        Security::init();
+
+        $this->assertArrayHasKey('send_headers', $GLOBALS['wp_mock_hooks']['actions']);
+        $this->assertGreaterThanOrEqual(2, count($GLOBALS['wp_mock_hooks']['actions']['send_headers']), 'hardening headers and CSP header are both hooked on send_headers');
+        $this->assertArrayHasKey('wp_headers', $GLOBALS['wp_mock_hooks']['filters']);
+        $this->assertArrayHasKey('script_loader_tag', $GLOBALS['wp_mock_hooks']['filters']);
+        $this->assertArrayHasKey('wp_inline_script_attributes', $GLOBALS['wp_mock_hooks']['filters']);
+        $this->assertArrayHasKey('wp_script_attributes', $GLOBALS['wp_mock_hooks']['filters']);
+        $this->assertSame(Security::getNonce(), $GLOBALS['csp_nonce']);
+    }
+
+    /** Disabling the CSP in config must not register a CSP header hook or the wp_headers filter. */
+    public function testInitSkipsCspHookAndFilterWhenDisabledInConfig(): void
+    {
+        Config::set('security.enable_csp', false);
+
+        Security::init();
+
+        // Only addHardeningHeaders() registers on send_headers when CSP is off.
+        $this->assertCount(1, $GLOBALS['wp_mock_hooks']['actions']['send_headers'] ?? []);
+        $this->assertArrayNotHasKey('wp_headers', $GLOBALS['wp_mock_hooks']['filters']);
+    }
+
+    /** The wp_headers filter callback only patches the CSP header on admin pages. */
+    public function testWpHeadersFilterCallbackPatchesCspOnlyOnAdminPages(): void
+    {
+        Security::init();
+        $callback = $GLOBALS['wp_mock_hooks']['filters']['wp_headers'][0]['callback'];
+
+        $GLOBALS['wp_mock_is_admin'] = true;
+        $patched = $callback(['Content-Security-Policy' => "script-src 'self'"]);
+        $this->assertStringContainsString("'unsafe-eval'", $patched['Content-Security-Policy']);
+
+        $GLOBALS['wp_mock_is_admin'] = false;
+        $unpatched = $callback(['Content-Security-Policy' => "script-src 'self'"]);
+        $this->assertSame("script-src 'self'", $unpatched['Content-Security-Policy']);
+    }
+
+    /** The script_loader_tag and wp_script_attributes filter callbacks inject the current nonce. */
+    public function testScriptAttributeFilterCallbacksInjectNonce(): void
+    {
+        Security::init();
+        $nonce = Security::getNonce();
+
+        $inlineCallback = $GLOBALS['wp_mock_hooks']['filters']['wp_inline_script_attributes'][0]['callback'];
+        $this->assertSame(['nonce' => $nonce], $inlineCallback([]));
+        $this->assertSame(['nonce' => 'existing'], $inlineCallback(['nonce' => 'existing']), 'must not overwrite an already-present nonce');
+
+        $scriptCallback = $GLOBALS['wp_mock_hooks']['filters']['wp_script_attributes'][0]['callback'];
+        $this->assertSame(['nonce' => $nonce], $scriptCallback([]));
+        $this->assertSame(['nonce' => 'existing'], $scriptCallback(['nonce' => 'existing']), 'must not overwrite an already-present nonce');
     }
 }
