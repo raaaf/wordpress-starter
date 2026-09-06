@@ -1,3 +1,9 @@
+## [2.34.1](https://github.com/raaaf/wordpress-starter/compare/v2.34.0...v2.34.1) (2026-09-06)
+
+### Bug Fixes
+
+- **seo:** keep gated pages out of the Yoast sitemap ([670749b](https://github.com/raaaf/wordpress-starter/commit/670749b49962200bc1331815c475467759c7b957))
+
 # [2.34.0](https://github.com/raaaf/wordpress-starter/compare/v2.33.1...v2.34.0) (2026-09-05)
 
 ### Bug Fixes
