@@ -295,4 +295,41 @@ final class AccessTest extends TestCase
 
         $this->assertSame('', $query->get('meta_query'));
     }
+
+    // -- excludeFromYoastSitemap() ----------------------------------------
+
+    public function testExcludeFromYoastSitemapAddsGatedPageIds(): void
+    {
+        $GLOBALS['wp_mock_posts']['page'] = [12, 34];
+
+        $result = Access::excludeFromYoastSitemap([7]);
+
+        $this->assertSame([7, 12, 34], $result);
+    }
+
+    public function testExcludeFromYoastSitemapQueriesOnlyPublishedPagesFlaggedAsGated(): void
+    {
+        $GLOBALS['wp_mock_posts']['page'] = [];
+
+        Access::excludeFromYoastSitemap([]);
+
+        $args = $GLOBALS['wp_mock_get_posts_args'][0] ?? [];
+        $this->assertSame('page', $args['post_type'] ?? null);
+        $this->assertSame('publish', $args['post_status'] ?? null);
+        $this->assertSame('ids', $args['fields'] ?? null);
+        $this->assertSame([
+            'relation' => 'OR',
+            ['key' => 'page_is_protected', 'value' => '1', 'compare' => '='],
+            ['key' => 'page_is_member_area', 'value' => '1', 'compare' => '='],
+        ], $args['meta_query'] ?? null);
+    }
+
+    public function testExcludeFromYoastSitemapKeepsIdsUniqueAndIntegers(): void
+    {
+        $GLOBALS['wp_mock_posts']['page'] = ['12', 12];
+
+        $result = Access::excludeFromYoastSitemap(['7']);
+
+        $this->assertSame([7, 12], $result);
+    }
 }

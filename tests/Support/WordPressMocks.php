@@ -67,6 +67,7 @@ trait WordPressMocks
             'wp_mock_password_required' => false,
             'wp_mock_permalinks' => [],
             'wp_mock_post_id' => false,
+            'wp_mock_get_posts_args' => [],
             'wp_mock_posts' => [],
             'wp_mock_posts_by_id' => [],
             'wp_mock_registered_field_groups' => [],

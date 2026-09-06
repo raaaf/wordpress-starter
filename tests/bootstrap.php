@@ -1289,6 +1289,7 @@ if (!function_exists('delete_post_meta')) {
 if (!function_exists('get_posts')) {
     function get_posts(array $args = []): array
     {
+        $GLOBALS['wp_mock_get_posts_args'][] = $args;
         $postType = $args['post_type'] ?? 'post';
 
         return $GLOBALS['wp_mock_posts'][$postType] ?? [];

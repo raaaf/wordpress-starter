@@ -12,6 +12,7 @@ class Access
         add_filter('wp_robots', [self::class, 'noindexMemberPages']);
         add_filter('rest_prepare_page', [self::class, 'restrictRestPage'], 10, 2);
         add_filter('wp_sitemaps_posts_query_args', [self::class, 'excludeFromSitemap'], 10, 2);
+        add_filter('wpseo_exclude_from_sitemap_by_post_ids', [self::class, 'excludeFromYoastSitemap']);
         add_action('pre_get_posts', [self::class, 'excludeFromSearch']);
         add_filter('rest_post_search_query', [self::class, 'excludeFromRestSearch'], 10, 2);
     }
@@ -67,6 +68,22 @@ class Access
                 ['key' => 'page_is_member_area', 'compare' => 'NOT EXISTS'],
                 ['key' => 'page_is_member_area', 'value' => '1', 'compare' => '!='],
             ],
+        ];
+    }
+
+    /**
+     * Meta query that matches pages flagged as protected or member-area, the
+     * inverse of {@see self::unprotectedMetaQuery()}. Used where a list of the
+     * gated pages is needed instead of a filtered result set.
+     *
+     * @return array<int|string, mixed>
+     */
+    private static function protectedMetaQuery(): array
+    {
+        return [
+            'relation' => 'OR',
+            ['key' => 'page_is_protected', 'value' => '1', 'compare' => '='],
+            ['key' => 'page_is_member_area', 'value' => '1', 'compare' => '='],
         ];
     }
 
@@ -290,6 +307,37 @@ class Access
         $args['meta_query'] = self::mergeProtectionMetaQuery($existingMetaQuery, self::unprotectedMetaQuery()); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 
         return $args;
+    }
+
+    /**
+     * Exclude protected/member-area pages from the Yoast XML sitemap.
+     *
+     * Yoast builds its own sitemap instead of the core one, so
+     * {@see self::excludeFromSitemap()} never runs for it. The noindex this
+     * theme adds through the wp_robots filter is applied while the page
+     * renders, which the sitemap generator never sees either. Without this
+     * filter the gated URLs stay listed in page-sitemap.xml.
+     *
+     * @param array<int, int|string> $excluded
+     * @return array<int, int>
+     */
+    public static function excludeFromYoastSitemap(array $excluded): array
+    {
+        $protected = get_posts([
+            'post_type'              => 'page',
+            'post_status'            => 'publish',
+            'posts_per_page'         => -1,
+            'fields'                 => 'ids',
+            'no_found_rows'          => true,
+            'update_post_term_cache' => false,
+            'meta_query'             => self::protectedMetaQuery(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+        ]);
+
+        if (!is_array($protected)) {
+            $protected = [];
+        }
+
+        return array_values(array_unique(array_map('intval', array_merge($excluded, $protected))));
     }
 
     /**
