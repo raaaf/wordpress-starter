@@ -12,6 +12,35 @@ use Tests\Support\TestCase;
  */
 final class FooterAlertBarTest extends TestCase
 {
+    public function testLandingPageNoticeVisibility(): void
+    {
+        $this->setMockField('footer_alerts', [
+            ['active' => true, 'text' => 'Global notice', 'dismissible' => true],
+        ], 'option');
+
+        $cases = [
+            'landing page hides notice' => [true, true, true, 0],
+            'landing page keeps notice by default' => [true, true, null, 1],
+            'landing page keeps notice when disabled' => [true, true, false, 1],
+            'normal page ignores stale hide flag' => [true, false, true, 1],
+            'non-page ignores stale landing flags' => [false, true, true, 1],
+        ];
+
+        foreach ($cases as $label => [$isPage, $isLandingPage, $hideNotice, $expectedCount]) {
+            $GLOBALS['wp_mock_is_page'] = $isPage;
+            $this->setMockField('page_is_landing_page', $isLandingPage);
+            $this->setMockField('page_hide_global_notice', $hideNotice);
+
+            $alerts = FooterAlertBar::getVisibleAlerts();
+
+            $this->assertCount($expectedCount, $alerts, $label);
+            if ($expectedCount > 0) {
+                $this->assertTrue($alerts[0]['dismissible'], $label);
+                $this->assertSame('footer_alert_' . md5('Global notice_0'), $alerts[0]['storage_key'], $label);
+            }
+        }
+    }
+
     public function testDemotesPastedHeadingToBoldParagraph(): void
     {
         // Real payload pasted from Outlook into the alert WYSIWYG.

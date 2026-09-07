@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WordpressStarter\Support;
 
 use WordpressStarter\Acf\Fields;
+use WordpressStarter\Acf\PageSettings;
 
 class FooterAlertBar
 {
@@ -15,6 +16,10 @@ class FooterAlertBar
      */
     public static function getVisibleAlerts(): array
     {
+        if (PageSettings::shouldHideGlobalNotice()) {
+            return [];
+        }
+
         $alerts = Fields::option('footer_alerts', []);
         if (empty($alerts)) {
             return [];

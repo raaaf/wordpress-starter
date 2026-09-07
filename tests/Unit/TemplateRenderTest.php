@@ -232,7 +232,6 @@ final class TemplateRenderTest extends TestCase
         'page-member-area', // wp_date() not mocked (partials.footer-menu)
         'page-styleguide', // sanitize_key() not mocked
         'page', // have_posts() not mocked
-        'partials.footer-menu', // wp_date() not mocked
         'partials.footer', // wp_date() not mocked
         'partials.styleguide-views', // add_query_arg() not mocked
         'search', // get_search_query() not mocked

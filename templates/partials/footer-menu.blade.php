@@ -4,6 +4,7 @@
     $showCompany = \WordpressStarter\Acf\Fields::option('footer_show_company', true);
     $footerText = \WordpressStarter\Acf\Fields::option('footer_text', '');
 
+    $reduceFooter = \WordpressStarter\Acf\PageSettings::shouldReduceFooter();
     $isLandingPage = \WordpressStarter\Acf\PageSettings::isLandingPage();
 
     // Navigation column
@@ -40,6 +41,7 @@
 @endphp
 
 <footer class="bg-surface border-t border-line">
+    @if(!$reduceFooter)
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div class="grid grid-cols-1 md:grid-cols-2 {{ $isLandingPage ? 'lg:grid-cols-2' : 'lg:grid-cols-4' }} gap-8 lg:gap-12">
             {{-- Logo / Company Info / Footer Text --}}
@@ -156,8 +158,10 @@
         </div>
     </div>
 
+    @endif
+
     {{-- Bottom Bar --}}
-    <div class="border-t border-line">
+    <div @if(!$reduceFooter) class="border-t border-line" @endif>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 {{-- Copyright --}}

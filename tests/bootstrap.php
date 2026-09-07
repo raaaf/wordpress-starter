@@ -73,10 +73,19 @@ if (!function_exists('get_template_directory_uri')) {
     }
 }
 
+if (!function_exists('wp_date')) {
+    function wp_date(string $format, ?int $timestamp = null, ?DateTimeZone $timezone = null): string
+    {
+        return ( new DateTimeImmutable('@' . ( $timestamp ?? time() )) )
+            ->setTimezone($timezone ?? new DateTimeZone('UTC'))->format($format);
+    }
+}
+
 if (!function_exists('wp_nav_menu')) {
     function wp_nav_menu(array $args = []): ?string
     {
-        $output = '<ul id="mock-nav-menu" class="' . ( $args['menu_class'] ?? '' ) . '"></ul>';
+        $items = $GLOBALS['wp_mock_nav_menu_items'][$args['theme_location'] ?? ''] ?? '';
+        $output = '<ul id="mock-nav-menu" class="' . ( $args['menu_class'] ?? '' ) . '">' . $items . '</ul>';
 
         if (!empty($args['echo']) || !isset($args['echo'])) {
             // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- test double echoes the menu markup the test supplied

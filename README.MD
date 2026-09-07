@@ -161,6 +161,15 @@ All providers in `src/Providers/` are registered automatically via `Application:
 @layout('hero') ... @endlayout
 ```
 
+## Landing pages
+
+In a page's **Seiteneinstellungen**, enable **Als Landingpage anzeigen** to hide navigation, breadcrumbs and social links. Two optional switches are available while landing mode is enabled:
+
+- **Seitenweiten Hinweis ausblenden** hides the global footer notice on this page.
+- **Reduzierten Footer anzeigen** keeps only copyright and the configured legal links in the footer.
+
+Both switches default to off and work independently. Disabling landing mode restores the normal page behavior even if these settings were previously enabled. Legal links still follow the global footer configuration.
+
 ## Flexible Content layouts
 
 36 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
