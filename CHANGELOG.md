@@ -1,3 +1,9 @@
+# [2.35.0](https://github.com/raaaf/wordpress-starter/compare/v2.34.1...v2.35.0) (2026-09-07)
+
+### Features
+
+- add landing page notice and reduced footer controls ([60d7ba7](https://github.com/raaaf/wordpress-starter/commit/60d7ba7251630470419d2482d5dbc23e2e0a5190))
+
 ## [2.34.1](https://github.com/raaaf/wordpress-starter/compare/v2.34.0...v2.34.1) (2026-09-06)
 
 ### Bug Fixes
