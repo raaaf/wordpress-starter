@@ -93,15 +93,16 @@ final class ThemeUpdateProvider extends ServiceProvider
      */
     private function registerChecksumVerification(): void
     {
-        add_filter('upgrader_pre_download', [$this, 'verifyPackageChecksum'], 10, 3);
+        add_filter('upgrader_pre_download', [$this, 'verifyPackageChecksum'], 10, 4);
     }
 
     /**
      * @param mixed $reply
+     * @param \WP_Upgrader $upgrader
      * @param array<string, mixed> $hookExtra
      * @return mixed
      */
-    public function verifyPackageChecksum(mixed $reply, string $package, array $hookExtra): mixed
+    public function verifyPackageChecksum(mixed $reply, string $package, \WP_Upgrader $upgrader, array $hookExtra): mixed
     {
         // Not our theme's package: leave core's default download flow alone.
         if (( $hookExtra['theme'] ?? null ) !== self::THEME_SLUG) {

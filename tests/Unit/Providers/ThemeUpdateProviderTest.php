@@ -57,6 +57,7 @@ final class ThemeUpdateProviderTest extends TestCase
         $result = $this->provider->verifyPackageChecksum(
             false,
             'https://example.com/other-plugin.zip',
+            new \WP_Upgrader(),
             ['plugin' => 'some-plugin/some-plugin.php']
         );
 
@@ -68,6 +69,7 @@ final class ThemeUpdateProviderTest extends TestCase
         $result = $this->provider->verifyPackageChecksum(
             '/already/downloaded/file.zip',
             'https://example.com/wp-starter.zip',
+            new \WP_Upgrader(),
             ['theme' => 'wp-starter']
         );
 
@@ -87,6 +89,7 @@ final class ThemeUpdateProviderTest extends TestCase
         $result = $this->provider->verifyPackageChecksum(
             false,
             'https://example.com/wp-starter.zip',
+            new \WP_Upgrader(),
             ['theme' => 'wp-starter']
         );
 
@@ -105,6 +108,7 @@ final class ThemeUpdateProviderTest extends TestCase
         $result = $this->provider->verifyPackageChecksum(
             false,
             'https://example.com/wp-starter.zip',
+            new \WP_Upgrader(),
             ['theme' => 'wp-starter']
         );
 
@@ -126,9 +130,28 @@ final class ThemeUpdateProviderTest extends TestCase
         $result = $this->provider->verifyPackageChecksum(
             false,
             'https://example.com/wp-starter.zip',
+            new \WP_Upgrader(),
             ['theme' => 'wp-starter']
         );
 
         $this->assertSame($file, $result);
+    }
+
+    public function testFilterAcceptsCoreArgumentOrder(): void
+    {
+        $method = new \ReflectionMethod($this->provider, 'registerChecksumVerification');
+        $method->invoke($this->provider);
+
+        $this->assertSame(4, $GLOBALS['wp_mock_hooks']['filters']['upgrader_pre_download'][0]['args']);
+
+        $result = apply_filters(
+            'upgrader_pre_download',
+            false,
+            'https://example.com/other-plugin.zip',
+            new \WP_Upgrader(),
+            ['plugin' => 'some-plugin/some-plugin.php']
+        );
+
+        $this->assertFalse($result);
     }
 }

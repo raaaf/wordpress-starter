@@ -1859,6 +1859,12 @@ if (!class_exists('WP_Error')) {
     }
 }
 
+if (!class_exists('WP_Upgrader')) {
+    class WP_Upgrader // phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound -- test double needs a class alongside the function mocks in this single bootstrap file
+    {
+    }
+}
+
 if (!function_exists('is_wp_error')) {
     function is_wp_error(mixed $thing): bool
     {
