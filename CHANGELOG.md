@@ -1,3 +1,9 @@
+## [2.35.1](https://github.com/raaaf/wordpress-starter/compare/v2.35.0...v2.35.1) (2026-09-20)
+
+### Bug Fixes
+
+- **update:** pass WordPress' four upgrader_pre_download arguments ([d2bca76](https://github.com/raaaf/wordpress-starter/commit/d2bca761e7be1f0447c952e7deb96ab93a2500df))
+
 # [2.35.0](https://github.com/raaaf/wordpress-starter/compare/v2.34.1...v2.35.0) (2026-09-07)
 
 ### Features
