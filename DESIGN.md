@@ -72,11 +72,11 @@ Unverändert: `bg-brand`, `bg-brand-hover`, `bg-brand-active`, `*-brand-secondar
 
 ## Marken-Slots
 
-Drei zusätzliche, optionale Brand-Slots in theme-hub's `generate`/`serve`-Konfigurator, angewendet nach der Akzentfarbe und vor dem Kontrastvertrag:
+Vier zusätzliche, optionale Brand-Slots in theme-hub's `generate`/`serve`-Konfigurator, angewendet nach der Akzentfarbe und vor dem Kontrastvertrag:
 
 - **`--neutral <hex>`:** verschiebt den Farbton (Hue) der zehn neutralen DS-Primitiven (vier Flächen, vier Textstufen, zwei Ränder) auf den Zielton, Helligkeit und Sättigung jeder einzelnen Stufe bleiben unverändert. Bricht eine Paarung dadurch knapp, versucht das System, sie über eine kleine Helligkeitskorrektur derselben Stufe zu retten; bleibt keine Paarung >= Schwelle erreichbar, bricht der Lauf mit „Neutralton `<hex>` erreicht keinen Kontrast, anderen Ton wählen“ ab, statt eine schlecht lesbare Seite auszuliefern.
 - **`--radius <tight|standard|soft>`:** skaliert `radius/sm`, `/md`, `/lg` mit Faktor 0.5/1/1.5, gerundet auf ganze Pixel. `full` und die größeren Stufen (`xl`/`2xl`/`3xl`) bleiben unverändert.
-- **Headline-Zeilenhöhe (`--headline-line-height <n>`, 0.8–1.6):** setzt `lineHeight/display`, `/section` und `/title` gemeinsam. Das Design System hat diese drei Werte auf seine eigene Display-Schrift (Colaborate) abgestimmt; nennt die Marke eine andere Headline-Schrift, ist der Slot Pflicht (Sichtprüfung im Konfigurator anhand einer Live-Probe), sonst bleibt der DS-Wert unverändert stehen.
+- **Headline-Zeilenhöhe und -Tracking (`--headline-line-height <n>`, 0.8–1.6; `--headline-tracking <em>`, -0.1em–0.1em):** setzt `lineHeight/display`, `/section`, `/title` und `tracking/heading` gemeinsam. Das Design System hat diese Werte auf seine eigene Display-Schrift (Colaborate) abgestimmt; nennt die Marke eine andere Headline-Schrift, sind beide Slots gemeinsam Pflicht (Sichtprüfung im Konfigurator anhand einer Live-Probe), sonst bleiben die DS-Werte unverändert stehen.
 
 ## Verweis
 
