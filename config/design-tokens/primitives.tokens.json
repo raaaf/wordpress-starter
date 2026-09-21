@@ -2176,15 +2176,15 @@
   "lineHeight": {
     "display": {
       "$type": "number",
-      "$value": 1.1
+      "$value": 1
     },
     "section": {
       "$type": "number",
-      "$value": 1.15
+      "$value": 1
     },
     "title": {
       "$type": "number",
-      "$value": 1.4
+      "$value": 1
     },
     "lead": {
       "$type": "number",

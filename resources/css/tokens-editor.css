@@ -12,7 +12,7 @@
  * than dark mode rules in app.css
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-09-21T11:52:37.835Z
+ * Generated: 2026-09-21T13:17:52.007Z
  */
 
 /* ============================================
@@ -265,31 +265,31 @@
   /* Display - 6xl / Regular (for hero headlines) */
   --typography-display-size: var(--font-size-6xl);
   --typography-display-weight: var(--font-weight-regular);
-  --typography-display-line-height: clamp(2.75rem, calc(2.31rem + 2.2vw), 4.95rem);
+  --typography-display-line-height: clamp(2.5rem, calc(2.1rem + 2vw), 4.5rem);
   --typography-display-letter-spacing: -0.02em;
 
   /* Heading 1 - 4xl / Regular */
   --typography-h1-size: var(--font-size-4xl);
   --typography-h1-weight: var(--font-weight-regular);
-  --typography-h1-line-height: clamp(2.3375rem, calc(2.2rem + 0.6875vw), 3.025rem);
+  --typography-h1-line-height: clamp(2.125rem, calc(2rem + 0.625vw), 2.75rem);
   --typography-h1-letter-spacing: -0.02em;
 
   /* Heading 2 - 3xl / Regular */
   --typography-h2-size: var(--font-size-3xl);
   --typography-h2-weight: var(--font-weight-regular);
-  --typography-h2-line-height: clamp(2.0125rem, calc(1.955rem + 0.2875vw), 2.3rem);
+  --typography-h2-line-height: clamp(1.75rem, calc(1.7rem + 0.25vw), 2rem);
   --typography-h2-letter-spacing: -0.02em;
 
   /* Heading 3 - 2xl / Regular */
   --typography-h3-size: var(--font-size-2xl);
   --typography-h3-weight: var(--font-weight-regular);
-  --typography-h3-line-height: clamp(1.75rem, calc(1.68rem + 0.35vw), 2.1rem);
+  --typography-h3-line-height: clamp(1.25rem, calc(1.2rem + 0.25vw), 1.5rem);
   --typography-h3-letter-spacing: -0.02em;
 
   /* Heading 4 - xl / Regular */
   --typography-h4-size: var(--font-size-xl);
   --typography-h4-weight: var(--font-weight-regular);
-  --typography-h4-line-height: 1.4;
+  --typography-h4-line-height: 1;
   --typography-h4-letter-spacing: 0px;
 
   /* Heading 5 - lg / Regular */
