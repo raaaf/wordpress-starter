@@ -12,7 +12,7 @@
 
     States from Figma:
     - Default: Underlined link with accent/dark color
-    - Hover: Color shifts to hover variant
+    - Hover: Color shifts to hover variant, underline removed
     - Visited: Tertiary text color
     - Disabled: Muted color, no interaction
 --}}
@@ -71,7 +71,10 @@
         $linkAriaLabel .= ' ' . __('(öffnet in neuem Tab)', 'wp-starter');
     }
 
-    $linkClasses = "link inline-flex items-center font-normal underline underline-offset-4 transition-colors duration-200 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] {$variantClass} {$sizeClass} {$class}";
+    // Underlined at rest; hover removes the underline instead of adding one,
+    // the colour shift alone (text-content-link-hover above) still signals
+    // the hover state.
+    $linkClasses = "link inline-flex items-center font-normal underline hover:no-underline underline-offset-4 transition-colors duration-200 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] {$variantClass} {$sizeClass} {$class}";
 @endphp
 
 {{-- Disabled link: rendered as a span, not an <a>, so it never navigates. --}}
