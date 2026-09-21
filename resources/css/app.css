@@ -147,6 +147,14 @@
      Light: darkens towards the bottom right. Dark: lightens the top left. */
   --surface-sheen: linear-gradient(135deg, transparent 35%, rgba(17, 24, 39, 0.035) 100%);
   --page-sheen: linear-gradient(160deg, rgba(17, 24, 39, 0.035) 0%, transparent 50%);
+  /* The ink wash above is 3.5% and disappears on the saturated accent fill,
+     so brand surfaces take the light wash instead, same value in both modes. */
+  --surface-sheen-on-brand: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.05) 45%,
+    transparent 80%
+  );
   --noise-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 
   /* Danger button hover: --bg-error-strong is already the darkest of the
@@ -1370,6 +1378,12 @@ html {
   .card,
   .surface-sheen {
     background-image: var(--surface-sheen);
+  }
+
+  /* The ink wash is 3.5% and disappears on the accent fill, so brand
+     surfaces take the light wash instead. */
+  .bg-surface-brand.surface-sheen {
+    background-image: var(--surface-sheen-on-brand);
   }
 
   /* On image cards the lit corner of the sheen sits under the opaque image and
