@@ -420,30 +420,65 @@ const HEADING_LINE_HEIGHTS = {
   body: { static: 1.5 },
 };
 
-function buildTypographyTokens() {
+/**
+ * Override HEADING_LINE_HEIGHTS with ratios exported from the design system,
+ * where present. `lineHeight` is the flattened `primitives.lineHeight.*` map
+ * (display/section/title/lead/body/small/micro); a role missing from it
+ * (older export, test fixtures) keeps its HEADING_LINE_HEIGHTS constant.
+ *
+ * display/h1 share `lineHeight.display`, h2 gets `lineHeight.section`, h3/h4
+ * get `lineHeight.title`, h5 gets `lineHeight.lead`, body gets
+ * `lineHeight.body` — the same role mapping the design system itself
+ * describes for these roles.
+ */
+function resolveHeadingLineHeights(lineHeight = {}) {
+  const fluid = (fallback, value) =>
+    typeof value === 'number' ? { key: fallback.key, mobile: value, desktop: value } : fallback;
+  const staticRatio = (fallback, value) =>
+    typeof value === 'number' ? { static: value } : fallback;
+
+  return {
+    display: fluid(HEADING_LINE_HEIGHTS.display, lineHeight.display),
+    h1: fluid(HEADING_LINE_HEIGHTS.h1, lineHeight.display),
+    h2: fluid(HEADING_LINE_HEIGHTS.h2, lineHeight.section),
+    h3: fluid(HEADING_LINE_HEIGHTS.h3, lineHeight.title),
+    h4: staticRatio(HEADING_LINE_HEIGHTS.h4, lineHeight.title),
+    h5: staticRatio(HEADING_LINE_HEIGHTS.h5, lineHeight.lead),
+    body: staticRatio(HEADING_LINE_HEIGHTS.body, lineHeight.body),
+  };
+}
+
+/**
+ * Letter-spacing per typography role. `tracking` is the flattened
+ * `primitives.tracking.*` map (default/heading/label); falls back to the
+ * existing constants (all 0, overline 0.08em) when a key is absent.
+ */
+function resolveTracking(tracking = {}) {
+  const heading = tracking.heading ?? 0;
+  const body = tracking.default ?? 0;
+  const label = tracking.label ?? '0.08em';
+  return { heading, body, label };
+}
+
+function buildTypographyTokens(lineHeight = {}, tracking = {}) {
+  const headings = resolveHeadingLineHeights(lineHeight);
   const displayLh = fluidLineHeight(
-    HEADING_LINE_HEIGHTS.display.key,
-    HEADING_LINE_HEIGHTS.display.mobile,
-    HEADING_LINE_HEIGHTS.display.desktop
+    headings.display.key,
+    headings.display.mobile,
+    headings.display.desktop
   );
-  const h1Lh = fluidLineHeight(
-    HEADING_LINE_HEIGHTS.h1.key,
-    HEADING_LINE_HEIGHTS.h1.mobile,
-    HEADING_LINE_HEIGHTS.h1.desktop
-  );
-  const h2Lh = fluidLineHeight(
-    HEADING_LINE_HEIGHTS.h2.key,
-    HEADING_LINE_HEIGHTS.h2.mobile,
-    HEADING_LINE_HEIGHTS.h2.desktop
-  );
-  const h3Lh = fluidLineHeight(
-    HEADING_LINE_HEIGHTS.h3.key,
-    HEADING_LINE_HEIGHTS.h3.mobile,
-    HEADING_LINE_HEIGHTS.h3.desktop
-  );
-  const h4Lh = HEADING_LINE_HEIGHTS.h4.static;
-  const h5Lh = HEADING_LINE_HEIGHTS.h5.static;
-  const bodyLh = HEADING_LINE_HEIGHTS.body.static;
+  const h1Lh = fluidLineHeight(headings.h1.key, headings.h1.mobile, headings.h1.desktop);
+  const h2Lh = fluidLineHeight(headings.h2.key, headings.h2.mobile, headings.h2.desktop);
+  const h3Lh = fluidLineHeight(headings.h3.key, headings.h3.mobile, headings.h3.desktop);
+  const h4Lh = headings.h4.static;
+  const h5Lh = headings.h5.static;
+  const bodyLh = headings.body.static;
+  const captionLh = typeof lineHeight.micro === 'number' ? lineHeight.micro : 1.4;
+  const {
+    heading: headingTracking,
+    body: bodyTracking,
+    label: labelTracking,
+  } = resolveTracking(tracking);
 
   return `
   /* ============================================
@@ -455,74 +490,74 @@ function buildTypographyTokens() {
   --typography-display-size: var(--font-size-6xl);
   --typography-display-weight: var(--font-weight-regular);
   --typography-display-line-height: ${displayLh};
-  --typography-display-letter-spacing: 0;
+  --typography-display-letter-spacing: ${headingTracking};
 
   /* Heading 1 - 4xl / Regular */
   --typography-h1-size: var(--font-size-4xl);
   --typography-h1-weight: var(--font-weight-regular);
   --typography-h1-line-height: ${h1Lh};
-  --typography-h1-letter-spacing: 0;
+  --typography-h1-letter-spacing: ${headingTracking};
 
   /* Heading 2 - 3xl / Regular */
   --typography-h2-size: var(--font-size-3xl);
   --typography-h2-weight: var(--font-weight-regular);
   --typography-h2-line-height: ${h2Lh};
-  --typography-h2-letter-spacing: 0;
+  --typography-h2-letter-spacing: ${headingTracking};
 
   /* Heading 3 - 2xl / Regular */
   --typography-h3-size: var(--font-size-2xl);
   --typography-h3-weight: var(--font-weight-regular);
   --typography-h3-line-height: ${h3Lh};
-  --typography-h3-letter-spacing: 0;
+  --typography-h3-letter-spacing: ${headingTracking};
 
   /* Heading 4 - xl / Regular */
   --typography-h4-size: var(--font-size-xl);
   --typography-h4-weight: var(--font-weight-regular);
   --typography-h4-line-height: ${h4Lh};
-  --typography-h4-letter-spacing: 0;
+  --typography-h4-letter-spacing: ${bodyTracking};
 
   /* Heading 5 - lg / Regular */
   --typography-h5-size: var(--font-size-lg);
   --typography-h5-weight: var(--font-weight-regular);
   --typography-h5-line-height: ${h5Lh};
-  --typography-h5-letter-spacing: 0;
+  --typography-h5-letter-spacing: ${bodyTracking};
 
   /* Body Large - lg / Regular */
   --typography-body-large-size: var(--font-size-lg);
   --typography-body-large-weight: var(--font-weight-regular);
   --typography-body-large-line-height: 1.6;
-  --typography-body-large-letter-spacing: 0;
+  --typography-body-large-letter-spacing: ${bodyTracking};
 
   /* Body - base / Regular */
   --typography-body-size: var(--font-size-base);
   --typography-body-weight: var(--font-weight-regular);
   --typography-body-line-height: ${bodyLh};
-  --typography-body-letter-spacing: 0;
+  --typography-body-letter-spacing: ${bodyTracking};
 
   /* Body Small - sm / Regular */
   --typography-body-small-size: var(--font-size-sm);
   --typography-body-small-weight: var(--font-weight-regular);
   --typography-body-small-line-height: 1.5;
-  --typography-body-small-letter-spacing: 0;
+  --typography-body-small-letter-spacing: ${bodyTracking};
 
   /* Caption - xs / Regular */
   --typography-caption-size: var(--font-size-xs);
   --typography-caption-weight: var(--font-weight-regular);
-  --typography-caption-line-height: 1.4;
-  --typography-caption-letter-spacing: 0;
+  --typography-caption-line-height: ${captionLh};
+  --typography-caption-letter-spacing: ${bodyTracking};
 
   /* Overline - xs / Regular / Uppercase */
   --typography-overline-size: var(--font-size-xs);
   --typography-overline-weight: var(--font-weight-regular);
   --typography-overline-line-height: 1.4;
-  --typography-overline-letter-spacing: 0.08em;
+  --typography-overline-letter-spacing: ${labelTracking};
   --typography-overline-transform: uppercase;
 
   /* Code - sm / Regular */
   --typography-code-size: var(--font-size-sm);
   --typography-code-weight: var(--font-weight-regular);
   --typography-code-line-height: 1.5;
-  --typography-code-letter-spacing: 0;
+  --typography-code-letter-spacing: ${bodyTracking};
 `;
 }
 
@@ -798,6 +833,20 @@ function transform() {
     extractNumericValue(token, 'px')
   );
 
+  // Process primitives - lineHeight (unitless ratios feeding the heading/body
+  // typography composite tokens below). Not emitted as their own CSS vars —
+  // only used to resolve HEADING_LINE_HEIGHTS overrides via buildTypographyTokens().
+  const primitiveLineHeight = flattenTokens(primitives.lineHeight || {}, '', (token) =>
+    extractNumericValue(token, '')
+  );
+
+  // Process primitives - tracking (letter-spacing em/px strings). Passed through
+  // as-is, like motion ease, since the unit varies per role (0px vs -0.02em).
+  const primitiveTracking = flattenTokens(primitives.tracking || {}, '', (token) => {
+    if (!token || token.$type !== 'string') return null;
+    return assertSafeCssValue(String(token.$value), 'tracking value');
+  });
+
   console.log('Processing semantic tokens (light mode)...');
 
   // Process semantic tokens - light mode (use var() references to primitives)
@@ -874,7 +923,7 @@ ${generateCss(primitiveMotionDuration, 'dur')}
 
   /* Accessibility */
 ${generateCss(primitiveA11y, 'a11y')}
-${buildTypographyTokens()}
+${buildTypographyTokens(primitiveLineHeight, primitiveTracking)}
 ${COMPONENT_TOKENS}
 }
 
@@ -1027,7 +1076,7 @@ ${generateCss(primitiveMotionDuration, 'dur')}
 
   /* Accessibility */
 ${generateCss(primitiveA11y, 'a11y')}
-${buildTypographyTokens()}
+${buildTypographyTokens(primitiveLineHeight, primitiveTracking)}
 ${COMPONENT_TOKENS}
 }
 
@@ -1167,4 +1216,5 @@ export {
   assertSafeCssValue,
   resolveOutputDir,
   writeAndVerify,
+  buildTypographyTokens,
 };

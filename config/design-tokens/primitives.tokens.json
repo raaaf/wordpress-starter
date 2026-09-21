@@ -2172,5 +2172,49 @@
         "$value": 2
       }
     }
+  },
+  "lineHeight": {
+    "display": {
+      "$type": "number",
+      "$value": 1.1
+    },
+    "section": {
+      "$type": "number",
+      "$value": 1.15
+    },
+    "title": {
+      "$type": "number",
+      "$value": 1.4
+    },
+    "lead": {
+      "$type": "number",
+      "$value": 1.5
+    },
+    "body": {
+      "$type": "number",
+      "$value": 1.5
+    },
+    "small": {
+      "$type": "number",
+      "$value": 1.5
+    },
+    "micro": {
+      "$type": "number",
+      "$value": 1.4
+    }
+  },
+  "tracking": {
+    "default": {
+      "$type": "string",
+      "$value": "0px"
+    },
+    "heading": {
+      "$type": "string",
+      "$value": "-0.02em"
+    },
+    "label": {
+      "$type": "string",
+      "$value": "0.08em"
+    }
   }
 }

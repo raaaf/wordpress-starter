@@ -60,7 +60,7 @@ Unverändert: `bg-brand`, `bg-brand-hover`, `bg-brand-active`, `*-brand-secondar
 - `fontWeight`: `regular` = 400, `medium` = 500, `light` = 300.
 - Neu: `motion/ease/standard` (String, `cubic-bezier(...)`), `motion/duration/{fast,base,medium,slow,reveal}` (ms) → `--ease-standard`, `--dur-fast`…`--dur-reveal`.
 - Neu: `a11y/tap-target`, `a11y/focus-ring/width`, `a11y/focus-ring/offset` (px) → `--a11y-tap-target`, `--a11y-focus-ring-width`, `--a11y-focus-ring-offset`.
-- `transform-tokens.js`: Letter-Spacing aller Typo-Rollen auf 0 (Overline bleibt 0.08em); Line-Heights `display`/`h1`/`h2` = 1.2, `h3`/`h4` = 1.4, `body` = 1.5; `--button-*-radius` von `var(--radius-full)` auf `var(--radius-md)`.
+- Neu: `lineHeight/{display,section,title,lead,body,small,micro}` (unitless) und `tracking/{default,heading,label}` (em/px-String) im Export. `transform-tokens.js` liest beide: Line-Heights `display`/`h1` = `lineHeight.display`, `h2` = `lineHeight.section`, `h3`/`h4` = `lineHeight.title`, `h5` = `lineHeight.lead`, `body` = `lineHeight.body`, `caption` = `lineHeight.micro`; Letter-Spacing `display`/`h1`/`h2`/`h3` = `tracking.heading` (−0.02em, enger als der Rest), `h4`/`h5`/Body-Rollen/`caption`/`code` = `tracking.default` (0px), `overline` = `tracking.label` (0.08em). Fehlt eine Gruppe im Export (älterer Export, Test-Fixtures), fällt der Transform auf die bisherigen Konstanten zurück. `--button-*-radius` von `var(--radius-full)` auf `var(--radius-md)`.
 
 ## Dokumentierte Abweichungen
 

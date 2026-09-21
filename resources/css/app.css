@@ -2879,15 +2879,27 @@ html {
    went invisible in dark mode, where the inverse surface is itself light.
    --text-inverse already flips the same way, so tinting with it keeps the
    overlay on the correct side of the surface in both modes. */
-.bg-surface-inverse :is(.button--ghost, .button--secondary) {
+.bg-surface-inverse .button--secondary {
   color: var(--text-inverse);
   border-color: color-mix(in srgb, var(--text-inverse) 40%, transparent);
   background-color: color-mix(in srgb, var(--text-inverse) 8%, transparent);
 }
 
-.bg-surface-inverse :is(.button--ghost, .button--secondary):hover {
+.bg-surface-inverse .button--secondary:hover {
   background-color: color-mix(in srgb, var(--text-inverse) 16%, transparent);
   border-color: color-mix(in srgb, var(--text-inverse) 70%, transparent);
+}
+
+/* Ghost stays borderless and unfilled at rest here too (DS Controls: "no
+   fill, text only"), unlike secondary above; only the label colour follows
+   the inverse surface. Hover gets the same tonal step as secondary's rest
+   fill, without picking up its border or rest-state fill. */
+.bg-surface-inverse .button--ghost {
+  color: var(--text-inverse);
+}
+
+.bg-surface-inverse .button--ghost:hover {
+  background-color: color-mix(in srgb, var(--text-inverse) 8%, transparent);
 }
 
 /* Auf der Markenflaeche ist Weiss die falsche Richtung: gemessen 2.84:1 auf dem

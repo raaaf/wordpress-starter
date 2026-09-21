@@ -16,6 +16,7 @@ import {
   assertSafeVarNameSegment,
   assertSafeCssValue,
   writeAndVerify,
+  buildTypographyTokens,
 } from './transform-tokens.js';
 
 /**
@@ -457,5 +458,42 @@ describe('writeAndVerify (write + readback)', () => {
       errorSpy.mockRestore();
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe('buildTypographyTokens with a design-system export', () => {
+  const lineHeight = {
+    display: 1.1,
+    section: 1.15,
+    title: 1.4,
+    lead: 1.5,
+    body: 1.5,
+    small: 1.5,
+    micro: 1.4,
+  };
+  const tracking = { default: '0px', heading: '-0.02em', label: '0.08em' };
+
+  it('reads heading tracking and h1/h2 line-height from the exported groups', () => {
+    const css = buildTypographyTokens(lineHeight, tracking);
+
+    expect(css).toContain('--typography-h1-letter-spacing: -0.02em;');
+    expect(css).toContain('--typography-h2-letter-spacing: -0.02em;');
+    expect(css).toContain('--typography-overline-letter-spacing: 0.08em;');
+    expect(css).toContain('--typography-h4-letter-spacing: 0px;');
+
+    const h2Line = fluidLineHeight('3xl', lineHeight.section, lineHeight.section);
+    expect(css).toContain(`--typography-h2-line-height: ${h2Line};`);
+  });
+
+  it('falls back to the HEADING_LINE_HEIGHTS constants when the export has no groups', () => {
+    const css = buildTypographyTokens();
+    const h2Line = fluidLineHeight(
+      '3xl',
+      HEADING_LINE_HEIGHTS.h2.mobile,
+      HEADING_LINE_HEIGHTS.h2.desktop
+    );
+    expect(css).toContain(`--typography-h2-line-height: ${h2Line};`);
+    expect(css).toContain('--typography-h1-letter-spacing: 0;');
+    expect(css).toContain('--typography-overline-letter-spacing: 0.08em;');
   });
 });
