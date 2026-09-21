@@ -282,16 +282,16 @@ const TEXT_PAIRS: [string, string, string][] = [
   ['--text-inverse', '--bg-error-strong', 'danger button label on its fill'],
   ['--text-inverse', '--bg-success-strong', 'solid success badge label'],
   ['--text-inverse', '--bg-warning-strong', 'solid warning badge label'],
-  ['--text-on-accent', '--bg-accent', 'checkbox mark on the checked fill'],
   ['--text-brand', '--bg-brand-tint', 'primary button at rest (tint)'],
   ['--text-on-accent', '--bg-brand', 'primary button on hover (solid fill)'],
-  ['--text-on-accent', '--bg-brand-active', 'primary button when pressed'],
+  ['--text-button-primary', '--bg-button-primary-hover', 'primary button when pressed'],
 ];
 
 const UI_PAIRS: [string, string, string][] = [
   ['--border-control', '--bg-primary', 'form control border'],
   ['--ring-focus', '--bg-primary', 'focus ring'],
   ['--border-focus', '--bg-primary', 'focused control border'],
+  ['--icon-on-accent', '--bg-accent', 'checkbox mark on the checked fill'],
   ['--bg-accent', '--bg-primary', 'checked control fill against the page'],
   ['--border-brand', '--bg-primary', 'brand border: spinner arc, card hover edge'],
   ['--icon-secondary', '--bg-primary', 'select chevron and input clear icon'],
@@ -301,26 +301,13 @@ const UI_PAIRS: [string, string, string][] = [
   ['--icon-error', '--bg-error', 'status icon on its own surface'],
 ];
 
-/**
- * The primary button is no longer a gradient fill (rafaelalex.de design
- * system, section 5): it is a pill, so a single foreground/background pair
- * describes each state and lives in TEXT_PAIRS above ('primary button at
- * rest (tint)', 'on hover (solid fill)', 'when pressed').
- *
- * These gradient tokens still exist in the export and are still used outside
- * the button, e.g. the current-page fill in the member-area downloads
- * pagination (templates/member-area/downloads.blade.php), so the pairs below
- * keep covering those legacy fills, not the button pill.
- */
-const BUTTON_GRADIENTS: [string, string, string][] = [
-  ['--gradient-primary-start', '--gradient-primary-end', 'primary button at rest'],
-  ['--gradient-primary-hover-start', '--gradient-primary-hover-end', 'primary button on hover'],
-  [
-    '--gradient-primary-active-start',
-    '--gradient-primary-active-end',
-    'primary button when pressed',
-  ],
-];
+// BUTTON_GRADIENTS (--gradient-primary-*) used to be checked here: the primary
+// button is a flat tonal fill since the design-system adoption (bg-button-
+// primary / bg-button-primary-hover, see TEXT_PAIRS above), not a gradient.
+// Nothing in app.css or the templates applies these gradient stops to a
+// button anymore (grepped for `linear-gradient(var(--gradient-primary` and
+// for the variable names in templates/**/*.blade.php: no hits). The tokens
+// stay defined in the export for the client brand slot, just unmeasured here.
 
 /**
  * 'contrast' is included here on purpose: the same 4.5:1/3:1 floors this
@@ -356,27 +343,6 @@ describe.each<Mode>(['light', 'dark', 'contrast'])('contrast contract (%s)', (mo
       `${fg} ${fgValue} on ${bg} ${bgValue} is ${ratio.toFixed(2)}:1`
     ).toBeGreaterThanOrEqual(3);
   });
-
-  it.each(BUTTON_GRADIENTS)(
-    '--text-on-accent clears 4.5:1 against both stops of %s..%s (%s)',
-    (startName, endName) => {
-      const label = resolve_('--text-on-accent', mode);
-      const start = resolve_(startName, mode);
-      const end = resolve_(endName, mode);
-      expect(label, `--text-on-accent does not resolve`).not.toBeNull();
-      expect(start, `${startName} does not resolve`).not.toBeNull();
-      expect(end, `${endName} does not resolve`).not.toBeNull();
-
-      const worst = Math.min(
-        contrast(label as string, start as string),
-        contrast(label as string, end as string)
-      );
-      expect(
-        Number(worst.toFixed(2)),
-        `--text-on-accent ${label} on ${start}..${end} is ${worst.toFixed(2)}:1 at its worst stop`
-      ).toBeGreaterThanOrEqual(4.5);
-    }
-  );
 });
 
 describe('focus ring', () => {

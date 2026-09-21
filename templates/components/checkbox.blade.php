@@ -88,7 +88,7 @@
             </span>
 
             {{-- Check/Minus icon (shown via CSS) --}}
-            <span class="absolute inset-0 flex items-center justify-center text-content-on-accent pointer-events-none opacity-0 peer-checked:opacity-100 {{ $disabled ? 'text-content-disabled' : '' }}">
+            <span class="absolute inset-0 flex items-center justify-center text-icon-on-accent pointer-events-none opacity-0 peer-checked:opacity-100 {{ $disabled ? 'text-content-disabled' : '' }}">
                 @if($indeterminate)
                     <x-icon name="minus" class="w-3 h-3" />
                 @else

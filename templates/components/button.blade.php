@@ -11,11 +11,10 @@
     @param string $type - Button type for <button> element (submit, button, reset)
     @param array $analytics - ['event' => 'name', 'meta' => 'value'] for Rybbit
 
-    States (rafaelalex.de design system, section 5 - pill CTAs, never boxes):
-    - Default: Hairline pill, transparent fill, brand-colour border and text
-    - Hover: Solid brand fill, no border, no shadow
-    - Active: Deeper brand fill, 97% scale
-    - Focus: 3px outline in --ring-focus, 2px offset
+    States (primary variant, design-system Controls section):
+    - Default: button-primary-fill, button-primary-label, no border
+    - Hover/Active: fill strengthens to button-primary-fill-hover, label unchanged
+    - Focus: 2px outline in --ring-focus, 2px offset
     - Disabled: Greyed out, no interaction
 --}}
 
@@ -60,22 +59,21 @@
     // button--<variante> traegt keine Gestaltung, sie macht die Variante nur
     // adressierbar: fuer Flaechen, die der Utility-Klasse nicht bekannt sind
     // (invers, Markenflaeche, Hero-Scrim), und fuer Messungen.
-    $baseClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-normal transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] active:scale-[0.97] motion-reduce:transform-none';
+    $baseClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-normal transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] active:scale-[0.97] motion-reduce:transform-none';
 
     // Variants: hairline pill at rest, flat fill on hover/active, never a
     // gradient (rafaelalex.de design system, section 5). No shadow on any
     // state, rest or hover: the Flat-at-Rest Rule applies to buttons too.
     $variants = [
         'primary' => implode(' ', [
-            'text-content-brand',
-            'border border-line-brand',
-            'bg-[var(--bg-brand-tint)]',
-            'hover:bg-surface-brand',
-            'hover:text-content-on-accent',
-            'hover:border-transparent',
-            'active:bg-[var(--bg-brand-active)]',
-            'active:text-content-on-accent',
-            'active:border-transparent',
+            // DS: label in button-primary-label on button-primary-fill, no
+            // border (references/components.md, Controls). Hover strengthens
+            // to button-primary-fill-hover, label unchanged, never a solid
+            // accent fill.
+            'text-[var(--text-button-primary)]',
+            'bg-[var(--bg-button-primary)]',
+            'hover:bg-[var(--bg-button-primary-hover)]',
+            'active:bg-[var(--bg-button-primary-hover)]',
         ]),
         'secondary' => implode(' ', [
             'bg-transparent',

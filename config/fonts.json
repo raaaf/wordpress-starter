@@ -1,0 +1,31 @@
+{
+  "headline": {
+    "source": "local",
+    "family": "Colaborate",
+    "files": [
+      {
+        "path": "/Users/rafael/Local Sites/wordpress/app/public/wp-content/themes/wst-design-system/resources/fonts/ColabReg-webfont.woff2",
+        "weight": 400
+      },
+      {
+        "path": "/Users/rafael/Local Sites/wordpress/app/public/wp-content/themes/wst-design-system/resources/fonts/colabthi-webfont.woff2",
+        "weight": 300
+      }
+    ]
+  },
+  "body": {
+    "source": "google",
+    "family": "Inter",
+    "weights": [400, 500]
+  },
+  "mono": {
+    "source": "local",
+    "family": "JetBrains Mono",
+    "files": [
+      {
+        "path": "/Users/rafael/Local Sites/wordpress/app/public/wp-content/themes/wst-design-system/resources/fonts/jetbrains-mono-v18-latin-regular.woff2",
+        "weight": 400
+      }
+    ]
+  }
+}

@@ -90,8 +90,8 @@ const FLUID_SIZES = {
   lg: { min: 17, max: 18 },
   xl: { min: 18, max: 20 },
   '2xl': { min: 20, max: 24 },
-  '3xl': { min: 24, max: 32 },
-  '4xl': { min: 30, max: 44 },
+  '3xl': { min: 28, max: 32 },
+  '4xl': { min: 34, max: 44 },
   '5xl': { min: 36, max: 56 },
   '6xl': { min: 40, max: 72 },
 };
@@ -411,13 +411,13 @@ function generateCssImportant(tokens, prefix = '') {
  * always resolves to the same number, which is more confusing than a second shape.
  */
 const HEADING_LINE_HEIGHTS = {
-  display: { key: '6xl', mobile: 1.15, desktop: 1.1 },
-  h1: { key: '4xl', mobile: 1.15, desktop: 1.1 },
-  h2: { key: '3xl', mobile: 1.25, desktop: 1.2 },
-  h3: { key: '2xl', mobile: 1.35, desktop: 1.3 },
+  display: { key: '6xl', mobile: 1.2, desktop: 1.2 },
+  h1: { key: '4xl', mobile: 1.2, desktop: 1.2 },
+  h2: { key: '3xl', mobile: 1.2, desktop: 1.2 },
+  h3: { key: '2xl', mobile: 1.4, desktop: 1.4 },
   h4: { static: 1.4 },
   h5: { static: 1.4 },
-  body: { static: 1.6 },
+  body: { static: 1.5 },
 };
 
 function buildTypographyTokens() {
@@ -455,55 +455,55 @@ function buildTypographyTokens() {
   --typography-display-size: var(--font-size-6xl);
   --typography-display-weight: var(--font-weight-regular);
   --typography-display-line-height: ${displayLh};
-  --typography-display-letter-spacing: -0.05em;
+  --typography-display-letter-spacing: 0;
 
   /* Heading 1 - 4xl / Regular */
   --typography-h1-size: var(--font-size-4xl);
   --typography-h1-weight: var(--font-weight-regular);
   --typography-h1-line-height: ${h1Lh};
-  --typography-h1-letter-spacing: -0.045em;
+  --typography-h1-letter-spacing: 0;
 
   /* Heading 2 - 3xl / Regular */
   --typography-h2-size: var(--font-size-3xl);
   --typography-h2-weight: var(--font-weight-regular);
   --typography-h2-line-height: ${h2Lh};
-  --typography-h2-letter-spacing: -0.04em;
+  --typography-h2-letter-spacing: 0;
 
   /* Heading 3 - 2xl / Regular */
   --typography-h3-size: var(--font-size-2xl);
   --typography-h3-weight: var(--font-weight-regular);
   --typography-h3-line-height: ${h3Lh};
-  --typography-h3-letter-spacing: -0.035em;
+  --typography-h3-letter-spacing: 0;
 
   /* Heading 4 - xl / Regular */
   --typography-h4-size: var(--font-size-xl);
   --typography-h4-weight: var(--font-weight-regular);
   --typography-h4-line-height: ${h4Lh};
-  --typography-h4-letter-spacing: -0.03em;
+  --typography-h4-letter-spacing: 0;
 
   /* Heading 5 - lg / Regular */
   --typography-h5-size: var(--font-size-lg);
   --typography-h5-weight: var(--font-weight-regular);
   --typography-h5-line-height: ${h5Lh};
-  --typography-h5-letter-spacing: -0.025em;
+  --typography-h5-letter-spacing: 0;
 
   /* Body Large - lg / Regular */
   --typography-body-large-size: var(--font-size-lg);
   --typography-body-large-weight: var(--font-weight-regular);
   --typography-body-large-line-height: 1.6;
-  --typography-body-large-letter-spacing: -0.025em;
+  --typography-body-large-letter-spacing: 0;
 
   /* Body - base / Regular */
   --typography-body-size: var(--font-size-base);
   --typography-body-weight: var(--font-weight-regular);
   --typography-body-line-height: ${bodyLh};
-  --typography-body-letter-spacing: -0.025em;
+  --typography-body-letter-spacing: 0;
 
   /* Body Small - sm / Regular */
   --typography-body-small-size: var(--font-size-sm);
   --typography-body-small-weight: var(--font-weight-regular);
   --typography-body-small-line-height: 1.5;
-  --typography-body-small-letter-spacing: -0.015em;
+  --typography-body-small-letter-spacing: 0;
 
   /* Caption - xs / Regular */
   --typography-caption-size: var(--font-size-xs);
@@ -557,17 +557,17 @@ const COMPONENT_TOKENS = `
      scale (md = 44px, the thumbable minimum). */
   --button-sm-padding-x: var(--spacing-3);
   --button-sm-padding-y: 4px;
-  --button-sm-radius: var(--radius-full);
+  --button-sm-radius: var(--radius-md);
   --button-sm-min-height: 2.25rem;
   --button-sm-gap: var(--spacing-1-5);
   --button-md-padding-x: var(--spacing-5);
   --button-md-padding-y: var(--spacing-2-5);
-  --button-md-radius: var(--radius-full);
+  --button-md-radius: var(--radius-md);
   --button-md-min-height: 2.75rem;
   --button-md-gap: var(--spacing-2);
   --button-lg-padding-x: var(--spacing-6);
   --button-lg-padding-y: var(--spacing-3);
-  --button-lg-radius: var(--radius-full);
+  --button-lg-radius: var(--radius-md);
   --button-lg-min-height: 3.25rem;
   --button-lg-gap: var(--spacing-2-5);
 
@@ -781,6 +781,23 @@ function transform() {
   // Process primitives - gradient (alias references to color tokens)
   const primitiveGradient = flattenTokens(primitives.gradient || {}, '', extractColorOrAlias);
 
+  // Process primitives - motion. Ease is a cubic-bezier() string passed through
+  // as-is (not quoted like fontFamily); durations are plain ms numbers, unit
+  // added here. Emitted as --ease-* / --dur-* rather than --motion-*, since
+  // that is how app.css consumes them (var(--dur-base) var(--ease-standard)).
+  const primitiveMotionEase = flattenTokens(primitives.motion?.ease || {}, '', (token) => {
+    if (!token || token.$type !== 'string') return null;
+    return assertSafeCssValue(String(token.$value), 'motion ease value');
+  });
+  const primitiveMotionDuration = flattenTokens(primitives.motion?.duration || {}, '', (token) =>
+    extractNumericValue(token, 'ms')
+  );
+
+  // Process primitives - a11y (tap target, focus ring width/offset, all px)
+  const primitiveA11y = flattenTokens(primitives.a11y || {}, '', (token) =>
+    extractNumericValue(token, 'px')
+  );
+
   console.log('Processing semantic tokens (light mode)...');
 
   // Process semantic tokens - light mode (use var() references to primitives)
@@ -850,6 +867,13 @@ ${generateCss(primitiveSizing, 'sizing')}
 
   /* Gradients */
 ${generateCss(primitiveGradient, 'gradient')}
+
+  /* Motion */
+${generateCss(primitiveMotionEase, 'ease')}
+${generateCss(primitiveMotionDuration, 'dur')}
+
+  /* Accessibility */
+${generateCss(primitiveA11y, 'a11y')}
 ${buildTypographyTokens()}
 ${COMPONENT_TOKENS}
 }
@@ -996,6 +1020,13 @@ ${generateCss(primitiveSizing, 'sizing')}
 
   /* Gradients */
 ${generateCss(primitiveGradient, 'gradient')}
+
+  /* Motion */
+${generateCss(primitiveMotionEase, 'ease')}
+${generateCss(primitiveMotionDuration, 'dur')}
+
+  /* Accessibility */
+${generateCss(primitiveA11y, 'a11y')}
 ${buildTypographyTokens()}
 ${COMPONENT_TOKENS}
 }

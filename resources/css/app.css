@@ -34,27 +34,20 @@
 
    STILL OVERRIDDEN HERE
 
-   1. --border-control: the boundary of a form control is the only thing that
-      shows where the field is, and WCAG 1.4.11 asks for 3:1. --border-default
-      reaches 1.2 to 1.5:1 in every palette. This is the lightest shade of each
-      theme's own greys that still clears 3:1, per colour scheme. Card borders
-      and dividers keep --border-default; 1.4.11 does not apply to them.
-      The export has no such role at all.
-
-   2. --shadow-color-*: the Tailwind theme block below builds --shadow-sm through
+   1. --shadow-color-*: the Tailwind theme block below builds --shadow-sm through
       --shadow-2xl out of these, and the export never delivered them. An
       unresolvable var() makes the whole box-shadow invalid at computed-value
       time, so every plain shadow-sm/md/lg/xl/2xl utility rendered nothing at
       all. The values follow the same rgba(23, 23, 23, a) vocabulary the
       component shadows in tokens.css already use.
 
-   3. Primary button gradient: the only fill in the theme that does not flip
+   2. Primary button gradient: the only fill in the theme that does not flip
       with the scheme. Light gets the dark end of the ramp under white text
       (5.23:1 at rest, improving to 7.39 and 10.36 as it is pressed), dark gets
       the light end under near-black text (4.80:1 at rest, improving to 6.32
       and 7.74). Both ladders now move away from the text, not towards it.
 
-   4. The dark surfaces further down: deliberately raw hex, not a step of the
+   3. The dark surfaces further down: deliberately raw hex, not a step of the
       grey ramp. See the comment on that block.
 
    RECORDED IN THE EXPORT
@@ -155,12 +148,6 @@
   --surface-sheen: linear-gradient(135deg, transparent 35%, rgba(17, 24, 39, 0.035) 100%);
   --page-sheen: linear-gradient(160deg, rgba(17, 24, 39, 0.035) 0%, transparent 50%);
   --noise-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-
-  /* Form controls draw a hairline, not a grey frame (rafaelalex.de design
-     system, section 5). The field is told apart from the page by its paper
-     fill and its label; the boundary only firms up on focus. This trades the
-     3:1 boundary of WCAG 1.4.11 for the quieter look on purpose. */
-  --border-control: var(--border-strong);
 
   /* Danger button hover: --bg-error-strong is already the darkest of the
      three-step error ramp, so there is no further token to step to. Mixed
@@ -462,6 +449,19 @@
     background-color: var(--bg-primary);
     border-color: var(--border-control);
     color: var(--bg-accent);
+  }
+
+  /* The DS never puts white on an accent fill (raw accent fails AA, see the
+     checkbox-mark contract pairing in theme-hub's contract.ts); the mark is
+     accent.ink instead. A data URI cannot read a custom property, so the hex
+     is literal here and recorded in DESIGN.md — copied shapes, plugin's own
+     white swapped for #1C1917. */
+  :is([type='checkbox'], [type='radio']):checked {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='%231C1917' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+  }
+
+  [type='radio']:checked {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='%231C1917' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='8' cy='8' r='3'/%3E%3C/svg%3E");
   }
 
   :is([type='checkbox'], [type='radio']):disabled {
@@ -938,6 +938,7 @@ html {
   --color-icon-warning: var(--icon-warning);
   --color-icon-error: var(--icon-error);
   --color-icon-disabled: var(--icon-disabled);
+  --color-icon-on-accent: var(--icon-on-accent);
 
   /* Status Colors - direct mapping */
   --color-success: var(--color-success);
@@ -1220,8 +1221,14 @@ html {
      is what every component ring already uses. 3px/2px per the rafaelalex.de
      focus-ring spec (section 4). */
   :focus-visible {
-    outline: 3px solid var(--ring-focus);
+    outline: 2px solid var(--ring-focus);
     outline-offset: 2px;
+  }
+
+  /* Round and pill shapes need more breathing room, or the ring clips into
+     the curve instead of tracing outside it. */
+  :focus-visible.rounded-full {
+    outline-offset: 6px;
   }
 
   /* Remove default outline when using custom focus styles */
@@ -1703,46 +1710,46 @@ html {
     font-size: var(--typography-body-small-size);
     font-weight: 400;
     letter-spacing: -0.02em;
-    color: var(--color-content-brand);
-    background-color: var(--bg-brand-tint);
+    color: var(--text-button-primary);
+    background-color: var(--bg-button-primary);
     border: 1px solid var(--color-line-brand);
     border-radius: var(--button-md-radius);
     cursor: pointer;
     transition:
-      color 200ms ease-out,
-      background-color 200ms ease-out,
-      border-color 200ms ease-out,
-      transform 200ms ease-out;
+      color var(--dur-base) var(--ease-standard),
+      background-color var(--dur-base) var(--ease-standard),
+      border-color var(--dur-base) var(--ease-standard),
+      transform var(--dur-base) var(--ease-standard);
     appearance: none;
   }
 
   .wpcf7-form input[type='submit']:hover {
-    background-color: var(--bg-brand);
-    color: var(--text-on-accent);
+    background-color: var(--bg-button-primary-hover);
+    color: var(--text-button-primary);
     border-color: transparent;
   }
 
   :root[data-theme='light'] .wpcf7-form input[type='submit']:hover {
-    background-color: var(--bg-brand-hover);
-    color: var(--text-on-accent);
+    background-color: var(--bg-button-primary-hover);
+    color: var(--text-button-primary);
   }
 
   @media (prefers-color-scheme: light) {
     :root:not([data-theme='dark']) .wpcf7-form input[type='submit']:hover {
-      background-color: var(--bg-brand-hover);
-      color: var(--text-on-accent);
+      background-color: var(--bg-button-primary-hover);
+      color: var(--text-button-primary);
     }
   }
 
   .wpcf7-form input[type='submit']:active {
-    background-color: var(--bg-brand-active);
-    color: var(--text-on-accent);
+    background-color: var(--bg-button-primary-hover);
+    color: var(--text-button-primary);
     border-color: transparent;
     transform: scale(0.97);
   }
 
   .wpcf7-form input[type='submit']:focus-visible {
-    outline: 3px solid var(--ring-focus);
+    outline: 2px solid var(--ring-focus);
     outline-offset: 2px;
   }
 
@@ -1813,10 +1820,10 @@ html {
     text-decoration: none;
     cursor: pointer;
     transition:
-      background-color 200ms ease-out,
-      border-color 200ms ease-out,
-      color 200ms ease-out,
-      transform 200ms ease-out;
+      background-color var(--dur-base) var(--ease-standard),
+      border-color var(--dur-base) var(--ease-standard),
+      color var(--dur-base) var(--ease-standard),
+      transform var(--dur-base) var(--ease-standard);
   }
 
   /* Hairline pill at rest (rafaelalex.de design system, section 5): brand
@@ -1824,8 +1831,8 @@ html {
      hover/focus, no gradient layer. */
   .prose a.button-primary,
   .button-primary {
-    background-color: var(--bg-brand-tint);
-    color: var(--color-content-brand);
+    background-color: var(--bg-button-primary);
+    color: var(--text-button-primary);
     border: 1px solid var(--color-line-brand);
   }
 
@@ -1833,8 +1840,8 @@ html {
   .prose a.button-primary:focus-visible,
   .button-primary:hover,
   .button-primary:focus-visible {
-    background-color: var(--bg-brand);
-    color: var(--text-on-accent);
+    background-color: var(--bg-button-primary-hover);
+    color: var(--text-button-primary);
     border-color: transparent;
     text-decoration: none;
   }
@@ -1843,8 +1850,8 @@ html {
   :root[data-theme='light'] .prose a.button-primary:focus-visible,
   :root[data-theme='light'] .button-primary:hover,
   :root[data-theme='light'] .button-primary:focus-visible {
-    background-color: var(--bg-brand-hover);
-    color: var(--text-on-accent);
+    background-color: var(--bg-button-primary-hover);
+    color: var(--text-button-primary);
   }
 
   @media (prefers-color-scheme: light) {
@@ -1852,15 +1859,15 @@ html {
     :root:not([data-theme='dark']) .prose a.button-primary:focus-visible,
     :root:not([data-theme='dark']) .button-primary:hover,
     :root:not([data-theme='dark']) .button-primary:focus-visible {
-      background-color: var(--bg-brand-hover);
-      color: var(--text-on-accent);
+      background-color: var(--bg-button-primary-hover);
+      color: var(--text-button-primary);
     }
   }
 
   .prose a.button-primary:active,
   .button-primary:active {
-    background-color: var(--bg-brand-active);
-    color: var(--text-on-accent);
+    background-color: var(--bg-button-primary-hover);
+    color: var(--text-button-primary);
     border-color: transparent;
     transform: scale(0.97);
   }
@@ -2875,9 +2882,8 @@ html {
    aller Zustaende braucht aber alle vier nebeneinander. Diese Regeln greifen auf
    dieselben Tokens zu wie die Komponente, kopieren also keine Farbwerte. */
 .zeige-hover .button--primary {
-  background-color: var(--bg-brand);
-  border-color: transparent;
-  color: var(--text-on-accent);
+  background-color: var(--bg-button-primary-hover);
+  color: var(--text-button-primary);
 }
 
 .zeige-hover .button--secondary {
@@ -2900,7 +2906,7 @@ html {
 }
 
 .zeige-fokus .button {
-  outline: 3px solid var(--ring-focus);
+  outline: 2px solid var(--ring-focus);
   outline-offset: 2px;
 }
 
@@ -2921,7 +2927,6 @@ html {
 }
 
 .zeige-aktiv .button--primary {
-  background-color: var(--bg-brand-active);
-  border-color: transparent;
-  color: var(--text-on-accent);
+  background-color: var(--bg-button-primary-hover);
+  color: var(--text-button-primary);
 }
