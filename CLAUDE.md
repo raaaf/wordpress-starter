@@ -120,7 +120,7 @@ Plugins are installed to `wp-content/plugins/` via `composer/installers`.
 
 ## Design Tokens
 
-Auto-generated from Figma in `resources/css/tokens.css`. See [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) for full documentation.
+Auto-generated from Figma in `resources/css/tokens.css`. See [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) for full documentation. Herkunft der Werte, die Fünf-Befehle-Kette und die Mapping-Tabelle stehen in [DESIGN.md](DESIGN.md).
 
 **Update tokens:**
 

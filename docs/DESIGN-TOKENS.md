@@ -1,11 +1,11 @@
 # Design Tokens
 
-Design Tokens sind die Brücke zwischen Figma-Design und Code. Sie definieren Farben, Abstände, Schriftgrößen und andere visuelle Eigenschaften als wiederverwendbare Variablen.
+Design Tokens definieren Farben, Abstände, Schriftgrößen und andere visuelle Eigenschaften als wiederverwendbare Variablen. Quelle ist seit der Design-System-Adoption `raaaf/rafael-design-system` (siehe [DESIGN.md](../DESIGN.md)), nicht mehr Figma direkt; Figma ist ein Empfänger, kein Herkunftsort.
 
 ## Übersicht
 
 ```
-Figma Variables → JSON Export → transform-tokens.js → tokens.css → TailwindCSS
+Design System (tokens/src) → theme-hub design-system → config/design-tokens/*.tokens.json → transform-tokens.js → tokens.css → TailwindCSS
 ```
 
 ## Dateien
@@ -20,37 +20,47 @@ Figma Variables → JSON Export → transform-tokens.js → tokens.css → Tailw
 
 ## Workflow
 
-### 1. Tokens aus Figma exportieren
+Die Kette der fünf Befehle (theme-hub, aus dem theme-hub-Repository heraus):
 
-1. Öffne deine Figma-Datei
-2. Gehe zu **Local Variables** (Rechtsklick → "Edit variables")
-3. Klicke auf das **⚙️ Einstellungen-Icon** → **Export**
-4. Wähle **JSON** als Format
-5. Exportiere drei Dateien:
-   - `primitives.tokens.json` - Collection mit Basis-Werten
-   - `light.tokens.json` - Mode "Light"
-   - `dark.tokens.json` - Mode "Dark"
-
-### 2. Tokens ins Theme kopieren
+### 1. Design-System-Werte in den Export schreiben
 
 ```bash
-# Kopiere die exportierten Dateien nach:
-config/design-tokens/
+theme-hub design-system --theme <pfad-zu-diesem-theme> --source <design-system>/tokens/src
 ```
 
-### 3. CSS generieren
+Schreibt Farbe, Spacing, Radius, Typo-Skala, Gewichte, Motion und A11y aus dem Design System in `config/design-tokens/*.tokens.json`. Legt vorher ein Backup in `config/design-tokens/backups/` an.
+
+### 2. CSS generieren
 
 ```bash
-# Einmalig
 npm run tokens
-
-# Oder mit Watch-Mode während der Entwicklung
-npm run tokens:watch
 ```
 
-### 4. Ergebnis prüfen
+Konvertiert den Export nach `resources/css/tokens.css` (und `tokens-editor.css`).
 
-Die generierten CSS Custom Properties findest du in `resources/css/tokens.css`.
+### 3. Redundante app.css-Korrekturen entfernen
+
+```bash
+theme-hub thin --from <pfad-zu-diesem-theme> --write
+```
+
+Entfernt `app.css`-Korrekturzeilen, die der Export inzwischen selbst richtig liefert, ohne das gerenderte Ergebnis zu verändern.
+
+### 4. Kontrastvertrag prüfen
+
+```bash
+theme-hub check --from <pfad-zu-diesem-theme>
+```
+
+Misst jede Text-/Icon-/UI-Paarung in Hell, Dunkel und System-Dunkel gegen WCAG 1.4.3/1.4.11.
+
+### 5. Figma-Importpaket erzeugen (optional, Figma ist Empfänger)
+
+```bash
+theme-hub figma --from <pfad-zu-diesem-theme> --out <verzeichnis>
+```
+
+Erzeugt ein Importpaket für Figma aus dem aktuellen Export — der umgekehrte Weg zum alten "Tokens aus Figma exportieren": Figma zeigt danach, was der Browser bereits rendert, statt umgekehrt.
 
 ## Token-Struktur
 
@@ -172,7 +182,6 @@ Tokens nur in `resources/css/app.css`, vom Figma-Export nicht geliefert (Begrün
 - `--surface-sheen` - 135°-Tuscheverlauf auf Cards und Panels (Hell-/Dunkelwert), über `.card` und die `surface-sheen`-Utility
 - `--page-sheen` - 160°-Verlauf über der Seite, deckt die erste Bildschirmhöhe des Body ab
 - `--noise-texture` - Noise-SVG im Body-Hintergrund
-- `--border-control` - überschreibt den Figma-Wert bewusst mit `var(--border-strong)`
 - `--color-icon-disabled` - Alias auf `--icon-disabled` im Tailwind-`@theme`-Block
 
 Neue Primitives aus dem Figma-Export, generiert in `resources/css/tokens.css`:
