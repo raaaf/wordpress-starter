@@ -1712,7 +1712,11 @@ html {
     letter-spacing: -0.02em;
     color: var(--text-button-primary);
     background-color: var(--bg-button-primary);
-    border: 1px solid var(--color-line-brand);
+    /* No border, DS Controls: never a solid accent fill AND never a border
+       on the primary button. Width kept and transparent, not `border: 0`,
+       so hover/active (already border-color: transparent) do not shift the
+       box by a pixel. */
+    border: 1px solid transparent;
     border-radius: var(--button-md-radius);
     cursor: pointer;
     transition:
@@ -1833,7 +1837,11 @@ html {
   .button-primary {
     background-color: var(--bg-button-primary);
     color: var(--text-button-primary);
-    border: 1px solid var(--color-line-brand);
+    /* No border, DS Controls: never a solid accent fill AND never a border
+       on the primary button. Width kept and transparent, not `border: 0`,
+       so hover/active (already border-color: transparent) do not shift the
+       box by a pixel. */
+    border: 1px solid transparent;
   }
 
   .prose a.button-primary:hover,
