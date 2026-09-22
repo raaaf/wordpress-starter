@@ -28,6 +28,18 @@
         $planCount === 2 => 'md:w-[calc(50%-1rem)]',
         default => 'md:w-full',
     };
+
+    // One primary action per view (DS identity law): only the featured
+    // plan's button is primary. Without a featured plan, the first plan
+    // takes that role instead so the table never shows more than one.
+    $featuredIndex = null;
+    foreach ($plans as $i => $p) {
+        if (!empty($p['is_featured'])) {
+            $featuredIndex = $i;
+            break;
+        }
+    }
+    $primaryIndex = $featuredIndex ?? 0;
 @endphp
 
 @if($title || !empty($plans) || current_user_can('edit_posts'))
@@ -59,9 +71,10 @@
         @endif
 
         <div class="flex flex-wrap justify-center gap-8">
-            @foreach($plans as $plan)
+            @foreach($plans as $planIndex => $plan)
                 @php
                     $isFeatured = $plan['is_featured'] ?? false;
+                    $isPrimaryButton = $planIndex === $primaryIndex;
                     $name = $plan['name'] ?? '';
                     $price = $plan['price'] ?? '';
                     $period = $plan['period'] ?? '';
@@ -112,7 +125,7 @@
                             :url="$cta['url'] ?? '#'"
                             :target="$cta['target'] ?? '_self'"
                             :title="$cta['title'] ?? __('Auswählen', 'wp-starter')"
-                            :variant="$isFeatured ? 'inverse' : 'primary'"
+                            :variant="$isFeatured ? 'inverse' : ($isPrimaryButton ? 'primary' : 'secondary')"
                             size="lg"
                             class="w-full justify-center"
                         />

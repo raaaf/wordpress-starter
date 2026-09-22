@@ -78,6 +78,11 @@ Vier zusätzliche, optionale Brand-Slots in theme-hub's `generate`/`serve`-Konfi
 - **`--radius <tight|standard|soft>`:** skaliert `radius/sm`, `/md`, `/lg` mit Faktor 0.5/1/1.5, gerundet auf ganze Pixel. `full` und die größeren Stufen (`xl`/`2xl`/`3xl`) bleiben unverändert.
 - **Headline-Zeilenhöhe und -Tracking (`--headline-line-height <n>`, 0.8–1.6; `--headline-tracking <em>`, -0.1em–0.1em):** setzt `lineHeight/display`, `/section`, `/title` und `tracking/heading` gemeinsam. Das Design System hat diese Werte auf seine eigene Display-Schrift (Colaborate) abgestimmt; nennt die Marke eine andere Headline-Schrift, sind beide Slots gemeinsam Pflicht (Sichtprüfung im Konfigurator anhand einer Live-Probe), sonst bleiben die DS-Werte unverändert stehen.
 
+## DS-Regeln
+
+- **Ein Primaer-Knopf pro Preistabelle:** in `pricing-table.blade.php` traegt nur das hervorgehobene Paket (`is_featured`) einen primaeren Button, alle anderen sekundaer. Ohne hervorgehobenes Paket uebernimmt das erste Paket diese Rolle. Grund: die DS-Identitaetsregel, ein Primaer-Element pro Ansicht.
+- **Ring bei deaktiviertem Primaer-Knopf auf der Karte im Dunkelmodus:** `[data-theme='dark'] .card .button--primary[aria-disabled='true']` (und `.button-primary` fuer die zweite Button-Klasse) traegt zusaetzlich `box-shadow: inset 0 0 0 1px var(--border-default)`, sonst verschwimmt die deaktivierte Fuellung mit der Kartenflaeche (components.md, Controls, Primary button, Disabled state).
+
 ## Verweis
 
 Werte stehen in `resources/css/tokens.css` (generiert) und `config/design-tokens/*.tokens.json` (Export). Nie hier kopieren — sie veralten beim nächsten Lauf, ohne dass es hier auffällt.

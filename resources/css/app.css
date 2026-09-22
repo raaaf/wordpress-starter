@@ -280,6 +280,17 @@
   border-color: var(--border-default);
 }
 
+/* components.md, Controls, primary button, Disabled state: on web dark, a
+   deaktivierter Primaer-Button auf einer Karte auf dem Grund (Variante
+   "outlined") traegt zusaetzlich den 1px border-default-Ring, sonst
+   verschwimmt die surface-stone-deep-Fuellung mit der Kartenflaeche. Nur der
+   deaktivierte Zustand: der aktive Button traegt seine eigene Akzentfuellung
+   und braucht den Ring nicht. Inset, damit sich am Layout nichts verschiebt. */
+[data-theme='dark'] .card .button--primary[aria-disabled='true'],
+[data-theme='dark'] .card .button-primary[aria-disabled='true'] {
+  box-shadow: inset 0 0 0 1px var(--border-default);
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     /* ------------------------------------------------------------------
@@ -364,6 +375,13 @@
   /* Siehe den [data-theme='dark'] Block oben. */
   :root:not([data-theme='light']) .card {
     border-color: var(--border-default);
+  }
+
+  /* Siehe den [data-theme='dark'] Block oben: derselbe deaktivierte
+     Primaer-Button-Ring, nur fuer System-Dunkel. */
+  :root:not([data-theme='light']) .card .button--primary[aria-disabled='true'],
+  :root:not([data-theme='light']) .card .button-primary[aria-disabled='true'] {
+    box-shadow: inset 0 0 0 1px var(--border-default);
   }
 }
 
