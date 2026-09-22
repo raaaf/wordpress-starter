@@ -2378,11 +2378,21 @@
       },
       "enter": {
         "$type": "string",
-        "$value": "cubic-bezier(0, 0, 0.2, 1)"
+        "$value": "cubic-bezier(0, 0, 0.2, 1)",
+        "$extensions": {
+          "com.figma.variableId": "VariableID:2008:1217",
+          "com.figma.scopes": ["ALL_SCOPES"],
+          "com.figma.codeSyntax": {}
+        }
       },
       "exit": {
         "$type": "string",
-        "$value": "cubic-bezier(0.4, 0, 1, 1)"
+        "$value": "cubic-bezier(0.4, 0, 1, 1)",
+        "$extensions": {
+          "com.figma.variableId": "VariableID:2008:1218",
+          "com.figma.scopes": ["ALL_SCOPES"],
+          "com.figma.codeSyntax": {}
+        }
       }
     },
     "duration": {
