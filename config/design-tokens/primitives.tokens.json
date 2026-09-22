@@ -2375,6 +2375,14 @@
           "com.figma.scopes": ["ALL_SCOPES"],
           "com.figma.type": "string"
         }
+      },
+      "enter": {
+        "$type": "string",
+        "$value": "cubic-bezier(0, 0, 0.2, 1)"
+      },
+      "exit": {
+        "$type": "string",
+        "$value": "cubic-bezier(0.4, 0, 1, 1)"
       }
     },
     "duration": {

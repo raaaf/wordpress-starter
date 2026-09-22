@@ -5,7 +5,7 @@
  * Run: node scripts/transform-tokens.js
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-09-22T09:48:28.247Z
+ * Generated: 2026-09-22T20:12:13.555Z
  */
 
 /* ============================================
@@ -239,6 +239,8 @@
 
   /* Motion */
   --ease-standard: cubic-bezier(0.44, 0, 0.56, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
   --dur-fast: 150ms;
   --dur-base: 200ms;
   --dur-medium: 300ms;

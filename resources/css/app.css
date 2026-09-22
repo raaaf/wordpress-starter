@@ -429,10 +429,10 @@
   /* One vocabulary for the whole theme. Entrances may take their time,
      exits should get out of the way, so they are shorter and ease in.
      Einzige Quelle für Komponenten-Transitions, nicht mehr pro Regel hart codieren. */
-  --motion-enter-duration: 200ms;
-  --motion-exit-duration: 150ms;
-  --motion-enter-ease: cubic-bezier(0, 0, 0.2, 1);
-  --motion-exit-ease: cubic-bezier(0.4, 0, 1, 1);
+  --motion-enter-duration: var(--dur-base);
+  --motion-exit-duration: var(--dur-fast);
+  --motion-enter-ease: var(--ease-enter);
+  --motion-exit-ease: var(--ease-exit);
 }
 
 @plugin "@tailwindcss/forms";
