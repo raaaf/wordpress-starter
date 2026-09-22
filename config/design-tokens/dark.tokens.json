@@ -433,7 +433,9 @@
       },
       "$extensions": {
         "com.figma.aliasData": {
-          "targetVariableName": "color/ds/surface/stone-deep/dark"
+          "targetVariableName": "color/ds/surface/stone-deep/dark",
+          "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
+          "targetVariableSetName": "primitives"
         }
       }
     },
@@ -738,7 +740,9 @@
       },
       "$extensions": {
         "com.figma.aliasData": {
-          "targetVariableName": "color/ds/accent/ink"
+          "targetVariableName": "color/ds/accent/ink",
+          "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
+          "targetVariableSetName": "primitives"
         }
       }
     },
@@ -752,7 +756,9 @@
       },
       "$extensions": {
         "com.figma.aliasData": {
-          "targetVariableName": "color/ds/accent/ink"
+          "targetVariableName": "color/ds/accent/ink",
+          "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
+          "targetVariableSetName": "primitives"
         }
       }
     },
@@ -766,7 +772,9 @@
       },
       "$extensions": {
         "com.figma.aliasData": {
-          "targetVariableName": "color/ds/text/tertiary/dark"
+          "targetVariableName": "color/ds/text/tertiary/dark",
+          "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
+          "targetVariableSetName": "primitives"
         }
       }
     },
@@ -1000,7 +1008,9 @@
       },
       "$extensions": {
         "com.figma.aliasData": {
-          "targetVariableName": "color/ds/border/default/dark"
+          "targetVariableName": "color/ds/border/default/dark",
+          "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
+          "targetVariableSetName": "primitives"
         }
       }
     }
@@ -1239,7 +1249,9 @@
       },
       "$extensions": {
         "com.figma.aliasData": {
-          "targetVariableName": "color/ds/accent/text/dark"
+          "targetVariableName": "color/ds/accent/text/dark",
+          "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
+          "targetVariableSetName": "primitives"
         }
       }
     }

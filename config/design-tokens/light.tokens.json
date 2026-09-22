@@ -740,7 +740,9 @@
       },
       "$extensions": {
         "com.figma.aliasData": {
-          "targetVariableName": "color/ds/accent/ink"
+          "targetVariableName": "color/ds/accent/ink",
+          "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
+          "targetVariableSetName": "primitives"
         }
       }
     },
@@ -754,7 +756,9 @@
       },
       "$extensions": {
         "com.figma.aliasData": {
-          "targetVariableName": "color/ds/accent/ink"
+          "targetVariableName": "color/ds/accent/ink",
+          "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
+          "targetVariableSetName": "primitives"
         }
       }
     },
@@ -768,7 +772,9 @@
       },
       "$extensions": {
         "com.figma.aliasData": {
-          "targetVariableName": "color/ds/text/tertiary/light"
+          "targetVariableName": "color/ds/text/tertiary/light",
+          "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
+          "targetVariableSetName": "primitives"
         }
       }
     },
@@ -1002,7 +1008,9 @@
       },
       "$extensions": {
         "com.figma.aliasData": {
-          "targetVariableName": "color/ds/border/default/light"
+          "targetVariableName": "color/ds/border/default/light",
+          "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
+          "targetVariableSetName": "primitives"
         }
       }
     }
@@ -1241,7 +1249,9 @@
       },
       "$extensions": {
         "com.figma.aliasData": {
-          "targetVariableName": "color/ds/accent/text/light"
+          "targetVariableName": "color/ds/accent/text/light",
+          "targetVariableSetId": "VariableCollectionId:d84754a3ba633422c83247c865f2f1758e2fbb66/-1:-1",
+          "targetVariableSetName": "primitives"
         }
       }
     }
