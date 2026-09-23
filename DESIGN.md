@@ -14,7 +14,7 @@ Ausgeführt aus dem theme-hub-Repository, mit `--theme`/`--from <pfad-zu-diesem-
 2. `npm run tokens` — erzeugt `resources/css/tokens.css` und `tokens-editor.css` aus dem Export.
 3. `theme-hub thin --from <theme> --write` — entfernt `app.css`-Korrekturen, die der Export inzwischen selbst richtig liefert.
 4. `theme-hub check --from <theme>` — misst den Kontrastvertrag (WCAG 1.4.3/1.4.11) in Hell, Dunkel und System-Dunkel.
-5. `theme-hub figma --from <theme> --out <verzeichnis>` — optional: Importpaket für Figma aus dem aktuellen Export.
+5. Sync im Figma-Plugin — optional: das lokale Figma-Plugin (`figma/plugin/` im theme-hub-Repository) holt den aktuellen Export über `theme-hub serve` und schreibt Variablen, Textstile und Bindungen direkt in die Figma-Datei; Details in `figma/plugin/README.md`. Ohne laufenden `serve` bleibt der Datei-Weg als Ersatz: `theme-hub figma --from <theme> --out <verzeichnis>` erzeugt ein Importpaket, das sich in Figma per Datei-Ersatz einspielen lässt.
 
 Details je Befehl: [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md).
 
