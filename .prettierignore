@@ -9,6 +9,12 @@ resources/css/tokens-editor.css
 # generator writes each unicode-range on one line, Prettier wraps it back.
 resources/css/fonts.css
 
+# Written by `theme-hub figma-ids` and the plugin's /api/figma-ids route on
+# every sync, with JSON.stringify(..., 2). Prettier collapses the short arrays
+# back, so each sync produced a 2000-line diff with no content change. The
+# route also refuses to write while this directory is dirty.
+config/design-tokens/*.tokens.json
+
 dist/
 node_modules/
 vendor/
