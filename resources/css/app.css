@@ -101,16 +101,6 @@
      result the accent ring had. Solid, like the others. */
   --shadow-focus-ring-error: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-error);
 
-  /* Shadow colours the Figma export never delivered. Same ink and the same
-     alpha steps the component shadows in tokens.css use, so a plain
-     shadow-lg and --shadow-card-hover now read as one family. */
-  --shadow-color-sm: rgba(23, 23, 23, 0.05);
-  --shadow-color-default: rgba(23, 23, 23, 0.1);
-  --shadow-color-md: rgba(23, 23, 23, 0.1);
-  --shadow-color-lg: rgba(23, 23, 23, 0.1);
-  --shadow-color-xl: rgba(23, 23, 23, 0.1);
-  --shadow-color-2xl: rgba(23, 23, 23, 0.25);
-
   /* Text that sits on --bg-brand. Deliberately the same value in both colour
      schemes: the brand orange does not change with the scheme, so the text on
      it must not either. */
@@ -224,12 +214,6 @@
      every shadow-sm/md/lg/xl/2xl utility was invisible here for the same
      reason the named component shadows below were. Same ink and alpha band
      as those. */
-  --shadow-color-sm: rgba(4, 6, 20, 0.3);
-  --shadow-color-default: rgba(4, 6, 20, 0.35);
-  --shadow-color-md: rgba(4, 6, 20, 0.4);
-  --shadow-color-lg: rgba(4, 6, 20, 0.45);
-  --shadow-color-xl: rgba(4, 6, 20, 0.5);
-  --shadow-color-2xl: rgba(4, 6, 20, 0.55);
 
   /* Structural shadows: button, card, input, modal and dropdown, plus their
      hover steps. The export defines these once (see COMPONENT_TOKENS in
@@ -255,21 +239,6 @@
   /* Flat-at-Rest Rule: no drop shadow on any surface at rest, in either
      colour scheme. Hover/overlay shadows below are interaction state and
      stay. */
-  --shadow-button: none;
-  --shadow-button-hover:
-    0px 2px 4px -1px rgba(4, 6, 20, 0.5), 0px 4px 6px -2px rgba(4, 6, 20, 0.35);
-  --shadow-input: none;
-  --shadow-input-hover: 0px 1px 3px 0px rgba(4, 6, 20, 0.45), 0px 1px 2px -1px rgba(4, 6, 20, 0.35);
-  --shadow-card: none;
-  --shadow-card-hover:
-    0px 2px 4px 0px rgba(4, 6, 20, 0.55), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
-    0px 20px 40px -8px rgba(4, 6, 20, 0.3);
-  --shadow-modal:
-    0px 4px 8px 0px rgba(4, 6, 20, 0.5), 0px 16px 32px 0px rgba(4, 6, 20, 0.4),
-    0px 40px 80px -16px rgba(4, 6, 20, 0.35);
-  --shadow-dropdown:
-    0px 2px 4px 0px rgba(4, 6, 20, 0.5), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
-    0px 20px 40px -8px rgba(4, 6, 20, 0.3);
 
   color-scheme: dark;
 }
@@ -342,32 +311,10 @@
 
     /* See the [data-theme='dark'] block above: the plain shadow-sm..shadow-2xl
        scale needs its own dark ink too, not just the named component shadows. */
-    --shadow-color-sm: rgba(4, 6, 20, 0.3);
-    --shadow-color-default: rgba(4, 6, 20, 0.35);
-    --shadow-color-md: rgba(4, 6, 20, 0.4);
-    --shadow-color-lg: rgba(4, 6, 20, 0.45);
-    --shadow-color-xl: rgba(4, 6, 20, 0.5);
-    --shadow-color-2xl: rgba(4, 6, 20, 0.55);
 
     /* See the [data-theme='dark'] block above for the measurement and the
        reasoning behind the ink and opacity change. */
     /* Flat-at-Rest Rule: no drop shadow on any surface at rest. */
-    --shadow-button: none;
-    --shadow-button-hover:
-      0px 2px 4px -1px rgba(4, 6, 20, 0.5), 0px 4px 6px -2px rgba(4, 6, 20, 0.35);
-    --shadow-input: none;
-    --shadow-input-hover:
-      0px 1px 3px 0px rgba(4, 6, 20, 0.45), 0px 1px 2px -1px rgba(4, 6, 20, 0.35);
-    --shadow-card: none;
-    --shadow-card-hover:
-      0px 2px 4px 0px rgba(4, 6, 20, 0.55), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
-      0px 20px 40px -8px rgba(4, 6, 20, 0.3);
-    --shadow-modal:
-      0px 4px 8px 0px rgba(4, 6, 20, 0.5), 0px 16px 32px 0px rgba(4, 6, 20, 0.4),
-      0px 40px 80px -16px rgba(4, 6, 20, 0.35);
-    --shadow-dropdown:
-      0px 2px 4px 0px rgba(4, 6, 20, 0.5), 0px 8px 16px 0px rgba(4, 6, 20, 0.4),
-      0px 20px 40px -8px rgba(4, 6, 20, 0.3);
 
     color-scheme: dark;
   }

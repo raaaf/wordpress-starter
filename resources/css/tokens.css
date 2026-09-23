@@ -5,7 +5,7 @@
  * Run: node scripts/transform-tokens.js
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-09-22T20:12:13.555Z
+ * Generated: 2026-09-23T19:35:48.387Z
  */
 
 /* ============================================
@@ -336,21 +336,9 @@
      Shadows and component-specific values
      ============================================ */
 
-  /* Shadows */
-  /* Flat-at-Rest Rule: no drop shadow on any surface at rest. Interaction-state
-     shadows (hover lift, overlays) stay, since they respond to user action. */
-  --shadow-button: none;
-  --shadow-button-hover: 0px 4px 6px -1px rgba(23, 23, 23, 0.1), 0px 2px 4px -2px rgba(23, 23, 23, 0.1);
-  --shadow-inner: inset 0px 2px 4px 0px rgba(23, 23, 23, 0.06);
-  --shadow-focus-ring: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-accent-alpha-50);
-  --shadow-focus-ring-ghost: 0px 0px 0px 2px var(--color-accent-alpha-50);
-  --shadow-focus-ring-error: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-error-alpha-50, rgba(220, 38, 38, 0.5));
-  --shadow-input: none;
-  --shadow-input-hover: 0px 1px 3px 0px rgba(23, 23, 23, 0.1), 0px 1px 2px -1px rgba(23, 23, 23, 0.1);
-  --shadow-card: none;
-  --shadow-card-hover: 0px 10px 15px -3px rgba(23, 23, 23, 0.1), 0px 4px 6px -4px rgba(23, 23, 23, 0.1);
-  --shadow-dropdown: 0px 10px 15px -3px rgba(23, 23, 23, 0.1), 0px 4px 6px -4px rgba(23, 23, 23, 0.1);
-  --shadow-modal: 0px 25px 50px -12px rgba(23, 23, 23, 0.25);
+  /* Shadows live in the token export now, emitted per appearance with the
+     semantic roles below. The three focus rings stay in app.css, which is
+     where their current values are authored. */
 
   /* Button Sizes */
   /* Pill CTAs: radius is full on every size. Heights follow the rafaelalex.de
@@ -493,6 +481,23 @@
 
   /* Ring */
   --ring-focus: var(--color-ds-accent-text-light);
+
+  /* Shadow */
+  --shadow-color-sm: rgba(23, 23, 23, 0.05);
+  --shadow-color-default: rgba(23, 23, 23, 0.10);
+  --shadow-color-md: rgba(23, 23, 23, 0.10);
+  --shadow-color-lg: rgba(23, 23, 23, 0.10);
+  --shadow-color-xl: rgba(23, 23, 23, 0.10);
+  --shadow-color-2xl: rgba(23, 23, 23, 0.25);
+  --shadow-button: none;
+  --shadow-button-hover: 0px 4px 6px -1px rgba(23,23,23,0.1), 0px 2px 4px -2px rgba(23,23,23,0.1);
+  --shadow-inner: inset 0px 2px 4px 0px rgba(23,23,23,0.06);
+  --shadow-input: none;
+  --shadow-input-hover: 0px 1px 3px 0px rgba(23,23,23,0.1), 0px 1px 2px -1px rgba(23,23,23,0.1);
+  --shadow-card: none;
+  --shadow-card-hover: 0px 10px 15px -3px rgba(23,23,23,0.1), 0px 4px 6px -4px rgba(23,23,23,0.1);
+  --shadow-dropdown: 0px 10px 15px -3px rgba(23,23,23,0.1), 0px 4px 6px -4px rgba(23,23,23,0.1);
+  --shadow-modal: 0px 25px 50px -12px rgba(23,23,23,0.25);
 }
 
 /* ============================================
@@ -579,6 +584,23 @@
 
   /* Ring */
   --ring-focus: var(--color-ds-accent-text-dark);
+
+  /* Shadow */
+  --shadow-color-sm: rgba(4, 6, 20, 0.30);
+  --shadow-color-default: rgba(4, 6, 20, 0.35);
+  --shadow-color-md: rgba(4, 6, 20, 0.40);
+  --shadow-color-lg: rgba(4, 6, 20, 0.45);
+  --shadow-color-xl: rgba(4, 6, 20, 0.50);
+  --shadow-color-2xl: rgba(4, 6, 20, 0.55);
+  --shadow-button: none;
+  --shadow-button-hover: 0px 2px 4px -1px rgba(4,6,20,0.5), 0px 4px 6px -2px rgba(4,6,20,0.35);
+  --shadow-inner: inset 0px 2px 4px 0px rgba(23,23,23,0.06);
+  --shadow-input: none;
+  --shadow-input-hover: 0px 1px 3px 0px rgba(4,6,20,0.45), 0px 1px 2px -1px rgba(4,6,20,0.35);
+  --shadow-card: none;
+  --shadow-card-hover: 0px 2px 4px 0px rgba(4,6,20,0.55), 0px 8px 16px 0px rgba(4,6,20,0.4), 0px 20px 40px -8px rgba(4,6,20,0.3);
+  --shadow-dropdown: 0px 2px 4px 0px rgba(4,6,20,0.5), 0px 8px 16px 0px rgba(4,6,20,0.4), 0px 20px 40px -8px rgba(4,6,20,0.3);
+  --shadow-modal: 0px 4px 8px 0px rgba(4,6,20,0.5), 0px 16px 32px 0px rgba(4,6,20,0.4), 0px 40px 80px -16px rgba(4,6,20,0.35);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -661,5 +683,22 @@
 
     /* Ring */
   --ring-focus: var(--color-ds-accent-text-dark);
+
+  /* Shadow */
+  --shadow-color-sm: rgba(4, 6, 20, 0.30);
+  --shadow-color-default: rgba(4, 6, 20, 0.35);
+  --shadow-color-md: rgba(4, 6, 20, 0.40);
+  --shadow-color-lg: rgba(4, 6, 20, 0.45);
+  --shadow-color-xl: rgba(4, 6, 20, 0.50);
+  --shadow-color-2xl: rgba(4, 6, 20, 0.55);
+  --shadow-button: none;
+  --shadow-button-hover: 0px 2px 4px -1px rgba(4,6,20,0.5), 0px 4px 6px -2px rgba(4,6,20,0.35);
+  --shadow-inner: inset 0px 2px 4px 0px rgba(23,23,23,0.06);
+  --shadow-input: none;
+  --shadow-input-hover: 0px 1px 3px 0px rgba(4,6,20,0.45), 0px 1px 2px -1px rgba(4,6,20,0.35);
+  --shadow-card: none;
+  --shadow-card-hover: 0px 2px 4px 0px rgba(4,6,20,0.55), 0px 8px 16px 0px rgba(4,6,20,0.4), 0px 20px 40px -8px rgba(4,6,20,0.3);
+  --shadow-dropdown: 0px 2px 4px 0px rgba(4,6,20,0.5), 0px 8px 16px 0px rgba(4,6,20,0.4), 0px 20px 40px -8px rgba(4,6,20,0.3);
+  --shadow-modal: 0px 4px 8px 0px rgba(4,6,20,0.5), 0px 16px 32px 0px rgba(4,6,20,0.4), 0px 40px 80px -16px rgba(4,6,20,0.35);
   }
 }

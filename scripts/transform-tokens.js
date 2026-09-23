@@ -223,6 +223,23 @@ function extractColorAsReference(token) {
  * Extract hex color value from Figma token $value object
  * Handles both simple values and complex color objects with alpha
  */
+/**
+ * A shadow token into a `box-shadow` value.
+ *
+ * The token carries its layers as objects so a consumer that is not CSS, the
+ * Figma plugin above all, can read them. An empty list is the flat-at-rest
+ * case and means `none`, not a missing token.
+ */
+function extractShadow(token) {
+  if (!token || token.$type !== 'shadow' || !Array.isArray(token.$value)) return null;
+  if (token.$value.length === 0) return 'none';
+  return token.$value
+    .map(({ inset, offsetX, offsetY, blur, spread, color }) =>
+      `${inset ? 'inset ' : ''}${offsetX} ${offsetY} ${blur} ${spread} ${color}`
+    )
+    .join(', ');
+}
+
 function extractColorValue(token) {
   if (!token || token.$type !== 'color') return null;
 
@@ -571,21 +588,9 @@ const COMPONENT_TOKENS = `
      Shadows and component-specific values
      ============================================ */
 
-  /* Shadows */
-  /* Flat-at-Rest Rule: no drop shadow on any surface at rest. Interaction-state
-     shadows (hover lift, overlays) stay, since they respond to user action. */
-  --shadow-button: none;
-  --shadow-button-hover: 0px 4px 6px -1px rgba(23, 23, 23, 0.1), 0px 2px 4px -2px rgba(23, 23, 23, 0.1);
-  --shadow-inner: inset 0px 2px 4px 0px rgba(23, 23, 23, 0.06);
-  --shadow-focus-ring: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-accent-alpha-50);
-  --shadow-focus-ring-ghost: 0px 0px 0px 2px var(--color-accent-alpha-50);
-  --shadow-focus-ring-error: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-error-alpha-50, rgba(220, 38, 38, 0.5));
-  --shadow-input: none;
-  --shadow-input-hover: 0px 1px 3px 0px rgba(23, 23, 23, 0.1), 0px 1px 2px -1px rgba(23, 23, 23, 0.1);
-  --shadow-card: none;
-  --shadow-card-hover: 0px 10px 15px -3px rgba(23, 23, 23, 0.1), 0px 4px 6px -4px rgba(23, 23, 23, 0.1);
-  --shadow-dropdown: 0px 10px 15px -3px rgba(23, 23, 23, 0.1), 0px 4px 6px -4px rgba(23, 23, 23, 0.1);
-  --shadow-modal: 0px 25px 50px -12px rgba(23, 23, 23, 0.25);
+  /* Shadows live in the token export now, emitted per appearance with the
+     semantic roles below. The three focus rings stay in app.css, which is
+     where their current values are authored. */
 
   /* Button Sizes */
   /* Pill CTAs: radius is full on every size. Heights follow the rafaelalex.de
@@ -858,6 +863,8 @@ function transform() {
   // outside the control, does not take part in layout, and has to stay legible
   // on every surface the control can sit on.
   const lightRing = flattenTokens(lightTokens.ring || {}, '', extractColorAsReference);
+  const lightShadowInk = flattenTokens(lightTokens.shadow?.color || {}, '', extractColorValue);
+  const lightShadow = flattenTokens(lightTokens.shadow || {}, '', extractShadow);
 
   console.log('Processing semantic tokens (dark mode)...');
 
@@ -867,6 +874,8 @@ function transform() {
   const darkBorder = flattenTokens(darkTokens.border || {}, '', extractColorAsReference);
   const darkIcon = flattenTokens(darkTokens.icon || {}, '', extractColorAsReference);
   const darkRing = flattenTokens(darkTokens.ring || {}, '', extractColorAsReference);
+  const darkShadowInk = flattenTokens(darkTokens.shadow?.color || {}, '', extractColorValue);
+  const darkShadow = flattenTokens(darkTokens.shadow || {}, '', extractShadow);
 
   console.log('Generating CSS...');
 
@@ -948,6 +957,10 @@ ${generateCss(lightIcon, 'icon')}
 
   /* Ring */
 ${generateCss(lightRing, 'ring')}
+
+  /* Shadow */
+${generateCss(lightShadowInk, 'shadow-color')}
+${generateCss(lightShadow, 'shadow')}
 }
 
 /* ============================================
@@ -970,6 +983,10 @@ ${generateCss(darkIcon, 'icon')}
 
   /* Ring */
 ${generateCss(darkRing, 'ring')}
+
+  /* Shadow */
+${generateCss(darkShadowInk, 'shadow-color')}
+${generateCss(darkShadow, 'shadow')}
 }
 
 @media (prefers-color-scheme: dark) {
@@ -988,6 +1005,10 @@ ${generateCss(darkIcon, 'icon')}
 
     /* Ring */
 ${generateCss(darkRing, 'ring')}
+
+  /* Shadow */
+${generateCss(darkShadowInk, 'shadow-color')}
+${generateCss(darkShadow, 'shadow')}
   }
 }
 `;
@@ -1100,6 +1121,10 @@ ${generateCss(lightIcon, 'icon')}
 
   /* Ring */
 ${generateCss(lightRing, 'ring')}
+
+  /* Shadow */
+${generateCss(lightShadowInk, 'shadow-color')}
+${generateCss(lightShadow, 'shadow')}
 }
 
 /* ============================================
