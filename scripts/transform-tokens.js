@@ -78,23 +78,51 @@ function writeAndVerify(path, content, readImpl = readFileSync) {
   }
 }
 
-// Fluid typography configuration
-// Mobile min values (at VIEWPORT_MIN). Max values come from Figma primitives.fontSize.
-// xs/sm/base stay non-fluid (min === max) for reading stability — see transform-tokens.test.js.
-
-// lg and above scale meaningfully for headline breathing room.
+// Fluid typography configuration.
+//
+// `min` is the mobile floor at VIEWPORT_MIN and lives here: no token defines it.
+// `max` is the desktop value and MUST equal primitives.fontSize, which is where
+// the design system writes it. That was only ever a comment before, and three
+// entries had drifted from it: xs said 12 against a token of 13, 3xl said 32
+// against 36, 4xl said 44 against 48. The page rendered the table, not the
+// design system. `assertFluidMaxMatchesExport` now stops the build instead.
+//
+// xs/sm/base stay non-fluid (min === max) for reading stability; lg and above
+// scale for headline breathing room.
 const FLUID_SIZES = {
-  xs: { min: 12, max: 12 },
+  xs: { min: 13, max: 13 },
   sm: { min: 14, max: 14 },
   base: { min: 16, max: 16 },
   lg: { min: 17, max: 18 },
   xl: { min: 18, max: 20 },
   '2xl': { min: 20, max: 24 },
-  '3xl': { min: 28, max: 32 },
-  '4xl': { min: 34, max: 44 },
+  '3xl': { min: 28, max: 36 },
+  '4xl': { min: 34, max: 48 },
   '5xl': { min: 36, max: 56 },
   '6xl': { min: 40, max: 72 },
 };
+
+/**
+ * The desktop end of every clamp is the design system's value, not this file's.
+ * A mismatch means a token moved and the table did not follow, which is exactly
+ * how xs, 3xl and 4xl came to render a size nobody had chosen.
+ */
+function assertFluidMaxMatchesExport(fontSize = {}) {
+  const wrong = [];
+  for (const [key, config] of Object.entries(FLUID_SIZES)) {
+    const px = fontSize[key]?.$value;
+    if (typeof px === 'number' && px !== config.max) {
+      wrong.push(`${key}: Tabelle ${config.max}px, Export ${px}px`);
+    }
+  }
+  if (wrong.length > 0) {
+    console.error(
+      `transform-tokens: FLUID_SIZES weicht vom Token-Export ab:\n  ${wrong.join('\n  ')}\n` +
+        '  Der Export ist die Quelle. Trage die Werte dort nach oder hier.'
+    );
+    process.exit(1);
+  }
+}
 
 const VIEWPORT_MIN = 320;
 const VIEWPORT_MAX = 1920;
@@ -775,6 +803,8 @@ function transform() {
   //          for most keys config.max === Figma px, avoiding any unintended drift)
   // xs/sm have min===current and max===current+1 (gentle 1px clamp without shrinking).
   // Unknown keys (not in FLUID_SIZES) fall back to a static rem value.
+  assertFluidMaxMatchesExport(primitives.fontSize);
+
   const primitiveFontSize = {};
   for (const [key, token] of Object.entries(primitives.fontSize || {})) {
     if (key.startsWith('$')) continue;
@@ -1230,6 +1260,7 @@ export {
   fluidClamp,
   fluidLineHeight,
   FLUID_SIZES,
+  assertFluidMaxMatchesExport,
   HEADING_LINE_HEIGHTS,
   VIEWPORT_MIN,
   VIEWPORT_MAX,
