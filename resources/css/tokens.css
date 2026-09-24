@@ -5,7 +5,7 @@
  * Run: node scripts/transform-tokens.js
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-09-24T10:09:20.092Z
+ * Generated: 2026-09-24T10:39:31.598Z
  */
 
 /* ============================================
@@ -175,9 +175,9 @@
   --font-size-base: 1rem;
   --font-size-lg: clamp(1.0625rem, calc(1.05rem + 0.0625vw), 1.125rem);
   --font-size-xl: clamp(1.125rem, calc(1.1rem + 0.125vw), 1.25rem);
-  --font-size-2xl: clamp(1.25rem, calc(1.2rem + 0.25vw), 1.5rem);
-  --font-size-3xl: clamp(1.75rem, calc(1.65rem + 0.5vw), 2.25rem);
-  --font-size-4xl: clamp(2.125rem, calc(1.95rem + 0.875vw), 3rem);
+  --font-size-2xl: clamp(1.25rem, calc(1.175rem + 0.375vw), 1.625rem);
+  --font-size-3xl: clamp(1.75rem, calc(1.6875rem + 0.3125vw), 2.0625rem);
+  --font-size-4xl: clamp(2.125rem, calc(2.0125rem + 0.5625vw), 2.6875rem);
   --font-size-5xl: clamp(2.25rem, calc(2rem + 1.25vw), 3.5rem);
   --font-size-6xl: clamp(2.5rem, calc(2.1rem + 2vw), 4.5rem);
 
@@ -266,19 +266,19 @@
   /* Heading 1 - 4xl / Regular */
   --typography-h1-size: var(--font-size-4xl);
   --typography-h1-weight: var(--font-weight-regular);
-  --typography-h1-line-height: clamp(2.125rem, calc(1.95rem + 0.875vw), 3rem);
+  --typography-h1-line-height: clamp(2.125rem, calc(2.0125rem + 0.5625vw), 2.6875rem);
   --typography-h1-letter-spacing: -0.02em;
 
   /* Heading 2 - 3xl / Regular */
   --typography-h2-size: var(--font-size-3xl);
   --typography-h2-weight: var(--font-weight-regular);
-  --typography-h2-line-height: clamp(1.75rem, calc(1.65rem + 0.5vw), 2.25rem);
+  --typography-h2-line-height: clamp(1.75rem, calc(1.6875rem + 0.3125vw), 2.0625rem);
   --typography-h2-letter-spacing: -0.02em;
 
   /* Heading 3 - 2xl / Regular */
   --typography-h3-size: var(--font-size-2xl);
   --typography-h3-weight: var(--font-weight-regular);
-  --typography-h3-line-height: clamp(1.25rem, calc(1.2rem + 0.25vw), 1.5rem);
+  --typography-h3-line-height: clamp(1.25rem, calc(1.175rem + 0.375vw), 1.625rem);
   --typography-h3-letter-spacing: -0.02em;
 
   /* Heading 4 - xl / Regular */

@@ -198,8 +198,9 @@ describe('fluidLineHeight', () => {
 
   it('keeps the ratio between the two endpoints across the range', () => {
     const expr = fluidLineHeight('4xl', 1.4, 1.2);
-    // 4xl min/max per FLUID_SIZES (updated with the rafaelalex.de type scale).
-    const sizeExpr = fluidClamp(34, 44);
+    // Read from the table rather than repeated here: writing the numbers out
+    // is how the generator itself came to render a size nobody had chosen.
+    const sizeExpr = fluidClamp(FLUID_SIZES['4xl'].min, FLUID_SIZES['4xl'].max);
     for (const vw of [320, 640, 960, 1280, 1600, 1920]) {
       const ratio = evaluate(expr, vw) / evaluate(sizeExpr, vw);
       expect(ratio, `ratio ${ratio} out of range at ${vw}px`).toBeGreaterThanOrEqual(1.2 - 0.001);

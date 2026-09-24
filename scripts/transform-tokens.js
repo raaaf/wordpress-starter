@@ -95,9 +95,9 @@ const FLUID_SIZES = {
   base: { min: 16, max: 16 },
   lg: { min: 17, max: 18 },
   xl: { min: 18, max: 20 },
-  '2xl': { min: 20, max: 24 },
-  '3xl': { min: 28, max: 36 },
-  '4xl': { min: 34, max: 48 },
+  '2xl': { min: 20, max: 26 },
+  '3xl': { min: 28, max: 33 },
+  '4xl': { min: 34, max: 43 },
   '5xl': { min: 36, max: 56 },
   '6xl': { min: 40, max: 72 },
 };

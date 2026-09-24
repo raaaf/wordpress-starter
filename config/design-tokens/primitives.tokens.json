@@ -2621,7 +2621,7 @@
     },
     "2xl": {
       "$type": "number",
-      "$value": 24,
+      "$value": 26,
       "$extensions": {
         "com.figma.variableId": "VariableID:1:2009",
         "com.figma.hiddenFromPublishing": true
@@ -2629,7 +2629,7 @@
     },
     "3xl": {
       "$type": "number",
-      "$value": 36,
+      "$value": 33,
       "$extensions": {
         "com.figma.variableId": "VariableID:1:2010",
         "com.figma.hiddenFromPublishing": true
@@ -2637,7 +2637,7 @@
     },
     "4xl": {
       "$type": "number",
-      "$value": 48,
+      "$value": 43,
       "$extensions": {
         "com.figma.variableId": "VariableID:1:2011",
         "com.figma.hiddenFromPublishing": true
