@@ -20,6 +20,8 @@ npm run build      # Production build
 npm run lint       # JS/TS linting
 npm run icons      # Sync resources/icons/ from config/icons.json
 npm test            # Vitest (JS unit tests)
+npx vitest run <file>  # Vitest, nur eine Datei
+npx vitest run -t <name>  # Vitest, nur Tests, deren Name matcht
 npm run test:watch  # Vitest in watch mode
 npm run test:coverage # Vitest with coverage report
 npm run test:e2e   # Playwright E2E tests
@@ -28,6 +30,8 @@ npm run test:styleguide  # Styleguide-Seite (braucht WP_USER + WP_PASSWORD, sieh
 composer lint      # PHP linting (phpcs + phpstan)
 composer test      # PHPUnit tests
 ```
+
+Während der Arbeit nur betroffene Tests laufen lassen; die volle Suite erst vor dem Push.
 
 Der Vite-Dev-Server bindet standardmäßig nur an `localhost`. `VITE_HOST=true` bindet
 zusätzlich an alle Interfaces (z. B. zum Testen von einem anderen Gerät im LAN).
