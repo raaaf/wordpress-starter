@@ -283,6 +283,21 @@ abstract class AbstractPostType
      */
     protected static function registerAdminColumns(): void
     {
+        // adminColumns() holds translated labels, which must not be evaluated
+        // before `init` (WP 6.7+ just-in-time textdomain loading notice).
+        if (did_action('init')) {
+            static::wireAdminColumns();
+            return;
+        }
+
+        add_action('init', static fn() => static::wireAdminColumns());
+    }
+
+    /**
+     * Evaluate adminColumns() and attach the column hooks.
+     */
+    protected static function wireAdminColumns(): void
+    {
         $definitions = static::adminColumns();
         if ($definitions === []) {
             return;

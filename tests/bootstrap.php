@@ -364,6 +364,15 @@ if (!function_exists('add_filter')) {
     }
 }
 
+if (!function_exists('did_action')) {
+    // Tests run as if `init` already fired, so hook wiring happens immediately.
+    // Seed $GLOBALS['wp_test_did_action'][$hook] = 0 to exercise the deferred branch.
+    function did_action(string $hook): int
+    {
+        return $GLOBALS['wp_test_did_action'][$hook] ?? 1;
+    }
+}
+
 if (!function_exists('add_shortcode')) {
     function add_shortcode(string $tag, callable $callback): void
     {
