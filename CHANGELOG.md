@@ -1,3 +1,9 @@
+## [2.37.1](https://github.com/raaaf/wordpress-starter/compare/v2.37.0...v2.37.1) (2026-09-29)
+
+### Bug Fixes
+
+- second audit round on events data, CPT labels and styleguide ([e783a2d](https://github.com/raaaf/wordpress-starter/commit/e783a2d7acd6e81d957b669d93379270203271cb))
+
 # [2.37.0](https://github.com/raaaf/wordpress-starter/compare/v2.36.0...v2.37.0) (2026-09-29)
 
 ### Bug Fixes
