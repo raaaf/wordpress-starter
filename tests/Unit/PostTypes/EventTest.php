@@ -59,9 +59,12 @@ final class EventTest extends TestCase
 
         do_action('pre_get_posts', $query);
 
-        $this->assertSame('event_date', $query->get('meta_key'));
-        $this->assertSame('meta_value', $query->get('orderby'));
-        $this->assertSame('ASC', $query->get('order'));
+        // Named clause on EXISTS OR NOT EXISTS keeps events without a date (drafts) in the list.
+        $metaQuery = $query->get('meta_query');
+        $this->assertSame('OR', $metaQuery['relation']);
+        $this->assertSame('EXISTS', $metaQuery['event_date_clause']['compare']);
+        $this->assertSame('NOT EXISTS', $metaQuery[0]['compare']);
+        $this->assertSame(['event_date_clause' => 'ASC'], $query->get('orderby'));
     }
 
     public function testAdminListDefaultSortDoesNotOverrideAnExplicitOrderby(): void
@@ -173,6 +176,8 @@ final class EventTest extends TestCase
         $this->assertNull($this->mapEvent(['event_time' => '300000000000'])['event_time']);
     }
 
+    private const PLACE = ['event_location' => 'Fürth'];
+
     /**
      * @param array<string, mixed> $overrides
      *
@@ -185,14 +190,16 @@ final class EventTest extends TestCase
 
     public function testToSchemaMapsEachFormatToItsAttendanceMode(): void
     {
-        $this->assertSame('https://schema.org/OfflineEventAttendanceMode', $this->schema(['event_format' => 'onsite'])['eventAttendanceMode']);
-        $this->assertSame('https://schema.org/OnlineEventAttendanceMode', $this->schema(['event_format' => 'online'])['eventAttendanceMode']);
-        $this->assertSame('https://schema.org/MixedEventAttendanceMode', $this->schema(['event_format' => 'hybrid'])['eventAttendanceMode']);
+        $fields = self::PLACE + ['event_link' => ['url' => 'https://example.org/live']];
+
+        $this->assertSame('https://schema.org/OfflineEventAttendanceMode', $this->schema(['event_format' => 'onsite'] + $fields)['eventAttendanceMode']);
+        $this->assertSame('https://schema.org/OnlineEventAttendanceMode', $this->schema(['event_format' => 'online'] + $fields)['eventAttendanceMode']);
+        $this->assertSame('https://schema.org/MixedEventAttendanceMode', $this->schema(['event_format' => 'hybrid'] + $fields)['eventAttendanceMode']);
     }
 
     public function testToSchemaStartDateIsPlainDateWithoutTime(): void
     {
-        $schema = $this->schema();
+        $schema = $this->schema(self::PLACE);
 
         $this->assertSame('Event', $schema['@type']);
         $this->assertSame('Titel', $schema['name']);
@@ -204,8 +211,8 @@ final class EventTest extends TestCase
     {
         $GLOBALS['wp_mock_timezone'] = 'Europe/Berlin';
 
-        $this->assertSame('2026-10-08T18:30+02:00', $this->schema(['event_time' => '18:30:00'])['startDate']);
-        $this->assertSame('2026-12-08T18:30+01:00', $this->schema(['event_date' => '20261208', 'event_time' => '18:30'])['startDate']);
+        $this->assertSame('2026-10-08T18:30+02:00', $this->schema(self::PLACE + ['event_time' => '18:30:00'])['startDate']);
+        $this->assertSame('2026-12-08T18:30+01:00', $this->schema(self::PLACE + ['event_date' => '20261208', 'event_time' => '18:30'])['startDate']);
     }
 
     public function testToSchemaOnsiteLocationIsAPlaceFromTheAddress(): void
@@ -213,7 +220,6 @@ final class EventTest extends TestCase
         $schema = $this->schema(['event_location' => 'Königstraße 1, Fürth', 'event_link' => ['url' => 'https://example.org/live']]);
 
         $this->assertSame(['@type' => 'Place', 'name' => 'Königstraße 1, Fürth', 'address' => 'Königstraße 1, Fürth'], $schema['location']);
-        $this->assertArrayNotHasKey('location', $this->schema());
     }
 
     public function testToSchemaOnlineLocationIsAVirtualLocationFromTheLinkUrl(): void
@@ -222,7 +228,6 @@ final class EventTest extends TestCase
         $withLink = $this->schema($fields + ['event_link' => ['url' => 'https://example.org/live']]);
 
         $this->assertSame(['@type' => 'VirtualLocation', 'url' => 'https://example.org/live'], $withLink['location']);
-        $this->assertArrayNotHasKey('location', $this->schema($fields));
     }
 
     public function testToSchemaHybridLocationListsOnlyThePartsThatAreSet(): void
@@ -235,15 +240,14 @@ final class EventTest extends TestCase
 
         $this->assertSame(['Place'], array_column($this->schema($fields + ['event_location' => 'Fürth'])['location'], '@type'));
         $this->assertSame(['VirtualLocation'], array_column($this->schema($fields + $link)['location'], '@type'));
-        $this->assertArrayNotHasKey('location', $this->schema($fields));
     }
 
     public function testToSchemaImageIsOmittedWithoutAUrl(): void
     {
-        $this->assertArrayNotHasKey('image', $this->schema());
+        $this->assertArrayNotHasKey('image', $this->schema(self::PLACE));
 
         $GLOBALS['wp_mock_attachments'] = [];
-        $entry = Event::mapEvent(77, 'Titel', ['event_date' => '20261008']);
+        $entry = Event::mapEvent(77, 'Titel', ['event_date' => '20261008'] + self::PLACE);
         $entry['image'] = 55;
         $this->assertArrayNotHasKey('image', Event::toSchema($entry));
 
@@ -253,13 +257,37 @@ final class EventTest extends TestCase
 
     public function testToSchemaStripsTagsAndOmitsEmptyKeys(): void
     {
-        $entry = Event::mapEvent(77, '<b>Fest</b>', ['event_date' => '20261008', 'event_description' => '<i>Hallo</i>']);
+        $entry = Event::mapEvent(77, '<b>Fest</b>', ['event_date' => '20261008', 'event_description' => '<i>Hallo</i>'] + self::PLACE);
         $schema = Event::toSchema($entry);
 
         $this->assertSame('Fest', $schema['name']);
         $this->assertSame('Hallo', $schema['description']);
         $this->assertArrayNotHasKey('url', $schema);
-        $this->assertSame('https://example.org/a', $this->schema(['event_link' => ['url' => 'https://example.org/a']])['url']);
+        $this->assertSame('https://example.org/a', $this->schema(self::PLACE + ['event_link' => ['url' => 'https://example.org/a']])['url']);
+    }
+
+    public function testToSchemaDropsNonHttpUrls(): void
+    {
+        $online = ['event_format' => 'online', 'event_link' => ['url' => 'javascript:alert(1)']];
+
+        // The only location source is the unsafe link, so the event goes away entirely.
+        $this->assertSame([], $this->schema($online));
+
+        $schema = $this->schema(self::PLACE + ['event_link' => ['url' => 'javascript:alert(1)']]);
+        $this->assertArrayNotHasKey('url', $schema);
+        $this->assertSame('Place', $schema['location']['@type']);
+    }
+
+    public function testToSchemaReturnsEmptyArrayWithoutALocation(): void
+    {
+        $this->assertSame([], $this->schema());
+        $this->assertSame([], $this->schema(['event_format' => 'online', 'event_location' => 'Ignored']));
+        $this->assertSame([], $this->schema(['event_format' => 'hybrid']));
+    }
+
+    public function testToSchemaCarriesAStableId(): void
+    {
+        $this->assertSame('https://example.com/#event-77', $this->schema(self::PLACE)['@id']);
     }
 
     public function testToSchemaReturnsEmptyArrayForAnInvalidDate(): void

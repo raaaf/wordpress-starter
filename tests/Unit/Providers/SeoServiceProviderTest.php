@@ -242,9 +242,9 @@ final class SeoServiceProviderTest extends TestCase
     {
         ob_start();
         SeoServiceProvider::emitEventSchema([
-            ['title' => 'Sommerfest', 'event_date' => '20261008', 'event_format' => 'onsite'],
-            ['title' => 'Webinar', 'event_date' => '20261105', 'event_format' => 'online'],
-            ['title' => 'Ohne Datum', 'event_date' => ''],
+            ['title' => 'Sommerfest', 'event_date' => '20261008', 'event_format' => 'onsite', 'event_location' => 'Fürth'],
+            ['title' => 'Webinar', 'event_date' => '20261105', 'event_format' => 'online', 'event_link' => ['url' => 'https://example.org/live']],
+            ['title' => 'Ohne Datum', 'event_date' => '', 'event_location' => 'Fürth'],
         ]);
         $out = (string) ob_get_clean();
 
@@ -253,6 +253,31 @@ final class SeoServiceProviderTest extends TestCase
         $this->assertStringContainsString('Sommerfest', $out);
         $this->assertStringContainsString('Webinar', $out);
         $this->assertStringNotContainsString('Ohne Datum', $out);
+    }
+
+    public function testEmitEventSchemaSkipsAnEventEmittedEarlierOnTheRequest(): void
+    {
+        $event = ['id' => 9001, 'title' => 'Sommerfest', 'event_date' => '20261008', 'event_location' => 'Fürth'];
+
+        ob_start();
+        SeoServiceProvider::emitEventSchema([$event]);
+        $first = (string) ob_get_clean();
+
+        ob_start();
+        SeoServiceProvider::emitEventSchema([$event]);
+        $second = (string) ob_get_clean();
+
+        $this->assertStringContainsString('Sommerfest', $first);
+        $this->assertSame('', $second);
+    }
+
+    public function testEmitEventSchemaSkipsEventsWithoutALocation(): void
+    {
+        ob_start();
+        SeoServiceProvider::emitEventSchema([['title' => 'Nirgends', 'event_date' => '20261008']]);
+        $out = (string) ob_get_clean();
+
+        $this->assertSame('', $out);
     }
 
     public function testEmitFaqSchemaSkipsEmptyEntries(): void

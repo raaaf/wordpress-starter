@@ -8,6 +8,7 @@ use Tests\Support\TestCase;
 use WordpressStarter\PostTypes\AbstractPostType;
 use WordpressStarter\PostTypes\Event;
 use WordpressStarter\PostTypes\MemberDownload;
+use WordpressStarter\PostTypes\Team;
 
 /**
  * The labels used to hard-code feminine forms, which produced "Neue Dokument"
@@ -51,17 +52,29 @@ final class PostTypeLabelGenderTest extends TestCase
 
         $labels = $GLOBALS['wp_mock_post_types']['gender_probe_m']['labels'];
 
-        $this->assertSame('Neuer Beitrag hinzufügen', $labels['add_new_item']);
+        // add_new_item is accusative ("Neuen"), new_item stays nominative ("Neuer").
+        $this->assertSame('Neuen Beitrag hinzufügen', $labels['add_new_item']);
+        $this->assertSame('Neuer Beitrag', $labels['new_item']);
         $this->assertSame('Zu diesem Beitrag hochgeladen', $labels['uploaded_to_this_item']);
     }
 
-    public function testCompoundLabelsAreHyphenated(): void
+    public function testTeamKeepsTheMenuNameWhilePluralReadsTeammitglieder(): void
+    {
+        Team::registerPostType();
+
+        $labels = $GLOBALS['wp_mock_post_types']['team_member']['labels'];
+
+        $this->assertSame('Team', $labels['menu_name']);
+        $this->assertSame('Keine Teammitglieder gefunden', $labels['not_found']);
+    }
+
+    public function testCompoundLabelsUseColonForms(): void
     {
         Event::registerPostType();
 
         $labels = $GLOBALS['wp_mock_post_types']['event']['labels'];
 
-        $this->assertSame('Veranstaltungen-Archiv', $labels['archives']);
-        $this->assertSame('Veranstaltungen-Listennavigation', $labels['items_list_navigation']);
+        $this->assertSame('Archiv: Veranstaltungen', $labels['archives']);
+        $this->assertSame('Listennavigation: Veranstaltungen', $labels['items_list_navigation']);
     }
 }

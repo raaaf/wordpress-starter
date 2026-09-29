@@ -50,7 +50,6 @@ class StyleguideLayoutData
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
-            'label' => '',
             'content' => '<h2>Layout &amp; Text</h2><p>Verschiedene Spalten-Layouts für die Inhaltsstrukturierung.</p>',
             'background_color' => 'secondary',
         ]);
@@ -74,7 +73,6 @@ class StyleguideLayoutData
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
-            'label' => '',
             'content' => '<h2>Interaktive Elemente</h2><p>Layouts mit Benutzerinteraktion wie Akkordeons und Tabs.</p>',
             'background_color' => 'primary',
         ]);
@@ -87,7 +85,6 @@ class StyleguideLayoutData
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
-            'label' => '',
             'content' => '<h2>Karten &amp; Inhalte</h2><p>Layouts zur Darstellung von Features, Team, Preisen und mehr.</p>',
             'background_color' => 'secondary',
         ]);
@@ -107,7 +104,6 @@ class StyleguideLayoutData
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
-            'label' => '',
             'content' => '<h2>Medien</h2><p>Layouts für Bilder, Videos und Galerien.</p>',
             'background_color' => 'primary',
         ]);
@@ -123,7 +119,6 @@ class StyleguideLayoutData
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
-            'label' => '',
             'content' => '<h2>Kontakt &amp; Standort</h2><p>Layouts für Kontaktformulare und Kartenansichten.</p>',
             'background_color' => 'secondary',
         ]);
@@ -137,7 +132,6 @@ class StyleguideLayoutData
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
-            'label' => '',
             'content' => '<h2>Call-to-Action</h2><p>Auffällige Handlungsaufforderungen für wichtige Konversionen.</p>',
             'background_color' => 'primary',
         ]);
@@ -150,7 +144,6 @@ class StyleguideLayoutData
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
-            'label' => '',
             'content' => '<h2>Daten &amp; Tabellen</h2><p>Strukturierte Darstellung von tabellarischen Daten.</p>',
             'background_color' => 'secondary',
         ]);
@@ -188,7 +181,6 @@ class StyleguideLayoutData
     private function getOneColumnLayoutData(): array
     {
         return $this->layout('one_column', [
-            'label' => 'Über uns',
             'content' => '<h3>Einspaltiger Inhalt</h3><p>Ein Beispiel für einen einspaltigen Textblock. Hier kannst du längere Texte, Überschriften und andere Inhalte platzieren. Der Text fließt über die gesamte verfügbare Breite.</p><p>Nutze dieses Layout für Einleitungen, ausführliche Beschreibungen oder Mitteilungen, die die volle Aufmerksamkeit brauchen.</p>',
             'background_color' => 'primary',
         ]);
@@ -1506,8 +1498,7 @@ class StyleguideLayoutData
 
             // Karten ohne Bild und ohne Icon: bleibt die Hoehe stabil?
             $this->layout('cards', [
-                'section_headline' => 'Karten ohne Bild',
-                'show_section_header' => true,
+                'title' => 'Karten ohne Bild',
                 'columns' => '3',
                 'cards' => [
                     ['title' => 'Ohne Icon', 'content' => 'Diese Karte hat weder Icon noch Bild.', 'icon' => '', 'link' => null],
@@ -1520,8 +1511,7 @@ class StyleguideLayoutData
 
             // Genau ein Eintrag in einem Raster fuer drei.
             $this->layout('cards', [
-                'section_headline' => 'Karten, ein Eintrag',
-                'show_section_header' => true,
+                'title' => 'Karten, ein Eintrag',
                 'columns' => '3',
                 'cards' => [
                     ['title' => 'Allein', 'content' => 'Ein einzelner Eintrag in einem Raster für drei.', 'icon' => 'check', 'link' => null],
@@ -1559,8 +1549,7 @@ class StyleguideLayoutData
 
             // Team ohne Portraits und mit leeren Kontaktfeldern.
             $this->layout('team', [
-                'section_headline' => 'Team ohne Porträts',
-                'show_section_header' => true,
+                'title' => 'Team ohne Porträts',
                 'source' => 'manual',
                 'columns' => '3',
                 'members' => [
@@ -1574,12 +1563,11 @@ class StyleguideLayoutData
 
             // Eine einzelne Kundenstimme in voller Breite.
             $this->layout('testimonials', [
-                'section_headline' => 'Kundenstimme ohne Foto',
-                'show_section_header' => true,
+                'title' => 'Kundenstimme ohne Foto',
                 'source' => 'manual',
                 'columns' => '1',
                 'testimonials' => [
-                    ['quote' => $langerText, 'author' => 'Ohne Foto', 'role' => '', 'image' => null, 'rating' => 0],
+                    ['quote' => $langerText, 'author' => 'Ohne Foto', 'role' => '', 'image' => null],
                 ],
                 'background_color' => 'secondary',
                 'section_anchor' => 'testimonials-zustand-ohne-foto',
@@ -1587,8 +1575,7 @@ class StyleguideLayoutData
 
             // Akkordeon mit einem einzigen Eintrag.
             $this->layout('accordion', [
-                'section_headline' => 'Akkordeon, ein Eintrag',
-                'show_section_header' => true,
+                'title' => 'Akkordeon, ein Eintrag',
                 'accordion' => [
                     ['title' => 'Einziger Eintrag', 'content' => '<p>Ein Akkordeon mit genau einem Eintrag.</p>'],
                 ],
@@ -1598,8 +1585,7 @@ class StyleguideLayoutData
 
             // Galerie mit einem Bild in einem Raster fuer drei.
             $this->layout('gallery', [
-                'section_headline' => 'Galerie, ein Bild',
-                'show_section_header' => true,
+                'title' => 'Galerie, ein Bild',
                 'columns' => '3',
                 'images' => array_filter([$this->imageId(1)]),
                 'background_color' => 'secondary',

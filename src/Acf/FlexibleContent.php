@@ -44,7 +44,8 @@ class FlexibleContent
     ];
 
     /**
-     * Cache for {@see getLayouts()} so repeated calls in one request are free.
+     * Cache for {@see layouts()}: the filtered, tab-split layout list, so repeated
+     * calls in one request are free.
      *
      * @var array<int, array<string, mixed>>|null
      */
@@ -285,8 +286,9 @@ class FlexibleContent
      * instead of copying getLayouts() and editing one line in it, which is what
      * made this file collide on every starter update.
      *
-     * Filter: "<theme_prefix>_flexible_content_layouts", in this theme
-     * "wp_starter_flexible_content_layouts".
+     * Filter: "{prefix}_flexible_content_layouts", where {prefix} is
+     * ThemeContext::prefix() (theme slug, dashes replaced by underscores). In the
+     * starter theme: "wordpress_starter_theme_flexible_content_layouts".
      *
      * In:  array<int, array<string, mixed>> - the layout definitions, each in
      *      the shape ACF expects (key, name, label, display, sub_fields,

@@ -136,7 +136,7 @@ class Testimonial extends AbstractPostType
 
         acf_add_local_field_group([
             'key' => 'group_testimonial',
-            'title' => __('Testimonial Details', 'wp-starter'),
+            'title' => __('Details zum Testimonial', 'wp-starter'),
             'fields' => self::getFieldDefinitions(),
             'location' => [
                 [
@@ -214,7 +214,7 @@ class Testimonial extends AbstractPostType
             FieldDefinitions::accordionField('testimonial_acc_review', __('Bewertung', 'wp-starter')),
             FieldDefinitions::textareaField(
                 'testimonial_content',
-                __('Testimonial Text', 'wp-starter'),
+                __('Text des Testimonials', 'wp-starter'),
                 'content',
                 4,
                 __('Das Testimonial/die Kundenbewertung.', 'wp-starter'),

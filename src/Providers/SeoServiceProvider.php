@@ -1027,16 +1027,45 @@ class SeoServiceProvider extends ServiceProvider
     }
 
     /**
+     * @var array<string, true> Event @ids already emitted on this request
+     */
+    private static array $emittedEventIds = [];
+
+    /**
      * Render one JSON-LD block for a list of events (as returned by
      * Event::getUpcomingEvents()). Always a single @graph of Event nodes,
      * also for one event, so consumers see one shape. Entries without a valid
-     * date are dropped; nothing is rendered when no entry remains.
+     * date or location are dropped; an event already emitted on this request
+     * (same @id, e.g. two events layouts on one page) is skipped; nothing is
+     * rendered when no entry remains.
      *
      * @param array<int, array<string, mixed>> $events
      */
     public static function emitEventSchema(array $events): void
     {
-        $graph = array_values(array_filter(array_map([\WordpressStarter\PostTypes\Event::class, 'toSchema'], $events)));
+        // Warm the attachment posts once instead of one query per event image.
+        $imageIds = array_filter(array_column($events, 'image'), 'is_int');
+        if ($imageIds !== [] && function_exists('_prime_post_caches')) {
+            _prime_post_caches($imageIds, false, true);
+        }
+
+        $graph = [];
+        foreach ($events as $event) {
+            $node = \WordpressStarter\PostTypes\Event::toSchema($event);
+            if ($node === []) {
+                continue;
+            }
+
+            $id = $node['@id'] ?? null;
+            if ($id !== null) {
+                if (isset(self::$emittedEventIds[$id])) {
+                    continue;
+                }
+                self::$emittedEventIds[$id] = true;
+            }
+
+            $graph[] = $node;
+        }
 
         if ($graph === []) {
             return;

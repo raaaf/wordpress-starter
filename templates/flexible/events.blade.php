@@ -4,7 +4,7 @@
     Uses shared components: x-section, x-section-header, x-prose, x-link, x-card, x-button;
     partials: partials.empty-state, partials.event-meta, partials.event-list
     (which includes partials.event-row).
-    Fields: title, text, link, background_color, plus the section header extras read by
+    Fields: title, text, link, all_events_link, background_color, plus the section header extras read by
     SectionHeader::extras() (section_chip, section_description, section_alignment).
 
     Data comes from the "event" custom post type (Event::getUpcomingEvents()), not from a
@@ -61,6 +61,10 @@
 @endif
 
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="events">
+    @if(empty($kopf['headline']))
+        {{-- Ohne Titel gaebe es keine h2 vor den h3-Terminkarten. --}}
+        <h2 class="sr-only">{{ __('Veranstaltungen', 'wp-starter') }}</h2>
+    @endif
     <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" :class="$text ? 'mb-4!' : ''" />
 
     @if($text)

@@ -15,14 +15,9 @@ use WP_Query;
 class Event extends AbstractPostType
 {
     /**
-     * Allowed values of the event_format field (value => label).
-     * Labels are German source strings, translated at use via __().
+     * Allowed values of the event_format field. Labels: see formatLabels().
      */
-    public const FORMATS = [
-        'onsite' => 'Vor Ort',
-        'online' => 'Online',
-        'hybrid' => 'Hybrid',
-    ];
+    public const FORMATS = ['onsite', 'online', 'hybrid'];
 
     protected static string $postType = 'event';
 
@@ -41,13 +36,13 @@ class Event extends AbstractPostType
     /**
      * Not public: there is no single-event template, events are displayed
      * entirely via the "events" flexible layout (same reasoning as
-     * Team.php:39).
+     * Team::$public).
      */
     protected static bool $public = false;
 
     /**
      * Matches $public = false above: no REST reach for anonymous requests
-     * (same reasoning as Team.php:46).
+     * (same reasoning as Team::$showInRest).
      */
     protected static bool $showInRest = false;
 
@@ -56,6 +51,21 @@ class Event extends AbstractPostType
 
     /** @var array<string, mixed>|false */
     protected static array|false $rewrite = false;
+
+    /**
+     * Labels of the event_format values (value => label), as literal __()
+     * calls so they are extractable for translation.
+     *
+     * @return array<string, string>
+     */
+    public static function formatLabels(): array
+    {
+        return [
+            'onsite' => __('Vor Ort', 'wp-starter'),
+            'online' => __('Online', 'wp-starter'),
+            'hybrid' => __('Hybrid', 'wp-starter'),
+        ];
+    }
 
     /**
      * Register the custom post type with admin columns and default sort order
@@ -89,7 +99,8 @@ class Event extends AbstractPostType
     }
 
     /**
-     * Sort the admin list table by event_date ascending by default. Only
+     * Sort the admin list table by event_date ascending by default. Events
+     * without an event_date (e.g. drafts) stay listed, sorted first. Only
      * applies when no explicit orderby is set, so a manually chosen sort
      * (e.g. via the sortable column above) is never overridden.
      */
@@ -106,9 +117,12 @@ class Event extends AbstractPostType
                 return;
             }
 
-            $query->set('meta_key', 'event_date'); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-            $query->set('orderby', 'meta_value');
-            $query->set('order', 'ASC');
+            $query->set('meta_query', [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+                'relation' => 'OR',
+                'event_date_clause' => ['key' => 'event_date', 'compare' => 'EXISTS'],
+                ['key' => 'event_date', 'compare' => 'NOT EXISTS'],
+            ]);
+            $query->set('orderby', ['event_date_clause' => 'ASC']);
         });
     }
 
@@ -123,7 +137,7 @@ class Event extends AbstractPostType
 
         acf_add_local_field_group([
             'key' => 'group_event',
-            'title' => __('Veranstaltung Details', 'wp-starter'),
+            'title' => __('Veranstaltungsdetails', 'wp-starter'),
             'fields' => self::getFieldDefinitions(),
             'location' => [
                 [
@@ -152,7 +166,7 @@ class Event extends AbstractPostType
         return [
             FieldDefinitions::dateField(
                 'event_date',
-                __('Datum', 'wp-starter'),
+                __('Termin', 'wp-starter'),
                 'event_date',
                 true,
                 __('Das Datum der Veranstaltung.', 'wp-starter'),
@@ -166,12 +180,9 @@ class Event extends AbstractPostType
             ),
             FieldDefinitions::buttonGroupField(
                 'event_format',
-                __('Art', 'wp-starter'),
+                __('Art der Veranstaltung', 'wp-starter'),
                 'event_format',
-                array_map(
-                    static fn (string $label): string => __($label, 'wp-starter'), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-                    self::FORMATS,
-                ),
+                self::formatLabels(),
                 'onsite',
                 __('Findet die Veranstaltung vor Ort, online oder beides statt?', 'wp-starter'),
             ),
@@ -286,7 +297,7 @@ class Event extends AbstractPostType
             'title' => $title,
             'event_date' => self::parseStored('!Ymd', $fields['event_date'] ?? null) ? $fields['event_date'] : '',
             'event_time' => self::displayTime($fields['event_time'] ?? null),
-            'event_format' => is_string($format) && array_key_exists($format, self::FORMATS) ? $format : 'onsite',
+            'event_format' => is_string($format) && in_array($format, self::FORMATS, true) ? $format : 'onsite',
             'event_location' => $text($fields['event_location'] ?? null),
             'event_description' => $text($fields['event_description'] ?? null),
             'event_link' => $eventLink,
@@ -296,7 +307,9 @@ class Event extends AbstractPostType
 
     /**
      * Map one getUpcomingEvents() entry to a schema.org Event (without @context).
-     * Keys with empty values are omitted. Returns [] for an entry without a valid event_date.
+     * Keys with empty values are omitted. Returns [] for an entry without a valid
+     * event_date or without a location (online without link, onsite/hybrid without address).
+     * Only http(s) URLs reach the output.
      *
      * @param array<string, mixed> $event
      *
@@ -328,7 +341,7 @@ class Event extends AbstractPostType
 
         $address = $text($event['event_location'] ?? null);
         $link = $event['event_link'] ?? null;
-        $linkUrl = is_array($link) && is_string($link['url'] ?? null) ? $link['url'] : '';
+        $linkUrl = is_array($link) ? self::httpUrl($link['url'] ?? null) : '';
 
         $place = $address !== '' ? ['@type' => 'Place', 'name' => $address, 'address' => $address] : null;
         $virtual = $linkUrl !== '' ? ['@type' => 'VirtualLocation', 'url' => $linkUrl] : null;
@@ -338,11 +351,19 @@ class Event extends AbstractPostType
             default => $place,
         };
 
+        // Google requires a location; without one the event is not emitted.
+        if ($location === null || $location === []) {
+            return [];
+        }
+
         $imageId = $event['image'] ?? null;
         $image = is_int($imageId) ? wp_get_attachment_image_url($imageId, 'large') : false;
 
+        $eventId = $event['id'] ?? null;
+
         $schema = [
             '@type' => 'Event',
+            '@id' => is_int($eventId) ? home_url('/#event-' . $eventId) : null,
             'name' => $text($event['title'] ?? null),
             'startDate' => $startDate,
             'eventStatus' => 'https://schema.org/EventScheduled',
@@ -354,6 +375,20 @@ class Event extends AbstractPostType
         ];
 
         return array_filter($schema, static fn (mixed $value): bool => $value !== null && $value !== '' && $value !== false && $value !== []);
+    }
+
+    /**
+     * The URL when it is http(s), otherwise ''. Keeps javascript:, data: etc. out of JSON-LD.
+     */
+    private static function httpUrl(mixed $url): string
+    {
+        if (!is_string($url)) {
+            return '';
+        }
+
+        $scheme = wp_parse_url($url, PHP_URL_SCHEME);
+
+        return is_string($scheme) && in_array(strtolower($scheme), ['http', 'https'], true) ? esc_url_raw($url) : '';
     }
 
     /**

@@ -63,7 +63,7 @@ npm run dev
 ├── resources/
 │   ├── css/
 │   │   ├── app.css        # Main stylesheet
-│   │   ├── tokens.css     # Design tokens (generated from Figma)
+│   │   ├── tokens.css     # Design tokens (generated from config/design-tokens)
 │   │   └── editor-style.css
 │   ├── js/
 │   │   └── app.ts         # TypeScript entry point
@@ -100,8 +100,8 @@ composer install     # PHP dependencies
 npm install           # JS dependencies
 npm run dev          # Vite dev server with HMR (localhost:5180)
 npm run build        # Production build
-npm run tokens       # Generate resources/css/tokens.css from Figma export
-npm run tokens:watch # Watch Figma export and regenerate tokens.css
+npm run tokens       # Generate resources/css/tokens.css from config/design-tokens
+npm run tokens:watch # Watch config/design-tokens and regenerate tokens.css
 npm run lint         # ESLint
 composer lint        # PHPCS + PHPStan
 composer test        # PHPUnit
@@ -212,7 +212,7 @@ private static function myLayout(): array
 
 ## Design tokens
 
-Tokens are exported from Figma and generated into `resources/css/tokens.css` via `npm run tokens`. Semantic variables:
+Token values come from the design system (`raaaf/rafael-design-system`), not from Figma; `config/design-tokens/*.tokens.json` is generated into `resources/css/tokens.css` via `npm run tokens`. Semantic variables:
 
 ```css
 background: var(--bg-primary);

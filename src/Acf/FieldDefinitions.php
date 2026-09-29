@@ -1761,7 +1761,7 @@ class FieldDefinitions
                 __('Als FAQ auszeichnen', 'wp-starter'),
                 'faq_schema',
                 true,
-                __('Gibt FAQPage-Auszeichnung fuer Suchmaschinen aus. Nur einschalten, wenn die Eintraege wirklich Fragen und Antworten sind.', 'wp-starter'),
+                __('Gibt FAQPage-Auszeichnung für Suchmaschinen aus. Nur einschalten, wenn die Einträge wirklich Fragen und Antworten sind.', 'wp-starter'),
             ),
             ...self::displaySettingsFields($prefix),
         ];
@@ -2067,7 +2067,7 @@ class FieldDefinitions
                     '21-9' => '21:9',
                 ],
                 '16-9',
-                __('Bestimmt die Hoehe des Videofensters.', 'wp-starter'),
+                __('Bestimmt die Höhe des Videofensters.', 'wp-starter'),
             ),
             self::trueFalseField(
                 "field_{$prefix}_autoplay",
@@ -2275,7 +2275,7 @@ class FieldDefinitions
     }
 
     /**
-     * Get Two Columns with Images layout fields
+     * Get One Column with Image layout fields
      *
      * @param string $prefix Key prefix
      *
@@ -2341,10 +2341,9 @@ class FieldDefinitions
     }
 
     /**
-     * Build the per-column field block (label + image + wysiwyg + accordion) for
-     * the *-columns-images layouts. All field keys and names are derived from
-     * $prefix and $n so that they remain byte-identical to the previously
-     * inlined versions.
+     * Build the per-column field block (accordion tab + label + image + wysiwyg +
+     * accordion) for the *-columns-images layouts. All field keys and names are
+     * derived from $prefix and $n.
      *
      * @param string $prefix Key prefix passed to the parent method
      * @param int $n Column number (1-based)
@@ -2671,7 +2670,7 @@ class FieldDefinitions
                     'filled' => __('Gefüllt', 'wp-starter'),
                 ],
                 'elevated',
-                __('Erhöht traegt einen Schatten, Umriss nur eine Linie, Gefuellt eine eigene Flaeche.', 'wp-starter'),
+                __('Erhöht trägt einen Schatten, Umriss nur eine Linie, Gefüllt eine eigene Fläche.', 'wp-starter'),
             ),
             ...self::displaySettingsFields($prefix),
         ];

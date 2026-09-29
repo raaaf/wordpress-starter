@@ -21,7 +21,9 @@ class Team extends AbstractPostType
 
     protected static string $genus = 'n';
 
-    protected static string $plural = 'Team';
+    protected static string $plural = 'Teammitglieder';
+
+    protected static string $menuName = 'Team';
 
     protected static string $menuIcon = 'dashicons-groups';
 
@@ -119,7 +121,7 @@ class Team extends AbstractPostType
 
         acf_add_local_field_group([
             'key' => 'group_team_member',
-            'title' => __('Teammitglied Details', 'wp-starter'),
+            'title' => __('Details zum Teammitglied', 'wp-starter'),
             'fields' => self::getFieldDefinitions(),
             'location' => [
                 [

@@ -117,6 +117,33 @@ Output on accordion layouts with FAQ content:
 }
 ```
 
+#### Event Schema
+
+Output on published, publicly reachable pages with an events layout, as one `@graph` of `Event` nodes (`SeoServiceProvider::emitEventSchema()`, nodes built by `Event::toSchema()`):
+
+```json
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Event",
+      "@id": "https://example.com/#event-42",
+      "name": "Sommerfest",
+      "startDate": "2026-10-08T18:30+02:00",
+      "eventStatus": "https://schema.org/EventScheduled",
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "location": {
+        "@type": "Place",
+        "name": "Königstraße 1, Fürth",
+        "address": "Königstraße 1, Fürth"
+      }
+    }
+  ]
+}
+```
+
+Events without a valid date or without a location (online without link, onsite or hybrid without address) are not emitted. Only `http` and `https` URLs are output. An event already emitted on the same request (two events layouts on one page) is skipped, matched by its `@id`.
+
 ## Open Graph Tags
 
 Automatically generated for social sharing:
@@ -383,6 +410,7 @@ echo '<script type="application/ld+json" nonce="' . esc_attr($nonce) . '">'
 Two ready-made helpers already exist on `SeoServiceProvider` for reuse in flexible layouts:
 
 - `SeoServiceProvider::emitFaqSchema(array $items)`: renders a `FAQPage` schema from `question`/`answer` pairs, skips rendering if the list is empty (used from the accordion layout).
+- `SeoServiceProvider::emitEventSchema(array $events)`: renders one `@graph` of `Event` nodes from `Event::getUpcomingEvents()` entries, skips entries without date or location and events already emitted on the request (used from the events layout).
 - `SeoServiceProvider::emitPersonSchema(array $person)`: renders a `Person` schema (name, jobTitle, image, sameAs, etc.) for team/author pages.
 
 ## Troubleshooting

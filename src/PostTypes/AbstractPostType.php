@@ -39,6 +39,12 @@ abstract class AbstractPostType
     protected static string $plural = '';
 
     /**
+     * Admin menu name; falls back to the plural label when empty
+     * (e.g. "Team" in the menu while the plural reads "Teammitglieder").
+     */
+    protected static string $menuName = '';
+
+    /**
      * Grammatical gender of the singular label: 'm', 'f' or 'n'.
      *
      * Drives the German article and adjective endings in the labels
@@ -155,7 +161,7 @@ abstract class AbstractPostType
             'add_new_item' => sprintf(
                 self::byGenus(
                     // translators: %s is the singular post type name
-                    __('Neuer %s hinzufügen', 'wp-starter'),
+                    __('Neuen %s hinzufügen', 'wp-starter'),
                     // translators: %s is the singular post type name
                     __('Neue %s hinzufügen', 'wp-starter'),
                     // translators: %s is the singular post type name
@@ -202,9 +208,9 @@ abstract class AbstractPostType
             // translators: %s is the plural post type name
             'all_items' => sprintf(__('Alle %s', 'wp-starter'), $plural),
             // translators: %s is the plural post type name
-            'archives' => sprintf(__('%s-Archiv', 'wp-starter'), $plural),
+            'archives' => sprintf(__('Archiv: %s', 'wp-starter'), $plural),
             // translators: %s is the plural post type name
-            'attributes' => sprintf(__('%s-Attribute', 'wp-starter'), $plural),
+            'attributes' => sprintf(__('Attribute: %s', 'wp-starter'), $plural),
             // translators: %s is the singular post type name
             'insert_into_item' => sprintf(__('In %s einfügen', 'wp-starter'), $singular),
             // translators: %s is the singular post type name
@@ -220,11 +226,11 @@ abstract class AbstractPostType
                 $singular,
             ),
             // translators: %s is the plural post type name
-            'filter_items_list' => sprintf(__('%s-Liste filtern', 'wp-starter'), $plural),
+            'filter_items_list' => sprintf(__('Liste filtern: %s', 'wp-starter'), $plural),
             // translators: %s is the plural post type name
-            'items_list_navigation' => sprintf(__('%s-Listennavigation', 'wp-starter'), $plural),
+            'items_list_navigation' => sprintf(__('Listennavigation: %s', 'wp-starter'), $plural),
             // translators: %s is the plural post type name
-            'items_list' => sprintf(__('%s-Liste', 'wp-starter'), $plural),
+            'items_list' => sprintf(__('Liste: %s', 'wp-starter'), $plural),
             // translators: %s is the singular post type name
             'item_published' => sprintf(__('%s veröffentlicht.', 'wp-starter'), $singular),
             // translators: %s is the singular post type name
@@ -235,7 +241,7 @@ abstract class AbstractPostType
             'item_scheduled' => sprintf(__('%s geplant.', 'wp-starter'), $singular),
             // translators: %s is the singular post type name
             'item_updated' => sprintf(__('%s aktualisiert.', 'wp-starter'), $singular),
-            'menu_name' => $plural,
+            'menu_name' => static::$menuName !== '' ? static::$menuName : $plural,
             'name_admin_bar' => $singular,
         ];
     }

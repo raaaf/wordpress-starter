@@ -58,7 +58,7 @@ Optional: `WP_STYLEGUIDE_PATH` (Standard `/styleguide/`).
 ```
 src/                    # PHP source code
 ├── Acf/               # ACF: FlexibleContent, Fields, Options
-├── PostTypes/         # Custom Post Types (AbstractPostType, Testimonial)
+├── PostTypes/         # Custom Post Types (AbstractPostType, Event, MemberDownload, Team, Testimonial)
 ├── Taxonomies/        # Custom Taxonomies (AbstractTaxonomy)
 ├── Providers/         # Service providers
 ├── Services/          # StyleguidePage.php
@@ -124,12 +124,12 @@ Plugins are installed to `wp-content/plugins/` via `composer/installers`.
 
 ## Design Tokens
 
-Auto-generated from Figma in `resources/css/tokens.css`. See [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) for full documentation. Herkunft der Werte, die Fünf-Befehle-Kette und die Mapping-Tabelle stehen in [DESIGN.md](DESIGN.md).
+Generated into `resources/css/tokens.css` from `config/design-tokens/*.tokens.json`; the design system (`raaaf/rafael-design-system`) is the source of the values, Figma is only a recipient. See [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) for full documentation. Herkunft der Werte, die Fünf-Befehle-Kette und die Mapping-Tabelle stehen in [DESIGN.md](DESIGN.md).
 
 **Update tokens:**
 
 ```bash
-# Export from Figma → config/design-tokens/*.tokens.json
+# config/design-tokens/*.tokens.json → resources/css/tokens.css
 npm run tokens        # Generate CSS
 npm run tokens:watch  # Watch mode
 ```
@@ -405,6 +405,7 @@ class Service extends AbstractPostType
     protected static string $postType = 'service';
     protected static string $singular = 'Leistung';
     protected static string $plural = 'Leistungen';
+    protected static string $genus = 'f'; // 'm', 'f' or 'n': drives Neuer/Neue/Neues in the labels
     protected static string $menuIcon = 'dashicons-admin-generic';
 
     public static function registerFields(): void

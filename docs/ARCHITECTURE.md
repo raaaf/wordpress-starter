@@ -131,7 +131,10 @@ src/
 │   └── AcfExtended.php      # ACF Extended config
 ├── PostTypes/              # Custom Post Types
 │   ├── AbstractPostType.php # Base CPT class
-│   └── Testimonial.php      # Example CPT
+│   ├── Event.php            # Events (events layout)
+│   ├── MemberDownload.php   # Member area downloads
+│   ├── Team.php             # Team members
+│   └── Testimonial.php      # Testimonials
 ├── Taxonomies/             # Custom Taxonomies
 │   └── AbstractTaxonomy.php # Base taxonomy class
 ├── Providers/              # Service providers
@@ -313,7 +316,7 @@ private static function myLayout(): array
         'label' => 'My Layout',
         'display' => 'block',
         'sub_fields' => FieldDefinitions::myLayoutFields('flex_my_layout'),
-        'acfe_flexible_category' => self::CATEGORIES['content'],
+        'acfe_flexible_category' => self::getCategories()['content'],
     ];
 }
 ```
