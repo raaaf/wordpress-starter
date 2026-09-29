@@ -1,3 +1,27 @@
+# [2.36.0](https://github.com/raaaf/wordpress-starter/compare/v2.35.1...v2.36.0) (2026-09-29)
+
+### Bug Fixes
+
+- button hover states, ghost on brand, link hover, cf7 checkbox and error alignment ([5a7a932](https://github.com/raaaf/wordpress-starter/commit/5a7a932c6a29ce6f76002c835bf47a7dc9eb4fc5))
+- carry the primitives collection on every token alias ([93ed1cf](https://github.com/raaaf/wordpress-starter/commit/93ed1cfe3d45da027fef93380b7ef00f1245a574))
+- defer admin columns to init ([be62416](https://github.com/raaaf/wordpress-starter/commit/be62416a9766118fe85e307718c7364e90fe888e))
+- drop the border on css-class primary buttons to match the component ([c794e1f](https://github.com/raaaf/wordpress-starter/commit/c794e1fb923f0cca89424e3aa15813137bef7fb1))
+- **fonts:** point fonts.json at the theme's own font files ([67d3ed7](https://github.com/raaaf/wordpress-starter/commit/67d3ed7d0c3d60d9e64b99e844557ba7aee0bed2))
+- give brand-surface cards the surface sheen ([f1e67a2](https://github.com/raaaf/wordpress-starter/commit/f1e67a2eee6694fa7db6ea61d773cf159997b056))
+- one primary action per pricing table and dark-on-card ring for primary buttons ([a2775f4](https://github.com/raaaf/wordpress-starter/commit/a2775f4806af3bae7ca9d9843b6e22994da694b1))
+- **tokens:** render the font sizes the design system actually defines ([30dc047](https://github.com/raaaf/wordpress-starter/commit/30dc04762e04a0d7887e7302aedb2bc7737f9c1f))
+- **tokens:** restore the alias targetVariableId in light and dark ([3ec0022](https://github.com/raaaf/wordpress-starter/commit/3ec002294db4524b22d762584a282ef6cc103661))
+- visible sheen on brand-surface cards ([76553d5](https://github.com/raaaf/wordpress-starter/commit/76553d5f25937e8bed589e84bc29a8820f3d8e69))
+
+### Features
+
+- adopt the design system as token source ([597ef0e](https://github.com/raaaf/wordpress-starter/commit/597ef0ea044798ad74dddafe4840cb52a5018879))
+- events layout ([afe1aa7](https://github.com/raaaf/wordpress-starter/commit/afe1aa720887b136ce08c2830450477e18624c93))
+- headline line-height 1.0 from the design system ([220455f](https://github.com/raaaf/wordpress-starter/commit/220455fb67d1f6e70e543b93cbf31360a24f0b67))
+- read heading line-height and tracking from the token export ([5915d3e](https://github.com/raaaf/wordpress-starter/commit/5915d3e5aae1a295d29cd94e55a9947c203d8574))
+- **tokens:** a regular heading scale in the starter ([4fa873b](https://github.com/raaaf/wordpress-starter/commit/4fa873bc16ff7100f7ddbe9cd3d1749ede79d9d9))
+- **tokens:** steer the enter and exit motion from design-system curves ([8cdbbe8](https://github.com/raaaf/wordpress-starter/commit/8cdbbe86ccf7d25a5af6450c165ae768c8e1e540))
+
 ## [2.35.1](https://github.com/raaaf/wordpress-starter/compare/v2.35.0...v2.35.1) (2026-09-20)
 
 ### Bug Fixes
