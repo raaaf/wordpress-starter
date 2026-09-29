@@ -412,6 +412,7 @@ class FieldDefinitions
      * @param string $name Field name
      * @param bool $required Whether field is required
      * @param string $instructions Field instructions
+     * @param string|null $width Wrapper width percentage
      *
      * @return array<string, mixed>
      */
@@ -421,8 +422,9 @@ class FieldDefinitions
         string $name,
         bool $required = false,
         string $instructions = '',
+        ?string $width = null,
     ): array {
-        return [
+        $field = [
             'key' => $key,
             'label' => $label,
             'name' => $name,
@@ -431,6 +433,12 @@ class FieldDefinitions
             'required' => $required ? 1 : 0,
             'return_format' => 'array',
         ];
+
+        if ($width !== null) {
+            $field['wrapper'] = ['width' => $width];
+        }
+
+        return $field;
     }
 
     /**
@@ -668,6 +676,7 @@ class FieldDefinitions
      * @param string $name Field name
      * @param bool $defaultValue Default value
      * @param string $instructions Field instructions
+     * @param string|null $width Wrapper width percentage
      *
      * @return array<string, mixed>
      */
@@ -677,8 +686,9 @@ class FieldDefinitions
         string $name,
         bool $defaultValue = false,
         string $instructions = '',
+        ?string $width = null,
     ): array {
-        return [
+        $field = [
             'key' => $key,
             'label' => $label,
             'name' => $name,
@@ -687,6 +697,12 @@ class FieldDefinitions
             'default_value' => $defaultValue ? 1 : 0,
             'ui' => 1,
         ];
+
+        if ($width !== null) {
+            $field['wrapper'] = ['width' => $width];
+        }
+
+        return $field;
     }
 
     /**
@@ -1346,26 +1362,22 @@ class FieldDefinitions
             ),
 
             // Buttons (nebeneinander)
-            [
-                'key' => "field_{$prefix}_cta_primary",
-                'label' => __('Primärer Button', 'wp-starter'),
-                'name' => 'cta_primary',
-                'type' => 'link',
-                'instructions' => __('Haupt-Button (orange, auffällig).', 'wp-starter'),
-                'required' => 0,
-                'return_format' => 'array',
-                'wrapper' => ['width' => '50'],
-            ],
-            [
-                'key' => "field_{$prefix}_cta_secondary",
-                'label' => __('Sekundärer Button', 'wp-starter'),
-                'name' => 'cta_secondary',
-                'type' => 'link',
-                'instructions' => __('Zweiter Button (dezent, Outline-Stil).', 'wp-starter'),
-                'required' => 0,
-                'return_format' => 'array',
-                'wrapper' => ['width' => '50'],
-            ],
+            self::linkField(
+                "field_{$prefix}_cta_primary",
+                __('Primärer Button', 'wp-starter'),
+                'cta_primary',
+                false,
+                __('Haupt-Button (orange, auffällig).', 'wp-starter'),
+                '50',
+            ),
+            self::linkField(
+                "field_{$prefix}_cta_secondary",
+                __('Sekundärer Button', 'wp-starter'),
+                'cta_secondary',
+                false,
+                __('Zweiter Button (dezent, Outline-Stil).', 'wp-starter'),
+                '50',
+            ),
 
             // Bild (nur bei Split-Variante)
             self::imageField(
@@ -2103,26 +2115,22 @@ class FieldDefinitions
                 null,
                 __('Das anzuzeigende Bild.', 'wp-starter'),
             ),
-            [
-                'key' => "field_{$prefix}_show_border",
-                'label' => __('Rahmen anzeigen', 'wp-starter'),
-                'name' => 'show_border',
-                'type' => 'true_false',
-                'instructions' => __('Zeigt einen dezenten Rahmen um das Bild.', 'wp-starter'),
-                'default_value' => 1,
-                'ui' => 1,
-                'wrapper' => ['width' => '50'],
-            ],
-            [
-                'key' => "field_{$prefix}_show_caption",
-                'label' => __('Bildunterschrift anzeigen', 'wp-starter'),
-                'name' => 'show_caption',
-                'type' => 'true_false',
-                'instructions' => __('Zeigt die in der Mediathek hinterlegte Bildunterschrift.', 'wp-starter'),
-                'default_value' => 1,
-                'ui' => 1,
-                'wrapper' => ['width' => '50'],
-            ],
+            self::trueFalseField(
+                "field_{$prefix}_show_border",
+                __('Rahmen anzeigen', 'wp-starter'),
+                'show_border',
+                true,
+                __('Zeigt einen dezenten Rahmen um das Bild.', 'wp-starter'),
+                '50',
+            ),
+            self::trueFalseField(
+                "field_{$prefix}_show_caption",
+                __('Bildunterschrift anzeigen', 'wp-starter'),
+                'show_caption',
+                true,
+                __('Zeigt die in der Mediathek hinterlegte Bildunterschrift.', 'wp-starter'),
+                '50',
+            ),
             self::buttonGroupField(
                 "field_{$prefix}_width",
                 __('Bildbreite', 'wp-starter'),
@@ -2238,6 +2246,29 @@ class FieldDefinitions
                 false,
                 '33.333',
                 __('Inhalt der schmalen rechten Spalte (ca. 1/3 der Breite).', 'wp-starter'),
+            ),
+            ...self::displaySettingsFields($prefix),
+        ];
+    }
+
+    /**
+     * Get One Column layout fields
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function oneColumnFields(string $prefix): array
+    {
+        return [
+            ...self::sectionHeaderFields($prefix),
+            self::wysiwygField(
+                "field_{$prefix}_content",
+                __('Inhalt', 'wp-starter'),
+                'content',
+                true,
+                null,
+                __('Der Textinhalt dieser Sektion.', 'wp-starter'),
             ),
             ...self::displaySettingsFields($prefix),
         ];
@@ -3451,36 +3482,30 @@ class FieldDefinitions
 
             // Tab: Anzeige
             self::tabField("field_{$prefix}_tab_display", __('Anzeige', 'wp-starter')),
-            [
-                'key' => "field_{$prefix}_show_excerpt",
-                'label' => __('Auszug', 'wp-starter'),
-                'name' => 'show_excerpt',
-                'type' => 'true_false',
-                'instructions' => __('Zeigt einen kurzen Textauszug an.', 'wp-starter'),
-                'default_value' => 1,
-                'ui' => 1,
-                'wrapper' => ['width' => '33'],
-            ],
-            [
-                'key' => "field_{$prefix}_show_date",
-                'label' => __('Datum', 'wp-starter'),
-                'name' => 'show_date',
-                'type' => 'true_false',
-                'instructions' => __('Zeigt das Veröffentlichungsdatum an.', 'wp-starter'),
-                'default_value' => 1,
-                'ui' => 1,
-                'wrapper' => ['width' => '33'],
-            ],
-            [
-                'key' => "field_{$prefix}_show_author",
-                'label' => __('Autor', 'wp-starter'),
-                'name' => 'show_author',
-                'type' => 'true_false',
-                'instructions' => __('Zeigt den Autorennamen an.', 'wp-starter'),
-                'default_value' => 0,
-                'ui' => 1,
-                'wrapper' => ['width' => '34'],
-            ],
+            self::trueFalseField(
+                "field_{$prefix}_show_excerpt",
+                __('Auszug', 'wp-starter'),
+                'show_excerpt',
+                true,
+                __('Zeigt einen kurzen Textauszug an.', 'wp-starter'),
+                '33',
+            ),
+            self::trueFalseField(
+                "field_{$prefix}_show_date",
+                __('Datum', 'wp-starter'),
+                'show_date',
+                true,
+                __('Zeigt das Veröffentlichungsdatum an.', 'wp-starter'),
+                '33',
+            ),
+            self::trueFalseField(
+                "field_{$prefix}_show_author",
+                __('Autor', 'wp-starter'),
+                'show_author',
+                false,
+                __('Zeigt den Autorennamen an.', 'wp-starter'),
+                '34',
+            ),
 
             // Tab: Darstellung
             self::tabField("field_{$prefix}_tab_style", __('Darstellung', 'wp-starter')),
@@ -3653,26 +3678,22 @@ class FieldDefinitions
                 'row',
                 __('Füge Datenzeilen hinzu. Jede Zeile braucht genau so viele Zellen wie Spalten definiert sind, sonst kannst du die Seite nicht speichern.', 'wp-starter'),
             ),
-            [
-                'key' => "field_{$prefix}_striped",
-                'label' => __('Gestreifte Zeilen', 'wp-starter'),
-                'name' => 'striped',
-                'type' => 'true_false',
-                'instructions' => __('Abwechselnde Hintergrundfarben für bessere Lesbarkeit.', 'wp-starter'),
-                'default_value' => 1,
-                'ui' => 1,
-                'wrapper' => ['width' => '50'],
-            ],
-            [
-                'key' => "field_{$prefix}_bordered",
-                'label' => __('Mit Rahmen', 'wp-starter'),
-                'name' => 'bordered',
-                'type' => 'true_false',
-                'instructions' => __('Zeigt Rahmenlinien um die Zellen.', 'wp-starter'),
-                'default_value' => 0,
-                'ui' => 1,
-                'wrapper' => ['width' => '50'],
-            ],
+            self::trueFalseField(
+                "field_{$prefix}_striped",
+                __('Gestreifte Zeilen', 'wp-starter'),
+                'striped',
+                true,
+                __('Abwechselnde Hintergrundfarben für bessere Lesbarkeit.', 'wp-starter'),
+                '50',
+            ),
+            self::trueFalseField(
+                "field_{$prefix}_bordered",
+                __('Mit Rahmen', 'wp-starter'),
+                'bordered',
+                false,
+                __('Zeigt Rahmenlinien um die Zellen.', 'wp-starter'),
+                '50',
+            ),
             self::trueFalseField(
                 "field_{$prefix}_compact",
                 __('Kompakt', 'wp-starter'),

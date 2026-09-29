@@ -982,8 +982,7 @@ if (!function_exists('wp_filter_content_tags')) {
      * Passthrough test-double. Real core adds loading/width/height attributes
      * to <img> tags found in content; nothing in this project's tests
      * exercises that behaviour, they only need the function to exist so
-     *
-     * @kses-compiled views (AcfServiceProvider.php:174) can render.
+     * that kses-compiled views (AcfServiceProvider.php:174) can render.
      */
     function wp_filter_content_tags(?string $content, string $context = 'content'): string
     {

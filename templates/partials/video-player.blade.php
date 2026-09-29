@@ -13,7 +13,7 @@
       $captions         — caption track URL, '' to omit the <track>
       $captionsLanguage — srclang for the caption track
       $captionsLabel    — label for the caption track
-      $autoplay         — bool, adds autoplay muted playsinline
+      $autoplay         — bool, adds autoplay muted playsinline (paused again under prefers-reduced-motion)
       $loop             — bool, adds loop
       $ariaLabel        — accessible label for the <video> element
       $aspectClass      — Tailwind aspect-ratio class
@@ -26,7 +26,13 @@
 
 <video
     controls
-    @if($autoplay) autoplay muted playsinline @endif
+    @if($autoplay)
+        autoplay muted playsinline
+        {{-- prefers-reduced-motion: das autoplay-Attribut startet vor Alpine, deshalb
+             hier anhalten und auf den Anfang zuruecksetzen. Bedienung bleibt ueber controls. --}}
+        x-data
+        x-init="if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { $el.pause(); $el.currentTime = 0 }"
+    @endif
     @if($loop) loop @endif
     preload="metadata"
     aria-label="{{ $ariaLabel }}"

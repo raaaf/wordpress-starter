@@ -19,6 +19,8 @@ class Team extends AbstractPostType
 
     protected static string $singular = 'Teammitglied';
 
+    protected static string $genus = 'n';
+
     protected static string $plural = 'Team';
 
     protected static string $menuIcon = 'dashicons-groups';

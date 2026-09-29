@@ -686,56 +686,48 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function importPlaceholderImages(): void
     {
+        $assetsDir = get_stylesheet_directory() . '/assets/images/';
+
+        // Schluessel => [Datei, Titel]. Neu hinzugekommene Eintraege (z.B. 'portrait')
+        // werden auch auf bereits eingerichteten Seiten nachgeladen.
+        $wanted = [];
+        for ($i = 1; $i <= 6; $i++) {
+            $wanted["placeholder_{$i}"] = ["placeholder-{$i}.jpg", "Styleguide Placeholder {$i}"];
+        }
+        // Ein echtes Hochformat, damit die Teamportraits zeigen, was sie auf
+        // Kundenseiten zeigen: 4:5 statt eines quer beschnittenen Querformats.
+        $wanted['portrait'] = ['placeholder-portrait.jpg', __('Styleguide Portrait', 'wp-starter')];
+        for ($i = 1; $i <= 6; $i++) {
+            $wanted["logo_{$i}"] = ["logo-placeholder-{$i}.svg", "Styleguide Logo {$i}"];
+        }
+
+        // Vorhandene, noch existierende Ids behalten; nur Fehlendes importieren.
         $existingImages = get_option(self::optImages(), []);
-        if (!empty($existingImages) && is_array($existingImages)) {
-            $allExist = true;
-            foreach ($existingImages as $id) {
-                if (!wp_get_attachment_url( (int) $id)) {
-                    $allExist = false;
-                    break;
+        if (is_array($existingImages)) {
+            foreach ($existingImages as $key => $id) {
+                if (wp_get_attachment_url( (int) $id)) {
+                    $this->imageIds[$key] = $id;
                 }
             }
-            if ($allExist) {
-                $this->imageIds = $existingImages;
+        }
 
-                return;
-            }
+        $missing = array_filter(
+            $wanted,
+            fn(array $entry, string $key): bool => !isset($this->imageIds[$key]) && file_exists($assetsDir . $entry[0]),
+            ARRAY_FILTER_USE_BOTH
+        );
+        if (empty($missing)) {
+            return;
         }
 
         require_once ABSPATH . 'wp-admin/includes/file.php';
         require_once ABSPATH . 'wp-admin/includes/media.php';
         require_once ABSPATH . 'wp-admin/includes/image.php';
 
-        $themeDir = get_stylesheet_directory();
-        $assetsDir = $themeDir . '/assets/images/';
-
-        for ($i = 1; $i <= 6; $i++) {
-            $file = $assetsDir . "placeholder-{$i}.jpg";
-            if (file_exists($file)) {
-                $attachmentId = $this->importImage($file, "Styleguide Placeholder {$i}");
-                if ($attachmentId) {
-                    $this->imageIds["placeholder_{$i}"] = $attachmentId;
-                }
-            }
-        }
-
-        // Ein echtes Hochformat, damit die Teamportraits zeigen, was sie auf
-        // Kundenseiten zeigen: 4:5 statt eines quer beschnittenen Querformats.
-        $portrait = $assetsDir . 'placeholder-portrait.jpg';
-        if (file_exists($portrait)) {
-            $portraitId = $this->importImage($portrait, __('Styleguide Portrait', 'wp-starter'));
-            if ($portraitId) {
-                $this->imageIds['portrait'] = $portraitId;
-            }
-        }
-
-        for ($i = 1; $i <= 6; $i++) {
-            $file = $assetsDir . "logo-placeholder-{$i}.svg";
-            if (file_exists($file)) {
-                $attachmentId = $this->importImage($file, "Styleguide Logo {$i}");
-                if ($attachmentId) {
-                    $this->imageIds["logo_{$i}"] = $attachmentId;
-                }
+        foreach ($missing as $key => [$file, $title]) {
+            $attachmentId = $this->importImage($assetsDir . $file, $title);
+            if ($attachmentId) {
+                $this->imageIds[$key] = $attachmentId;
             }
         }
 
@@ -822,27 +814,12 @@ class WelcomeServiceProvider extends ServiceProvider
         ];
 
         foreach ($testimonials as $index => [$name, $role, $quote]) {
-            $postId = wp_insert_post([
-                'post_title' => $name,
-                'post_type' => Testimonial::getPostType(),
-                'post_status' => 'publish',
-                'meta_input' => [self::STYLEGUIDE_DEMO_POST_META_KEY => 1],
-            ]);
-
-            if (!$postId || is_wp_error($postId)) {
-                continue;
-            }
-
-            if (function_exists('update_field')) {
-                update_field('author_name', $name, $postId);
-                update_field('author_position', $role, $postId);
-                update_field('content', $quote, $postId);
-            }
-
-            $imageId = $this->imageIds['placeholder_' . ( ( $index % 6 ) + 1 )] ?? null;
-            if ($imageId) {
-                set_post_thumbnail($postId, (int) $imageId);
-            }
+            $this->insertDemoPost(
+                Testimonial::getPostType(),
+                $name,
+                ['author_name' => $name, 'author_position' => $role, 'content' => $quote],
+                $this->imageIds['placeholder_' . ( ( $index % 6 ) + 1 )] ?? null
+            );
         }
 
         $members = [
@@ -852,36 +829,25 @@ class WelcomeServiceProvider extends ServiceProvider
         ];
 
         foreach ($members as $index => [$name, $position, $bio, $email, $linkedin]) {
-            $postId = wp_insert_post([
-                'post_title' => $name,
-                'post_type' => Team::getPostType(),
-                'post_status' => 'publish',
-                'meta_input' => [self::STYLEGUIDE_DEMO_POST_META_KEY => 1],
-            ]);
-
-            if (!$postId || is_wp_error($postId)) {
-                continue;
-            }
-
-            if (function_exists('update_field')) {
-                update_field('position', $position, $postId);
-                update_field('bio', $bio, $postId);
-                update_field('display_order', $index + 1, $postId);
-                // Bewusst unterschiedlich befuellt: eine Person mit beiden
-                // Kontaktwegen, eine mit einem, eine ohne. So zeigt der
-                // Styleguide auch die Faelle, in denen Icons fehlen.
-                update_field('email', $email, $postId);
-                update_field('linkedin', $linkedin, $postId);
-                update_field('phone', '', $postId);
-                update_field('xing', '', $postId);
-            }
-
+            // Bewusst unterschiedlich befuellt: eine Person mit beiden
+            // Kontaktwegen, eine mit einem, eine ohne. So zeigt der
+            // Styleguide auch die Faelle, in denen Icons fehlen.
             // Teamportraits nutzen das Hochformat, sonst zeigt der Styleguide
             // einen quer beschnittenen Schnappschuss statt eines Portraits.
-            $imageId = $this->imageIds['portrait'] ?? ( $this->imageIds['placeholder_' . ( ( $index % 6 ) + 1 )] ?? null );
-            if ($imageId) {
-                set_post_thumbnail($postId, (int) $imageId);
-            }
+            $this->insertDemoPost(
+                Team::getPostType(),
+                $name,
+                [
+                    'position' => $position,
+                    'bio' => $bio,
+                    'display_order' => $index + 1,
+                    'email' => $email,
+                    'linkedin' => $linkedin,
+                    'phone' => '',
+                    'xing' => '',
+                ],
+                $this->imageIds['portrait'] ?? ( $this->imageIds['placeholder_' . ( ( $index % 6 ) + 1 )] ?? null )
+            );
         }
 
         // Relative Zukunftsdaten, damit die Demo-Termine nicht mit der Zeit
@@ -895,31 +861,47 @@ class WelcomeServiceProvider extends ServiceProvider
         ];
 
         foreach ($events as [$name, $daysAhead, $time, $format, $location, $description, $link, $imageId]) {
-            $postId = wp_insert_post([
-                'post_title' => $name,
-                'post_type' => Event::getPostType(),
-                'post_status' => 'publish',
-                'meta_input' => [self::STYLEGUIDE_DEMO_POST_META_KEY => 1],
-            ]);
-
-            if (!$postId || is_wp_error($postId)) {
-                continue;
+            $fields = [
+                'event_date' => gmdate('Ymd', strtotime("+{$daysAhead} days")),
+                'event_time' => $time,
+                'event_format' => $format,
+                'event_location' => $location,
+                'event_description' => $description,
+            ];
+            if ($link) {
+                $fields['event_link'] = ['url' => $link[0], 'title' => $link[1], 'target' => ''];
             }
 
-            if ($imageId) {
-                set_post_thumbnail($postId, (int) $imageId);
-            }
+            $this->insertDemoPost(Event::getPostType(), $name, $fields, $imageId);
+        }
+    }
 
-            if (function_exists('update_field')) {
-                update_field('event_date', gmdate('Ymd', strtotime("+{$daysAhead} days")), $postId);
-                update_field('event_time', $time, $postId);
-                update_field('event_format', $format, $postId);
-                update_field('event_location', $location, $postId);
-                update_field('event_description', $description, $postId);
-                if ($link) {
-                    update_field('event_link', ['url' => $link[0], 'title' => $link[1], 'target' => ''], $postId);
-                }
+    /**
+     * Einen markierten Demo-Eintrag samt ACF-Feldern und optionalem Beitragsbild anlegen.
+     *
+     * @param array<string, mixed> $fields ACF-Feldname => Wert
+     */
+    private function insertDemoPost(string $postType, string $title, array $fields, int|string|null $imageId = null): void
+    {
+        $postId = wp_insert_post([
+            'post_title' => $title,
+            'post_type' => $postType,
+            'post_status' => 'publish',
+            'meta_input' => [self::STYLEGUIDE_DEMO_POST_META_KEY => 1],
+        ]);
+
+        if (!$postId || is_wp_error($postId)) {
+            return;
+        }
+
+        if (function_exists('update_field')) {
+            foreach ($fields as $name => $value) {
+                update_field($name, $value, $postId);
             }
+        }
+
+        if ($imageId) {
+            set_post_thumbnail($postId, (int) $imageId);
         }
     }
 

@@ -7,9 +7,11 @@ namespace WordpressStarter\Content;
 /**
  * Styleguide layout data factory.
  *
- * Pure data class: no WordPress hooks, no side effects. Generates the ACF
- * Flexible Content layout arrays used by the styleguide page. Image IDs are
- * injected at construction time from the media library import step.
+ * Generates the ACF Flexible Content layout arrays used by the styleguide
+ * page. Registers no hooks and writes nothing, but it is not WordPress-free:
+ * it reads the media library (wp_get_attachment_url) and, when Contact Form 7
+ * is active, looks up a form (ContactForm7Configurator, get_posts). Image IDs
+ * are injected at construction time from the media library import step.
  */
 class StyleguideLayoutData
 {
@@ -38,14 +40,13 @@ class StyleguideLayoutData
         // aus ACF-Daten und rendert dort durch ihre eigenen Templates.
 
         // =====================================================================
-        // TEIL 3: FLEXIBLE CONTENT LAYOUTS - HERO
+        // TEIL 1: FLEXIBLE CONTENT LAYOUTS - HERO
         // =====================================================================
-
 
         $layouts[] = $this->getHeroLayoutData();
 
         // =====================================================================
-        // TEIL 4: LAYOUT & TEXT
+        // TEIL 2: LAYOUT & TEXT
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
@@ -69,7 +70,7 @@ class StyleguideLayoutData
         $layouts[] = $this->getDividerLayoutData();
 
         // =====================================================================
-        // TEIL 5: INTERAKTIVE ELEMENTE
+        // TEIL 3: INTERAKTIVE ELEMENTE
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
@@ -82,7 +83,7 @@ class StyleguideLayoutData
         $layouts[] = $this->getTabsLayoutData();
 
         // =====================================================================
-        // TEIL 6: KARTEN & INHALTE
+        // TEIL 4: KARTEN & INHALTE
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
@@ -102,7 +103,7 @@ class StyleguideLayoutData
         $layouts[] = $this->getPostsLayoutData();
 
         // =====================================================================
-        // TEIL 7: MEDIEN
+        // TEIL 5: MEDIEN
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
@@ -118,7 +119,7 @@ class StyleguideLayoutData
         $layouts[] = $this->getLogoSliderLayoutData();
 
         // =====================================================================
-        // TEIL 8: KONTAKT & STANDORT
+        // TEIL 6: KONTAKT & STANDORT
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
@@ -132,7 +133,7 @@ class StyleguideLayoutData
         $layouts[] = $this->getMapLayoutData();
 
         // =====================================================================
-        // TEIL 9: CALL-TO-ACTION
+        // TEIL 7: CALL-TO-ACTION
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
@@ -145,7 +146,7 @@ class StyleguideLayoutData
         $layouts[] = $this->getButtonLayoutData();
 
         // =====================================================================
-        // TEIL 10: DATEN & TABELLEN
+        // TEIL 8: DATEN & TABELLEN
         // =====================================================================
 
         $layouts[] = $this->layout('one_column', [
@@ -178,8 +179,8 @@ class StyleguideLayoutData
             'copy' => 'Wir bauen dir Lösungen, die zu deinen Anforderungen passen. Mit langjähriger Erfahrung und einem Team, das zuhört.',
             'background_image' => $this->imageId(1),
             'overlay_opacity' => 70,
-            'cta_primary' => ['title' => 'Mehr erfahren', 'url' => '#features', 'target' => ''],
-            'cta_secondary' => ['title' => 'Kontakt aufnehmen', 'url' => '#kontakt', 'target' => ''],
+            'cta_primary' => self::link('Mehr erfahren', 'https://example.org/leistungen'),
+            'cta_secondary' => self::link('Kontakt aufnehmen', 'https://example.org/kontakt'),
         ]);
     }
 
@@ -336,7 +337,7 @@ class StyleguideLayoutData
     private function getQuoteLayoutData(): array
     {
         return $this->layout('quote', [
-            'quote' => 'Die Foerderung hat uns den Start ermoeglicht, und die Begleitung danach hat uns gehalten.',
+            'quote' => 'Die Förderung hat uns den Start ermöglicht, und die Begleitung danach hat uns gehalten.',
             'author' => 'Maria Beispiel',
             'role' => 'Projektleiterin',
             'image' => $this->imageId(1),
@@ -351,7 +352,7 @@ class StyleguideLayoutData
         return $this->layout('alert', [
             'variant' => 'info',
             'title' => 'Bitte beachten',
-            'content' => '<p>Ein Hinweis steht immer ueber dem Abschnitt, auf den er sich bezieht.</p>',
+            'content' => '<p>Ein Hinweis steht immer über dem Abschnitt, auf den er sich bezieht.</p>',
             'background_color' => 'primary',
         ]);
     }
@@ -410,9 +411,9 @@ class StyleguideLayoutData
         return $this->layout('cards', [
             'title' => 'Unsere Leistungen',
             'cards' => [
-                ['icon' => 'user', 'title' => 'Beratung', 'content' => 'Beratung, die bei deinen Zielen anfängt und nicht bei unserem Baukasten.', 'link' => ['title' => 'Mehr erfahren', 'url' => '#', 'target' => '']],
-                ['icon' => 'check', 'title' => 'Umsetzung', 'content' => 'Umsetzung deiner Projekte, verlässlich und mit aktueller Technik.', 'link' => ['title' => 'Details ansehen', 'url' => '#', 'target' => '']],
-                ['icon' => 'phone', 'title' => 'Support', 'content' => 'Betreuung über den Launch hinaus, mit Support, der antwortet.', 'link' => ['title' => 'Kontakt', 'url' => '#', 'target' => '']],
+                ['icon' => 'user', 'title' => 'Beratung', 'content' => 'Beratung, die bei deinen Zielen anfängt und nicht bei unserem Baukasten.', 'link' => self::link('Mehr erfahren', '#')],
+                ['icon' => 'check', 'title' => 'Umsetzung', 'content' => 'Umsetzung deiner Projekte, verlässlich und mit aktueller Technik.', 'link' => self::link('Details ansehen', '#')],
+                ['icon' => 'phone', 'title' => 'Support', 'content' => 'Betreuung über den Launch hinaus, mit Support, der antwortet.', 'link' => self::link('Kontakt', '#')],
             ],
             'columns' => '3',
             'background_color' => 'primary',
@@ -455,7 +456,7 @@ class StyleguideLayoutData
             'title' => 'Veranstaltungen',
             'text' => '<p>Alle kommenden Termine im Überblick.</p>',
             'link' => null,
-            'all_events_link' => ['title' => 'Alle Termine ansehen', 'url' => 'https://example.org/termine', 'target' => ''],
+            'all_events_link' => self::link('Alle Termine ansehen', 'https://example.org/termine'),
             'background_color' => 'secondary',
         ]);
     }
@@ -481,9 +482,9 @@ class StyleguideLayoutData
         return $this->layout('pricing_table', [
             'title' => 'Unsere Pakete',
             'plans' => [
-                ['name' => 'Starter', 'price' => '49 EUR', 'period' => 'Monat', 'features' => '<ul><li>Grundfunktionen</li><li>E-Mail Support</li><li>5 Projekte</li><li>1 Benutzer</li></ul>', 'cta' => ['title' => 'Auswählen', 'url' => '#', 'target' => ''], 'is_featured' => false],
-                ['name' => 'Professional', 'price' => '99 EUR', 'period' => 'Monat', 'features' => '<ul><li>Alle Funktionen</li><li>Prioritäts-Support</li><li>Unbegrenzte Projekte</li><li>5 Benutzer</li><li>API-Zugang</li></ul>', 'cta' => ['title' => 'Auswählen', 'url' => '#', 'target' => ''], 'is_featured' => true],
-                ['name' => 'Enterprise', 'price' => 'Auf Anfrage', 'period' => '', 'features' => '<ul><li>Individuelle Lösungen</li><li>Dedicated Support</li><li>On-Premise Option</li><li>Unbegrenzte Benutzer</li><li>SLA-Garantie</li></ul>', 'cta' => ['title' => 'Kontakt', 'url' => '#', 'target' => ''], 'is_featured' => false],
+                ['name' => 'Starter', 'price' => '49 EUR', 'period' => 'Monat', 'features' => '<ul><li>Grundfunktionen</li><li>E-Mail Support</li><li>5 Projekte</li><li>1 Benutzer</li></ul>', 'cta' => self::link('Auswählen', '#'), 'is_featured' => false],
+                ['name' => 'Professional', 'price' => '99 EUR', 'period' => 'Monat', 'features' => '<ul><li>Alle Funktionen</li><li>Prioritäts-Support</li><li>Unbegrenzte Projekte</li><li>5 Benutzer</li><li>API-Zugang</li></ul>', 'cta' => self::link('Auswählen', '#'), 'is_featured' => true],
+                ['name' => 'Enterprise', 'price' => 'Auf Anfrage', 'period' => '', 'features' => '<ul><li>Individuelle Lösungen</li><li>Dedicated Support</li><li>On-Premise Option</li><li>Unbegrenzte Benutzer</li><li>SLA-Garantie</li></ul>', 'cta' => self::link('Kontakt', '#'), 'is_featured' => false],
             ],
             'background_color' => 'secondary',
         ]);
@@ -596,7 +597,7 @@ class StyleguideLayoutData
         return $this->layout('cta', [
             'title' => 'Bereit loszulegen?',
             'content' => 'Schreib uns für ein unverbindliches Gespräch. Wir hören zu, bevor wir etwas vorschlagen.',
-            'button' => ['title' => 'Jetzt Kontakt aufnehmen', 'url' => '#kontakt', 'target' => ''],
+            'button' => self::link('Jetzt Kontakt aufnehmen', 'https://example.org/kontakt'),
         ]);
     }
 
@@ -604,7 +605,7 @@ class StyleguideLayoutData
     private function getButtonLayoutData(): array
     {
         return $this->layout('button', [
-            'button' => ['title' => 'Beratungstermin vereinbaren', 'url' => '#kontakt', 'target' => ''],
+            'button' => self::link('Beratungstermin vereinbaren', 'https://example.org/kontakt'),
             'variant' => 'secondary',
             'alignment' => 'center',
         ]);
@@ -627,11 +628,11 @@ class StyleguideLayoutData
     {
         return $this->layout('newsletter', [
             'title' => 'Auf dem Laufenden bleiben',
-            'content' => 'Viermal im Jahr ein kurzer Bericht darueber, was gefoerdert wurde.',
+            'content' => 'Viermal im Jahr ein kurzer Bericht darüber, was gefördert wurde.',
             'action_url' => 'https://example.com/newsletter',
             'email_field' => 'EMAIL',
             'button_label' => 'Anmelden',
-            'note' => 'Die Anmeldung laeuft ueber unseren Versanddienst. Abmeldung jederzeit ueber den Link in jeder E-Mail.',
+            'note' => 'Die Anmeldung läuft über unseren Versanddienst. Abmeldung jederzeit über den Link in jeder E-Mail.',
             'background_color' => 'brand-subtle',
         ]);
     }
@@ -684,10 +685,6 @@ class StyleguideLayoutData
     }
 
     // =========================================================================
-    // DESIGN SYSTEM HTML GENERATORS
-    // =========================================================================
-
-    // =========================================================================
     // HELPERS
     // =========================================================================
 
@@ -701,6 +698,16 @@ class StyleguideLayoutData
     private function layout(string $layoutName, array $data): array
     {
         return array_merge(['acf_fc_layout' => $layoutName], $data);
+    }
+
+    /**
+     * Build an ACF link array (title, url, target).
+     *
+     * @return array{title: string, url: string, target: string}
+     */
+    private static function link(string $title, string $url, string $target = ''): array
+    {
+        return ['title' => $title, 'url' => $url, 'target' => $target];
     }
 
     private function imageId(int $index): ?int
@@ -782,8 +789,8 @@ class StyleguideLayoutData
             'badge' => 'Variante',
             'title' => 'Hero, zentriert',
             'copy' => 'Diese Variante stellt Text und Buttons mittig über einer Flächenfarbe dar.',
-            'cta_primary' => ['title' => 'Primär', 'url' => '#', 'target' => ''],
-            'cta_secondary' => ['title' => 'Sekundär', 'url' => '#', 'target' => ''],
+            'cta_primary' => self::link('Primär', '#'),
+            'cta_secondary' => self::link('Sekundär', '#'),
             'background_color' => 'secondary',
         ]);
 
@@ -793,7 +800,7 @@ class StyleguideLayoutData
             'title' => 'Hero, geteilt',
             'copy' => 'Text links, Bild rechts. Auf kleinen Bildschirmen stapeln sich beide Hälften.',
             'image' => $this->imageId(2),
-            'cta_primary' => ['title' => 'Primär', 'url' => '#', 'target' => ''],
+            'cta_primary' => self::link('Primär', '#'),
             'background_color' => 'primary',
         ]);
 
@@ -948,15 +955,15 @@ class StyleguideLayoutData
         // weil nur der Vergleich zeigt, dass die Karte ihre Markenfarbe behaelt.
         $catalog[] = $this->layout('cta', [
             'title' => 'CTA auf sekundärer Fläche',
-            'content' => 'Die Sektion faerbt sich, die Karte bleibt auf der Markenflaeche.',
-            'button' => ['title' => 'Kontakt aufnehmen', 'url' => '#kontakt', 'target' => ''],
+            'content' => 'Die Sektion färbt sich, die Karte bleibt auf der Markenfläche.',
+            'button' => self::link('Kontakt aufnehmen', 'https://example.org/kontakt'),
             'background_color' => 'secondary',
         ]);
 
         $catalog[] = $this->layout('cta', [
             'title' => 'CTA auf dunkler Fläche',
-            'content' => 'Dieselbe Karte auf der inversen Flaeche.',
-            'button' => ['title' => 'Kontakt aufnehmen', 'url' => '#kontakt', 'target' => ''],
+            'content' => 'Dieselbe Karte auf der inversen Fläche.',
+            'button' => self::link('Kontakt aufnehmen', 'https://example.org/kontakt'),
             'background_color' => 'inverse',
         ]);
 
@@ -966,8 +973,8 @@ class StyleguideLayoutData
         $catalog[] = $this->layout('accordion', [
             'accordion' => [
                 ['title' => 'Erster Eintrag, beim Laden offen', 'content' => '<p>Dieser Eintrag ist ohne Klick sichtbar.</p>'],
-                ['title' => 'Zweiter Eintrag', 'content' => '<p>Er bleibt offen, wenn ein dritter geoeffnet wird.</p>'],
-                ['title' => 'Dritter Eintrag', 'content' => '<p>Mehrere Eintraege duerfen hier gleichzeitig offen stehen.</p>'],
+                ['title' => 'Zweiter Eintrag', 'content' => '<p>Er bleibt offen, wenn ein dritter geöffnet wird.</p>'],
+                ['title' => 'Dritter Eintrag', 'content' => '<p>Mehrere Einträge dürfen hier gleichzeitig offen stehen.</p>'],
             ],
             'first_open' => true,
             'allow_multiple' => true,
@@ -991,8 +998,8 @@ class StyleguideLayoutData
         $catalog[] = $this->layout('cards', [
             'title' => 'Karten gefüllt',
             'cards' => [
-                ['icon' => 'check', 'title' => 'Gefüllt', 'content' => 'Eine Stufe ueber der Sektionsflaeche.', 'link' => null],
-                ['icon' => 'star', 'title' => 'Gefüllt', 'content' => 'Traegt auch ohne Schatten.', 'link' => null],
+                ['icon' => 'check', 'title' => 'Gefüllt', 'content' => 'Eine Stufe über der Sektionsfläche.', 'link' => null],
+                ['icon' => 'star', 'title' => 'Gefüllt', 'content' => 'Trägt auch ohne Schatten.', 'link' => null],
             ],
             'columns' => '2',
             'card_style' => 'filled',
@@ -1033,9 +1040,9 @@ class StyleguideLayoutData
         $catalog[] = $this->layout('pricing_table', [
             'title' => 'Pakete mit Umschalter Monat und Jahr',
             'plans' => [
-                ['name' => 'Basis', 'price' => '19 EUR', 'period' => 'Monat', 'price_yearly' => '190 EUR', 'period_yearly' => 'Jahr', 'features' => '<ul><li>Grundfunktionen</li><li>E-Mail Support</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
-                ['name' => 'Plus', 'price' => '39 EUR', 'period' => 'Monat', 'price_yearly' => '390 EUR', 'period_yearly' => 'Jahr', 'features' => '<ul><li>Alle Funktionen</li><li>Prioritäts-Support</li></ul>', 'is_featured' => true, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
-                ['name' => 'Auf Anfrage', 'price' => 'Individuell', 'period' => '', 'price_yearly' => '', 'period_yearly' => '', 'features' => '<ul><li>Individuelle Lösung</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Kontakt', 'url' => '#', 'target' => '']],
+                ['name' => 'Basis', 'price' => '19 EUR', 'period' => 'Monat', 'price_yearly' => '190 EUR', 'period_yearly' => 'Jahr', 'features' => '<ul><li>Grundfunktionen</li><li>E-Mail Support</li></ul>', 'is_featured' => false, 'cta' => self::link('Auswählen', '#')],
+                ['name' => 'Plus', 'price' => '39 EUR', 'period' => 'Monat', 'price_yearly' => '390 EUR', 'period_yearly' => 'Jahr', 'features' => '<ul><li>Alle Funktionen</li><li>Prioritäts-Support</li></ul>', 'is_featured' => true, 'cta' => self::link('Auswählen', '#')],
+                ['name' => 'Auf Anfrage', 'price' => 'Individuell', 'period' => '', 'price_yearly' => '', 'period_yearly' => '', 'features' => '<ul><li>Individuelle Lösung</li></ul>', 'is_featured' => false, 'cta' => self::link('Kontakt', '#')],
             ],
             'billing_toggle' => true,
             'background_color' => 'primary',
@@ -1073,8 +1080,8 @@ class StyleguideLayoutData
         ]);
 
         $catalog[] = $this->layout('button', [
-            'button' => ['title' => 'Termin vereinbaren', 'url' => '#kontakt', 'target' => ''],
-            'button_secondary' => ['title' => 'Unterlagen ansehen', 'url' => '#downloads', 'target' => ''],
+            'button' => self::link('Termin vereinbaren', 'https://example.org/kontakt'),
+            'button_secondary' => self::link('Unterlagen ansehen', 'https://example.org/downloads'),
             'variant' => 'primary',
             'size' => 'md',
             'alignment' => 'center',
@@ -1085,21 +1092,21 @@ class StyleguideLayoutData
         $catalog[] = $this->layout('alert', [
             'variant' => 'success',
             'title' => 'Antrag eingegangen',
-            'content' => '<p>Der gruene Hinweis bestaetigt etwas, das geklappt hat.</p>',
+            'content' => '<p>Der grüne Hinweis bestätigt etwas, das geklappt hat.</p>',
             'background_color' => 'primary',
         ]);
 
         $catalog[] = $this->layout('alert', [
             'variant' => 'warning',
-            'title' => 'Frist laeuft ab',
+            'title' => 'Frist läuft ab',
             'content' => '<p>Der gelbe Hinweis warnt, ohne einen Fehler zu melden.</p>',
             'background_color' => 'primary',
         ]);
 
         $catalog[] = $this->layout('alert', [
             'variant' => 'error',
-            'title' => 'Antrag unvollstaendig',
-            'content' => '<p>Der rote Hinweis meldet einen Fehler und traegt role="alert".</p>',
+            'title' => 'Antrag unvollständig',
+            'content' => '<p>Der rote Hinweis meldet einen Fehler und trägt role="alert".</p>',
             'dismissible' => true,
             'background_color' => 'primary',
         ]);
@@ -1107,7 +1114,7 @@ class StyleguideLayoutData
         // Einzelzitat gross und ohne Bild: die zweite Groesse und der Fall ohne
         // Portrait, den die Instanz oben nicht zeigt.
         $catalog[] = $this->layout('quote', [
-            'quote' => 'Ein grosses Zitat traegt den Abschnitt allein.',
+            'quote' => 'Ein großes Zitat trägt den Abschnitt allein.',
             'author' => 'Jonas Muster',
             'role' => '',
             'image' => null,
@@ -1121,7 +1128,7 @@ class StyleguideLayoutData
             'action_url' => 'https://example.com/newsletter',
             'email_field' => 'EMAIL',
             'button_label' => 'Eintragen',
-            'note' => 'Ohne Ueberschrift und Text bleibt nur die Leiste.',
+            'note' => 'Ohne Überschrift und Text bleibt nur die Leiste.',
             'background_color' => 'secondary',
         ]);
 
@@ -1211,19 +1218,19 @@ class StyleguideLayoutData
         // Die Stufen sind nur im Vergleich lesbar, deshalb stehen sie direkt
         // untereinander und alle auf derselben Flaeche.
         $catalog[] = $this->layout('one_column', [
-            'content' => '<h3>Abstand: Kompakt</h3><p>Kleinste Stufe, fuer eng gesetzte Folgeabschnitte.</p>',
+            'content' => '<h3>Abstand: Kompakt</h3><p>Kleinste Stufe, für eng gesetzte Folgeabschnitte.</p>',
             'background_color' => 'secondary',
             'section_spacing' => 'sm',
         ]);
 
         $catalog[] = $this->layout('one_column', [
-            'content' => '<h3>Abstand: Groß</h3><p>Groesste Stufe, fuer Abschnitte, die fuer sich stehen sollen.</p>',
+            'content' => '<h3>Abstand: Groß</h3><p>Größte Stufe, für Abschnitte, die für sich stehen sollen.</p>',
             'background_color' => 'secondary',
             'section_spacing' => 'xl',
         ]);
 
         $catalog[] = $this->layout('one_column', [
-            'content' => '<h3>Abstand: Ohne</h3><p>Ohne eigenen Innenabstand, fuer direkt aneinander stossende Flaechen.</p>',
+            'content' => '<h3>Abstand: Ohne</h3><p>Ohne eigenen Innenabstand, für direkt aneinander stoßende Flächen.</p>',
             'background_color' => 'secondary',
             'section_spacing' => 'none',
         ]);
@@ -1374,27 +1381,27 @@ class StyleguideLayoutData
 
         // --- Button -----------------------------------------------------------
         $catalog[] = $this->layout('button', [
-            'button' => ['title' => 'Primär, klein, linksbündig', 'url' => '#', 'target' => ''],
+            'button' => self::link('Primär, klein, linksbündig', '#'),
             'variant' => 'primary',
             'size' => 'sm',
             'alignment' => 'left',
         ]);
 
         $catalog[] = $this->layout('button', [
-            'button' => ['title' => 'Dezent, groß, rechtsbündig', 'url' => '#', 'target' => ''],
+            'button' => self::link('Dezent, groß, rechtsbündig', '#'),
             'variant' => 'ghost',
             'size' => 'lg',
             'alignment' => 'right',
         ]);
 
         $catalog[] = $this->layout('button', [
-            'button' => ['title' => 'Invertiert über volle Breite', 'url' => '#', 'target' => ''],
+            'button' => self::link('Invertiert über volle Breite', '#'),
             'variant' => 'inverse',
             'full_width' => true,
         ]);
 
         $catalog[] = $this->layout('button', [
-            'button' => ['title' => 'Warnung', 'url' => '#', 'target' => ''],
+            'button' => self::link('Warnung', '#'),
             'variant' => 'danger',
         ]);
 
@@ -1491,7 +1498,7 @@ class StyleguideLayoutData
 
         return [
             $this->layout('one_column', [
-                'content' => '<h2>Zustände</h2><p>Ab hier folgen Randfaelle: fehlende Bilder, '
+                'content' => '<h2>Zustände</h2><p>Ab hier folgen Randfälle: fehlende Bilder, '
                     . 'überlange Texte, Wiederholungsfelder mit einem einzigen Eintrag. Sie '
                     . 'gehören zur Abnahme, nicht in den Gestaltungsvorschlag.</p>',
                 'background_color' => 'secondary',
@@ -1541,10 +1548,10 @@ class StyleguideLayoutData
             $this->layout('pricing_table', [
                 'title' => 'Vier Preispläne',
                 'plans' => [
-                    ['name' => 'Basis', 'price' => '19', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
-                    ['name' => 'Plus', 'price' => '39', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => true, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
-                    ['name' => 'Pro', 'price' => '79', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
-                    ['name' => 'Maximal', 'price' => '149', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => false, 'cta' => ['title' => 'Wählen', 'url' => '#', 'target' => '']],
+                    ['name' => 'Basis', 'price' => '19', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => false, 'cta' => self::link('Auswählen', '#')],
+                    ['name' => 'Plus', 'price' => '39', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => true, 'cta' => self::link('Auswählen', '#')],
+                    ['name' => 'Pro', 'price' => '79', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => false, 'cta' => self::link('Auswählen', '#')],
+                    ['name' => 'Maximal', 'price' => '149', 'period' => 'Monat', 'features' => '<ul><li>Eine Position</li><li>Zweite Position</li></ul>', 'is_featured' => false, 'cta' => self::link('Auswählen', '#')],
                 ],
                 'background_color' => 'secondary',
                 'section_anchor' => 'pricing-table-zustand-letzte-zeile',

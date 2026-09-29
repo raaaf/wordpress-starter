@@ -339,7 +339,7 @@ class FlexibleContent
      * eine Ueberschrift aendern wollte, scrollte an diesem Block vorbei. Zwei
      * Reiter trennen beides, ohne ein Feld umzubenennen oder zu verschieben:
      * die Reihenfolge bleibt, es kommen nur zwei Marken dazwischen.
-
+     *
      * Hier statt in jedem der rund 30 Feldbauer: die Regel steht damit an
      * einer Stelle und gilt auch fuer Layouts, die ein abgeleitetes Theme
      * ueber den Filter oben nachreicht.
@@ -525,21 +525,7 @@ class FlexibleContent
             'name' => 'one_column',
             'label' => __('Eine Spalte', 'wp-starter'),
             'display' => 'block',
-            'sub_fields' => [
-                ...FieldDefinitions::sectionHeaderFields('flex_one_column'),
-                FieldDefinitions::wysiwygField(
-                    'field_flex_one_column_content',
-                    __('Inhalt', 'wp-starter'),
-                    'content',
-                    true,
-                    null,
-                    __('Der Textinhalt dieser Sektion.', 'wp-starter'),
-                ),
-                FieldDefinitions::backgroundColorField('flex_one_column'),
-                FieldDefinitions::sectionSpacingField('flex_one_column'),
-                FieldDefinitions::sectionWidthField('flex_one_column'),
-                FieldDefinitions::sectionAnchorField('flex_one_column'),
-            ],
+            'sub_fields' => FieldDefinitions::oneColumnFields('flex_one_column'),
             'acfe_flexible_category' => self::getCategories()['layout'],
             'acfe_flexible_thumbnail' => 'one_column.png',
         ];

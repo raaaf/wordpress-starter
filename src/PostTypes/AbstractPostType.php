@@ -39,6 +39,14 @@ abstract class AbstractPostType
     protected static string $plural = '';
 
     /**
+     * Grammatical gender of the singular label: 'm', 'f' or 'n'.
+     *
+     * Drives the German article and adjective endings in the labels
+     * (Neuer/Neue/Neues, Zu diesem/dieser/diesem).
+     */
+    protected static string $genus = 'f';
+
+    /**
      * Dashicon or custom icon URL for admin menu
      */
     protected static string $menuIcon = 'dashicons-admin-post';
@@ -144,11 +152,31 @@ abstract class AbstractPostType
             // translators: %s is the singular post type name
             'add_new' => sprintf(__('%s hinzufügen', 'wp-starter'), $singular),
             // translators: %s is the singular post type name
-            'add_new_item' => sprintf(__('Neue %s hinzufügen', 'wp-starter'), $singular),
+            'add_new_item' => sprintf(
+                self::byGenus(
+                    // translators: %s is the singular post type name
+                    __('Neuer %s hinzufügen', 'wp-starter'),
+                    // translators: %s is the singular post type name
+                    __('Neue %s hinzufügen', 'wp-starter'),
+                    // translators: %s is the singular post type name
+                    __('Neues %s hinzufügen', 'wp-starter'),
+                ),
+                $singular,
+            ),
             // translators: %s is the singular post type name
             'edit_item' => sprintf(__('%s bearbeiten', 'wp-starter'), $singular),
             // translators: %s is the singular post type name
-            'new_item' => sprintf(__('Neue %s', 'wp-starter'), $singular),
+            'new_item' => sprintf(
+                self::byGenus(
+                    // translators: %s is the singular post type name
+                    __('Neuer %s', 'wp-starter'),
+                    // translators: %s is the singular post type name
+                    __('Neue %s', 'wp-starter'),
+                    // translators: %s is the singular post type name
+                    __('Neues %s', 'wp-starter'),
+                ),
+                $singular,
+            ),
             // translators: %s is the singular post type name
             'view_item' => sprintf(__('%s ansehen', 'wp-starter'), $singular),
             // translators: %s is the plural post type name
@@ -160,23 +188,43 @@ abstract class AbstractPostType
             // translators: %s is the plural post type name
             'not_found_in_trash' => sprintf(__('Keine %s im Papierkorb', 'wp-starter'), $plural),
             // translators: %s is the singular post type name
-            'parent_item_colon' => sprintf(__('Übergeordnete %s:', 'wp-starter'), $singular),
+            'parent_item_colon' => sprintf(
+                self::byGenus(
+                    // translators: %s is the singular post type name
+                    __('Übergeordneter %s:', 'wp-starter'),
+                    // translators: %s is the singular post type name
+                    __('Übergeordnete %s:', 'wp-starter'),
+                    // translators: %s is the singular post type name
+                    __('Übergeordnetes %s:', 'wp-starter'),
+                ),
+                $singular,
+            ),
             // translators: %s is the plural post type name
             'all_items' => sprintf(__('Alle %s', 'wp-starter'), $plural),
             // translators: %s is the plural post type name
-            'archives' => sprintf(__('%s Archiv', 'wp-starter'), $plural),
+            'archives' => sprintf(__('%s-Archiv', 'wp-starter'), $plural),
             // translators: %s is the plural post type name
-            'attributes' => sprintf(__('%s Attribute', 'wp-starter'), $plural),
+            'attributes' => sprintf(__('%s-Attribute', 'wp-starter'), $plural),
             // translators: %s is the singular post type name
             'insert_into_item' => sprintf(__('In %s einfügen', 'wp-starter'), $singular),
             // translators: %s is the singular post type name
-            'uploaded_to_this_item' => sprintf(__('Zu dieser %s hochgeladen', 'wp-starter'), $singular),
+            'uploaded_to_this_item' => sprintf(
+                self::byGenus(
+                    // translators: %s is the singular post type name
+                    __('Zu diesem %s hochgeladen', 'wp-starter'),
+                    // translators: %s is the singular post type name
+                    __('Zu dieser %s hochgeladen', 'wp-starter'),
+                    // translators: %s is the singular post type name
+                    __('Zu diesem %s hochgeladen', 'wp-starter'),
+                ),
+                $singular,
+            ),
             // translators: %s is the plural post type name
-            'filter_items_list' => sprintf(__('%s Liste filtern', 'wp-starter'), $plural),
+            'filter_items_list' => sprintf(__('%s-Liste filtern', 'wp-starter'), $plural),
             // translators: %s is the plural post type name
-            'items_list_navigation' => sprintf(__('%s Liste Navigation', 'wp-starter'), $plural),
+            'items_list_navigation' => sprintf(__('%s-Listennavigation', 'wp-starter'), $plural),
             // translators: %s is the plural post type name
-            'items_list' => sprintf(__('%s Liste', 'wp-starter'), $plural),
+            'items_list' => sprintf(__('%s-Liste', 'wp-starter'), $plural),
             // translators: %s is the singular post type name
             'item_published' => sprintf(__('%s veröffentlicht.', 'wp-starter'), $singular),
             // translators: %s is the singular post type name
@@ -190,6 +238,18 @@ abstract class AbstractPostType
             'menu_name' => $plural,
             'name_admin_bar' => $singular,
         ];
+    }
+
+    /**
+     * Pick the label variant that matches the grammatical gender.
+     */
+    private static function byGenus(string $masculine, string $feminine, string $neuter): string
+    {
+        return match (static::$genus) {
+            'm' => $masculine,
+            'n' => $neuter,
+            default => $feminine,
+        };
     }
 
     /**

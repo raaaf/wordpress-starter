@@ -13,6 +13,8 @@ class MemberDownload extends AbstractPostType
 
     protected static string $singular = 'Dokument';
 
+    protected static string $genus = 'n';
+
     protected static string $plural = 'Dokumente';
 
     protected static string $menuIcon = 'dashicons-download';

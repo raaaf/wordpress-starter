@@ -28,6 +28,8 @@ class Event extends AbstractPostType
 
     protected static string $singular = 'Veranstaltung';
 
+    protected static string $genus = 'f';
+
     protected static string $plural = 'Veranstaltungen';
 
     protected static string $menuIcon = 'dashicons-calendar-alt';

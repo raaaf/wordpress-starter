@@ -16,6 +16,7 @@ class Testimonial extends AbstractPostType
 {
     protected static string $postType = 'testimonial';
     protected static string $singular = 'Testimonial';
+    protected static string $genus = 'n';
     protected static string $plural = 'Testimonials';
     protected static string $menuIcon = 'dashicons-format-quote';
     protected static int $menuPosition = 25;
