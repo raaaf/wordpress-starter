@@ -1027,6 +1027,25 @@ class SeoServiceProvider extends ServiceProvider
     }
 
     /**
+     * Render one JSON-LD block for a list of events (as returned by
+     * Event::getUpcomingEvents()). Always a single @graph of Event nodes,
+     * also for one event, so consumers see one shape. Entries without a valid
+     * date are dropped; nothing is rendered when no entry remains.
+     *
+     * @param array<int, array<string, mixed>> $events
+     */
+    public static function emitEventSchema(array $events): void
+    {
+        $graph = array_values(array_filter(array_map([\WordpressStarter\PostTypes\Event::class, 'toSchema'], $events)));
+
+        if ($graph === []) {
+            return;
+        }
+
+        self::renderJsonLd(['@context' => 'https://schema.org', '@graph' => $graph]);
+    }
+
+    /**
      * Render a Person JSON-LD block. Useful for team pages, author bios and
      * E-E-A-T signals on regulated pages (finance, health, legal).
      *

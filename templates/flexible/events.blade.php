@@ -20,6 +20,7 @@
     $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $text = get_sub_field('text');
     $link = get_sub_field('link');
+    $allEventsLink = get_sub_field('all_events_link');
     $background = get_sub_field('background_color') ?: 'primary';
 
     // Mehr als acht Listeneintraege scrollt auf einer Inhaltsseite niemand.
@@ -115,8 +116,20 @@
             </x-card>
 
             @if(!empty($rest))
-                @include('partials.event-list', ['events' => $rest, 'headingClass' => 'mt-10', 'formatDate' => $formatDate, 'overflow' => $overflow])
+                {{-- Mit Uebersichtslink ersetzt der Link den Hinweis "+ weitere Termine". --}}
+                @include('partials.event-list', ['events' => $rest, 'headingClass' => 'mt-10', 'formatDate' => $formatDate, 'overflow' => $overflow && empty($allEventsLink['url'])])
+            @endif
+
+            @if(!empty($allEventsLink['url']))
+                <div class="mt-6">
+                    <x-link :url="$allEventsLink['url']" :target="$allEventsLink['target'] ?: '_self'">{{ $allEventsLink['title'] ?: __('Alle Termine ansehen', 'wp-starter') }}</x-link>
+                </div>
             @endif
         </div>
     @endif
 </x-section>
+
+{{-- Event JSON-LD, only for content the public can reach (same gate as the accordion's FAQ schema). --}}
+@if(!empty($fetched) && is_singular() && get_post_status() === 'publish' && !post_password_required())
+    @php \WordpressStarter\Providers\SeoServiceProvider::emitEventSchema(array_merge($lead, $rest)); @endphp
+@endif

@@ -293,6 +293,68 @@ class Event extends AbstractPostType
     }
 
     /**
+     * Map one getUpcomingEvents() entry to a schema.org Event (without @context).
+     * Keys with empty values are omitted. Returns [] for an entry without a valid event_date.
+     *
+     * @param array<string, mixed> $event
+     *
+     * @return array<string, mixed>
+     */
+    public static function toSchema(array $event): array
+    {
+        $date = self::parseStored('!Ymd', $event['event_date'] ?? null);
+        if ($date === null) {
+            return [];
+        }
+
+        $text = static fn (mixed $value): string => is_string($value) ? trim(wp_strip_all_tags($value)) : '';
+
+        $time = self::displayTime($event['event_time'] ?? null);
+        if ($time !== null) {
+            $start = \DateTimeImmutable::createFromFormat('!Ymd H:i', $date->format('Ymd') . ' ' . $time, wp_timezone());
+            $startDate = $start ? $start->format('Y-m-d\TH:iP') : $date->format('Y-m-d');
+        } else {
+            $startDate = $date->format('Y-m-d');
+        }
+
+        $format = $event['event_format'] ?? 'onsite';
+        $modes = [
+            'onsite' => 'OfflineEventAttendanceMode',
+            'online' => 'OnlineEventAttendanceMode',
+            'hybrid' => 'MixedEventAttendanceMode',
+        ];
+
+        $address = $text($event['event_location'] ?? null);
+        $link = $event['event_link'] ?? null;
+        $linkUrl = is_array($link) && is_string($link['url'] ?? null) ? $link['url'] : '';
+
+        $place = $address !== '' ? ['@type' => 'Place', 'name' => $address, 'address' => $address] : null;
+        $virtual = $linkUrl !== '' ? ['@type' => 'VirtualLocation', 'url' => $linkUrl] : null;
+        $location = match ($format) {
+            'online' => $virtual,
+            'hybrid' => array_values(array_filter([$place, $virtual])),
+            default => $place,
+        };
+
+        $imageId = $event['image'] ?? null;
+        $image = is_int($imageId) ? wp_get_attachment_image_url($imageId, 'large') : false;
+
+        $schema = [
+            '@type' => 'Event',
+            'name' => $text($event['title'] ?? null),
+            'startDate' => $startDate,
+            'eventStatus' => 'https://schema.org/EventScheduled',
+            'eventAttendanceMode' => 'https://schema.org/' . ( $modes[$format] ?? $modes['onsite'] ),
+            'location' => $location,
+            'description' => $text($event['event_description'] ?? null),
+            'image' => $image,
+            'url' => $linkUrl,
+        ];
+
+        return array_filter($schema, static fn (mixed $value): bool => $value !== null && $value !== '' && $value !== false && $value !== []);
+    }
+
+    /**
      * Strict parse of a stored value; null unless it round-trips unchanged
      * (rejects non-strings, overflowing dates like 20261332 and huge numbers).
      */

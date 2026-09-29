@@ -3227,6 +3227,13 @@ class FieldDefinitions
                 false,
                 __('Optionaler Link, z.B. zu einer Anmeldeseite.', 'wp-starter'),
             ),
+            self::linkField(
+                "field_{$prefix}_all_events_link",
+                __('Link zu allen Terminen', 'wp-starter'),
+                'all_events_link',
+                false,
+                __('Optional. Erscheint unter der Terminliste, z.B. zu einer Seite mit allen Veranstaltungen.', 'wp-starter'),
+            ),
             ...self::displaySettingsFields($prefix),
         ];
     }

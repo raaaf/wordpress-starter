@@ -81,6 +81,14 @@ if (!function_exists('wp_date')) {
     }
 }
 
+if (!function_exists('wp_timezone')) {
+    // Tests seed $GLOBALS['wp_mock_timezone'] with a timezone name (default UTC).
+    function wp_timezone(): DateTimeZone
+    {
+        return new DateTimeZone($GLOBALS['wp_mock_timezone'] ?? 'UTC');
+    }
+}
+
 if (!function_exists('wp_nav_menu')) {
     function wp_nav_menu(array $args = []): ?string
     {

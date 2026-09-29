@@ -455,6 +455,7 @@ class StyleguideLayoutData
             'title' => 'Veranstaltungen',
             'text' => '<p>Alle kommenden Termine im Überblick.</p>',
             'link' => null,
+            'all_events_link' => ['title' => 'Alle Termine ansehen', 'url' => 'https://example.org/termine', 'target' => ''],
             'background_color' => 'secondary',
         ]);
     }

@@ -229,6 +229,32 @@ final class SeoServiceProviderTest extends TestCase
         $this->assertStringContainsString('What is GEO?', $out);
     }
 
+    public function testEmitEventSchemaEmitsNothingForAnEmptyList(): void
+    {
+        ob_start();
+        SeoServiceProvider::emitEventSchema([]);
+        $out = (string) ob_get_clean();
+
+        $this->assertSame('', $out);
+    }
+
+    public function testEmitEventSchemaEmitsOneBlockWithAllEvents(): void
+    {
+        ob_start();
+        SeoServiceProvider::emitEventSchema([
+            ['title' => 'Sommerfest', 'event_date' => '20261008', 'event_format' => 'onsite'],
+            ['title' => 'Webinar', 'event_date' => '20261105', 'event_format' => 'online'],
+            ['title' => 'Ohne Datum', 'event_date' => ''],
+        ]);
+        $out = (string) ob_get_clean();
+
+        $this->assertSame(1, substr_count($out, 'application/ld+json'));
+        $this->assertStringContainsString('"@graph"', $out);
+        $this->assertStringContainsString('Sommerfest', $out);
+        $this->assertStringContainsString('Webinar', $out);
+        $this->assertStringNotContainsString('Ohne Datum', $out);
+    }
+
     public function testEmitFaqSchemaSkipsEmptyEntries(): void
     {
         ob_start();

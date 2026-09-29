@@ -20,7 +20,7 @@ final class EventTest extends TestCase
 {
     protected function tearDown(): void
     {
-        unset($GLOBALS['wp_mock_last_query_args'], $GLOBALS['wp_mock_is_admin']);
+        unset($GLOBALS['wp_mock_last_query_args'], $GLOBALS['wp_mock_is_admin'], $GLOBALS['wp_mock_timezone'], $GLOBALS['wp_mock_attachments']);
 
         parent::tearDown();
     }
@@ -171,5 +171,100 @@ final class EventTest extends TestCase
         $this->assertSame('18:30', $this->mapEvent(['event_time' => '18:30:00'])['event_time']);
         $this->assertNull($this->mapEvent(['event_time' => '99:99:99'])['event_time']);
         $this->assertNull($this->mapEvent(['event_time' => '300000000000'])['event_time']);
+    }
+
+    /**
+     * @param array<string, mixed> $overrides
+     *
+     * @return array<string, mixed>
+     */
+    private function schema(array $overrides = []): array
+    {
+        return Event::toSchema(Event::mapEvent(77, 'Titel', array_merge(['event_date' => '20261008'], $overrides)));
+    }
+
+    public function testToSchemaMapsEachFormatToItsAttendanceMode(): void
+    {
+        $this->assertSame('https://schema.org/OfflineEventAttendanceMode', $this->schema(['event_format' => 'onsite'])['eventAttendanceMode']);
+        $this->assertSame('https://schema.org/OnlineEventAttendanceMode', $this->schema(['event_format' => 'online'])['eventAttendanceMode']);
+        $this->assertSame('https://schema.org/MixedEventAttendanceMode', $this->schema(['event_format' => 'hybrid'])['eventAttendanceMode']);
+    }
+
+    public function testToSchemaStartDateIsPlainDateWithoutTime(): void
+    {
+        $schema = $this->schema();
+
+        $this->assertSame('Event', $schema['@type']);
+        $this->assertSame('Titel', $schema['name']);
+        $this->assertSame('2026-10-08', $schema['startDate']);
+        $this->assertSame('https://schema.org/EventScheduled', $schema['eventStatus']);
+    }
+
+    public function testToSchemaStartDateCarriesSiteTimezoneOffsetWithTime(): void
+    {
+        $GLOBALS['wp_mock_timezone'] = 'Europe/Berlin';
+
+        $this->assertSame('2026-10-08T18:30+02:00', $this->schema(['event_time' => '18:30:00'])['startDate']);
+        $this->assertSame('2026-12-08T18:30+01:00', $this->schema(['event_date' => '20261208', 'event_time' => '18:30'])['startDate']);
+    }
+
+    public function testToSchemaOnsiteLocationIsAPlaceFromTheAddress(): void
+    {
+        $schema = $this->schema(['event_location' => 'Königstraße 1, Fürth', 'event_link' => ['url' => 'https://example.org/live']]);
+
+        $this->assertSame(['@type' => 'Place', 'name' => 'Königstraße 1, Fürth', 'address' => 'Königstraße 1, Fürth'], $schema['location']);
+        $this->assertArrayNotHasKey('location', $this->schema());
+    }
+
+    public function testToSchemaOnlineLocationIsAVirtualLocationFromTheLinkUrl(): void
+    {
+        $fields = ['event_format' => 'online', 'event_location' => 'Ignored Street 1'];
+        $withLink = $this->schema($fields + ['event_link' => ['url' => 'https://example.org/live']]);
+
+        $this->assertSame(['@type' => 'VirtualLocation', 'url' => 'https://example.org/live'], $withLink['location']);
+        $this->assertArrayNotHasKey('location', $this->schema($fields));
+    }
+
+    public function testToSchemaHybridLocationListsOnlyThePartsThatAreSet(): void
+    {
+        $fields = ['event_format' => 'hybrid'];
+        $link = ['event_link' => ['url' => 'https://example.org/live']];
+
+        $both = $this->schema($fields + $link + ['event_location' => 'Fürth']);
+        $this->assertSame(['Place', 'VirtualLocation'], array_column($both['location'], '@type'));
+
+        $this->assertSame(['Place'], array_column($this->schema($fields + ['event_location' => 'Fürth'])['location'], '@type'));
+        $this->assertSame(['VirtualLocation'], array_column($this->schema($fields + $link)['location'], '@type'));
+        $this->assertArrayNotHasKey('location', $this->schema($fields));
+    }
+
+    public function testToSchemaImageIsOmittedWithoutAUrl(): void
+    {
+        $this->assertArrayNotHasKey('image', $this->schema());
+
+        $GLOBALS['wp_mock_attachments'] = [];
+        $entry = Event::mapEvent(77, 'Titel', ['event_date' => '20261008']);
+        $entry['image'] = 55;
+        $this->assertArrayNotHasKey('image', Event::toSchema($entry));
+
+        $GLOBALS['wp_mock_attachments'][55] = ['large' => ['https://example.org/large.jpg', 800, 600]];
+        $this->assertSame('https://example.org/large.jpg', Event::toSchema($entry)['image']);
+    }
+
+    public function testToSchemaStripsTagsAndOmitsEmptyKeys(): void
+    {
+        $entry = Event::mapEvent(77, '<b>Fest</b>', ['event_date' => '20261008', 'event_description' => '<i>Hallo</i>']);
+        $schema = Event::toSchema($entry);
+
+        $this->assertSame('Fest', $schema['name']);
+        $this->assertSame('Hallo', $schema['description']);
+        $this->assertArrayNotHasKey('url', $schema);
+        $this->assertSame('https://example.org/a', $this->schema(['event_link' => ['url' => 'https://example.org/a']])['url']);
+    }
+
+    public function testToSchemaReturnsEmptyArrayForAnInvalidDate(): void
+    {
+        $this->assertSame([], Event::toSchema(['event_date' => '', 'title' => 'x']));
+        $this->assertSame([], Event::toSchema(['event_date' => '20261332', 'title' => 'x']));
     }
 }
