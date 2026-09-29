@@ -48,7 +48,10 @@ describe('design values live in the token export', () => {
       // Growing means a design value was invented here instead of in the
       // design system. Shrinking means one moved where it belongs: lower the
       // ceiling in the same commit, so the next one cannot slip back in.
-      expect(found.length, `Bekannte Schuld:\n- ${debt.join('\n- ')}\n\nGefunden:\n${found.join('\n')}`).toBeLessThanOrEqual(max);
+      expect(
+        found.length,
+        `Bekannte Schuld:\n- ${debt.join('\n- ')}\n\nGefunden:\n${found.join('\n')}`
+      ).toBeLessThanOrEqual(max);
     });
   }
 });

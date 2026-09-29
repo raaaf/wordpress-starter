@@ -262,8 +262,9 @@ function extractShadow(token) {
   if (!token || token.$type !== 'shadow' || !Array.isArray(token.$value)) return null;
   if (token.$value.length === 0) return 'none';
   return token.$value
-    .map(({ inset, offsetX, offsetY, blur, spread, color }) =>
-      `${inset ? 'inset ' : ''}${offsetX} ${offsetY} ${blur} ${spread} ${color}`
+    .map(
+      ({ inset, offsetX, offsetY, blur, spread, color }) =>
+        `${inset ? 'inset ' : ''}${offsetX} ${offsetY} ${blur} ${spread} ${color}`
     )
     .join(', ');
 }
