@@ -318,13 +318,13 @@ class FlexibleContent
             // the unfiltered list for the rest of the request.
             $filtered = apply_filters(
                 ThemeContext::prefix() . '_flexible_content_layouts',
-                self::getLayouts()
+                self::getLayouts(),
             );
 
             self::$layoutCache = self::withTabs(
                 is_array($filtered)
                     ? array_values(array_filter($filtered, 'is_array'))
-                    : self::getLayouts()
+                    : self::getLayouts(),
             );
         }
 
@@ -461,6 +461,7 @@ class FlexibleContent
             self::statsLayout(),
             self::timelineLayout(),
             self::teamLayout(),
+            self::eventsLayout(),
             self::pricingTableLayout(),
 
             // Form-related layouts
@@ -949,6 +950,24 @@ class FlexibleContent
             'sub_fields' => FieldDefinitions::teamFields('flex_team'),
             'acfe_flexible_category' => self::getCategories()['interactive'],
             'acfe_flexible_thumbnail' => 'team.png',
+        ];
+    }
+
+    /**
+     * Events layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function eventsLayout(): array
+    {
+        return [
+            'key' => 'layout_events',
+            'name' => 'events',
+            'label' => __('Veranstaltungen', 'wp-starter'),
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::eventsFields('flex_events'),
+            'acfe_flexible_category' => self::getCategories()['interactive'],
+            'acfe_flexible_thumbnail' => 'events.png',
         ];
     }
 

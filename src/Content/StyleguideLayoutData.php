@@ -95,6 +95,7 @@ class StyleguideLayoutData
         $layouts[] = $this->getTestimonialsLayoutData();
         $layouts[] = $this->getQuoteLayoutData();
         $layouts[] = $this->getTeamLayoutData();
+        $layouts[] = $this->getEventsLayoutData();
         $layouts[] = $this->getStatsLayoutData();
         $layouts[] = $this->getPricingLayoutData();
         $layouts[] = $this->getTimelineLayoutData();
@@ -444,6 +445,17 @@ class StyleguideLayoutData
             ],
             'columns' => '3',
             'background_color' => 'primary',
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function getEventsLayoutData(): array
+    {
+        return $this->layout('events', [
+            'title' => 'Veranstaltungen',
+            'text' => '<p>Alle kommenden Termine im Überblick.</p>',
+            'link' => null,
+            'background_color' => 'secondary',
         ]);
     }
 
@@ -1170,7 +1182,7 @@ class StyleguideLayoutData
                         ['content' => number_format(120000 + $i * 5000, 0, ',', '.') . ' EUR'],
                     ],
                 ],
-                range(0, 15)
+                range(0, 15),
             ),
             'striped' => true,
             'bordered' => false,

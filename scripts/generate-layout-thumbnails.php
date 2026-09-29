@@ -63,6 +63,7 @@ const LAYOUTS = [
     'cards' => ['cols' => 3, 'cell' => [['card'], ['card'], ['card']], 'head' => true],
     'testimonials' => ['cols' => 2, 'cell' => [['quote', 'avatar'], ['quote', 'avatar']], 'head' => true],
     'team' => ['cols' => 3, 'cell' => [['portrait', 'head'], ['portrait', 'head'], ['portrait', 'head']], 'head' => true],
+    'events' => ['cols' => 1, 'cell' => [['eventfeature', 'eventrow', 'eventrow', 'eventrow']], 'head' => true],
     'stats' => ['cols' => 4, 'cell' => [['big', 'text'], ['big', 'text'], ['big', 'text'], ['big', 'text']], 'head' => true],
     'pricing_table' => ['cols' => 3, 'cell' => [['price'], ['price'], ['price']], 'head' => true],
     'timeline' => ['cols' => 1, 'cell' => [['timeline']], 'head' => true],
@@ -240,6 +241,26 @@ function draw(Canvas $c, string $kind, int $x, int $y, int $w, int $avail): int 
             $c->box($x + 12, $y + 78, (int) ( ( $w - 24 ) * 0.8 ), 5, $c->inkSoft, 2);
 
             return $y + $h + $gap;
+
+        case 'eventfeature':
+            $h = 80;
+            $c->box($x, $y, $w, $h, imagecolorallocate($c->img, 255, 255, 255), 6);
+            $c->outline($x, $y, $w, $h, $c->line);
+            $c->box($x + 8, $y + 8, (int) ( $w * 0.34 ), $h - 16, $c->inkSoft, 4);
+            $tx = $x + (int) ( $w * 0.34 ) + 22;
+            $c->box($tx, $y + 12, (int) ( $w * 0.3 ), 8, $c->ink, 3);
+            $c->box($tx, $y + 28, (int) ( $w * 0.5 ), 5, $c->inkSoft, 2);
+            $c->box($tx, $y + 40, (int) ( $w * 0.4 ), 5, $c->inkSoft, 2);
+            $c->box($tx, $y + $h - 26, 60, 16, $c->accent, 8);
+
+            return $y + $h + $gap;
+
+        case 'eventrow':
+            $c->box($x, $y, 28, 28, $c->inkSoft, 4);
+            $c->box($x + 40, $y + 6, (int) ( $w * 0.35 ), 7, $c->ink, 3);
+            $c->box($x + 40, $y + 19, (int) ( $w * 0.55 ), 4, $c->inkSoft, 2);
+
+            return $y + 28 + $gap;
 
         case 'quote':
             $h = min(96, $avail);

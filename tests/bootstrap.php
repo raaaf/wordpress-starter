@@ -373,6 +373,13 @@ if (!function_exists('did_action')) {
     }
 }
 
+if (!function_exists('get_post_thumbnail_id')) {
+    function get_post_thumbnail_id(int|object|null $post = null): int|false
+    {
+        return 0;
+    }
+}
+
 if (!function_exists('add_shortcode')) {
     function add_shortcode(string $tag, callable $callback): void
     {

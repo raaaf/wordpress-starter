@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\PostTypes\Event;
 use WordpressStarter\PostTypes\MemberDownload;
 use WordpressStarter\PostTypes\Team;
 use WordpressStarter\PostTypes\Testimonial;
@@ -23,6 +24,7 @@ class PostTypeServiceProvider extends ServiceProvider
      * @var array<class-string>
      */
     private array $postTypes = [
+        Event::class,
         MemberDownload::class,
         Team::class,
         Testimonial::class,

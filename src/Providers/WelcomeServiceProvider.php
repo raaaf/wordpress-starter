@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace WordpressStarter\Providers;
 
 use WordpressStarter\Content\StyleguideLayoutData;
+use WordpressStarter\PostTypes\Event;
+use WordpressStarter\PostTypes\Team;
+use WordpressStarter\PostTypes\Testimonial;
 use WordpressStarter\Services\StyleguidePage;
 use WordpressStarter\ThemeContext;
 
@@ -36,6 +39,10 @@ class WelcomeServiceProvider extends ServiceProvider
      * nichts, er blieb deshalb in jeder visuellen Abnahme ungeprueft. Der Marker
      * grenzt die vom Styleguide erzeugten Eintraege ab, damit das Regenerieren
      * genau sie wieder entfernt und keine echten Inhalte anfasst.
+     *
+     * Dazu gehoeren auch die Demo-Termine des Layouts "Events": Sie werden mit
+     * dem Styleguide angelegt und beim Regenerieren sowie beim endgueltigen
+     * Loeschen des Styleguides wieder entfernt.
      */
     public const STYLEGUIDE_DEMO_POST_META_KEY = '_wp_starter_styleguide_demo';
 
@@ -531,6 +538,8 @@ class WelcomeServiceProvider extends ServiceProvider
         if ($existingPageId > 0) {
             wp_delete_post($existingPageId, true);
         }
+        $this->deleteDemoCptEntries();
+        $this->deleteDemoMedia();
         // force: true, this handler already authorized on delete_pages (verifyAdminAction() above),
         // but forget()'s own gate requires edit_pages, so without force the option/marker would survive.
         StyleguidePage::forget(force: true);
@@ -560,8 +569,8 @@ class WelcomeServiceProvider extends ServiceProvider
                 '<div class="notice notice-warning"><p>%s</p></div>',
                 esc_html__(
                     'Mehrere Seiten kommen als Styleguide in Frage. Öffne die richtige Seite und wähle dort das Template "Styleguide" aus; automatisch wird hier nichts geändert.',
-                    'wp-starter'
-                )
+                    'wp-starter',
+                ),
             );
 
             return;
@@ -573,19 +582,19 @@ class WelcomeServiceProvider extends ServiceProvider
 
         $url = wp_nonce_url(
             add_query_arg(self::nonceMigrateStyleguide(), '1', admin_url()),
-            self::nonceMigrateStyleguide()
+            self::nonceMigrateStyleguide(),
         );
 
         printf(
             '<div class="notice notice-info"><p>%s</p><p><a href="%s" class="button button-primary">%s</a> <a href="%s">%s</a></p></div>',
             esc_html__(
                 'Der Styleguide zeigt die Design-System-Referenz noch als kopiertes HTML. Die neue Fassung rendert sie aus den echten Komponenten, bleibt damit automatisch aktuell und behaelt die Layout-Galerie.',
-                'wp-starter'
+                'wp-starter',
             ),
             esc_url($url),
             esc_html__('Styleguide umstellen', 'wp-starter'),
-            esc_url( (string) get_edit_post_link($pageId, 'url') ),
-            esc_html__('Seite vorher ansehen', 'wp-starter')
+            esc_url( (string) get_edit_post_link($pageId, 'url')),
+            esc_html__('Seite vorher ansehen', 'wp-starter'),
         );
     }
 
@@ -619,6 +628,8 @@ class WelcomeServiceProvider extends ServiceProvider
         }
 
         $this->importPlaceholderImages();
+        $this->importDemoVideo();
+        $this->createDemoCptEntries();
 
         update_post_meta($pageId, '_wp_page_template', StyleguidePage::TEMPLATE);
         StyleguidePage::adopt($pageId);
@@ -813,7 +824,7 @@ class WelcomeServiceProvider extends ServiceProvider
         foreach ($testimonials as $index => [$name, $role, $quote]) {
             $postId = wp_insert_post([
                 'post_title' => $name,
-                'post_type' => 'testimonial',
+                'post_type' => Testimonial::getPostType(),
                 'post_status' => 'publish',
                 'meta_input' => [self::STYLEGUIDE_DEMO_POST_META_KEY => 1],
             ]);
@@ -843,7 +854,7 @@ class WelcomeServiceProvider extends ServiceProvider
         foreach ($members as $index => [$name, $position, $bio, $email, $linkedin]) {
             $postId = wp_insert_post([
                 'post_title' => $name,
-                'post_type' => 'team_member',
+                'post_type' => Team::getPostType(),
                 'post_status' => 'publish',
                 'meta_input' => [self::STYLEGUIDE_DEMO_POST_META_KEY => 1],
             ]);
@@ -872,6 +883,44 @@ class WelcomeServiceProvider extends ServiceProvider
                 set_post_thumbnail($postId, (int) $imageId);
             }
         }
+
+        // Relative Zukunftsdaten, damit die Demo-Termine nicht mit der Zeit
+        // in die Vergangenheit rutschen und aus dem Events-Layout verschwinden.
+        // Sommerfest hat bewusst kein Bild, damit der Styleguide den Fallback ohne Bild zeigt.
+        $events = [
+            ['Jahresauftakt', 9, '09:00', 'onsite', 'Königstraße 1, 90762 Fürth', 'Rückblick und Ausblick für alle Teams.', ['https://example.org/anmeldung', 'Anmelden'], $this->imageIds['placeholder_1'] ?? null],
+            ['Kundenworkshop', 16, '14:00', 'online', '', 'Gemeinsamer Workshop zu neuen Anforderungen.', ['https://example.org/livestream', 'Zum Livestream'], $this->imageIds['placeholder_2'] ?? null],
+            ['Sommerfest', 45, '', 'onsite', 'Stadtpark Fürth', '', null, null],
+            ['Strategietag', 60, '10:00', 'hybrid', 'Konferenzraum Berlin', 'Planung für das kommende Quartal.', ['https://example.org/anmeldung', 'Anmelden'], $this->imageIds['placeholder_3'] ?? null],
+        ];
+
+        foreach ($events as [$name, $daysAhead, $time, $format, $location, $description, $link, $imageId]) {
+            $postId = wp_insert_post([
+                'post_title' => $name,
+                'post_type' => Event::getPostType(),
+                'post_status' => 'publish',
+                'meta_input' => [self::STYLEGUIDE_DEMO_POST_META_KEY => 1],
+            ]);
+
+            if (!$postId || is_wp_error($postId)) {
+                continue;
+            }
+
+            if ($imageId) {
+                set_post_thumbnail($postId, (int) $imageId);
+            }
+
+            if (function_exists('update_field')) {
+                update_field('event_date', gmdate('Ymd', strtotime("+{$daysAhead} days")), $postId);
+                update_field('event_time', $time, $postId);
+                update_field('event_format', $format, $postId);
+                update_field('event_location', $location, $postId);
+                update_field('event_description', $description, $postId);
+                if ($link) {
+                    update_field('event_link', ['url' => $link[0], 'title' => $link[1], 'target' => ''], $postId);
+                }
+            }
+        }
     }
 
     /**
@@ -880,7 +929,7 @@ class WelcomeServiceProvider extends ServiceProvider
     private function deleteDemoCptEntries(): void
     {
         $posts = get_posts([
-            'post_type' => ['testimonial', 'team_member'],
+            'post_type' => [Testimonial::getPostType(), Team::getPostType(), Event::getPostType()],
             'post_status' => 'any',
             'posts_per_page' => -1,
             'fields' => 'ids',

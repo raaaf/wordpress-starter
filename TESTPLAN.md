@@ -166,7 +166,7 @@ Kein Gutenberg, kein Block-Editor: Der Classic Editor bekommt sein Flexible-Cont
 | ---- | ----------------------------------- | -------------------------------------------------------------------------------------------------- | --- |
 | 6.1  | Layout hinzufügen                   | "Auswählen"-Button öffnet Modal mit 4-Spalten-Grid                                                 |     |
 | 6.2  | Kategorien im Modal                 | Header, Layout, Inhalte, Medien, Interaktiv, Formulare, Beiträge, Interner Bereich, Sonstiges      |     |
-| 6.3  | Layout-Thumbnails                   | Jedes der 36 Layouts zeigt ein Vorschaubild statt nur Text                                         |     |
+| 6.3  | Layout-Thumbnails                   | Jedes der 37 Layouts zeigt ein Vorschaubild statt nur Text                                         |     |
 | 6.4  | Layout auswählen (z. B. Hero)       | Layout wird eingefügt, Bearbeiten-Modal öffnet sich groß ("large")                                 |     |
 | 6.5  | Feld-Tabs im Modal                  | Layouts mit Tab-Split zeigen "Inhalt" und "Darstellung" als getrennte Tabs                         |     |
 | 6.6  | Layouts ohne Tab-Split              | hero, posts, map, contact-form, die drei `*-columns-images`-Layouts zeigen ihre eigene Gruppierung |     |
@@ -180,20 +180,21 @@ Kein Gutenberg, kein Block-Editor: Der Classic Editor bekommt sein Flexible-Cont
 
 ## Phase 7: Flexible-Content-Layouts im Frontend
 
-Stichprobe über die 36 Layouts aus `templates/flexible/`, je Layout mindestens ein Pflichtfeld leer lassen, um das Verhalten bei unvollständigen Daten zu prüfen.
+Stichprobe über die 37 Layouts aus `templates/flexible/`, je Layout mindestens ein Pflichtfeld leer lassen, um das Verhalten bei unvollständigen Daten zu prüfen.
 
-| #    | Layout                                 | Test                                                                   | Erwartet                                                                 | ✓   |
-| ---- | -------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------ | --- |
-| 7.1  | hero                                   | Variante Zentriert/Split/Hintergrund                                   | Je Variante korrektes Layout, Overlay-Regler wirkt nur bei Hintergrund   |     |
-| 7.2  | hero                                   | Zwei Hero-Layouts auf einer Seite                                      | Erstes Hero rendert `<h1>`, jedes weitere `<h2>`                         |     |
-| 7.3  | accordion                              | Mehrere Items, FAQ-Schema                                              | Auf-/Zuklappen funktioniert, strukturierte Daten im Quelltext vorhanden  |     |
-| 7.4  | tabs                                   | Mehrere Tabs mit Inhalt                                                | Tab-Wechsel funktioniert, aktiver Tab visuell markiert                   |     |
-| 7.5  | gallery                                | Mehrere Bilder                                                         | Lightbox öffnet über medium-zoom, kein Alpine-Fehler in der Konsole      |     |
-| 7.6  | posts                                  | Kategorie + Anzahl gesetzt                                             | Passende Beiträge werden dynamisch ausgegeben                            |     |
-| 7.7  | contact-form                           | Gültige CF7-Formular-ID                                                | Contact-Form-7-Formular rendert und sendet ab                            |     |
-| 7.8  | contact-form                           | Keine/ungültige CF7-Formular-ID                                        | Layout zeigt keinen Fehler, sondern verzichtet sichtbar auf das Formular |     |
-| 7.9  | beliebiges Layout mit Pflichtfeld leer | Pflichtfeld (z. B. Titel) nicht ausgefüllt                             | Layout blendet den leeren Bereich aus, kein leerer Tag im Markup         |     |
-| 7.10 | Hintergrundfarbe                       | primary/secondary/tertiary/brand/brand-subtle/inverse je Layout testen | Farbe wird korrekt übernommen, Kontrast passt in Hell und Dunkel         |     |
+| #    | Layout                                 | Test                                                                           | Erwartet                                                                                                               | ✓   |
+| ---- | -------------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | --- |
+| 7.1  | hero                                   | Variante Zentriert/Split/Hintergrund                                           | Je Variante korrektes Layout, Overlay-Regler wirkt nur bei Hintergrund                                                 |     |
+| 7.2  | hero                                   | Zwei Hero-Layouts auf einer Seite                                              | Erstes Hero rendert `<h1>`, jedes weitere `<h2>`                                                                       |     |
+| 7.3  | accordion                              | Mehrere Items, FAQ-Schema                                                      | Auf-/Zuklappen funktioniert, strukturierte Daten im Quelltext vorhanden                                                |     |
+| 7.4  | tabs                                   | Mehrere Tabs mit Inhalt                                                        | Tab-Wechsel funktioniert, aktiver Tab visuell markiert                                                                 |     |
+| 7.5  | gallery                                | Mehrere Bilder                                                                 | Lightbox öffnet über medium-zoom, kein Alpine-Fehler in der Konsole                                                    |     |
+| 7.6  | posts                                  | Kategorie + Anzahl gesetzt                                                     | Passende Beiträge werden dynamisch ausgegeben                                                                          |     |
+| 7.7  | contact-form                           | Gültige CF7-Formular-ID                                                        | Contact-Form-7-Formular rendert und sendet ab                                                                          |     |
+| 7.8  | contact-form                           | Keine/ungültige CF7-Formular-ID                                                | Layout zeigt keinen Fehler, sondern verzichtet sichtbar auf das Formular                                               |     |
+| 7.9  | beliebiges Layout mit Pflichtfeld leer | Pflichtfeld (z. B. Titel) nicht ausgefüllt                                     | Layout blendet den leeren Bereich aus, kein leerer Tag im Markup                                                       |     |
+| 7.10 | Hintergrundfarbe                       | primary/secondary/tertiary/brand/brand-subtle/inverse je Layout testen         | Farbe wird korrekt übernommen, Kontrast passt in Hell und Dunkel                                                       |     |
+| 7.11 | events                                 | 0, 1 und mehr als 9 kommende Termine, ein vergangener, ein passwortgeschützter | Leerhinweis; nächster Termin groß, Rest als Liste, ab 10 "+ weitere Termine"; vergangene und passwortgeschützte fehlen |
 
 ---
 
@@ -219,7 +220,7 @@ Stichprobe über die 36 Layouts aus `templates/flexible/`, je Layout mindestens 
 | #   | Test                                               | Erwartet                                                                                          | ✓   |
 | --- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --- |
 | 9.1 | Ansicht "Design-System" (`?ansicht=design-system`) | Zeigt Farb-Tokens, Typografie und Komponenten aus `styleguide/tokens` und `styleguide/components` |     |
-| 9.2 | Ansicht "Module" (Standard)                        | Zeigt Layout-Galerie, gruppiert nach den 36 Flexible-Content-Layouts                              |     |
+| 9.2 | Ansicht "Module" (Standard)                        | Zeigt Layout-Galerie, gruppiert nach den 37 Flexible-Content-Layouts                              |     |
 | 9.3 | Varianten-Schalter je Layout                       | Wechselt zwischen mehreren Instanzen desselben Layouts (z. B. Hero-Varianten)                     |     |
 | 9.4 | Navigation innerhalb der Seite                     | Sprungmarken/Nav führen zum passenden Abschnitt                                                   |     |
 | 9.5 | Hell/Dunkel-Umschalter auf der Seite               | Theme-Switcher im Seiten-Header schaltet sofort um, alle Module bleiben lesbar                    |     |

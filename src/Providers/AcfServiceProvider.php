@@ -475,6 +475,11 @@ class AcfServiceProvider extends ServiceProvider
             return $valid;
         }, 10, 2);
 
+        // date_picker/time_picker: ACF's format_value throws on garbage (e.g.
+        // "300000000000"), which would 500 every page reading the field.
+        add_filter('acf/validate_value/type=date_picker', [self::class, 'validateDatePicker'], 10, 2);
+        add_filter('acf/validate_value/type=time_picker', [self::class, 'validateTimePicker'], 10, 2);
+
         // Sanitize text fields on save
         add_filter('acf/update_value/type=text', function ($value) {
             return sanitize_text_field($value);
@@ -553,6 +558,54 @@ class AcfServiceProvider extends ServiceProvider
             }
         };
         add_action('acf/save_post', $callback, 20);
+    }
+
+    /**
+     * Accept only empty or a real calendar date stored as Ymd.
+     *
+     * @param true|string $valid
+     */
+    public static function validateDatePicker(mixed $valid, mixed $value): mixed
+    {
+        if ($valid !== true || $value === '' || $value === null) {
+            return $valid;
+        }
+
+        if (!is_string($value) || !self::matchesFormat('!Ymd', $value)) {
+            return __('Bitte ein gültiges Datum wählen.', 'wp-starter');
+        }
+
+        return $valid;
+    }
+
+    /**
+     * Accept only empty or a real time of day as H:i:s or H:i.
+     *
+     * @param true|string $valid
+     */
+    public static function validateTimePicker(mixed $valid, mixed $value): mixed
+    {
+        if ($valid !== true || $value === '' || $value === null) {
+            return $valid;
+        }
+
+        $isTime = is_string($value)
+            && ( self::matchesFormat('!H:i:s', $value) || self::matchesFormat('!H:i', $value) );
+        if (!$isTime) {
+            return __('Bitte eine gültige Uhrzeit wählen.', 'wp-starter');
+        }
+
+        return $valid;
+    }
+
+    /**
+     * Strict round-trip check: the value must parse and re-format identically.
+     */
+    private static function matchesFormat(string $format, string $value): bool
+    {
+        $parsed = \DateTimeImmutable::createFromFormat($format, $value);
+
+        return $parsed !== false && $parsed->format(ltrim($format, '!')) === $value;
     }
 
     /**

@@ -73,7 +73,7 @@ npm run dev
 │   │   ├── AcfExtended.php      # ACF Extended configuration
 │   │   ├── FieldDefinitions.php # Central field definitions
 │   │   ├── Fields.php           # Field helpers
-│   │   ├── FlexibleContent.php  # 36 Flexible Content layouts
+│   │   ├── FlexibleContent.php  # 37 Flexible Content layouts
 │   │   └── Options.php          # Theme options pages
 │   ├── MemberArea/              # Member area (optional)
 │   ├── PostTypes/               # Custom post types
@@ -88,7 +88,7 @@ npm run dev
 │   └── Vite.php
 └── templates/
     ├── components/        # Blade components (<x-button>, <x-section> etc.)
-    ├── flexible/          # Flexible Content templates (36 layouts)
+    ├── flexible/          # Flexible Content templates (37 layouts)
     ├── layouts/           # Base layouts
     └── partials/          # Reusable partials
 ```
@@ -172,7 +172,7 @@ Both switches default to off and work independently. Disabling landing mode rest
 
 ## Flexible Content layouts
 
-36 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
+37 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
 
 Grouped by function; the editor modal uses the ACF categories, see CLAUDE.md.
 
@@ -180,7 +180,7 @@ Grouped by function; the editor modal uses the ACF categories, see CLAUDE.md.
 
 **Content:** hero, accordion, cta, button, image, video, divider, alert, quote, embed
 
-**Interactive:** testimonials, cards, gallery, logo-slider, tabs, stats, timeline, team, before-after, pricing-table
+**Interactive:** testimonials, cards, gallery, logo-slider, tabs, stats, timeline, team, before-after, pricing-table, events
 
 **Forms:** contact-form, map, newsletter
 

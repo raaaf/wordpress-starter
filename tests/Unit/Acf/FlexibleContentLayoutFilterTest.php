@@ -41,6 +41,7 @@ final class FlexibleContentLayoutFilterTest extends TestCase
         'stats',
         'timeline',
         'team',
+        'events',
         'pricing_table',
         'contact_form',
         'newsletter',
@@ -137,7 +138,7 @@ final class FlexibleContentLayoutFilterTest extends TestCase
         add_filter($this->filterName(), static function (array $layouts): array {
             return array_filter(
                 $layouts,
-                static fn (array $layout): bool => $layout['name'] !== 'map'
+                static fn (array $layout): bool => $layout['name'] !== 'map',
             );
         });
 
@@ -152,7 +153,7 @@ final class FlexibleContentLayoutFilterTest extends TestCase
         add_filter($this->filterName(), static function (array $layouts): array {
             return array_filter(
                 $layouts,
-                static fn (array $layout): bool => $layout['name'] !== 'map'
+                static fn (array $layout): bool => $layout['name'] !== 'map',
             );
         });
 

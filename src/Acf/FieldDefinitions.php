@@ -292,6 +292,72 @@ class FieldDefinitions
     }
 
     /**
+     * Get date picker field definition
+     *
+     * @param string $key Unique field key
+     * @param string $label Field label
+     * @param string $name Field name
+     * @param bool $required Whether field is required
+     * @param string $instructions Field instructions
+     *
+     * @return array<string, mixed>
+     */
+    public static function dateField(
+        string $key,
+        string $label,
+        string $name,
+        bool $required = false,
+        string $instructions = '',
+    ): array {
+        return [
+            'key' => $key,
+            'label' => $label,
+            'name' => $name,
+            'type' => 'date_picker',
+            'instructions' => $instructions,
+            'required' => $required ? 1 : 0,
+            'display_format' => 'd.m.Y',
+            // 'return_format' => 'Ymd' is enough. ACF stores date_picker values
+            // internally as 'Ymd' unconditionally; a 'save_format' key (any
+            // value) switches on a pre-5.0 compatibility path that formats the
+            // saved value via a naive JS/PHP-token conversion instead of ACF's
+            // own reliable date handling, which corrupts the stored value
+            // (observed: '20261002' saved as 'Y102' through the real editor UI).
+            'return_format' => 'Ymd',
+        ];
+    }
+
+    /**
+     * Get time picker field definition
+     *
+     * @param string $key Unique field key
+     * @param string $label Field label
+     * @param string $name Field name
+     * @param bool $required Whether field is required
+     * @param string $instructions Field instructions
+     *
+     * @return array<string, mixed>
+     */
+    public static function timeField(
+        string $key,
+        string $label,
+        string $name,
+        bool $required = false,
+        string $instructions = '',
+    ): array {
+        return [
+            'key' => $key,
+            'label' => $label,
+            'name' => $name,
+            'type' => 'time_picker',
+            'instructions' => $instructions,
+            'required' => $required ? 1 : 0,
+            'display_format' => 'H:i',
+            'return_format' => 'H:i',
+        ];
+    }
+
+    /**
      * Get image field definition
      *
      * @param string $key Unique field key
@@ -3128,6 +3194,44 @@ class FieldDefinitions
     }
 
     /**
+     * Get Events layout fields
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function eventsFields(string $prefix): array
+    {
+        return [
+            self::textField(
+                "field_{$prefix}_title",
+                __('Überschrift', 'wp-starter'),
+                'title',
+                false,
+                __('Optionale Überschrift über den Veranstaltungen.', 'wp-starter'),
+                __('z.B. Veranstaltungen', 'wp-starter'),
+            ),
+            ...self::sectionHeaderExtras($prefix),
+            self::wysiwygField(
+                "field_{$prefix}_text",
+                __('Textblock', 'wp-starter'),
+                'text',
+                false,
+                null,
+                __('Optionaler Text über den Veranstaltungen.', 'wp-starter'),
+            ),
+            self::linkField(
+                "field_{$prefix}_link",
+                __('Link', 'wp-starter'),
+                'link',
+                false,
+                __('Optionaler Link, z.B. zu einer Anmeldeseite.', 'wp-starter'),
+            ),
+            ...self::displaySettingsFields($prefix),
+        ];
+    }
+
+    /**
      * Get Stats/Counter layout fields
      *
      * @param string $prefix Key prefix
@@ -3773,7 +3877,6 @@ class FieldDefinitions
             ...self::displaySettingsFields($prefix),
         ];
     }
-
 
     /**
      * Get embed fields
