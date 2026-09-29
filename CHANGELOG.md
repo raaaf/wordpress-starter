@@ -1,3 +1,13 @@
+# [2.37.0](https://github.com/raaaf/wordpress-starter/compare/v2.36.0...v2.37.0) (2026-09-29)
+
+### Bug Fixes
+
+- audit findings in styleguide data, field helpers and CPT labels ([86d4c22](https://github.com/raaaf/wordpress-starter/commit/86d4c22c4884e63035d3c8886f2e6496ebd1349a))
+
+### Features
+
+- events overview link and schema.org Event data ([ff95f7f](https://github.com/raaaf/wordpress-starter/commit/ff95f7f9cddb9927a4e9f1a26d13bee2e7f65da0))
+
 # [2.36.0](https://github.com/raaaf/wordpress-starter/compare/v2.35.1...v2.36.0) (2026-09-29)
 
 ### Bug Fixes
