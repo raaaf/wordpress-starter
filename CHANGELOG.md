@@ -1,3 +1,9 @@
+## [2.37.2](https://github.com/raaaf/wordpress-starter/compare/v2.37.1...v2.37.2) (2026-09-30)
+
+### Bug Fixes
+
+- external videos behind consent, and the remaining audit findings ([b9622df](https://github.com/raaaf/wordpress-starter/commit/b9622dfae9bdbe08edbaa55ad4d421d8bd319a7d))
+
 ## [2.37.1](https://github.com/raaaf/wordpress-starter/compare/v2.37.0...v2.37.1) (2026-09-29)
 
 ### Bug Fixes
