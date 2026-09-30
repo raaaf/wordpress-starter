@@ -8,6 +8,7 @@ use WordpressStarter\Content\StyleguideLayoutData;
 use WordpressStarter\PostTypes\Event;
 use WordpressStarter\PostTypes\Team;
 use WordpressStarter\PostTypes\Testimonial;
+use WordpressStarter\Services\ContentSetupService;
 use WordpressStarter\Services\StyleguidePage;
 use WordpressStarter\ThemeContext;
 
@@ -23,13 +24,9 @@ class WelcomeServiceProvider extends ServiceProvider
     use AdminActionGuard;
 
     /**
-     * Post meta flag marking an attachment as one this importer created.
-     *
-     * Lets ContentSetupService::rerun() safely delete only the styleguide
-     * placeholder attachments it is responsible for, never an unrelated
-     * attachment that happens to share a cached ID.
+     * @deprecated Use ContentSetupService::STYLEGUIDE_IMAGE_META_KEY.
      */
-    public const STYLEGUIDE_IMAGE_META_KEY = '_wp_starter_styleguide_image';
+    public const STYLEGUIDE_IMAGE_META_KEY = ContentSetupService::STYLEGUIDE_IMAGE_META_KEY;
 
     /**
      * Marker fuer Demo-Eintraege in den Custom Post Types.
@@ -46,6 +43,8 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     public const STYLEGUIDE_DEMO_POST_META_KEY = '_wp_starter_styleguide_demo';
 
+    private const STYLEGUIDE_ERROR_FLAG = 'styleguide-error';
+
     private static function optActivated(): string
     {
         return ThemeContext::optionKey('theme_activated');
@@ -57,13 +56,12 @@ class WelcomeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Resolve the cached styleguide page ID, tolerating a stale value.
+     * Resolve the styleguide page ID for destructive or overwriting handlers.
      *
-     * The cached option can point at a page that was deleted outright, or
-     * at a post ID a user has since re-purposed. Both must be treated as
-     * "no styleguide page" rather than trusted blindly.
+     * Delegates to StyleguidePage::find() and maps AMBIGUOUS to 0, so no caller
+     * deletes or overwrites a page when several pages could be the styleguide.
      *
-     * @return int Page ID if it still resolves to a page, 0 otherwise.
+     * @return int Page ID if exactly one page resolves, 0 otherwise.
      */
     private static function resolveStyleguidePageId(): int
     {
@@ -135,6 +133,7 @@ class WelcomeServiceProvider extends ServiceProvider
         add_action('admin_notices', [$this, 'displayWelcomeNotice']);
         add_action('admin_notices', [$this, 'displayImportOptionsNotice']);
         add_action('admin_notices', [$this, 'displayStyleguideMigrationNotice']);
+        add_action('admin_notices', [$this, 'displayStyleguideErrorNotice']);
         add_action('admin_init', [$this, 'handleNoticeActions']);
     }
 
@@ -414,8 +413,18 @@ class WelcomeServiceProvider extends ServiceProvider
             return;
         }
 
-        $pageId = $this->createStyleguidePage();
+        $this->finishStyleguideCreation($this->createStyleguidePage(), admin_url());
+    }
 
+    /**
+     * Redirect after a create/regenerate attempt.
+     *
+     * On success: dismiss the welcome notice and open the page editor. On failure
+     * (page not created, or no edit link): go to the fallback with an error flag,
+     * so the failure is not mistaken for success.
+     */
+    private function finishStyleguideCreation(int $pageId, string $fallbackUrl): void
+    {
         if ($pageId) {
             update_option(self::optDismissed(), true);
 
@@ -426,8 +435,27 @@ class WelcomeServiceProvider extends ServiceProvider
             }
         }
 
-        wp_safe_redirect(admin_url());
+        wp_safe_redirect($pageId ? $fallbackUrl : add_query_arg(self::STYLEGUIDE_ERROR_FLAG, '1', $fallbackUrl));
         exit;
+    }
+
+    /**
+     * Tell the admin that creating the styleguide page failed.
+     */
+    public function displayStyleguideErrorNotice(): void
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flag, only selects a static message
+        if (!isset($_GET[self::STYLEGUIDE_ERROR_FLAG]) || !current_user_can('publish_pages')) {
+            return;
+        }
+
+        printf(
+            '<div class="notice notice-error"><p>%s</p></div>',
+            esc_html__(
+                'Die Styleguide-Seite konnte nicht angelegt werden. Versuche es unter Theme-Einstellungen – Werkzeuge erneut.',
+                'wp-starter',
+            ),
+        );
     }
 
     /**
@@ -475,20 +503,10 @@ class WelcomeServiceProvider extends ServiceProvider
 
         $this->deleteDemoMedia();
 
-        $pageId = $this->createStyleguidePage();
-
-        if ($pageId) {
-            update_option(self::optDismissed(), true);
-
-            $editUrl = get_edit_post_link($pageId, 'url');
-            if ($editUrl) {
-                wp_safe_redirect($editUrl);
-                exit;
-            }
-        }
-
-        wp_safe_redirect(admin_url('admin.php?page=theme-options-tools'));
-        exit;
+        $this->finishStyleguideCreation(
+            $this->createStyleguidePage(),
+            admin_url('admin.php?page=theme-options-tools'),
+        );
     }
 
     /**
@@ -624,18 +642,10 @@ class WelcomeServiceProvider extends ServiceProvider
         $pageId = StyleguidePage::find();
 
         if ($pageId <= 0) {
-            wp_die(esc_html__('Es wurde keine eindeutige Styleguide-Seite gefunden.', 'wp-starter'));
+            wp_die(esc_html__('Das Theme findet keine eindeutige Styleguide-Seite. Öffne die richtige Seite, wähle dort das Template „Styleguide“ aus und versuche es dann erneut.', 'wp-starter'));
         }
 
-        $this->importPlaceholderImages();
-        $this->importDemoVideo();
-        $this->createDemoCptEntries();
-
-        update_post_meta($pageId, '_wp_page_template', StyleguidePage::TEMPLATE);
-        StyleguidePage::adopt($pageId);
-
-        $factory = new StyleguideLayoutData($this->imageIds);
-        update_field('page_sections', $factory->build(), $pageId);
+        $this->seedStyleguidePage($pageId);
 
         $viewUrl = get_permalink($pageId);
 
@@ -652,10 +662,6 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function createStyleguidePage(): int
     {
-        $this->importPlaceholderImages();
-        $this->importDemoVideo();
-        $this->createDemoCptEntries();
-
         $pageId = wp_insert_post([
             'post_title' => __('Styleguide', 'wp-starter'),
             'post_content' => '',
@@ -668,17 +674,29 @@ class WelcomeServiceProvider extends ServiceProvider
             return 0;
         }
 
+        $this->seedStyleguidePage($pageId);
+
+        return $pageId;
+    }
+
+    /**
+     * Import the demo assets and fill a page with the styleguide layouts.
+     *
+     * Shared by create and migrate; a new seeding step belongs here.
+     */
+    private function seedStyleguidePage(int $pageId): void
+    {
+        $this->importPlaceholderImages();
+        $this->importDemoVideo();
+        $this->createDemoCptEntries();
+
         update_post_meta($pageId, '_wp_page_template', StyleguidePage::TEMPLATE);
         StyleguidePage::adopt($pageId);
 
-        $factory = new StyleguideLayoutData($this->imageIds);
-        $layouts = $factory->build();
-
         if (function_exists('update_field')) {
-            update_field('page_sections', $layouts, $pageId);
+            $factory = new StyleguideLayoutData($this->imageIds);
+            update_field('page_sections', $factory->build(), $pageId);
         }
-
-        return $pageId;
     }
 
     /**
@@ -692,13 +710,13 @@ class WelcomeServiceProvider extends ServiceProvider
         // werden auch auf bereits eingerichteten Seiten nachgeladen.
         $wanted = [];
         for ($i = 1; $i <= 6; $i++) {
-            $wanted["placeholder_{$i}"] = ["placeholder-{$i}.jpg", "Styleguide Placeholder {$i}"];
+            $wanted[StyleguideLayoutData::IMAGE_PLACEHOLDER_PREFIX . $i] = ["placeholder-{$i}.jpg", "Styleguide Placeholder {$i}"];
         }
         // Ein echtes Hochformat, damit die Teamportraits zeigen, was sie auf
         // Kundenseiten zeigen: 4:5 statt eines quer beschnittenen Querformats.
-        $wanted['portrait'] = ['placeholder-portrait.jpg', __('Styleguide Portrait', 'wp-starter')];
+        $wanted[StyleguideLayoutData::IMAGE_PORTRAIT] = ['placeholder-portrait.jpg', __('Styleguide Portrait', 'wp-starter')];
         for ($i = 1; $i <= 6; $i++) {
-            $wanted["logo_{$i}"] = ["logo-placeholder-{$i}.svg", "Styleguide Logo {$i}"];
+            $wanted[StyleguideLayoutData::IMAGE_LOGO_PREFIX . $i] = ["logo-placeholder-{$i}.svg", "Styleguide Logo {$i}"];
         }
 
         // Vorhandene, noch existierende Ids behalten; nur Fehlendes importieren.
@@ -770,7 +788,7 @@ class WelcomeServiceProvider extends ServiceProvider
             'post_content' => '',
             'post_status' => 'inherit',
             'meta_input' => [
-                self::STYLEGUIDE_IMAGE_META_KEY => 1,
+                ContentSetupService::STYLEGUIDE_IMAGE_META_KEY => 1,
                 // Ohne Alt-Text meldet Text::imageAlt bei jedem Aufruf eine
                 // Luecke, und zwar zu Recht: 44 Bilder der Styleguide-Seite
                 // waren fuer Screenreader stumm. Der Text benennt, was das Bild
@@ -818,7 +836,7 @@ class WelcomeServiceProvider extends ServiceProvider
                 Testimonial::getPostType(),
                 $name,
                 ['author_name' => $name, 'author_position' => $role, 'content' => $quote],
-                $this->imageIds['placeholder_' . ( ( $index % 6 ) + 1 )] ?? null
+                $this->imageIds[StyleguideLayoutData::IMAGE_PLACEHOLDER_PREFIX . ( ( $index % 6 ) + 1 )] ?? null
             );
         }
 
@@ -846,7 +864,7 @@ class WelcomeServiceProvider extends ServiceProvider
                     'phone' => '',
                     'xing' => '',
                 ],
-                $this->imageIds['portrait'] ?? ( $this->imageIds['placeholder_' . ( ( $index % 6 ) + 1 )] ?? null )
+                $this->imageIds[StyleguideLayoutData::IMAGE_PORTRAIT] ?? ( $this->imageIds[StyleguideLayoutData::IMAGE_PLACEHOLDER_PREFIX . ( ( $index % 6 ) + 1 )] ?? null )
             );
         }
 
@@ -854,10 +872,10 @@ class WelcomeServiceProvider extends ServiceProvider
         // in die Vergangenheit rutschen und aus dem Events-Layout verschwinden.
         // Sommerfest hat bewusst kein Bild, damit der Styleguide den Fallback ohne Bild zeigt.
         $events = [
-            ['Jahresauftakt', 9, '09:00', 'onsite', 'Königstraße 1, 90762 Fürth', 'Rückblick und Ausblick für alle Teams.', ['https://example.org/anmeldung', 'Anmelden'], $this->imageIds['placeholder_1'] ?? null],
-            ['Kundenworkshop', 16, '14:00', 'online', '', 'Gemeinsamer Workshop zu neuen Anforderungen.', ['https://example.org/livestream', 'Zum Livestream'], $this->imageIds['placeholder_2'] ?? null],
+            ['Jahresauftakt', 9, '09:00', 'onsite', 'Königstraße 1, 90762 Fürth', 'Rückblick und Ausblick für alle Teams.', ['https://example.org/anmeldung', 'Anmelden'], $this->imageIds[StyleguideLayoutData::IMAGE_PLACEHOLDER_PREFIX . 1] ?? null],
+            ['Kundenworkshop', 16, '14:00', 'online', '', 'Gemeinsamer Workshop zu neuen Anforderungen.', ['https://example.org/livestream', 'Zum Livestream'], $this->imageIds[StyleguideLayoutData::IMAGE_PLACEHOLDER_PREFIX . 2] ?? null],
             ['Sommerfest', 45, '', 'onsite', 'Stadtpark Fürth', '', null, null],
-            ['Strategietag', 60, '10:00', 'hybrid', 'Konferenzraum Berlin', 'Planung für das kommende Quartal.', ['https://example.org/anmeldung', 'Anmelden'], $this->imageIds['placeholder_3'] ?? null],
+            ['Strategietag', 60, '10:00', 'hybrid', 'Konferenzraum Berlin', 'Planung für das kommende Quartal.', ['https://example.org/anmeldung', 'Anmelden'], $this->imageIds[StyleguideLayoutData::IMAGE_PLACEHOLDER_PREFIX . 3] ?? null],
         ];
 
         foreach ($events as [$name, $daysAhead, $time, $format, $location, $description, $link, $imageId]) {
@@ -936,7 +954,7 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function importDemoVideo(): void
     {
-        $existing = $this->imageIds['video_demo'] ?? null;
+        $existing = $this->imageIds[StyleguideLayoutData::IMAGE_VIDEO_DEMO] ?? null;
         if ($existing && wp_get_attachment_url( (int) $existing)) {
             return;
         }
@@ -955,7 +973,7 @@ class WelcomeServiceProvider extends ServiceProvider
             return;
         }
 
-        $this->imageIds['video_demo'] = $attachmentId;
+        $this->imageIds[StyleguideLayoutData::IMAGE_VIDEO_DEMO] = $attachmentId;
         update_option(self::optImages(), $this->imageIds);
     }
 
@@ -975,7 +993,7 @@ class WelcomeServiceProvider extends ServiceProvider
             'posts_per_page' => -1,
             'fields' => 'ids',
             // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-            'meta_key' => self::STYLEGUIDE_IMAGE_META_KEY,
+            'meta_key' => ContentSetupService::STYLEGUIDE_IMAGE_META_KEY,
         ]);
 
         foreach ($attachments as $id) {

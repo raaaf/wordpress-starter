@@ -199,6 +199,11 @@ if (!current_user_can('manage_options')) {
 | SVG upload     | `manage_options`    |
 | Content edit   | `edit_posts`        |
 
+Exception: the `member_download` post type stores SFTP credentials, so it sets
+`AbstractPostType::$requiredCapability = 'manage_options'`. Every capability of that
+post type (edit, delete, publish, read) then maps to `manage_options` instead of
+`edit_posts`. Set the same property on any new post type that stores sensitive data.
+
 ## REST API Security
 
 ### Endpoint Protection

@@ -45,52 +45,52 @@ class MemberDownload extends AbstractPostType
     /**
      * WordPress admin color palette values, reused across sync status indicators
      * in renderSyncColumn(), renderSyncNoticeMetaBox() and the inline JS in enqueueSyncScript().
+     * SYNCED and PENDING are darker admin shades that reach 4.5:1 as text on white.
      */
-    private const COLOR_SYNCED = '#00a32a';
+    private const COLOR_SYNCED = '#007017';
 
-    private const COLOR_PENDING = '#dba617';
+    private const COLOR_PENDING = '#996800';
 
     private const COLOR_ERROR = '#d63638';
 
     private const COLOR_INFO = '#2271b1';
 
+    public static function register(): void
+    {
+        parent::register();
+        static::registerAdminColumns();
+    }
+
     public static function registerAdminHooks(): void
     {
-        add_filter('manage_member_download_posts_columns', [static::class, 'addSyncColumn']);
-        add_action('manage_member_download_posts_custom_column', [static::class, 'renderSyncColumn'], 10, 2);
-        add_action('add_meta_boxes_member_download', [static::class, 'addSyncNoticeMetaBox']);
+        add_action('add_meta_boxes_' . static::$postType, [static::class, 'addSyncNoticeMetaBox']);
         add_action('admin_footer-post.php', [static::class, 'enqueueSyncScript']);
         add_action('admin_footer-post-new.php', [static::class, 'enqueueSyncScript']);
     }
 
     /**
-     * @param array<string, string> $columns
-     *
-     * @return array<string, string>
+     * @return array<string, array<string, mixed>>
      */
-    public static function addSyncColumn(array $columns): array
+    protected static function adminColumns(): array
     {
-        $columns['sftp_sync'] = __('Sync', 'wp-starter');
-
-        return $columns;
+        return [
+            'sftp_sync' => [
+                'label' => __('Sync', 'wp-starter'),
+                'before' => 'date',
+                'render' => [static::class, 'renderSyncColumn'],
+            ],
+        ];
     }
 
-    public static function renderSyncColumn(string $column, int $postId): void
+    public static function renderSyncColumn(int $postId): void
     {
-        if ($column !== 'sftp_sync') {
-            return;
-        }
-
-        $sourceType = get_post_meta($postId, 'download_source_type', true);
-        if ($sourceType !== 'sftp') {
-            echo '—';
+        if (get_post_meta($postId, 'download_source_type', true) !== 'sftp') {
+            echo '–';
 
             return;
         }
 
         $sftpSource = get_post_meta($postId, 'download_sftp_source', true);
-        $isSynced = get_post_meta($postId, '_sftp_synced', true) === '1';
-
         if (!empty($sftpSource)) {
             // Child entry
             echo '<span style="color:' . esc_attr(self::COLOR_INFO) . '">&#8618; ' . esc_html($sftpSource) . '</span>';
@@ -99,24 +99,43 @@ class MemberDownload extends AbstractPostType
         }
 
         // Parent entry
-        if ($isSynced) {
-            echo '<span style="color:' . esc_attr(self::COLOR_SYNCED) . '">&#10003; ' . esc_html__('Synchronisiert', 'wp-starter') . '</span>';
-        } else {
-            echo '<span style="color:' . esc_attr(self::COLOR_PENDING) . '">&#9733; ' . esc_html__('Ausstehend', 'wp-starter') . '</span>';
-        }
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- syncStatusLabel() returns escaped markup
+        echo '<span style="color:' . esc_attr(self::syncStatusColor($postId)) . '">' . self::syncStatusLabel($postId) . '</span>';
+    }
+
+    /**
+     * True for an SFTP entry that owns a folder (not one of its imported child entries).
+     */
+    private static function isSftpParent(int $postId): bool
+    {
+        return get_post_meta($postId, 'download_source_type', true) === 'sftp'
+            && empty(get_post_meta($postId, 'download_sftp_source', true));
+    }
+
+    private static function isSynced(int $postId): bool
+    {
+        return get_post_meta($postId, '_sftp_synced', true) === '1';
+    }
+
+    private static function syncStatusColor(int $postId): string
+    {
+        return self::isSynced($postId) ? self::COLOR_SYNCED : self::COLOR_PENDING;
+    }
+
+    /**
+     * Escaped status label with icon, so the state never relies on colour alone.
+     */
+    private static function syncStatusLabel(int $postId): string
+    {
+        return self::isSynced($postId)
+            ? '&#10003; ' . esc_html__('Synchronisiert', 'wp-starter')
+            : '&#9733; ' . esc_html__('Ausstehend', 'wp-starter');
     }
 
     public static function addSyncNoticeMetaBox(): void
     {
         global $post;
-        if (!$post instanceof \WP_Post || !current_user_can('manage_options')) {
-            return;
-        }
-
-        $sftpSource = get_post_meta($post->ID, 'download_sftp_source', true);
-        $sourceType = get_post_meta($post->ID, 'download_source_type', true);
-
-        if ($sourceType !== 'sftp' || !empty($sftpSource)) {
+        if (!$post instanceof \WP_Post || !current_user_can('manage_options') || !self::isSftpParent($post->ID)) {
             return;
         }
 
@@ -124,7 +143,7 @@ class MemberDownload extends AbstractPostType
             'member_download_sync_notice',
             __('SFTP-Sync-Konfiguration', 'wp-starter'),
             [static::class, 'renderSyncNoticeMetaBox'],
-            'member_download',
+            static::$postType,
             'side',
             'high',
         );
@@ -132,17 +151,15 @@ class MemberDownload extends AbstractPostType
 
     public static function renderSyncNoticeMetaBox(\WP_Post $post): void
     {
-        $isSynced = get_post_meta($post->ID, '_sftp_synced', true) === '1';
-        $host = get_post_meta($post->ID, 'download_sftp_host', true) ?: '—';
-        $path = get_post_meta($post->ID, 'download_sftp_path', true) ?: '—';
+        $host = get_post_meta($post->ID, 'download_sftp_host', true) ?: '–';
+        $path = get_post_meta($post->ID, 'download_sftp_path', true) ?: '–';
 
-        $color = $isSynced ? self::COLOR_SYNCED : self::COLOR_PENDING;
-        $label = $isSynced
-            ? __('Dieser Eintrag wurde bereits synchronisiert. Neue Dateien im konfigurierten Ordner werden beim nächsten Cronjob-Lauf automatisch importiert.', 'wp-starter')
-            : __('Dieser Eintrag wurde noch nicht synchronisiert. Beim nächsten Cronjob-Lauf werden Dateien aus dem konfigurierten Ordner importiert.', 'wp-starter');
+        $label = self::isSynced($post->ID)
+            ? __('Dieses Dokument wurde bereits synchronisiert. Neue Dateien im konfigurierten Ordner werden einmal täglich automatisch importiert.', 'wp-starter')
+            : __('Dieses Dokument wurde noch nicht synchronisiert. Dateien aus dem konfigurierten Ordner werden beim nächsten täglichen Abgleich importiert, oder sofort mit dem Button unten.', 'wp-starter');
 
-        echo '<p style="margin-top:0;color:' . esc_attr($color) . ';font-weight:600;">'
-            . ( $isSynced ? '&#10003; ' . esc_html__('Synchronisiert', 'wp-starter') : '&#9733; ' . esc_html__('Ausstehend', 'wp-starter') )
+        echo '<p style="margin-top:0;color:' . esc_attr(self::syncStatusColor($post->ID)) . ';font-weight:600;">'
+            . self::syncStatusLabel($post->ID) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper
             . '</p>';
         echo '<p style="margin:0 0 8px;">' . esc_html($label) . '</p>';
         echo '<p style="margin:0 0 12px;font-size:12px;color:#646970;">'
@@ -156,21 +173,14 @@ class MemberDownload extends AbstractPostType
             . 'data-ajax-url="' . esc_attr(admin_url('admin-ajax.php')) . '">'
             . esc_html__('Jetzt synchronisieren', 'wp-starter')
             . '</button>';
-        echo '<p id="member-sync-status" style="margin:8px 0 0;font-size:12px;display:none;"></p>';
+        echo '<p id="member-sync-status" role="status" aria-live="polite" style="margin:8px 0 0;font-size:12px;"></p>';
     }
 
     public static function enqueueSyncScript(): void
     {
         global $post, $typenow;
 
-        if ($typenow !== 'member_download' || !$post instanceof \WP_Post || !current_user_can('manage_options')) {
-            return;
-        }
-
-        $sftpSource = get_post_meta($post->ID, 'download_sftp_source', true);
-        $sourceType = get_post_meta($post->ID, 'download_source_type', true);
-
-        if ($sourceType !== 'sftp' || !empty($sftpSource)) {
+        if ($typenow !== static::$postType || !$post instanceof \WP_Post || !current_user_can('manage_options') || !self::isSftpParent($post->ID)) {
             return;
         }
 
@@ -182,38 +192,48 @@ class MemberDownload extends AbstractPostType
             var status = document.getElementById('member-sync-status');
             if (!btn) return;
 
+            var idleLabel = '<?php echo esc_js(__('Jetzt synchronisieren', 'wp-starter')); ?>';
+
+            function showStatus(color, message) {
+                status.style.color = color;
+                status.textContent = message;
+            }
+
+            function fail(message) {
+                btn.removeAttribute('aria-disabled');
+                btn.textContent = idleLabel;
+                showStatus('<?php echo esc_js(self::COLOR_ERROR); ?>', message);
+                btn.focus();
+            }
+
             btn.addEventListener('click', function () {
-                btn.disabled = true;
+                if (btn.getAttribute('aria-disabled') === 'true') return;
+
+                // aria-disabled instead of disabled keeps keyboard focus on the button.
+                btn.setAttribute('aria-disabled', 'true');
                 btn.textContent = '<?php echo esc_js(__('Synchronisiere…', 'wp-starter')); ?>';
-                status.style.display = 'none';
+                showStatus('', '');
 
                 var body = new FormData();
                 body.append('action', 'member_sync_now');
                 body.append('nonce', btn.dataset.nonce);
 
                 fetch(btn.dataset.ajaxUrl, { method: 'POST', body: body })
-                    .then(function (r) { return r.json(); })
+                    .then(function (r) { return r.json().catch(function () { return null; }); })
                     .then(function (data) {
-                        if (data.success) {
-                            btn.textContent = '<?php echo esc_js(__('Fertig — Seite wird neu geladen…', 'wp-starter')); ?>';
-                            status.style.color = '<?php echo esc_js(self::COLOR_SYNCED); ?>';
-                            status.style.display = 'block';
-                            status.textContent = data.data.message;
+                        var message = data && data.data && data.data.message;
+                        if (data && data.success) {
+                            btn.textContent = '<?php echo esc_js(__('Fertig – Seite wird neu geladen…', 'wp-starter')); ?>';
+                            showStatus('<?php echo esc_js(self::COLOR_SYNCED); ?>', message || '');
                             setTimeout(function () { window.location.reload(); }, 1500);
+                        } else if (data) {
+                            fail(message || '<?php echo esc_js(__('Die Synchronisierung ist fehlgeschlagen. Prüfe Host, Benutzername, Passwort und Pfad und versuche es erneut.', 'wp-starter')); ?>');
                         } else {
-                            btn.disabled = false;
-                            btn.textContent = '<?php echo esc_js(__('Jetzt synchronisieren', 'wp-starter')); ?>';
-                            status.style.color = '<?php echo esc_js(self::COLOR_ERROR); ?>';
-                            status.style.display = 'block';
-                            status.textContent = data.data.message || '<?php echo esc_js(__('Fehler beim Synchronisieren.', 'wp-starter')); ?>';
+                            fail('<?php echo esc_js(__('Der Server hat die Synchronisierung nicht abgeschlossen. Versuche es erneut. Bleibt der Fehler, wende dich an den Administrator.', 'wp-starter')); ?>');
                         }
                     })
                     .catch(function () {
-                        btn.disabled = false;
-                        btn.textContent = '<?php echo esc_js(__('Jetzt synchronisieren', 'wp-starter')); ?>';
-                        status.style.color = '<?php echo esc_js(self::COLOR_ERROR); ?>';
-                        status.style.display = 'block';
-                        status.textContent = '<?php echo esc_js(__('Verbindungsfehler.', 'wp-starter')); ?>';
+                        fail('<?php echo esc_js(__('Keine Verbindung zum Server. Prüfe deine Internetverbindung und versuche es erneut.', 'wp-starter')); ?>');
                     });
             });
         }());
@@ -353,7 +373,7 @@ class MemberDownload extends AbstractPostType
                     [
                         'param' => 'post_type',
                         'operator' => '==',
-                        'value' => 'member_download',
+                        'value' => static::$postType,
                     ],
                 ],
             ],
@@ -387,14 +407,14 @@ class MemberDownload extends AbstractPostType
                     [
                         'param' => 'post_type',
                         'operator' => '==',
-                        'value' => 'member_download',
+                        'value' => static::$postType,
                     ],
                 ],
             ],
             'position' => 'side',
         ]);
 
-        // Sidebar: SFTP import details — only shown on child entries (download_sftp_source is set)
+        // Sidebar: SFTP import details, only shown on child entries (download_sftp_source is set)
         acf_add_local_field_group([
             'key' => 'group_member_download_sftp_info',
             'title' => __('SFTP-Import', 'wp-starter'),
@@ -423,10 +443,10 @@ class MemberDownload extends AbstractPostType
                 ),
                 FieldDefinitions::textField(
                     'field_mdl_sftp_identifier',
-                    __('SFTP-Identifier', 'wp-starter'),
+                    __('SFTP-Kennung', 'wp-starter'),
                     'download_sftp_identifier',
                     false,
-                    '',
+                    __('Interne Kennung, die diese Datei dem Ordner zuordnet. Nicht ändern.', 'wp-starter'),
                     '',
                     null,
                     null,
@@ -438,7 +458,7 @@ class MemberDownload extends AbstractPostType
                     [
                         'param' => 'post_type',
                         'operator' => '==',
-                        'value' => 'member_download',
+                        'value' => static::$postType,
                     ],
                 ],
             ],
@@ -448,13 +468,13 @@ class MemberDownload extends AbstractPostType
         // Remove the SFTP import meta box entirely on parent entries (download_sftp_source is empty)
         add_action('add_meta_boxes', static function (): void {
             global $post;
-            if (!$post instanceof \WP_Post || $post->post_type !== 'member_download') {
+            if (!$post instanceof \WP_Post || $post->post_type !== static::$postType) {
                 return;
             }
 
             $sftpSource = get_post_meta($post->ID, 'download_sftp_source', true);
             if (empty($sftpSource)) {
-                remove_meta_box('acf-group_member_download_sftp_info', 'member_download', 'side');
+                remove_meta_box('acf-group_member_download_sftp_info', static::$postType, 'side');
             }
         }, 99);
     }

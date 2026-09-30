@@ -41,7 +41,7 @@ final class EventTest extends TestCase
     {
         // The named meta_query clause is reused in orderby instead of a
         // separate top-level meta_key/orderby pair, to avoid a second
-        // wp_postmeta join (see Event::getUpcomingEvents() docblock).
+        // wp_postmeta join (rationale in the Event::getUpcomingEvents() docblock).
         Event::getUpcomingEvents(21);
 
         $args = $GLOBALS['wp_mock_last_query_args'];

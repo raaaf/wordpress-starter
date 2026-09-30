@@ -136,7 +136,8 @@ src/
 │   ├── Team.php             # Team members
 │   └── Testimonial.php      # Testimonials
 ├── Taxonomies/             # Custom Taxonomies
-│   └── AbstractTaxonomy.php # Base taxonomy class
+│   ├── AbstractTaxonomy.php # Base taxonomy class
+│   └── DownloadCategory.php # Member area download categories
 ├── Providers/              # Service providers
 │   ├── ServiceProvider.php  # Base provider class
 │   └── *.php               # Individual providers
@@ -146,6 +147,10 @@ src/
 │   ├── StyleguideReference.php      # Reference index
 │   └── StyleguideVariantLabels.php  # Variant labels
 ├── Helpers/                 # Template helpers used across templates/flexible/
+│   ├── ComponentId.php      # Request-scoped ids and anchor slugs
+│   ├── FormAttributes.php   # Shared form-attribute allowlist
+│   ├── HeroScrim.php        # Hero overlay helper
+│   ├── ImageData.php        # Image data helper
 │   ├── SectionHeader.php    # Reads section-header fields, returns array
 │   └── Text.php             # Text helpers
 ├── Services/                 # Application services
@@ -365,6 +370,8 @@ class Service extends AbstractPostType
     protected static string $postType = 'service';
     protected static string $singular = 'Leistung';
     protected static string $plural = 'Leistungen';
+    protected static string $genus = 'f'; // 'm', 'f' or 'n': drives Neuer/Neue/Neues in the labels
+    protected static string $menuName = ''; // optional sidebar label, defaults to $plural
     protected static string $menuIcon = 'dashicons-admin-generic';
 
     public static function registerFields(): void

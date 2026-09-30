@@ -23,11 +23,11 @@
     $allEventsLink = get_sub_field('all_events_link');
     $background = get_sub_field('background_color') ?: 'primary';
 
-    // Mehr als acht Listeneintraege scrollt auf einer Inhaltsseite niemand.
+    // Nobody scrolls past eight list entries on a content page.
     $listMax = 8;
     $leadCount = 1;
 
-    // Einer mehr als angezeigt wird, damit "genau voll" nicht als Ueberlauf gilt.
+    // Fetch one more than shown so "exactly full" does not count as overflow.
     $fetched = \WordpressStarter\PostTypes\Event::getUpcomingEvents($leadCount + $listMax + 1);
     $lead = array_slice($fetched, 0, $leadCount);
     $rest = array_slice($fetched, $leadCount, $listMax);
@@ -133,7 +133,7 @@
     @endif
 </x-section>
 
-{{-- Event JSON-LD, only for content the public can reach (same gate as the accordion's FAQ schema). --}}
-@if(!empty($fetched) && is_singular() && get_post_status() === 'publish' && !post_password_required())
+{{-- Event JSON-LD, only for content the public can reach (shared gate: SeoServiceProvider::canEmitSchema()). --}}
+@if(!empty($fetched) && \WordpressStarter\Providers\SeoServiceProvider::canEmitSchema())
     @php \WordpressStarter\Providers\SeoServiceProvider::emitEventSchema(array_merge($lead, $rest)); @endphp
 @endif

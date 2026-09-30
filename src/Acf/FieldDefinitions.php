@@ -54,7 +54,7 @@ class FieldDefinitions
             return self::$iconCache;
         }
 
-        $choices = ['' => __('— Kein Icon —', 'wp-starter')];
+        $choices = ['' => __('– Kein Icon –', 'wp-starter')];
         $configPath = get_template_directory() . '/config/icons.json';
 
         if (!file_exists($configPath)) {
@@ -450,6 +450,8 @@ class FieldDefinitions
      * @param string $instructions Field instructions
      * @param array<int, array<int, array<string, string>>>|null $conditionalLogic Conditional logic
      * @param string $placeholder Placeholder text
+     * @param bool $required Whether field is required
+     * @param array<string, string>|null $wrapper Wrapper attributes (e.g. ['width' => '50'])
      *
      * @return array<string, mixed>
      */
@@ -461,6 +463,7 @@ class FieldDefinitions
         ?array $conditionalLogic = null,
         string $placeholder = '',
         bool $required = false,
+        ?array $wrapper = null,
     ): array {
         $field = [
             'key' => $key,
@@ -477,6 +480,10 @@ class FieldDefinitions
 
         if ($conditionalLogic !== null) {
             $field['conditional_logic'] = $conditionalLogic;
+        }
+
+        if ($wrapper !== null) {
+            $field['wrapper'] = $wrapper;
         }
 
         return $field;
@@ -1202,6 +1209,40 @@ class FieldDefinitions
     }
 
     /**
+     * Get the email and LinkedIn fields of a team member.
+     *
+     * Shared by the team layout repeater and the team post type so the two
+     * definitions cannot drift apart.
+     *
+     * @param string $keyBase Field key base, "_email" and "_linkedin" are appended
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function teamContactFields(string $keyBase): array
+    {
+        return [
+            self::emailField(
+                "{$keyBase}_email",
+                __('E-Mail', 'wp-starter'),
+                'email',
+                __('Direkte E-Mail-Adresse.', 'wp-starter'),
+                'max@beispiel.de',
+                ['width' => '50'],
+            ),
+            self::urlField(
+                "{$keyBase}_linkedin",
+                __('LinkedIn', 'wp-starter'),
+                'linkedin',
+                __('Link zum LinkedIn-Profil.', 'wp-starter'),
+                null,
+                'https://linkedin.com/in/...',
+                false,
+                ['width' => '50'],
+            ),
+        ];
+    }
+
+    /**
      * Get email field definition
      *
      * @param string $key Unique field key
@@ -1209,6 +1250,7 @@ class FieldDefinitions
      * @param string $name Field name
      * @param string $instructions Field instructions
      * @param string $placeholder Placeholder text
+     * @param array<string, string>|null $wrapper Wrapper attributes (e.g. ['width' => '50'])
      *
      * @return array<string, mixed>
      */
@@ -1218,6 +1260,7 @@ class FieldDefinitions
         string $name,
         string $instructions = '',
         string $placeholder = '',
+        ?array $wrapper = null,
     ): array {
         $field = [
             'key' => $key,
@@ -1229,6 +1272,10 @@ class FieldDefinitions
 
         if ($placeholder !== '') {
             $field['placeholder'] = $placeholder;
+        }
+
+        if ($wrapper !== null) {
+            $field['wrapper'] = $wrapper;
         }
 
         return $field;
@@ -1342,7 +1389,7 @@ class FieldDefinitions
                 'badge',
                 false,
                 __('Optionaler Badge-Text über der Überschrift.', 'wp-starter'),
-                __('z.B. NEU, Coming Soon...', 'wp-starter'),
+                __('z.B. NEU, Coming Soon…', 'wp-starter'),
             ),
             self::textField(
                 "field_{$prefix}_title",
@@ -1350,7 +1397,7 @@ class FieldDefinitions
                 'title',
                 true,
                 __('Die Hauptüberschrift des Hero-Bereichs.', 'wp-starter'),
-                __('z.B. Willkommen bei...', 'wp-starter'),
+                __('z.B. Willkommen bei…', 'wp-starter'),
             ),
             self::textareaField(
                 "field_{$prefix}_copy",
@@ -1358,7 +1405,7 @@ class FieldDefinitions
                 'copy',
                 3,
                 __('Kurzer Beschreibungstext unter der Überschrift.', 'wp-starter'),
-                __('z.B. Wir helfen dir...', 'wp-starter'),
+                __('z.B. Wir helfen dir…', 'wp-starter'),
             ),
 
             // Buttons (nebeneinander)
@@ -1387,7 +1434,7 @@ class FieldDefinitions
                 false,
                 'array',
                 $showOnSplit,
-                __('Empfohlene Größe: mindestens 960×800 Pixel (6:5).', 'wp-starter'),
+                __('Empfohlene Größe: mindestens 960×800 Pixel (6:5).', 'wp-starter'),
             ),
 
             // Hintergrundbild (nur bei Background-Variante)
@@ -1418,7 +1465,7 @@ class FieldDefinitions
                     'full' => __('Voller Bildschirm', 'wp-starter'),
                 ],
                 'auto',
-                __('Automatisch heißt: die Höhe folgt dem Inhalt. Die Variante Hintergrund behält dabei ein Mindestmaß, sonst wäre das Bild nur ein Streifen. Halb und Voll setzen eine Mindesthöhe aus der Bildschirmhöhe. Wird der Inhalt höher, wächst der Hero mit, er schneidet nichts ab.', 'wp-starter'),
+                __('Automatisch: die Höhe folgt dem Inhalt, bei der Variante Hintergrund mit einem Mindestmaß. Halb und Voll setzen eine Mindesthöhe aus der Bildschirmhöhe. Wird der Inhalt höher, wächst der Hero mit.', 'wp-starter'),
             ),
 
             // Overlay-Deckkraft (nur bei Background-Variante)
@@ -1430,7 +1477,7 @@ class FieldDefinitions
                 100,
                 5,
                 80,
-                __('Wie stark der Scrim das Bild abdunkelt. 20% = Bild dominiert, 100% = Bild kaum sichtbar. Der Text steht immer hell auf dem abgedunkelten Bild, deshalb wird es unter 40% auf hellen Motiven knapp.', 'wp-starter'),
+                __('Wie stark das Bild abgedunkelt wird. 20% = Bild dominiert, 100% = Bild kaum sichtbar. Der Text steht immer hell auf dem abgedunkelten Bild, deshalb wird es unter 40% auf hellen Motiven knapp.', 'wp-starter'),
                 '%',
                 $showOnBackground,
             ),
@@ -1521,9 +1568,10 @@ class FieldDefinitions
             'section_chip',
             false,
             __('Optionaler Chip/Badge über der Überschrift.', 'wp-starter'),
+            '',
+            $showWhenEnabled,
+            ['width' => '40'],
         );
-        $chipField['conditional_logic'] = $showWhenEnabled;
-        $chipField['wrapper'] = ['width' => '40'];
 
         $headlineField = self::textField(
             "field_{$prefix}_section_headline",
@@ -1531,9 +1579,10 @@ class FieldDefinitions
             'section_headline',
             false,
             __('H2-Überschrift. Nutze [br] für Zeilenumbrüche.', 'wp-starter'),
+            '',
+            $showWhenEnabled,
+            ['width' => '40'],
         );
-        $headlineField['conditional_logic'] = $showWhenEnabled;
-        $headlineField['wrapper'] = ['width' => '40'];
 
         $descriptionField = self::textareaField(
             "field_{$prefix}_section_description",
@@ -1553,7 +1602,7 @@ class FieldDefinitions
                 'center' => __('Zentriert', 'wp-starter'),
             ],
             'center',
-            __('Textausrichtung des Section Headers.', 'wp-starter'),
+            __('Textausrichtung des Sektionskopfs.', 'wp-starter'),
             $showWhenEnabled,
         );
         $alignmentField['wrapper'] = ['width' => '20'];
@@ -1561,7 +1610,7 @@ class FieldDefinitions
         return [
             self::trueFalseField(
                 "field_{$prefix}_show_section_header",
-                __('Section Header anzeigen', 'wp-starter'),
+                __('Sektionskopf anzeigen', 'wp-starter'),
                 'show_section_header',
                 false,
                 __('Zeigt Chip, Überschrift und Beschreibung über dem Inhalt an.', 'wp-starter'),
@@ -1720,7 +1769,7 @@ class FieldDefinitions
                         'title',
                         true,
                         __('Der klickbare Titel des Akkordeon-Eintrags.', 'wp-starter'),
-                        __('z.B. Wie funktioniert...?', 'wp-starter'),
+                        __('z.B. Wie funktioniert…?', 'wp-starter'),
                     ),
                     self::wysiwygField(
                         "field_{$prefix}_accordion_content",
@@ -1911,7 +1960,7 @@ class FieldDefinitions
             ),
             // Ausrichtung hat bei voller Breite keine Wirkung, deshalb nur dann
             // sichtbar, wenn full_width aus ist.
-            array_merge(self::buttonGroupField(
+            self::buttonGroupField(
                 "field_{$prefix}_alignment",
                 __('Ausrichtung', 'wp-starter'),
                 'alignment',
@@ -1922,17 +1971,8 @@ class FieldDefinitions
                 ],
                 'left',
                 __('Ausrichtung des Buttons innerhalb der Sektion.', 'wp-starter'),
-            ), [
-                'conditional_logic' => [
-                    [
-                        [
-                            'field' => "field_{$prefix}_full_width",
-                            'operator' => '!=',
-                            'value' => '1',
-                        ],
-                    ],
-                ],
-            ]),
+                [[['field' => "field_{$prefix}_full_width", 'operator' => '!=', 'value' => '1']]],
+            ),
 
             // Als einziges Layout ausser dem Trenner hatte der Button keine
             // Hintergrundfarbe. Damit liess sich eine Handlungsaufforderung nicht
@@ -2012,7 +2052,7 @@ class FieldDefinitions
                 false,
                 'id',
                 null,
-                __('Standbild, das vor dem Abspielen zu sehen ist. Ohne dieses Bild steht bei YouTube und Vimeo bis zur Einwilligung eine leere graue Fläche über die volle Breite. Empfohlen: 16:9, mindestens 1280x720 Pixel.', 'wp-starter'),
+                __('Standbild, das vor dem Abspielen zu sehen ist. Ohne dieses Bild steht bei YouTube und Vimeo bis zur Einwilligung eine leere graue Fläche über die volle Breite. Empfohlen: 16:9, mindestens 1280×720 Pixel.', 'wp-starter'),
             ),
             self::fileField(
                 "field_{$prefix}_captions",
@@ -2041,7 +2081,7 @@ class FieldDefinitions
                     ],
                     'de',
                     false,
-                    __('Bestimmt srclang und die Beschriftung der Untertitelspur im Player.', 'wp-starter'),
+                    __('Bestimmt, in welcher Sprache die Untertitel im Player angeboten werden.', 'wp-starter'),
                 ),
                 [
                     'conditional_logic' => [
@@ -2054,7 +2094,7 @@ class FieldDefinitions
                 __('Video-Titel', 'wp-starter'),
                 'video_title',
                 false,
-                __('Optionaler Titel des Videos. Wird als title-Attribut des iFrames (YouTube/Vimeo) und als aria-label des video-Elements verwendet, um das Video für Screenreader und Suchmaschinen zu beschriften. Leer lassen = generischer Fallback.', 'wp-starter'),
+                __('Optionaler Titel des Videos. Beschreibt das Video für Screenreader und Suchmaschinen. Leer lassen: es wird eine allgemeine Beschreibung verwendet.', 'wp-starter'),
             ),
             self::buttonGroupField(
                 "field_{$prefix}_aspect_ratio",
@@ -2171,18 +2211,17 @@ class FieldDefinitions
                 __('Linie: dünne Trennlinie. Punkte: drei zentrierte Punkte. Welle: geschwungene Kante zwischen zwei Flächen. Abstand: nur Leerraum, ohne sichtbares Element.', 'wp-starter'),
             ),
             self::backgroundColorField($prefix),
-            [
-                'key' => "field_{$prefix}_height",
-                'label' => __('Höhe', 'wp-starter'),
-                'name' => 'height',
-                'type' => 'number',
-                'instructions' => __('Höhe in Pixel (Standard: 50)', 'wp-starter'),
-                'default_value' => 50,
-                'min' => 10,
-                'max' => 200,
-                'step' => 10,
-                'append' => 'px',
-            ],
+            self::numberField(
+                "field_{$prefix}_height",
+                __('Höhe', 'wp-starter'),
+                'height',
+                50,
+                10,
+                200,
+                10,
+                'px',
+                __('Höhe in Pixel (Standard: 50)', 'wp-starter'),
+            ),
             self::sectionSpacingField($prefix),
             self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
@@ -2505,13 +2544,59 @@ class FieldDefinitions
         // Conditional logic: show only when source is 'manual'
         $showOnManual = [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'manual']]];
 
+        $testimonials = self::repeaterField(
+            "field_{$prefix}_testimonials",
+            __('Kundenstimmen', 'wp-starter'),
+            'testimonials',
+            [
+                self::textareaField(
+                    "field_{$prefix}_testimonial_quote",
+                    __('Zitat', 'wp-starter'),
+                    'quote',
+                    3,
+                    __('Das Zitat oder die Bewertung des Kunden.', 'wp-starter'),
+                    __('z.B. Die Zusammenarbeit war hervorragend…', 'wp-starter'),
+                ),
+                self::textField(
+                    "field_{$prefix}_testimonial_author",
+                    __('Name', 'wp-starter'),
+                    'author',
+                    true,
+                    __('Name der Person.', 'wp-starter'),
+                    __('z.B. Max Mustermann', 'wp-starter'),
+                ),
+                self::textField(
+                    "field_{$prefix}_testimonial_role",
+                    __('Position / Firma', 'wp-starter'),
+                    'role',
+                    false,
+                    __('Position oder Firmenname.', 'wp-starter'),
+                    __('z.B. Geschäftsführer, Musterfirma GmbH', 'wp-starter'),
+                ),
+                self::imageField(
+                    "field_{$prefix}_testimonial_image",
+                    __('Foto', 'wp-starter'),
+                    'image',
+                    false,
+                    'id',
+                    null,
+                    __('Optionales Foto der Person. Wird als kleiner Kreis dargestellt, quadratische Bilder empfohlen.', 'wp-starter'),
+                ),
+            ],
+            __('Kundenstimme hinzufügen', 'wp-starter'),
+            1,
+            'block',
+            __('Füge Kundenstimmen und Bewertungen hinzu.', 'wp-starter'),
+        );
+        $testimonials['conditional_logic'] = $showOnManual;
+
         return [
             self::textField(
                 "field_{$prefix}_title",
                 __('Überschrift', 'wp-starter'),
                 'title',
                 false,
-                __('Optionale Überschrift über den Testimonials.', 'wp-starter'),
+                __('Optionale Überschrift über den Kundenstimmen.', 'wp-starter'),
                 __('z.B. Das sagen unsere Kunden', 'wp-starter'),
             ),
             ...self::sectionHeaderExtras($prefix),
@@ -2524,55 +2609,9 @@ class FieldDefinitions
                     'cpt' => __('Aus Kundenstimmen-Verwaltung', 'wp-starter'),
                 ],
                 'manual',
-                __('Manuell: du pflegst die Stimmen hier im Layout. Aus der Verwaltung: es werden automatisch alle veröffentlichten Einträge unter Testimonials gezeigt, neueste zuerst.', 'wp-starter'),
+                __('Manuell: du pflegst die Stimmen hier im Layout. Aus der Verwaltung: es werden automatisch alle veröffentlichten Einträge unter Kundenstimmen gezeigt, neueste zuerst.', 'wp-starter'),
             ),
-            [
-                'key' => "field_{$prefix}_testimonials",
-                'label' => __('Kundenstimmen', 'wp-starter'),
-                'name' => 'testimonials',
-                'type' => 'repeater',
-                'instructions' => __('Füge Kundenstimmen und Bewertungen hinzu.', 'wp-starter'),
-                'min' => 1,
-                'layout' => 'block',
-                'button_label' => __('Kundenstimme hinzufügen', 'wp-starter'),
-                'collapsed' => "field_{$prefix}_testimonial_author",
-                'conditional_logic' => $showOnManual,
-                'sub_fields' => [
-                    self::textareaField(
-                        "field_{$prefix}_testimonial_quote",
-                        __('Zitat', 'wp-starter'),
-                        'quote',
-                        3,
-                        __('Das Zitat oder die Bewertung des Kunden.', 'wp-starter'),
-                        __('z.B. Die Zusammenarbeit war hervorragend...', 'wp-starter'),
-                    ),
-                    self::textField(
-                        "field_{$prefix}_testimonial_author",
-                        __('Name', 'wp-starter'),
-                        'author',
-                        true,
-                        __('Name der Person.', 'wp-starter'),
-                        __('z.B. Max Mustermann', 'wp-starter'),
-                    ),
-                    self::textField(
-                        "field_{$prefix}_testimonial_role",
-                        __('Position / Firma', 'wp-starter'),
-                        'role',
-                        false,
-                        __('Position oder Firmenname.', 'wp-starter'),
-                        __('z.B. Geschäftsführer, Musterfirma GmbH', 'wp-starter'),
-                    ),
-                    self::imageField(
-                        "field_{$prefix}_testimonial_image",
-                        __('Foto', 'wp-starter'),
-                        'image',
-                        false,
-                        'id',
-                        null,
-                        __('Optionales Foto der Person. Wird als kleiner Kreis dargestellt, quadratische Bilder empfohlen.', 'wp-starter'),
-                    ),
-                ],
-            ],
+            $testimonials,
             self::buttonGroupField(
                 "field_{$prefix}_columns",
                 __('Spalten', 'wp-starter'),
@@ -2627,7 +2666,7 @@ class FieldDefinitions
                         'content',
                         3,
                         __('Kurze Beschreibung.', 'wp-starter'),
-                        __('z.B. Wir beraten dich umfassend...', 'wp-starter'),
+                        __('z.B. Wir beraten dich umfassend…', 'wp-starter'),
                     ),
                     self::linkField(
                         "field_{$prefix}_card_link",
@@ -2867,7 +2906,7 @@ class FieldDefinitions
             self::tabField("field_{$prefix}_tab_map", __('Karte', 'wp-starter')),
             self::messageField(
                 "field_{$prefix}_map_help",
-                __('<strong>So bekommst du die Einbettungs-URL:</strong><br>1) Öffne <a href="https://maps.google.com" target="_blank">Google Maps</a><br>2) Suche deinen Standort<br>3) Klicke auf "Teilen" → "Karte einbetten"<br>4) Kopiere die URL aus dem HTML-Code (beginnt mit https://www.google.com/maps/embed)', 'wp-starter'),
+                __('<strong>So bekommst du die Einbettungs-URL:</strong><br>1) Öffne <a href="https://maps.google.com" target="_blank">Google Maps</a><br>2) Suche deinen Standort<br>3) Klicke auf „Teilen“ → „Karte einbetten“<br>4) Kopiere die URL aus dem HTML-Code (beginnt mit https://www.google.com/maps/embed)', 'wp-starter'),
             ),
             self::urlField(
                 "field_{$prefix}_embed_url",
@@ -2906,12 +2945,12 @@ class FieldDefinitions
                 __('Adresse', 'wp-starter'),
                 'address',
                 2,
-                __('Die vollständige Adresse (für den "Route planen" Link).', 'wp-starter'),
+                __('Die vollständige Adresse (für den „Route planen“ Link).', 'wp-starter'),
                 __('Musterstraße 123, 12345 Musterstadt', 'wp-starter'),
             ),
             self::trueFalseField(
                 "field_{$prefix}_show_directions_link",
-                __('„Route planen" Link anzeigen', 'wp-starter'),
+                __('„Route planen“ Link anzeigen', 'wp-starter'),
                 'show_directions_link',
                 true,
                 __('Zeigt einen Link zum Planen der Route an.', 'wp-starter'),
@@ -3009,59 +3048,62 @@ class FieldDefinitions
                 [
                     // Accordion: Preis (offen)
                     self::accordionField("field_{$prefix}_acc_price", __('Preis', 'wp-starter'), true),
-                    [
-                        'key' => "field_{$prefix}_plan_name",
-                        'label' => __('Paketname', 'wp-starter'),
-                        'name' => 'name',
-                        'type' => 'text',
-                        'instructions' => __('Name des Pakets.', 'wp-starter'),
-                        'placeholder' => __('z.B. Basic, Professional', 'wp-starter'),
-                        'required' => 1,
-                        'wrapper' => ['width' => '40'],
-                    ],
-                    [
-                        'key' => "field_{$prefix}_plan_price",
-                        'label' => __('Preis', 'wp-starter'),
-                        'name' => 'price',
-                        'type' => 'text',
-                        'instructions' => __('Der Preis inkl. Währung.', 'wp-starter'),
-                        'placeholder' => __('z.B. 49€', 'wp-starter'),
-                        'required' => 1,
-                        'wrapper' => ['width' => '30'],
-                    ],
-                    [
-                        'key' => "field_{$prefix}_plan_period",
-                        'label' => __('Zeitraum', 'wp-starter'),
-                        'name' => 'period',
-                        'type' => 'text',
-                        'instructions' => __('Abrechnungszeitraum.', 'wp-starter'),
-                        'placeholder' => __('z.B. / Monat', 'wp-starter'),
-                        'wrapper' => ['width' => '30'],
-                    ],
-                    [
-                        'key' => "field_{$prefix}_plan_price_yearly",
-                        'label' => __('Preis im Jahrestarif', 'wp-starter'),
-                        'name' => 'price_yearly',
-                        'type' => 'text',
-                        'instructions' => __('Nur nötig, wenn der Umschalter unten aktiv ist.', 'wp-starter'),
-                        'placeholder' => __('z.B. 490€', 'wp-starter'),
-                        'wrapper' => ['width' => '35'],
-                    ],
-                    [
-                        'key' => "field_{$prefix}_plan_period_yearly",
-                        'label' => __('Zeitraum im Jahrestarif', 'wp-starter'),
-                        'name' => 'period_yearly',
-                        'type' => 'text',
-                        'instructions' => __('Nur nötig, wenn der Umschalter unten aktiv ist.', 'wp-starter'),
-                        'placeholder' => __('z.B. Jahr', 'wp-starter'),
-                        'wrapper' => ['width' => '35'],
-                    ],
+                    self::textField(
+                        "field_{$prefix}_plan_name",
+                        __('Paketname', 'wp-starter'),
+                        'name',
+                        true,
+                        __('Name des Pakets.', 'wp-starter'),
+                        __('z.B. Basic, Professional', 'wp-starter'),
+                        null,
+                        ['width' => '40'],
+                    ),
+                    self::textField(
+                        "field_{$prefix}_plan_price",
+                        __('Preis', 'wp-starter'),
+                        'price',
+                        true,
+                        __('Der Preis inkl. Währung.', 'wp-starter'),
+                        __('z.B. 49 €', 'wp-starter'),
+                        null,
+                        ['width' => '30'],
+                    ),
+                    self::textField(
+                        "field_{$prefix}_plan_period",
+                        __('Zeitraum', 'wp-starter'),
+                        'period',
+                        false,
+                        __('Abrechnungszeitraum.', 'wp-starter'),
+                        __('z.B. / Monat', 'wp-starter'),
+                        null,
+                        ['width' => '30'],
+                    ),
+                    self::textField(
+                        "field_{$prefix}_plan_price_yearly",
+                        __('Preis im Jahrestarif', 'wp-starter'),
+                        'price_yearly',
+                        false,
+                        __('Nur nötig, wenn der Umschalter unten aktiv ist.', 'wp-starter'),
+                        __('z.B. 490 €', 'wp-starter'),
+                        null,
+                        ['width' => '35'],
+                    ),
+                    self::textField(
+                        "field_{$prefix}_plan_period_yearly",
+                        __('Zeitraum im Jahrestarif', 'wp-starter'),
+                        'period_yearly',
+                        false,
+                        __('Nur nötig, wenn der Umschalter unten aktiv ist.', 'wp-starter'),
+                        __('z.B. Jahr', 'wp-starter'),
+                        null,
+                        ['width' => '35'],
+                    ),
                     self::trueFalseField(
                         "field_{$prefix}_plan_featured",
                         __('Hervorheben', 'wp-starter'),
                         'is_featured',
                         false,
-                        __('Dieses Paket als „Empfohlen" hervorheben.', 'wp-starter'),
+                        __('Dieses Paket als „Empfohlen“ hervorheben.', 'wp-starter'),
                     ),
                     // Accordion: Leistungen
                     self::accordionField("field_{$prefix}_acc_features", __('Leistungen', 'wp-starter')),
@@ -3113,6 +3155,61 @@ class FieldDefinitions
         // Conditional logic: show only when source is 'manual'
         $showOnManual = [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'manual']]];
 
+        $members = self::repeaterField(
+            "field_{$prefix}_members",
+            __('Teammitglieder', 'wp-starter'),
+            'members',
+            [
+                // Accordion: Person (offen)
+                self::accordionField("field_{$prefix}_acc_person", __('Person', 'wp-starter'), true),
+                self::imageField(
+                    "field_{$prefix}_member_image",
+                    __('Foto', 'wp-starter'),
+                    'image',
+                    false,
+                    'id',
+                    null,
+                    __('Portraitfoto im Hochformat, empfohlen 4:5 (z.B. 640×800 Pixel). Der Zuschnitt erfolgt von oben, damit das Gesicht im Bild bleibt.', 'wp-starter'),
+                ),
+                self::textField(
+                    "field_{$prefix}_member_name",
+                    __('Name', 'wp-starter'),
+                    'name',
+                    true,
+                    __('Vollständiger Name.', 'wp-starter'),
+                    __('z.B. Max Mustermann', 'wp-starter'),
+                ),
+                self::textField(
+                    "field_{$prefix}_member_position",
+                    __('Position', 'wp-starter'),
+                    'position',
+                    false,
+                    __('Jobtitel oder Rolle.', 'wp-starter'),
+                    __('z.B. Geschäftsführer', 'wp-starter'),
+                ),
+                // Accordion: Details
+                self::accordionField("field_{$prefix}_acc_details", __('Details', 'wp-starter')),
+                self::textareaField(
+                    "field_{$prefix}_member_bio",
+                    __('Kurzbiografie', 'wp-starter'),
+                    'bio',
+                    2,
+                    __('Optionale kurze Beschreibung.', 'wp-starter'),
+                    __('z.B. Seit 2020 im Unternehmen…', 'wp-starter'),
+                ),
+                // Accordion: Kontakt
+                self::accordionField("field_{$prefix}_acc_contact", __('Kontakt', 'wp-starter')),
+                ...self::teamContactFields("field_{$prefix}_member"),
+                // Accordion Ende
+                self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
+            ],
+            __('Mitglied hinzufügen', 'wp-starter'),
+            1,
+            'block',
+            __('Füge Teammitglieder hinzu.', 'wp-starter'),
+        );
+        $members['conditional_logic'] = $showOnManual;
+
         return [
             self::textField(
                 "field_{$prefix}_title",
@@ -3134,79 +3231,7 @@ class FieldDefinitions
                 'manual',
                 __('Manuell: du pflegst die Personen hier im Layout. Aus der Verwaltung: es werden automatisch alle veröffentlichten Einträge unter Team gezeigt, sortiert nach dem Feld Reihenfolge.', 'wp-starter'),
             ),
-            [
-                'key' => "field_{$prefix}_members",
-                'label' => __('Teammitglieder', 'wp-starter'),
-                'name' => 'members',
-                'type' => 'repeater',
-                'instructions' => __('Füge Teammitglieder hinzu.', 'wp-starter'),
-                'min' => 1,
-                'layout' => 'block',
-                'button_label' => __('Mitglied hinzufügen', 'wp-starter'),
-                'collapsed' => "field_{$prefix}_member_name",
-                'conditional_logic' => $showOnManual,
-                'sub_fields' => [
-                    // Accordion: Person (offen)
-                    self::accordionField("field_{$prefix}_acc_person", __('Person', 'wp-starter'), true),
-                    self::imageField(
-                        "field_{$prefix}_member_image",
-                        __('Foto', 'wp-starter'),
-                        'image',
-                        false,
-                        'id',
-                        null,
-                        __('Portraitfoto im Hochformat, empfohlen 4:5 (z.B. 640x800 Pixel). Der Zuschnitt erfolgt von oben, damit das Gesicht im Bild bleibt.', 'wp-starter'),
-                    ),
-                    self::textField(
-                        "field_{$prefix}_member_name",
-                        __('Name', 'wp-starter'),
-                        'name',
-                        true,
-                        __('Vollständiger Name.', 'wp-starter'),
-                        __('z.B. Max Mustermann', 'wp-starter'),
-                    ),
-                    self::textField(
-                        "field_{$prefix}_member_position",
-                        __('Position', 'wp-starter'),
-                        'position',
-                        false,
-                        __('Jobtitel oder Rolle.', 'wp-starter'),
-                        __('z.B. Geschäftsführer', 'wp-starter'),
-                    ),
-                    // Accordion: Details
-                    self::accordionField("field_{$prefix}_acc_details", __('Details', 'wp-starter')),
-                    self::textareaField(
-                        "field_{$prefix}_member_bio",
-                        __('Kurzbiografie', 'wp-starter'),
-                        'bio',
-                        2,
-                        __('Optionale kurze Beschreibung.', 'wp-starter'),
-                        __('z.B. Seit 2020 im Unternehmen...', 'wp-starter'),
-                    ),
-                    // Accordion: Kontakt
-                    self::accordionField("field_{$prefix}_acc_contact", __('Kontakt', 'wp-starter')),
-                    [
-                        'key' => "field_{$prefix}_member_email",
-                        'label' => __('E-Mail', 'wp-starter'),
-                        'name' => 'email',
-                        'type' => 'email',
-                        'instructions' => __('Direkte E-Mail-Adresse.', 'wp-starter'),
-                        'placeholder' => 'max@beispiel.de',
-                        'wrapper' => ['width' => '50'],
-                    ],
-                    [
-                        'key' => "field_{$prefix}_member_linkedin",
-                        'label' => __('LinkedIn', 'wp-starter'),
-                        'name' => 'linkedin',
-                        'type' => 'url',
-                        'instructions' => __('Link zum LinkedIn-Profil.', 'wp-starter'),
-                        'placeholder' => 'https://linkedin.com/in/...',
-                        'wrapper' => ['width' => '50'],
-                    ],
-                    // Accordion Ende
-                    self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
-                ],
-            ],
+            $members,
             self::buttonGroupField(
                 "field_{$prefix}_columns",
                 __('Spalten', 'wp-starter'),
@@ -3323,7 +3348,7 @@ class FieldDefinitions
                 __('Statistik hinzufügen', 'wp-starter'),
                 1,
                 'table',
-                __('Füge Kennzahlen hinzu (empfohlen: 3-4).', 'wp-starter'),
+                __('Füge Kennzahlen hinzu (empfohlen: 3–4).', 'wp-starter'),
             ),
             ...self::displaySettingsFields($prefix),
         ];
@@ -3353,28 +3378,28 @@ class FieldDefinitions
                 __('Ereignisse', 'wp-starter'),
                 'events',
                 [
-                    // Accordion: Event (offen)
-                    self::accordionField("field_{$prefix}_acc_event", __('Event', 'wp-starter'), true),
-                    [
-                        'key' => "field_{$prefix}_event_year",
-                        'label' => __('Jahr / Datum', 'wp-starter'),
-                        'name' => 'year',
-                        'type' => 'text',
-                        'instructions' => __('Zeitpunkt des Ereignisses.', 'wp-starter'),
-                        'placeholder' => __('z.B. 2020', 'wp-starter'),
-                        'required' => 1,
-                        'wrapper' => ['width' => '30'],
-                    ],
-                    [
-                        'key' => "field_{$prefix}_event_title",
-                        'label' => __('Titel', 'wp-starter'),
-                        'name' => 'title',
-                        'type' => 'text',
-                        'instructions' => __('Kurzer Titel des Ereignisses.', 'wp-starter'),
-                        'placeholder' => __('z.B. Firmengründung', 'wp-starter'),
-                        'required' => 1,
-                        'wrapper' => ['width' => '70'],
-                    ],
+                    // Accordion: Ereignis (offen)
+                    self::accordionField("field_{$prefix}_acc_event", __('Ereignis', 'wp-starter'), true),
+                    self::textField(
+                        "field_{$prefix}_event_year",
+                        __('Jahr / Datum', 'wp-starter'),
+                        'year',
+                        true,
+                        __('Zeitpunkt des Ereignisses.', 'wp-starter'),
+                        __('z.B. 2020', 'wp-starter'),
+                        null,
+                        ['width' => '30'],
+                    ),
+                    self::textField(
+                        "field_{$prefix}_event_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Kurzer Titel des Ereignisses.', 'wp-starter'),
+                        __('z.B. Firmengründung', 'wp-starter'),
+                        null,
+                        ['width' => '70'],
+                    ),
                     // Accordion: Details
                     self::accordionField("field_{$prefix}_acc_details", __('Details', 'wp-starter')),
                     self::wysiwygField(
@@ -3574,7 +3599,7 @@ class FieldDefinitions
                 true,
                 'id',
                 null,
-                __('Das „Vorher"-Bild (links).', 'wp-starter'),
+                __('Das „Vorher“-Bild (links).', 'wp-starter'),
                 '50',
             ),
             self::imageField(
@@ -3584,27 +3609,29 @@ class FieldDefinitions
                 true,
                 'id',
                 null,
-                __('Das „Nachher"-Bild (rechts). Sollte gleiche Maße haben.', 'wp-starter'),
+                __('Das „Nachher“-Bild (rechts). Sollte gleiche Maße haben.', 'wp-starter'),
                 '50',
             ),
-            [
-                'key' => "field_{$prefix}_label_before",
-                'label' => __('Label Vorher', 'wp-starter'),
-                'name' => 'label_before',
-                'type' => 'text',
-                'instructions' => __('Text für das Vorher-Label.', 'wp-starter'),
-                'placeholder' => __('Vorher', 'wp-starter'),
-                'wrapper' => ['width' => '50'],
-            ],
-            [
-                'key' => "field_{$prefix}_label_after",
-                'label' => __('Label Nachher', 'wp-starter'),
-                'name' => 'label_after',
-                'type' => 'text',
-                'instructions' => __('Text für das Nachher-Label.', 'wp-starter'),
-                'placeholder' => __('Nachher', 'wp-starter'),
-                'wrapper' => ['width' => '50'],
-            ],
+            self::textField(
+                "field_{$prefix}_label_before",
+                __('Label Vorher', 'wp-starter'),
+                'label_before',
+                false,
+                __('Text für das Vorher-Label.', 'wp-starter'),
+                __('Vorher', 'wp-starter'),
+                null,
+                ['width' => '50'],
+            ),
+            self::textField(
+                "field_{$prefix}_label_after",
+                __('Label Nachher', 'wp-starter'),
+                'label_after',
+                false,
+                __('Text für das Nachher-Label.', 'wp-starter'),
+                __('Nachher', 'wp-starter'),
+                null,
+                ['width' => '50'],
+            ),
             ...self::displaySettingsFields($prefix),
         ];
     }
@@ -3791,7 +3818,7 @@ class FieldDefinitions
                 'quote',
                 3,
                 __('Der Wortlaut ohne Anführungszeichen, die setzt das Layout.', 'wp-starter'),
-                __('z.B. Die Stiftung hat uns den Start ermöglicht.', 'wp-starter'),
+                __('z.B. Das Team hat uns den Start ermöglicht.', 'wp-starter'),
             ),
             self::textField(
                 "field_{$prefix}_author",
@@ -3890,7 +3917,7 @@ class FieldDefinitions
                 __('Beschriftung des Buttons', 'wp-starter'),
                 'button_label',
                 false,
-                __('Leer lassen für „Anmelden".', 'wp-starter'),
+                __('Leer lassen für „Anmelden“.', 'wp-starter'),
                 __('z.B. Anmelden', 'wp-starter'),
             ),
             self::textField(
@@ -3942,7 +3969,7 @@ class FieldDefinitions
                 __('Beschriftung für Screenreader', 'wp-starter'),
                 'iframe_title',
                 false,
-                __('Was in dem Fenster steckt. Ohne diese Angabe hört ein Screenreader nur „Frame".', 'wp-starter'),
+                __('Was in dem Fenster steckt. Ohne diese Angabe hört ein Screenreader nur „Frame“.', 'wp-starter'),
                 __('z.B. Terminbuchung', 'wp-starter'),
             ),
             self::buttonGroupField(
@@ -3988,7 +4015,7 @@ class FieldDefinitions
             __('Anker-ID', 'wp-starter'),
             'section_anchor',
             false,
-            __('Optionale ID für Anker-Links (z.B. "kontakt"). Wird automatisch generiert wenn leer.', 'wp-starter'),
+            __('Optionale ID für Anker-Links (z.B. „kontakt“). Wird automatisch generiert wenn leer.', 'wp-starter'),
             'z.B. kontakt',
         );
     }

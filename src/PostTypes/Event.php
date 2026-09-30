@@ -5,12 +5,25 @@ declare(strict_types=1);
 namespace WordpressStarter\PostTypes;
 
 use WordpressStarter\Acf\FieldDefinitions;
+use WordpressStarter\Providers\AcfServiceProvider;
 use WP_Query;
 
 /**
  * Event Custom Post Type
  *
  * Manages upcoming events for display via the "events" flexible layout.
+ *
+ * @phpstan-type EventEntry array{
+ *   id: int,
+ *   title: string,
+ *   event_date: string,
+ *   event_time: string|null,
+ *   event_format: 'onsite'|'online'|'hybrid',
+ *   event_location: string|null,
+ *   event_description: string|null,
+ *   event_link: array{url: string, title: string, target: string}|null,
+ *   image: int|null
+ * }
  */
 class Event extends AbstractPostType
 {
@@ -73,7 +86,6 @@ class Event extends AbstractPostType
     public static function register(): void
     {
         parent::register();
-        self::registerAdminColumns();
         self::registerDefaultSortOrder();
     }
 
@@ -91,7 +103,7 @@ class Event extends AbstractPostType
                 'render' => function (int $postId): void {
                     // Stored as Ymd; format it directly so no timezone shift can move the day.
                     // Read unformatted: ACF's formatting throws on invalid stored values.
-                    $date = self::parseStored('!Ymd', get_field('event_date', $postId, false));
+                    $date = AcfServiceProvider::parseStrict('!Ymd', get_field('event_date', $postId, false));
                     echo $date ? esc_html($date->format('d.m.Y')) : '–';
                 },
             ],
@@ -139,15 +151,7 @@ class Event extends AbstractPostType
             'key' => 'group_event',
             'title' => __('Veranstaltungsdetails', 'wp-starter'),
             'fields' => self::getFieldDefinitions(),
-            'location' => [
-                [
-                    [
-                        'param' => 'post_type',
-                        'operator' => '==',
-                        'value' => self::$postType,
-                    ],
-                ],
-            ],
+            'location' => self::locationForThisType(),
             'menu_order' => 0,
             'position' => 'normal',
             'style' => 'default',
@@ -215,19 +219,12 @@ class Event extends AbstractPostType
     /**
      * Get upcoming events (event_date today or later), sorted ascending.
      *
+     * The named meta_query clause is reused in orderby (instead of a separate
+     * meta_key/orderby pair) so WordPress needs no second wp_postmeta join.
+     *
      * @param int $limit Number of events to return (-1 for all)
      *
-     * @return array<int, array{
-     *   id: int,
-     *   title: string,
-     *   event_date: string,
-     *   event_time: string|null,
-     *   event_format: 'onsite'|'online'|'hybrid',
-     *   event_location: string|null,
-     *   event_description: string|null,
-     *   event_link: array{url: string, title: string, target: string}|null,
-     *   image: int|null
-     * }>
+     * @return array<int, EventEntry>
      */
     public static function getUpcomingEvents(int $limit = -1): array
     {
@@ -264,17 +261,7 @@ class Event extends AbstractPostType
      *
      * @param array<string, mixed> $fields
      *
-     * @return array{
-     *   id: int,
-     *   title: string,
-     *   event_date: string,
-     *   event_time: string|null,
-     *   event_format: 'onsite'|'online'|'hybrid',
-     *   event_location: string|null,
-     *   event_description: string|null,
-     *   event_link: array{url: string, title: string, target: string}|null,
-     *   image: int|null
-     * }
+     * @return EventEntry
      */
     public static function mapEvent(int $postId, string $title, array $fields): array
     {
@@ -295,7 +282,7 @@ class Event extends AbstractPostType
         return [
             'id' => $postId,
             'title' => $title,
-            'event_date' => self::parseStored('!Ymd', $fields['event_date'] ?? null) ? $fields['event_date'] : '',
+            'event_date' => AcfServiceProvider::parseStrict('!Ymd', $fields['event_date'] ?? null) ? $fields['event_date'] : '',
             'event_time' => self::displayTime($fields['event_time'] ?? null),
             'event_format' => is_string($format) && in_array($format, self::FORMATS, true) ? $format : 'onsite',
             'event_location' => $text($fields['event_location'] ?? null),
@@ -317,7 +304,7 @@ class Event extends AbstractPostType
      */
     public static function toSchema(array $event): array
     {
-        $date = self::parseStored('!Ymd', $event['event_date'] ?? null);
+        $date = AcfServiceProvider::parseStrict('!Ymd', $event['event_date'] ?? null);
         if ($date === null) {
             return [];
         }
@@ -392,26 +379,11 @@ class Event extends AbstractPostType
     }
 
     /**
-     * Strict parse of a stored value; null unless it round-trips unchanged
-     * (rejects non-strings, overflowing dates like 20261332 and huge numbers).
-     */
-    private static function parseStored(string $format, mixed $value): ?\DateTimeImmutable
-    {
-        if (!is_string($value)) {
-            return null;
-        }
-
-        $parsed = \DateTimeImmutable::createFromFormat($format, $value);
-
-        return $parsed !== false && $parsed->format(ltrim($format, '!')) === $value ? $parsed : null;
-    }
-
-    /**
      * Raw stored time (H:i:s, or H:i) to the H:i display format; null if invalid.
      */
     private static function displayTime(mixed $value): ?string
     {
-        $time = self::parseStored('!H:i:s', $value) ?? self::parseStored('!H:i', $value);
+        $time = AcfServiceProvider::parseStrict('!H:i:s', $value) ?? AcfServiceProvider::parseStrict('!H:i', $value);
 
         return $time?->format('H:i');
     }

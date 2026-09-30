@@ -1417,7 +1417,6 @@ if (!class_exists('WP_Query')) {
     }
 }
 
-// phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed -- test double needs a class alongside the function mocks in this single bootstrap file
 if (!class_exists('WP_Post')) {
     /**
      * Minimal WP_Post double: the properties Access::restrictRestPage() and
@@ -1887,6 +1886,7 @@ if (!class_exists('WP_Upgrader')) {
     {
     }
 }
+// phpcs:enable Universal.Files.SeparateFunctionsFromOO.Mixed
 
 if (!function_exists('is_wp_error')) {
     function is_wp_error(mixed $thing): bool
@@ -2040,6 +2040,15 @@ if (!function_exists('wp_using_ext_object_cache')) {
 if (!function_exists('is_singular')) {
     function is_singular(string|array $type = ''): bool
     {
-        return $GLOBALS['wp_mock_is_singular'] ?? false;
+        $singular = $GLOBALS['wp_mock_is_singular'] ?? false;
+        $seededType = $GLOBALS['wp_mock_singular_type'] ?? null;
+
+        // Unseeded or unfiltered calls keep the plain flag; a seeded post type
+        // is matched against the requested type(s).
+        if (!$singular || $type === '' || $type === [] || $seededType === null) {
+            return $singular;
+        }
+
+        return in_array($seededType, (array) $type, true);
     }
 }

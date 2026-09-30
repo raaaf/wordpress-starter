@@ -15,9 +15,9 @@ use WordpressStarter\Acf\FieldDefinitions;
 class Testimonial extends AbstractPostType
 {
     protected static string $postType = 'testimonial';
-    protected static string $singular = 'Testimonial';
-    protected static string $genus = 'n';
-    protected static string $plural = 'Testimonials';
+    protected static string $singular = 'Kundenstimme';
+    protected static string $genus = 'f';
+    protected static string $plural = 'Kundenstimmen';
     protected static string $menuIcon = 'dashicons-format-quote';
     protected static int $menuPosition = 25;
     protected static bool $hasArchive = false;
@@ -29,12 +29,11 @@ class Testimonial extends AbstractPostType
     protected static array|false $rewrite = ['slug' => 'testimonials'];
 
     /**
-     * Register the custom post type with admin columns
+     * Register the custom post type with admin columns and auto title
      */
     public static function register(): void
     {
         parent::register();
-        self::registerAdminColumns();
         self::registerAutoTitle();
     }
 
@@ -44,16 +43,7 @@ class Testimonial extends AbstractPostType
     protected static function adminColumns(): array
     {
         return [
-            'thumbnail' => [
-                'label' => __('Foto', 'wp-starter'),
-                'before' => 'title',
-                'width' => 60,
-                'render' => function (int $postId): void {
-                    $thumbnail = get_the_post_thumbnail($postId, [50, 50], ['style' => 'border-radius: 50%; object-fit: cover;']);
-                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_the_post_thumbnail() returns safe HTML
-                    echo $thumbnail ?: '<span style="color: #999;">—</span>';
-                },
-            ],
+            'thumbnail' => self::thumbnailColumn(),
             'author_name' => [
                 'label' => __('Kunde', 'wp-starter'),
                 'after' => 'title',
@@ -109,7 +99,7 @@ class Testimonial extends AbstractPostType
             if ($authorName) {
                 $data['post_title'] = $authorName;
                 $data['post_name'] = sanitize_title($authorName);
-            } elseif (empty($data['post_title']) || $data['post_title'] === 'Automatischer Entwurf') {
+            } elseif (empty($data['post_title']) || ( $data['post_status'] ?? '' ) === 'auto-draft') {
                 $data['post_title'] = __('Neues Testimonial', 'wp-starter');
             }
 
@@ -138,15 +128,7 @@ class Testimonial extends AbstractPostType
             'key' => 'group_testimonial',
             'title' => __('Details zum Testimonial', 'wp-starter'),
             'fields' => self::getFieldDefinitions(),
-            'location' => [
-                [
-                    [
-                        'param' => 'post_type',
-                        'operator' => '==',
-                        'value' => self::$postType,
-                    ],
-                ],
-            ],
+            'location' => self::locationForThisType(),
             'menu_order' => 0,
             'position' => 'normal',
             'style' => 'default',
@@ -164,19 +146,11 @@ class Testimonial extends AbstractPostType
                     'label' => '',
                     'name' => '',
                     'type' => 'message',
-                    'message' => __('<strong>Kundenfoto:</strong> Verwende das "Beitragsbild" rechts für das Profilbild des Kunden.', 'wp-starter'),
+                    'message' => __('<strong>Foto:</strong> Verwende das „Beitragsbild“ rechts für das Foto des Kunden.', 'wp-starter'),
                     'esc_html' => 0,
                 ],
             ],
-            'location' => [
-                [
-                    [
-                        'param' => 'post_type',
-                        'operator' => '==',
-                        'value' => self::$postType,
-                    ],
-                ],
-            ],
+            'location' => self::locationForThisType(),
             'menu_order' => 1,
             'position' => 'side',
             'style' => 'default',
@@ -214,18 +188,18 @@ class Testimonial extends AbstractPostType
             FieldDefinitions::accordionField('testimonial_acc_review', __('Bewertung', 'wp-starter')),
             FieldDefinitions::textareaField(
                 'testimonial_content',
-                __('Text des Testimonials', 'wp-starter'),
+                __('Text der Kundenstimme', 'wp-starter'),
                 'content',
                 4,
-                __('Das Testimonial/die Kundenbewertung.', 'wp-starter'),
-                __('z.B. Die Zusammenarbeit war hervorragend...', 'wp-starter')
+                __('Die Kundenstimme bzw. Kundenbewertung.', 'wp-starter'),
+                __('z.B. Die Zusammenarbeit war hervorragend …', 'wp-starter')
             ),
             [
                 'key' => 'testimonial_rating',
                 'label' => __('Sterne-Bewertung', 'wp-starter'),
                 'name' => 'rating',
                 'type' => 'range',
-                'instructions' => __('Bewertung von 1-5 Sternen (optional).', 'wp-starter'),
+                'instructions' => __('Bewertung von 1 bis 5 Sternen (optional). 0 – keine Bewertung.', 'wp-starter'),
                 'min' => 0,
                 'max' => 5,
                 'step' => 1,

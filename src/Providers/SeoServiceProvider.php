@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\Acf\Fields;
 use WordpressStarter\MemberArea\Access;
+use WordpressStarter\PluginConfigurators\YoastSeoConfigurator;
 use WordpressStarter\Services\StyleguidePage;
 use WP_Post;
 use WP_Post_Type;
@@ -161,7 +163,7 @@ class SeoServiceProvider extends ServiceProvider
         // Yoast filters its own robots string separately from wp_robots on
         // some versions, so without this the styleguide/password overrides
         // above are silently overridden back to indexable when Yoast is active.
-        if (defined('WPSEO_VERSION')) {
+        if (YoastSeoConfigurator::isPluginActive()) {
             add_filter('wpseo_robots', function (string $robots): string {
                 $overridden = $this->applyRobotsOverrides(['index' => true]);
 
@@ -195,6 +197,19 @@ class SeoServiceProvider extends ServiceProvider
         add_filter('wpseo_metadesc', $gate);
         add_filter('wpseo_opengraph_desc', $gate);
         add_filter('wpseo_twitter_description', $gate);
+
+        // Yoast's JSON-LD WebPage/Article nodes read the description from the
+        // indexable, not from the filtered presenter output above.
+        $schemaGate = function (array $data): array {
+            if (Access::isProtectedForCurrentVisitor( (int) get_queried_object_id())) {
+                unset($data['description']);
+            }
+
+            return $data;
+        };
+
+        add_filter('wpseo_schema_webpage', $schemaGate);
+        add_filter('wpseo_schema_article', $schemaGate);
     }
 
     /**
@@ -317,7 +332,7 @@ class SeoServiceProvider extends ServiceProvider
         add_action('wp_head', function (): void {
             // Yoast emits WebSite and Organization itself; two competing nodes
             // for the same entity are worse than one.
-            $seoPluginOwnsSchema = defined('WPSEO_VERSION');
+            $seoPluginOwnsSchema = YoastSeoConfigurator::isPluginActive();
 
             // WebSite Schema (front page only)
             if (is_front_page() && !$seoPluginOwnsSchema) {
@@ -500,6 +515,38 @@ class SeoServiceProvider extends ServiceProvider
     }
 
     /**
+     * Ancestor pages of a page, root first. Shared by the BreadcrumbList JSON-LD
+     * and the visible breadcrumbs partial so both trails stay identical.
+     *
+     * @return array<int, array{name: string, url: string}>
+     */
+    public static function getPageAncestorItems(WP_Post $post): array
+    {
+        $items = [];
+
+        foreach (array_reverse(get_post_ancestors($post->ID)) as $ancestorId) {
+            $ancestor = get_post($ancestorId);
+            if ($ancestor) {
+                $items[] = [
+                    'name' => get_the_title($ancestor),
+                    'url' => get_permalink($ancestor),
+                ];
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * Whether JSON-LD may be emitted for the current request: only content the
+     * public can reach (singular, published, not password-gated).
+     */
+    public static function canEmitSchema(): bool
+    {
+        return is_singular() && get_post_status() === 'publish' && !post_password_required();
+    }
+
+    /**
      * Build breadcrumb items array for schema generation
      *
      * @return array<int, array{name: string, url: string}>
@@ -522,18 +569,7 @@ class SeoServiceProvider extends ServiceProvider
 
             // For pages, add ancestors
             if (is_page() && $post->post_parent) {
-                $ancestors = get_post_ancestors($post->ID);
-                $ancestors = array_reverse($ancestors);
-
-                foreach ($ancestors as $ancestorId) {
-                    $ancestor = get_post($ancestorId);
-                    if ($ancestor) {
-                        $items[] = [
-                            'name' => get_the_title($ancestor),
-                            'url' => get_permalink($ancestor),
-                        ];
-                    }
-                }
+                array_push($items, ...self::getPageAncestorItems($post));
             }
 
             // For posts, add blog page if set
@@ -602,14 +638,18 @@ class SeoServiceProvider extends ServiceProvider
     {
         add_action('wp_head', function (): void {
             // Skip if Yoast SEO is active - it handles canonical URLs
-            if (defined('WPSEO_VERSION')) {
+            if (YoastSeoConfigurator::isPluginActive()) {
                 return;
             }
 
-            // Skip if another SEO plugin has already output canonical
-            if (has_action('wp_head', 'rel_canonical')) {
+            // Core registers rel_canonical by default; a missing callback means
+            // another SEO plugin took over canonical output.
+            if (!has_action('wp_head', 'rel_canonical')) {
                 return;
             }
+
+            // Core only covers singular posts; our tag covers every context.
+            remove_action('wp_head', 'rel_canonical');
 
             $canonicalUrl = $this->getCanonicalUrl();
 
@@ -671,7 +711,7 @@ class SeoServiceProvider extends ServiceProvider
     {
         add_action('wp_head', function (): void {
             // Yoast owns the description tag when active; two would conflict.
-            if (defined('WPSEO_VERSION')) {
+            if (YoastSeoConfigurator::isPluginActive()) {
                 return;
             }
 
@@ -812,7 +852,7 @@ class SeoServiceProvider extends ServiceProvider
     {
         add_action('wp_head', function (): void {
             // Skip if Yoast SEO is active - it handles Open Graph tags
-            if (defined('WPSEO_VERSION')) {
+            if (YoastSeoConfigurator::isPluginActive()) {
                 return;
             }
 
@@ -907,16 +947,10 @@ class SeoServiceProvider extends ServiceProvider
             return $this->getImageMetadata( (int) $socialImageId, 'full');
         }
 
-        // 3. Try site logo
-        $acfLogo = $themeOptions['site_logo'] ?? null;
-        if ($acfLogo && !empty($acfLogo['id'])) {
-            return $this->getImageMetadata( (int) $acfLogo['id'], 'full');
-        }
-
-        // 4. Fallback to Customizer logo
-        $customLogoId = get_theme_mod('custom_logo');
-        if ($customLogoId) {
-            return $this->getImageMetadata( (int) $customLogoId, 'full');
+        // 3. Site logo (ACF, then Customizer)
+        $logoId = Fields::siteLogoId();
+        if ($logoId) {
+            return $this->getImageMetadata($logoId, 'full');
         }
 
         return null;
@@ -1127,11 +1161,10 @@ class SeoServiceProvider extends ServiceProvider
     }
 
     /**
-     * Krumen mit » statt > trennen.
+     * Separate crumbs with » instead of >.
      *
-     * Yoast nimmt das Trennzeichen aus seinen Einstellungen. Der Filter setzt
-     * es unabhaengig davon, was dort gespeichert ist, damit alle Seiten
-     * dasselbe Zeichen zeigen.
+     * Yoast takes the separator from its settings. The filter sets it
+     * regardless of what is stored there, so all pages show the same character.
      */
     private function setBreadcrumbSeparator(): void
     {

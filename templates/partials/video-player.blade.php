@@ -17,12 +17,7 @@
       $loop             — bool, adds loop
       $ariaLabel        — accessible label for the <video> element
       $aspectClass      — Tailwind aspect-ratio class
-      $id               — optional id attribute, '' to omit
 --}}
-
-@php
-    $id ??= '';
-@endphp
 
 <video
     controls
@@ -38,7 +33,6 @@
     aria-label="{{ $ariaLabel }}"
     class="w-full {{ $aspectClass }} object-cover rounded-lg"
     @if($poster) poster="{{ esc_url($poster) }}" @endif
-    @if($id) id="{{ esc_attr($id) }}" @endif
 >
     <source src="{{ esc_url($url) }}"@if($mimeType) type="{{ esc_attr($mimeType) }}"@endif>
     @if($captions)
@@ -50,5 +44,6 @@
             default
         >
     @endif
-    Ihr Browser unterstützt das Video-Tag nicht.
+    {{ __('Dein Browser kann dieses Video nicht abspielen.', 'wp-starter') }}
+    <a href="{{ esc_url($url) }}">{{ __('Video herunterladen', 'wp-starter') }}</a>
 </video>

@@ -56,30 +56,12 @@ class Team extends AbstractPostType
     protected static array|false $rewrite = false;
 
     /**
-     * Register the custom post type with admin columns
-     */
-    public static function register(): void
-    {
-        parent::register();
-        self::registerAdminColumns();
-    }
-
-    /**
      * Declarative admin list-table columns (thumbnail, position, email, display_order)
      */
     protected static function adminColumns(): array
     {
         return [
-            'thumbnail' => [
-                'label' => __('Foto', 'wp-starter'),
-                'before' => 'title',
-                'width' => 60,
-                'render' => function (int $postId): void {
-                    $thumbnail = get_the_post_thumbnail($postId, [50, 50], ['style' => 'border-radius: 50%; object-fit: cover;']);
-                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_the_post_thumbnail() returns safe HTML
-                    echo $thumbnail ?: '<span style="color: #999;">—</span>';
-                },
-            ],
+            'thumbnail' => self::thumbnailColumn(),
             'position' => [
                 'label' => __('Position', 'wp-starter'),
                 'after' => 'title',
@@ -123,15 +105,7 @@ class Team extends AbstractPostType
             'key' => 'group_team_member',
             'title' => __('Details zum Teammitglied', 'wp-starter'),
             'fields' => self::getFieldDefinitions(),
-            'location' => [
-                [
-                    [
-                        'param' => 'post_type',
-                        'operator' => '==',
-                        'value' => self::$postType,
-                    ],
-                ],
-            ],
+            'location' => self::locationForThisType(),
             'menu_order' => 0,
             'position' => 'normal',
             'style' => 'default',
@@ -160,19 +134,11 @@ class Team extends AbstractPostType
                     'label' => '',
                     'name' => '',
                     'type' => 'message',
-                    'message' => __('<strong>Profilbild:</strong> Verwende das "Beitragsbild" rechts für das Foto der Person.', 'wp-starter'),
+                    'message' => __('<strong>Foto:</strong> Verwende das „Beitragsbild“ rechts für das Foto der Person.', 'wp-starter'),
                     'esc_html' => 0,
                 ],
             ],
-            'location' => [
-                [
-                    [
-                        'param' => 'post_type',
-                        'operator' => '==',
-                        'value' => self::$postType,
-                    ],
-                ],
-            ],
+            'location' => self::locationForThisType(),
             'menu_order' => 1,
             'position' => 'side',
             'style' => 'default',
@@ -186,6 +152,8 @@ class Team extends AbstractPostType
      */
     private static function getFieldDefinitions(): array
     {
+        $contact = FieldDefinitions::teamContactFields('team_member');
+
         return [
             // Accordion: Berufliche Informationen
             FieldDefinitions::accordionField('team_acc_job', __('Berufliche Informationen', 'wp-starter'), true),
@@ -208,15 +176,7 @@ class Team extends AbstractPostType
 
             // Accordion: Kontaktdaten
             FieldDefinitions::accordionField('team_acc_contact', __('Kontaktdaten', 'wp-starter')),
-            [
-                'key' => 'team_member_email',
-                'label' => __('E-Mail', 'wp-starter'),
-                'name' => 'email',
-                'type' => 'email',
-                'instructions' => __('Direkte E-Mail-Adresse.', 'wp-starter'),
-                'placeholder' => 'max@beispiel.de',
-                'wrapper' => ['width' => '50'],
-            ],
+            $contact[0],
             [
                 'key' => 'team_member_phone',
                 'label' => __('Telefon', 'wp-starter'),
@@ -226,15 +186,7 @@ class Team extends AbstractPostType
                 'placeholder' => '+49 123 456789',
                 'wrapper' => ['width' => '50'],
             ],
-            [
-                'key' => 'team_member_linkedin',
-                'label' => __('LinkedIn', 'wp-starter'),
-                'name' => 'linkedin',
-                'type' => 'url',
-                'instructions' => __('Link zum LinkedIn-Profil.', 'wp-starter'),
-                'placeholder' => 'https://linkedin.com/in/...',
-                'wrapper' => ['width' => '50'],
-            ],
+            $contact[1],
             [
                 'key' => 'team_member_xing',
                 'label' => __('Xing', 'wp-starter'),

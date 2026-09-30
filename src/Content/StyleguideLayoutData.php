@@ -15,8 +15,18 @@ namespace WordpressStarter\Content;
  */
 class StyleguideLayoutData
 {
+    public const IMAGE_PORTRAIT = 'portrait';
+    public const IMAGE_VIDEO_DEMO = 'video_demo';
+    public const IMAGE_PLACEHOLDER_PREFIX = 'placeholder_';
+    public const IMAGE_LOGO_PREFIX = 'logo_';
+
+    private const DEMO_YOUTUBE_EMBED_URL = 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ';
+    private const DEMO_YOUTUBE_WATCH_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+    private const DEMO_CONTACT_URL = 'https://example.org/kontakt';
+    private const DEMO_MAPS_EMBED_URL = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2427.924165409515!2d13.404954!3d52.520008!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47a84e373f035901%3A0x42120465b5e3b70!2sBerlin!5e0!3m2!1sde!2sde!4v1234567890';
+
     /**
-     * @param array<string, int> $imageIds Keyed as placeholder_N and logo_N
+     * @param array<string, int> $imageIds Keyed by the IMAGE_* constants (placeholder_N, logo_N, portrait, video_demo)
      */
     public function __construct(private readonly array $imageIds)
     {
@@ -173,7 +183,7 @@ class StyleguideLayoutData
             'background_image' => $this->imageId(1),
             'overlay_opacity' => 70,
             'cta_primary' => self::link('Mehr erfahren', 'https://example.org/leistungen'),
-            'cta_secondary' => self::link('Kontakt aufnehmen', 'https://example.org/kontakt'),
+            'cta_secondary' => self::link('Kontakt aufnehmen', self::DEMO_CONTACT_URL),
         ]);
     }
 
@@ -329,7 +339,7 @@ class StyleguideLayoutData
     private function getQuoteLayoutData(): array
     {
         return $this->layout('quote', [
-            'quote' => 'Die Förderung hat uns den Start ermöglicht, und die Begleitung danach hat uns gehalten.',
+            'quote' => 'Die Zusammenarbeit hat uns den Start ermöglicht, und die Begleitung danach hat uns gehalten.',
             'author' => 'Maria Beispiel',
             'role' => 'Projektleiterin',
             'image' => $this->imageId(1),
@@ -356,7 +366,7 @@ class StyleguideLayoutData
         // der ohne Eintrag in den Einstellungen ohnehin laedt.
         return $this->layout('embed', [
             'title' => 'Eingebetteter Inhalt',
-            'url' => 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ',
+            'url' => self::DEMO_YOUTUBE_EMBED_URL,
             'iframe_title' => 'Beispiel-Einbettung',
             'aspect_ratio' => '16-9',
             'background_color' => 'primary',
@@ -474,8 +484,8 @@ class StyleguideLayoutData
         return $this->layout('pricing_table', [
             'title' => 'Unsere Pakete',
             'plans' => [
-                ['name' => 'Starter', 'price' => '49 EUR', 'period' => 'Monat', 'features' => '<ul><li>Grundfunktionen</li><li>E-Mail Support</li><li>5 Projekte</li><li>1 Benutzer</li></ul>', 'cta' => self::link('Auswählen', '#'), 'is_featured' => false],
-                ['name' => 'Professional', 'price' => '99 EUR', 'period' => 'Monat', 'features' => '<ul><li>Alle Funktionen</li><li>Prioritäts-Support</li><li>Unbegrenzte Projekte</li><li>5 Benutzer</li><li>API-Zugang</li></ul>', 'cta' => self::link('Auswählen', '#'), 'is_featured' => true],
+                ['name' => 'Starter', 'price' => '49 €', 'period' => 'Monat', 'features' => '<ul><li>Grundfunktionen</li><li>E-Mail Support</li><li>5 Projekte</li><li>1 Benutzer</li></ul>', 'cta' => self::link('Auswählen', '#'), 'is_featured' => false],
+                ['name' => 'Professional', 'price' => '99 €', 'period' => 'Monat', 'features' => '<ul><li>Alle Funktionen</li><li>Prioritäts-Support</li><li>Unbegrenzte Projekte</li><li>5 Benutzer</li><li>API-Zugang</li></ul>', 'cta' => self::link('Auswählen', '#'), 'is_featured' => true],
                 ['name' => 'Enterprise', 'price' => 'Auf Anfrage', 'period' => '', 'features' => '<ul><li>Individuelle Lösungen</li><li>Dedicated Support</li><li>On-Premise Option</li><li>Unbegrenzte Benutzer</li><li>SLA-Garantie</li></ul>', 'cta' => self::link('Kontakt', '#'), 'is_featured' => false],
             ],
             'background_color' => 'secondary',
@@ -547,7 +557,7 @@ class StyleguideLayoutData
         return $this->layout('video', [
             'source' => 'external',
             'video' => '',
-            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            'video_url' => self::DEMO_YOUTUBE_WATCH_URL,
             // Mit Standbild: so soll es aussehen. Eine Katalog-Instanz weiter
             // unten laesst es bewusst weg, damit beide Zustaende sichtbar sind.
             'poster' => $this->imageId(3),
@@ -589,7 +599,7 @@ class StyleguideLayoutData
         return $this->layout('cta', [
             'title' => 'Bereit loszulegen?',
             'content' => 'Schreib uns für ein unverbindliches Gespräch. Wir hören zu, bevor wir etwas vorschlagen.',
-            'button' => self::link('Jetzt Kontakt aufnehmen', 'https://example.org/kontakt'),
+            'button' => self::link('Jetzt Kontakt aufnehmen', self::DEMO_CONTACT_URL),
         ]);
     }
 
@@ -597,7 +607,7 @@ class StyleguideLayoutData
     private function getButtonLayoutData(): array
     {
         return $this->layout('button', [
-            'button' => self::link('Beratungstermin vereinbaren', 'https://example.org/kontakt'),
+            'button' => self::link('Beratungstermin vereinbaren', self::DEMO_CONTACT_URL),
             'variant' => 'secondary',
             'alignment' => 'center',
         ]);
@@ -620,7 +630,7 @@ class StyleguideLayoutData
     {
         return $this->layout('newsletter', [
             'title' => 'Auf dem Laufenden bleiben',
-            'content' => 'Viermal im Jahr ein kurzer Bericht darüber, was gefördert wurde.',
+            'content' => 'Viermal im Jahr ein kurzer Bericht darüber, was bei uns passiert ist.',
             'action_url' => 'https://example.com/newsletter',
             'email_field' => 'EMAIL',
             'button_label' => 'Anmelden',
@@ -635,7 +645,7 @@ class StyleguideLayoutData
         return $this->layout('map', [
             'title' => 'So findest du uns',
             'address' => 'Musterstraße 123, 12345 Berlin, Deutschland',
-            'embed_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2427.924165409515!2d13.404954!3d52.520008!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47a84e373f035901%3A0x42120465b5e3b70!2sBerlin!5e0!3m2!1sde!2sde!4v1234567890',
+            'embed_url' => self::DEMO_MAPS_EMBED_URL,
             'height' => 400,
             'show_directions_link' => true,
             'background_color' => 'primary',
@@ -665,10 +675,10 @@ class StyleguideLayoutData
             'title' => 'Preisübersicht',
             'headers' => [['label' => 'Leistung'], ['label' => 'Starter'], ['label' => 'Professional']],
             'rows' => [
-                ['cells' => [['content' => 'Beratung'], ['content' => '2 Std./Monat'], ['content' => 'Unbegrenzt']]],
+                ['cells' => [['content' => 'Beratung'], ['content' => '2 Std./Monat'], ['content' => 'Unbegrenzt']]],
                 ['cells' => [['content' => 'Support'], ['content' => 'E-Mail'], ['content' => 'Telefon & E-Mail']]],
                 ['cells' => [['content' => 'Projekte'], ['content' => '5'], ['content' => 'Unbegrenzt']]],
-                ['cells' => [['content' => 'Speicherplatz'], ['content' => '10 GB'], ['content' => '100 GB']]],
+                ['cells' => [['content' => 'Speicherplatz'], ['content' => '10 GB'], ['content' => '100 GB']]],
             ],
             'striped' => true,
             'bordered' => false,
@@ -704,17 +714,17 @@ class StyleguideLayoutData
 
     private function imageId(int $index): ?int
     {
-        return $this->imageIds["placeholder_{$index}"] ?? null;
+        return $this->imageIds[self::IMAGE_PLACEHOLDER_PREFIX . $index] ?? null;
     }
 
     private function logoId(int $index): ?int
     {
-        return $this->imageIds["logo_{$index}"] ?? null;
+        return $this->imageIds[self::IMAGE_LOGO_PREFIX . $index] ?? null;
     }
 
     private function videoId(): ?int
     {
-        return $this->imageIds['video_demo'] ?? null;
+        return $this->imageIds[self::IMAGE_VIDEO_DEMO] ?? null;
     }
 
     /**
@@ -911,12 +921,12 @@ class StyleguideLayoutData
         // Stufe 2 der Abdeckung: beide Flaechen mindestens einmal, auf einem
         // textlastigen und einem kartenbasierten Modul.
         $catalog[] = $this->layout('one_column', [
-            'content' => '<h3>Fläche: Markenfarbe</h3><p>Fließtext auf der Markenfläche. Diese Kombination war bis zum Audit vom 10.08.2026 nie im Styleguide zu sehen.</p>',
+            'content' => '<h3>Fläche: Markenfarbe</h3><p>Fließtext auf der Markenfläche. Sie zeigt die Lesbarkeit von Text auf der Markenfläche.</p>',
             'background_color' => 'brand',
         ]);
 
         $catalog[] = $this->layout('one_column', [
-            'content' => '<h3>Fläche: Dunkel (Invers)</h3><p>Fließtext auf der dunklen Fläche. Ebenfalls nie geprüft, bis der Kontrastscan sie eingefordert hat.</p>',
+            'content' => '<h3>Fläche: Dunkel (Invers)</h3><p>Fließtext auf der dunklen Fläche. Sie zeigt die Lesbarkeit von Text auf dunklem Grund.</p>',
             'background_color' => 'inverse',
         ]);
 
@@ -948,14 +958,14 @@ class StyleguideLayoutData
         $catalog[] = $this->layout('cta', [
             'title' => 'CTA auf sekundärer Fläche',
             'content' => 'Die Sektion färbt sich, die Karte bleibt auf der Markenfläche.',
-            'button' => self::link('Kontakt aufnehmen', 'https://example.org/kontakt'),
+            'button' => self::link('Kontakt aufnehmen', self::DEMO_CONTACT_URL),
             'background_color' => 'secondary',
         ]);
 
         $catalog[] = $this->layout('cta', [
             'title' => 'CTA auf dunkler Fläche',
             'content' => 'Dieselbe Karte auf der inversen Fläche.',
-            'button' => self::link('Kontakt aufnehmen', 'https://example.org/kontakt'),
+            'button' => self::link('Kontakt aufnehmen', self::DEMO_CONTACT_URL),
             'background_color' => 'inverse',
         ]);
 
@@ -1032,8 +1042,8 @@ class StyleguideLayoutData
         $catalog[] = $this->layout('pricing_table', [
             'title' => 'Pakete mit Umschalter Monat und Jahr',
             'plans' => [
-                ['name' => 'Basis', 'price' => '19 EUR', 'period' => 'Monat', 'price_yearly' => '190 EUR', 'period_yearly' => 'Jahr', 'features' => '<ul><li>Grundfunktionen</li><li>E-Mail Support</li></ul>', 'is_featured' => false, 'cta' => self::link('Auswählen', '#')],
-                ['name' => 'Plus', 'price' => '39 EUR', 'period' => 'Monat', 'price_yearly' => '390 EUR', 'period_yearly' => 'Jahr', 'features' => '<ul><li>Alle Funktionen</li><li>Prioritäts-Support</li></ul>', 'is_featured' => true, 'cta' => self::link('Auswählen', '#')],
+                ['name' => 'Basis', 'price' => '19 €', 'period' => 'Monat', 'price_yearly' => '190 €', 'period_yearly' => 'Jahr', 'features' => '<ul><li>Grundfunktionen</li><li>E-Mail Support</li></ul>', 'is_featured' => false, 'cta' => self::link('Auswählen', '#')],
+                ['name' => 'Plus', 'price' => '39 €', 'period' => 'Monat', 'price_yearly' => '390 €', 'period_yearly' => 'Jahr', 'features' => '<ul><li>Alle Funktionen</li><li>Prioritäts-Support</li></ul>', 'is_featured' => true, 'cta' => self::link('Auswählen', '#')],
                 ['name' => 'Auf Anfrage', 'price' => 'Individuell', 'period' => '', 'price_yearly' => '', 'period_yearly' => '', 'features' => '<ul><li>Individuelle Lösung</li></ul>', 'is_featured' => false, 'cta' => self::link('Kontakt', '#')],
             ],
             'billing_toggle' => true,
@@ -1072,7 +1082,7 @@ class StyleguideLayoutData
         ]);
 
         $catalog[] = $this->layout('button', [
-            'button' => self::link('Termin vereinbaren', 'https://example.org/kontakt'),
+            'button' => self::link('Termin vereinbaren', self::DEMO_CONTACT_URL),
             'button_secondary' => self::link('Unterlagen ansehen', 'https://example.org/downloads'),
             'variant' => 'primary',
             'size' => 'md',
@@ -1083,7 +1093,7 @@ class StyleguideLayoutData
         // Hinweise: alle vier Arten, der letzte zusaetzlich schliessbar.
         $catalog[] = $this->layout('alert', [
             'variant' => 'success',
-            'title' => 'Antrag eingegangen',
+            'title' => 'Nachricht gesendet',
             'content' => '<p>Der grüne Hinweis bestätigt etwas, das geklappt hat.</p>',
             'background_color' => 'primary',
         ]);
@@ -1097,7 +1107,7 @@ class StyleguideLayoutData
 
         $catalog[] = $this->layout('alert', [
             'variant' => 'error',
-            'title' => 'Antrag unvollständig',
+            'title' => 'Angaben unvollständig',
             'content' => '<p>Der rote Hinweis meldet einen Fehler und trägt role="alert".</p>',
             'dismissible' => true,
             'background_color' => 'primary',
@@ -1127,7 +1137,7 @@ class StyleguideLayoutData
         // Einbettung in den drei uebrigen Verhaeltnissen.
         $catalog[] = $this->layout('embed', [
             'title' => 'Einbettung 4:3',
-            'url' => 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ',
+            'url' => self::DEMO_YOUTUBE_EMBED_URL,
             'iframe_title' => 'Beispiel-Einbettung',
             'aspect_ratio' => '4-3',
             'background_color' => 'secondary',
@@ -1135,7 +1145,7 @@ class StyleguideLayoutData
 
         $catalog[] = $this->layout('embed', [
             'title' => 'Einbettung 1:1',
-            'url' => 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ',
+            'url' => self::DEMO_YOUTUBE_EMBED_URL,
             'iframe_title' => 'Beispiel-Einbettung',
             'aspect_ratio' => '1-1',
             'background_color' => 'primary',
@@ -1143,7 +1153,7 @@ class StyleguideLayoutData
 
         $catalog[] = $this->layout('embed', [
             'title' => 'Einbettung mit fester Höhe',
-            'url' => 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ',
+            'url' => self::DEMO_YOUTUBE_EMBED_URL,
             'iframe_title' => 'Beispiel-Einbettung',
             'aspect_ratio' => 'fixed',
             'height' => 320,
@@ -1172,7 +1182,7 @@ class StyleguideLayoutData
         // dafuer nicht, die Kopfzeile bliebe sichtbar, ohne je zu kleben.
         $catalog[] = $this->layout('table', [
             'title' => 'Kompakt mit mitscrollender Kopfzeile',
-            'headers' => [['label' => 'Jahr'], ['label' => 'Anträge'], ['label' => 'Bewilligt'], ['label' => 'Summe']],
+            'headers' => [['label' => 'Jahr'], ['label' => 'Anfragen'], ['label' => 'Abgeschlossen'], ['label' => 'Summe']],
             'rows' => array_map(
                 static fn (int $i): array => [
                     'cells' => [
@@ -1196,7 +1206,7 @@ class StyleguideLayoutData
         $catalog[] = $this->layout('cards', [
             'title' => 'Karten mit Chip und Einleitung',
             'section_chip' => 'Leistungen',
-            'section_description' => 'Die Einleitung steht jetzt im Modul selbst, nicht mehr in einer eigenen Textsektion davor.',
+            'section_description' => 'Die Einleitung gehört zum Modul und braucht keine eigene Textsektion davor.',
             'section_alignment' => 'left',
             'cards' => [
                 ['icon' => 'check', 'title' => 'Linksbündig', 'content' => 'Chip, Überschrift und Einleitung stehen links.', 'link' => null],
@@ -1361,7 +1371,7 @@ class StyleguideLayoutData
         $catalog[] = $this->layout('video', [
             'source' => 'external',
             'video' => '',
-            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            'video_url' => self::DEMO_YOUTUBE_WATCH_URL,
             'captions_language' => 'it',
             'background_color' => 'primary',
         ]);
@@ -1421,7 +1431,7 @@ class StyleguideLayoutData
         $catalog[] = $this->layout('map', [
             'title' => 'Karte ohne Routen-Link',
             'address' => 'Musterstraße 123, 12345 Berlin, Deutschland',
-            'embed_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2427.924165409515!2d13.404954!3d52.520008!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47a84e373f035901%3A0x42120465b5e3b70!2sBerlin!5e0!3m2!1sde!2sde!4v1234567890',
+            'embed_url' => self::DEMO_MAPS_EMBED_URL,
             'height' => 300,
             'show_directions_link' => false,
             'background_color' => 'secondary',
@@ -1460,7 +1470,7 @@ class StyleguideLayoutData
      */
     private function portraitId(): ?int
     {
-        return $this->imageIds['portrait'] ?? $this->imageId(1);
+        return $this->imageIds[self::IMAGE_PORTRAIT] ?? $this->imageId(1);
     }
 
     // =========================================================================
@@ -1492,7 +1502,7 @@ class StyleguideLayoutData
             $this->layout('one_column', [
                 'content' => '<h2>Zustände</h2><p>Ab hier folgen Randfälle: fehlende Bilder, '
                     . 'überlange Texte, Wiederholungsfelder mit einem einzigen Eintrag. Sie '
-                    . 'gehören zur Abnahme, nicht in den Gestaltungsvorschlag.</p>',
+                    . 'dienen der Qualitätsprüfung und gehören nicht in eine echte Seite.</p>',
                 'background_color' => 'secondary',
             ]),
 

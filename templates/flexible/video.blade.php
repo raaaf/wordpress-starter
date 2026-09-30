@@ -92,6 +92,13 @@
     $autoplay = $selfHosted && (bool) get_sub_field('autoplay');
     $loop = $selfHosted && (bool) get_sub_field('loop');
 
+    // A direct file URL on a foreign host contacts that host on page load, so it
+    // goes behind the consent gate like YouTube/Vimeo. Own hosts stay ungated.
+    $ownHosts = array_filter([wp_parse_url(home_url(), PHP_URL_HOST)]);
+    $fileUrlHost = $video_file_url ? wp_parse_url($video_file_url, PHP_URL_HOST) : null;
+    $fileUrlGated = $source === 'url' && $fileUrlHost
+        && !in_array(strtolower($fileUrlHost), array_map('strtolower', $ownHosts), true);
+
     $posterId = (int) (get_sub_field('poster') ?: 0);
     $posterUrl = $posterId > 0 ? wp_get_attachment_image_url($posterId, 'hero-background') : '';
 
@@ -129,7 +136,7 @@
         <div class="max-w-6xl mx-auto">
             <div
                 class="relative overflow-hidden rounded-lg {{ $aspectClass }} bg-surface-secondary"
-                x-data="{ loaded: {{ $selfHosted ? 'true' : 'false' }}, iframeLoaded: false, iframeError: false }"
+                x-data="{ loaded: {{ $selfHosted && !$fileUrlGated ? 'true' : 'false' }}, iframeLoaded: false, iframeError: false }"
                 x-ref="videoContainer"
                 tabindex="-1"
             >
@@ -254,20 +261,42 @@
                         'aspectClass' => $aspectClass,
                     ])
                 @elseif($source === 'url' && $video_file_url)
-                    {{-- External file URL - no consent needed. Geteiltes Markup in
-                         partials/video-player.blade.php. --}}
-                    @include('partials.video-player', [
-                        'url' => $video_file_url,
-                        'mimeType' => $videoFileUrlMimeType,
-                        'poster' => $posterUrl,
-                        'captions' => $captions,
-                        'captionsLanguage' => $captionsLanguage,
-                        'captionsLabel' => $captionsLabel,
-                        'autoplay' => $autoplay,
-                        'loop' => $loop,
-                        'ariaLabel' => $video_title ? sprintf(__('Video: %s', 'wp-starter'), $video_title) : __('Video', 'wp-starter'),
-                        'aspectClass' => $aspectClass,
-                    ])
+                    @php
+                        $filePlayerData = [
+                            'url' => $video_file_url,
+                            'mimeType' => $videoFileUrlMimeType,
+                            'poster' => $posterUrl,
+                            'captions' => $captions,
+                            'captionsLanguage' => $captionsLanguage,
+                            'captionsLabel' => $captionsLabel,
+                            'autoplay' => $autoplay,
+                            'loop' => $loop,
+                            'ariaLabel' => $video_title ? sprintf(__('Video: %s', 'wp-starter'), $video_title) : __('Video', 'wp-starter'),
+                            'aspectClass' => $aspectClass,
+                        ];
+                    @endphp
+                    @if($fileUrlGated)
+                        {{-- Foreign host: nothing is requested until the click. --}}
+                        @include('partials.consent-gate', [
+                            'containerRef' => 'videoContainer',
+                            'icon' => 'play',
+                            'iconClass' => 'text-content-secondary',
+                            'wrapperClass' => 'video-consent-notice',
+                            'textClass' => 'text-content-secondary',
+                            'message' => __('Zum Abspielen des Videos wird eine Datei von einem externen Server geladen.', 'wp-starter'),
+                            'buttonLabel' => __('Video laden', 'wp-starter'),
+                            'providerName' => $fileUrlHost,
+                            'privacyLink' => get_privacy_policy_url(),
+                            'ownPrivacyPolicy' => true,
+                        ])
+                        <template x-if="loaded">
+                            <div>@include('partials.video-player', $filePlayerData)</div>
+                        </template>
+                    @else
+                        {{-- Own host - no consent needed. Geteiltes Markup in
+                             partials/video-player.blade.php. --}}
+                        @include('partials.video-player', $filePlayerData)
+                    @endif
                 @endif
             </div>
         </div>

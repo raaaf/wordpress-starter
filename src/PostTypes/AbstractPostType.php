@@ -121,6 +121,36 @@ abstract class AbstractPostType
     public static function register(): void
     {
         add_action('init', [static::class, 'registerPostType']);
+        static::registerAdminColumns();
+    }
+
+    /**
+     * ACF group location rule: show the group on this post type's edit screen.
+     *
+     * @return array<int, array<int, array<string, string>>>
+     */
+    protected static function locationForThisType(): array
+    {
+        return [[['param' => 'post_type', 'operator' => '==', 'value' => static::$postType]]];
+    }
+
+    /**
+     * Shared "thumbnail" admin column: round 50px featured image, dash fallback.
+     *
+     * @return array<string, mixed>
+     */
+    protected static function thumbnailColumn(): array
+    {
+        return [
+            'label' => __('Foto', 'wp-starter'),
+            'before' => 'title',
+            'width' => 60,
+            'render' => function (int $postId): void {
+                $thumbnail = get_the_post_thumbnail($postId, [50, 50], ['style' => 'border-radius: 50%; object-fit: cover;']);
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_the_post_thumbnail() returns safe HTML
+                echo $thumbnail ?: '<span style="color: #999;">—</span>';
+            },
+        ];
     }
 
     /**

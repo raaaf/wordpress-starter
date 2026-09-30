@@ -8,7 +8,7 @@
     $isMemberArea = is_page() && function_exists('get_field') && get_field('page_is_member_area');
     $isAuthenticated = $isMemberArea && \WordpressStarter\MemberArea\Auth::isAuthenticated();
 
-    // Ancestor pages, same order as SeoServiceProvider::getBreadcrumbItems(), so
+    // Ancestor pages via SeoServiceProvider::getPageAncestorItems(), so
     // the visual trail below matches the BreadcrumbList JSON-LD that provider
     // already emits on wp_head. Only that one schema exists now; this partial
     // used to render its own second, non-ancestor-aware one.
@@ -16,12 +16,7 @@
     if ($showBreadcrumbs && !$hasYoast && is_page()) {
         $currentPost = get_queried_object();
         if ($currentPost instanceof \WP_Post && $currentPost->post_parent) {
-            foreach (array_reverse(get_post_ancestors($currentPost->ID)) as $ancestorId) {
-                $breadcrumbAncestors[] = [
-                    'title' => get_the_title($ancestorId),
-                    'url' => get_permalink($ancestorId),
-                ];
-            }
+            $breadcrumbAncestors = \WordpressStarter\Providers\SeoServiceProvider::getPageAncestorItems($currentPost);
         }
     }
 @endphp
@@ -40,7 +35,7 @@
                         @foreach($breadcrumbAncestors as $ancestor)
                             <li aria-hidden="true" class="text-content-tertiary">»</li>
                             <li>
-                                <a href="{{ esc_url($ancestor['url']) }}" class="hover:text-content transition-colors">{{ $ancestor['title'] }}</a>
+                                <a href="{{ esc_url($ancestor['url']) }}" class="hover:text-content transition-colors">{{ $ancestor['name'] }}</a>
                             </li>
                         @endforeach
                         @if(!is_front_page())

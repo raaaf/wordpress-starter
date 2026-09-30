@@ -603,9 +603,23 @@ class AcfServiceProvider extends ServiceProvider
      */
     private static function matchesFormat(string $format, string $value): bool
     {
+        return self::parseStrict($format, $value) !== null;
+    }
+
+    /**
+     * Strict parse of a stored value; null unless it round-trips unchanged
+     * (rejects non-strings, overflowing dates like 20261332 and huge numbers).
+     * Shared by the validators above and the Event reader.
+     */
+    public static function parseStrict(string $format, mixed $value): ?\DateTimeImmutable
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
         $parsed = \DateTimeImmutable::createFromFormat($format, $value);
 
-        return $parsed !== false && $parsed->format(ltrim($format, '!')) === $value;
+        return $parsed !== false && $parsed->format(ltrim($format, '!')) === $value ? $parsed : null;
     }
 
     /**

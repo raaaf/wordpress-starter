@@ -184,6 +184,42 @@ final class SeoServiceProviderTest extends TestCase
     /**
      * @runInSeparateProcess
      */
+    public function testWpseoSchemaFiltersDropDescriptionForProtectedPage(): void
+    {
+        if (!defined('WPSEO_VERSION')) {
+            define('WPSEO_VERSION', '1.0');
+        }
+
+        $GLOBALS['wp_mock_queried_object_id'] = 55;
+        $this->setMockField('page_is_protected', true, 55);
+        $GLOBALS['wp_mock_current_user_id'] = 0;
+
+        $this->provider->boot();
+
+        $node = ['@type' => 'WebPage', 'description' => 'Protected text'];
+
+        $this->assertArrayNotHasKey('description', apply_filters('wpseo_schema_webpage', $node));
+        $this->assertArrayNotHasKey('description', apply_filters('wpseo_schema_article', $node));
+    }
+
+    public function testSingularDoubleHonoursSeededPostType(): void
+    {
+        $GLOBALS['wp_mock_is_singular'] = true;
+        $GLOBALS['wp_mock_singular_type'] = 'page';
+
+        try {
+            $this->assertTrue(is_singular());
+            $this->assertTrue(is_singular('page'));
+            $this->assertFalse(is_singular('post'));
+        } finally {
+            // Not in WordPressMocks' reset map (unowned file), so clean up here.
+            unset($GLOBALS['wp_mock_singular_type']);
+        }
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
     public function testWpseoDescriptionFiltersPassThroughForAuthenticatedMember(): void
     {
         if (!defined('WPSEO_VERSION')) {

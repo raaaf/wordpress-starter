@@ -153,7 +153,7 @@ ls -la dist/
 | 5.3 | Farben-Sektion                 | Alle Design Tokens     |     |
 | 5.4 | Typography-Sektion             | Display, H1-H5, Body   |     |
 | 5.5 | Spacing-Sektion                | Alle Abstände          |     |
-| 5.6 | Block-Übersicht                | Tabelle mit 27+ Blocks |     |
+| 5.6 | Block-Übersicht                | Tabelle mit 37 Layouts |     |
 | 5.7 | Notice verschwindet            | Nach Erstellung        |     |
 
 ---
@@ -185,7 +185,7 @@ Stichprobe über die 37 Layouts aus `templates/flexible/`, je Layout mindestens 
 | #    | Layout                                 | Test                                                                           | Erwartet                                                                                                                                                                                      | ✓   |
 | ---- | -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
 | 7.1  | hero                                   | Variante Zentriert/Split/Hintergrund                                           | Je Variante korrektes Layout, Overlay-Regler wirkt nur bei Hintergrund                                                                                                                        |     |
-| 7.2  | hero                                   | Zwei Hero-Layouts auf einer Seite                                              | Erstes Hero rendert `<h1>`, jedes weitere `<h2>`                                                                                                                                              |     |
+| 7.2  | hero                                   | Hero zweimal hinzufügen versuchen                                              | Editor erlaubt nur ein Hero (`max` 1); das Hero rendert genau ein `<h1>`                                                                                                                      |     |
 | 7.3  | accordion                              | Mehrere Items, FAQ-Schema                                                      | Auf-/Zuklappen funktioniert, strukturierte Daten im Quelltext vorhanden                                                                                                                       |     |
 | 7.4  | tabs                                   | Mehrere Tabs mit Inhalt                                                        | Tab-Wechsel funktioniert, aktiver Tab visuell markiert                                                                                                                                        |     |
 | 7.5  | gallery                                | Mehrere Bilder                                                                 | Lightbox öffnet über medium-zoom, kein Alpine-Fehler in der Konsole                                                                                                                           |     |
@@ -337,7 +337,7 @@ Stichprobe über die 37 Layouts aus `templates/flexible/`, je Layout mindestens 
 | C   | Keine JS-Fehler in Console     |        |     |
 | D   | Responsive auf Mobile getestet |        |     |
 | E   | Dark Mode funktioniert         |        |     |
-| F   | Alle 27+ Blocks funktionieren  |        |     |
+| F   | Alle 37 Layouts funktionieren  |        |     |
 
 ---
 

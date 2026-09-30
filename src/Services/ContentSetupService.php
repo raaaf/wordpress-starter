@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace WordpressStarter\Services;
 
 use WordpressStarter\Providers\LogServiceProvider;
-use WordpressStarter\Providers\WelcomeServiceProvider;
 use WordpressStarter\ThemeContext;
 
 /**
@@ -17,6 +16,14 @@ use WordpressStarter\ThemeContext;
  */
 class ContentSetupService
 {
+    /**
+     * Post meta flag marking an attachment as one the styleguide importer created.
+     *
+     * Lets rerun() safely delete only the styleguide placeholder attachments it
+     * is responsible for, never an unrelated attachment that shares a cached ID.
+     */
+    public const STYLEGUIDE_IMAGE_META_KEY = '_wp_starter_styleguide_image';
+
     /**
      * Default options used when no config file is present (rerun path).
      *
@@ -102,7 +109,7 @@ class ContentSetupService
      * Without this, a rerun discards the ID cache and re-imports fresh
      * placeholders while the old attachments stay in the media library,
      * orphaned forever. Only attachments created by the styleguide importer
-     * (marked via WelcomeServiceProvider::STYLEGUIDE_IMAGE_META_KEY) are
+     * (marked via self::STYLEGUIDE_IMAGE_META_KEY) are
      * deleted, and only if the cached ID still resolves to an attachment.
      * A stale ID may point at nothing, or at a post a user has since
      * re-purposed.
@@ -124,7 +131,7 @@ class ContentSetupService
                 continue;
             }
 
-            if (!get_post_meta($attachmentId, WelcomeServiceProvider::STYLEGUIDE_IMAGE_META_KEY, true)) {
+            if (!get_post_meta($attachmentId, self::STYLEGUIDE_IMAGE_META_KEY, true)) {
                 continue;
             }
 
