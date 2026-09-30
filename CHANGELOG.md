@@ -1,3 +1,5 @@
+## [2.37.3](https://github.com/raaaf/wordpress-starter/compare/v2.37.2...v2.37.3) (2026-09-30)
+
 ## [2.37.2](https://github.com/raaaf/wordpress-starter/compare/v2.37.1...v2.37.2) (2026-09-30)
 
 ### Bug Fixes
