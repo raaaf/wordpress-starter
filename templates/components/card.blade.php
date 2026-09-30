@@ -88,8 +88,8 @@
         ? implode(' ', [
             // active:scale-[0.99] is a Tailwind v4 `scale` utility, not `transform`.
             'transition-[color,background,border-color,box-shadow,scale] duration-200 cursor-pointer',
-            'hover:border-line-brand hover:shadow-[var(--shadow-card-hover)]',
-            'active:shadow-[var(--shadow-inner)] active:scale-[0.99] motion-reduce:transform-none',
+            'hover:border-line-brand hover:shadow-[var(--rafael-shadow-card-hover)]',
+            'active:shadow-[var(--rafael-shadow-inner)] active:scale-[0.99] motion-reduce:transform-none',
             'focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--ring-focus)]',
         ])
         : '';
@@ -101,7 +101,7 @@
 
     // Selected state (from Figma)
     $selectedClasses = $selected && !$disabled
-        ? 'border-line-brand shadow-[var(--shadow-card-hover)]'
+        ? 'border-line-brand shadow-[var(--rafael-shadow-card-hover)]'
         : '';
 
     // Use stretched-link pattern to avoid nested interactive elements

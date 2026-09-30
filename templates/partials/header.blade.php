@@ -25,8 +25,8 @@
     @endif
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {{-- Browser chrome colour per scheme. Values are --bg-primary from
-         resources/css/tokens.css (light: --color-gray-100 #F5F5F5, dark:
-         --color-black #000000), the same token bg-surface resolves to. --}}
+         resources/css/tokens.css (light: --rafael-color-gray-100 #F5F5F5, dark:
+         --rafael-color-black #000000), the same token bg-surface resolves to. --}}
     <meta name="theme-color" content="#F5F5F5" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
     <link rel="pingback" href="{{ esc_url(get_bloginfo('pingback_url')) }}">

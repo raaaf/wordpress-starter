@@ -37,7 +37,7 @@
 
   body {
     margin: 0;
-    font-family: var(--font-family-body, ui-sans-serif, system-ui, sans-serif);
+    font-family: var(--rafael-font-family-body, ui-sans-serif, system-ui, sans-serif);
     background-color: var(--bg-primary, #fff);
     color: var(--text-primary, #1a1a1a);
   }

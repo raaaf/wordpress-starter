@@ -113,7 +113,7 @@
         @foreach(StyleguideReference::spacing() as $token)
             <div class="flex items-center gap-4">
                 <code class="shrink-0 text-code text-content-secondary w-28">{{ $token }}</code>
-                <div class="h-4 bg-surface-accent rounded-[var(--radius-sm)]" style="width: var({{ $token }})"></div>
+                <div class="h-4 bg-surface-accent rounded-[var(--rafael-radius-sm)]" style="width: var({{ $token }})"></div>
             </div>
         @endforeach
     </div>

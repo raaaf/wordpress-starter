@@ -227,9 +227,36 @@ function assertSafeCssValue(value, context) {
 }
 
 /**
+ * Primitive families emitted with the "rafael-" prefix (see toCssVarName
+ * call sites below). An alias that targets one of these primitives has to
+ * be rewritten to the prefixed name too, or the resulting var() points at
+ * a CSS custom property that no longer exists.
+ */
+const RAFAEL_PREFIXED_FAMILIES = [
+  'font-family',
+  'font-weight',
+  'font-size',
+  'shadow-color',
+  'shadow',
+  'color',
+  'spacing',
+  'radius',
+  'opacity',
+];
+
+function withRafaelPrefix(varName) {
+  for (const family of RAFAEL_PREFIXED_FAMILIES) {
+    if (varName === family || varName.startsWith(`${family}-`)) {
+      return `rafael-${varName}`;
+    }
+  }
+  return varName;
+}
+
+/**
  * Extract CSS var() reference from Figma token alias data.
  * Converts aliasData.targetVariableName (e.g. "color/accent/500")
- * to var(--color-accent-500). Falls back to resolved hex value.
+ * to var(--rafael-color-accent-500). Falls back to resolved hex value.
  */
 function extractColorAsReference(token) {
   if (!token || token.$type !== 'color') return null;
@@ -240,7 +267,7 @@ function extractColorAsReference(token) {
       aliasData.targetVariableName.replace(/\//g, '-'),
       'aliasData.targetVariableName'
     );
-    return `var(--${varName})`;
+    return `var(--${withRafaelPrefix(varName)})`;
   }
 
   // Fallback to resolved hex value if no alias
@@ -341,7 +368,7 @@ function extractColorOrAlias(token) {
   if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
     const path = value.slice(1, -1); // Remove braces
     const varName = assertSafeVarNameSegment(path.replace(/\./g, '-'), 'gradient alias path'); // dots to dashes
-    return `var(--${varName})`;
+    return `var(--${withRafaelPrefix(varName)})`;
   }
 
   // Fall back to regular color extraction
@@ -533,75 +560,75 @@ function buildTypographyTokens(lineHeight = {}, tracking = {}) {
      ============================================ */
 
   /* Display - 6xl / Regular (for hero headlines) */
-  --typography-display-size: var(--font-size-6xl);
-  --typography-display-weight: var(--font-weight-regular);
+  --typography-display-size: var(--rafael-font-size-6xl);
+  --typography-display-weight: var(--rafael-font-weight-regular);
   --typography-display-line-height: ${displayLh};
   --typography-display-letter-spacing: ${headingTracking};
 
   /* Heading 1 - 4xl / Regular */
-  --typography-h1-size: var(--font-size-4xl);
-  --typography-h1-weight: var(--font-weight-regular);
+  --typography-h1-size: var(--rafael-font-size-4xl);
+  --typography-h1-weight: var(--rafael-font-weight-regular);
   --typography-h1-line-height: ${h1Lh};
   --typography-h1-letter-spacing: ${headingTracking};
 
   /* Heading 2 - 3xl / Regular */
-  --typography-h2-size: var(--font-size-3xl);
-  --typography-h2-weight: var(--font-weight-regular);
+  --typography-h2-size: var(--rafael-font-size-3xl);
+  --typography-h2-weight: var(--rafael-font-weight-regular);
   --typography-h2-line-height: ${h2Lh};
   --typography-h2-letter-spacing: ${headingTracking};
 
   /* Heading 3 - 2xl / Regular */
-  --typography-h3-size: var(--font-size-2xl);
-  --typography-h3-weight: var(--font-weight-regular);
+  --typography-h3-size: var(--rafael-font-size-2xl);
+  --typography-h3-weight: var(--rafael-font-weight-regular);
   --typography-h3-line-height: ${h3Lh};
   --typography-h3-letter-spacing: ${headingTracking};
 
   /* Heading 4 - xl / Regular */
-  --typography-h4-size: var(--font-size-xl);
-  --typography-h4-weight: var(--font-weight-regular);
+  --typography-h4-size: var(--rafael-font-size-xl);
+  --typography-h4-weight: var(--rafael-font-weight-regular);
   --typography-h4-line-height: ${h4Lh};
   --typography-h4-letter-spacing: ${bodyTracking};
 
   /* Heading 5 - lg / Regular */
-  --typography-h5-size: var(--font-size-lg);
-  --typography-h5-weight: var(--font-weight-regular);
+  --typography-h5-size: var(--rafael-font-size-lg);
+  --typography-h5-weight: var(--rafael-font-weight-regular);
   --typography-h5-line-height: ${h5Lh};
   --typography-h5-letter-spacing: ${bodyTracking};
 
   /* Body Large - lg / Regular */
-  --typography-body-large-size: var(--font-size-lg);
-  --typography-body-large-weight: var(--font-weight-regular);
+  --typography-body-large-size: var(--rafael-font-size-lg);
+  --typography-body-large-weight: var(--rafael-font-weight-regular);
   --typography-body-large-line-height: 1.6;
   --typography-body-large-letter-spacing: ${bodyTracking};
 
   /* Body - base / Regular */
-  --typography-body-size: var(--font-size-base);
-  --typography-body-weight: var(--font-weight-regular);
+  --typography-body-size: var(--rafael-font-size-base);
+  --typography-body-weight: var(--rafael-font-weight-regular);
   --typography-body-line-height: ${bodyLh};
   --typography-body-letter-spacing: ${bodyTracking};
 
   /* Body Small - sm / Regular */
-  --typography-body-small-size: var(--font-size-sm);
-  --typography-body-small-weight: var(--font-weight-regular);
+  --typography-body-small-size: var(--rafael-font-size-sm);
+  --typography-body-small-weight: var(--rafael-font-weight-regular);
   --typography-body-small-line-height: 1.5;
   --typography-body-small-letter-spacing: ${bodyTracking};
 
   /* Caption - xs / Regular */
-  --typography-caption-size: var(--font-size-xs);
-  --typography-caption-weight: var(--font-weight-regular);
+  --typography-caption-size: var(--rafael-font-size-xs);
+  --typography-caption-weight: var(--rafael-font-weight-regular);
   --typography-caption-line-height: ${captionLh};
   --typography-caption-letter-spacing: ${bodyTracking};
 
   /* Overline - xs / Regular / Uppercase */
-  --typography-overline-size: var(--font-size-xs);
-  --typography-overline-weight: var(--font-weight-regular);
+  --typography-overline-size: var(--rafael-font-size-xs);
+  --typography-overline-weight: var(--rafael-font-weight-regular);
   --typography-overline-line-height: 1.4;
   --typography-overline-letter-spacing: ${labelTracking};
   --typography-overline-transform: uppercase;
 
   /* Code - sm / Regular */
-  --typography-code-size: var(--font-size-sm);
-  --typography-code-weight: var(--font-weight-regular);
+  --typography-code-size: var(--rafael-font-size-sm);
+  --typography-code-weight: var(--rafael-font-weight-regular);
   --typography-code-line-height: 1.5;
   --typography-code-letter-spacing: ${bodyTracking};
 `;
@@ -624,56 +651,56 @@ const COMPONENT_TOKENS = `
   /* Button Sizes */
   /* Pill CTAs: radius is full on every size. Heights follow the rafaelalex.de
      scale (md = 44px, the thumbable minimum). */
-  --button-sm-padding-x: var(--spacing-3);
+  --button-sm-padding-x: var(--rafael-spacing-3);
   --button-sm-padding-y: 4px;
-  --button-sm-radius: var(--radius-md);
+  --button-sm-radius: var(--rafael-radius-md);
   --button-sm-min-height: 2.25rem;
-  --button-sm-gap: var(--spacing-1-5);
-  --button-md-padding-x: var(--spacing-5);
-  --button-md-padding-y: var(--spacing-2-5);
-  --button-md-radius: var(--radius-md);
+  --button-sm-gap: var(--rafael-spacing-1-5);
+  --button-md-padding-x: var(--rafael-spacing-5);
+  --button-md-padding-y: var(--rafael-spacing-2-5);
+  --button-md-radius: var(--rafael-radius-md);
   --button-md-min-height: 2.75rem;
-  --button-md-gap: var(--spacing-2);
-  --button-lg-padding-x: var(--spacing-6);
-  --button-lg-padding-y: var(--spacing-3);
-  --button-lg-radius: var(--radius-md);
+  --button-md-gap: var(--rafael-spacing-2);
+  --button-lg-padding-x: var(--rafael-spacing-6);
+  --button-lg-padding-y: var(--rafael-spacing-3);
+  --button-lg-radius: var(--rafael-radius-md);
   --button-lg-min-height: 3.25rem;
-  --button-lg-gap: var(--spacing-2-5);
+  --button-lg-gap: var(--rafael-spacing-2-5);
 
   /* Input Sizes */
-  --input-sm-padding-x: var(--spacing-2-5);
-  --input-sm-padding-y: var(--spacing-1-5);
-  --input-sm-radius: var(--radius-sm);
-  --input-md-padding-x: var(--spacing-3);
-  --input-md-padding-y: var(--spacing-2-5);
-  --input-md-radius: var(--radius-md);
-  --input-lg-padding-x: var(--spacing-4);
-  --input-lg-padding-y: var(--spacing-3);
-  --input-lg-radius: var(--radius-lg);
+  --input-sm-padding-x: var(--rafael-spacing-2-5);
+  --input-sm-padding-y: var(--rafael-spacing-1-5);
+  --input-sm-radius: var(--rafael-radius-sm);
+  --input-md-padding-x: var(--rafael-spacing-3);
+  --input-md-padding-y: var(--rafael-spacing-2-5);
+  --input-md-radius: var(--rafael-radius-md);
+  --input-lg-padding-x: var(--rafael-spacing-4);
+  --input-lg-padding-y: var(--rafael-spacing-3);
+  --input-lg-radius: var(--rafael-radius-lg);
 
   /* Badge Sizes */
-  --badge-sm-padding-x: var(--spacing-1-5);
-  --badge-sm-padding-y: var(--spacing-0-5);
-  --badge-sm-radius: var(--radius-sm);
-  --badge-sm-gap: var(--spacing-1);
-  --badge-md-padding-x: var(--spacing-2-5);
-  --badge-md-padding-y: var(--spacing-1);
-  --badge-md-radius: var(--radius-md);
-  --badge-md-gap: var(--spacing-1-5);
-  --badge-lg-padding-x: var(--spacing-3);
-  --badge-lg-padding-y: var(--spacing-1-5);
-  --badge-lg-radius: var(--radius-md);
-  --badge-lg-gap: var(--spacing-2);
+  --badge-sm-padding-x: var(--rafael-spacing-1-5);
+  --badge-sm-padding-y: var(--rafael-spacing-0-5);
+  --badge-sm-radius: var(--rafael-radius-sm);
+  --badge-sm-gap: var(--rafael-spacing-1);
+  --badge-md-padding-x: var(--rafael-spacing-2-5);
+  --badge-md-padding-y: var(--rafael-spacing-1);
+  --badge-md-radius: var(--rafael-radius-md);
+  --badge-md-gap: var(--rafael-spacing-1-5);
+  --badge-lg-padding-x: var(--rafael-spacing-3);
+  --badge-lg-padding-y: var(--rafael-spacing-1-5);
+  --badge-lg-radius: var(--rafael-radius-md);
+  --badge-lg-gap: var(--rafael-spacing-2);
 
   /* Card Tokens */
   --card-bg: var(--bg-primary);
   --card-border: var(--border-default);
-  --card-radius: var(--radius-lg);
-  --card-padding: var(--spacing-5);
-  --card-gap: var(--spacing-4);
-  --card-media-radius: var(--radius-md);
-  --card-footer-gap: var(--spacing-3);
-  --card-footer-padding-top: var(--spacing-4);
+  --card-radius: var(--rafael-radius-lg);
+  --card-padding: var(--rafael-spacing-5);
+  --card-gap: var(--rafael-spacing-4);
+  --card-media-radius: var(--rafael-radius-md);
+  --card-footer-gap: var(--rafael-spacing-3);
+  --card-footer-padding-top: var(--rafael-spacing-4);
 `;
 
 /**
@@ -686,7 +713,7 @@ function validateAndFix(css) {
   let fixedCss = css;
 
   // 1. Check for unquoted font-family values (multi-word fonts need quotes)
-  const fontFamilyRegex = /--font-family-\w+:\s*([^;]+);/g;
+  const fontFamilyRegex = /--rafael-font-family-\w+:\s*([^;]+);/g;
   let match;
   while ((match = fontFamilyRegex.exec(css)) !== null) {
     const value = match[1].trim();
@@ -701,7 +728,7 @@ function validateAndFix(css) {
 
   // 2. Check for invalid color values (exclude border-width which is not a color)
   const colorRegex =
-    /--(?:color|bg|text|border-(?!width)[\w-]*|border-default|icon)-[\w-]*:\s*([^;]+);/g;
+    /--(?:rafael-color|bg|text|border-(?!width)[\w-]*|border-default|icon)-[\w-]*:\s*([^;]+);/g;
   while ((match = colorRegex.exec(css)) !== null) {
     const value = match[1].trim();
     // Skip CSS variable references
@@ -722,13 +749,13 @@ function validateAndFix(css) {
   // 3. Check for px values that should be rem (font-size).
   // Negative lookahead prevents matching inside clamp()/calc() expressions from
   // the fluid typography pipeline. Offset-based replace avoids substring collisions
-  // when the same --font-size-* line would appear twice anywhere in the CSS.
-  const fontSizeRegex = /--font-size-(\w+):\s*(?!clamp)(\d+)px;/g;
+  // when the same --rafael-font-size-* line would appear twice anywhere in the CSS.
+  const fontSizeRegex = /--rafael-font-size-(\w+):\s*(?!clamp)(\d+)px;/g;
   let fontSizeDelta = 0;
   while ((match = fontSizeRegex.exec(css)) !== null) {
     const pxValue = parseInt(match[2]);
     const remValue = (pxValue / 16).toFixed(4).replace(/\.?0+$/, '');
-    const replacement = `--font-size-${match[1]}: ${remValue}rem;`;
+    const replacement = `--rafael-font-size-${match[1]}: ${remValue}rem;`;
     warnings.push(`Font size in px: ${match[2]}px (should be ${remValue}rem for accessibility)`);
     const start = match.index + fontSizeDelta;
     fixedCss = fixedCss.slice(0, start) + replacement + fixedCss.slice(start + match[0].length);
@@ -738,11 +765,11 @@ function validateAndFix(css) {
 
   // 4. Check for missing required tokens
   const requiredTokens = [
-    '--font-family-headline',
-    '--font-family-body',
-    '--color-white',
-    '--color-gray-50',
-    '--color-gray-900',
+    '--rafael-font-family-headline',
+    '--rafael-font-family-body',
+    '--rafael-color-white',
+    '--rafael-color-gray-50',
+    '--rafael-color-gray-900',
     '--bg-primary',
     '--text-primary',
     '--border-default',
@@ -782,8 +809,8 @@ function transform() {
   // All three ramps are neutral-gray-toned and export near-identical hex values in the
   // starter theme. This is INTENTIONAL: primary/secondary are Figma variable aliases
   // providing semantic re-theming hooks for client forks. A client theme swaps
-  // --color-primary-* or --color-secondary-* to brand colors without touching gray.
-  // app.css references --color-primary-* explicitly, confirming the ramps are in active use.
+  // --rafael-color-primary-* or --rafael-color-secondary-* to brand colors without touching gray.
+  // app.css references --rafael-color-primary-* explicitly, confirming the ramps are in active use.
   // Do NOT deduplicate or remove any of the three ramps.
   const primitiveColors = flattenTokens(primitives.color || {}, '', extractColorValue);
 
@@ -928,28 +955,28 @@ function transform() {
 
 :root {
   /* Colors - Primitives */
-${generateCss(primitiveColors, 'color')}
+${generateCss(primitiveColors, 'rafael-color')}
 
   /* Spacing */
-${generateCss(primitiveSpacing, 'spacing')}
+${generateCss(primitiveSpacing, 'rafael-spacing')}
 
   /* Border Radius */
-${generateCss(primitiveRadius, 'radius')}
+${generateCss(primitiveRadius, 'rafael-radius')}
 
   /* Font Size */
-${generateCss(primitiveFontSize, 'font-size')}
+${generateCss(primitiveFontSize, 'rafael-font-size')}
 
   /* Font Weight */
-${generateCss(primitiveFontWeight, 'font-weight')}
+${generateCss(primitiveFontWeight, 'rafael-font-weight')}
 
   /* Font Family */
-${generateCss(primitiveFontFamily, 'font-family')}
+${generateCss(primitiveFontFamily, 'rafael-font-family')}
 
   /* Border Width */
 ${generateCss(primitiveBorderWidth, 'border-width')}
 
   /* Opacity */
-${generateCss(primitiveOpacity, 'opacity')}
+${generateCss(primitiveOpacity, 'rafael-opacity')}
 
   /* Sizing */
 ${generateCss(primitiveSizing, 'sizing')}
@@ -990,8 +1017,8 @@ ${generateCss(lightIcon, 'icon')}
 ${generateCss(lightRing, 'ring')}
 
   /* Shadow */
-${generateCss(lightShadowInk, 'shadow-color')}
-${generateCss(lightShadow, 'shadow')}
+${generateCss(lightShadowInk, 'rafael-shadow-color')}
+${generateCss(lightShadow, 'rafael-shadow')}
 }
 
 /* ============================================
@@ -1016,8 +1043,8 @@ ${generateCss(darkIcon, 'icon')}
 ${generateCss(darkRing, 'ring')}
 
   /* Shadow */
-${generateCss(darkShadowInk, 'shadow-color')}
-${generateCss(darkShadow, 'shadow')}
+${generateCss(darkShadowInk, 'rafael-shadow-color')}
+${generateCss(darkShadow, 'rafael-shadow')}
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1038,8 +1065,8 @@ ${generateCss(darkIcon, 'icon')}
 ${generateCss(darkRing, 'ring')}
 
   /* Shadow */
-${generateCss(darkShadowInk, 'shadow-color')}
-${generateCss(darkShadow, 'shadow')}
+${generateCss(darkShadowInk, 'rafael-shadow-color')}
+${generateCss(darkShadow, 'rafael-shadow')}
   }
 }
 `;
@@ -1093,28 +1120,28 @@ ${generateCss(darkShadow, 'shadow')}
 
 :root {
   /* Colors - Primitives */
-${generateCss(primitiveColors, 'color')}
+${generateCss(primitiveColors, 'rafael-color')}
 
   /* Spacing */
-${generateCss(primitiveSpacing, 'spacing')}
+${generateCss(primitiveSpacing, 'rafael-spacing')}
 
   /* Border Radius */
-${generateCss(primitiveRadius, 'radius')}
+${generateCss(primitiveRadius, 'rafael-radius')}
 
   /* Font Size */
-${generateCss(primitiveFontSize, 'font-size')}
+${generateCss(primitiveFontSize, 'rafael-font-size')}
 
   /* Font Weight */
-${generateCss(primitiveFontWeight, 'font-weight')}
+${generateCss(primitiveFontWeight, 'rafael-font-weight')}
 
   /* Font Family */
-${generateCss(primitiveFontFamily, 'font-family')}
+${generateCss(primitiveFontFamily, 'rafael-font-family')}
 
   /* Border Width */
 ${generateCss(primitiveBorderWidth, 'border-width')}
 
   /* Opacity */
-${generateCss(primitiveOpacity, 'opacity')}
+${generateCss(primitiveOpacity, 'rafael-opacity')}
 
   /* Sizing */
 ${generateCss(primitiveSizing, 'sizing')}
@@ -1154,8 +1181,8 @@ ${generateCss(lightIcon, 'icon')}
 ${generateCss(lightRing, 'ring')}
 
   /* Shadow */
-${generateCss(lightShadowInk, 'shadow-color')}
-${generateCss(lightShadow, 'shadow')}
+${generateCss(lightShadowInk, 'rafael-shadow-color')}
+${generateCss(lightShadow, 'rafael-shadow')}
 }
 
 /* ============================================

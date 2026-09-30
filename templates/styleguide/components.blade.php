@@ -206,7 +206,7 @@
         </p>
         <x-grid cols="4" gap="md">
             @for($i = 1; $i <= 4; $i++)
-                <div class="p-4 text-center bg-surface-secondary rounded-[var(--radius-md)] text-body-small text-content">
+                <div class="p-4 text-center bg-surface-secondary rounded-[var(--rafael-radius-md)] text-body-small text-content">
                     Spalte {{ $i }}
                 </div>
             @endfor

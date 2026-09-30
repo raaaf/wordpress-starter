@@ -1744,6 +1744,13 @@
           ],
           "alpha": 0.05,
           "hex": "#171717"
+        },
+        "$extensions": {
+          "com.figma.variableId": "VariableID:2038:1488",
+          "com.figma.scopes": [
+            "ALL_SCOPES"
+          ],
+          "com.figma.codeSyntax": {}
         }
       },
       "default": {
@@ -1757,6 +1764,13 @@
           ],
           "alpha": 0.1,
           "hex": "#171717"
+        },
+        "$extensions": {
+          "com.figma.variableId": "VariableID:2038:1489",
+          "com.figma.scopes": [
+            "ALL_SCOPES"
+          ],
+          "com.figma.codeSyntax": {}
         }
       },
       "md": {
@@ -1770,6 +1784,13 @@
           ],
           "alpha": 0.1,
           "hex": "#171717"
+        },
+        "$extensions": {
+          "com.figma.variableId": "VariableID:2038:1490",
+          "com.figma.scopes": [
+            "ALL_SCOPES"
+          ],
+          "com.figma.codeSyntax": {}
         }
       },
       "lg": {
@@ -1783,6 +1804,13 @@
           ],
           "alpha": 0.1,
           "hex": "#171717"
+        },
+        "$extensions": {
+          "com.figma.variableId": "VariableID:2038:1491",
+          "com.figma.scopes": [
+            "ALL_SCOPES"
+          ],
+          "com.figma.codeSyntax": {}
         }
       },
       "xl": {
@@ -1796,6 +1824,13 @@
           ],
           "alpha": 0.1,
           "hex": "#171717"
+        },
+        "$extensions": {
+          "com.figma.variableId": "VariableID:2038:1492",
+          "com.figma.scopes": [
+            "ALL_SCOPES"
+          ],
+          "com.figma.codeSyntax": {}
         }
       },
       "2xl": {
@@ -1809,12 +1844,20 @@
           ],
           "alpha": 0.25,
           "hex": "#171717"
+        },
+        "$extensions": {
+          "com.figma.variableId": "VariableID:2038:1493",
+          "com.figma.scopes": [
+            "ALL_SCOPES"
+          ],
+          "com.figma.codeSyntax": {}
         }
       }
     },
     "button": {
       "$type": "shadow",
-      "$value": []
+      "$value": [],
+      "$extensions": {}
     },
     "button-hover": {
       "$type": "shadow",
@@ -1833,7 +1876,8 @@
           "spread": "-2px",
           "color": "rgba(23,23,23,0.1)"
         }
-      ]
+      ],
+      "$extensions": {}
     },
     "inner": {
       "$type": "shadow",
@@ -1846,11 +1890,13 @@
           "color": "rgba(23,23,23,0.06)",
           "inset": true
         }
-      ]
+      ],
+      "$extensions": {}
     },
     "input": {
       "$type": "shadow",
-      "$value": []
+      "$value": [],
+      "$extensions": {}
     },
     "input-hover": {
       "$type": "shadow",
@@ -1869,11 +1915,13 @@
           "spread": "-1px",
           "color": "rgba(23,23,23,0.1)"
         }
-      ]
+      ],
+      "$extensions": {}
     },
     "card": {
       "$type": "shadow",
-      "$value": []
+      "$value": [],
+      "$extensions": {}
     },
     "card-hover": {
       "$type": "shadow",
@@ -1892,7 +1940,8 @@
           "spread": "-4px",
           "color": "rgba(23,23,23,0.1)"
         }
-      ]
+      ],
+      "$extensions": {}
     },
     "dropdown": {
       "$type": "shadow",
@@ -1911,7 +1960,8 @@
           "spread": "-4px",
           "color": "rgba(23,23,23,0.1)"
         }
-      ]
+      ],
+      "$extensions": {}
     },
     "modal": {
       "$type": "shadow",
@@ -1922,6 +1972,157 @@
           "blur": "50px",
           "spread": "-12px",
           "color": "rgba(23,23,23,0.25)"
+        }
+      ],
+      "$extensions": {}
+    },
+    "xs": {
+      "$type": "shadow",
+      "$value": [
+        {
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "2px",
+          "spread": "0px",
+          "color": "rgba(23,23,23,0.05)"
+        }
+      ]
+    },
+    "sm": {
+      "$type": "shadow",
+      "$value": [
+        {
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "3px",
+          "spread": "0px",
+          "color": "rgba(23,23,23,0.1)"
+        },
+        {
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "2px",
+          "spread": "-1px",
+          "color": "rgba(23,23,23,0.1)"
+        }
+      ]
+    },
+    "md": {
+      "$type": "shadow",
+      "$value": [
+        {
+          "offsetX": "0px",
+          "offsetY": "4px",
+          "blur": "6px",
+          "spread": "-1px",
+          "color": "rgba(23,23,23,0.1)"
+        },
+        {
+          "offsetX": "0px",
+          "offsetY": "2px",
+          "blur": "4px",
+          "spread": "-2px",
+          "color": "rgba(23,23,23,0.1)"
+        }
+      ]
+    },
+    "lg": {
+      "$type": "shadow",
+      "$value": [
+        {
+          "offsetX": "0px",
+          "offsetY": "10px",
+          "blur": "15px",
+          "spread": "-3px",
+          "color": "rgba(23,23,23,0.1)"
+        },
+        {
+          "offsetX": "0px",
+          "offsetY": "4px",
+          "blur": "6px",
+          "spread": "-4px",
+          "color": "rgba(23,23,23,0.1)"
+        }
+      ]
+    },
+    "xl": {
+      "$type": "shadow",
+      "$value": [
+        {
+          "offsetX": "0px",
+          "offsetY": "20px",
+          "blur": "25px",
+          "spread": "-5px",
+          "color": "rgba(23,23,23,0.1)"
+        },
+        {
+          "offsetX": "0px",
+          "offsetY": "8px",
+          "blur": "10px",
+          "spread": "-6px",
+          "color": "rgba(23,23,23,0.1)"
+        }
+      ]
+    },
+    "2xl": {
+      "$type": "shadow",
+      "$value": [
+        {
+          "offsetX": "0px",
+          "offsetY": "25px",
+          "blur": "50px",
+          "spread": "-12px",
+          "color": "rgba(23,23,23,0.25)"
+        }
+      ]
+    },
+    "focus-ring": {
+      "$type": "shadow",
+      "$value": [
+        {
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "blur": "0px",
+          "spread": "2px",
+          "color": "#FAFAF9"
+        },
+        {
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "blur": "0px",
+          "spread": "4px",
+          "color": "#C4451D"
+        }
+      ]
+    },
+    "focus-ring-ghost": {
+      "$type": "shadow",
+      "$value": [
+        {
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "blur": "0px",
+          "spread": "2px",
+          "color": "#C4451D"
+        }
+      ]
+    },
+    "focus-ring-error": {
+      "$type": "shadow",
+      "$value": [
+        {
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "blur": "0px",
+          "spread": "2px",
+          "color": "#FAFAF9"
+        },
+        {
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "blur": "0px",
+          "spread": "4px",
+          "color": "#EF4444"
         }
       ]
     }

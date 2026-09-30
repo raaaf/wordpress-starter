@@ -125,8 +125,8 @@
     // State classes from Figma
     $stateClasses = match(true) {
         $disabled => 'border-line-disabled bg-surface-disabled text-content-disabled cursor-not-allowed',
-        $hasError => 'border-line-error shadow-[var(--shadow-input)] focus:border-line-error focus:outline-3 focus:outline-offset-2 focus:outline-[var(--color-error)]',
-        default => 'border-line-control shadow-[var(--shadow-input)] hover:border-line-strong hover:shadow-[var(--shadow-input-hover)] focus:border-line-focus focus:outline-3 focus:outline-offset-2 focus:outline-[var(--ring-focus)]',
+        $hasError => 'border-line-error shadow-[var(--rafael-shadow-input)] focus:border-line-error focus:outline-3 focus:outline-offset-2 focus:outline-[var(--color-error)]',
+        default => 'border-line-control shadow-[var(--rafael-shadow-input)] hover:border-line-strong hover:shadow-[var(--rafael-shadow-input-hover)] focus:border-line-focus focus:outline-3 focus:outline-offset-2 focus:outline-[var(--ring-focus)]',
     };
 @endphp
 

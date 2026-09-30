@@ -127,13 +127,13 @@ final class StyleguideReference
             '--shadow-md' => 'shadow-md',
             '--shadow-lg' => 'shadow-lg',
             '--shadow-xl' => 'shadow-xl',
-            '--shadow-button' => 'shadow-button',
-            '--shadow-card' => 'shadow-card',
-            '--shadow-card-hover' => 'shadow-card-hover',
-            '--shadow-input' => 'shadow-input',
-            '--shadow-dropdown' => 'shadow-dropdown',
-            '--shadow-modal' => 'shadow-modal',
-            '--shadow-focus-ring' => 'shadow-focus-ring',
+            '--rafael-shadow-button' => 'shadow-button',
+            '--rafael-shadow-card' => 'shadow-card',
+            '--rafael-shadow-card-hover' => 'shadow-card-hover',
+            '--rafael-shadow-input' => 'shadow-input',
+            '--rafael-shadow-dropdown' => 'shadow-dropdown',
+            '--rafael-shadow-modal' => 'shadow-modal',
+            '--rafael-shadow-focus-ring' => 'shadow-focus-ring',
         ];
     }
 
@@ -180,7 +180,7 @@ final class StyleguideReference
      */
     public static function spacing(): array
     {
-        return ['--spacing-1', '--spacing-2', '--spacing-3', '--spacing-4', '--spacing-5', '--spacing-6', '--spacing-8', '--spacing-10', '--spacing-12', '--spacing-16', '--spacing-20', '--spacing-24'];
+        return ['--rafael-spacing-1', '--rafael-spacing-2', '--rafael-spacing-3', '--rafael-spacing-4', '--rafael-spacing-5', '--rafael-spacing-6', '--rafael-spacing-8', '--rafael-spacing-10', '--rafael-spacing-12', '--rafael-spacing-16', '--rafael-spacing-20', '--rafael-spacing-24'];
     }
 
     /**
@@ -191,12 +191,12 @@ final class StyleguideReference
     public static function radii(): array
     {
         return [
-            '--radius-sm' => 'radius-sm',
-            '--radius-md' => 'radius-md',
-            '--radius-lg' => 'radius-lg',
-            '--radius-xl' => 'radius-xl',
+            '--rafael-radius-sm' => 'radius-sm',
+            '--rafael-radius-md' => 'radius-md',
+            '--rafael-radius-lg' => 'radius-lg',
+            '--rafael-radius-xl' => 'radius-xl',
             '--card-radius' => 'card-radius',
-            '--radius-full' => 'radius-full',
+            '--rafael-radius-full' => 'radius-full',
         ];
     }
 }

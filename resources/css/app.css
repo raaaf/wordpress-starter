@@ -94,13 +94,6 @@
    ============================================ */
 
 :root {
-  --shadow-focus-ring: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--ring-focus);
-  --shadow-focus-ring-ghost: 0px 0px 0px 2px var(--ring-focus);
-  /* tokens.css points this at --color-error-alpha-50, which it never defines,
-     so it fell back to an inline 50 percent alpha with the same washed-out
-     result the accent ring had. Solid, like the others. */
-  --shadow-focus-ring-error: 0px 0px 0px 2px var(--bg-primary), 0px 0px 0px 4px var(--color-error);
-
   /* Text that sits on --bg-brand. Deliberately the same value in both colour
      schemes: the brand orange does not change with the scheme, so the text on
      it must not either. */
@@ -116,12 +109,12 @@
   /* Primary button reads as a flat fill, not a gradient (start === end):
      rafaelalex.de design system, section 5, primary CTA is a hairline pill
      at rest and a flat colour fill on hover/active, never a gradient. */
-  --gradient-primary-start: var(--color-accent-500);
-  --gradient-primary-end: var(--color-accent-500);
-  --gradient-primary-hover-start: var(--color-accent-600);
-  --gradient-primary-hover-end: var(--color-accent-600);
-  --gradient-primary-active-start: var(--color-accent-600);
-  --gradient-primary-active-end: var(--color-accent-600);
+  --gradient-primary-start: var(--rafael-color-accent-500);
+  --gradient-primary-end: var(--rafael-color-accent-500);
+  --gradient-primary-hover-start: var(--rafael-color-accent-600);
+  --gradient-primary-hover-end: var(--rafael-color-accent-600);
+  --gradient-primary-active-start: var(--rafael-color-accent-600);
+  --gradient-primary-active-end: var(--rafael-color-accent-600);
 
   /* Pure Paper cards on the Warm Paper page (light mode). */
   --card-bg: var(--bg-secondary);
@@ -151,7 +144,7 @@
      three-step error ramp, so there is no further token to step to. Mixed
      towards black instead, same direction the text-on-white fill needs to
      move to gain contrast (6.47:1 at rest -> 8.15:1 on hover). */
-  --bg-error-strong-hover: color-mix(in srgb, var(--color-error-dark) 85%, black);
+  --bg-error-strong-hover: color-mix(in srgb, var(--rafael-color-error-dark) 85%, black);
 
   /* Native widgets the theme does not draw itself: checkboxes and radios in
      WYSIWYG content, date pickers, scrollbars, form autofill. Without a
@@ -193,19 +186,19 @@
   --page-sheen: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, transparent 50%);
 
   /* Flat fill, same rule as the light-mode block above (start === end). */
-  --gradient-primary-start: var(--color-accent-500);
-  --gradient-primary-end: var(--color-accent-500);
-  --gradient-primary-hover-start: var(--color-accent-600);
-  --gradient-primary-hover-end: var(--color-accent-600);
-  --gradient-primary-active-start: var(--color-accent-600);
-  --gradient-primary-active-end: var(--color-accent-600);
+  --gradient-primary-start: var(--rafael-color-accent-500);
+  --gradient-primary-end: var(--rafael-color-accent-500);
+  --gradient-primary-hover-start: var(--rafael-color-accent-600);
+  --gradient-primary-hover-end: var(--rafael-color-accent-600);
+  --gradient-primary-active-start: var(--rafael-color-accent-600);
+  --gradient-primary-active-end: var(--rafael-color-accent-600);
 
   /* Here --bg-error-strong is the mid tone under near-black text (4.76:1 at
      rest, see point c above): darkening it the way light mode does would
      push it towards the text instead of away, the same trap point 3 already
      documents for the primary gradient. Mixed towards white instead
      (4.76:1 -> 5.99:1). */
-  --bg-error-strong-hover: color-mix(in srgb, var(--color-error) 80%, white);
+  --bg-error-strong-hover: color-mix(in srgb, var(--rafael-color-error) 80%, white);
 
   /* The plain Tailwind shadow-sm..shadow-2xl scale (see the TOKEN CORRECTIONS
      block above, point 2) is built from these --shadow-color-* custom
@@ -293,12 +286,12 @@
     --page-sheen: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, transparent 50%);
 
     /* Flat fill, same rule as the [data-theme='dark'] block above. */
-    --gradient-primary-start: var(--color-accent-500);
-    --gradient-primary-end: var(--color-accent-500);
-    --gradient-primary-hover-start: var(--color-accent-600);
-    --gradient-primary-hover-end: var(--color-accent-600);
-    --gradient-primary-active-start: var(--color-accent-600);
-    --gradient-primary-active-end: var(--color-accent-600);
+    --gradient-primary-start: var(--rafael-color-accent-500);
+    --gradient-primary-end: var(--rafael-color-accent-500);
+    --gradient-primary-hover-start: var(--rafael-color-accent-600);
+    --gradient-primary-hover-end: var(--rafael-color-accent-600);
+    --gradient-primary-active-start: var(--rafael-color-accent-600);
+    --gradient-primary-active-end: var(--rafael-color-accent-600);
 
     /* See the [data-theme='dark'] block above. */
 
@@ -307,7 +300,7 @@
     /* See the [data-theme='dark'] block above -- same unscoped :root
        correction, same fix. */
     /* See the [data-theme='dark'] block above: same trap, same fix. */
-    --bg-error-strong-hover: color-mix(in srgb, var(--color-error) 80%, white);
+    --bg-error-strong-hover: color-mix(in srgb, var(--rafael-color-error) 80%, white);
 
     /* See the [data-theme='dark'] block above: the plain shadow-sm..shadow-2xl
        scale needs its own dark ink too, not just the named component shadows. */
@@ -387,7 +380,7 @@
 
 @layer base {
   /* @tailwindcss/forms adds its own 1px ring on focus, in Tailwind's default
-     blue, which composes with the theme's --shadow-focus-ring into a visible
+     blue, which composes with the theme's --rafael-shadow-focus-ring into a visible
      double ring around every focused field. The theme supplies the ring, so
      the plugin's is switched off here. Deliberate ring-* utilities elsewhere
      (skip link, cards) are untouched. */
@@ -475,7 +468,7 @@ html {
   width: 100% !important;
   max-width: 100% !important;
   overflow: hidden;
-  border-radius: var(--radius-lg, 0.5rem);
+  border-radius: var(--rafael-radius-lg, 0.5rem);
 }
 
 .wp-video-shortcode,
@@ -484,7 +477,7 @@ html {
   max-width: 100% !important;
   height: auto !important;
   aspect-ratio: 16 / 9;
-  border-radius: var(--radius-lg, 0.5rem);
+  border-radius: var(--rafael-radius-lg, 0.5rem);
 }
 
 /* Inner video and overlay fill the aspect-ratio container */
@@ -553,7 +546,7 @@ html {
   }
 
   .prose :is(h1, h2, h3, h4, h5, h6) {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
     color: var(--text-primary);
     text-wrap: balance;
   }
@@ -809,35 +802,35 @@ html {
 @theme {
   /* Typography - from Figma tokens */
   --font-sans:
-    var(--font-family-body), ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-headline: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  --font-headline: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
   --font-mono:
-    var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    var(--rafael-font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Primitive Colors - Accent palette from Figma */
-  --color-accent-50: var(--color-accent-50);
-  --color-accent-100: var(--color-accent-100);
-  --color-accent-200: var(--color-accent-200);
-  --color-accent-300: var(--color-accent-300);
-  --color-accent-400: var(--color-accent-400);
-  --color-accent-500: var(--color-accent-500);
-  --color-accent-600: var(--color-accent-600);
-  --color-accent-700: var(--color-accent-700);
-  --color-accent-800: var(--color-accent-800);
-  --color-accent-900: var(--color-accent-900);
+  --color-accent-50: var(--rafael-color-accent-50);
+  --color-accent-100: var(--rafael-color-accent-100);
+  --color-accent-200: var(--rafael-color-accent-200);
+  --color-accent-300: var(--rafael-color-accent-300);
+  --color-accent-400: var(--rafael-color-accent-400);
+  --color-accent-500: var(--rafael-color-accent-500);
+  --color-accent-600: var(--rafael-color-accent-600);
+  --color-accent-700: var(--rafael-color-accent-700);
+  --color-accent-800: var(--rafael-color-accent-800);
+  --color-accent-900: var(--rafael-color-accent-900);
 
   /* Primitive Colors - Primary from Figma */
-  --color-primary-50: var(--color-primary-50);
-  --color-primary-100: var(--color-primary-100);
-  --color-primary-200: var(--color-primary-200);
-  --color-primary-300: var(--color-primary-300);
-  --color-primary-400: var(--color-primary-400);
-  --color-primary-500: var(--color-primary-500);
-  --color-primary-600: var(--color-primary-600);
-  --color-primary-700: var(--color-primary-700);
-  --color-primary-800: var(--color-primary-800);
-  --color-primary-900: var(--color-primary-900);
+  --color-primary-50: var(--rafael-color-primary-50);
+  --color-primary-100: var(--rafael-color-primary-100);
+  --color-primary-200: var(--rafael-color-primary-200);
+  --color-primary-300: var(--rafael-color-primary-300);
+  --color-primary-400: var(--rafael-color-primary-400);
+  --color-primary-500: var(--rafael-color-primary-500);
+  --color-primary-600: var(--rafael-color-primary-600);
+  --color-primary-700: var(--rafael-color-primary-700);
+  --color-primary-800: var(--rafael-color-primary-800);
+  --color-primary-900: var(--rafael-color-primary-900);
 
   /* ===== SEMANTIC TOKENS - Surface/Content Pattern ===== */
 
@@ -866,9 +859,9 @@ html {
   --color-surface-overlay: var(--bg-overlay);
 
   /* Status colors for hover/active states */
-  --color-error-dark: var(--color-error-dark);
-  --color-warning-dark: var(--color-warning-dark);
-  --color-success-dark: var(--color-success-dark);
+  --color-error-dark: var(--rafael-color-error-dark);
+  --color-warning-dark: var(--rafael-color-warning-dark);
+  --color-success-dark: var(--rafael-color-success-dark);
 
   /* Text → content-* */
   --color-content: var(--text-primary);
@@ -914,17 +907,21 @@ html {
   --color-icon-on-accent: var(--icon-on-accent);
 
   /* Status Colors - direct mapping */
-  --color-success: var(--color-success);
-  --color-warning: var(--color-warning);
-  --color-error: var(--color-error);
+  --color-success: var(--rafael-color-success);
+  --color-warning: var(--rafael-color-warning);
+  --color-error: var(--rafael-color-error);
 
-  /* Shadows - theme-aware, changes with light/dark mode */
-  --shadow-sm: 0 1px 2px 0 var(--shadow-color-sm);
-  --shadow: 0 1px 3px 0 var(--shadow-color-default), 0 1px 2px -1px var(--shadow-color-default);
-  --shadow-md: 0 4px 6px -1px var(--shadow-color-md), 0 2px 4px -2px var(--shadow-color-md);
-  --shadow-lg: 0 10px 15px -3px var(--shadow-color-lg), 0 4px 6px -4px var(--shadow-color-lg);
-  --shadow-xl: 0 20px 25px -5px var(--shadow-color-xl), 0 8px 10px -6px var(--shadow-color-xl);
-  --shadow-2xl: 0 25px 50px -12px var(--shadow-color-2xl);
+  /* Shadows - theme-aware, changes with light/dark mode. Composed once per
+     appearance in tokens.css (see COMPONENT_TOKENS / the shadow export in
+     scripts/transform-tokens.js), so the plain Tailwind scale below just
+     forwards those, instead of recomposing box-shadow layers from ink alone. */
+  --shadow-xs: var(--rafael-shadow-xs);
+  --shadow-sm: var(--rafael-shadow-sm);
+  --shadow: var(--rafael-shadow-sm);
+  --shadow-md: var(--rafael-shadow-md);
+  --shadow-lg: var(--rafael-shadow-lg);
+  --shadow-xl: var(--rafael-shadow-xl);
+  --shadow-2xl: var(--rafael-shadow-2xl);
 }
 
 /* ============================================
@@ -1021,7 +1018,7 @@ html {
 
   h1,
   .text-h1 {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h1-size);
     font-weight: var(--typography-h1-weight);
     line-height: var(--typography-h1-line-height);
@@ -1034,7 +1031,7 @@ html {
 
   h2,
   .text-h2 {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h2-size);
     font-weight: var(--typography-h2-weight);
     line-height: var(--typography-h2-line-height);
@@ -1047,7 +1044,7 @@ html {
 
   h3,
   .text-h3 {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h3-size);
     font-weight: var(--typography-h3-weight);
     line-height: var(--typography-h3-line-height);
@@ -1060,7 +1057,7 @@ html {
 
   h4,
   .text-h4 {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h4-size);
     font-weight: var(--typography-h4-weight);
     line-height: var(--typography-h4-line-height);
@@ -1073,7 +1070,7 @@ html {
 
   h5,
   .text-h5 {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h5-size);
     font-weight: var(--typography-h5-weight);
     line-height: var(--typography-h5-line-height);
@@ -1087,7 +1084,7 @@ html {
   /* h6 no longer shares h5's size — it steps down to the body size so the
      level is told apart without weight (weight is fixed at 400 theme-wide). */
   h6 {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-body-size);
     font-weight: var(--typography-h5-weight);
     line-height: var(--typography-h5-line-height);
@@ -1265,7 +1262,7 @@ html {
 @layer utilities {
   /* Display Heading - 60px / Bold */
   .text-display {
-    font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-display-size);
     font-weight: var(--typography-display-weight);
     line-height: var(--typography-display-line-height);
@@ -1278,7 +1275,7 @@ html {
 
   /* Body Large - 18px / Regular - Intro text */
   .text-body-large {
-    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-body-large-size);
     font-weight: var(--typography-body-large-weight);
     line-height: var(--typography-body-large-line-height);
@@ -1287,7 +1284,7 @@ html {
 
   /* Body - 16px / Regular - Standard text */
   .text-body {
-    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-body-size);
     font-weight: var(--typography-body-weight);
     line-height: var(--typography-body-line-height);
@@ -1296,7 +1293,7 @@ html {
 
   /* Body Small - 14px / Regular - Secondary text */
   .text-body-small {
-    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-body-small-size);
     font-weight: var(--typography-body-small-weight);
     line-height: var(--typography-body-small-line-height);
@@ -1305,7 +1302,7 @@ html {
 
   /* Caption - 12px / Regular - Meta info */
   .text-caption {
-    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-caption-size);
     font-weight: var(--typography-caption-weight);
     line-height: var(--typography-caption-line-height);
@@ -1314,7 +1311,7 @@ html {
 
   /* Overline - 12px / Semibold / Uppercase */
   .text-overline {
-    font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-overline-size);
     font-weight: var(--typography-overline-weight);
     line-height: var(--typography-overline-line-height);
@@ -1325,7 +1322,8 @@ html {
   /* Code - 14px / Mono */
   .text-code {
     font-family:
-      var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      var(--rafael-font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      monospace;
     font-size: var(--typography-code-size);
     font-weight: var(--typography-code-weight);
     line-height: var(--typography-code-line-height);
@@ -1429,7 +1427,7 @@ html {
   .wpcf7-form .wpcf7-response-output {
     margin: 1rem 0 0;
     padding: 0.75rem 1rem;
-    border-radius: var(--radius-md, 0.5rem);
+    border-radius: var(--rafael-radius-md, 0.5rem);
     border: 1px solid var(--border-default);
     color: var(--text-primary);
   }
@@ -1453,7 +1451,7 @@ html {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-control);
     border-radius: var(--input-md-radius);
-    box-shadow: var(--shadow-input);
+    box-shadow: var(--rafael-shadow-input);
     transition:
       color var(--motion-enter-duration) var(--motion-enter-ease),
       border-color var(--motion-enter-duration) var(--motion-enter-ease),
@@ -1480,7 +1478,7 @@ html {
   .wpcf7-form input[type='time']:hover,
   .wpcf7-form input[type='password']:hover {
     border-color: var(--border-strong);
-    box-shadow: var(--shadow-input-hover);
+    box-shadow: var(--rafael-shadow-input-hover);
   }
 
   .wpcf7-form input[type='text']:focus,
@@ -1507,7 +1505,7 @@ html {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-control);
     border-radius: var(--input-md-radius);
-    box-shadow: var(--shadow-input);
+    box-shadow: var(--rafael-shadow-input);
     resize: vertical;
     transition:
       color var(--motion-enter-duration) var(--motion-enter-ease),
@@ -1521,7 +1519,7 @@ html {
 
   .wpcf7-form textarea:hover {
     border-color: var(--border-strong);
-    box-shadow: var(--shadow-input-hover);
+    box-shadow: var(--rafael-shadow-input-hover);
   }
 
   .wpcf7-form textarea:focus {
@@ -1551,7 +1549,7 @@ html {
     background-size: 1rem;
     border: 1px solid var(--border-control);
     border-radius: var(--input-md-radius);
-    box-shadow: var(--shadow-input);
+    box-shadow: var(--rafael-shadow-input);
     appearance: none;
     cursor: pointer;
     transition:
@@ -1562,7 +1560,7 @@ html {
 
   .wpcf7-form select:hover {
     border-color: var(--border-strong);
-    box-shadow: var(--shadow-input-hover);
+    box-shadow: var(--rafael-shadow-input-hover);
   }
 
   .wpcf7-form select:focus {
@@ -1625,7 +1623,7 @@ html {
   }
 
   .wpcf7-form .wpcf7-list-item input[type='checkbox'] {
-    border-radius: var(--radius-sm);
+    border-radius: var(--rafael-radius-sm);
   }
 
   .wpcf7-form .wpcf7-list-item input[type='radio'] {
@@ -1678,7 +1676,7 @@ html {
     color: var(--text-primary);
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-control);
-    border-radius: var(--radius-sm);
+    border-radius: var(--rafael-radius-sm);
     cursor: pointer;
     transition:
       background-color var(--motion-enter-duration) var(--motion-enter-ease),
@@ -1877,13 +1875,13 @@ html {
     background-color: var(--color-surface-secondary);
     color: var(--color-content);
     border: 1px solid var(--color-line);
-    box-shadow: var(--shadow-button);
+    box-shadow: var(--rafael-shadow-button);
   }
 
   .prose a.button-secondary:hover,
   .button-secondary:hover {
     border-color: var(--color-line-strong);
-    box-shadow: var(--shadow-button-hover);
+    box-shadow: var(--rafael-shadow-button-hover);
     color: var(--color-content);
     text-decoration: none;
   }
@@ -1891,7 +1889,7 @@ html {
   .prose a.button-secondary:active,
   .button-secondary:active {
     background-color: var(--color-surface-tertiary);
-    box-shadow: var(--shadow-inner);
+    box-shadow: var(--rafael-shadow-inner);
     transform: scale(0.98);
   }
 
@@ -1921,16 +1919,16 @@ html {
     /* Mirrors button.blade.php danger. */
     color: var(--text-inverse);
     border: 1px solid transparent;
-    box-shadow: var(--shadow-button);
+    box-shadow: var(--rafael-shadow-button);
   }
 
   .button-danger:hover {
     background-color: var(--bg-error-strong-hover);
-    box-shadow: var(--shadow-button-hover);
+    box-shadow: var(--rafael-shadow-button-hover);
   }
 
   .button-danger:active {
-    box-shadow: var(--shadow-inner);
+    box-shadow: var(--rafael-shadow-inner);
     transform: scale(0.98);
   }
 
@@ -2124,8 +2122,8 @@ html {
     padding: 0;
     background: var(--bg-primary);
     border: 1px solid var(--border-default);
-    border-radius: var(--radius-md, 0.5rem);
-    box-shadow: var(--shadow-dropdown);
+    border-radius: var(--rafael-radius-md, 0.5rem);
+    box-shadow: var(--rafael-shadow-dropdown);
     opacity: 0;
     visibility: hidden;
     transform: translateY(0.25rem);
@@ -2168,13 +2166,13 @@ html {
      ueber die Rundung des Panels hinausstehen. Der Innenradius ist der des
      Panels abzueglich seiner Rahmenstaerke. */
   .desktop-nav .sub-menu > li:first-child > a {
-    border-start-start-radius: calc(var(--radius-md, 0.5rem) - 1px);
-    border-start-end-radius: calc(var(--radius-md, 0.5rem) - 1px);
+    border-start-start-radius: calc(var(--rafael-radius-md, 0.5rem) - 1px);
+    border-start-end-radius: calc(var(--rafael-radius-md, 0.5rem) - 1px);
   }
 
   .desktop-nav .sub-menu > li:last-child > a {
-    border-end-start-radius: calc(var(--radius-md, 0.5rem) - 1px);
-    border-end-end-radius: calc(var(--radius-md, 0.5rem) - 1px);
+    border-end-start-radius: calc(var(--rafael-radius-md, 0.5rem) - 1px);
+    border-end-end-radius: calc(var(--rafael-radius-md, 0.5rem) - 1px);
   }
 
   .desktop-nav .sub-menu a:hover {
@@ -2646,7 +2644,7 @@ html {
   margin: 1.25rem 0 0;
   padding: 0.75rem 1rem;
   font-size: var(--typography-body-small-size);
-  border-radius: var(--radius-md);
+  border-radius: var(--rafael-radius-md);
   border-width: 1px;
   border-style: solid;
   /* CF7 scrolls to this box after a submit; keep it clear of the sticky header */

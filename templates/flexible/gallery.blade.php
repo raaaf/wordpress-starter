@@ -52,7 +52,7 @@
                         {{-- Permanent zoom cue. The cursor change and the hover scale only
                              exist for pointer devices, so touch had no signal at all. --}}
                         <span
-                            class="absolute z-10 flex items-center justify-center w-8 h-8 rounded-full pointer-events-none top-2 right-2 bg-surface text-content shadow-[var(--shadow-card)]"
+                            class="absolute z-10 flex items-center justify-center w-8 h-8 rounded-full pointer-events-none top-2 right-2 bg-surface text-content shadow-[var(--rafael-shadow-card)]"
                             aria-hidden="true"
                         >
                             <x-icon name="search" size="lg" />

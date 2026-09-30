@@ -32,7 +32,7 @@
     // Checks that this is a singular, published, non-password-protected
     // page — schema is only emitted for content the public can actually
     // reach.
-    $canPublishFaqSchema = is_singular() && get_post_status() === 'publish' && !post_password_required();
+    $canPublishFaqSchema = \WordpressStarter\Providers\SeoServiceProvider::canEmitSchema();
 
     // Build FAQPage schema for SEO
     $faqQuestions = [];
@@ -101,7 +101,7 @@
                             @keydown.end.prevent="focusItem(itemCount - 1)"
                             :aria-expanded="isOpen({{ $index }})"
                             aria-controls="accordion-content-{{ $accordionId }}-{{ $index }}"
-                            class="group flex items-center justify-between w-full py-4 px-3 mb-0 font-normal text-left cursor-pointer transition-colors rounded-[var(--radius-sm)] hover:text-content-brand focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
+                            class="group flex items-center justify-between w-full py-4 px-3 mb-0 font-normal text-left cursor-pointer transition-colors rounded-[var(--rafael-radius-sm)] hover:text-content-brand focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
                             :class="{ 'text-content-brand': isOpen({{ $index }}) }">
                         <span class="flex items-center gap-3">
                             @if(!empty($item['icon']))

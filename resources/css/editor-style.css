@@ -21,7 +21,7 @@
    geladen, deshalb standen sie im Editor weiter offen. Diese Datei ist das
    Gegenstück zu app.css: handgeschrieben, für dieselben zwei Korrekturen.
 
-   1. Der Figma-Export überspringt --spacing-1 und --spacing-2, obwohl vier
+   1. Der Figma-Export überspringt --rafael-spacing-1 und --rafael-spacing-2, obwohl vier
       Komponenten-Tokens sie referenzieren. Eine undefinierte Variable macht
       die ganze Deklaration ungültig, der mittlere Button verlor damit den
       Abstand zwischen Symbol und Beschriftung und Badges ihre vertikale
@@ -36,15 +36,15 @@
    ============================================ */
 
 :root {
-  --spacing-1: 4px;
-  --spacing-2: 8px;
+  --rafael-spacing-1: 4px;
+  --rafael-spacing-2: 8px;
 
-  --gradient-primary-start: var(--color-accent-700);
-  --gradient-primary-end: var(--color-accent-800);
-  --gradient-primary-hover-start: var(--color-accent-800);
-  --gradient-primary-hover-end: var(--color-accent-900);
-  --gradient-primary-active-start: var(--color-accent-900);
-  --gradient-primary-active-end: var(--color-accent-900);
+  --gradient-primary-start: var(--rafael-color-accent-700);
+  --gradient-primary-end: var(--rafael-color-accent-800);
+  --gradient-primary-hover-start: var(--rafael-color-accent-800);
+  --gradient-primary-hover-end: var(--rafael-color-accent-900);
+  --gradient-primary-active-start: var(--rafael-color-accent-900);
+  --gradient-primary-active-end: var(--rafael-color-accent-900);
 }
 
 /* ============================================
@@ -53,7 +53,7 @@
    ============================================ */
 
 body.mce-content-body {
-  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-body-size);
   font-weight: var(--typography-body-weight);
   line-height: var(--typography-body-line-height);
@@ -71,7 +71,7 @@ body.mce-content-body {
    ============================================ */
 
 body.mce-content-body h1 {
-  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h1-size);
   font-weight: var(--typography-h1-weight);
   line-height: var(--typography-h1-line-height);
@@ -81,7 +81,7 @@ body.mce-content-body h1 {
 }
 
 body.mce-content-body h2 {
-  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h2-size);
   font-weight: var(--typography-h2-weight);
   line-height: var(--typography-h2-line-height);
@@ -91,7 +91,7 @@ body.mce-content-body h2 {
 }
 
 body.mce-content-body h3 {
-  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h3-size);
   font-weight: var(--typography-h3-weight);
   line-height: var(--typography-h3-line-height);
@@ -101,7 +101,7 @@ body.mce-content-body h3 {
 }
 
 body.mce-content-body h4 {
-  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h4-size);
   font-weight: var(--typography-h4-weight);
   line-height: var(--typography-h4-line-height);
@@ -112,7 +112,7 @@ body.mce-content-body h4 {
 
 body.mce-content-body h5,
 body.mce-content-body h6 {
-  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h5-size);
   font-weight: var(--typography-h5-weight);
   line-height: var(--typography-h5-line-height);
@@ -186,7 +186,7 @@ body.mce-content-body blockquote {
 
 body.mce-content-body code {
   font-family:
-    var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    var(--rafael-font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: var(--typography-code-size);
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-default);
@@ -196,7 +196,7 @@ body.mce-content-body code {
 
 body.mce-content-body pre {
   font-family:
-    var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    var(--rafael-font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: var(--typography-code-size);
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-default);
@@ -241,7 +241,7 @@ body.mce-content-body img {
    ============================================ */
 
 body.mce-content-body .text-display {
-  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-display-size);
   font-weight: var(--typography-display-weight);
   line-height: var(--typography-display-line-height);
@@ -249,7 +249,7 @@ body.mce-content-body .text-display {
 }
 
 body.mce-content-body .text-h1 {
-  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h1-size);
   font-weight: var(--typography-h1-weight);
   line-height: var(--typography-h1-line-height);
@@ -257,7 +257,7 @@ body.mce-content-body .text-h1 {
 }
 
 body.mce-content-body .text-h2 {
-  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h2-size);
   font-weight: var(--typography-h2-weight);
   line-height: var(--typography-h2-line-height);
@@ -265,7 +265,7 @@ body.mce-content-body .text-h2 {
 }
 
 body.mce-content-body .text-h3 {
-  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h3-size);
   font-weight: var(--typography-h3-weight);
   line-height: var(--typography-h3-line-height);
@@ -273,7 +273,7 @@ body.mce-content-body .text-h3 {
 }
 
 body.mce-content-body .text-h4 {
-  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h4-size);
   font-weight: var(--typography-h4-weight);
   line-height: var(--typography-h4-line-height);
@@ -281,7 +281,7 @@ body.mce-content-body .text-h4 {
 }
 
 body.mce-content-body .text-h5 {
-  font-family: var(--font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h5-size);
   font-weight: var(--typography-h5-weight);
   line-height: var(--typography-h5-line-height);
@@ -289,7 +289,7 @@ body.mce-content-body .text-h5 {
 }
 
 body.mce-content-body .text-body-large {
-  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-body-large-size);
   font-weight: var(--typography-body-large-weight);
   line-height: var(--typography-body-large-line-height);
@@ -297,7 +297,7 @@ body.mce-content-body .text-body-large {
 }
 
 body.mce-content-body .text-body {
-  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-body-size);
   font-weight: var(--typography-body-weight);
   line-height: var(--typography-body-line-height);
@@ -305,7 +305,7 @@ body.mce-content-body .text-body {
 }
 
 body.mce-content-body .text-body-small {
-  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-body-small-size);
   font-weight: var(--typography-body-small-weight);
   line-height: var(--typography-body-small-line-height);
@@ -313,7 +313,7 @@ body.mce-content-body .text-body-small {
 }
 
 body.mce-content-body .text-caption {
-  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-caption-size);
   font-weight: var(--typography-caption-weight);
   line-height: var(--typography-caption-line-height);
@@ -321,7 +321,7 @@ body.mce-content-body .text-caption {
 }
 
 body.mce-content-body .text-overline {
-  font-family: var(--font-family-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-overline-size);
   font-weight: var(--typography-overline-weight);
   line-height: var(--typography-overline-line-height);
@@ -331,7 +331,7 @@ body.mce-content-body .text-overline {
 
 body.mce-content-body .text-code {
   font-family:
-    var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    var(--rafael-font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: var(--typography-code-size);
   font-weight: var(--typography-code-weight);
   line-height: var(--typography-code-line-height);
@@ -382,12 +382,12 @@ body.mce-content-body a.button-secondary {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-default);
-  box-shadow: var(--shadow-button);
+  box-shadow: var(--rafael-shadow-button);
 }
 
 body.mce-content-body a.button-secondary:hover {
   border-color: var(--border-strong);
-  box-shadow: var(--shadow-button-hover);
+  box-shadow: var(--rafael-shadow-button-hover);
 }
 
 body.mce-content-body a.button-ghost {
