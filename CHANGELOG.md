@@ -1,3 +1,9 @@
+## [2.38.1](https://github.com/raaaf/wordpress-starter/compare/v2.38.0...v2.38.1) (2026-10-01)
+
+### Bug Fixes
+
+- **security:** restrict form targets via CSP form-action, harden SVG uploads and form-control kses ([86d49d9](https://github.com/raaaf/wordpress-starter/commit/86d49d9ee0d57618db9765442f1ad3afaa8748fa))
+
 # [2.38.0](https://github.com/raaaf/wordpress-starter/compare/v2.37.3...v2.38.0) (2026-10-01)
 
 ### Features
