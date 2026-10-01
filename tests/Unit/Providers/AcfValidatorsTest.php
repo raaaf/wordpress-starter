@@ -73,20 +73,21 @@ final class AcfValidatorsTest extends TestCase
         $this->assertIsString(AcfServiceProvider::validateUrl(true, 'not a url'));
     }
 
-    public function testNewsletterActionUrlAcceptsEmptyAndProvider(): void
+    public function testNewsletterActionUrlAcceptsEmptyAndHttps(): void
     {
         $this->assertTrue(AcfServiceProvider::validateNewsletterActionUrl(true, ''));
-        $this->assertTrue(AcfServiceProvider::validateNewsletterActionUrl(true, 'https://abc.us21.list-manage.com/subscribe/post'));
+        $this->assertTrue(AcfServiceProvider::validateNewsletterActionUrl(true, 'https://any-provider.example/post'));
     }
 
-    public function testNewsletterActionUrlRejectsForeignHost(): void
+    public function testNewsletterActionUrlRejectsHttpAndGarbage(): void
     {
-        $this->assertIsString(AcfServiceProvider::validateNewsletterActionUrl(true, 'https://evil.example/post'));
+        $this->assertIsString(AcfServiceProvider::validateNewsletterActionUrl(true, 'http://x.example'));
+        $this->assertIsString(AcfServiceProvider::validateNewsletterActionUrl(true, 'not a url'));
     }
 
     public function testNewsletterActionUrlKeepsEarlierError(): void
     {
-        $this->assertSame('frueherer Fehler', AcfServiceProvider::validateNewsletterActionUrl('frueherer Fehler', 'https://abc.us21.list-manage.com/subscribe/post'));
+        $this->assertSame('frueherer Fehler', AcfServiceProvider::validateNewsletterActionUrl('frueherer Fehler', 'https://any-provider.example/post'));
     }
 
     public function testValidateEmail(): void

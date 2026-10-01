@@ -22,7 +22,7 @@
     $background = get_sub_field('background_color') ?: 'primary';
     $privacyPolicyUrl = (string) get_privacy_policy_url();
 
-    $isAllowedAction = $actionUrl !== '' && \WordpressStarter\Security::isAllowedFormActionUrl($actionUrl);
+    $isAllowedAction = strtolower(strval(wp_parse_url($actionUrl, PHP_URL_SCHEME))) === 'https';
     $inputId = 'newsletter-email-' . uniqid();
 
     // Ein Feldname aus dem Backend landet in name="", deshalb auf das eingedampft,
@@ -77,11 +77,7 @@
                 </form>
             @elseif(current_user_can('edit_posts'))
                 <div class="p-6 rounded-[var(--card-radius)] bg-surface-secondary surface-sheen">
-                    @if($actionUrl !== '')
-                        <p class="text-content-secondary">{{ __('Die eingetragene Formular-Adresse wird nicht akzeptiert (nur https und unterstützte Newsletter-Anbieter). Besucher sehen das Formular deshalb nicht.', 'wp-starter') }}</p>
-                    @else
-                        <p class="text-content-secondary">{{ __('Bitte trage die https-Adresse aus dem Einbettungscode deines Newsletter-Anbieters ein. Solange sie fehlt, sehen Besucher das Formular nicht.', 'wp-starter') }}</p>
-                    @endif
+                    <p class="text-content-secondary">{{ __('Bitte trage die https-Adresse aus dem Einbettungscode deines Newsletter-Anbieters ein.', 'wp-starter') }}</p>
                 </div>
             @endif
         </div>

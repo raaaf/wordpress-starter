@@ -4,46 +4,29 @@ This document describes the security measures implemented in the WordPress Start
 
 ## Content Security Policy (CSP)
 
-The theme implements a strict Content Security Policy to prevent XSS attacks.
+The theme sends a deliberately small CSP. The full header value is exactly:
 
-### Implementation
-
-Built by `Security::getCSPHeader()` in `src/Security.php`:
-
-```php
-$directives = [
-    "default-src 'self'" . $localSources,
-    "font-src 'self' data:" . $localSources,
-    "img-src 'self' data: https:" . $localSources,
-    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com" . self::getEmbedOrigins(),
-    "form-action 'self' https://<FORM_ACTION_PROVIDER_HOSTS>" . self::getSiteUrlFormOrigin(),
-    "frame-ancestors 'self'",
-    "base-uri 'self'",
-    "media-src 'self' https:" . $localSources,
-    "script-src 'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'" . $analyticsOrigin . $localSources,
-    "style-src 'self' 'unsafe-inline'" . $localSources,
-    "connect-src 'self'" . $analyticsOrigin . $localSources,
-    "worker-src 'self' blob:",
-];
+```
+frame-ancestors 'self'; base-uri 'self'; object-src 'none'
 ```
 
-`$localSources` (from `Security::getLocalSources()`) appends a space-separated list of `http://` and `ws://` origins for `localhost` and `127.0.0.1` across common dev ports (3000, 3001, 4173, 5173, 5180-5182, 8000, 8080, 8888, 9000, plus the dynamic Vite port read from `.vite-port`). It only applies when `WP_ENVIRONMENT_TYPE` is `local`; in production it resolves to an empty string. `default-src`, `font-src`, `img-src`, `media-src`, `script-src`, `style-src` and `connect-src` all carry this suffix, `frame-src`, `frame-ancestors`, `base-uri` and `worker-src` do not.
+Built in `Security::getCSPHeader()` in `src/Security.php`, pinned by `SecurityTest::testGetCSPHeaderIsExactlyTheThreeNonBreakingDirectives`.
 
-`$analyticsOrigin` (from `Security::getAnalyticsOrigin()`) resolves the `rybbit_script_url` option to its `https://` origin and appends it to `script-src` and `connect-src`, so the Rybbit Analytics tracking script (if the plugin is active) can both load and send events. Falls back to the plugin's own default origin when the option is unset, and to an empty string when the value cannot be parsed as a safe `https://` host.
+- `frame-ancestors 'self'`: no foreign site can frame the pages (clickjacking).
+- `base-uri 'self'`: an injected `<base>` tag cannot rebase relative URLs.
+- `object-src 'none'`: no plugins or `<object>`/`<embed>` content.
 
-`Security::getEmbedOrigins()` reads the admin-configured `embed_allowed_hosts` option, one host per line, and appends the resulting `https://` origins to `frame-src`. It strips any scheme or path from each entry and drops anything it cannot parse as a plain hostname, so `frame-src` never widens beyond a host list an administrator explicitly entered under Theme-Einstellungen → Analytics → Externe Einbettungen. The hostname pattern is ASCII-only, so an internationalised host must be entered in its punycode form (`xn--...`), not as Unicode.
+Nothing in the CSP restricts scripts, styles, images, fonts, connections, frames or form targets. A stricter policy (`script-src`, `frame-src`, `form-action` with a provider list) broke plugins, embeds and newsletter forms too often, so it was dropped. The protection against injected content comes from other layers: kses and the `unfiltered_html` save-context gate in `AcfServiceProvider::allowFormControlTags` (a user without that capability cannot store form controls), SVG sanitizing (below) and the hardening headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`).
 
-`Security::isAllowedEmbedHost()` is the shared gate the same layouts use before rendering an iframe: it accepts exactly what `getCSPHeader()` writes into `frame-src`. On top of the host list it rejects a non-default port (only an implicit or explicit `443` passes) and rejects the site's own host together with its `www.`/non-www counterpart, so a same-origin alias in `home_url()` cannot combine with `allow-same-origin` to break the sandbox.
+The CSP is only sent for frontend requests and only when `config('security.enable_csp')` is true.
 
-`form-action` limits where forms may submit: form tags survive kses in post content (`AcfServiceProvider::allowFormControlTags`), so without it a contributor could post to a foreign host. The allowed hosts (`FORM_ACTION_PROVIDER_HOSTS`: Mailchimp, Brevo, CleverReach, rapidmail, KlickTipp, MailerLite, Kit, ActiveCampaign, GetResponse, Klaviyo, AWeber, EmailOctopus, Constant Contact, PayPal buttons) belong to the newsletter layout and PayPal embeds; `Security::isAllowedFormActionUrl()` gates both its template and its ACF validation. When the host of `site_url()` differs from `home_url()`, `Security::getSiteUrlFormOrigin()` adds the `site_url()` origin to `form-action` so the password form (which posts to `wp-login.php`) keeps working.
+### Embeds and Newsletter
 
-**Limit of `form-action`:** the allowed providers are multi-tenant, so the CSP cannot stop a post to an attacker-owned tenant at an allowed provider. The actual guard is the save-context rule in `AcfServiceProvider::allowFormControlTags`: a user without the `unfiltered_html` capability cannot save form controls at all (rendering keeps them for forms an administrator saved). The CSP is also only sent when `config('security.enable_csp')` is true and never for admin or AJAX requests.
+`Security::isAllowedEmbedHost()` still decides which iframes the embed and map layouts render (`HARDCODED_FRAME_SRC_HOSTS` plus the admin option `embed_allowed_hosts`). The newsletter layout and its ACF validator (`validateNewsletterActionUrl`) accept any `https://` form action.
 
-### Nonce-Based Script Loading
+### Nonce
 
-Open point: whether the per-request nonce survives a full-page cache is not settled. A cached page carries the nonce of the request that built it, while the header is generated per request. Do not treat this as solved.
-
-All inline scripts require a nonce for execution:
+`Security::getNonce()` creates a per-request nonce, exposed as `$GLOBALS['csp_nonce']`. It is added to registered, inline and printed scripts and can be used in templates:
 
 ```blade
 <script nonce="{{ $GLOBALS['csp_nonce'] }}">
@@ -51,25 +34,11 @@ All inline scripts require a nonce for execution:
 </script>
 ```
 
-The nonce is automatically generated per-request using cryptographically secure random bytes.
-
-### Known Limitations
-
-| Directive                 | Reason                                |
-| ------------------------- | ------------------------------------- |
-| `'unsafe-inline'` (style) | WordPress/ACF generates inline styles |
-| `'unsafe-eval'` (script)  | Alpine.js x-data requires eval        |
+The CSP no longer references it, so it has no security effect today.
 
 ### Customizing CSP
 
-Edit the `$directives` array in `Security::getCSPHeader()` (`src/Security.php`) to adjust policies for your needs. Edit the existing directive line directly rather than appending a new one; a repeated directive of the same type is ignored by the browser, not merged:
-
-```php
-// Add a domain to the existing img-src line
-"img-src 'self' data: https: https://cdn.example.com" . $localSources,
-```
-
-Script, style and connect sources are built in `$scriptSrc`, `$styleSrc` and `$connectSrc`; extend those variables. Embed hosts need no code change: add them to the `embed_allowed_hosts` option.
+Edit `Security::getCSPHeader()` in `src/Security.php`. Keep every addition non-breaking: a new restricting directive needs a check against all active plugins and embeds first.
 
 ## SVG Sanitization
 
@@ -162,11 +131,11 @@ add_filter('acf/validate_value/type=email', [self::class, 'validateEmail'], 10, 
 
 URL and email fields are validators, not sanitizers: an invalid value blocks the save with an error message and nothing is rewritten or blanked.
 
-| Field Type | Hook                                                                                             |
-| ---------- | ------------------------------------------------------------------------------------------------ |
-| URL        | `acf/validate_value/type=url` (`validateUrl`)                                                    |
-| Email      | `acf/validate_value/type=email` (`validateEmail`)                                                |
-| Newsletter | `acf/validate_value/key=field_flex_newsletter_action_url` (only hosts that `form-action` allows) |
+| Field Type | Hook                                                                                   |
+| ---------- | -------------------------------------------------------------------------------------- |
+| URL        | `acf/validate_value/type=url` (`validateUrl`)                                          |
+| Email      | `acf/validate_value/type=email` (`validateEmail`)                                      |
+| Newsletter | `acf/validate_value/key=field_flex_newsletter_action_url` (empty or an `https://` URL) |
 
 ### Member Area Shared Password
 
@@ -413,11 +382,11 @@ If you discover a security vulnerability:
 
 ## Externe Einbettungen
 
-`frame-src` erlaubt ab Werk YouTube, Vimeo und Google Maps. Jeder weitere
-Anbieter muss unter **Theme-Einstellungen → Analytics → Externe Einbettungen**
-eingetragen werden, ein Host je Zeile. `Security::getEmbedOrigins()` filtert die
-Liste streng: nur Hostnamen, kein Schema, kein Pfad, nichts, was die Direktive
-zerlegen koennte.
+Das Modul "Einbettung" rendert ab Werk nur YouTube, Vimeo und Google Maps. Jeder
+weitere Anbieter muss unter **Theme-Einstellungen → Analytics → Externe
+Einbettungen** eingetragen werden, ein Host je Zeile. `Security::isAllowedEmbedHost()`
+prueft die Adresse: nur https, nur Hostnamen, nie der eigene Host. Die CSP
+beschraenkt Frames nicht.
 
 Das Modul „Einbettung" nimmt deshalb nur die Adresse aus dem `src`-Attribut und
 baut den iframe selbst. Den Einbettungscode des Anbieters entgegenzunehmen waere

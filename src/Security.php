@@ -7,19 +7,9 @@ namespace WordpressStarter;
 /**
  * Security class for Content Security Policy (CSP) and other security headers.
  *
- * NOTE: 'unsafe-inline' is currently required because:
- * - WordPress core adds inline styles (e.g., wp_add_inline_style)
- * - ACF Pro generates inline scripts for field initialization
- * - Block editor injects inline styles for block previews
- *
- * NOTE: 'unsafe-eval' is required because:
- * - Alpine.js evaluates x-data expressions as JavaScript
- * - Block previews are rendered via REST API (not caught by is_admin())
- *
- * To remove 'unsafe-inline' in the future:
- * 1. Add nonce attributes to all inline scripts/styles
- * 2. Use wp_script_add_data() with 'nonce' for registered scripts
- * 3. Filter script_loader_tag to add nonces to third-party scripts
+ * The CSP is reduced to frame-ancestors, base-uri and object-src: a stricter
+ * policy broke plugins, embeds and newsletter forms. Nonces are still added to
+ * registered, inline and printed scripts (harmless, templates read csp_nonce).
  *
  * @see https://developer.wordpress.org/reference/hooks/script_loader_tag/
  */
@@ -52,45 +42,8 @@ class Security
     }
 
     /**
-     * Hosts, an die ein Formular senden darf (CSP form-action): Newsletter-
-     * Einbettungscodes und PayPal-Buttons. Eine einzige Quelle fuer
-     * getCSPHeader() UND isAllowedFormActionUrl(), damit das Newsletter-Layout
-     * nur URLs annimmt, die die CSP auch durchlaesst. Kontaktformular-Plugins
-     * (Contact Form 7, WPForms, Gravity Forms, Fluent Forms, Ninja Forms,
-     * Formidable, Elementor) senden an die eigene Seite oder per AJAX/REST und
-     * brauchen nur 'self'. Ein Eintrag mit "*." gilt fuer jede Subdomain, nicht
-     * fuer die Domain selbst.
-     *
-     * @var list<string>
-     */
-    private const FORM_ACTION_PROVIDER_HOSTS = [
-        '*.list-manage.com', // Mailchimp
-        'sibforms.com', // Brevo
-        '*.sibforms.com', // Brevo
-        '*.sendinblue.com', // Brevo (inkl. alter Sendinblue-Formulare)
-        '*.cleverreach.com', // CleverReach
-        '*.rapidmail.de', // rapidmail
-        '*.emailsys1a.net', // rapidmail
-        '*.klicktipp.com', // KlickTipp
-        '*.klick-tipp.com', // KlickTipp
-        '*.mailerlite.com', // MailerLite
-        'app.kit.com', // Kit (ConvertKit)
-        'app.convertkit.com', // Kit (ConvertKit)
-        '*.activehosted.com', // ActiveCampaign
-        'app.getresponse.com', // GetResponse
-        'manage.kmail-lists.com', // Klaviyo
-        'www.aweber.com', // AWeber
-        'emailoctopus.com', // EmailOctopus
-        '*.emailoctopus.com', // EmailOctopus
-        '*.constantcontact.com', // Constant Contact
-        'www.paypal.com', // PayPal-Buttons (Spenden/Kaufen)
-    ];
-
-    /**
-     * Hosts fest verdrahtet in frame-src, unabhaengig von der Admin-Option
-     * embed_allowed_hosts. Eine einzige Quelle fuer getCSPHeader() UND
-     * isAllowedEmbedHost(), damit die beiden nicht auseinanderlaufen: sonst
-     * erlaubt die CSP einen Host, den das Embed-Feld ablehnt (oder umgekehrt).
+     * Hosts fest verdrahtet fuer Embeds, unabhaengig von der Admin-Option
+     * embed_allowed_hosts. Quelle fuer isAllowedEmbedHost().
      *
      * @var list<string>
      */
@@ -115,236 +68,8 @@ class Security
     }
 
     /**
-     * Patch a foreign admin CSP header (set by another plugin, e.g. Solid
-     * Security) so the theme's own admin inline scripts/styles still work:
-     *
-     * - Adds 'unsafe-eval' to script-src, still required because ACF Pro's
-     *   block-preview rendering (REST API, not caught by is_admin()) evaluates
-     *   inline JavaScript.
-     * - Adds the theme's current nonce ('nonce-{value}') to script-src and
-     *   style-src, but ONLY when that directive already carries a
-     *   'nonce-...'/'sha256-...'/'sha384-...'/'sha512-...' source. Per the
-     *   CSP2+ spec, a nonce or hash source in a directive makes browsers
-     *   ignore 'unsafe-inline' in that same directive, so nothing is lost
-     *   by adding our nonce there. Injecting the nonce into a directive that
-     *   still relies on 'unsafe-inline' alone (no nonce/hash present) would
-     *   make CSP2+ browsers ignore that 'unsafe-inline' too and block every
-     *   other plugin's and WordPress core's un-nonced inline script or
-     *   style in wp-admin, so such directives are left untouched. The
-     *   theme's own admin tags remain unblocked because the foreign
-     *   'unsafe-inline' still applies to them.
-     * - A foreign header with only default-src (no script-src/style-src) is
-     *   a no-op for both patches: nothing to touch, nothing errors.
-     *
-     * Only script-src and style-src are touched. script-src-elem and
-     * script-src-attr are separate directives under CSP3 and are left alone;
-     * matching them here would also modify allowances the foreign header
-     * intentionally set apart from script-src. Directive bodies are matched
-     * up to the next ';' or ',' so a second, comma-separated policy in the
-     * same header value is never touched.
-     */
-    public static function addUnsafeEvalToCSP(string $csp): string
-    {
-        if (preg_match('/(^|;\s*)(script-src)(\s[^;,]*)/', $csp, $scriptSrcMatch) === 1
-            && !str_contains($scriptSrcMatch[3], "'unsafe-eval'")
-        ) {
-            $csp = preg_replace(
-                '/(^|;\s*)(script-src)(\s[^;,]*)/',
-                '$1$2$3 \'unsafe-eval\'',
-                $csp,
-                1,
-            ) ?? $csp;
-        }
-
-        $nonceSource = "'nonce-" . self::getNonce() . "'";
-        foreach (['script-src', 'style-src'] as $directive) {
-            if (preg_match('/(^|;\s*)(' . $directive . ')(\s[^;,]*)/', $csp, $matches) === 1
-                && preg_match('/\'(?:nonce|sha256|sha384|sha512)-/', $matches[3]) === 1
-                && !str_contains($matches[3], $nonceSource)
-            ) {
-                $csp = preg_replace(
-                    '/(^|;\s*)(' . $directive . ')(\s[^;,]*)/',
-                    '$1$2$3 ' . $nonceSource,
-                    $csp,
-                    1,
-                ) ?? $csp;
-            }
-        }
-
-        return $csp;
-    }
-
-    /**
-     * Recognize and patch a single raw "Header: value" line (as returned by
-     * headers_list()) if it is the Content-Security-Policy header.
-     *
-     * Extracted out of the admin_init header_register_callback closure in
-     * init() so the prefix-stripping and patching can be unit-tested without
-     * relying on PHP actually flushing headers.
-     *
-     * Regex-strips the "Content-Security-Policy:" prefix instead of
-     * substr(): a header value can arrive without a space after the colon
-     * (e.g. no leading space from the sending plugin), and substr() with a
-     * fixed 'Content-Security-Policy: ' length would then eat the CSP's
-     * first character. "Content-Security-Policy-Report-Only:" is a
-     * different, CSP3 header and is deliberately NOT matched here: the
-     * literal prefix check requires the colon right after "Policy".
-     *
-     * @return string|null The replacement full header line ("Content-Security-Policy: ...")
-     *                     or null when $rawHeaderValue is not a CSP header, left untouched.
-     */
-    public static function patchCspHeaderValue(string $rawHeaderValue): ?string
-    {
-        if (stripos($rawHeaderValue, 'Content-Security-Policy:') !== 0) {
-            return null;
-        }
-
-        $csp = preg_replace('/^content-security-policy:\s*/i', '', $rawHeaderValue) ?? $rawHeaderValue;
-
-        return 'Content-Security-Policy: ' . self::addUnsafeEvalToCSP($csp);
-    }
-
-    /**
-     * Get the current Vite dev server port from .vite-port file.
-     * Returns null if the file doesn't exist or is invalid.
-     */
-    private static function getVitePort(): ?int
-    {
-        $portFile = get_template_directory() . '/.vite-port';
-
-        if (file_exists($portFile)) {
-            $port = file_get_contents($portFile);
-            if ($port !== false && is_numeric(trim($port))) {
-                return (int) trim($port);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Get localhost sources for CSP in development environments.
-     *
-     * CSP doesn't support port wildcards, so we list common development ports.
-     * Additionally reads the dynamic port from .vite-port if available.
-     * Includes both localhost and 127.0.0.1 for maximum compatibility.
-     *
-     * @return string Space-prefixed localhost sources or empty string in production
-     */
-    private static function getLocalSources(): string
-    {
-        $isLocalEnv = defined('WP_ENVIRONMENT_TYPE') && WP_ENVIRONMENT_TYPE === 'local';
-
-        if (!$isLocalEnv) {
-            return '';
-        }
-
-        // Common development server ports
-        $ports = [
-            3000,  // React, Next.js, generic dev servers
-            3001,  // Alternative React port
-            4173,  // Vite preview
-            5173,  // Vite dev server (default)
-            5180,  // Vite dev server (theme default)
-            5181,  // Vite alternative port
-            5182,  // Vite alternative port
-            8000,  // Python, PHP built-in server
-            8080,  // Common alternative port
-            8888,  // Jupyter, some PHP setups
-            9000,  // PHP-FPM, some dev servers
-        ];
-
-        // Add dynamic Vite port if available
-        $vitePort = self::getVitePort();
-        if ($vitePort !== null && !in_array($vitePort, $ports, true)) {
-            $ports[] = $vitePort;
-        }
-
-        $hosts = ['localhost', '127.0.0.1'];
-        $protocols = ['http', 'ws']; // HTTP and WebSocket
-
-        $sources = [];
-        foreach ($hosts as $host) {
-            foreach ($ports as $port) {
-                foreach ($protocols as $protocol) {
-                    $sources[] = "{$protocol}://{$host}:{$port}";
-                }
-            }
-        }
-
-        return ' ' . implode(' ', $sources);
-    }
-
-    /**
-     * Baue eine https-Origin aus einem geprueften Hostnamen.
-     *
-     * Gemeinsame Validierung und Aufbau fuer getAnalyticsOrigin() und
-     * getEmbedOrigins(): nur Zeichen, die in einem Hostnamen vorkommen
-     * duerfen, kein Schema, kein Pfad. Gibt null zurueck, wenn der Host
-     * nicht passt, statt eine Direktive zu zerlegen.
-     */
-    private static function httpsOriginFromHost(string $host, mixed $port = null): ?string
-    {
-        if (preg_match('/^[A-Za-z0-9.-]+$/', $host) !== 1) {
-            return null;
-        }
-
-        $origin = 'https://' . $host;
-
-        if (is_int($port) && $port > 0 && $port <= 65535) {
-            $origin .= ':' . $port;
-        }
-
-        return $origin;
-    }
-
-    /**
-     * Herkunft des Analytics-Hosts fuer die CSP, aus der Plugin-Option.
-     *
-     * Rybbit laedt sein Skript per wp_enqueue_script von einem externen Host und
-     * schickt die Ereignisse per fetch() dorthin zurueck. Beides braucht einen
-     * Eintrag in der CSP: `connect-src` allein reicht nicht, dann wird schon das
-     * Skript blockiert und es sendet nie jemand.
-     *
-     * Der Host wird nicht hartkodiert, weil jede Installation ihre eigene
-     * Rybbit-Instanz haben kann. Quelle ist dieselbe Option, aus der das Plugin
-     * sein Skript zieht, damit CSP und Skript-URL nicht auseinanderlaufen.
-     *
-     * Die Option ist von Administratoren setzbar und landet in einem Header,
-     * deshalb streng gefiltert: nur https, nur Host und optionaler Port, und nur
-     * Zeichen, die in einem Hostnamen vorkommen duerfen. Alles andere faellt
-     * heraus, statt eine Direktive zu zerlegen oder den Header zu spalten.
-     */
-    private static function getAnalyticsOrigin(): string
-    {
-        $url = (string) get_option('rybbit_script_url', 'https://app.rybbit.io/api/script.js');
-
-        if ($url === '') {
-            return '';
-        }
-
-        $host = wp_parse_url($url, PHP_URL_HOST);
-        $scheme = wp_parse_url($url, PHP_URL_SCHEME);
-
-        if (!is_string($host) || $host === '' || $scheme !== 'https') {
-            return '';
-        }
-
-        $port = wp_parse_url($url, PHP_URL_PORT);
-        $origin = self::httpsOriginFromHost($host, $port);
-
-        if ($origin === null) {
-            return '';
-        }
-
-        return ' ' . $origin;
-    }
-
-    /**
      * Zulaessige Hosts aus der Admin-Option, normalisiert (Kleinschreibung,
-     * ohne Schema/Pfad). Gemeinsame Quelle fuer getEmbedOrigins() (baut die
-     * CSP-Origins) UND isAllowedEmbedHost() (prueft einen einzelnen Host),
-     * damit beide dieselbe Zulassung sehen.
+     * ohne Schema/Pfad). Quelle fuer isAllowedEmbedHost().
      *
      * @return list<string>
      */
@@ -383,31 +108,14 @@ class Security
         return array_values(array_unique($hosts));
     }
 
-    private static function getEmbedOrigins(): string
-    {
-        $origins = array_map(
-            static fn (string $host): string => 'https://' . $host,
-            self::getEmbedAllowedHosts(),
-        );
-
-        if ($origins === []) {
-            return '';
-        }
-
-        return ' ' . implode(' ', $origins);
-    }
-
     /**
-     * Ist $url als Iframe-Quelle zulaessig? Dieselbe Zulassung, die
-     * getCSPHeader() in frame-src schreibt: die fest verdrahteten Hosts
-     * (HARDCODED_FRAME_SRC_HOSTS) plus die Admin-Option embed_allowed_hosts
-     * (ueber getEmbedAllowedHosts() normalisiert). Templates, die vor dem
-     * Rendern eines Iframes pruefen wollen, ob die CSP ihn ohnehin blockieren
-     * wuerde, rufen diese Methode statt die private Zulassungslogik zu
-     * duplizieren.
+     * Ist $url als Iframe-Quelle zulaessig? Zulassung: die fest verdrahteten
+     * Hosts (HARDCODED_FRAME_SRC_HOSTS) plus die Admin-Option
+     * embed_allowed_hosts (ueber getEmbedAllowedHosts() normalisiert).
+     * Templates pruefen damit vor dem Rendern eines Iframes den Anbieter.
      *
      * Der eigene Host der Seite ist NIE zulaessig: ein Iframe mit
-     * allow-same-origin auf die eigene Seite wuerde den CSP-Sandkasten
+     * allow-same-origin auf die eigene Seite wuerde den Sandkasten
      * aushebeln, egal was in der Options-Liste steht.
      */
     public static function isAllowedEmbedHost(string $url): bool
@@ -418,9 +126,7 @@ class Security
             return false;
         }
 
-        // Ein expliziter Nicht-443-Port passiert diese Pruefung, waehrend
-        // die CSP frame-src den portlosen Origin ausgibt: der Browser
-        // blockiert den Iframe dann still. Nur der Standardport ist erlaubt.
+        // Nur der https-Standardport ist erlaubt.
         $port = wp_parse_url($url, PHP_URL_PORT);
 
         if (is_int($port) && $port !== 443) {
@@ -459,121 +165,16 @@ class Security
     }
 
     /**
-     * Prueft, ob eine Formular-Adresse von der CSP form-action durchgelassen
-     * wird: https und ein Host aus FORM_ACTION_PROVIDER_HOSTS. Bei "*."-Eintraegen
-     * zaehlt nur ein echtes Subdomain-Suffix mit Punkt, damit weder
-     * "list-manage.com.evil.example" noch "evillist-manage.com" passieren.
-     */
-    public static function isAllowedFormActionUrl(string $url): bool
-    {
-        $scheme = wp_parse_url($url, PHP_URL_SCHEME);
-
-        if (!is_string($scheme) || strtolower($scheme) !== 'https') {
-            return false;
-        }
-
-        // Wie bei isAllowedEmbedHost(): form-action gibt portlose Origins aus,
-        // ein expliziter Nicht-443-Port wuerde vom Browser blockiert.
-        $port = wp_parse_url($url, PHP_URL_PORT);
-
-        if (is_int($port) && $port !== 443) {
-            return false;
-        }
-
-        $host = wp_parse_url($url, PHP_URL_HOST);
-
-        if (!is_string($host) || $host === '') {
-            return false;
-        }
-
-        $host = strtolower($host);
-
-        foreach (self::FORM_ACTION_PROVIDER_HOSTS as $entry) {
-            if (str_starts_with($entry, '*.')) {
-                if (str_ends_with($host, '.' . substr($entry, 2))) {
-                    return true;
-                }
-            } elseif ($host === $entry) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Origin von site_url(), wenn dessen Host von home_url() abweicht. Das
-     * Passwortformular postet an site_url('wp-login.php'), und form-action
-     * 'self' kennt nur den Origin der ausgelieferten Seite.
-     */
-    private static function getSiteUrlFormOrigin(): string
-    {
-        $siteHost = wp_parse_url(site_url(), PHP_URL_HOST);
-        $homeHost = wp_parse_url(home_url(), PHP_URL_HOST);
-
-        if (!is_string($siteHost) || $siteHost === '' || $siteHost === $homeHost) {
-            return '';
-        }
-
-        if (preg_match('/^[A-Za-z0-9.-]+$/', $siteHost) !== 1) {
-            return '';
-        }
-
-        $scheme = wp_parse_url(site_url(), PHP_URL_SCHEME) === 'http' ? 'http' : 'https';
-        $port = wp_parse_url(site_url(), PHP_URL_PORT);
-        $origin = $scheme . '://' . $siteHost;
-
-        if (is_int($port) && $port > 0 && $port <= 65535) {
-            $origin .= ':' . $port;
-        }
-
-        return ' ' . $origin;
-    }
-
-    /**
      * Build the Content-Security-Policy header value.
+     *
+     * Bewusst nur drei Direktiven, die nichts Bestehendes brechen: Clickjacking,
+     * Base-Tag-Injection und Plugins/Objekte. Skripte, Styles, Bilder, Fonts,
+     * Verbindungen, Frames und Formularziele sind nicht eingeschraenkt, weil
+     * eine strengere Richtlinie Plugins, Embeds und Newsletter-Formulare brach.
      */
     public static function getCSPHeader(): string
     {
-        $nonce = self::getNonce();
-        $localSources = self::getLocalSources();
-        $analyticsOrigin = self::getAnalyticsOrigin();
-
-        // Base directives
-        $directives = [
-            "default-src 'self'" . $localSources,
-            "font-src 'self' data:" . $localSources,
-            "img-src 'self' data: https:" . $localSources,
-            "frame-src 'self' " . implode(' ', array_map(
-                static fn (string $host): string => 'https://' . $host,
-                self::HARDCODED_FRAME_SRC_HOSTS,
-            )) . self::getEmbedOrigins(),
-            "form-action 'self' " . implode(' ', array_map(
-                static fn (string $host): string => 'https://' . $host,
-                self::FORM_ACTION_PROVIDER_HOSTS,
-            )) . self::getSiteUrlFormOrigin(),
-            "frame-ancestors 'self'",
-            "base-uri 'self'",
-            "media-src 'self' https:" . $localSources,
-        ];
-
-        // Script sources
-        // Note: 'unsafe-eval' is required for Alpine.js to evaluate x-data expressions
-        $scriptSrc = "'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval'" . $analyticsOrigin . $localSources;
-        $directives[] = "script-src {$scriptSrc}";
-
-        // Style sources (unsafe-inline needed for WordPress/ACF inline styles)
-        $styleSrc = "'self' 'unsafe-inline'" . $localSources;
-        $directives[] = "style-src {$styleSrc}";
-
-        // Connect sources (API calls, WebSockets)
-        $connectSrc = "'self'" . $analyticsOrigin . $localSources;
-        $directives[] = "connect-src {$connectSrc}";
-
-        // Worker sources (for WordPress emoji loader and other web workers)
-        $directives[] = "worker-src 'self' blob:";
-
-        return implode('; ', $directives);
+        return "frame-ancestors 'self'; base-uri 'self'; object-src 'none'";
     }
 
     /**
@@ -633,35 +234,6 @@ class Security
                 header('Content-Security-Policy: ' . self::getCSPHeader());
             }
         });
-
-        // Add unsafe-eval to CSP for admin pages (needed for Alpine.js in block editor)
-        // This modifies any CSP header set by other plugins (e.g., Solid Security)
-        add_filter('wp_headers', function (array $headers): array {
-            if (is_admin() && isset($headers['Content-Security-Policy'])) {
-                $headers['Content-Security-Policy'] = self::addUnsafeEvalToCSP($headers['Content-Security-Policy']);
-            }
-
-            return $headers;
-        });
-
-        // Fallback: Also modify CSP headers set directly via header() function
-        // This runs late to override plugin-set headers
-        add_action('admin_init', function (): void {
-            // Use output buffering to capture and modify headers
-            if (!headers_sent()) {
-                header_register_callback(function (): void {
-                    $headers = headers_list();
-                    foreach ($headers as $header) {
-                        $patched = Security::patchCspHeaderValue($header);
-                        if ($patched !== null) {
-                            header_remove('Content-Security-Policy');
-                            header($patched);
-                            break;
-                        }
-                    }
-                });
-            }
-        }, 1);
 
         // Make nonce available globally for templates
         $GLOBALS['csp_nonce'] = self::getNonce();

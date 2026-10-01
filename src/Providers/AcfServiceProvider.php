@@ -220,11 +220,9 @@ class AcfServiceProvider extends ServiceProvider
      * a user without the unfiltered_html capability gets $tags back unchanged,
      * so they cannot store form controls at all. Rendering on the frontend
      * (visitors, no capabilities) keeps the additions, so forms an administrator
-     * saved still render. The CSP form-action is only a second layer: it
-     * allows multi-tenant provider hosts (e.g. *.list-manage.com) and cannot
-     * stop a post to an attacker-owned tenant at an allowed provider. It is also
-     * emitted only when config('security.enable_csp') is true, never for admin
-     * or AJAX requests, so this capability check is the control that matters.
+     * saved still render. There is no CSP form-action any more, so this
+     * capability check is the control that stops a contributor from posting
+     * forms to a foreign host.
      *
      * @param array<string, array<string, bool>|mixed> $tags Allowed tags.
      * @param string $context Kses context.
@@ -480,7 +478,7 @@ class AcfServiceProvider extends ServiceProvider
         // Validate every url field: absolute and protocol-relative URLs, IDN hosts included.
         add_filter('acf/validate_value/type=url', [self::class, 'validateUrl'], 10, 2);
 
-        // Newsletter-Adresse: nur Anbieter, die die CSP form-action durchlaesst.
+        // Newsletter-Adresse: leer oder eine https-Adresse.
         add_filter('acf/validate_value/key=field_flex_newsletter_action_url', [self::class, 'validateNewsletterActionUrl'], 10, 2);
 
         // Validate every email field.
@@ -564,7 +562,7 @@ class AcfServiceProvider extends ServiceProvider
     }
 
     /**
-     * Newsletter form action: only providers the CSP form-action lets through.
+     * Newsletter form action: empty or an https URL.
      *
      * @param bool|string $valid
      */
@@ -574,8 +572,8 @@ class AcfServiceProvider extends ServiceProvider
             return $valid;
         }
 
-        if (!\WordpressStarter\Security::isAllowedFormActionUrl(strval($value))) {
-            return __('Bitte gib die https-Adresse aus dem Einbettungscode deines Newsletter-Anbieters an. Unterstützt werden u. a. Mailchimp, Brevo, CleverReach, rapidmail, KlickTipp, MailerLite, Kit, ActiveCampaign, GetResponse, Klaviyo, AWeber, EmailOctopus und Constant Contact.', 'wp-starter');
+        if (strtolower(strval(wp_parse_url(strval($value), PHP_URL_SCHEME))) !== 'https') {
+            return __('Bitte gib die https-Adresse aus dem Einbettungscode deines Newsletter-Anbieters an.', 'wp-starter');
         }
 
         return $valid;
