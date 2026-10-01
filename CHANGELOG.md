@@ -1,3 +1,9 @@
+## [2.38.2](https://github.com/raaaf/wordpress-starter/compare/v2.38.1...v2.38.2) (2026-10-01)
+
+### Bug Fixes
+
+- **deps:** update phpseclib to 3.0.57 (CVE-2026-84308) ([9f58a42](https://github.com/raaaf/wordpress-starter/commit/9f58a42f842e1d178994408d01fffdbce04f6129))
+
 ## [2.38.1](https://github.com/raaaf/wordpress-starter/compare/v2.38.0...v2.38.1) (2026-10-01)
 
 ### Bug Fixes
