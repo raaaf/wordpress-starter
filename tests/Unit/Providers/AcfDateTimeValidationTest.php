@@ -79,7 +79,7 @@ final class AcfDateTimeValidationTest extends TestCase
     #[DataProvider('provideInvalidDates')]
     public function testDateValidatorRejectsInvalidValues(mixed $value): void
     {
-        $this->assertSame('Bitte ein gültiges Datum wählen.', AcfServiceProvider::validateDatePicker(true, $value));
+        $this->assertSame('Bitte wähle ein gültiges Datum.', AcfServiceProvider::validateDatePicker(true, $value));
     }
 
     #[DataProvider('provideValidTimes')]
@@ -91,7 +91,7 @@ final class AcfDateTimeValidationTest extends TestCase
     #[DataProvider('provideInvalidTimes')]
     public function testTimeValidatorRejectsInvalidValues(mixed $value): void
     {
-        $this->assertSame('Bitte eine gültige Uhrzeit wählen.', AcfServiceProvider::validateTimePicker(true, $value));
+        $this->assertSame('Bitte wähle eine gültige Uhrzeit.', AcfServiceProvider::validateTimePicker(true, $value));
     }
 
     public function testValidatorsKeepAnEarlierFailureMessage(): void

@@ -40,6 +40,7 @@ $GLOBALS['wp_mock_options'] = [];
 $GLOBALS['wp_mock_cache'] = [];
 $GLOBALS['wp_mock_hooks'] = ['actions' => [], 'filters' => []];
 $GLOBALS['wp_mock_enqueued'] = ['scripts' => [], 'styles' => []];
+$GLOBALS['wp_mock_acf_validation_errors'] = [];
 $GLOBALS['wp_mock_have_rows_cursor'] = [];
 $GLOBALS['wp_mock_loop_posts'] = [];
 $GLOBALS['wp_mock_loop_cursor'] = 0;
@@ -660,6 +661,14 @@ if (!function_exists('acf_register_block_type')) {
     function acf_register_block_type(array $settings): void
     {
         $GLOBALS['wp_mock_registered_blocks'][] = $settings;
+    }
+}
+
+// ACF validation errors. Tests read $GLOBALS['wp_mock_acf_validation_errors'].
+if (!function_exists('acf_add_validation_error')) {
+    function acf_add_validation_error(string $input, string $message = ''): void
+    {
+        $GLOBALS['wp_mock_acf_validation_errors'][] = ['input' => $input, 'message' => $message];
     }
 }
 
@@ -1660,6 +1669,13 @@ if (!function_exists('absint')) {
     function absint(mixed $maybeint): int
     {
         return abs( (int) $maybeint);
+    }
+}
+
+if (!function_exists('sanitize_textarea_field')) {
+    function sanitize_textarea_field(string $str): string
+    {
+        return trim(strip_tags($str));
     }
 }
 

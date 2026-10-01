@@ -486,9 +486,7 @@ class AcfServiceProvider extends ServiceProvider
         }, 10, 1);
 
         // Sanitize textarea fields on save
-        add_filter('acf/update_value/type=textarea', function ($value) {
-            return sanitize_textarea_field($value);
-        }, 10, 1);
+        add_filter('acf/update_value/type=textarea', [self::class, 'sanitizeTextarea'], 10, 3);
 
         // Add [br] hint to all text and textarea field instructions
         $brHint = function ($field): mixed {
@@ -499,6 +497,11 @@ class AcfServiceProvider extends ServiceProvider
             // Skip fields that don't benefit from line breaks
             $excludeNames = ['email', 'phone', 'url', 'website', 'section_anchor'];
             if (in_array($field['_name'] ?? '', $excludeNames, true)) {
+                return $field;
+            }
+
+            // Tabellenzellen erlauben HTML, [br] wird dort nicht umgewandelt
+            if (str_ends_with( (string) ( $field['key'] ?? '' ), '_cell_content')) {
                 return $field;
             }
 
@@ -528,7 +531,7 @@ class AcfServiceProvider extends ServiceProvider
                 return;
             }
 
-            $sections = get_field('page_sections', $postId);
+            $sections = get_field('page_sections', $postId, false);
             if (!is_array($sections)) {
                 return;
             }
@@ -572,7 +575,7 @@ class AcfServiceProvider extends ServiceProvider
         }
 
         if (!is_string($value) || !self::matchesFormat('!Ymd', $value)) {
-            return __('Bitte ein gültiges Datum wählen.', 'wp-starter');
+            return __('Bitte wähle ein gültiges Datum.', 'wp-starter');
         }
 
         return $valid;
@@ -592,7 +595,7 @@ class AcfServiceProvider extends ServiceProvider
         $isTime = is_string($value)
             && ( self::matchesFormat('!H:i:s', $value) || self::matchesFormat('!H:i', $value) );
         if (!$isTime) {
-            return __('Bitte eine gültige Uhrzeit wählen.', 'wp-starter');
+            return __('Bitte wähle eine gültige Uhrzeit.', 'wp-starter');
         }
 
         return $valid;
@@ -623,6 +626,40 @@ class AcfServiceProvider extends ServiceProvider
     }
 
     /**
+     * Textarea-Felder beim Speichern von Tags befreien.
+     *
+     * Ausnahme Tabellenzelle: Die Feldanweisung verspricht "HTML erlaubt" und die
+     * Ausgabe laeuft durch wp_kses_post, daher bleibt erlaubtes HTML erhalten.
+     *
+     * Auch in der Tabellenzelle bleiben Formularelemente draussen: die Ausgabe
+     * erlaubt sie wegen allowFormControlTags, aber eine Zelle braucht sie nicht
+     * und ohne form-action in der CSP koennte ein Redakteur ohne unfiltered_html
+     * ein Formular an einen fremden Host speichern.
+     *
+     * @param array<string, mixed> $field
+     */
+    public static function sanitizeTextarea(mixed $value, mixed $postId, array $field): mixed
+    {
+        $key = $field['key'] ?? '';
+
+        if (str_ends_with( (string) $key, '_cell_content')) {
+            // Erst die Post-Allowlist, dann Formular-Tags samt Attributen entfernen
+            // (Anführungszeichen-bewusst, damit ein ">" im Attributwert nicht abschneidet),
+            // dann zur Sicherheit noch einmal durch die Allowlist.
+            $bereinigt = wp_kses_post( (string) $value);
+            $bereinigt = preg_replace(
+                '~</?(?:form|input|select|option|optgroup|textarea|button)\b(?:"[^"]*"|\'[^\']*\'|[^>"\'])*>~i',
+                '',
+                $bereinigt
+            ) ?? '';
+
+            return wp_kses_post($bereinigt);
+        }
+
+        return sanitize_textarea_field($value);
+    }
+
+    /**
      * Zellenzahl jeder Tabellenzeile gegen die Zahl der Spaltenueberschriften.
      *
      * Laeuft ueber den geposteten ACF-Baum, weil Kopfzeilen und Zeilen
@@ -642,6 +679,34 @@ class AcfServiceProvider extends ServiceProvider
             return;
         }
 
+        foreach (self::findTableRowMismatches($posted) as $abweichung) {
+            acf_add_validation_error(
+                $abweichung['eingabe'],
+                sprintf(
+                    /* translators: 1: Zeilennummer, 2: Zahl der Zellen, 3: Zahl der Spalten */
+                    __('Tabelle: Zeile %1$d hat %2$d Zellen, die Tabelle aber %3$d Spalten. Ergänze oder entferne Zellen in dieser Zeile.', 'wp-starter'),
+                    $abweichung['zeile'],
+                    $abweichung['zellen'],
+                    $abweichung['spalten'],
+                ),
+            );
+        }
+    }
+
+    /**
+     * Zeilen, deren Zellenzahl nicht zur Zahl der Spaltenueberschriften passt.
+     *
+     * Reine Funktion ueber den geposteten Baum, ohne $_POST und ohne ACF-Aufruf.
+     * Eine Tabelle ohne Spaltenueberschriften wird uebersprungen.
+     *
+     * @param array<mixed> $posted
+     *
+     * @return array<int, array{eingabe: string, zeile: int, zellen: int, spalten: int}>
+     */
+    public static function findTableRowMismatches(array $posted): array
+    {
+        $abweichungen = [];
+
         foreach (self::findTableGroups($posted) as $gruppe) {
             $spalten = count($gruppe['headers']);
 
@@ -656,18 +721,16 @@ class AcfServiceProvider extends ServiceProvider
                     continue;
                 }
 
-                acf_add_validation_error(
-                    $gruppe['feld'],
-                    sprintf(
-                        /* translators: 1: Zeilennummer, 2: Zahl der Zellen, 3: Zahl der Spalten */
-                        __('Tabelle: Zeile %1$d hat %2$d Zellen, die Tabelle aber %3$d Spalten. Ergänze oder entferne Zellen in dieser Zeile.', 'wp-starter'),
-                        $index + 1,
-                        $zellen,
-                        $spalten,
-                    ),
-                );
+                $abweichungen[] = [
+                    'eingabe' => $gruppe['eingabe'],
+                    'zeile' => $index + 1,
+                    'zellen' => $zellen,
+                    'spalten' => $spalten,
+                ];
             }
         }
+
+        return $abweichungen;
     }
 
     /**
@@ -698,20 +761,24 @@ class AcfServiceProvider extends ServiceProvider
      * Tabelle. Das ueberlebt eine Umbenennung des Layouts und findet auch
      * Tabellen in verschachtelten Feldgruppen.
      *
-     * @param array<mixed> $baum
+     * `eingabe` ist der volle Eingabename des Zeilen-Repeaters (acf[...][...]),
+     * an den acf_add_validation_error die Meldung hängt.
      *
-     * @return array<int, array{feld: string, headers: array<mixed>, rows: array<mixed>}>
+     * @param array<mixed> $baum
+     * @param array<int, int|string> $pfad Schluessel von der Wurzel bis zu $baum
+     *
+     * @return array<int, array{feld: string, eingabe: string, headers: array<mixed>, rows: array<mixed>}>
      */
-    private static function findTableGroups(array $baum): array
+    private static function findTableGroups(array $baum, array $pfad = []): array
     {
         $gefunden = [];
 
-        foreach ($baum as $wert) {
+        foreach ($baum as $schluessel => $wert) {
             if (!is_array($wert)) {
                 continue;
             }
 
-            $gefunden = array_merge($gefunden, self::findTableGroups($wert));
+            $gefunden = array_merge($gefunden, self::findTableGroups($wert, [...$pfad, $schluessel]));
         }
 
         $headerFeld = null;
@@ -735,6 +802,7 @@ class AcfServiceProvider extends ServiceProvider
             && is_array($baum[$headerFeld]) && is_array($baum[$rowFeld])) {
             $gefunden[] = [
                 'feld' => $rowFeld,
+                'eingabe' => 'acf[' . implode('][', [...$pfad, $rowFeld]) . ']',
                 'headers' => $baum[$headerFeld],
                 'rows' => $baum[$rowFeld],
             ];

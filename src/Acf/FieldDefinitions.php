@@ -3698,12 +3698,49 @@ class FieldDefinitions
                         'table',
                         '',
                     ),
+                    self::trueFalseField(
+                        "field_{$prefix}_row_thick_border",
+                        __('Dicke Linie darunter', 'wp-starter'),
+                        'thick_border',
+                        false,
+                        __('Trennt diese Zeile mit einer kräftigen Linie von der nächsten.', 'wp-starter'),
+                    ),
                 ],
                 __('Zeile hinzufügen', 'wp-starter'),
                 1,
                 'row',
                 __('Füge Datenzeilen hinzu. Jede Zeile braucht genau so viele Zellen wie Spalten definiert sind, sonst kannst du die Seite nicht speichern.', 'wp-starter'),
             ),
+            self::selectField(
+                "field_{$prefix}_side_content_position",
+                __('Inhaltsspalte', 'wp-starter'),
+                'side_content_position',
+                [
+                    '' => __('Keine', 'wp-starter'),
+                    'right' => __('Rechts neben der Tabelle', 'wp-starter'),
+                    'left' => __('Links neben der Tabelle', 'wp-starter'),
+                ],
+                '',
+                false,
+                __('Optionale Textspalte neben der Tabelle. Die Tabelle nimmt dann 2/3 der Breite ein.', 'wp-starter'),
+            ),
+            [
+                ...self::wysiwygField(
+                    "field_{$prefix}_side_content",
+                    __('Inhalt der Spalte', 'wp-starter'),
+                    'side_content',
+                    false
+                ),
+                'conditional_logic' => [
+                    [
+                        [
+                            'field' => "field_{$prefix}_side_content_position",
+                            'operator' => '!=',
+                            'value' => '',
+                        ],
+                    ],
+                ],
+            ],
             self::trueFalseField(
                 "field_{$prefix}_striped",
                 __('Gestreifte Zeilen', 'wp-starter'),

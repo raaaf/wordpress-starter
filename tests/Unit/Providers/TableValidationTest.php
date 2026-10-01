@@ -13,40 +13,45 @@ use WordpressStarter\Providers\AcfServiceProvider;
  * keinerlei Rueckmeldung. Das Template gleicht die Zahl beim Rendern an, aber
  * ueberzaehlige Zellen fallen dabei weg: stiller Datenverlust.
  *
- * Geprueft wird hier die Suche im geposteten Baum, nicht der ACF-Hook selbst.
- * Sie traegt die ganze Logik: sie muss Tabellen in beliebiger
- * Verschachtelungstiefe finden und darf nichts als Tabelle ansehen, das keine
- * ist.
+ * Geprueft wird das oeffentliche Verhalten: findTableRowMismatches (welche
+ * Zeilen weichen ab, mit Zeilennummer, Zellen- und Spaltenzahl und dem vollen
+ * Eingabenamen) und validateTableRows (der Hook, der daraus ACF-Fehler macht).
+ * Die Suche im Baum und die Zellenzaehlung laufen dabei ueber diesen Weg mit.
  */
 final class TableValidationTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $GLOBALS['wp_mock_acf_validation_errors'] = [];
+        unset($_POST['acf']);
+    }
+
+    protected function tearDown(): void
+    {
+        $GLOBALS['wp_mock_acf_validation_errors'] = [];
+        unset($_POST['acf']);
+
+        parent::tearDown();
+    }
+
     /**
      * @param array<mixed> $baum
      *
-     * @return array<int, array{feld: string, headers: array<mixed>, rows: array<mixed>}>
+     * @return array<int, array{eingabe: string, zeile: int, zellen: int, spalten: int}>
      */
-    private function finde(array $baum): array
+    private function abweichungen(array $baum): array
     {
-        /** @var array<int, array{feld: string, headers: array<mixed>, rows: array<mixed>}> $ergebnis */
-        $ergebnis = $this->invokeStaticMethod(AcfServiceProvider::class, 'findTableGroups', [$baum]);
-
-        return $ergebnis;
+        return AcfServiceProvider::findTableRowMismatches($baum);
     }
 
     /**
-     * @param array<mixed> $zeile
+     * @return array<mixed>
      */
-    private function zaehleZellen(array $zeile): int
+    private function tabelleInFlexibleContent(): array
     {
-        /** @var int $ergebnis */
-        $ergebnis = $this->invokeStaticMethod(AcfServiceProvider::class, 'countRowCells', [$zeile]);
-
-        return $ergebnis;
-    }
-
-    public function testFindetTabelleInEinerFlexibleContentZeile(): void
-    {
-        $treffer = $this->finde([
+        return [
             'field_page_sections' => [
                 'row-0' => [
                     'acf_fc_layout' => 'table',
@@ -61,36 +66,92 @@ final class TableValidationTest extends TestCase
                                 'row-1' => ['field_flex_table_cell_content' => '90 Euro'],
                             ],
                         ],
+                        'row-1' => [
+                            'field_flex_table_row_cells' => [
+                                'row-0' => ['field_flex_table_cell_content' => 'Nur eine Zelle'],
+                            ],
+                        ],
                     ],
+                ],
+            ],
+        ];
+    }
+
+    public function testMeldetZeileMitZuWenigZellenMitVollemEingabenamen(): void
+    {
+        $treffer = $this->abweichungen($this->tabelleInFlexibleContent());
+
+        // Zeile 1 passt, nur die zweite weicht ab: Nummer ist 1-basiert.
+        $this->assertSame([
+            [
+                'eingabe' => 'acf[field_page_sections][row-0][field_flex_table_rows]',
+                'zeile' => 2,
+                'zellen' => 1,
+                'spalten' => 2,
+            ],
+        ], $treffer);
+    }
+
+    public function testMeldetNichtsWennZellenzahlUndSpaltenzahlPassen(): void
+    {
+        $baum = $this->tabelleInFlexibleContent();
+        unset($baum['field_page_sections']['row-0']['field_flex_table_rows']['row-1']);
+
+        $this->assertSame([], $this->abweichungen($baum));
+    }
+
+    public function testTabelleOhneKopfzeilenWirdUebersprungen(): void
+    {
+        $baum = $this->tabelleInFlexibleContent();
+        $baum['field_page_sections']['row-0']['field_flex_table_headers'] = [];
+
+        $this->assertSame([], $this->abweichungen($baum));
+    }
+
+    public function testSkalarFeldVorDenZellenStoertDieZaehlungNicht(): void
+    {
+        // Der Schalter "Dicke Linie darunter" wird als "0"/"1" gepostet und kann
+        // vor dem Zellen-Repeater stehen: er ist kein Array und zaehlt nicht.
+        $treffer = $this->abweichungen([
+            'field_flex_table_headers' => ['a' => [], 'b' => [], 'c' => []],
+            'field_flex_table_rows' => [
+                'row-0' => [
+                    'field_flex_table_row_thick_border' => '1',
+                    'field_flex_table_row_cells' => ['row-0' => [], 'row-1' => []],
                 ],
             ],
         ]);
 
         $this->assertCount(1, $treffer);
-        $this->assertSame('field_flex_table_rows', $treffer[0]['feld']);
-        $this->assertCount(2, $treffer[0]['headers']);
-        $this->assertCount(1, $treffer[0]['rows']);
+        $this->assertSame(2, $treffer[0]['zellen']);
+        $this->assertSame(3, $treffer[0]['spalten']);
     }
 
     public function testFindetZweiTabellenAufDerselbenSeite(): void
     {
-        $zeile = [
+        $tabelle = [
             'field_flex_table_headers' => ['row-0' => ['label' => 'A']],
-            'field_flex_table_rows' => ['row-0' => ['cells' => ['row-0' => []]]],
+            'field_flex_table_rows' => ['row-0' => ['cells' => ['row-0' => [], 'row-1' => []]]],
         ];
 
-        $treffer = $this->finde([
-            'field_page_sections' => ['row-0' => $zeile, 'row-1' => $zeile],
+        $treffer = $this->abweichungen([
+            'field_page_sections' => ['row-0' => $tabelle, 'row-1' => $tabelle],
         ]);
 
-        $this->assertCount(2, $treffer);
+        $this->assertSame(
+            [
+                'acf[field_page_sections][row-0][field_flex_table_rows]',
+                'acf[field_page_sections][row-1][field_flex_table_rows]',
+            ],
+            array_column($treffer, 'eingabe')
+        );
     }
 
     public function testHaeltEinenKnotenOhneZeilenNichtFuerEineTabelle(): void
     {
         // Nur Kopfzeilen, keine Zeilen: kein Treffer, sonst meldete die Pruefung
         // jede halbe Konfiguration als Fehler.
-        $this->assertSame([], $this->finde([
+        $this->assertSame([], $this->abweichungen([
             'field_page_sections' => [
                 'row-0' => ['field_flex_table_headers' => ['row-0' => ['label' => 'A']]],
             ],
@@ -99,7 +160,7 @@ final class TableValidationTest extends TestCase
 
     public function testIgnoriertEinenBaumOhneTabelle(): void
     {
-        $this->assertSame([], $this->finde([
+        $this->assertSame([], $this->abweichungen([
             'field_page_sections' => [
                 'row-0' => [
                     'acf_fc_layout' => 'cards',
@@ -110,14 +171,13 @@ final class TableValidationTest extends TestCase
     }
 
     /**
-     * Der Zellenvergleich selbst: eine Zeile zaehlt so viele Zellen, wie ihr
-     * erster Array-Wert Eintraege hat. Das ist die Annahme, auf der die Meldung
-     * beruht, und sie muss auch dann halten, wenn ACF den Zellen-Repeater unter
-     * einem Schluessel mit anderem Praefix ablegt.
+     * Eine Zeile zaehlt so viele Zellen, wie ihr erster Array-Wert Eintraege
+     * hat. Das muss auch dann halten, wenn ACF den Zellen-Repeater unter einem
+     * Schluessel mit anderem Praefix ablegt.
      */
     public function testZaehltZellenUnabhaengigVomSchluesselnamen(): void
     {
-        $treffer = $this->finde([
+        $treffer = $this->abweichungen([
             'field_flex_table_headers' => ['a' => [], 'b' => [], 'c' => []],
             'field_flex_table_rows' => [
                 'row-0' => ['irgendein_key' => ['z1' => [], 'z2' => []]],
@@ -125,36 +185,55 @@ final class TableValidationTest extends TestCase
         ]);
 
         $this->assertCount(1, $treffer);
-
-        $zeile = array_values($treffer[0]['rows'])[0];
-        $zellen = $this->zaehleZellen( (array) $zeile);
-
-        $this->assertSame(2, $zellen, 'Zwei Zellen bei drei Spalten muss auffallen.');
-        $this->assertCount(3, $treffer[0]['headers']);
+        $this->assertSame(2, $treffer[0]['zellen'], 'Zwei Zellen bei drei Spalten muss auffallen.');
+        $this->assertSame(3, $treffer[0]['spalten']);
     }
 
-    public function testZaehltZellenEinerNormalenZeile(): void
+    public function testZeileOhneArrayWertHatNullZellen(): void
     {
-        $this->assertSame(3, $this->zaehleZellen([
-            'field_flex_table_row_cells' => ['row-0' => [], 'row-1' => [], 'row-2' => []],
-        ]));
-    }
+        // Kein Wert der Zeile ist ein Array, z. B. nur ein Layout-Schluessel.
+        $treffer = $this->abweichungen([
+            'field_flex_table_headers' => ['a' => []],
+            'field_flex_table_rows' => ['row-0' => ['acf_fc_layout' => 'row']],
+        ]);
 
-    public function testZaehltNullZellenOhneArrayWert(): void
-    {
-        // Kein Wert der Zeile ist ein Array, z. B. nur ein Layout-Schluessel:
-        // keine Zellen zu zaehlen, kein Treffer.
-        $this->assertSame(0, $this->zaehleZellen([
-            'acf_fc_layout' => 'row',
-        ]));
+        $this->assertCount(1, $treffer);
+        $this->assertSame(0, $treffer[0]['zellen']);
     }
 
     public function testZaehltNurDenErstenArrayWertBeiMehreren(): void
     {
         // Zwei Array-Werte in derselben Zeile: nur der erste zaehlt.
-        $this->assertSame(2, $this->zaehleZellen([
-            'field_flex_table_row_cells' => ['row-0' => [], 'row-1' => []],
-            'field_flex_table_row_meta' => ['row-0' => [], 'row-1' => [], 'row-2' => []],
-        ]));
+        $treffer = $this->abweichungen([
+            'field_flex_table_headers' => ['a' => [], 'b' => [], 'c' => []],
+            'field_flex_table_rows' => [
+                'row-0' => [
+                    'field_flex_table_row_cells' => ['row-0' => [], 'row-1' => []],
+                    'field_flex_table_row_meta' => ['row-0' => [], 'row-1' => [], 'row-2' => []],
+                ],
+            ],
+        ]);
+
+        $this->assertCount(1, $treffer);
+        $this->assertSame(2, $treffer[0]['zellen']);
+    }
+
+    public function testValidateTableRowsMeldetEinenFehlerAmZeilenRepeater(): void
+    {
+        $_POST['acf'] = $this->tabelleInFlexibleContent();
+
+        AcfServiceProvider::validateTableRows();
+
+        $fehler = $GLOBALS['wp_mock_acf_validation_errors'];
+
+        $this->assertCount(1, $fehler);
+        $this->assertSame('acf[field_page_sections][row-0][field_flex_table_rows]', $fehler[0]['input']);
+    }
+
+    public function testValidateTableRowsOhnePostDatenMeldetNichts(): void
+    {
+        AcfServiceProvider::validateTableRows();
+
+        $this->assertSame([], $GLOBALS['wp_mock_acf_validation_errors']);
     }
 }

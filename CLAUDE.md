@@ -57,9 +57,9 @@ Optional: `WP_STYLEGUIDE_PATH` (Standard `/styleguide/`).
 
 ```
 src/                    # PHP source code
-├── Acf/               # ACF: FlexibleContent, Fields, Options
+├── Acf/               # ACF: AcfExtended, FieldDefinitions, FlexibleContent, Fields, Options, PageSettings
 ├── PostTypes/         # Custom Post Types (AbstractPostType, Event, MemberDownload, Team, Testimonial)
-├── Taxonomies/        # Custom Taxonomies (AbstractTaxonomy)
+├── Taxonomies/        # Custom Taxonomies (AbstractTaxonomy, DownloadCategory)
 ├── Providers/         # Service providers
 ├── Services/          # StyleguidePage.php
 ├── Content/           # Styleguide reference/data classes
@@ -314,7 +314,7 @@ private static function myNewLayout(): array
 
 2. Add field definitions in `src/Acf/FieldDefinitions.php`
 
-3. Create template `templates/flexible/{name}.blade.php`
+3. Create template `templates/flexible/{name-with-hyphens}.blade.php` (underscores in the layout name become hyphens, so `my_new` is `my-new.blade.php`; a mismatched filename is skipped silently by `@includeIf`)
 
 4. Register layout in `getLayouts()` array
 
@@ -460,6 +460,7 @@ LogServiceProvider::exception($e);
 - Clear `compiled/` if Blade cache issues
 - Plugins managed via Composer (`wpackagist-plugin/*`)
 - SVG uploads sanitized via `enshrined/svg-sanitize`
+- ACF textarea values are tag-stripped on save (`AcfServiceProvider::sanitizeTextarea`), except table cells (`*_cell_content`), which go through `wp_kses_post` minus form controls (form, input, select, option, optgroup, textarea, button). Pinned by `TextareaSanitizeTest`.
 - AJAX handlers protected by rate limiting
 - See `docs/` for detailed documentation
 

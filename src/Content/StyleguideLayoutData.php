@@ -1420,6 +1420,47 @@ class StyleguideLayoutData
             'background_color' => 'secondary',
         ]);
 
+        $catalog[] = $this->layout('table', [
+            'title' => 'Tabelle mit dicker Linie unter einer Zeile',
+            'headers' => [['label' => 'Merkmal'], ['label' => 'Wert']],
+            'rows' => [
+                ['cells' => [['content' => 'Normale Zeile'], ['content' => 'dünne Linie']]],
+                ['cells' => [['content' => 'Abschlusszeile'], ['content' => 'dicke Linie darunter']], 'thick_border' => 1],
+                ['cells' => [['content' => 'Folgezeile'], ['content' => 'wieder normal']]],
+            ],
+            'striped' => false,
+            'bordered' => false,
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('table', [
+            'title' => 'Tabelle mit Zusatztext rechts',
+            'headers' => [['label' => 'Merkmal'], ['label' => 'Wert']],
+            'rows' => [
+                ['cells' => [['content' => 'Zusatztext'], ['content' => 'rechts']]],
+                ['cells' => [['content' => 'Tabelle'], ['content' => 'links']]],
+            ],
+            'striped' => false,
+            'bordered' => false,
+            'side_content_position' => 'right',
+            'side_content' => '<h3>Hinweis</h3><p>Der Zusatztext steht neben der Tabelle.</p>',
+            'background_color' => 'secondary',
+        ]);
+
+        $catalog[] = $this->layout('table', [
+            'title' => 'Tabelle mit Zusatztext links',
+            'headers' => [['label' => 'Merkmal'], ['label' => 'Wert']],
+            'rows' => [
+                ['cells' => [['content' => 'Zusatztext'], ['content' => 'links']]],
+                ['cells' => [['content' => 'Tabelle'], ['content' => 'rechts']]],
+            ],
+            'striped' => false,
+            'bordered' => false,
+            'side_content_position' => 'left',
+            'side_content' => '<h3>Hinweis</h3><p>Der Zusatztext steht vor der Tabelle.</p>',
+            'background_color' => 'primary',
+        ]);
+
         $catalog[] = $this->layout('contact_form', [
             'title' => 'Formular ohne Kontaktdaten',
             'content' => '<p>Gleiches Modul, aber ohne die Kontaktkarte daneben.</p>',

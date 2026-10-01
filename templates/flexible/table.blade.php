@@ -1,9 +1,13 @@
 {{--
     Table Flexible Content Layout
 
-    Uses shared components: x-section, x-section-header
+    Uses shared components: x-section, x-section-header, x-grid, x-prose
     Fields: title, headers (repeater: label), rows (repeater: cells), striped, bordered,
-    compact, sticky_header, background_color
+    compact, sticky_header, background_color, side_content_position (right|left), side_content (WYSIWYG).
+    Section header extras (section_chip, section_description, section_alignment) kommen
+    ueber SectionHeader::extras($title).
+    Zeilen haben zusaetzlich thick_border (dicke Linie unter der Zeile).
+    Mit Inhaltsspalte: Tabelle 2/3, Inhalt 1/3, mobil untereinander (Tabelle zuerst).
 --}}
 
 @php
@@ -16,14 +20,23 @@
     $bordered = get_sub_field('bordered') ?? false;
     $compact = (bool) get_sub_field('compact');
     $stickyHeader = (bool) get_sub_field('sticky_header');
+    $sidePosition = (string) (get_sub_field('side_content_position') ?: '');
+    $sideContent = (string) (get_sub_field('side_content') ?: '');
+    $hasSide = $sidePosition !== '' && trim(strip_tags($sideContent, '<img>')) !== '';
 
     $cellClass = $compact ? 'px-4 py-2' : 'px-6 py-4';
 
     // Eine mitscrollende Kopfzeile braucht eine Flaeche, in der ueberhaupt
     // gescrollt wird. overflow-x allein reicht nicht: sticky haengt dann an einem
     // Kasten, der selbst mit der Seite wandert, und bleibt wirkungslos.
-    $wrapperClass = $stickyHeader ? 'overflow-auto max-h-[70vh]' : 'overflow-x-auto';
+    // scroll-pt haelt die Kopfhoehe frei, damit ein per Tastatur fokussierter Link
+    // nicht unter der mitscrollenden Kopfzeile verschwindet (WCAG 2.4.11).
+    $wrapperClass = $stickyHeader ? 'overflow-auto max-h-[70vh] scroll-pt-16' : 'overflow-x-auto';
     $headClass = $stickyHeader ? 'sticky top-0 z-10' : '';
+    // Bei border-collapse wandern Zellrahmen nicht mit der sticky Kopfzeile mit:
+    // die Unterkante wird deshalb als innerer Schatten auf den th gezeichnet.
+    $headCellEdge = $stickyHeader && $bordered ? 'shadow-[inset_0_-1px_0_var(--color-line)]' : '';
+    $tableLabel = $title ? strip_tags($title) : __('Tabelle', 'wp-starter');
     $background = get_sub_field('background_color') ?: 'primary';
     $captionId = 'table-caption-' . uniqid();
 @endphp
@@ -33,15 +46,16 @@
     <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if(!empty($rows))
+        @php ob_start(); @endphp
         {{-- tabindex, damit der scrollende Bereich auch per Tastatur erreichbar ist (WCAG 2.1.1) --}}
         <div class="{{ $wrapperClass }} rounded-lg" tabindex="0" role="group" aria-labelledby="{{ esc_attr($captionId) }}">
             <table class="w-full border-collapse {{ $bordered ? 'border border-line' : '' }}">
-                <caption class="sr-only" id="{{ esc_attr($captionId) }}">{{ $title ? strip_tags($title) : __('Tabelle', 'wp-starter') }}</caption>
+                <caption class="sr-only" id="{{ esc_attr($captionId) }}">{{ $tableLabel }}</caption>
                 @if(!empty($headers))
                     <thead class="bg-surface-tertiary {{ $headClass }}">
                         <tr>
                             @foreach($headers as $header)
-                                <th scope="col" class="{{ $cellClass }} text-left font-normal text-xs uppercase tracking-[0.08em] text-content-secondary bg-surface-tertiary {{ $bordered ? 'border border-line' : 'border-b border-line-strong' }}">
+                                <th scope="col" class="{{ $cellClass }} text-left font-normal text-xs uppercase tracking-[0.08em] text-content-secondary bg-surface-tertiary {{ $bordered ? 'border border-line' : 'border-b border-line-strong' }} {{ $headCellEdge }}">
                                     {{ $header['label'] ?? '' }}
                                 </th>
                             @endforeach
@@ -53,6 +67,10 @@
                     @foreach($rows as $rowIndex => $row)
                         <tr class="{{ $striped && $rowIndex % 2 === 1 ? 'bg-surface-secondary' : 'bg-surface' }}">
                             @php
+                                // Dicke Linie unter der Zeile: auf den Zellen, nicht auf dem tr,
+                                // damit sie mit und ohne "Mit Rahmen" sichtbar ist.
+                                $rowBorderClass = !empty($row['thick_border']) ? 'border-b-2 border-b-content' : '';
+
                                 $cells = $row['cells'] ?? [];
 
                                 // Auf die Spaltenzahl bringen. Ohne das erzeugt eine
@@ -65,11 +83,11 @@
                             @endphp
                             @foreach($cells as $cellIndex => $cell)
                                 @if($cellIndex === 0 && !empty($headers))
-                                    <th scope="row" class="{{ $cellClass }} font-normal text-left text-content {{ $bordered ? 'border border-line' : '' }}">
+                                    <th scope="row" class="{{ $cellClass }} font-normal text-left [&_a]:underline [&_a]:underline-offset-2 text-content {{ $bordered ? 'border border-line' : '' }} {{ $rowBorderClass }}">
                                         {!! wp_kses_post($cell['content'] ?? '') !!}
                                     </th>
                                 @else
-                                    <td class="{{ $cellClass }} text-content tabular-nums {{ $bordered ? 'border border-line' : '' }}">
+                                    <td class="{{ $cellClass }} text-content tabular-nums [&_a]:underline [&_a]:underline-offset-2 {{ $bordered ? 'border border-line' : '' }} {{ $rowBorderClass }}">
                                         {!! wp_kses_post($cell['content'] ?? '') !!}
                                     </td>
                                 @endif
@@ -79,6 +97,19 @@
                 </tbody>
             </table>
         </div>
+        @php $tableBlock = ob_get_clean(); @endphp
+
+        @if($hasSide)
+            {{-- DOM-Reihenfolge immer Tabelle, dann Inhalt: mobil steht die Tabelle oben --}}
+            <x-grid :cols="$sidePosition === 'left' ? '1/3-2/3' : '2/3-1/3'" gap="lg">
+                <div class="min-w-0">{!! $tableBlock !!}</div>
+                <div class="{{ $sidePosition === 'left' ? 'md:order-first' : '' }}">
+                    <x-prose>@kses($sideContent)</x-prose>
+                </div>
+            </x-grid>
+        @else
+            {!! $tableBlock !!}
+        @endif
     @elseif(current_user_can('edit_posts'))
         <div class="p-8 text-center rounded-lg bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte füge Tabellenzeilen hinzu.', 'wp-starter') }}</p>
