@@ -1,3 +1,9 @@
+# [2.38.0](https://github.com/raaaf/wordpress-starter/compare/v2.37.3...v2.38.0) (2026-10-01)
+
+### Features
+
+- table cells keep HTML, thick row separator, optional side content column ([18e08dc](https://github.com/raaaf/wordpress-starter/commit/18e08dc7535f98179a5bf711da258de5a621fa0f))
+
 ## [2.37.3](https://github.com/raaaf/wordpress-starter/compare/v2.37.2...v2.37.3) (2026-09-30)
 
 ## [2.37.2](https://github.com/raaaf/wordpress-starter/compare/v2.37.1...v2.37.2) (2026-09-30)
