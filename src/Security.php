@@ -6,6 +6,8 @@ namespace WordpressStarter;
 
 /**
  * Security class for Content Security Policy (CSP) and other security headers.
+ * It also owns the iframe embed host allowlist (isAllowedEmbedHost()), which
+ * reads the admin option embed_allowed_hosts through the ACF layer.
  *
  * The CSP is reduced to frame-ancestors, base-uri and object-src: a stricter
  * policy broke plugins, embeds and newsletter forms. Nonces are still added to
@@ -18,7 +20,7 @@ class Security
     private static ?string $nonce = null;
 
     /**
-     * Test seam for the hardening headers: when set, addHardeningHeaders()
+     * Test seam for the response headers: when set, emitHeader()
      * calls this instead of the real header() function, so tests can assert
      * on the emitted header lines without triggering "headers already sent"
      * warnings or needing a real HTTP response.
@@ -206,14 +208,23 @@ class Security
                 return;
             }
 
-            $emitter = self::$headerEmitter ?? static function (string $headerLine): void {
-                header($headerLine);
-            };
-
             foreach (self::getHardeningHeaders() as $name => $value) {
-                $emitter("{$name}: {$value}");
+                self::emitHeader("{$name}: {$value}");
             }
         });
+    }
+
+    /**
+     * Single exit for every response header this class sends, so the test seam
+     * (setHeaderEmitter) covers the CSP header as well as the hardening headers.
+     */
+    private static function emitHeader(string $headerLine): void
+    {
+        $emitter = self::$headerEmitter ?? static function (string $line): void {
+            header($line);
+        };
+
+        $emitter($headerLine);
     }
 
     /**
@@ -231,14 +242,14 @@ class Security
         // Add CSP header for frontend requests
         add_action('send_headers', function (): void {
             if (!is_admin() && !wp_doing_ajax()) {
-                header('Content-Security-Policy: ' . self::getCSPHeader());
+                self::emitHeader('Content-Security-Policy: ' . self::getCSPHeader());
             }
         });
 
         // Make nonce available globally for templates
         $GLOBALS['csp_nonce'] = self::getNonce();
 
-        // Add nonce to script tags (preparation for removing unsafe-inline)
+        // Add nonce to script tags (no security effect today: the CSP has no script-src)
         add_filter('script_loader_tag', function (string $tag, string $handle): string {
             // Core can concatenate several script tags (before/main/after
             // inline scripts) into one $tag string, so nonce each opening

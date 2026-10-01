@@ -750,8 +750,9 @@ if (!function_exists('wp_kses')) {
      * Test-double, not a full port of core's wp_kses: it works with a regex
      * pass over tags/attributes instead of core's HTML parser, but it does
      * enforce what security assertions rely on: a per-tag allowlist, per-tag
-     * attribute allowlists (including the `data-*`/`aria-*` wildcards core
-     * uses), unconditional removal of any `on*` event-handler attribute, and
+     * attribute allowlists (including the `data-*` wildcard core uses; core
+     * has no `aria-*` wildcard, so aria attributes must be listed by name),
+     * unconditional removal of any `on*` event-handler attribute, and
      * a scheme check on href/src/action via wp_kses_test_double_check_scheme().
      *
      * @param array<string, array<string, mixed>> $allowedTags
@@ -822,8 +823,7 @@ if (!function_exists('wp_kses')) {
                     }
 
                     $isAllowed = isset($allowedAttrs[$name])
-                        || ( str_starts_with($name, 'data-') && isset($allowedAttrs['data-*']) )
-                        || ( str_starts_with($name, 'aria-') && isset($allowedAttrs['aria-*']) );
+                        || ( str_starts_with($name, 'data-') && isset($allowedAttrs['data-*']) );
 
                     if (!$isAllowed) {
                         continue;
@@ -889,7 +889,15 @@ if (!function_exists('wp_kses_post')) {
             'lang' => true,
             'tabindex' => true,
             'data-*' => true,
-            'aria-*' => true,
+            // Core lists aria attributes by name, there is no wildcard.
+            'aria-label' => true,
+            'aria-labelledby' => true,
+            'aria-describedby' => true,
+            'aria-hidden' => true,
+            'aria-expanded' => true,
+            'aria-controls' => true,
+            'aria-live' => true,
+            'aria-current' => true,
         ];
 
         $tags = [
@@ -999,10 +1007,26 @@ if (!function_exists('wp_filter_content_tags')) {
     }
 }
 
+if (!function_exists('wp_test_double_strip_tags')) {
+    /**
+     * Shared tag stripping for wp_strip_all_tags() and the sanitize_*_field()
+     * doubles: like core, script/style elements are dropped together with
+     * their bodies, and a stray '<' that does not open a tag is escaped to
+     * &lt; instead of being swallowed. Not a port of core's full pipeline.
+     */
+    function wp_test_double_strip_tags(string $text): string
+    {
+        $text = preg_replace('@<(script|style)[^>]*?>.*?</\\1>@si', '', $text) ?? $text;
+        $text = preg_replace('%<(?=[^a-zA-Z/!?]|$)%', '&lt;', $text) ?? $text;
+
+        return strip_tags($text);  // phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags -- test double mirrors the core implementation
+    }
+}
+
 if (!function_exists('wp_strip_all_tags')) {
     function wp_strip_all_tags(string $text): string
     {
-        return strip_tags($text);  // phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags -- test double mirrors the core implementation
+        return trim(wp_test_double_strip_tags($text));
     }
 }
 
@@ -1675,14 +1699,16 @@ if (!function_exists('absint')) {
 if (!function_exists('sanitize_textarea_field')) {
     function sanitize_textarea_field(string $str): string
     {
-        return trim(strip_tags($str));
+        // Core keeps line breaks for textarea input.
+        return trim(wp_test_double_strip_tags($str));
     }
 }
 
 if (!function_exists('sanitize_text_field')) {
     function sanitize_text_field(string $str): string
     {
-        return trim(strip_tags($str));  // phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags -- test double mirrors the core implementation
+        // Core collapses line breaks, tabs and runs of spaces to one space.
+        return trim(preg_replace('/[\r\n\t ]+/', ' ', wp_test_double_strip_tags($str)) ?? '');
     }
 }
 

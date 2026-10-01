@@ -772,7 +772,7 @@ class Options
             'fields' => [
                 FieldDefinitions::infoBoxField(
                     'field_options_embeds_info',
-                    __('<strong>Warum diese Liste?</strong><br>Die Sicherheitsrichtlinie der Seite (CSP) blockiert fremde iframes. Erst ein Host in dieser Liste darf im Modul „Einbettung" geladen werden. YouTube, Vimeo und Google Maps sind bereits freigegeben.', 'wp-starter'),
+                    __('<strong>Warum diese Liste?</strong><br>Das Modul „Einbettung" rendert nur iframes von Hosts aus dieser Liste, die Prüfung läuft serverseitig. YouTube, Vimeo und Google Maps sind bereits freigegeben.', 'wp-starter'),
                     'info',
                 ),
                 FieldDefinitions::textareaField(

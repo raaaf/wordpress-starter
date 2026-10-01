@@ -1,8 +1,11 @@
 {{--
     Einbettung - Flexible Content Layout
 
-    Uses shared components: x-section
+    Uses shared components: x-section, x-section-header
     Fields: title, url, iframe_title, aspect_ratio, height, background_color
+    Section header extras (section_chip, section_description, section_alignment) kommen
+    ueber SectionHeader::extras($title). Section-Felder (section_spacing, section_width,
+    section_anchor) kommen als $sectionSpacing, $sectionWidth, $sectionAnchor von der einbindenden Seite.
 
     Bewusst nur eine Adresse statt des Einbettungscodes des Anbieters. Zwei
     Gruende: ACF entfernt <iframe> beim Speichern fuer jeden ohne Recht
@@ -10,8 +13,11 @@
     Und der Rahmen gehoert ohnehin uns, damit title, loading und referrerpolicy
     gesetzt sind, statt davon abzuhaengen, was im kopierten Schnipsel stand.
 
-    Geladen wird trotzdem nur, was die CSP erlaubt: die Hostliste steht unter
-    Theme-Einstellungen und landet in frame-src (siehe Security::getEmbedOrigins).
+    Geladen wird nur, was die Hostliste erlaubt: sie steht unter
+    Theme-Einstellungen. Security::isAllowedEmbedHost() prueft den Host
+    serverseitig, damit eine nicht erlaubte Adresse gar nicht erst als
+    <iframe> ausgeliefert wird. Erst nach Einwilligung
+    laedt der Iframe ueberhaupt (DSGVO), siehe partials/consent-gate.
 --}}
 
 @php
@@ -26,10 +32,10 @@
     $host = $url !== '' ? (string) wp_parse_url($url, PHP_URL_HOST) : '';
     $isHttps = $url !== '' && strtolower((string) wp_parse_url($url, PHP_URL_SCHEME)) === 'https';
 
-    // Gleiche Host-Zulassung wie Security::getCSPHeader() (das dieselbe
-    // Pruefung in frame-src schreibt): eine Adresse, die die CSP ohnehin
-    // blockiert, soll gar nicht erst als Iframe versucht werden.
+    // Die CSP hat kein frame-src: diese serverseitige Host-Zulassung ist das
+    // einzige Gate, eine nicht erlaubte Adresse wird gar nicht erst gerendert.
     $isAllowedHost = $url !== '' && \WordpressStarter\Security::isAllowedEmbedHost($url);
+    $canEdit = current_user_can('edit_posts');
 
     // Eigene Datenschutzerklaerung statt einer anbieterspezifischen: anders als
     // beim Video kennen wir hier den Anbieter nicht vorab (jede erlaubte
@@ -45,7 +51,7 @@
     };
 @endphp
 
-@if(($url !== '' && $isHttps && $isAllowedHost) || current_user_can('edit_posts'))
+@if(($url !== '' && $isHttps && $isAllowedHost) || $canEdit)
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="embed">
     <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
@@ -54,10 +60,18 @@
             <div
                 class="relative overflow-hidden rounded-[var(--card-radius)] bg-surface-secondary {{ $aspectClass }}"
                 @if(!$aspectClass) style="height: {{ $height }}px" @endif
-                x-data="{ loaded: false }"
+                x-data="{ loaded: false, iframeLoaded: false }"
                 x-ref="embedContainer"
                 tabindex="-1"
             >
+                {{-- Live region: immer im DOM, damit Screenreader den Textwechsel (Laden) melden. Ohne Text unsichtbar, pointer-events-none damit der Iframe bedienbar bleibt. --}}
+                <div
+                    class="absolute inset-0 flex items-center justify-center p-8 text-center text-content-secondary pointer-events-none"
+                    role="status"
+                    aria-live="polite"
+                    x-text="loaded && !iframeLoaded ? @js(__('Inhalt wird geladen...', 'wp-starter')) : ''"
+                ></div>
+
                 {{-- Consent notice: das Widget laedt erst nach Klick, DSGVO-konform
                      wie bei video.blade.php. Geteiltes Markup in
                      partials/consent-gate.blade.php. --}}
@@ -87,17 +101,18 @@
                              allow-popups: Zahlungs-/Login-Popups (z. B. Google-Kalender-Verbindung). --}}
                         sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                         allowfullscreen
+                        @load="iframeLoaded = true"
                     ></iframe>
                 </template>
             </div>
         </div>
-    @elseif($url !== '' && $isHttps && current_user_can('edit_posts'))
+    @elseif($url !== '' && $isHttps && $canEdit)
         <div class="p-8 text-center rounded-[var(--card-radius)] bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">
                 {{ sprintf(__('Nur für dich sichtbar: Der Host %s ist nicht in den Theme-Einstellungen freigegeben. Trage ihn dort ein, sonst bleibt die Fläche für Besucher leer.', 'wp-starter'), $host) }}
             </p>
         </div>
-    @elseif(current_user_can('edit_posts'))
+    @elseif($canEdit)
         <div class="p-8 text-center rounded-[var(--card-radius)] bg-surface-secondary surface-sheen">
             <p class="text-content-secondary">{{ __('Bitte trage eine https-Adresse ein. Der Einbettungscode des Anbieters enthält sie im src-Attribut.', 'wp-starter') }}</p>
         </div>

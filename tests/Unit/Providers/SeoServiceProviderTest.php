@@ -349,7 +349,7 @@ final class SeoServiceProviderTest extends TestCase
     {
         ob_start();
         SeoServiceProvider::emitFaqSchema([
-            ['question' => '</script><script>alert(1)</script>', 'answer' => 'A safe answer.'],
+            ['question' => 'Frage</script><b>alert(1)</b>', 'answer' => 'A safe answer.'],
         ]);
         $out = (string) ob_get_clean();
 
@@ -358,8 +358,8 @@ final class SeoServiceProviderTest extends TestCase
         // wp_strip_all_tags() removes every tag from the question before it
         // reaches the JSON-LD block, so no script markup - literal or
         // escaped - can survive in the "name" field.
-        $this->assertStringNotContainsString('</script><script>', $ldJsonBlock);
-        $this->assertStringContainsString('"name":"alert(1)"', $ldJsonBlock);
+        $this->assertStringNotContainsString('</script>', $ldJsonBlock);
+        $this->assertStringContainsString('"name":"Fragealert(1)"', $ldJsonBlock);
     }
 
     public function testRenderJsonLdHexEscapesAngleBracketsAndAmpersand(): void

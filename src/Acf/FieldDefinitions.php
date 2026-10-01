@@ -15,6 +15,34 @@ namespace WordpressStarter\Acf;
 class FieldDefinitions
 {
     /**
+     * Zeichen der Contact-Form-7-ID (Ziffern oder Hash), als Inhalt einer Zeichenklasse.
+     * Einzige Quelle fuer AcfServiceProvider::validateContactFormId und das Template contact-form.
+     */
+    public const CONTACT_FORM_ID_CHARS = 'A-Za-z0-9-';
+
+    /**
+     * Zeichen des Newsletter-E-Mail-Feldnamens, als Inhalt einer Zeichenklasse.
+     * Einzige Quelle fuer AcfServiceProvider::validateNewsletterEmailField und das Template newsletter.
+     */
+    public const NEWSLETTER_EMAIL_FIELD_CHARS = 'A-Za-z0-9_\-\[\]';
+
+    /**
+     * Feldnamen der Tabellen-Felder (Teil des Keys hinter dem Praefix); der
+     * AcfServiceProvider erkennt die Felder im geposteten Baum an diesen Suffixen.
+     */
+    public const TABLE_HEADERS_NAME = 'headers';
+    public const TABLE_ROWS_NAME = 'rows';
+    public const TABLE_CELL_CONTENT_NAME = 'cell_content';
+
+    /**
+     * Build an ACF field key: "field_{$prefix}_{$name}".
+     */
+    public static function fieldKey(string $prefix, string $name): string
+    {
+        return "field_{$prefix}_{$name}";
+    }
+
+    /**
      * Memoized icon choices, see getThemeIcons(). Reset via resetIconCache().
      *
      * @var array<string, string>|null
@@ -31,9 +59,9 @@ class FieldDefinitions
         return [
             'primary' => __('Standard (Weiß)', 'wp-starter'),
             'secondary' => __('Sekundär (Hellgrau)', 'wp-starter'),
-            'tertiary' => __('Tertiär', 'wp-starter'),
+            'tertiary' => __('Tertiär (Grau)', 'wp-starter'),
             'brand' => __('Markenfarbe', 'wp-starter'),
-            'brand-subtle' => __('Markenfarbe Dezent', 'wp-starter'),
+            'brand-subtle' => __('Markenfarbe (helle Tönung)', 'wp-starter'),
             'inverse' => __('Dunkel (Invers)', 'wp-starter'),
         ];
     }
@@ -1401,7 +1429,7 @@ class FieldDefinitions
             ),
             self::textareaField(
                 "field_{$prefix}_copy",
-                __('Copy', 'wp-starter'),
+                __('Beschreibungstext', 'wp-starter'),
                 'copy',
                 3,
                 __('Kurzer Beschreibungstext unter der Überschrift.', 'wp-starter'),
@@ -1414,7 +1442,7 @@ class FieldDefinitions
                 __('Primärer Button', 'wp-starter'),
                 'cta_primary',
                 false,
-                __('Haupt-Button (orange, auffällig).', 'wp-starter'),
+                __('Haupt-Button (auffällig).', 'wp-starter'),
                 '50',
             ),
             self::linkField(
@@ -1422,7 +1450,7 @@ class FieldDefinitions
                 __('Sekundärer Button', 'wp-starter'),
                 'cta_secondary',
                 false,
-                __('Zweiter Button (dezent, Outline-Stil).', 'wp-starter'),
+                __('Zweiter Button (dezent, Umriss-Stil).', 'wp-starter'),
                 '50',
             ),
 
@@ -1465,7 +1493,7 @@ class FieldDefinitions
                     'full' => __('Voller Bildschirm', 'wp-starter'),
                 ],
                 'auto',
-                __('Automatisch: die Höhe folgt dem Inhalt, bei der Variante Hintergrund mit einem Mindestmaß. Halb und Voll setzen eine Mindesthöhe aus der Bildschirmhöhe. Wird der Inhalt höher, wächst der Hero mit.', 'wp-starter'),
+                __('Automatisch: die Höhe folgt dem Inhalt, bei der Variante Hintergrund mit einer Mindesthöhe. Halb und Voll setzen eine Mindesthöhe aus der Bildschirmhöhe.', 'wp-starter'),
             ),
 
             // Overlay-Deckkraft (nur bei Background-Variante)
@@ -1518,10 +1546,10 @@ class FieldDefinitions
     {
         $chip = self::textField(
             "field_{$prefix}_section_chip",
-            __('Chip', 'wp-starter'),
+            __('Badge', 'wp-starter'),
             'section_chip',
             false,
-            __('Optionaler Chip über der Überschrift.', 'wp-starter'),
+            __('Optionales Badge über der Überschrift.', 'wp-starter'),
         );
         $chip['wrapper'] = ['width' => '50'];
 
@@ -1534,7 +1562,7 @@ class FieldDefinitions
                 'left' => __('Linksbündig', 'wp-starter'),
             ],
             'center',
-            __('Ausrichtung von Chip, Überschrift und Beschreibung.', 'wp-starter'),
+            __('Ausrichtung von Badge, Überschrift und Beschreibung.', 'wp-starter'),
         );
         $alignment['wrapper'] = ['width' => '50'];
 
@@ -1564,10 +1592,10 @@ class FieldDefinitions
 
         $chipField = self::textField(
             "field_{$prefix}_section_chip",
-            __('Chip', 'wp-starter'),
+            __('Badge', 'wp-starter'),
             'section_chip',
             false,
-            __('Optionaler Chip/Badge über der Überschrift.', 'wp-starter'),
+            __('Optionales Badge über der Überschrift.', 'wp-starter'),
             '',
             $showWhenEnabled,
             ['width' => '40'],
@@ -1613,7 +1641,7 @@ class FieldDefinitions
                 __('Sektionskopf anzeigen', 'wp-starter'),
                 'show_section_header',
                 false,
-                __('Zeigt Chip, Überschrift und Beschreibung über dem Inhalt an.', 'wp-starter'),
+                __('Zeigt Badge, Überschrift und Beschreibung über dem Inhalt an.', 'wp-starter'),
             ),
             $alignmentField,
             $chipField,
@@ -1831,7 +1859,7 @@ class FieldDefinitions
                 __('Überschrift', 'wp-starter'),
                 'title',
                 true,
-                __('Die Hauptüberschrift des Call-to-Action Bereichs.', 'wp-starter'),
+                __('Die Hauptüberschrift des Call-to-Action-Bereichs.', 'wp-starter'),
                 __('z.B. Jetzt starten!', 'wp-starter'),
             ),
             ...self::sectionHeaderExtras($prefix),
@@ -1848,7 +1876,7 @@ class FieldDefinitions
                 __('Button', 'wp-starter'),
                 'button',
                 true,
-                __('Der Call-to-Action Button mit Link und Text.', 'wp-starter'),
+                __('Der Call-to-Action-Button mit Link und Text.', 'wp-starter'),
             ),
             ...self::displaySettingsFields($prefix),
         ];
@@ -1874,7 +1902,7 @@ class FieldDefinitions
                 __('Überschrift', 'wp-starter'),
                 'title',
                 true,
-                __('Die Hauptüberschrift des Call-to-Action Bereichs.', 'wp-starter'),
+                __('Die Hauptüberschrift des Call-to-Action-Bereichs.', 'wp-starter'),
                 __('z.B. Jetzt starten!', 'wp-starter'),
             ),
             self::wysiwygField(
@@ -1890,7 +1918,7 @@ class FieldDefinitions
                 __('Button', 'wp-starter'),
                 'cta',
                 true,
-                __('Der Call-to-Action Button mit Link und Text.', 'wp-starter'),
+                __('Der Call-to-Action-Button mit Link und Text.', 'wp-starter'),
             ),
         ];
     }
@@ -2025,13 +2053,13 @@ class FieldDefinitions
                 'mp4,webm,ogg',
                 'url',
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'wordpress']]],
-                __('Lade eine MP4, WebM oder OGG Datei hoch.', 'wp-starter'),
+                __('Lade eine MP4-, WebM- oder OGG-Datei hoch.', 'wp-starter'),
             ),
             self::urlField(
                 "field_{$prefix}_video_url",
                 __('Video-URL', 'wp-starter'),
                 'video_url',
-                __('Füge die YouTube oder Vimeo URL ein.', 'wp-starter'),
+                __('Füge die YouTube- oder Vimeo-URL ein.', 'wp-starter'),
                 [[['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'external']]],
                 'https://www.youtube.com/watch?v=...',
                 true,
@@ -2052,7 +2080,7 @@ class FieldDefinitions
                 false,
                 'id',
                 null,
-                __('Standbild, das vor dem Abspielen zu sehen ist. Ohne dieses Bild steht bei YouTube und Vimeo bis zur Einwilligung eine leere graue Fläche über die volle Breite. Empfohlen: 16:9, mindestens 1280×720 Pixel.', 'wp-starter'),
+                __('Standbild vor dem Abspielen, bei YouTube und Vimeo bis zur Einwilligung sichtbar (ohne Bild eine graue Fläche). Empfohlen: 16:9, mindestens 1280×720 Pixel.', 'wp-starter'),
             ),
             self::fileField(
                 "field_{$prefix}_captions",
@@ -2065,7 +2093,7 @@ class FieldDefinitions
                     [['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'wordpress']],
                     [['field' => "field_{$prefix}_source", 'operator' => '==', 'value' => 'url']],
                 ],
-                __('WebVTT-Datei (.vtt) mit den Untertiteln. Ohne Untertitel ist ein Video für gehörlose und schwerhörige Nutzer nicht zugänglich (WCAG 1.2.2, Stufe A). Bei YouTube und Vimeo werden stattdessen die Untertitel des Anbieters genutzt.', 'wp-starter'),
+                __('WebVTT-Datei (.vtt) mit den Untertiteln, nötig für gehörlose und schwerhörige Nutzer (WCAG 1.2.2). Bei YouTube und Vimeo gelten die Untertitel des Anbieters.', 'wp-starter'),
             ),
             array_merge(
                 self::selectField(
@@ -2094,7 +2122,7 @@ class FieldDefinitions
                 __('Video-Titel', 'wp-starter'),
                 'video_title',
                 false,
-                __('Optionaler Titel des Videos. Beschreibt das Video für Screenreader und Suchmaschinen. Leer lassen: es wird eine allgemeine Beschreibung verwendet.', 'wp-starter'),
+                __('Optionaler Titel für Screenreader und Suchmaschinen. Leer lassen verwendet eine allgemeine Beschreibung.', 'wp-starter'),
             ),
             self::buttonGroupField(
                 "field_{$prefix}_aspect_ratio",
@@ -2326,7 +2354,7 @@ class FieldDefinitions
             ...self::sectionHeaderFields($prefix),
             self::textField(
                 "field_{$prefix}_label",
-                __('Label', 'wp-starter'),
+                __('Bildüberschrift', 'wp-starter'),
                 'label',
                 false,
                 __('Optionale Überschrift über dem Bild.', 'wp-starter'),
@@ -2338,7 +2366,7 @@ class FieldDefinitions
                 false,
                 'id',
                 null,
-                __('Bild für die Karte.', 'wp-starter'),
+                __('Bild für die Spalte.', 'wp-starter'),
                 '25',
             ),
             self::wysiwygField(
@@ -2359,7 +2387,7 @@ class FieldDefinitions
                         __('Titel', 'wp-starter'),
                         'title',
                         true,
-                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter'),
+                        __('Der klickbare Titel des Akkordeon-Eintrags.', 'wp-starter'),
                     ),
                     self::wysiwygField(
                         "field_{$prefix}_accordion_content",
@@ -2414,7 +2442,7 @@ class FieldDefinitions
             self::textField(
                 "field_{$prefix}_label_{$n}",
                 /* translators: %d: column number */
-                sprintf(__('Label %d', 'wp-starter'), $n),
+                sprintf(__('Bildüberschrift %d', 'wp-starter'), $n),
                 "label_{$n}",
                 false,
                 /* translators: %s: ordinal column word (e.g. ersten, zweiten) */
@@ -2452,7 +2480,7 @@ class FieldDefinitions
                         __('Titel', 'wp-starter'),
                         'title',
                         true,
-                        __('Der klickbare Titel des Akkordeon-Elements.', 'wp-starter'),
+                        __('Der klickbare Titel des Akkordeon-Eintrags.', 'wp-starter'),
                     ),
                     self::wysiwygField(
                         "field_{$prefix}_accordion_{$n}_content",
@@ -2480,8 +2508,8 @@ class FieldDefinitions
     {
         return [
             ...self::sectionHeaderFields($prefix),
-            ...self::buildColumnImageBlock($prefix, 1, __('Bild für die linke Karte.', 'wp-starter')),
-            ...self::buildColumnImageBlock($prefix, 2, __('Bild für die rechte Karte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 1, __('Bild für die linke Spalte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 2, __('Bild für die rechte Spalte.', 'wp-starter')),
             // Endpunkt: ohne ihn zieht das Akkordeon der letzten Spalte auch
             // Hintergrund, Abstand und Anker zu sich herein.
             self::accordionField("field_{$prefix}_acc_ende", '', false, true, true),
@@ -2498,9 +2526,9 @@ class FieldDefinitions
     {
         return [
             ...self::sectionHeaderFields($prefix),
-            ...self::buildColumnImageBlock($prefix, 1, __('Bild für die linke Karte.', 'wp-starter')),
-            ...self::buildColumnImageBlock($prefix, 2, __('Bild für die mittlere Karte.', 'wp-starter')),
-            ...self::buildColumnImageBlock($prefix, 3, __('Bild für die rechte Karte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 1, __('Bild für die linke Spalte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 2, __('Bild für die mittlere Spalte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 3, __('Bild für die rechte Spalte.', 'wp-starter')),
             // Endpunkt: ohne ihn zieht das Akkordeon der letzten Spalte auch
             // Hintergrund, Abstand und Anker zu sich herein.
             self::accordionField("field_{$prefix}_acc_ende", '', false, true, true),
@@ -2517,10 +2545,10 @@ class FieldDefinitions
     {
         return [
             ...self::sectionHeaderFields($prefix),
-            ...self::buildColumnImageBlock($prefix, 1, __('Bild für die erste Karte.', 'wp-starter')),
-            ...self::buildColumnImageBlock($prefix, 2, __('Bild für die zweite Karte.', 'wp-starter')),
-            ...self::buildColumnImageBlock($prefix, 3, __('Bild für die dritte Karte.', 'wp-starter')),
-            ...self::buildColumnImageBlock($prefix, 4, __('Bild für die vierte Karte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 1, __('Bild für die erste Spalte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 2, __('Bild für die zweite Spalte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 3, __('Bild für die dritte Spalte.', 'wp-starter')),
+            ...self::buildColumnImageBlock($prefix, 4, __('Bild für die vierte Spalte.', 'wp-starter')),
             // Endpunkt: ohne ihn zieht das Akkordeon der letzten Spalte auch
             // Hintergrund, Abstand und Anker zu sich herein.
             self::accordionField("field_{$prefix}_acc_ende", '', false, true, true),
@@ -2846,7 +2874,7 @@ class FieldDefinitions
                 __('<strong>So findest du die Formular-ID:</strong><br>1) Gehe zu <em>Formulare</em> im Menü<br>2) Wähle dein Formular aus<br>3) Die ID steht in der URL (z.B. post=<strong>123</strong>) oder im Shortcode', 'wp-starter'),
             ),
             [
-                'key' => "field_{$prefix}_form_id",
+                'key' => self::fieldKey($prefix, 'form_id'),
                 'label' => __('Formular-ID', 'wp-starter'),
                 'name' => 'form_id',
                 // Zahlenfeld statt Freitext: ein Leerzeichen oder Buchstabe hat
@@ -2945,12 +2973,12 @@ class FieldDefinitions
                 __('Adresse', 'wp-starter'),
                 'address',
                 2,
-                __('Die vollständige Adresse (für den „Route planen“ Link).', 'wp-starter'),
+                __('Die vollständige Adresse (für den „Route planen“-Link).', 'wp-starter'),
                 __('Musterstraße 123, 12345 Musterstadt', 'wp-starter'),
             ),
             self::trueFalseField(
                 "field_{$prefix}_show_directions_link",
-                __('„Route planen“ Link anzeigen', 'wp-starter'),
+                __('„Route planen“-Link anzeigen', 'wp-starter'),
                 'show_directions_link',
                 true,
                 __('Zeigt einen Link zum Planen der Route an.', 'wp-starter'),
@@ -3122,7 +3150,7 @@ class FieldDefinitions
                         __('Button', 'wp-starter'),
                         'cta',
                         false,
-                        __('Call-to-Action Button für dieses Paket.', 'wp-starter'),
+                        __('Call-to-Action-Button für dieses Paket.', 'wp-starter'),
                     ),
                     // Accordion Ende
                     self::accordionField("field_{$prefix}_acc_end", '', false, true, true),
@@ -3284,10 +3312,10 @@ class FieldDefinitions
             ),
             self::linkField(
                 "field_{$prefix}_all_events_link",
-                __('Link zu allen Terminen', 'wp-starter'),
+                __('Link zu allen Veranstaltungen', 'wp-starter'),
                 'all_events_link',
                 false,
-                __('Optional. Erscheint unter der Terminliste, z.B. zu einer Seite mit allen Veranstaltungen.', 'wp-starter'),
+                __('Optional. Erscheint unter der Veranstaltungsliste, z.B. zu einer Seite mit allen Veranstaltungen.', 'wp-starter'),
             ),
             ...self::displaySettingsFields($prefix),
         ];
@@ -3547,7 +3575,7 @@ class FieldDefinitions
             ),
             self::buttonGroupField(
                 "field_{$prefix}_post_layout",
-                __('Darstellung', 'wp-starter'),
+                __('Ansicht', 'wp-starter'),
                 'post_layout',
                 [
                     'grid' => __('Raster', 'wp-starter'),
@@ -3656,7 +3684,7 @@ class FieldDefinitions
             ),
             ...self::sectionHeaderExtras($prefix),
             self::repeaterField(
-                "field_{$prefix}_headers",
+                self::fieldKey($prefix, self::TABLE_HEADERS_NAME),
                 __('Spaltenüberschriften', 'wp-starter'),
                 'headers',
                 [
@@ -3675,7 +3703,7 @@ class FieldDefinitions
                 __('Definiere die Spalten der Tabelle.', 'wp-starter'),
             ),
             self::repeaterField(
-                "field_{$prefix}_rows",
+                self::fieldKey($prefix, self::TABLE_ROWS_NAME),
                 __('Zeilen', 'wp-starter'),
                 'rows',
                 [
@@ -3685,7 +3713,7 @@ class FieldDefinitions
                         'cells',
                         [
                             self::textareaField(
-                                "field_{$prefix}_cell_content",
+                                self::fieldKey($prefix, self::TABLE_CELL_CONTENT_NAME),
                                 __('Inhalt', 'wp-starter'),
                                 'content',
                                 1,
@@ -3933,7 +3961,7 @@ class FieldDefinitions
                 __('<strong>Wo finde ich die Adresse?</strong><br>Mailchimp: <em>Audience → Signup forms → Embedded form</em>, im Code steht <em>form action="…"</em>. Brevo und CleverReach nennen es ebenfalls Einbettungscode. Die Anmeldung öffnet sich beim Absenden im neuen Tab beim Anbieter, dort läuft auch die Bestätigungsmail.', 'wp-starter'),
             ),
             self::urlField(
-                "field_{$prefix}_action_url",
+                self::fieldKey($prefix, 'action_url'),
                 __('Adresse des Anbieters', 'wp-starter'),
                 'action_url',
                 __('Das action-Attribut aus dem Einbettungscode.', 'wp-starter'),
@@ -3942,7 +3970,7 @@ class FieldDefinitions
                 true,
             ),
             self::textField(
-                "field_{$prefix}_email_field",
+                self::fieldKey($prefix, 'email_field'),
                 __('Name des E-Mail-Feldes', 'wp-starter'),
                 'email_field',
                 false,
@@ -3990,7 +4018,7 @@ class FieldDefinitions
             ...self::sectionHeaderExtras($prefix),
             self::messageField(
                 "field_{$prefix}_help",
-                __('<strong>Nur die Adresse, nicht der ganze Code.</strong> Im Einbettungscode des Anbieters steht <em>src="…"</em>, genau diese Adresse gehört hier hinein. Der Host muss unter <em>Theme-Einstellungen → Analytics → Externe Einbettungen</em> freigegeben sein, sonst blockiert ihn die Sicherheitsrichtlinie der Seite.', 'wp-starter'),
+                __('<strong>Nur die Adresse, nicht der ganze Code.</strong> Im Einbettungscode des Anbieters steht <em>src="…"</em>, genau diese Adresse gehört hier hinein. Der Host muss unter <em>Theme-Einstellungen → Analytics → Externe Einbettungen</em> freigegeben sein, sonst zeigt die Seite die Einbettung nicht an.', 'wp-starter'),
             ),
             self::urlField(
                 "field_{$prefix}_url",
@@ -4052,7 +4080,7 @@ class FieldDefinitions
             __('Anker-ID', 'wp-starter'),
             'section_anchor',
             false,
-            __('Optionale ID für Anker-Links (z.B. „kontakt“). Wird automatisch generiert wenn leer.', 'wp-starter'),
+            __('Optionale ID für Anker-Links (z.B. „kontakt“). Wird automatisch generiert, wenn leer.', 'wp-starter'),
             __('z.B. kontakt', 'wp-starter'),
         );
     }

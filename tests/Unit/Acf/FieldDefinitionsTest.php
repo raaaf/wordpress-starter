@@ -147,9 +147,9 @@ final class FieldDefinitionsTest extends TestCase
         $this->assertSame([
             'primary' => 'Standard (Weiß)',
             'secondary' => 'Sekundär (Hellgrau)',
-            'tertiary' => 'Tertiär',
+            'tertiary' => 'Tertiär (Grau)',
             'brand' => 'Markenfarbe',
-            'brand-subtle' => 'Markenfarbe Dezent',
+            'brand-subtle' => 'Markenfarbe (helle Tönung)',
             'inverse' => 'Dunkel (Invers)',
         ], $field['choices']);
     }

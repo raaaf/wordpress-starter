@@ -16,7 +16,7 @@ Built in `Security::getCSPHeader()` in `src/Security.php`, pinned by `SecurityTe
 - `base-uri 'self'`: an injected `<base>` tag cannot rebase relative URLs.
 - `object-src 'none'`: no plugins or `<object>`/`<embed>` content.
 
-Nothing in the CSP restricts scripts, styles, images, fonts, connections, frames or form targets. A stricter policy (`script-src`, `frame-src`, `form-action` with a provider list) broke plugins, embeds and newsletter forms too often, so it was dropped. The protection against injected content comes from other layers: kses and the `unfiltered_html` save-context gate in `AcfServiceProvider::allowFormControlTags` (a user without that capability cannot store form controls), SVG sanitizing (below) and the hardening headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`).
+Nothing in the CSP restricts scripts, styles, images, fonts, connections, frames or form targets. A stricter policy (`script-src`, `frame-src`, `form-action` with a provider list) broke plugins, embeds and newsletter forms too often, so it was dropped. The protection against injected content comes from other layers: kses on save (`AcfServiceProvider::sanitizeWysiwyg` for WYSIWYG fields, with `allowFormControlTags` withholding the form-control tags in save contexts), so a user without `unfiltered_html` cannot store form controls; users with `unfiltered_html` are exempt from this save-time strip, SVG sanitizing (below) and the hardening headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`).
 
 The CSP is only sent for frontend requests and only when `config('security.enable_csp')` is true.
 
@@ -26,7 +26,7 @@ The CSP is only sent for frontend requests and only when `config('security.enabl
 
 ### Nonce
 
-`Security::getNonce()` creates a per-request nonce, exposed as `$GLOBALS['csp_nonce']`. It is added to registered, inline and printed scripts and can be used in templates:
+`Security::getNonce()` creates a per-request nonce, exposed as `$GLOBALS['csp_nonce']`. The global is set only when `config('security.enable_csp')` is true. Under the same condition `Security::init()` adds the nonce to registered, inline and printed scripts (with `ENABLE_CSP=false` no script gets a nonce attribute). It can be used in templates:
 
 ```blade
 <script nonce="{{ $GLOBALS['csp_nonce'] }}">
@@ -114,6 +114,7 @@ add_filter('acf/update_value/type=text', function ($value) {
 }, 10, 1);
 
 add_filter('acf/update_value/type=textarea', [self::class, 'sanitizeTextarea'], 10, 3);
+add_filter('acf/update_value/type=wysiwyg', [self::class, 'sanitizeWysiwyg'], 10, 3);
 
 add_filter('acf/validate_value/type=url', [self::class, 'validateUrl'], 10, 2);
 add_filter('acf/validate_value/type=email', [self::class, 'validateEmail'], 10, 2);
@@ -125,17 +126,23 @@ add_filter('acf/validate_value/type=email', [self::class, 'validateEmail'], 10, 
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Text           | `sanitize_text_field()`                                                                                                                                                |
 | Textarea       | `sanitize_textarea_field()`; table cells (`*_cell_content`) use `wp_kses_post()` minus form controls (form, input, select, option, optgroup, textarea, button) instead |
-| HTML (WYSIWYG) | `wp_kses_post()`                                                                                                                                                       |
+| HTML (WYSIWYG) | `wp_kses_post()` via `sanitizeWysiwyg`, only for users without `unfiltered_html` (their value is stored unchanged)                                                     |
 
 ### Validators
 
-URL and email fields are validators, not sanitizers: an invalid value blocks the save with an error message and nothing is rewritten or blanked.
+These fields are validated, not sanitized: an invalid value blocks the save with an error message and nothing is rewritten or blanked.
 
-| Field Type | Hook                                                                                   |
-| ---------- | -------------------------------------------------------------------------------------- |
-| URL        | `acf/validate_value/type=url` (`validateUrl`)                                          |
-| Email      | `acf/validate_value/type=email` (`validateEmail`)                                      |
-| Newsletter | `acf/validate_value/key=field_flex_newsletter_action_url` (empty or an `https://` URL) |
+| Field Type            | Hook                                                                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| URL                   | `acf/validate_value/type=url` (`validateUrl`)                                                                                            |
+| Email                 | `acf/validate_value/type=email` (`validateEmail`)                                                                                        |
+| Newsletter URL        | `acf/validate_value/key=field_flex_newsletter_action_url` (`validateNewsletterActionUrl`, empty or an `https://` URL)                    |
+| Newsletter field name | `acf/validate_value/key=field_flex_newsletter_email_field` (`validateNewsletterEmailField`, empty or only characters the template keeps) |
+| Contact form ID       | `acf/validate_value/key=field_flex_contact_form_form_id` (`validateContactFormId`, digits or hash)                                       |
+| Date picker           | `acf/validate_value/type=date_picker` (`validateDatePicker`, empty or a real date stored as Ymd)                                         |
+| Time picker           | `acf/validate_value/type=time_picker` (`validateTimePicker`, empty or a real time as H:i:s or H:i)                                       |
+
+Table row counts are checked on the whole posted tree via `acf/validate_save_post` (`validateTableRows`): the cells of each row are compared against the number of column headings, and a mismatch blocks the save.
 
 ### Member Area Shared Password
 
@@ -212,7 +219,8 @@ register_rest_route('theme/v1', '/options', [
 // Filter out sensitive fields from REST responses
 $filtered = array_filter($options, function ($key) {
     return !str_starts_with($key, 'analytics_') &&
-           !str_starts_with($key, 'api_');
+           !str_starts_with($key, 'api_') &&
+           !str_starts_with($key, 'member_');
 }, ARRAY_FILTER_USE_KEY);
 ```
 

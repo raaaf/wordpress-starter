@@ -2,7 +2,8 @@
     Newsletter-Anmeldung - Flexible Content Layout
 
     Uses shared components: x-section, x-input, x-button
-    Fields: title, content, action_url, email_field, button_label, note, background_color
+    Fields: title, content, action_url, email_field, button_label, note, background_color,
+    section_spacing, section_width, section_anchor
 
     Das Formular postet direkt an den Anbieter und oeffnet dessen Seite in einem
     neuen Tab. Damit laufen Bestaetigungsmail, Verteiler und Abmeldung dort, wo
@@ -27,7 +28,7 @@
 
     // Ein Feldname aus dem Backend landet in name="", deshalb auf das eingedampft,
     // was Anbieter dort ueberhaupt verwenden.
-    $emailField = preg_replace('/[^A-Za-z0-9_\-\[\]]/', '', $emailField) ?: 'EMAIL';
+    $emailField = preg_replace('/[^' . \WordpressStarter\Acf\FieldDefinitions::NEWSLETTER_EMAIL_FIELD_CHARS . ']/', '', $emailField) ?: 'EMAIL';
 @endphp
 
 @if($isAllowedAction || current_user_can('edit_posts'))
@@ -62,7 +63,7 @@
                             :label="__('E-Mail-Adresse', 'wp-starter')"
                             :required="true"
                             autocomplete="email"
-                            :placeholder="__('deine@adresse.de', 'wp-starter')"
+                            :placeholder="__('name@beispiel.de', 'wp-starter')"
                         />
                     </div>
 

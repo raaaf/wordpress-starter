@@ -2,8 +2,9 @@
     Consent Gate Partial
 
     Shared "click to load" consent notice for content that only appears
-    after the visitor agrees to load a third-party iframe (used by
-    templates/flexible/embed.blade.php and templates/flexible/video.blade.php).
+    after the visitor agrees to load third-party content (used by
+    templates/flexible/embed.blade.php, templates/flexible/video.blade.php and
+    templates/flexible/map.blade.php).
     DSGVO-konform: nothing external loads until the click, and the parent
     container's Alpine scope (`loaded`) plus its `x-ref` drive the visibility
     and focus restore.
@@ -12,12 +13,12 @@
       $containerRef  — x-ref name of the surrounding container (focus target after load).
                        Must be a literal identifier: it is interpolated unescaped into an
                        Alpine expression below, so it never carries user input.
-      $icon          — icon name (e.g. 'info', 'play')
+      $icon          — icon name (e.g. 'info', 'play', 'map-pin')
       $iconClass     — extra classes for the icon
       $wrapperClass  — extra classes for the outer notice div (e.g. background, poster text colour)
       $textClass     — extra classes for the message paragraph
       $message       — main notice text
-      $buttonLabel   — button text (e.g. 'Inhalt laden', 'Video laden')
+      $buttonLabel   — button text (e.g. 'Inhalt laden', 'Video laden', 'Karte laden')
       $buttonClass   — extra classes on the button, '' to omit
       $providerName  — provider label for the privacy sentence, '' to omit the sentence
       $privacyLink   — privacy policy URL, '' to omit the privacy sentence
@@ -42,9 +43,9 @@
     x-transition:leave="transition ease-in duration-150 motion-reduce:transition-none"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
-    class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center {{ $wrapperClass }}"
+    class="absolute inset-0 flex flex-col items-center justify-center overflow-y-auto p-4 sm:p-8 text-center {{ $wrapperClass }}"
 >
-    <x-icon name="{{ $icon }}" class="w-16 h-16 mb-4 {{ $iconClass }}" />
+    <x-icon name="{{ $icon }}" class="size-10 sm:size-16 mb-4 shrink-0 {{ $iconClass }}" />
     <p class="mb-4 {{ $textClass }}">
         {{ $message }}
         @if($privacyLink)

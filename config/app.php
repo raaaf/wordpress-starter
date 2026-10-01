@@ -29,7 +29,6 @@ return [
     
     'security' => [
         'enable_csp' => env('ENABLE_CSP', true),
-        'csp_report_uri' => env('CSP_REPORT_URI', ''),
     ],
     
     

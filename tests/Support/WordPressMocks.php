@@ -88,6 +88,8 @@ trait WordPressMocks
             'wp_mock_the_date' => '',
             'wp_mock_download_url_result' => null,
             'wp_mock_remote_responses' => [],
+            'wp_mock_acf_validation_errors' => [],
+            'wp_mock_privacy_policy_url' => '',
         ];
 
         foreach ($defaults as $key => $default) {

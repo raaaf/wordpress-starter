@@ -17,9 +17,9 @@
     $showDirections = get_sub_field('show_directions_link') ?? true;
     $background = get_sub_field('background_color') ?: 'primary';
 
-    // Same host allowlist as Security::getCSPHeader() (which writes the same
-    // check into frame-src) and embed.blade.php: an address the CSP would
-    // block anyway must not even be attempted as an iframe.
+    // Host allowlist via Security::isAllowedEmbedHost (docs/SECURITY.md, Embeds and Newsletter),
+    // same as embed.blade.php: the CSP has no frame-src, so this server-side check
+    // is the only gate. An embed URL with a host that is not allowed is not rendered.
     $isAllowedHost = $embedUrl !== '' && \WordpressStarter\Security::isAllowedEmbedHost($embedUrl);
 
     // Generate directions URL

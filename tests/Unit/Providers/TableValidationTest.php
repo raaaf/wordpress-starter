@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Providers;
 
 use Tests\Support\TestCase;
+use WordpressStarter\Acf\FieldDefinitions;
 use WordpressStarter\Providers\AcfServiceProvider;
 
 /**
@@ -24,13 +25,11 @@ final class TableValidationTest extends TestCase
     {
         parent::setUp();
 
-        $GLOBALS['wp_mock_acf_validation_errors'] = [];
         unset($_POST['acf']);
     }
 
     protected function tearDown(): void
     {
-        $GLOBALS['wp_mock_acf_validation_errors'] = [];
         unset($_POST['acf']);
 
         parent::tearDown();
@@ -84,10 +83,10 @@ final class TableValidationTest extends TestCase
         // Zeile 1 passt, nur die zweite weicht ab: Nummer ist 1-basiert.
         $this->assertSame([
             [
-                'eingabe' => 'acf[field_page_sections][row-0][field_flex_table_rows]',
-                'zeile' => 2,
-                'zellen' => 1,
-                'spalten' => 2,
+                'input' => 'acf[field_page_sections][row-0][field_flex_table_rows]',
+                'row' => 2,
+                'cells' => 1,
+                'columns' => 2,
             ],
         ], $treffer);
     }
@@ -123,8 +122,8 @@ final class TableValidationTest extends TestCase
         ]);
 
         $this->assertCount(1, $treffer);
-        $this->assertSame(2, $treffer[0]['zellen']);
-        $this->assertSame(3, $treffer[0]['spalten']);
+        $this->assertSame(2, $treffer[0]['cells']);
+        $this->assertSame(3, $treffer[0]['columns']);
     }
 
     public function testFindetZweiTabellenAufDerselbenSeite(): void
@@ -143,7 +142,7 @@ final class TableValidationTest extends TestCase
                 'acf[field_page_sections][row-0][field_flex_table_rows]',
                 'acf[field_page_sections][row-1][field_flex_table_rows]',
             ],
-            array_column($treffer, 'eingabe')
+            array_column($treffer, 'input')
         );
     }
 
@@ -185,8 +184,8 @@ final class TableValidationTest extends TestCase
         ]);
 
         $this->assertCount(1, $treffer);
-        $this->assertSame(2, $treffer[0]['zellen'], 'Zwei Zellen bei drei Spalten muss auffallen.');
-        $this->assertSame(3, $treffer[0]['spalten']);
+        $this->assertSame(2, $treffer[0]['cells'], 'Zwei Zellen bei drei Spalten muss auffallen.');
+        $this->assertSame(3, $treffer[0]['columns']);
     }
 
     public function testZeileOhneArrayWertHatNullZellen(): void
@@ -198,7 +197,7 @@ final class TableValidationTest extends TestCase
         ]);
 
         $this->assertCount(1, $treffer);
-        $this->assertSame(0, $treffer[0]['zellen']);
+        $this->assertSame(0, $treffer[0]['cells']);
     }
 
     public function testZaehltNurDenErstenArrayWertBeiMehreren(): void
@@ -215,7 +214,30 @@ final class TableValidationTest extends TestCase
         ]);
 
         $this->assertCount(1, $treffer);
-        $this->assertSame(2, $treffer[0]['zellen']);
+        $this->assertSame(2, $treffer[0]['cells']);
+    }
+
+    /**
+     * Die Erkennung laeuft ueber Schluessel-Suffixe (_headers, _rows). Hier
+     * kommen die Schluessel aus der echten Felddefinition: wird dort ein
+     * Repeater umbenannt, faellt die Validierung sonst unbemerkt aus.
+     */
+    public function testErkenntDieSchluesselDerEchtenTabellenDefinition(): void
+    {
+        $schluessel = [];
+        foreach (FieldDefinitions::tableFields('flex_table') as $feld) {
+            $schluessel[$feld['name']] = $feld['key'];
+        }
+
+        $treffer = $this->abweichungen([
+            $schluessel['headers'] => ['row-0' => [], 'row-1' => []],
+            $schluessel['rows'] => ['row-0' => ['cells' => ['row-0' => []]]],
+        ]);
+
+        $this->assertSame(
+            [['input' => 'acf[' . $schluessel['rows'] . ']', 'row' => 1, 'cells' => 1, 'columns' => 2]],
+            $treffer
+        );
     }
 
     public function testValidateTableRowsMeldetEinenFehlerAmZeilenRepeater(): void

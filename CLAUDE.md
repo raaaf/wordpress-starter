@@ -81,8 +81,8 @@ scripts/
 ├── sync-icons.js      # Generates resources/icons/ from config/icons.json
 tests/
 ├── Unit/             # PHPUnit tests
-├── js/               # Vitest tests
 ├── e2e/              # Playwright E2E tests
+# Vitest tests live next to the code: resources/js/*.test.ts, resources/js/admin/*.test.ts, scripts/transform-tokens.test.js
 docs/                 # Documentation
 ├── ARCHITECTURE.md        # Service provider pattern
 ├── COMPONENT-DEVELOPMENT.md # Adding new Blade components
@@ -185,16 +185,18 @@ first field named `background_color`, `section_spacing`, `section_width` or
 `section_anchor` (`FlexibleContent::DISPLAY_FIELDS`); everything from there on
 is display.
 
-The rule lives in one place instead of in ~30 field builders, and it applies to
-layouts a derived theme adds through the layout filter too. Field order and
+The rule lives in one place instead of in ~30 field builders. Field order and
 field names are untouched, only two markers are inserted.
 
 Skipped, on purpose:
 
 - Layouts that already group themselves with their own tabs or accordions
-  (hero, posts, map, contact-form, the three `*-columns-images`). Those that
-  carry a display tail name that tab "Darstellung" too; only the extra leading
-  tab differs ("Formular", "Karte", "Anzeige").
+  (hero, posts, map, contact-form, the three `*-columns-images`). Hero,
+  contact-form, map and posts name their display tab "Darstellung" too and
+  carry their own Inhalt tab; contact-form and map add one extra leading
+  tab ("Formular", "Karte"), posts has a middle "Anzeige" tab between Inhalt
+  and Darstellung, hero has none. The three
+  `*-columns-images` layouts use accordions and have no Darstellung tab.
 - Layouts with fewer than three fields on the content side, where a tab would
   sit above a single control (divider), or none at all because the layout _is_
   the display tail (member-downloads).

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Providers;
 
 use Tests\Support\TestCase;
+use WordpressStarter\Acf\FieldDefinitions;
 use WordpressStarter\Providers\AcfServiceProvider;
 
 /**
@@ -12,18 +13,6 @@ use WordpressStarter\Providers\AcfServiceProvider;
  */
 final class AcfValidatorsTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $GLOBALS['wp_mock_current_user_can'] = [];
-    }
-
-    protected function tearDown(): void
-    {
-        $GLOBALS['wp_mock_current_user_can'] = [];
-        parent::tearDown();
-    }
-
     public function testFormControlTagsAllowedOnFrontend(): void
     {
         $GLOBALS['wp_mock_is_admin'] = false;
@@ -90,9 +79,54 @@ final class AcfValidatorsTest extends TestCase
         $this->assertSame('frueherer Fehler', AcfServiceProvider::validateNewsletterActionUrl('frueherer Fehler', 'https://any-provider.example/post'));
     }
 
+    public function testContactFormIdAcceptsHashAndDigits(): void
+    {
+        $this->assertTrue(AcfServiceProvider::validateContactFormId(true, 'a1b2c3d'));
+    }
+
+    public function testContactFormIdRejectsShortcodeBreakout(): void
+    {
+        $this->assertIsString(AcfServiceProvider::validateContactFormId(true, '1][x]'));
+    }
+
     public function testValidateEmail(): void
     {
         $this->assertTrue(AcfServiceProvider::validateEmail(true, 'a@b.de'));
         $this->assertIsString(AcfServiceProvider::validateEmail(true, 'kein-mail'));
+    }
+
+    /**
+     * Die Validator-Hooks haengen an Feld-Keys; stimmen sie nicht mit den
+     * Keys der echten Felddefinitionen ueberein, laeuft die Validierung still ins Leere.
+     */
+    public function testValidationHooksTargetKeysOfRealFieldDefinitions(): void
+    {
+        $GLOBALS['wp_mock_hooks']['filters'] = [];
+        $method = new \ReflectionMethod(AcfServiceProvider::class, 'registerValidationHooks');
+        $method->invoke($this->createStub(AcfServiceProvider::class));
+
+        $hooked = [
+            'validateNewsletterActionUrl' => 'flex_newsletter',
+            'validateNewsletterEmailField' => 'flex_newsletter',
+            'validateContactFormId' => 'flex_contact_form',
+        ];
+        $definitions = [
+            'flex_newsletter' => FieldDefinitions::newsletterFields('flex_newsletter'),
+            'flex_contact_form' => FieldDefinitions::contactFormFields('flex_contact_form'),
+        ];
+
+        foreach ($hooked as $validator => $prefix) {
+            $keys = [];
+            foreach ($GLOBALS['wp_mock_hooks']['filters'] as $hook => $entries) {
+                foreach ($entries as $entry) {
+                    if ($entry['callback'] === [AcfServiceProvider::class, $validator]) {
+                        $keys[] = substr($hook, strlen('acf/validate_value/key='));
+                    }
+                }
+            }
+
+            $this->assertCount(1, $keys, $validator);
+            $this->assertContains($keys[0], array_column($definitions[$prefix], 'key'), $validator);
+        }
     }
 }

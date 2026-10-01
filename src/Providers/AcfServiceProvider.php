@@ -6,6 +6,7 @@ namespace WordpressStarter\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use WordpressStarter\Acf\AcfExtended;
+use WordpressStarter\Acf\FieldDefinitions;
 use WordpressStarter\Acf\FlexibleContent;
 use WordpressStarter\Acf\Options;
 use WordpressStarter\Acf\PageSettings;
@@ -13,6 +14,14 @@ use WordpressStarter\Vite;
 
 class AcfServiceProvider extends ServiceProvider
 {
+    /**
+     * Field key suffixes of the table fields, derived from the names FieldDefinitions::tableFields
+     * builds its keys from ("field_{$prefix}_<name>").
+     */
+    private const TABLE_CELL_CONTENT_SUFFIX = '_' . FieldDefinitions::TABLE_CELL_CONTENT_NAME;
+    private const TABLE_HEADERS_SUFFIX = '_' . FieldDefinitions::TABLE_HEADERS_NAME;
+    private const TABLE_ROWS_SUFFIX = '_' . FieldDefinitions::TABLE_ROWS_NAME;
+
     public function register(): void
     {
         // Set up ACF JSON save/load points
@@ -218,10 +227,14 @@ class AcfServiceProvider extends ServiceProvider
      *
      * Saving: in a save context (is_admin(), wp_doing_ajax(), a REST request or an XML-RPC request)
      * a user without the unfiltered_html capability gets $tags back unchanged,
-     * so they cannot store form controls at all. Rendering on the frontend
-     * (visitors, no capabilities) keeps the additions, so forms an administrator
-     * saved still render. There is no CSP form-action any more, so this
-     * capability check is the control that stops a contributor from posting
+     * so wp_kses_post() strips form controls for them. This filter alone does
+     * not cover ACF WYSIWYG values, because ACF stores them without kses;
+     * sanitizeWysiwyg() runs wp_kses_post() on them at save time for users
+     * without unfiltered_html, which makes the strip effective there. Rendering
+     * on the frontend (visitors, no capabilities) keeps the additions, so forms
+     * a user with unfiltered_html saved still render. There is no CSP
+     * form-action any more, so this capability check together with
+     * sanitizeWysiwyg() is the control that stops a contributor from posting
      * forms to a foreign host.
      *
      * @param array<string, array<string, bool>|mixed> $tags Allowed tags.
@@ -255,8 +268,20 @@ class AcfServiceProvider extends ServiceProvider
     }
 
     /**
-     * Form-control tags with their allowed attributes, the single list behind
-     * both allowFormControlTags() and the table-cell strip in sanitizeTextarea().
+     * Tag names removed from table cells: every form-control tag plus <button>,
+     * which core's post allowlist already permits and formControlTags() omits.
+     *
+     * @return list<string>
+     */
+    private static function formTagsToStrip(): array
+    {
+        return [...array_keys(self::formControlTags()), 'button'];
+    }
+
+    /**
+     * Form-control tags with their allowed attributes, the list behind
+     * allowFormControlTags(). The table-cell strip in sanitizeTextarea() reads
+     * formTagsToStrip(), which adds the tags core already allows.
      *
      * @return array<string, array<string, bool>>
      */
@@ -443,7 +468,11 @@ class AcfServiceProvider extends ServiceProvider
                     // Filter out sensitive data
                     $safeOptions = array_filter($options ?? [], function ($key) {
                         // Exclude analytics IDs and other sensitive data from public API
-                        return !str_starts_with($key, 'analytics_') && !str_starts_with($key, 'api_');
+                        // member_ covers the member-area shared password hash, whose
+                        // load_value blanking only runs in wp-admin, not in REST.
+                        return !str_starts_with($key, 'analytics_')
+                            && !str_starts_with($key, 'api_')
+                            && !str_starts_with($key, 'member_');
                     }, ARRAY_FILTER_USE_KEY);
 
                     return rest_ensure_response($safeOptions);
@@ -479,7 +508,13 @@ class AcfServiceProvider extends ServiceProvider
         add_filter('acf/validate_value/type=url', [self::class, 'validateUrl'], 10, 2);
 
         // Newsletter-Adresse: leer oder eine https-Adresse.
-        add_filter('acf/validate_value/key=field_flex_newsletter_action_url', [self::class, 'validateNewsletterActionUrl'], 10, 2);
+        add_filter('acf/validate_value/key=' . FieldDefinitions::fieldKey('flex_newsletter', 'action_url'), [self::class, 'validateNewsletterActionUrl'], 10, 2);
+
+        // Newsletter-Feldname: nur Zeichen, die das Template behaelt.
+        add_filter('acf/validate_value/key=' . FieldDefinitions::fieldKey('flex_newsletter', 'email_field'), [self::class, 'validateNewsletterEmailField'], 10, 2);
+
+        // Contact-Form-7-ID: Ziffern oder Hash (CF7 5.8+), nichts Weiteres.
+        add_filter('acf/validate_value/key=' . FieldDefinitions::fieldKey('flex_contact_form', 'form_id'), [self::class, 'validateContactFormId'], 10, 2);
 
         // Validate every email field.
         add_filter('acf/validate_value/type=email', [self::class, 'validateEmail'], 10, 2);
@@ -496,6 +531,9 @@ class AcfServiceProvider extends ServiceProvider
 
         // Sanitize textarea fields on save
         add_filter('acf/update_value/type=textarea', [self::class, 'sanitizeTextarea'], 10, 3);
+
+        // ACF stores WYSIWYG values without kses: strip disallowed markup on save
+        add_filter('acf/update_value/type=wysiwyg', [self::class, 'sanitizeWysiwyg'], 10, 3);
 
         // Add [br] hint to all text and textarea field instructions
         $brHint = function ($field): mixed {
@@ -534,7 +572,7 @@ class AcfServiceProvider extends ServiceProvider
      */
     public static function validateUrl(mixed $valid, mixed $value): mixed
     {
-        if (!$valid || empty($value)) {
+        if ($valid !== true || empty($value)) {
             return $valid;
         }
 
@@ -568,12 +606,50 @@ class AcfServiceProvider extends ServiceProvider
      */
     public static function validateNewsletterActionUrl(mixed $valid, mixed $value): mixed
     {
-        if (!$valid || empty($value)) {
+        if ($valid !== true || empty($value)) {
             return $valid;
         }
 
         if (strtolower(strval(wp_parse_url(strval($value), PHP_URL_SCHEME))) !== 'https') {
             return __('Bitte gib die https-Adresse aus dem Einbettungscode deines Newsletter-Anbieters an.', 'wp-starter');
+        }
+
+        return $valid;
+    }
+
+    /**
+     * Newsletter email field name: empty or only characters the template keeps.
+     *
+     * @param bool|string $valid
+     */
+    public static function validateNewsletterEmailField(mixed $valid, mixed $value): mixed
+    {
+        // Keep an earlier error string (or false) from another validator.
+        if ($valid !== true || empty($value)) {
+            return $valid;
+        }
+
+        if (!preg_match('/^[' . FieldDefinitions::NEWSLETTER_EMAIL_FIELD_CHARS . ']+$/D', strval($value))) {
+            return __('Bitte nutze nur Buchstaben, Ziffern, Unterstrich, Bindestrich und eckige Klammern.', 'wp-starter');
+        }
+
+        return $valid;
+    }
+
+    /**
+     * Validate the Contact Form 7 ID (digits or hash, as in the shortcode).
+     *
+     * @param bool|string $valid
+     */
+    public static function validateContactFormId(mixed $valid, mixed $value): mixed
+    {
+        // Keep an earlier error string (or false) from another validator.
+        if ($valid !== true || empty($value)) {
+            return $valid;
+        }
+
+        if (!preg_match('/^[' . FieldDefinitions::CONTACT_FORM_ID_CHARS . ']+$/D', strval($value))) {
+            return __('Bitte trage nur die ID aus dem Shortcode ein (Buchstaben, Ziffern, Bindestrich).', 'wp-starter');
         }
 
         return $valid;
@@ -586,7 +662,7 @@ class AcfServiceProvider extends ServiceProvider
      */
     public static function validateEmail(mixed $valid, mixed $value): mixed
     {
-        if (!$valid || empty($value)) {
+        if ($valid !== true || empty($value)) {
             return $valid;
         }
 
@@ -710,10 +786,11 @@ class AcfServiceProvider extends ServiceProvider
      * Ausnahme Tabellenzelle: Die Feldanweisung verspricht "HTML erlaubt" und die
      * Ausgabe laeuft durch wp_kses_post, daher bleibt erlaubtes HTML erhalten.
      *
-     * Auch in der Tabellenzelle bleiben Formularelemente draussen: die Ausgabe
-     * erlaubt sie wegen allowFormControlTags, aber eine Zelle braucht sie nicht
-     * und ohne form-action in der CSP koennte ein Redakteur ohne unfiltered_html
-     * ein Formular an einen fremden Host speichern.
+     * Auch in der Tabellenzelle bleiben Formularelemente draussen, auch fuer
+     * Nutzer mit unfiltered_html: die Ausgabe erlaubt sie wegen
+     * allowFormControlTags, aber eine Zelle braucht sie nicht, und ohne
+     * form-action in der CSP koennte sonst ein Formular an einen fremden Host
+     * gespeichert werden.
      *
      * @param array<string, mixed> $field
      */
@@ -721,12 +798,12 @@ class AcfServiceProvider extends ServiceProvider
     {
         $key = $field['key'] ?? '';
 
-        if (str_ends_with( (string) $key, '_cell_content')) {
+        if (str_ends_with( (string) $key, self::TABLE_CELL_CONTENT_SUFFIX)) {
             // Erst die Post-Allowlist, dann Formular-Tags samt Attributen entfernen
             // (Anführungszeichen-bewusst, damit ein ">" im Attributwert nicht abschneidet),
             // dann zur Sicherheit noch einmal durch die Allowlist.
             $cleaned = wp_kses_post( (string) $value);
-            $formTags = implode('|', [...array_keys(self::formControlTags()), 'button']);
+            $formTags = implode('|', self::formTagsToStrip());
             $cleaned = preg_replace(
                 '~</?(?:' . $formTags . ')\b(?:"[^"]*"|\'[^\']*\'|[^>"\'])*>~i',
                 '',
@@ -737,6 +814,25 @@ class AcfServiceProvider extends ServiceProvider
         }
 
         return sanitize_textarea_field($value);
+    }
+
+    /**
+     * Sanitize WYSIWYG values on save for users without unfiltered_html.
+     *
+     * ACF stores WYSIWYG values without kses. In this save context
+     * allowFormControlTags() withholds the form-control additions, so
+     * wp_kses_post() strips <form>, <input> and the like. Users with
+     * unfiltered_html keep their markup unchanged.
+     *
+     * @param array<string, mixed> $field
+     */
+    public static function sanitizeWysiwyg(mixed $value, mixed $postId, array $field): mixed
+    {
+        if (!is_string($value) || current_user_can('unfiltered_html')) {
+            return $value;
+        }
+
+        return wp_kses_post($value);
     }
 
     /**
@@ -761,13 +857,13 @@ class AcfServiceProvider extends ServiceProvider
 
         foreach (self::findTableRowMismatches($posted) as $mismatch) {
             acf_add_validation_error(
-                $mismatch['eingabe'],
+                $mismatch['input'],
                 sprintf(
                     /* translators: 1: Zeilennummer, 2: Zahl der Zellen, 3: Zahl der Spalten */
                     __('Tabelle: Zeile %1$d passt nicht zur Spaltenzahl (Zellen in der Zeile: %2$d, Spalten in der Tabelle: %3$d). Ergänze oder entferne Zellen in dieser Zeile.', 'wp-starter'),
-                    $mismatch['zeile'],
-                    $mismatch['zellen'],
-                    $mismatch['spalten'],
+                    $mismatch['row'],
+                    $mismatch['cells'],
+                    $mismatch['columns'],
                 ),
             );
         }
@@ -781,7 +877,7 @@ class AcfServiceProvider extends ServiceProvider
      *
      * @param array<mixed> $posted
      *
-     * @return array<int, array{eingabe: string, zeile: int, zellen: int, spalten: int}>
+     * @return array<int, array{input: string, row: int, cells: int, columns: int}>
      */
     public static function findTableRowMismatches(array $posted): array
     {
@@ -802,10 +898,10 @@ class AcfServiceProvider extends ServiceProvider
                 }
 
                 $mismatches[] = [
-                    'eingabe' => $group['eingabe'],
-                    'zeile' => $index + 1,
-                    'zellen' => $cells,
-                    'spalten' => $columns,
+                    'input' => $group['input'],
+                    'row' => $index + 1,
+                    'cells' => $cells,
+                    'columns' => $columns,
                 ];
             }
         }
@@ -841,13 +937,13 @@ class AcfServiceProvider extends ServiceProvider
      * Tabelle. Das ueberlebt eine Umbenennung des Layouts und findet auch
      * Tabellen in verschachtelten Feldgruppen.
      *
-     * `eingabe` ist der volle Eingabename des Zeilen-Repeaters (acf[...][...]),
+     * `input` ist der volle Eingabename des Zeilen-Repeaters (acf[...][...]),
      * an den acf_add_validation_error die Meldung hängt.
      *
      * @param array<mixed> $tree
      * @param array<int, int|string> $path Schluessel von der Wurzel bis zu $tree
      *
-     * @return array<int, array{eingabe: string, headers: array<mixed>, rows: array<mixed>}>
+     * @return array<int, array{input: string, headers: array<mixed>, rows: array<mixed>}>
      */
     private static function findTableGroups(array $tree, array $path = []): array
     {
@@ -861,29 +957,29 @@ class AcfServiceProvider extends ServiceProvider
             $found = array_merge($found, self::findTableGroups($value, [...$path, $key]));
         }
 
-        $headerFeld = null;
-        $rowFeld = null;
+        $headerField = null;
+        $rowField = null;
 
         foreach (array_keys($tree) as $key) {
             if (!is_string($key)) {
                 continue;
             }
 
-            if (str_ends_with($key, '_headers')) {
-                $headerFeld = $key;
+            if (str_ends_with($key, self::TABLE_HEADERS_SUFFIX)) {
+                $headerField = $key;
             }
 
-            if (str_ends_with($key, '_rows')) {
-                $rowFeld = $key;
+            if (str_ends_with($key, self::TABLE_ROWS_SUFFIX)) {
+                $rowField = $key;
             }
         }
 
-        if ($headerFeld !== null && $rowFeld !== null
-            && is_array($tree[$headerFeld]) && is_array($tree[$rowFeld])) {
+        if ($headerField !== null && $rowField !== null
+            && is_array($tree[$headerField]) && is_array($tree[$rowField])) {
             $found[] = [
-                'eingabe' => 'acf[' . implode('][', [...$path, $rowFeld]) . ']',
-                'headers' => $tree[$headerFeld],
-                'rows' => $tree[$rowFeld],
+                'input' => 'acf[' . implode('][', [...$path, $rowField]) . ']',
+                'headers' => $tree[$headerField],
+                'rows' => $tree[$rowField],
             ];
         }
 
