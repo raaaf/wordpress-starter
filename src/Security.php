@@ -52,6 +52,41 @@ class Security
     }
 
     /**
+     * Hosts, an die ein Formular senden darf (CSP form-action): Newsletter-
+     * Einbettungscodes und PayPal-Buttons. Eine einzige Quelle fuer
+     * getCSPHeader() UND isAllowedFormActionUrl(), damit das Newsletter-Layout
+     * nur URLs annimmt, die die CSP auch durchlaesst. Kontaktformular-Plugins
+     * (Contact Form 7, WPForms, Gravity Forms, Fluent Forms, Ninja Forms,
+     * Formidable, Elementor) senden an die eigene Seite oder per AJAX/REST und
+     * brauchen nur 'self'. Ein Eintrag mit "*." gilt fuer jede Subdomain, nicht
+     * fuer die Domain selbst.
+     *
+     * @var list<string>
+     */
+    private const FORM_ACTION_PROVIDER_HOSTS = [
+        '*.list-manage.com', // Mailchimp
+        'sibforms.com', // Brevo
+        '*.sibforms.com', // Brevo
+        '*.sendinblue.com', // Brevo (inkl. alter Sendinblue-Formulare)
+        '*.cleverreach.com', // CleverReach
+        '*.rapidmail.de', // rapidmail
+        '*.emailsys1a.net', // rapidmail
+        '*.klicktipp.com', // KlickTipp
+        '*.klick-tipp.com', // KlickTipp
+        '*.mailerlite.com', // MailerLite
+        'app.kit.com', // Kit (ConvertKit)
+        'app.convertkit.com', // Kit (ConvertKit)
+        '*.activehosted.com', // ActiveCampaign
+        'app.getresponse.com', // GetResponse
+        'manage.kmail-lists.com', // Klaviyo
+        'www.aweber.com', // AWeber
+        'emailoctopus.com', // EmailOctopus
+        '*.emailoctopus.com', // EmailOctopus
+        '*.constantcontact.com', // Constant Contact
+        'www.paypal.com', // PayPal-Buttons (Spenden/Kaufen)
+    ];
+
+    /**
      * Hosts fest verdrahtet in frame-src, unabhaengig von der Admin-Option
      * embed_allowed_hosts. Eine einzige Quelle fuer getCSPHeader() UND
      * isAllowedEmbedHost(), damit die beiden nicht auseinanderlaufen: sonst
@@ -424,6 +459,78 @@ class Security
     }
 
     /**
+     * Prueft, ob eine Formular-Adresse von der CSP form-action durchgelassen
+     * wird: https und ein Host aus FORM_ACTION_PROVIDER_HOSTS. Bei "*."-Eintraegen
+     * zaehlt nur ein echtes Subdomain-Suffix mit Punkt, damit weder
+     * "list-manage.com.evil.example" noch "evillist-manage.com" passieren.
+     */
+    public static function isAllowedFormActionUrl(string $url): bool
+    {
+        $scheme = wp_parse_url($url, PHP_URL_SCHEME);
+
+        if (!is_string($scheme) || strtolower($scheme) !== 'https') {
+            return false;
+        }
+
+        // Wie bei isAllowedEmbedHost(): form-action gibt portlose Origins aus,
+        // ein expliziter Nicht-443-Port wuerde vom Browser blockiert.
+        $port = wp_parse_url($url, PHP_URL_PORT);
+
+        if (is_int($port) && $port !== 443) {
+            return false;
+        }
+
+        $host = wp_parse_url($url, PHP_URL_HOST);
+
+        if (!is_string($host) || $host === '') {
+            return false;
+        }
+
+        $host = strtolower($host);
+
+        foreach (self::FORM_ACTION_PROVIDER_HOSTS as $entry) {
+            if (str_starts_with($entry, '*.')) {
+                if (str_ends_with($host, '.' . substr($entry, 2))) {
+                    return true;
+                }
+            } elseif ($host === $entry) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Origin von site_url(), wenn dessen Host von home_url() abweicht. Das
+     * Passwortformular postet an site_url('wp-login.php'), und form-action
+     * 'self' kennt nur den Origin der ausgelieferten Seite.
+     */
+    private static function getSiteUrlFormOrigin(): string
+    {
+        $siteHost = wp_parse_url(site_url(), PHP_URL_HOST);
+        $homeHost = wp_parse_url(home_url(), PHP_URL_HOST);
+
+        if (!is_string($siteHost) || $siteHost === '' || $siteHost === $homeHost) {
+            return '';
+        }
+
+        if (preg_match('/^[A-Za-z0-9.-]+$/', $siteHost) !== 1) {
+            return '';
+        }
+
+        $scheme = wp_parse_url(site_url(), PHP_URL_SCHEME) === 'http' ? 'http' : 'https';
+        $port = wp_parse_url(site_url(), PHP_URL_PORT);
+        $origin = $scheme . '://' . $siteHost;
+
+        if (is_int($port) && $port > 0 && $port <= 65535) {
+            $origin .= ':' . $port;
+        }
+
+        return ' ' . $origin;
+    }
+
+    /**
      * Build the Content-Security-Policy header value.
      */
     public static function getCSPHeader(): string
@@ -441,6 +548,10 @@ class Security
                 static fn (string $host): string => 'https://' . $host,
                 self::HARDCODED_FRAME_SRC_HOSTS,
             )) . self::getEmbedOrigins(),
+            "form-action 'self' " . implode(' ', array_map(
+                static fn (string $host): string => 'https://' . $host,
+                self::FORM_ACTION_PROVIDER_HOSTS,
+            )) . self::getSiteUrlFormOrigin(),
             "frame-ancestors 'self'",
             "base-uri 'self'",
             "media-src 'self' https:" . $localSources,

@@ -214,9 +214,17 @@ class AcfServiceProvider extends ServiceProvider
      * Applies to every post-context kses call site-wide. Attributes are listed
      * explicitly because tags added through this filter do not inherit core's
      * global attributes, and kses still drops on* handlers and javascript:
-     * URLs, so no script can enter this way. A <form> pointing at an arbitrary
-     * action does become possible for anyone who may edit content, which is
-     * the same trust level already required to place arbitrary links.
+     * URLs, so no script can enter this way.
+     *
+     * Saving: in a save context (is_admin(), wp_doing_ajax(), a REST request or an XML-RPC request)
+     * a user without the unfiltered_html capability gets $tags back unchanged,
+     * so they cannot store form controls at all. Rendering on the frontend
+     * (visitors, no capabilities) keeps the additions, so forms an administrator
+     * saved still render. The CSP form-action is only a second layer: it
+     * allows multi-tenant provider hosts (e.g. *.list-manage.com) and cannot
+     * stop a post to an attacker-owned tenant at an allowed provider. It is also
+     * emitted only when config('security.enable_csp') is true, never for admin
+     * or AJAX requests, so this capability check is the control that matters.
      *
      * @param array<string, array<string, bool>|mixed> $tags Allowed tags.
      * @param string $context Kses context.
@@ -229,6 +237,33 @@ class AcfServiceProvider extends ServiceProvider
             return $tags;
         }
 
+        $isSaveContext = is_admin()
+            || wp_doing_ajax()
+            || ( defined('REST_REQUEST') && REST_REQUEST )
+            || ( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST );
+
+        if ($isSaveContext && !current_user_can('unfiltered_html')) {
+            return $tags;
+        }
+
+        foreach (self::formControlTags() as $tag => $attributes) {
+            // Core allows <textarea> but only a handful of attributes, which drops
+            // the placeholder and validation hints form plugins emit.
+            $existing = $tag === 'textarea' && is_array($tags['textarea'] ?? null) ? $tags['textarea'] : [];
+            $tags[$tag] = array_merge($existing, $attributes);
+        }
+
+        return $tags;
+    }
+
+    /**
+     * Form-control tags with their allowed attributes, the single list behind
+     * both allowFormControlTags() and the table-cell strip in sanitizeTextarea().
+     *
+     * @return array<string, array<string, bool>>
+     */
+    private static function formControlTags(): array
+    {
         // Tags added by a filter miss core's global attributes, so the ones
         // form markup relies on are repeated for each tag below.
         $common = [
@@ -251,65 +286,61 @@ class AcfServiceProvider extends ServiceProvider
             'aria-required' => true,
         ];
 
-        $tags['form'] = array_merge($common, [
-            'action' => true,
-            'method' => true,
-            'enctype' => true,
-            'accept-charset' => true,
-            'name' => true,
-            'target' => true,
-            'novalidate' => true,
-        ]);
+        return [
+            'form' => array_merge($common, [
+                'action' => true,
+                'method' => true,
+                'enctype' => true,
+                'accept-charset' => true,
+                'name' => true,
+                'target' => true,
+                'novalidate' => true,
+            ]),
 
-        $tags['input'] = array_merge($common, [
-            'type' => true,
-            'name' => true,
-            'value' => true,
-            'placeholder' => true,
-            'size' => true,
-            'maxlength' => true,
-            'minlength' => true,
-            'min' => true,
-            'max' => true,
-            'step' => true,
-            'pattern' => true,
-            'accept' => true,
-            'autocomplete' => true,
-            'autocapitalize' => true,
-            'checked' => true,
-            'multiple' => true,
-            'required' => true,
-            'readonly' => true,
-            'disabled' => true,
-        ]);
+            'input' => array_merge($common, [
+                'type' => true,
+                'name' => true,
+                'value' => true,
+                'placeholder' => true,
+                'size' => true,
+                'maxlength' => true,
+                'minlength' => true,
+                'min' => true,
+                'max' => true,
+                'step' => true,
+                'pattern' => true,
+                'accept' => true,
+                'autocomplete' => true,
+                'autocapitalize' => true,
+                'checked' => true,
+                'multiple' => true,
+                'required' => true,
+                'readonly' => true,
+                'disabled' => true,
+            ]),
 
-        $tags['select'] = array_merge($common, [
-            'name' => true,
-            'size' => true,
-            'multiple' => true,
-            'autocomplete' => true,
-            'required' => true,
-            'disabled' => true,
-        ]);
+            'select' => array_merge($common, [
+                'name' => true,
+                'size' => true,
+                'multiple' => true,
+                'autocomplete' => true,
+                'required' => true,
+                'disabled' => true,
+            ]),
 
-        $tags['option'] = array_merge($common, [
-            'value' => true,
-            'label' => true,
-            'selected' => true,
-            'disabled' => true,
-        ]);
+            'option' => array_merge($common, [
+                'value' => true,
+                'label' => true,
+                'selected' => true,
+                'disabled' => true,
+            ]),
 
-        $tags['optgroup'] = array_merge($common, [
-            'label' => true,
-            'disabled' => true,
-        ]);
+            'optgroup' => array_merge($common, [
+                'label' => true,
+                'disabled' => true,
+            ]),
 
-        // Core allows <textarea> but only a handful of attributes, which drops
-        // the placeholder and validation hints form plugins emit.
-        $tags['textarea'] = array_merge(
-            is_array($tags['textarea'] ?? null) ? $tags['textarea'] : [],
-            $common,
-            [
+            'textarea' => array_merge($common, [
                 'cols' => true,
                 'rows' => true,
                 'wrap' => true,
@@ -320,10 +351,8 @@ class AcfServiceProvider extends ServiceProvider
                 'required' => true,
                 'readonly' => true,
                 'disabled' => true,
-            ],
-        );
-
-        return $tags;
+            ]),
+        ];
     }
 
     private function addAdminStyles(): void
@@ -398,10 +427,9 @@ class AcfServiceProvider extends ServiceProvider
      */
     private function registerRestApi(): void
     {
-        // Enable ACF fields in REST API for posts
-        add_filter('acf/rest_api/item_permissions/get', function () {
-            return current_user_can('read');
-        });
+        // No ACF read-permission filter is registered here: 'acf/rest_api/item_permissions/get'
+        // does not exist in the installed ACF plugins, so ACF fields in REST
+        // responses follow core's defaults for the post type.
 
         // Add custom endpoint for theme options (read-only, admin only)
         add_action('rest_api_init', function () {
@@ -449,31 +477,14 @@ class AcfServiceProvider extends ServiceProvider
         // reicht bei der Feldvalidierung keinen Pfad dorthin mit.
         add_action('acf/validate_save_post', [self::class, 'validateTableRows']);
 
-        // Example: Validate URL fields contain valid URLs
-        add_filter('acf/validate_value/type=url', function ($valid, $value) {
-            if (!$valid || empty($value)) {
-                return $valid;
-            }
+        // Validate every url field: absolute and protocol-relative URLs, IDN hosts included.
+        add_filter('acf/validate_value/type=url', [self::class, 'validateUrl'], 10, 2);
 
-            if (!filter_var($value, FILTER_VALIDATE_URL)) {
-                return __('Bitte gib eine gültige URL ein.', 'wp-starter');
-            }
+        // Newsletter-Adresse: nur Anbieter, die die CSP form-action durchlaesst.
+        add_filter('acf/validate_value/key=field_flex_newsletter_action_url', [self::class, 'validateNewsletterActionUrl'], 10, 2);
 
-            return $valid;
-        }, 10, 2);
-
-        // Example: Validate email fields
-        add_filter('acf/validate_value/type=email', function ($valid, $value) {
-            if (!$valid || empty($value)) {
-                return $valid;
-            }
-
-            if (!is_email($value)) {
-                return __('Bitte gib eine gültige E-Mail-Adresse ein.', 'wp-starter');
-            }
-
-            return $valid;
-        }, 10, 2);
+        // Validate every email field.
+        add_filter('acf/validate_value/type=email', [self::class, 'validateEmail'], 10, 2);
 
         // date_picker/time_picker: ACF's format_value throws on garbage (e.g.
         // "300000000000"), which would 500 every page reading the field.
@@ -516,6 +527,76 @@ class AcfServiceProvider extends ServiceProvider
         };
         add_filter('acf/prepare_field/type=text', $brHint);
         add_filter('acf/prepare_field/type=textarea', $brHint);
+    }
+
+    /**
+     * Validate url fields: absolute and protocol-relative URLs, IDN hosts included.
+     *
+     * @param bool|string $valid
+     */
+    public static function validateUrl(mixed $valid, mixed $value): mixed
+    {
+        if (!$valid || empty($value)) {
+            return $valid;
+        }
+
+        $candidate = (string) $value;
+
+        // filter_var() rejects a missing scheme, which core ACF url fields allow.
+        if (str_starts_with($candidate, '//')) {
+            $candidate = 'https:' . $candidate;
+        }
+
+        // filter_var() also rejects non-ASCII hosts, so test their punycode form.
+        $host = parse_url($candidate, PHP_URL_HOST);
+        if (is_string($host) && !preg_match('/^[\x20-\x7e]+$/', $host) && function_exists('idn_to_ascii')) {
+            $ascii = idn_to_ascii($host);
+            if ($ascii !== false) {
+                $candidate = str_replace($host, $ascii, $candidate);
+            }
+        }
+
+        if (!filter_var($candidate, FILTER_VALIDATE_URL)) {
+            return __('Bitte gib eine gültige URL ein.', 'wp-starter');
+        }
+
+        return $valid;
+    }
+
+    /**
+     * Newsletter form action: only providers the CSP form-action lets through.
+     *
+     * @param bool|string $valid
+     */
+    public static function validateNewsletterActionUrl(mixed $valid, mixed $value): mixed
+    {
+        if (!$valid || empty($value)) {
+            return $valid;
+        }
+
+        if (!\WordpressStarter\Security::isAllowedFormActionUrl(strval($value))) {
+            return __('Bitte gib die https-Adresse aus dem Einbettungscode deines Newsletter-Anbieters an. Unterstützt werden u. a. Mailchimp, Brevo, CleverReach, rapidmail, KlickTipp, MailerLite, Kit, ActiveCampaign, GetResponse, Klaviyo, AWeber, EmailOctopus und Constant Contact.', 'wp-starter');
+        }
+
+        return $valid;
+    }
+
+    /**
+     * Validate email fields.
+     *
+     * @param bool|string $valid
+     */
+    public static function validateEmail(mixed $valid, mixed $value): mixed
+    {
+        if (!$valid || empty($value)) {
+            return $valid;
+        }
+
+        if (!is_email($value)) {
+            return __('Bitte gib eine gültige E-Mail-Adresse ein.', 'wp-starter');
+        }
+
+        return $valid;
     }
 
     /**
@@ -646,14 +727,15 @@ class AcfServiceProvider extends ServiceProvider
             // Erst die Post-Allowlist, dann Formular-Tags samt Attributen entfernen
             // (Anführungszeichen-bewusst, damit ein ">" im Attributwert nicht abschneidet),
             // dann zur Sicherheit noch einmal durch die Allowlist.
-            $bereinigt = wp_kses_post( (string) $value);
-            $bereinigt = preg_replace(
-                '~</?(?:form|input|select|option|optgroup|textarea|button)\b(?:"[^"]*"|\'[^\']*\'|[^>"\'])*>~i',
+            $cleaned = wp_kses_post( (string) $value);
+            $formTags = implode('|', [...array_keys(self::formControlTags()), 'button']);
+            $cleaned = preg_replace(
+                '~</?(?:' . $formTags . ')\b(?:"[^"]*"|\'[^\']*\'|[^>"\'])*>~i',
                 '',
-                $bereinigt
+                $cleaned
             ) ?? '';
 
-            return wp_kses_post($bereinigt);
+            return wp_kses_post($cleaned);
         }
 
         return sanitize_textarea_field($value);
@@ -679,15 +761,15 @@ class AcfServiceProvider extends ServiceProvider
             return;
         }
 
-        foreach (self::findTableRowMismatches($posted) as $abweichung) {
+        foreach (self::findTableRowMismatches($posted) as $mismatch) {
             acf_add_validation_error(
-                $abweichung['eingabe'],
+                $mismatch['eingabe'],
                 sprintf(
                     /* translators: 1: Zeilennummer, 2: Zahl der Zellen, 3: Zahl der Spalten */
-                    __('Tabelle: Zeile %1$d hat %2$d Zellen, die Tabelle aber %3$d Spalten. Ergänze oder entferne Zellen in dieser Zeile.', 'wp-starter'),
-                    $abweichung['zeile'],
-                    $abweichung['zellen'],
-                    $abweichung['spalten'],
+                    __('Tabelle: Zeile %1$d passt nicht zur Spaltenzahl (Zellen in der Zeile: %2$d, Spalten in der Tabelle: %3$d). Ergänze oder entferne Zellen in dieser Zeile.', 'wp-starter'),
+                    $mismatch['zeile'],
+                    $mismatch['zellen'],
+                    $mismatch['spalten'],
                 ),
             );
         }
@@ -705,32 +787,32 @@ class AcfServiceProvider extends ServiceProvider
      */
     public static function findTableRowMismatches(array $posted): array
     {
-        $abweichungen = [];
+        $mismatches = [];
 
-        foreach (self::findTableGroups($posted) as $gruppe) {
-            $spalten = count($gruppe['headers']);
+        foreach (self::findTableGroups($posted) as $group) {
+            $columns = count($group['headers']);
 
-            if ($spalten === 0) {
+            if ($columns === 0) {
                 continue;
             }
 
-            foreach (array_values( (array) $gruppe['rows']) as $index => $zeile) {
-                $zellen = self::countRowCells( (array) $zeile);
+            foreach (array_values( (array) $group['rows']) as $index => $row) {
+                $cells = self::countRowCells( (array) $row);
 
-                if ($zellen === $spalten) {
+                if ($cells === $columns) {
                     continue;
                 }
 
-                $abweichungen[] = [
-                    'eingabe' => $gruppe['eingabe'],
+                $mismatches[] = [
+                    'eingabe' => $group['eingabe'],
                     'zeile' => $index + 1,
-                    'zellen' => $zellen,
-                    'spalten' => $spalten,
+                    'zellen' => $cells,
+                    'spalten' => $columns,
                 ];
             }
         }
 
-        return $abweichungen;
+        return $mismatches;
     }
 
     /**
@@ -740,13 +822,13 @@ class AcfServiceProvider extends ServiceProvider
      * Feldkontext variiert, deshalb wird der erste Array-Wert genommen statt
      * ein Feld beim Namen zu suchen.
      *
-     * @param array<mixed> $zeile
+     * @param array<mixed> $row
      */
-    private static function countRowCells(array $zeile): int
+    private static function countRowCells(array $row): int
     {
-        foreach ($zeile as $wert) {
-            if (is_array($wert)) {
-                return count($wert);
+        foreach ($row as $value) {
+            if (is_array($value)) {
+                return count($value);
             }
         }
 
@@ -764,50 +846,49 @@ class AcfServiceProvider extends ServiceProvider
      * `eingabe` ist der volle Eingabename des Zeilen-Repeaters (acf[...][...]),
      * an den acf_add_validation_error die Meldung hängt.
      *
-     * @param array<mixed> $baum
-     * @param array<int, int|string> $pfad Schluessel von der Wurzel bis zu $baum
+     * @param array<mixed> $tree
+     * @param array<int, int|string> $path Schluessel von der Wurzel bis zu $tree
      *
-     * @return array<int, array{feld: string, eingabe: string, headers: array<mixed>, rows: array<mixed>}>
+     * @return array<int, array{eingabe: string, headers: array<mixed>, rows: array<mixed>}>
      */
-    private static function findTableGroups(array $baum, array $pfad = []): array
+    private static function findTableGroups(array $tree, array $path = []): array
     {
-        $gefunden = [];
+        $found = [];
 
-        foreach ($baum as $schluessel => $wert) {
-            if (!is_array($wert)) {
+        foreach ($tree as $key => $value) {
+            if (!is_array($value)) {
                 continue;
             }
 
-            $gefunden = array_merge($gefunden, self::findTableGroups($wert, [...$pfad, $schluessel]));
+            $found = array_merge($found, self::findTableGroups($value, [...$path, $key]));
         }
 
         $headerFeld = null;
         $rowFeld = null;
 
-        foreach (array_keys($baum) as $schluessel) {
-            if (!is_string($schluessel)) {
+        foreach (array_keys($tree) as $key) {
+            if (!is_string($key)) {
                 continue;
             }
 
-            if (str_ends_with($schluessel, '_headers')) {
-                $headerFeld = $schluessel;
+            if (str_ends_with($key, '_headers')) {
+                $headerFeld = $key;
             }
 
-            if (str_ends_with($schluessel, '_rows')) {
-                $rowFeld = $schluessel;
+            if (str_ends_with($key, '_rows')) {
+                $rowFeld = $key;
             }
         }
 
         if ($headerFeld !== null && $rowFeld !== null
-            && is_array($baum[$headerFeld]) && is_array($baum[$rowFeld])) {
-            $gefunden[] = [
-                'feld' => $rowFeld,
-                'eingabe' => 'acf[' . implode('][', [...$pfad, $rowFeld]) . ']',
-                'headers' => $baum[$headerFeld],
-                'rows' => $baum[$rowFeld],
+            && is_array($tree[$headerFeld]) && is_array($tree[$rowFeld])) {
+            $found[] = [
+                'eingabe' => 'acf[' . implode('][', [...$path, $rowFeld]) . ']',
+                'headers' => $tree[$headerFeld],
+                'rows' => $tree[$rowFeld],
             ];
         }
 
-        return $gefunden;
+        return $found;
     }
 }

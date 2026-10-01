@@ -1769,6 +1769,13 @@ if (!function_exists('shortcode_atts')) {
     }
 }
 
+if (!function_exists('is_email')) {
+    function is_email(string $email): string|false
+    {
+        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false ? $email : false;
+    }
+}
+
 if (!function_exists('wp_unslash')) {
     function wp_unslash(mixed $value): mixed
     {

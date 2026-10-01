@@ -1,14 +1,14 @@
 {{--
     Newsletter-Anmeldung - Flexible Content Layout
 
-    Uses shared components: x-section, x-button
+    Uses shared components: x-section, x-input, x-button
     Fields: title, content, action_url, email_field, button_label, note, background_color
 
     Das Formular postet direkt an den Anbieter und oeffnet dessen Seite in einem
     neuen Tab. Damit laufen Bestaetigungsmail, Verteiler und Abmeldung dort, wo
     sie hingehoeren, und diese Seite speichert keine Adresse.
 
-    Kein type="email" ohne novalidate: die Browserpruefung faengt Tippfehler ab,
+    type="email" ohne novalidate: die Browserpruefung faengt Tippfehler ab,
     bevor der Anbieter eine unbrauchbare Adresse bekommt.
 --}}
 
@@ -22,7 +22,7 @@
     $background = get_sub_field('background_color') ?: 'primary';
     $privacyPolicyUrl = (string) get_privacy_policy_url();
 
-    $isHttps = $actionUrl !== '' && wp_parse_url($actionUrl, PHP_URL_SCHEME) === 'https';
+    $isAllowedAction = $actionUrl !== '' && \WordpressStarter\Security::isAllowedFormActionUrl($actionUrl);
     $inputId = 'newsletter-email-' . uniqid();
 
     // Ein Feldname aus dem Backend landet in name="", deshalb auf das eingedampft,
@@ -30,7 +30,7 @@
     $emailField = preg_replace('/[^A-Za-z0-9_\-\[\]]/', '', $emailField) ?: 'EMAIL';
 @endphp
 
-@if($isHttps || current_user_can('edit_posts'))
+@if($isAllowedAction || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" padding="md" class="newsletter">
     <div class="max-w-4xl mx-auto">
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -46,7 +46,7 @@
                 </div>
             @endif
 
-            @if($isHttps)
+            @if($isAllowedAction)
                 <form
                     action="{{ esc_url($actionUrl) }}"
                     method="post"
@@ -71,16 +71,22 @@
                         :title="$buttonLabel"
                         variant="primary"
                         class="shrink-0"
-                    />
+                    >
+                        <span class="sr-only"> {{ __('(öffnet in neuem Tab)', 'wp-starter') }}</span>
+                    </x-button>
                 </form>
             @elseif(current_user_can('edit_posts'))
                 <div class="p-6 rounded-[var(--card-radius)] bg-surface-secondary surface-sheen">
-                    <p class="text-content-secondary">{{ __('Bitte trage die https-Adresse aus dem Einbettungscode deines Newsletter-Anbieters ein.', 'wp-starter') }}</p>
+                    @if($actionUrl !== '')
+                        <p class="text-content-secondary">{{ __('Die eingetragene Formular-Adresse wird nicht akzeptiert (nur https und unterstützte Newsletter-Anbieter). Besucher sehen das Formular deshalb nicht.', 'wp-starter') }}</p>
+                    @else
+                        <p class="text-content-secondary">{{ __('Bitte trage die https-Adresse aus dem Einbettungscode deines Newsletter-Anbieters ein. Solange sie fehlt, sehen Besucher das Formular nicht.', 'wp-starter') }}</p>
+                    @endif
                 </div>
             @endif
         </div>
 
-        @if($isHttps)
+        @if($isAllowedAction)
             <p class="mt-4 max-w-[60ch] text-body-small text-content-secondary">
                 @if($note)
                     {{ $note }}

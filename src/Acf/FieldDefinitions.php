@@ -4053,7 +4053,7 @@ class FieldDefinitions
             'section_anchor',
             false,
             __('Optionale ID für Anker-Links (z.B. „kontakt“). Wird automatisch generiert wenn leer.', 'wp-starter'),
-            'z.B. kontakt',
+            __('z.B. kontakt', 'wp-starter'),
         );
     }
 

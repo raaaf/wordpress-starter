@@ -631,7 +631,7 @@ class StyleguideLayoutData
         return $this->layout('newsletter', [
             'title' => 'Auf dem Laufenden bleiben',
             'content' => 'Viermal im Jahr ein kurzer Bericht darüber, was bei uns passiert ist.',
-            'action_url' => 'https://example.com/newsletter',
+            'action_url' => 'https://example.us1.list-manage.com/subscribe/post?u=0&id=0',
             'email_field' => 'EMAIL',
             'button_label' => 'Anmelden',
             'note' => 'Die Anmeldung läuft über unseren Versanddienst. Abmeldung jederzeit über den Link in jeder E-Mail.',
@@ -1127,7 +1127,7 @@ class StyleguideLayoutData
         $catalog[] = $this->layout('newsletter', [
             'title' => '',
             'content' => '',
-            'action_url' => 'https://example.com/newsletter',
+            'action_url' => 'https://example.us1.list-manage.com/subscribe/post?u=0&id=0',
             'email_field' => 'EMAIL',
             'button_label' => 'Eintragen',
             'note' => 'Ohne Überschrift und Text bleibt nur die Leiste.',

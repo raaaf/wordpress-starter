@@ -16,6 +16,7 @@ $directives = [
     "font-src 'self' data:" . $localSources,
     "img-src 'self' data: https:" . $localSources,
     "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com" . self::getEmbedOrigins(),
+    "form-action 'self' https://<FORM_ACTION_PROVIDER_HOSTS>" . self::getSiteUrlFormOrigin(),
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "media-src 'self' https:" . $localSources,
@@ -34,7 +35,13 @@ $directives = [
 
 `Security::isAllowedEmbedHost()` is the shared gate the same layouts use before rendering an iframe: it accepts exactly what `getCSPHeader()` writes into `frame-src`. On top of the host list it rejects a non-default port (only an implicit or explicit `443` passes) and rejects the site's own host together with its `www.`/non-www counterpart, so a same-origin alias in `home_url()` cannot combine with `allow-same-origin` to break the sandbox.
 
+`form-action` limits where forms may submit: form tags survive kses in post content (`AcfServiceProvider::allowFormControlTags`), so without it a contributor could post to a foreign host. The allowed hosts (`FORM_ACTION_PROVIDER_HOSTS`: Mailchimp, Brevo, CleverReach, rapidmail, KlickTipp, MailerLite, Kit, ActiveCampaign, GetResponse, Klaviyo, AWeber, EmailOctopus, Constant Contact, PayPal buttons) belong to the newsletter layout and PayPal embeds; `Security::isAllowedFormActionUrl()` gates both its template and its ACF validation. When the host of `site_url()` differs from `home_url()`, `Security::getSiteUrlFormOrigin()` adds the `site_url()` origin to `form-action` so the password form (which posts to `wp-login.php`) keeps working.
+
+**Limit of `form-action`:** the allowed providers are multi-tenant, so the CSP cannot stop a post to an attacker-owned tenant at an allowed provider. The actual guard is the save-context rule in `AcfServiceProvider::allowFormControlTags`: a user without the `unfiltered_html` capability cannot save form controls at all (rendering keeps them for forms an administrator saved). The CSP is also only sent when `config('security.enable_csp')` is true and never for admin or AJAX requests.
+
 ### Nonce-Based Script Loading
+
+Open point: whether the per-request nonce survives a full-page cache is not settled. A cached page carries the nonce of the request that built it, while the header is generated per request. Do not treat this as solved.
 
 All inline scripts require a nonce for execution:
 
@@ -62,6 +69,8 @@ Edit the `$directives` array in `Security::getCSPHeader()` (`src/Security.php`) 
 "img-src 'self' data: https: https://cdn.example.com" . $localSources,
 ```
 
+Script, style and connect sources are built in `$scriptSrc`, `$styleSrc` and `$connectSrc`; extend those variables. Embed hosts need no code change: add them to the `embed_allowed_hosts` option.
+
 ## SVG Sanitization
 
 SVG uploads are sanitized using the `enshrined/svg-sanitize` library.
@@ -77,20 +86,23 @@ SVG uploads are sanitized using the `enshrined/svg-sanitize` library.
 
 ### Upload Restrictions
 
-- Only administrators can upload SVGs
-- Sanitization runs before file is saved
-- MIME type verification enforced
+- Only administrators (`manage_options`) can upload SVGs
+- The `svg` mime type is only registered for administrators; server-initiated imports without a logged-in user (WP-CLI, cron) skip the capability check but are still sanitized
+- An upload counts as SVG by its file extension (`.svg`, case-insensitive), never by the client-supplied type, which an uploader controls
+- `.svgz` is not allowed: it is not in `upload_mimes`, and gzipped SVGs cannot be sanitized
+- Sanitization runs on regular uploads and sideloads (`wp_handle_upload_prefilter`, `wp_handle_sideload_prefilter`) before the file is saved; a file that cannot be read, sanitized or written back is rejected (fails closed)
 
 ### Implementation
 
 ```php
 // In MediaServiceProvider.php
-private function sanitizeSvg(string $content): string
+private function sanitizeSvg(string $content): string|false
 {
     $sanitizer = new \enshrined\svgSanitize\Sanitizer();
     $sanitizer->removeRemoteReferences(true);
     $sanitizer->removeXMLTag(false); // Keep the XML declaration
-    return $sanitizer->sanitize($content) ?: $content;
+    // false propagates to the upload prefilter, which rejects the file
+    return $sanitizer->sanitize($content);
 }
 ```
 
@@ -124,28 +136,37 @@ AJAX handlers are protected against abuse with transient-based rate limiting.
 
 ### ACF Field Sanitization
 
-ACF fields are sanitized on save:
+ACF fields are sanitized on save (`acf/update_value`) and validated before save (`acf/validate_value`):
 
 ```php
 // In AcfServiceProvider.php
 add_filter('acf/update_value/type=text', function ($value) {
     return sanitize_text_field($value);
-});
+}, 10, 1);
 
-add_filter('acf/update_value/type=url', function ($value) {
-    return filter_var($value, FILTER_VALIDATE_URL) ? $value : '';
-});
+add_filter('acf/update_value/type=textarea', [self::class, 'sanitizeTextarea'], 10, 3);
+
+add_filter('acf/validate_value/type=url', [self::class, 'validateUrl'], 10, 2);
+add_filter('acf/validate_value/type=email', [self::class, 'validateEmail'], 10, 2);
 ```
 
 ### Sanitization Functions Used
 
-| Field Type     | Function                                  |
-| -------------- | ----------------------------------------- |
-| Text           | `sanitize_text_field()`                   |
-| Textarea       | `sanitize_textarea_field()`               |
-| URL            | `filter_var($value, FILTER_VALIDATE_URL)` |
-| Email          | `is_email()`                              |
-| HTML (WYSIWYG) | `wp_kses_post()`                          |
+| Field Type     | Function                                                                                                                                                               |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Text           | `sanitize_text_field()`                                                                                                                                                |
+| Textarea       | `sanitize_textarea_field()`; table cells (`*_cell_content`) use `wp_kses_post()` minus form controls (form, input, select, option, optgroup, textarea, button) instead |
+| HTML (WYSIWYG) | `wp_kses_post()`                                                                                                                                                       |
+
+### Validators
+
+URL and email fields are validators, not sanitizers: an invalid value blocks the save with an error message and nothing is rewritten or blanked.
+
+| Field Type | Hook                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------ |
+| URL        | `acf/validate_value/type=url` (`validateUrl`)                                                    |
+| Email      | `acf/validate_value/type=email` (`validateEmail`)                                                |
+| Newsletter | `acf/validate_value/key=field_flex_newsletter_action_url` (only hosts that `form-action` allows) |
 
 ### Member Area Shared Password
 
@@ -228,15 +249,16 @@ $filtered = array_filter($options, function ($key) {
 
 ## Security Headers
 
-Additional security headers sent with responses:
+Additional security headers sent with responses, defined in `Security::getHardeningHeaders()` and sent on `send_headers`:
 
 ```php
-// In Security.php
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: SAMEORIGIN');
-header('Referrer-Policy: strict-origin-when-cross-origin');
-header('Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=()');
+'X-Content-Type-Options' => 'nosniff',
+'X-Frame-Options' => 'SAMEORIGIN',
+'Referrer-Policy' => 'strict-origin-when-cross-origin',
+'Permissions-Policy' => 'geolocation=(), camera=(), microphone=(), payment=()',
 ```
+
+They are skipped for admin and AJAX requests.
 
 `Strict-Transport-Security` is set separately, in `SecurityServiceProvider::boot()`:
 
@@ -304,20 +326,19 @@ These files should not be web-accessible:
 </FilesMatch>
 ```
 
-## Update-Integritaet
+## Update Integrity
 
-Theme-Updates kommen ueber `ThemeUpdateProvider` (`src/Providers/ThemeUpdateProvider.php`)
-per plugin-update-checker aus GitHub-Releases. Die Release-Pipeline
-(`.github/workflows/release.yml`) legt neben der Release-Zip eine `.sha256`-Datei
-als zweiten Release-Asset ab (`shasum -a 256`-Ausgabe).
+Theme updates come through `ThemeUpdateProvider` (`src/Providers/ThemeUpdateProvider.php`)
+via plugin-update-checker from GitHub releases. The release pipeline
+(`.github/workflows/release.yml`) stores a `.sha256` file next to the release zip
+as a second release asset (`shasum -a 256` output).
 
-Vor der Installation haengt sich `ThemeUpdateProvider::verifyPackageChecksum()` in
-den WordPress-Kernfilter `upgrader_pre_download` ein, laedt die Zip selbst
-herunter und vergleicht ihren Hash gegen die zugehoerige `.sha256`-Datei desselben
-Release. Stimmt die Pruefsumme nicht ueberein, wird die Installation mit einem
-`WP_Error` abgebrochen. Fehlt die `.sha256`-Datei (aeltere Releases vor dieser
-Aenderung), wird das Update nicht blockiert, aber als Warnung ueber
-`LogServiceProvider::warning()` protokolliert.
+Before installation, `ThemeUpdateProvider::verifyPackageChecksum()` hooks into the
+WordPress core filter `upgrader_pre_download`, downloads the zip itself and
+compares its hash against the `.sha256` file of the same release. If the checksum
+does not match, the installation is aborted with a `WP_Error`. If the `.sha256`
+file is missing (older releases from before this change), the update is not
+blocked but logged as a warning via `LogServiceProvider::warning()`.
 
 ## Contact Form Spam Protection
 

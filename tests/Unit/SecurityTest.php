@@ -91,6 +91,49 @@ final class SecurityTest extends TestCase
         $this->assertStringContainsString("worker-src 'self'", $header);
     }
 
+    /** Form-action begrenzt Formular-Ziele auf die Seite selbst und die Newsletter-Anbieter. */
+    public function testCSPRestrictsFormActionToSelfAndProviders(): void
+    {
+        $formAction = $this->directive(Security::getCSPHeader(), 'form-action');
+
+        $this->assertStringContainsString("'self'", $formAction);
+        $this->assertStringContainsString('https://*.list-manage.com', $formAction);
+        $this->assertStringContainsString('https://sibforms.com', $formAction);
+        $this->assertStringContainsString('https://*.sibforms.com', $formAction);
+        $this->assertStringContainsString('https://*.cleverreach.com', $formAction);
+        $this->assertStringContainsString('https://*.mailerlite.com', $formAction);
+        $this->assertStringContainsString('https://*.activehosted.com', $formAction);
+        $this->assertStringContainsString('https://www.paypal.com', $formAction);
+    }
+
+    #[DataProvider('formActionAllowance')]
+    public function testIsAllowedFormActionUrl(string $url, bool $expected): void
+    {
+        $this->assertSame($expected, Security::isAllowedFormActionUrl($url), $url);
+    }
+
+    /** @return array<string, array{0: string, 1: bool}> */
+    public static function formActionAllowance(): array
+    {
+        return [
+            'Mailchimp' => ['https://abc.us21.list-manage.com/subscribe/post?u=1', true],
+            'Brevo ohne Subdomain' => ['https://sibforms.com/serve/x', true],
+            'Brevo mit Subdomain' => ['https://e3f.sibforms.com/serve/x', true],
+            'CleverReach' => ['https://seu2.cleverreach.com/f/1/', true],
+            'MailerLite' => ['https://assets.mailerlite.com/jsonp/1/forms/2/subscribe', true],
+            'Kit' => ['https://app.kit.com/forms/1/subscriptions', true],
+            'ActiveCampaign' => ['https://acme.activehosted.com/proc.php', true],
+            'PayPal' => ['https://www.paypal.com/cgi-bin/webscr', true],
+            'PayPal als Subdomain eines fremden Hosts' => ['https://paypal.com.evil.example/', false],
+            'http abgelehnt' => ['http://abc.us21.list-manage.com/subscribe/post', false],
+            'fremder Host' => ['https://evil.example/post', false],
+            'Anbieter als Subdomain eines fremden Hosts' => ['https://list-manage.com.evil.example/', false],
+            'Suffix ohne Punkt' => ['https://evillist-manage.com/', false],
+            'leer' => ['', false],
+            'keine URL' => ['not a url', false],
+        ];
+    }
+
     /**
      * Die Analytics-Herkunft muss in BEIDEN Direktiven stehen.
      *
@@ -536,8 +579,9 @@ final class SecurityTest extends TestCase
 
     /**
      * The isAllowedEmbedHost() method is the shared gate templates use before
-     * rendering an iframe; it must accept exactly what getCSPHeader() writes
-     * into frame-src, no more and no less.
+     * rendering an iframe. It accepts only hosts that getCSPHeader() writes into
+     * frame-src, and is deliberately stricter on top: https only, no explicit
+     * non-443 port, never the site's own host or its www alias.
      */
     #[DataProvider('embedHostAllowance')]
     public function testIsAllowedEmbedHost(string $url, bool $expected, string $warum): void
