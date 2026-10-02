@@ -1,3 +1,9 @@
+## [2.38.3](https://github.com/raaaf/wordpress-starter/compare/v2.38.2...v2.38.3) (2026-10-02)
+
+### Bug Fixes
+
+- clear minor backlog, filter WYSIWYG saves without unfiltered_html, fix embed consent layout ([d5ad3bf](https://github.com/raaaf/wordpress-starter/commit/d5ad3bfdeda405c8544dd967fb768c414eba69d3))
+
 ## [2.38.2](https://github.com/raaaf/wordpress-starter/compare/v2.38.1...v2.38.2) (2026-10-01)
 
 ### Bug Fixes
