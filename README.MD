@@ -6,8 +6,8 @@ My own WordPress theme framework as the basis for every client project. No page 
 
 | Technology                    | Version        | Purpose                         |
 | ----------------------------- | -------------- | ------------------------------- |
-| PHP                           | 8.2+           | Strict types, modern features   |
-| Laravel Blade                 | Illuminate v12 | Templating                      |
+| PHP                           | 8.3+           | Strict types, modern features   |
+| Laravel Blade                 | Illuminate v13 | Templating                      |
 | TailwindCSS                   | v4.1           | Utility CSS, design tokens      |
 | Alpine.js                     | v3.15          | Interactive components, bundled |
 | Vite                          | 8              | Build tool with HMR             |
@@ -18,7 +18,7 @@ Gutenberg is disabled. Content model: Classic Editor + ACF Flexible Content.
 
 ## Requirements
 
-- PHP 8.2+ (runtime), PHP 8.4+ for the test toolchain (PHPUnit)
+- PHP 8.3+ (runtime), PHP 8.4+ for the test toolchain (PHPUnit)
 - Composer
 - Node.js 20.19+ / 22.12+
 - WordPress 6.8+
