@@ -1,3 +1,10 @@
+## [2.39.1](https://github.com/raaaf/wordpress-starter/compare/v2.39.0...v2.39.1) (2026-10-07)
+
+### Bug Fixes
+
+- **deps:** move to illuminate 13 on PHP 8.3 ([8a3389c](https://github.com/raaaf/wordpress-starter/commit/8a3389cb90b5d71e1036bf1cafaacd8fa03619ab))
+- **deps:** raise remaining PHP floor declarations to 8.3 ([f6b134f](https://github.com/raaaf/wordpress-starter/commit/f6b134fd91a511175c3abc1d2e7f33051bf53c70))
+
 # [2.39.0](https://github.com/raaaf/wordpress-starter/compare/v2.38.3...v2.39.0) (2026-10-07)
 
 ### Bug Fixes
