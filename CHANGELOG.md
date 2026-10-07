@@ -1,3 +1,10 @@
+## [2.39.2](https://github.com/raaaf/wordpress-starter/compare/v2.39.1...v2.39.2) (2026-10-07)
+
+### Bug Fixes
+
+- **build:** keep CLAUDE.md files out of the release zip ([28d78de](https://github.com/raaaf/wordpress-starter/commit/28d78dec8bb37d4cc7d020f71cc31b991f14e3b7))
+- **setup:** rewrite namespace in nested CLAUDE.md files ([d0d3e6c](https://github.com/raaaf/wordpress-starter/commit/d0d3e6c5871e7133314ed6e6d7e446b3526f299e))
+
 ## [2.39.1](https://github.com/raaaf/wordpress-starter/compare/v2.39.0...v2.39.1) (2026-10-07)
 
 ### Bug Fixes
