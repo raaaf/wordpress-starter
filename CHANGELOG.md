@@ -1,3 +1,17 @@
+# [2.39.0](https://github.com/raaaf/wordpress-starter/compare/v2.38.3...v2.39.0) (2026-10-07)
+
+### Bug Fixes
+
+- **events:** constrain intro text width ([a82d1cb](https://github.com/raaaf/wordpress-starter/commit/a82d1cbbe02787ae017d30445d79e9c39e7988a0))
+- **tabs:** atomic migration, height fallback, aria-label spacing ([6c452e8](https://github.com/raaaf/wordpress-starter/commit/6c452e841cc31f85dae0e1cb56c0b2c1454d112b))
+- **tabs:** audit findings ([611b839](https://github.com/raaaf/wordpress-starter/commit/611b83988516f64a96fbcc5bddad12e56daccb90))
+- **tabs:** harden migration and async member layouts ([efbf2d0](https://github.com/raaaf/wordpress-starter/commit/efbf2d0a888b66f3ae2772fde21453dc7ccbb958))
+- **tabs:** verify migration writes, document nested modules ([70e4e82](https://github.com/raaaf/wordpress-starter/commit/70e4e82e81343e41932673a5348907551733e8bc))
+
+### Features
+
+- **tabs:** modules per tab with one-time text migration ([d4d0b6d](https://github.com/raaaf/wordpress-starter/commit/d4d0b6dbd1e4c902e3cb13859285dd8dd907f811))
+
 ## [2.38.3](https://github.com/raaaf/wordpress-starter/compare/v2.38.2...v2.38.3) (2026-10-02)
 
 ### Bug Fixes
