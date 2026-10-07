@@ -133,4 +133,14 @@ final class TabsContentMigrationTest extends TestCase
         $this->assertSame('<p>Echt</p>', $plan['set']['page_sections_1_tabs_0_modules_0_content']);
         $this->assertSame(1, $plan['migrated']);
     }
+
+    public function testVerifyApplied(): void
+    {
+        $plan = ['set' => ['a_modules' => ['one_column'], 'a_count' => 2], 'delete' => ['a_content']];
+
+        $this->assertNull(TabsContentMigration::verifyApplied($plan, ['a_modules' => ['one_column'], 'a_count' => '2']));
+        $this->assertSame('a_modules', TabsContentMigration::verifyApplied($plan, ['a_modules' => ['button'], 'a_count' => '2']));
+        $this->assertSame('a_count', TabsContentMigration::verifyApplied($plan, ['a_modules' => ['one_column']]));
+        $this->assertSame('a_content', TabsContentMigration::verifyApplied($plan, ['a_modules' => ['one_column'], 'a_count' => '2', 'a_content' => 'x']));
+    }
 }

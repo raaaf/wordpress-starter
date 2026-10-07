@@ -61,9 +61,9 @@ src/                    # PHP source code
 ├── PostTypes/         # Custom Post Types (AbstractPostType, Event, MemberDownload, Team, Testimonial)
 ├── Taxonomies/        # Custom Taxonomies (AbstractTaxonomy, DownloadCategory)
 ├── Providers/         # Service providers
-├── Services/          # StyleguidePage.php
+├── Services/          # StyleguidePage.php, TabsContentMigration.php (one-time tab text move)
 ├── Content/           # Styleguide reference/data classes
-├── Helpers/           # Text.php, SectionHeader.php, ComponentId.php (request-scoped ids + anchor slugs), FormAttributes.php (shared form-attribute allowlist)
+├── Helpers/           # Text.php, SectionHeader.php, ComponentId.php (request-scoped ids + anchor slugs), FormAttributes.php (shared form-attribute allowlist), SectionNesting.php (nesting depth, no section chrome inside tab panels)
 ├── RateLimiter.php    # AJAX rate limiting
 templates/             # Blade templates
 ├── layouts/          # Base layouts
@@ -202,6 +202,14 @@ Skipped, on purpose:
   the display tail (member-downloads).
 - Layouts without a display tail at all, so there is nothing to separate (in
   some themes cta and button).
+
+### Nested modules in tabs
+
+- Each tab row holds a `modules` flexible field (`FlexibleContent::NESTED_MODULES_KEY`), built from the page layouts minus `NESTED_EXCLUDED_LAYOUTS` (hero, tabs, divider, map, contact_form, newsletter, logo_slider). A denylist, so layouts added via the `_flexible_content_layouts` filter are offered too.
+- The nested copies get rewritten ACF keys (`tabsnested_` inserted after the first `_`), no display fields (background, spacing, width, anchor), a `left` default for `section_alignment`, and no empty tabs.
+- `tabs.blade.php` renders them through the normal `flexible.*` templates inside `SectionNesting::enter()/leave()`; `x-section` then outputs a plain `section-nested` div instead of the section chrome.
+- The per-tab text field is gone. `Services/TabsContentMigration` moves legacy tab text once into a leading `one_column` module (on `init`, behind an option lock, flag option `*_tabs_content_migrated`).
+- Both flexible fields use ACFE async layouts (`acfe_flexible_async`), and the member_downloads visibility filter covers both.
 
 ### Background Colors
 

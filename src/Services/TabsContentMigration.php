@@ -128,7 +128,8 @@ final class TabsContentMigration
      *
      * @return int|null Number of tabs whose text became a module, null if it could not run
      *
-     * @throws \Throwable When a post's changes fail; that post is rolled back
+     * @throws \RuntimeException When a post does not hold the planned meta after writing
+     * @throws \Throwable        When a post's changes fail; that post is rolled back
      */
     public static function migrate(): ?int
     {
@@ -173,6 +174,21 @@ final class TabsContentMigration
 
                 foreach ($plan['delete'] as $key) {
                     delete_post_meta($postId, $key);
+                }
+
+                // update_post_meta()/delete_post_meta() return false instead of throwing
+                // (also for an unchanged value), so read the result back before COMMIT.
+                wp_cache_delete($postId, 'post_meta');
+                $actual = [];
+
+                foreach (get_post_meta($postId) as $key => $values) {
+                    $actual[$key] = maybe_unserialize($values[0] ?? '');
+                }
+
+                $failed = self::verifyApplied($plan, $actual);
+
+                if ($failed !== null) {
+                    throw new \RuntimeException("Tabs content migration: post {$postId} does not hold the planned meta at {$failed}");
                 }
 
                 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -266,6 +282,31 @@ final class TabsContentMigration
             'delete' => array_values(array_diff(array_unique($delete), array_keys($set))),
             'migrated' => $migrated,
         ];
+    }
+
+    /**
+     * First key where the stored meta differs from the plan, null if all good.
+     *
+     * @param array{set: array<string, mixed>, delete: array<int, string>} $plan
+     * @param array<string, mixed>                                         $actual Meta as stored (key => unserialized value)
+     */
+    public static function verifyApplied(array $plan, array $actual): ?string
+    {
+        foreach ($plan['set'] as $key => $value) {
+            // Loose on purpose: ids and counts come back as strings.
+            // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+            if (!array_key_exists($key, $actual) || $actual[$key] != $value) {
+                return (string) $key;
+            }
+        }
+
+        foreach ($plan['delete'] as $key) {
+            if (array_key_exists($key, $actual)) {
+                return $key;
+            }
+        }
+
+        return null;
     }
 
     /**
