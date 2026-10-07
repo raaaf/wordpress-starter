@@ -1387,11 +1387,38 @@ class ThemeSetup
 
     private function updateClaudeMd(): void
     {
-        $claudePath = $this->themeDir . '/CLAUDE.md';
-        if (!file_exists($claudePath)) {
-            return;
+        foreach ($this->claudeMdFiles() as $claudePath) {
+            $this->updateClaudeMdFile($claudePath);
+        }
+    }
+
+    /**
+     * The root CLAUDE.md plus every nested one (src/, templates/, resources/ ...),
+     * all of which carry the starter namespace and text domain in their examples.
+     *
+     * @return list<string>
+     */
+    private function claudeMdFiles(): array
+    {
+        $files = [];
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveCallbackFilterIterator(
+                new RecursiveDirectoryIterator($this->themeDir, FilesystemIterator::SKIP_DOTS),
+                static fn (SplFileInfo $entry): bool => !in_array($entry->getFilename(), ['vendor', 'node_modules', '.git'], true),
+            ),
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getFilename() === 'CLAUDE.md') {
+                $files[] = $file->getPathname();
+            }
         }
 
+        return $files;
+    }
+
+    private function updateClaudeMdFile(string $claudePath): void
+    {
         $content = file_get_contents($claudePath);
 
         // Update description line
