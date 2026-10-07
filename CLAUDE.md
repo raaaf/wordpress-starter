@@ -426,11 +426,7 @@ class Service extends AbstractPostType
 }
 ```
 
-Register in `PostTypeServiceProvider::boot()`:
-
-```php
-Service::register();
-```
+Add the class to `PostTypeServiceProvider::$postTypes`; `boot()` calls its `register()`.
 
 ## Rate Limiting
 
@@ -462,7 +458,7 @@ LogServiceProvider::exception($e);
 
 ## Important Notes
 
-- All service providers in `src/Providers/` auto-registered
+- Service providers are listed in `Application::registerProviders()` (`PluginServiceProvider` and `DesignTokenServiceProvider` only in wp-admin)
 - ACF fields defined in PHP, not JSON (version control)
 - Field labels/instructions in German
 - Gutenberg is disabled - use Classic Editor

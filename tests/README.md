@@ -38,7 +38,7 @@ composer test
 - `ApplicationTest.php` - Service provider bootstrap tests
 - `SecurityTest.php` - CSP and security header tests
 - `ViteTest.php` - Asset loading tests
-- `FieldDefinitionsTest.php` - ACF field configuration tests
+- `Acf/FieldDefinitionsTest.php` - ACF field configuration tests
 - `HelpersTest.php` - Helper function tests
 
 ## JavaScript/TypeScript Tests
@@ -66,7 +66,7 @@ Located in `tests/e2e/`. Requires a running WordPress installation.
 2. Set the base URL in environment or `playwright.config.ts`
 
 ```bash
-# Set base URL (default: http://starter.local)
+# Set base URL (default: https://wordpress.local)
 export PLAYWRIGHT_BASE_URL=http://your-site.local
 ```
 
@@ -109,7 +109,7 @@ Violations are categorized by impact:
 Tests run automatically on:
 
 - Pull requests
-- Pushes to main/master branch
+- Pushes to main/master/develop branch
 
 See `.github/workflows/` for CI configuration.
 

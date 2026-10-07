@@ -23,7 +23,7 @@ Gutenberg is disabled. Content model: Classic Editor + ACF Flexible Content.
 - Node.js 20.19+ / 22.12+
 - WordPress 6.8+
 - ACF Pro (install manually, premium plugin)
-- Local by Flywheel
+- Local by Flywheel (PHP 8.3)
 
 ## Create a new client project
 
@@ -51,7 +51,7 @@ npm run dev
 ## Directory structure
 
 ```
-├── acf-json/              # ACF field group JSON (versioned)
+├── acf-json/              # ACF JSON save/load point, created at runtime (fields are defined in PHP)
 ├── bin/
 │   └── setup.php          # Setup wizard for new projects
 ├── compiled/              # Blade cache (gitignored)
@@ -74,7 +74,8 @@ npm run dev
 │   │   ├── FieldDefinitions.php # Central field definitions
 │   │   ├── Fields.php           # Field helpers
 │   │   ├── FlexibleContent.php  # 37 Flexible Content layouts
-│   │   └── Options.php          # Theme options pages
+│   │   ├── Options.php          # Theme options pages
+│   │   └── PageSettings.php     # Per-page settings (landing page mode)
 │   ├── MemberArea/              # Member area (optional)
 │   ├── PostTypes/               # Custom post types
 │   ├── Providers/               # Service providers
@@ -119,7 +120,7 @@ The Vite dev server binds to `localhost` by default. Set `VITE_HOST=true` to opt
 
 ## Service providers
 
-All providers in `src/Providers/` are registered automatically via `Application::boot()`.
+The providers are listed in `Application::registerProviders()`; `PluginServiceProvider` and `DesignTokenServiceProvider` are only added in wp-admin.
 
 | Provider                            | Responsibility                                                                 |
 | ----------------------------------- | ------------------------------------------------------------------------------ |
@@ -240,11 +241,7 @@ class Service extends AbstractPostType
 }
 ```
 
-Registration in `PostTypeServiceProvider::boot()`:
-
-```php
-Service::register();
-```
+Add the class to `PostTypeServiceProvider::$postTypes`; its `boot()` calls `register()`.
 
 ## Member area
 
