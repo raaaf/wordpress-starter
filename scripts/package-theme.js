@@ -115,6 +115,12 @@ async function packageTheme() {
             return false;
           }
 
+          // Agent context files are for development; nested ones sit in src/ and templates/
+          // and would be web-readable on the production server.
+          if (baseName === 'CLAUDE.md') {
+            return false;
+          }
+
           // Source maps leak build paths and are never needed at runtime.
           if (baseName.endsWith('.map')) {
             return false;
