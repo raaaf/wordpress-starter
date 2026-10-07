@@ -127,6 +127,8 @@ final class TabsContentMigration
      * Move the tab text of every affected post.
      *
      * @return int|null Number of tabs whose text became a module, null if it could not run
+     *
+     * @throws \Throwable When a post's changes fail; that post is rolled back
      */
     public static function migrate(): ?int
     {
@@ -159,16 +161,32 @@ final class TabsContentMigration
 
             $plan = self::plan($meta, FlexibleContent::NESTED_MODULES_KEY, $contentKey);
 
-            foreach ($plan['set'] as $key => $value) {
-                update_post_meta($postId, $key, wp_slash($value));
-            }
+            // One transaction per post: an interruption between the shift and the
+            // delete would leave a half-shifted modules list the next run shifts again.
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            $wpdb->query('START TRANSACTION');
 
-            foreach ($plan['delete'] as $key) {
-                delete_post_meta($postId, $key);
+            try {
+                foreach ($plan['set'] as $key => $value) {
+                    update_post_meta($postId, $key, wp_slash($value));
+                }
+
+                foreach ($plan['delete'] as $key) {
+                    delete_post_meta($postId, $key);
+                }
+
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+                $wpdb->query('COMMIT');
+            } catch (\Throwable $e) {
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+                $wpdb->query('ROLLBACK');
+
+                throw $e;
+            } finally {
+                clean_post_cache($postId);
             }
 
             $migrated += $plan['migrated'];
-            clean_post_cache($postId);
         }
 
         return $migrated;
@@ -238,6 +256,10 @@ final class TabsContentMigration
             $set[$prefix . '_modules_0_content'] = $content;
             $set['_' . $prefix . '_modules_0_content'] = $contentKey;
         }
+
+        // Highest module index first: a shifted slot never overwrites one not yet written.
+        $slot = static fn (string $key): int => preg_match('/_modules_(\d+)_/', $key, $m) ? (int) $m[1] : -1;
+        uksort($set, static fn (string $a, string $b): int => $slot($b) <=> $slot($a));
 
         return [
             'set' => $set,

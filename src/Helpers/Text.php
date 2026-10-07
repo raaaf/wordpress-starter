@@ -20,6 +20,24 @@ class Text
     }
 
     /**
+     * Plain text of an HTML snippet for attributes such as aria-label.
+     * A <br> becomes a space first, or the words around it would be glued together.
+     */
+    public static function plain(?string $html): string
+    {
+        if (!$html) {
+            return '';
+        }
+
+        $spaced = (string) preg_replace('/<br\s*\/?>/i', ' ', $html);
+        $plain = wp_strip_all_tags($spaced);
+
+        $collapsed = (string) preg_replace('/\s+/', ' ', $plain);
+
+        return trim($collapsed);
+    }
+
+    /**
      * Build a dialable tel: href from a formatted phone number.
      *
      * The German trunk prefix is written as "(0)" between country code and area

@@ -74,4 +74,10 @@ final class TextTest extends TestCase
     {
         $this->assertSame('a<br>b', Text::lineBreaks('a<br>b'));
     }
+
+    public function testPlainReplacesBreaksWithSpaceAndStripsTags(): void
+    {
+        $this->assertSame('Häufige Fragen zu uns', Text::plain('Häufige<br>Fragen <br /> zu <strong>uns</strong>'));
+        $this->assertSame('', Text::plain(null));
+    }
 }

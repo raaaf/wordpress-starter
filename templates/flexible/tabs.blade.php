@@ -37,11 +37,13 @@
                 tabCount: {{ $tabCount }},
                 run: 0,
                 onEnd: null,
+                timer: null,
                 select(index) {
                     if (index === this.activeTab) return;
                     const el = this.$refs.panels;
                     const from = el.offsetHeight;
                     const run = ++this.run;
+                    clearTimeout(this.timer);
                     if (this.onEnd) {
                         el.removeEventListener('transitionend', this.onEnd);
                         el.removeEventListener('transitioncancel', this.onEnd);
@@ -57,8 +59,8 @@
                         el.style.height = from + 'px';
                         el.offsetHeight;
                         el.style.height = to + 'px';
-                        this.onEnd = (e) => {
-                            if (e.target !== el || e.propertyName !== 'height') return;
+                        const finish = () => {
+                            clearTimeout(this.timer);
                             el.removeEventListener('transitionend', this.onEnd);
                             el.removeEventListener('transitioncancel', this.onEnd);
                             this.onEnd = null;
@@ -67,8 +69,14 @@
                                 el.style.overflow = '';
                             }
                         };
+                        this.onEnd = (e) => {
+                            if (e.target !== el || e.propertyName !== 'height') return;
+                            finish();
+                        };
                         el.addEventListener('transitionend', this.onEnd);
                         el.addEventListener('transitioncancel', this.onEnd);
+                        // Fallback, falls weder transitionend noch transitioncancel kommt (Dauer 250ms + 100ms).
+                        this.timer = setTimeout(finish, 350);
                     });
                 },
                 focusTab(index) {
@@ -84,7 +92,7 @@
             <div
                 class="flex flex-wrap gap-6 mb-6 border-b border-line"
                 role="tablist"
-                aria-label="{{ $title ? strip_tags($title) : __('Tabs', 'wp-starter') }}"
+                aria-label="{{ $title ? \WordpressStarter\Helpers\Text::plain($title) : __('Tabs', 'wp-starter') }}"
             >
                 @foreach($tabs as $index => $tab)
                     <button
