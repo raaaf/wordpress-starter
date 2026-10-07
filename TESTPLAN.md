@@ -228,7 +228,7 @@ Stichprobe über die 37 Layouts aus `templates/flexible/`, je Layout mindestens 
 
 ---
 
-## Phase 10: Komponenten (Figma Design Tokens)
+## Phase 10: Komponenten (Design Tokens)
 
 ### 10.1 Button Component
 

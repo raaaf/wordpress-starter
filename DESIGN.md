@@ -6,7 +6,7 @@ Herkunft und Regeln der visuellen Werte dieses Themes. Werte selbst stehen nicht
 
 Seit der Design-System-Adoption ist `raaaf/rafael-design-system` (`tokens/src`) die Quelle, nicht mehr Figma. `theme-hub design-system` schreibt Farbe, Spacing, Radius, Typo-Skala, Gewichte, Motion und A11y aus dem Design System in `config/design-tokens/*.tokens.json`; `scripts/transform-tokens.js` erzeugt daraus `resources/css/tokens.css`. Figma ist seither ein Empfänger (`theme-hub figma`), kein Herkunftsort mehr.
 
-## Kette der fünf Befehle
+## Kette der vier Befehle
 
 Ausgeführt aus dem theme-hub-Repository, mit `--theme`/`--from <pfad-zu-diesem-theme>`:
 
@@ -14,7 +14,8 @@ Ausgeführt aus dem theme-hub-Repository, mit `--theme`/`--from <pfad-zu-diesem-
 2. `npm run tokens` — erzeugt `resources/css/tokens.css` und `tokens-editor.css` aus dem Export.
 3. `theme-hub thin --from <theme> --write` — entfernt `app.css`-Korrekturen, die der Export inzwischen selbst richtig liefert.
 4. `theme-hub check --from <theme>` — misst den Kontrastvertrag (WCAG 1.4.3/1.4.11) in Hell, Dunkel und System-Dunkel.
-5. Sync im Figma-Plugin — optional: das lokale Figma-Plugin (`figma/plugin/` im theme-hub-Repository) holt den aktuellen Export über `theme-hub serve` und schreibt Variablen, Textstile und Bindungen direkt in die Figma-Datei; Details in `figma/plugin/README.md`. Ohne laufenden `serve` bleibt der Datei-Weg als Ersatz: `theme-hub figma --from <theme> --out <verzeichnis>` erzeugt ein Importpaket, das sich in Figma per Datei-Ersatz einspielen lässt.
+
+Optional, nur in Richtung Figma: Figma ist eingefroren (Stand committet, nicht gepflegt), Werte entstehen dort nie. Wer den Stand dennoch nach Figma spiegeln will, nutzt das lokale Figma-Plugin (`figma/plugin/` im theme-hub-Repository, holt den Export über `theme-hub serve`; Details in `figma/plugin/README.md`) oder den Datei-Weg `theme-hub figma --from <theme> --out <verzeichnis>`, der ein Importpaket erzeugt.
 
 Details je Befehl: [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md).
 
