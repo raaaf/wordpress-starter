@@ -8,7 +8,7 @@
 
 ## Voraussetzungen
 
-- [ ] Local by Flywheel mit PHP 8.2+
+- [ ] Local by Flywheel mit PHP 8.3+
 - [ ] Neue WordPress-Instanz (leer)
 - [ ] ACF Pro Lizenz verfügbar
 - [ ] Node.js 20.19+ oder 22.12+

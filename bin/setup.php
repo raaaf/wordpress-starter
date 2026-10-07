@@ -1509,7 +1509,7 @@ class ThemeSetup
 
             ## Stack
 
-            Blade, TailwindCSS v4.1, Alpine.js, ACF Pro + ACF Extended, Vite 8, PHP 8.2+. Kein Gutenberg.
+            Blade, TailwindCSS v4.1, Alpine.js, ACF Pro + ACF Extended, Vite 8, PHP 8.3+. Kein Gutenberg.
 
             ## Entwicklung
 

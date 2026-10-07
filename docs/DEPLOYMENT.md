@@ -58,27 +58,27 @@ Recommended plugins (auto-install via `composer install`):
 
 | Requirement         | Version              |
 | ------------------- | -------------------- |
-| PHP                 | 8.2+                 |
+| PHP                 | 8.3+                 |
 | MySQL               | 5.7+ / MariaDB 10.3+ |
 | WordPress           | 6.8+                 |
 | Memory Limit        | 256M                 |
 | Max Execution Time  | 60s                  |
 | Upload Max Filesize | 64M                  |
 
-Production runs on PHP 8.2+. The dev test toolchain (PHPUnit) requires PHP
+Production runs on PHP 8.3+. The dev test toolchain (PHPUnit) requires PHP
 8.4+ locally and in CI; it is a `require-dev` dependency, so it is not
 installed on a `composer install --no-dev` production build and does not
 raise the server's PHP requirement. Package the deploy/build step with
 `composer install --no-dev --no-scripts` (or `--optimize-autoloader` as
-below) on PHP >= 8.2.
+below) on PHP >= 8.3.
 
 ### PHP-Versionen
 
 Die Dev-Toolchain (PHPUnit, php-cs-fixer) läuft auf PHP 8.4, die Produktion
-auf PHP 8.2.31. Die Unit-Test-Suite läuft nur auf 8.4, deckt PHP-8.2-Verhalten
-also nicht ab. Wächter dafür ist der CI-Job `php-compat-82`
+auf PHP 8.3. Die Unit-Test-Suite läuft nur auf 8.4, deckt PHP-8.3-Verhalten
+also nicht ab. Wächter dafür ist der CI-Job `php-compat-83`
 (`.github/workflows/ci.yml`): er installiert die Produktions-Dependencies auf
-PHP 8.2, prüft Syntax und läuft PHPCompatibility gegen `src/`, `config/`,
+PHP 8.3, prüft Syntax und läuft PHPCompatibility gegen `src/`, `config/`,
 `functions.php` und `index.php`. Diese Aufteilung ist eine akzeptierte
 Entscheidung (2026-09-05), kein offener Punkt.
 

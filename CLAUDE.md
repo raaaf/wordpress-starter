@@ -95,7 +95,7 @@ docs/                 # Documentation
 
 ### Key Technologies
 
-- **Blade** (Laravel Illuminate v13) - Templates extend `layouts.app`
+- **Blade** (Laravel Illuminate v13) - Templates extend `layouts.app`. symfony/translation, clock and finder are pinned to ^7.4 because symfony 8 needs PHP >= 8.4.1 and production runs 8.3; lift the pin when the server moves to 8.4.
 - **Alpine.js** (bundled, no CDN) - Interactive components
 - **TailwindCSS v4.1** - Utility-first CSS
 - **ACF Pro** - Flexible Content page builder

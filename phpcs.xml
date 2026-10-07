@@ -27,7 +27,7 @@
 
     <!-- PHP version -->
     <config name="minimum_supported_wp_version" value="6.8"/>
-    <config name="testVersion" value="8.2-"/>
+    <config name="testVersion" value="8.3-"/>
 
     <!-- Use WordPress coding standards with PSR-4/PSR-12 exclusions -->
     <rule ref="WordPress">
