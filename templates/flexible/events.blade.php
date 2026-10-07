@@ -68,7 +68,7 @@
     <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" :class="$text ? 'mb-4!' : ''" />
 
     @if($text)
-        <x-prose class="max-w-2xl mx-auto text-center mb-8">@kses($text)</x-prose>
+        <div class="max-w-2xl mx-auto text-center mb-8"><x-prose>@kses($text)</x-prose></div>
     @endif
 
     @if(!empty($link['url']))
