@@ -124,7 +124,7 @@ Plugins are installed to `wp-content/plugins/` via `composer/installers`.
 
 ## Design Tokens
 
-Generated into `resources/css/tokens.css` from `config/design-tokens/*.tokens.json`; the design system (`raaaf/rafael-design-system`) is the source of the values, Figma is only a recipient. See [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) for full documentation. Herkunft der Werte, die Fünf-Befehle-Kette und die Mapping-Tabelle stehen in [DESIGN.md](DESIGN.md).
+Generated into `resources/css/tokens.css` from `config/design-tokens/*.tokens.json`; the design system (`raaaf/rafael-design-system`) is the source of the values; Figma is frozen and no longer a source. See [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) for full documentation. Herkunft der Werte, die Fünf-Befehle-Kette und die Mapping-Tabelle stehen in [DESIGN.md](DESIGN.md).
 
 **Update tokens:**
 

@@ -1,6 +1,6 @@
 # Design Tokens
 
-Design Tokens definieren Farben, Abstände, Schriftgrößen und andere visuelle Eigenschaften als wiederverwendbare Variablen. Quelle ist seit der Design-System-Adoption `raaaf/rafael-design-system` (siehe [DESIGN.md](../DESIGN.md)), nicht mehr Figma direkt; Figma ist ein Empfänger, kein Herkunftsort.
+Design Tokens definieren Farben, Abstände, Schriftgrößen und andere visuelle Eigenschaften als wiederverwendbare Variablen. Quelle ist seit der Design-System-Adoption `raaaf/rafael-design-system` (siehe [DESIGN.md](../DESIGN.md)), nicht mehr Figma. Figma ist eingefroren (Stand committet, nicht gepflegt) und weder Quelle noch Empfänger.
 
 ## Übersicht
 
@@ -20,7 +20,7 @@ Design System (tokens/src) → theme-hub design-system → config/design-tokens/
 
 ## Workflow
 
-Die Kette der fünf Befehle (theme-hub, aus dem theme-hub-Repository heraus):
+Die Kette der vier Befehle (theme-hub, aus dem theme-hub-Repository heraus):
 
 ### 1. Design-System-Werte in den Export schreiben
 
@@ -54,13 +54,9 @@ theme-hub check --from <pfad-zu-diesem-theme>
 
 Misst jede Text-/Icon-/UI-Paarung in Hell, Dunkel und System-Dunkel gegen WCAG 1.4.3/1.4.11.
 
-### 5. Figma-Importpaket erzeugen (optional, Figma ist Empfänger)
+### 5. Figma (eingefroren)
 
-```bash
-theme-hub figma --from <pfad-zu-diesem-theme> --out <verzeichnis>
-```
-
-Erzeugt ein Importpaket für Figma aus dem aktuellen Export — der umgekehrte Weg zum alten "Tokens aus Figma exportieren": Figma zeigt danach, was der Browser bereits rendert, statt umgekehrt.
+Es gibt keinen Sync-Schritt mehr. Werte werden nur über die Token-Dateien in `config/design-tokens/*.tokens.json` gepflegt und mit `npm run tokens` nach `resources/css/tokens.css` generiert. Früher erzeugte `theme-hub figma` hier ein Importpaket für Figma.
 
 ## Token-Struktur
 
@@ -94,7 +90,7 @@ Wird zu:
 
 ### Semantische Tokens (Light/Dark)
 
-Semantische Tokens referenzieren Primitives via Figma-Alias-Daten. Der Transformer generiert `var()`-Referenzen statt aufgelöster Hex-Werte, sodass Änderungen an Primitives automatisch kaskadieren.
+Semantische Tokens referenzieren Primitives über die Alias-Daten (`com.figma.aliasData`) in den Token-Dateien, deren Format aus dem früheren Figma-Export stammt. Der Transformer generiert `var()`-Referenzen statt aufgelöster Hex-Werte, sodass Änderungen an Primitives automatisch kaskadieren.
 
 ```css
 :root,
@@ -176,7 +172,7 @@ Details zur Herleitung: `.claude/plans/logs/2026-04-16-fluid-typography-scale.md
 
 ## Neu hinzugekommene Tokens
 
-Tokens nur in `resources/css/app.css`, vom Figma-Export nicht geliefert (Begründung in `docs/DESIGN-TOKEN-GAPS.md` Abschnitt B):
+Tokens nur in `resources/css/app.css`, in den Token-Dateien nicht enthalten (Begründung in `docs/DESIGN-TOKEN-GAPS.md` Abschnitt B):
 
 - `--bg-brand-tint` - Ruhezustand-Füllung des Primary-Buttons, gleich `--bg-brand-subtle`
 - `--surface-sheen` - 135°-Tuscheverlauf auf Cards und Panels (Hell-/Dunkelwert), über `.card` und die `surface-sheen`-Utility
@@ -184,7 +180,7 @@ Tokens nur in `resources/css/app.css`, vom Figma-Export nicht geliefert (Begrün
 - `--noise-texture` - Noise-SVG im Body-Hintergrund
 - `--color-icon-disabled` - Alias auf `--icon-disabled` im Tailwind-`@theme`-Block
 
-Neue Primitives aus dem Figma-Export, generiert in `resources/css/tokens.css`:
+Neue Primitives aus den Token-Dateien, generiert in `resources/css/tokens.css`:
 
 - `--color-ash-lifted`, `--color-white-alpha-10`, `--color-black-alpha-8` - zusätzliche Grundfarben
 - `--font-weight-light` (300) - zusätzliche Schriftstärke
@@ -220,7 +216,7 @@ npm run tokens
 
 ### Farben stimmen nicht
 
-Prüfe, ob die Figma-Export-Dateien das richtige Format haben. Der Transformer erwartet das native Figma Variables JSON-Format.
+Prüfe, ob die Dateien in `config/design-tokens/` das richtige Format haben. Der Transformer erwartet das Figma-Variables-JSON-Format des früheren Figma-Exports.
 
 ### TailwindCSS zeigt keine Änderungen
 

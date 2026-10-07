@@ -213,7 +213,7 @@ private static function myLayout(): array
 
 ## Design tokens
 
-Token values come from the design system (`raaaf/rafael-design-system`), not from Figma; `config/design-tokens/*.tokens.json` is generated into `resources/css/tokens.css` via `npm run tokens`. Semantic variables:
+Token values come from the design system (`raaaf/rafael-design-system`), not from Figma (frozen); `config/design-tokens/*.tokens.json` is generated into `resources/css/tokens.css` via `npm run tokens`. Semantic variables:
 
 ```css
 background: var(--bg-primary);
