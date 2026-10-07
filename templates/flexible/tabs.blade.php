@@ -3,7 +3,8 @@
 
     Uses shared components: x-section, x-section-header
     Uses Alpine.js for tab switching
-    Fields: title, tabs (repeater: title, content), background_color
+    Fields: title, tabs (repeater: title, content, icon, modules); the tab text lives in a nested one_column module, background_color
+    Nested modules render through their own flexible templates without section chrome.
 --}}
 
 @php
@@ -25,14 +26,40 @@
             x-data="{
                 activeTab: 0,
                 tabCount: {{ $tabCount }},
-                focusTab(index) {
+                run: 0,
+                onEnd: null,
+                select(index) {
+                    if (index === this.activeTab) return;
+                    const el = this.$refs.panels;
+                    const from = el.offsetHeight;
+                    const run = ++this.run;
+                    if (this.onEnd) el.removeEventListener('transitionend', this.onEnd);
+                    this.onEnd = null;
                     this.activeTab = index;
+                    this.$nextTick(() => {
+                        el.style.height = '';
+                        const to = el.offsetHeight;
+                        if (from === to || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                        el.style.height = from + 'px';
+                        el.offsetHeight;
+                        el.style.height = to + 'px';
+                        this.onEnd = (e) => {
+                            if (e.target !== el || e.propertyName !== 'height') return;
+                            el.removeEventListener('transitionend', this.onEnd);
+                            this.onEnd = null;
+                            if (run === this.run) el.style.height = '';
+                        };
+                        el.addEventListener('transitionend', this.onEnd);
+                    });
+                },
+                focusTab(index) {
+                    this.select(index);
                     this.$nextTick(() => {
                         this.$refs['tab' + index]?.focus();
                     });
                 }
             }"
-            class="w-full max-w-3xl mx-auto"
+            class="w-full"
         >
             {{-- Tab Navigation with ARIA keyboard pattern --}}
             <div
@@ -44,7 +71,7 @@
                     <button
                         id="{{ esc_attr($uniqueId) }}-tab-{{ $index }}"
                         x-ref="tab{{ $index }}"
-                        @click="activeTab = {{ $index }}"
+                        @click="select({{ $index }})"
                         @keydown.right.prevent="focusTab((activeTab + 1) % tabCount)"
                         @keydown.left.prevent="focusTab((activeTab - 1 + tabCount) % tabCount)"
                         @keydown.home.prevent="focusTab(0)"
@@ -68,32 +95,49 @@
                 @endforeach
             </div>
 
-            {{-- Tab Panels - no aria-live; focus moves to panel via tabindex --}}
-            <div>
-                @foreach($tabs as $index => $tab)
+            {{-- Tab Panels - no aria-live; focus moves to panel via tabindex.
+                 Iterated via ACF row context so nested templates can use get_sub_field(). --}}
+            {{-- Nur das aktive Panel nimmt Platz, ein kurzer Tab laesst keine Luft vor der
+                 naechsten Sektion. Die Hoehe des Bereichs faehrt beim Wechsel von alt nach neu,
+                 damit nichts springt. Per JS (select()), weil CSS nicht zwischen auto-Hoehen
+                 uebergehen kann. Der Zustand haengt allein an `inert`: Alpines :class entfernt
+                 keine Klassen aus dem statischen class-Attribut. Anfangszustand serverseitig. --}}
+            <div x-ref="panels" class="overflow-hidden transition-[height] duration-[250ms] ease-[var(--ease-standard)] motion-reduce:transition-none">
+                @php $index = -1; @endphp
+                @while(have_rows('tabs'))
+                    @php
+                        the_row();
+                        $index++;
+                        $isFirst = $index === 0;
+                    @endphp
                     <div
-                        x-show="activeTab === {{ $index }}"
-                        x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 translate-y-2"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        {{-- Ohne Leave-Transition poppt das alte Panel sofort weg,
-                             während das neue einblendet. Symmetrisch zur
-                             Enter-Transition, mit dem Exit-Token der Motion-Skala. --}}
-                        x-transition:leave="transition duration-[var(--motion-exit-duration)] ease-[var(--motion-exit-ease)]"
-                        x-transition:leave-start="opacity-100 translate-y-0"
-                        x-transition:leave-end="opacity-0 translate-y-2"
-                        x-cloak
+                        class="starting:opacity-0 transition-opacity duration-150 ease-[var(--motion-enter-ease)] motion-reduce:transition-none inert:hidden"
+                        @unless($isFirst) inert aria-hidden="true" @endunless
+                        :inert="activeTab !== {{ $index }}"
                         :aria-hidden="activeTab !== {{ $index }}"
                         :tabindex="activeTab === {{ $index }} ? 0 : -1"
                         id="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"
                         role="tabpanel"
                         aria-labelledby="{{ esc_attr($uniqueId) }}-tab-{{ $index }}"
                     >
-                        <x-prose class="max-w-2xl text-content">
-                            @kses($tab['content'] ?? '')
-                        </x-prose>
+                        @if(have_rows('modules'))
+                            <div class="flex flex-col gap-10">
+                                @php \WordpressStarter\Helpers\SectionNesting::enter(); @endphp
+                                @while(have_rows('modules'))
+                                    @php
+                                        the_row();
+                                        $nestedLayout = get_row_layout();
+                                        $sectionAnchor = null;
+                                        $sectionSpacing = null;
+                                        $sectionWidth = null;
+                                    @endphp
+                                    @includeIf('flexible.' . str_replace('_', '-', $nestedLayout))
+                                @endwhile
+                                @php \WordpressStarter\Helpers\SectionNesting::leave(); @endphp
+                            </div>
+                        @endif
                     </div>
-                @endforeach
+                @endwhile
             </div>
         </div>
     @elseif(current_user_can('edit_posts'))

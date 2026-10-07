@@ -1,0 +1,190 @@
+<?php
+
+declare(strict_types=1);
+
+namespace WordpressStarter\Services;
+
+use WordpressStarter\Acf\FlexibleContent;
+use WordpressStarter\ThemeContext;
+
+/**
+ * One-time move of the removed per-tab text (`tabs_{j}_content`) into a nested
+ * `one_column` module at position 0 of the same tab.
+ *
+ * The tab text field is gone, a tab now holds modules only. Pages saved before
+ * that still carry the text as post meta; without this move it would stay in
+ * the database and never render again. plan() is the pure part (meta in,
+ * operations out), the rest is WordPress glue around it.
+ */
+final class TabsContentMigration
+{
+    private const MODULES_KEY = 'field_flex_tabs_tab_modules';
+
+    /**
+     * Handler for admin_init. Skips AJAX (admin-ajax.php fires admin_init too) and
+     * everyone without manage_options, like the other one-time migrations.
+     */
+    public static function maybeRun(): void
+    {
+        if (wp_doing_ajax() || !current_user_can('manage_options')) {
+            return;
+        }
+
+        if (get_option(ThemeContext::optionKey('tabs_content_migrated')) === '1') {
+            return;
+        }
+
+        // Only after every post is done: an interrupted run resumes next time.
+        // null means it could not run at all (no one_column layout), so retry later.
+        if (self::migrate() === null) {
+            return;
+        }
+
+        update_option(ThemeContext::optionKey('tabs_content_migrated'), '1', autoload: false);
+    }
+
+    /**
+     * Move the tab text of every affected post.
+     *
+     * @return int|null Number of tabs whose text became a module, null if it could not run
+     */
+    public static function migrate(): ?int
+    {
+        global $wpdb;
+
+        $contentKey = self::oneColumnContentKey();
+
+        if ($contentKey === null) {
+            return null;
+        }
+
+        // One-time migration, a REGEXP over meta keys has no WP API equivalent.
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $postIds = $wpdb->get_col($wpdb->prepare(
+            "SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key REGEXP %s",
+            '^page_sections_[0-9]+_tabs_[0-9]+_content$',
+        ));
+
+        $migrated = 0;
+
+        foreach ($postIds as $postId) {
+            $postId = (int) $postId;
+            $meta = [];
+
+            foreach (get_post_meta($postId) as $key => $values) {
+                if (preg_match('/^_?page_sections_/', (string) $key)) {
+                    $meta[$key] = maybe_unserialize($values[0] ?? '');
+                }
+            }
+
+            $plan = self::plan($meta, self::MODULES_KEY, $contentKey);
+
+            foreach ($plan['set'] as $key => $value) {
+                update_post_meta($postId, $key, wp_slash($value));
+            }
+
+            foreach ($plan['delete'] as $key) {
+                delete_post_meta($postId, $key);
+            }
+
+            $migrated += $plan['migrated'];
+            clean_post_cache($postId);
+        }
+
+        return $migrated;
+    }
+
+    /**
+     * Operations that move the tab text of one post into modules.
+     *
+     * @param array<string, mixed> $meta        Meta of the post (key => value)
+     * @param string               $modulesKey  ACF key of the nested modules field
+     * @param string               $contentKey  ACF key of the one_column content field
+     *
+     * @return array{set: array<string, mixed>, delete: array<int, string>, migrated: int}
+     */
+    public static function plan(array $meta, string $modulesKey, string $contentKey): array
+    {
+        $set = [];
+        $delete = [];
+        $migrated = 0;
+
+        foreach ($meta as $key => $content) {
+            if (!preg_match('/^(page_sections_\d+_tabs_\d+)_content$/', (string) $key, $match)) {
+                continue;
+            }
+
+            $prefix = $match[1];
+            $delete[] = $prefix . '_content';
+            $delete[] = '_' . $prefix . '_content';
+
+            if (!is_string($content) || trim($content) === '') {
+                continue;
+            }
+
+            ++$migrated;
+
+            // Existing modules move one slot down, sub keys and "_" reference keys included.
+            $pattern = '/^(_?)' . preg_quote($prefix, '/') . '_modules_(\d+)_(.+)$/';
+
+            foreach ($meta as $other => $value) {
+                if (preg_match($pattern, (string) $other, $slot)) {
+                    $delete[] = $other;
+                    $set[$slot[1] . $prefix . '_modules_' . ( (int) $slot[2] + 1 ) . '_' . $slot[3]] = $value;
+                }
+            }
+
+            $existing = $meta[$prefix . '_modules'] ?? [];
+
+            $set[$prefix . '_modules'] = ['one_column', ...( is_array($existing) ? array_values($existing) : [] )];
+            $set['_' . $prefix . '_modules'] = $modulesKey;
+            $set[$prefix . '_modules_0_content'] = $content;
+            $set['_' . $prefix . '_modules_0_content'] = $contentKey;
+        }
+
+        return [
+            'set' => $set,
+            'delete' => array_values(array_diff(array_unique($delete), array_keys($set))),
+            'migrated' => $migrated,
+        ];
+    }
+
+    /**
+     * The rewritten ACF key of the content field of the nested one_column
+     * layout, read from the real field tree instead of guessed.
+     */
+    private static function oneColumnContentKey(): ?string
+    {
+        foreach (FlexibleContent::layouts() as $layout) {
+            if (( $layout['name'] ?? '' ) !== 'tabs') {
+                continue;
+            }
+
+            foreach ($layout['sub_fields'] as $field) {
+                if (( $field['name'] ?? '' ) !== 'tabs') {
+                    continue;
+                }
+
+                foreach ($field['sub_fields'] as $sub) {
+                    if (( $sub['key'] ?? '' ) !== self::MODULES_KEY) {
+                        continue;
+                    }
+
+                    foreach ($sub['layouts'] as $nested) {
+                        if (( $nested['name'] ?? '' ) !== 'one_column') {
+                            continue;
+                        }
+
+                        foreach ($nested['sub_fields'] as $nestedField) {
+                            if (( $nestedField['name'] ?? '' ) === 'content') {
+                                return $nestedField['key'];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+}

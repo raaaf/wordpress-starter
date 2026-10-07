@@ -60,11 +60,15 @@ final class SectionHeader
     {
         $show = get_sub_field('show_section_header');
 
+        // Inside a tab panel the host section is left-aligned, a centered
+        // column under a left-aligned tab bar would look broken.
+        $fallback = SectionNesting::active() ? 'left' : 'center';
+
         return [
             'chip' => $show ? get_sub_field('section_chip') : null,
             'headline' => $show ? Text::lineBreaks(get_sub_field('section_headline')) : null,
             'description' => $show ? Text::lineBreaks(get_sub_field('section_description')) : null,
-            'alignment' => $show ? ( get_sub_field('section_alignment') ?: 'center' ) : 'center',
+            'alignment' => $show ? ( get_sub_field('section_alignment') ?: $fallback ) : $fallback,
         ];
     }
 }

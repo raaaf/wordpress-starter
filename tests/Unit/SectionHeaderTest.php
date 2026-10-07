@@ -6,6 +6,7 @@ namespace Tests\Unit;
 
 use Tests\Support\TestCase;
 use WordpressStarter\Helpers\SectionHeader;
+use WordpressStarter\Helpers\SectionNesting;
 
 /**
  * Ten layouts read the section-header fields with the identical five lines.
@@ -79,6 +80,23 @@ final class SectionHeaderTest extends TestCase
         ]);
 
         $this->assertSame('center', $ergebnis['alignment']);
+    }
+
+    public function testFaelltImModulAufLinksZurueckAberRedakteurWahlGewinnt(): void
+    {
+        SectionNesting::enter();
+
+        try {
+            $ohneWahl = $this->mitFeldern(['show_section_header' => true, 'section_alignment' => '']);
+            $ausgeblendet = $this->mitFeldern(['show_section_header' => false]);
+            $mitWahl = $this->mitFeldern(['show_section_header' => true, 'section_alignment' => 'center']);
+        } finally {
+            SectionNesting::leave();
+        }
+
+        $this->assertSame('left', $ohneWahl['alignment']);
+        $this->assertSame('left', $ausgeblendet['alignment']);
+        $this->assertSame('center', $mitWahl['alignment']);
     }
 
     public function testLiefertImmerAlleVierSchluessel(): void

@@ -22,6 +22,7 @@ declare const themeAdminStrings:
 
 interface AcfField {
   $el?: HTMLElement;
+  $rows?: () => { addClass: (className: string) => unknown };
 }
 
 interface TinyMCEEditor {
@@ -339,4 +340,13 @@ if (document.readyState === 'loading') {
 // Also initialize when ACF is ready
 if (typeof acf !== 'undefined') {
   acf.addAction('ready', init);
+
+  // Tab-Zeilen starten eingeklappt und zeigen nur den Titel. ACFs eigenes
+  // Klick-zum-Aufklappen bleibt, es arbeitet auf derselben Klasse. Neu
+  // hinzugefuegte Zeilen sind kein ready_field und bleiben offen. Oberste
+  // Ebene statt init(): init() laeuft erst im ready-Action, dann waere
+  // ready_field fuer die vorhandenen Felder schon durch.
+  acf.addAction('ready_field/key=field_flex_tabs_tabs', (field) => {
+    field?.$rows?.().addClass('-collapsed');
+  });
 }

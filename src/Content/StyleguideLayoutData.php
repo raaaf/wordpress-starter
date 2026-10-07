@@ -399,9 +399,47 @@ class StyleguideLayoutData
         return $this->layout('tabs', [
             'title' => '',
             'tabs' => [
-                ['title' => 'Übersicht', 'icon' => 'eye', 'content' => '<h3>Allgemeine Informationen</h3><p>Dies ist der Inhalt des ersten Tabs. Tabs eignen sich hervorragend, um zusammengehörige Informationen zu strukturieren und übersichtlich darzustellen, ohne die Seite mit zu viel Text zu überladen.</p>'],
-                ['title' => 'Funktionen', 'icon' => 'check', 'content' => '<h3>Unsere Funktionen</h3><ul><li>Automatische Anpassung an alle Geräte</li><li>Schnelle Ladezeiten</li><li>Benutzerfreundliche Oberfläche</li><li>Regelmäßige Updates</li></ul>'],
-                ['title' => 'Preise', 'icon' => 'calendar', 'content' => '<h3>Preisgestaltung</h3><p>Die Preise richten sich nach dem Umfang deines Vorhabens. Schreib uns für ein individuelles Angebot.</p>'],
+                [
+                    'title' => 'Übersicht',
+                    'icon' => 'eye',
+                    'modules' => [
+                        $this->layout('one_column', [
+                            'content' => '<h3>Allgemeine Informationen</h3><p>Dies ist der Inhalt des ersten Tabs. Tabs eignen sich hervorragend, um zusammengehörige Informationen zu strukturieren und übersichtlich darzustellen, ohne die Seite mit zu viel Text zu überladen.</p>',
+                        ]),
+                    ],
+                ],
+                [
+                    'title' => 'Funktionen',
+                    'icon' => 'check',
+                    'modules' => [
+                        $this->layout('one_column', [
+                            'content' => '<h3>Unsere Funktionen</h3><ul><li>Automatische Anpassung an alle Geräte</li><li>Schnelle Ladezeiten</li><li>Benutzerfreundliche Oberfläche</li><li>Regelmäßige Updates</li></ul>',
+                        ]),
+                        $this->layout('cards', [
+                            'title' => '',
+                            'cards' => [
+                                ['icon' => 'check', 'title' => 'Responsiv', 'content' => 'Passt sich jedem Gerät an.', 'link' => self::link('Mehr erfahren', '#')],
+                                ['icon' => 'eye', 'title' => 'Schnell', 'content' => 'Kurze Ladezeiten auf jeder Seite.', 'link' => self::link('Details ansehen', '#')],
+                                ['icon' => 'user', 'title' => 'Einfach', 'content' => 'Eine Oberfläche, die jeder versteht.', 'link' => self::link('Kontakt', '#')],
+                            ],
+                            'columns' => '3',
+                        ]),
+                    ],
+                ],
+                [
+                    'title' => 'Preise',
+                    'icon' => 'calendar',
+                    'modules' => [
+                        $this->layout('one_column', [
+                            'content' => '<h3>Preisgestaltung</h3><p>Die Preise richten sich nach dem Umfang deines Vorhabens. Schreib uns für ein individuelles Angebot.</p>',
+                        ]),
+                        $this->layout('button', [
+                            'button' => self::link('Angebot anfragen', self::DEMO_CONTACT_URL),
+                            'variant' => 'secondary',
+                            'alignment' => 'left',
+                        ]),
+                    ],
+                ],
             ],
             'background_color' => 'secondary',
         ]);

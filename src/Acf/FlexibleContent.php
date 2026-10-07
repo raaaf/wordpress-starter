@@ -44,6 +44,26 @@ class FlexibleContent
     ];
 
     /**
+     * Layouts, die in einem Tab-Panel nicht angeboten werden: seitenweite oder
+     * randlose Module brechen im Panel (hero, map, contact_form, newsletter,
+     * logo_slider, divider), Tabs in Tabs sind unbrauchbar. Eine Sperrliste statt
+     * einer Freigabeliste, damit auch Layouts abgeleiteter Themes angeboten werden.
+     *
+     * @var array<int, string>
+     */
+    private const NESTED_EXCLUDED_LAYOUTS = [
+        'hero',
+        'tabs',
+        'divider',
+        'map',
+        'contact_form',
+        'newsletter',
+        'logo_slider',
+    ];
+
+    private const NESTED_MODULES_KEY = 'field_flex_tabs_tab_modules';
+
+    /**
      * Cache for {@see layouts()}: the filtered, tab-split layout list, so repeated
      * calls in one request are free.
      *
@@ -108,7 +128,7 @@ class FlexibleContent
      */
     private static function registerMemberDownloadsVisibilityFilter(): void
     {
-        add_filter('acf/load_field/key=field_page_sections', function (array $field): array {
+        $hideMemberDownloads = function (array $field): array {
             if (!is_admin()) {
                 return $field;
             }
@@ -128,7 +148,11 @@ class FlexibleContent
             }
 
             return $field;
-        }, 10);
+        };
+
+        foreach (['field_page_sections', self::NESTED_MODULES_KEY] as $key) {
+            add_filter("acf/load_field/key={$key}", $hideMemberDownloads, 10);
+        }
     }
 
     /**
@@ -201,6 +225,45 @@ class FlexibleContent
     }
 
     /**
+     * ACF Extended settings shared by the page builder field and the nested
+     * tab modules field
+     *
+     * @param string $modalTitle Title of the layout selection modal
+     *
+     * @return array<string, mixed>
+     */
+    private static function flexibleSettings(string $modalTitle): array
+    {
+        return [
+            // ACF Extended: Modal for selecting layouts
+            'acfe_flexible_modal' => [
+                'acfe_flexible_modal_enabled' => true,
+                'acfe_flexible_modal_title' => $modalTitle,
+                'acfe_flexible_modal_col' => '4',
+                'acfe_flexible_modal_categories' => true,
+                'acfe_flexible_modal_search' => true,
+            ],
+
+            // ACF Extended: Modal for editing layouts
+            'acfe_flexible_modal_edit' => [
+                'acfe_flexible_modal_edit_enabled' => true,
+                'acfe_flexible_modal_edit_size' => 'large',
+            ],
+
+            // ACF Extended: Additional features
+            'acfe_flexible_copy_paste' => true,
+            'acfe_flexible_layouts_state' => 'collapse',
+            'acfe_flexible_stylised_button' => true,
+            'acfe_flexible_title_edition' => true,
+            'acfe_flexible_layouts_templates' => false,
+            'acfe_flexible_layouts_previews' => false,
+            'acfe_flexible_layouts_thumbnails' => true,
+            'acfe_flexible_hide_empty_message' => false,
+            'acfe_flexible_empty_message' => '',
+        ];
+    }
+
+    /**
      * Register the main page builder field group
      */
     public static function registerPageBuilderGroup(): void
@@ -227,31 +290,7 @@ class FlexibleContent
                     'min' => '',
                     'max' => '',
 
-                    // ACF Extended: Modal for selecting layouts
-                    'acfe_flexible_modal' => [
-                        'acfe_flexible_modal_enabled' => true,
-                        'acfe_flexible_modal_title' => __('Sektion auswählen', 'wp-starter'),
-                        'acfe_flexible_modal_col' => '4',
-                        'acfe_flexible_modal_categories' => true,
-                        'acfe_flexible_modal_search' => true,
-                    ],
-
-                    // ACF Extended: Modal for editing layouts
-                    'acfe_flexible_modal_edit' => [
-                        'acfe_flexible_modal_edit_enabled' => true,
-                        'acfe_flexible_modal_edit_size' => 'large',
-                    ],
-
-                    // ACF Extended: Additional features
-                    'acfe_flexible_copy_paste' => true,
-                    'acfe_flexible_layouts_state' => 'collapse',
-                    'acfe_flexible_stylised_button' => true,
-                    'acfe_flexible_title_edition' => true,
-                    'acfe_flexible_layouts_templates' => false,
-                    'acfe_flexible_layouts_previews' => false,
-                    'acfe_flexible_layouts_thumbnails' => true,
-                    'acfe_flexible_hide_empty_message' => false,
-                    'acfe_flexible_empty_message' => '',
+                    ...self::flexibleSettings(__('Sektion auswählen', 'wp-starter')),
                 ],
             ],
             'location' => [
@@ -323,14 +362,111 @@ class FlexibleContent
                 self::getLayouts(),
             );
 
-            self::$layoutCache = self::withTabs(
+            self::$layoutCache = self::withTabs(self::withNestedModules(
                 is_array($filtered)
                     ? array_values(array_filter($filtered, 'is_array'))
                     : self::getLayouts(),
-            );
+            ));
         }
 
         return self::$layoutCache;
+    }
+
+    /**
+     * Jedem Tab des Layouts "tabs" ein Flexible-Content-Feld "modules" mitgeben.
+     *
+     * Hier statt in FieldDefinitions::tabsFields(): die verschachtelte Liste
+     * entsteht aus der gefilterten Layoutliste und kann deshalb nicht aus dem
+     * Feldbauer heraus gebaut werden (Rekursion, und Layouts abgeleiteter Themes
+     * fehlten).
+     *
+     * @param array<int, array<string, mixed>> $layouts
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private static function withNestedModules(array $layouts): array
+    {
+        $nested = self::nestedLayouts($layouts);
+
+        foreach ($layouts as &$layout) {
+            if (( $layout['name'] ?? '' ) !== 'tabs') {
+                continue;
+            }
+
+            foreach ($layout['sub_fields'] as &$field) {
+                if (( $field['name'] ?? '' ) !== 'tabs') {
+                    continue;
+                }
+
+                $field['sub_fields'][] = [
+                    'key' => self::NESTED_MODULES_KEY,
+                    'label' => __('Module', 'wp-starter'),
+                    'name' => 'modules',
+                    'type' => 'flexible_content',
+                    'instructions' => __('Optional: Module, die unter dem Text dieses Tabs erscheinen.', 'wp-starter'),
+                    'required' => 0,
+                    'conditional_logic' => 0,
+                    'layouts' => $nested,
+                    'button_label' => __('Modul hinzufügen', 'wp-starter'),
+                    'min' => '',
+                    'max' => '',
+                    ...self::flexibleSettings(__('Modul auswählen', 'wp-starter')),
+                ];
+            }
+            unset($field);
+        }
+        unset($layout);
+
+        return $layouts;
+    }
+
+    /**
+     * Die Layouts, die ein Tab-Panel aufnehmen kann.
+     *
+     * Ohne Darstellungsfelder (Hintergrund, Abstand, Breite, Anker: im Panel
+     * zeichnet kein Modul eine eigene Sektion) und mit eigenen Feld-Keys,
+     * denn ACF verlangt global eindeutige Keys, und dieselben Layouts stehen
+     * schon auf oberster Ebene. Die Layout-Namen bleiben, die Templates werden
+     * darueber gefunden.
+     *
+     * @param array<int, array<string, mixed>> $layouts
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private static function nestedLayouts(array $layouts): array
+    {
+        $nested = [];
+
+        foreach ($layouts as $layout) {
+            if (in_array($layout['name'] ?? '', self::NESTED_EXCLUDED_LAYOUTS, true)) {
+                continue;
+            }
+
+            $layout['sub_fields'] = array_values(array_filter(
+                $layout['sub_fields'] ?? [],
+                static fn (array $field): bool => !in_array($field['name'] ?? '', self::DISPLAY_FIELDS, true),
+            ));
+
+            $map = [];
+
+            // Nur field_*/layout_*: ein Choice-Eintrag namens "key" soll nicht mitgezogen werden.
+            array_walk_recursive($layout, static function ($value, $name) use (&$map): void {
+                if ($name === 'key' && is_string($value) && preg_match('/^(field|layout)_/', $value)) {
+                    $map[$value] = (string) preg_replace('/^([^_]+)_/', '$1_tabsnested_', $value);
+                }
+            });
+
+            // Jede Fundstelle: key, conditional_logic.field, collapsed, ...
+            array_walk_recursive($layout, static function (&$value) use ($map): void {
+                if (is_string($value) && isset($map[$value])) {
+                    $value = $map[$value];
+                }
+            });
+
+            $nested[] = $layout;
+        }
+
+        return $nested;
     }
 
     /**

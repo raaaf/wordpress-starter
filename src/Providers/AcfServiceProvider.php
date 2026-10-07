@@ -10,6 +10,7 @@ use WordpressStarter\Acf\FieldDefinitions;
 use WordpressStarter\Acf\FlexibleContent;
 use WordpressStarter\Acf\Options;
 use WordpressStarter\Acf\PageSettings;
+use WordpressStarter\Services\TabsContentMigration;
 use WordpressStarter\Vite;
 
 class AcfServiceProvider extends ServiceProvider
@@ -50,6 +51,9 @@ class AcfServiceProvider extends ServiceProvider
 
         // Auto-generate section anchors on save
         $this->registerSectionAnchorGeneration();
+
+        // One-time move of the removed tab text into nested one_column modules
+        add_action('admin_init', [TabsContentMigration::class, 'maybeRun']);
     }
 
     public function boot(): void

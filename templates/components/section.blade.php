@@ -12,6 +12,10 @@
     @param string $class - Additional CSS classes
     @param bool $container - Wrap content in container (default: true)
     @param bool|null $animate - Enable scroll animation (null = use global setting)
+
+    Inside a tab panel (SectionNesting::active()) none of the section chrome
+    applies: background, padding, container, anchor and animation are skipped
+    and only a plain wrapper div with the class is rendered.
 --}}
 
 @props([
@@ -81,6 +85,11 @@
     }
 @endphp
 
+@if(\WordpressStarter\Helpers\SectionNesting::active())
+<div {{ $attributes->except('id')->merge(['class' => "section-nested {$class}"]) }}>
+    {{ $slot }}
+</div>
+@else
 <section
     @if($anchorId) id="{{ $anchorId }}" @endif
     @if($shouldAnimate)
@@ -120,3 +129,4 @@
         @endif
     @endif
 </section>
+@endif

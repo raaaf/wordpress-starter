@@ -3022,18 +3022,13 @@ class FieldDefinitions
                         __('Der Titel des Tabs (im Tab-Button sichtbar).', 'wp-starter'),
                         __('z.B. Übersicht', 'wp-starter'),
                     ),
-                    self::wysiwygField(
-                        "field_{$prefix}_tab_content",
-                        __('Inhalt', 'wp-starter'),
-                        'content',
-                        true,
-                        null,
-                        __('Der Inhalt, der angezeigt wird, wenn dieser Tab aktiv ist.', 'wp-starter'),
-                    ),
-                    self::iconRadioField(
+                    self::selectField(
                         "field_{$prefix}_tab_icon",
                         __('Icon', 'wp-starter'),
                         'icon',
+                        self::getThemeIcons(),
+                        '',
+                        false,
                         __('Optionales Icon neben dem Tab-Titel.', 'wp-starter'),
                     ),
                 ],
