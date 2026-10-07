@@ -99,6 +99,22 @@ final class SectionHeaderTest extends TestCase
         $this->assertSame('center', $mitWahl['alignment']);
     }
 
+    public function testExtrasFaelltImModulAufLinksZurueck(): void
+    {
+        $GLOBALS['wp_mock_sub_fields'] = ['section_alignment' => ''];
+
+        SectionNesting::enter();
+
+        try {
+            $imModul = SectionHeader::extras('Titel')['alignment'];
+        } finally {
+            SectionNesting::leave();
+        }
+
+        $this->assertSame('left', $imModul);
+        $this->assertSame('center', SectionHeader::extras('Titel')['alignment']);
+    }
+
     public function testLiefertImmerAlleVierSchluessel(): void
     {
         // Die Layouts destrukturieren das Ergebnis; ein fehlender Schluessel

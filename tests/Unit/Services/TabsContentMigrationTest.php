@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Services;
 
 use PHPUnit\Framework\TestCase;
+use WordpressStarter\Acf\FlexibleContent;
 use WordpressStarter\Services\TabsContentMigration;
 
 /**
@@ -16,7 +17,6 @@ use WordpressStarter\Services\TabsContentMigration;
  */
 final class TabsContentMigrationTest extends TestCase
 {
-    private const MODULES_KEY = 'field_flex_tabs_tab_modules';
     private const CONTENT_KEY = 'field_tabsnested_one_column_content';
 
     /**
@@ -26,7 +26,7 @@ final class TabsContentMigrationTest extends TestCase
      */
     private function plan(array $meta): array
     {
-        return TabsContentMigration::plan($meta, self::MODULES_KEY, self::CONTENT_KEY);
+        return TabsContentMigration::plan($meta, FlexibleContent::NESTED_MODULES_KEY, self::CONTENT_KEY);
     }
 
     public function testTextOnlyTabBecomesAOneColumnModuleAtZero(): void
@@ -37,7 +37,7 @@ final class TabsContentMigrationTest extends TestCase
         ]);
 
         $this->assertSame(['one_column'], $plan['set']['page_sections_0_tabs_1_modules']);
-        $this->assertSame(self::MODULES_KEY, $plan['set']['_page_sections_0_tabs_1_modules']);
+        $this->assertSame(FlexibleContent::NESTED_MODULES_KEY, $plan['set']['_page_sections_0_tabs_1_modules']);
         $this->assertSame('<p>Text</p>', $plan['set']['page_sections_0_tabs_1_modules_0_content']);
         $this->assertSame(self::CONTENT_KEY, $plan['set']['_page_sections_0_tabs_1_modules_0_content']);
         $this->assertEqualsCanonicalizing(
@@ -52,7 +52,7 @@ final class TabsContentMigrationTest extends TestCase
         $plan = $this->plan([
             'page_sections_0_tabs_0_content' => '<p>Text</p>',
             'page_sections_0_tabs_0_modules' => ['cards', 'button'],
-            '_page_sections_0_tabs_0_modules' => self::MODULES_KEY,
+            '_page_sections_0_tabs_0_modules' => FlexibleContent::NESTED_MODULES_KEY,
             'page_sections_0_tabs_0_modules_0_cards' => '2',
             'page_sections_0_tabs_0_modules_0_cards_1_title' => 'B',
             '_page_sections_0_tabs_0_modules_0_cards' => 'field_x',
@@ -97,5 +97,23 @@ final class TabsContentMigrationTest extends TestCase
         $this->assertSame('primary', $plan['set']['page_sections_2_tabs_0_modules_1_variant']);
         $this->assertArrayNotHasKey('page_sections_0_tabs_0_modules_1_variant', $plan['set']);
         $this->assertSame(2, $plan['migrated']);
+    }
+
+    public function testAlreadyMigratedTabOnlyDropsTheLegacyKeys(): void
+    {
+        $plan = $this->plan([
+            'page_sections_0_tabs_0_content' => '<p>Text</p>',
+            '_page_sections_0_tabs_0_content' => 'field_flex_tabs_tab_content',
+            'page_sections_0_tabs_0_modules' => ['one_column', 'button'],
+            'page_sections_0_tabs_0_modules_0_content' => '<p>Text</p>',
+            'page_sections_0_tabs_0_modules_1_variant' => 'secondary',
+        ]);
+
+        $this->assertSame([], $plan['set']);
+        $this->assertEqualsCanonicalizing(
+            ['page_sections_0_tabs_0_content', '_page_sections_0_tabs_0_content'],
+            $plan['delete'],
+        );
+        $this->assertSame(0, $plan['migrated']);
     }
 }

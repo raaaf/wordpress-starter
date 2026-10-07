@@ -183,4 +183,70 @@ final class FlexibleContentNestedTabsTest extends TestCase
 
         $this->assertContains('precious_metals', array_column($this->nestedLayouts(), 'name'));
     }
+
+    public function testSectionAlignmentDefaultsToLeftInNestedLayouts(): void
+    {
+        $found = 0;
+
+        foreach ($this->nestedLayouts() as $layout) {
+            $stack = [$layout];
+
+            while ($stack) {
+                $node = array_pop($stack);
+
+                if (( $node['name'] ?? '' ) === 'section_alignment' && isset($node['key'])) {
+                    $this->assertSame('left', $node['default_value'] ?? null, $layout['name']);
+                    ++$found;
+                }
+
+                foreach ($node as $child) {
+                    if (is_array($child)) {
+                        $stack[] = $child;
+                    }
+                }
+            }
+        }
+
+        $this->assertGreaterThan(0, $found);
+    }
+
+    public function testNestedLayoutsHaveNoEmptyTab(): void
+    {
+        // Ein abgeleitetes Theme mit eigenen Reitern: nach dem Entfernen der
+        // Darstellungsfelder bliebe "Darstellung" ohne Inhalt stehen.
+        add_filter(ThemeContext::prefix() . '_flexible_content_layouts', static function (array $layouts): array {
+            $layouts[] = [
+                'key' => 'layout_with_tabs',
+                'name' => 'with_tabs',
+                'label' => 'Mit Reitern',
+                'display' => 'block',
+                'sub_fields' => [
+                    ['key' => 'field_wt_tab_a', 'label' => 'Inhalt', 'name' => '', 'type' => 'tab'],
+                    ['key' => 'field_wt_text', 'label' => 'Text', 'name' => 'text', 'type' => 'text'],
+                    ['key' => 'field_wt_tab_b', 'label' => 'Darstellung', 'name' => '', 'type' => 'tab'],
+                    ['key' => 'field_wt_bg', 'label' => 'Hintergrund', 'name' => 'background_color', 'type' => 'select'],
+                ],
+            ];
+
+            return $layouts;
+        });
+
+        $names = array_column($this->nestedLayouts(), 'name');
+        $this->assertContains('with_tabs', $names);
+
+        foreach ($this->nestedLayouts() as $layout) {
+            $fields = $layout['sub_fields'];
+
+            foreach ($fields as $index => $field) {
+                if (( $field['type'] ?? '' ) !== 'tab') {
+                    continue;
+                }
+
+                $next = $fields[$index + 1] ?? null;
+
+                $this->assertNotNull($next, $layout['name'] . ': Reiter am Ende');
+                $this->assertNotSame('tab', $next['type'] ?? '', $layout['name'] . ': leerer Reiter');
+            }
+        }
+    }
 }

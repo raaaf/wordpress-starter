@@ -3,14 +3,23 @@
 
     Uses shared components: x-section, x-section-header
     Uses Alpine.js for tab switching
-    Fields: title, tabs (repeater: title, content, icon, modules); the tab text lives in a nested one_column module, background_color
+    Fields: title, tabs (repeater: title, icon, modules), background_color
+    The tab text lives in a nested one_column module.
     Nested modules render through their own flexible templates without section chrome.
 --}}
 
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
-    $tabs = get_sub_field('tabs') ?: [];
+    // Nur Titel und Icon fuer die Buttons: get_sub_field('tabs') laedt jede Zeile samt
+    // Modulen, die unten nochmal per have_rows() geladen werden. Eine durchlaufene
+    // Schleife raeumt ihren ACF-Loop selbst weg, reset_rows() danach wuerde den
+    // Loop der uebergeordneten Sektion entfernen.
+    $tabs = [];
+    while (have_rows('tabs')) {
+        the_row();
+        $tabs[] = ['title' => get_sub_field('title'), 'icon' => get_sub_field('icon')];
+    }
     $background = get_sub_field('background_color') ?: 'primary';
     $uniqueId = 'tabs-' . uniqid();
 @endphp
@@ -33,23 +42,33 @@
                     const el = this.$refs.panels;
                     const from = el.offsetHeight;
                     const run = ++this.run;
-                    if (this.onEnd) el.removeEventListener('transitionend', this.onEnd);
+                    if (this.onEnd) {
+                        el.removeEventListener('transitionend', this.onEnd);
+                        el.removeEventListener('transitioncancel', this.onEnd);
+                    }
                     this.onEnd = null;
                     this.activeTab = index;
                     this.$nextTick(() => {
                         el.style.height = '';
+                        el.style.overflow = '';
                         const to = el.offsetHeight;
                         if (from === to || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                        el.style.overflow = 'hidden';
                         el.style.height = from + 'px';
                         el.offsetHeight;
                         el.style.height = to + 'px';
                         this.onEnd = (e) => {
                             if (e.target !== el || e.propertyName !== 'height') return;
                             el.removeEventListener('transitionend', this.onEnd);
+                            el.removeEventListener('transitioncancel', this.onEnd);
                             this.onEnd = null;
-                            if (run === this.run) el.style.height = '';
+                            if (run === this.run) {
+                                el.style.height = '';
+                                el.style.overflow = '';
+                            }
                         };
                         el.addEventListener('transitionend', this.onEnd);
+                        el.addEventListener('transitioncancel', this.onEnd);
                     });
                 },
                 focusTab(index) {
@@ -100,9 +119,10 @@
             {{-- Nur das aktive Panel nimmt Platz, ein kurzer Tab laesst keine Luft vor der
                  naechsten Sektion. Die Hoehe des Bereichs faehrt beim Wechsel von alt nach neu,
                  damit nichts springt. Per JS (select()), weil CSS nicht zwischen auto-Hoehen
-                 uebergehen kann. Der Zustand haengt allein an `inert`: Alpines :class entfernt
+                 uebergehen kann; overflow nur waehrend der Fahrt, sonst schnitte es Fokusringe und
+                 Schatten ab. Der Zustand haengt allein an `inert`: Alpines :class entfernt
                  keine Klassen aus dem statischen class-Attribut. Anfangszustand serverseitig. --}}
-            <div x-ref="panels" class="overflow-hidden transition-[height] duration-[250ms] ease-[var(--ease-standard)] motion-reduce:transition-none">
+            <div x-ref="panels" class="transition-[height] duration-[250ms] ease-[var(--ease-standard)] motion-reduce:transition-none">
                 @php $index = -1; @endphp
                 @while(have_rows('tabs'))
                     @php
@@ -111,7 +131,8 @@
                         $isFirst = $index === 0;
                     @endphp
                     <div
-                        class="starting:opacity-0 transition-opacity duration-150 ease-[var(--motion-enter-ease)] motion-reduce:transition-none inert:hidden"
+                        class="transition-opacity duration-150 ease-[var(--motion-enter-ease)] motion-reduce:transition-none inert:hidden"
+                        :class="{ 'starting:opacity-0': run > 0 }"
                         @unless($isFirst) inert aria-hidden="true" @endunless
                         :inert="activeTab !== {{ $index }}"
                         :aria-hidden="activeTab !== {{ $index }}"
@@ -122,7 +143,10 @@
                     >
                         @if(have_rows('modules'))
                             <div class="flex flex-col gap-10">
-                                @php \WordpressStarter\Helpers\SectionNesting::enter(); @endphp
+                                @php
+                                    \WordpressStarter\Helpers\SectionNesting::enter();
+                                    try {
+                                @endphp
                                 @while(have_rows('modules'))
                                     @php
                                         the_row();
@@ -133,7 +157,11 @@
                                     @endphp
                                     @includeIf('flexible.' . str_replace('_', '-', $nestedLayout))
                                 @endwhile
-                                @php \WordpressStarter\Helpers\SectionNesting::leave(); @endphp
+                                @php
+                                    } finally {
+                                        \WordpressStarter\Helpers\SectionNesting::leave();
+                                    }
+                                @endphp
                             </div>
                         @endif
                     </div>

@@ -53,7 +53,7 @@ class AcfServiceProvider extends ServiceProvider
         $this->registerSectionAnchorGeneration();
 
         // One-time move of the removed tab text into nested one_column modules
-        add_action('admin_init', [TabsContentMigration::class, 'maybeRun']);
+        add_action('init', [TabsContentMigration::class, 'maybeRun'], 99);
     }
 
     public function boot(): void

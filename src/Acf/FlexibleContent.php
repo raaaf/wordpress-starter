@@ -61,7 +61,7 @@ class FlexibleContent
         'logo_slider',
     ];
 
-    private const NESTED_MODULES_KEY = 'field_flex_tabs_tab_modules';
+    public const NESTED_MODULES_KEY = 'field_flex_tabs_tab_modules';
 
     /**
      * Cache for {@see layouts()}: the filtered, tab-split layout list, so repeated
@@ -260,6 +260,10 @@ class FlexibleContent
             'acfe_flexible_layouts_thumbnails' => true,
             'acfe_flexible_hide_empty_message' => false,
             'acfe_flexible_empty_message' => '',
+
+            // ACF Extended: Layout-Klone per Ajax laden statt in die Seite zu rendern
+            // (bei Tabs mit verschachtelten Modulen sonst jedes Layout je Tab-Zeile).
+            'acfe_flexible_async' => ['layout'],
         ];
     }
 
@@ -442,10 +446,20 @@ class FlexibleContent
                 continue;
             }
 
-            $layout['sub_fields'] = array_values(array_filter(
+            $fields = array_values(array_filter(
                 $layout['sub_fields'] ?? [],
                 static fn (array $field): bool => !in_array($field['name'] ?? '', self::DISPLAY_FIELDS, true),
             ));
+
+            // Ein Reiter ohne Feld dahinter (z.B. "Darstellung" nach dem Entfernen) bliebe leer stehen.
+            $layout['sub_fields'] = array_values(array_filter(
+                $fields,
+                static fn (array $field, int $index): bool => ( $field['type'] ?? '' ) !== 'tab'
+                    || ( isset($fields[$index + 1]) && ( $fields[$index + 1]['type'] ?? '' ) !== 'tab' ),
+                ARRAY_FILTER_USE_BOTH,
+            ));
+
+            $layout = self::leftAlignmentDefault($layout);
 
             $map = [];
 
@@ -467,6 +481,29 @@ class FlexibleContent
         }
 
         return $nested;
+    }
+
+    /**
+     * Im Tab-Panel steht die Sektion linksbuendig, ein neues Modul soll deshalb
+     * links starten. Eine ausdrueckliche Wahl des Redakteurs gewinnt weiter.
+     *
+     * @param array<mixed> $node
+     *
+     * @return array<mixed>
+     */
+    private static function leftAlignmentDefault(array $node): array
+    {
+        if (isset($node['key']) && ( $node['name'] ?? '' ) === 'section_alignment') {
+            $node['default_value'] = 'left';
+        }
+
+        foreach ($node as $key => $value) {
+            if (is_array($value)) {
+                $node[$key] = self::leftAlignmentDefault($value);
+            }
+        }
+
+        return $node;
     }
 
     /**

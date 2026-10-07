@@ -18,29 +18,71 @@ use WordpressStarter\ThemeContext;
  */
 final class TabsContentMigration
 {
-    private const MODULES_KEY = 'field_flex_tabs_tab_modules';
+    private const LOCK_TTL = 5 * MINUTE_IN_SECONDS;
 
     /**
-     * Handler for admin_init. Skips AJAX (admin-ajax.php fires admin_init too) and
-     * everyone without manage_options, like the other one-time migrations.
+     * Handler for init (late, after ACF registered the local fields). Runs on
+     * every request, not only in wp-admin: the live pages must not lose their
+     * tab text while nobody happens to open the admin. After the first run the
+     * cost is one autoloaded option read.
      */
     public static function maybeRun(): void
     {
-        if (wp_doing_ajax() || !current_user_can('manage_options')) {
+        $doneKey = ThemeContext::optionKey('tabs_content_migrated');
+
+        if (self::isDone()) {
             return;
         }
 
-        if (get_option(ThemeContext::optionKey('tabs_content_migrated')) === '1') {
-            return;
+        // Two requests must not shift the same modules twice.
+        $lockKey = ThemeContext::optionKey('tabs_content_migration_lock');
+
+        if (!self::lock($lockKey)) {
+            if (time() - (int) get_option($lockKey) < self::LOCK_TTL) {
+                return;
+            }
+
+            // A crashed run left the lock behind.
+            delete_option($lockKey);
+
+            if (!self::lock($lockKey)) {
+                return;
+            }
         }
 
-        // Only after every post is done: an interrupted run resumes next time.
-        // null means it could not run at all (no one_column layout), so retry later.
-        if (self::migrate() === null) {
-            return;
-        }
+        try {
+            // The winner of an earlier race may have finished while we waited.
+            wp_load_alloptions(true);
 
-        update_option(ThemeContext::optionKey('tabs_content_migrated'), '1', autoload: false);
+            // Only after every post is done: an interrupted run resumes next time.
+            // null means it could not run at all (no one_column layout), so retry later.
+            if (!self::isDone() && self::migrate() !== null) {
+                update_option($doneKey, '1', autoload: true);
+            }
+        } finally {
+            delete_option($lockKey);
+        }
+    }
+
+    /**
+     * Whether the migration finished on an earlier run.
+     *
+     * @phpstan-impure
+     */
+    private static function isDone(): bool
+    {
+        return get_option(ThemeContext::optionKey('tabs_content_migrated')) === '1';
+    }
+
+    /**
+     * Take the lock. add_option() only inserts when the row does not exist yet,
+     * which makes it the atomic part.
+     *
+     * @phpstan-impure
+     */
+    private static function lock(string $lockKey): bool
+    {
+        return add_option($lockKey, time(), '', false);
     }
 
     /**
@@ -77,7 +119,7 @@ final class TabsContentMigration
                 }
             }
 
-            $plan = self::plan($meta, self::MODULES_KEY, $contentKey);
+            $plan = self::plan($meta, FlexibleContent::NESTED_MODULES_KEY, $contentKey);
 
             foreach ($plan['set'] as $key => $value) {
                 update_post_meta($postId, $key, wp_slash($value));
@@ -119,6 +161,15 @@ final class TabsContentMigration
             $delete[] = '_' . $prefix . '_content';
 
             if (!is_string($content) || trim($content) === '') {
+                continue;
+            }
+
+            // Already moved by an earlier (interrupted or concurrent) run: the module
+            // is there, only the legacy keys are left. Shifting again would duplicate it.
+            $modules = $meta[$prefix . '_modules'] ?? null;
+
+            if (is_array($modules) && ( $modules[0] ?? null ) === 'one_column'
+                && ( $meta[$prefix . '_modules_0_content'] ?? null ) === $content) {
                 continue;
             }
 
@@ -166,7 +217,7 @@ final class TabsContentMigration
                 }
 
                 foreach ($field['sub_fields'] as $sub) {
-                    if (( $sub['key'] ?? '' ) !== self::MODULES_KEY) {
+                    if (( $sub['key'] ?? '' ) !== FlexibleContent::NESTED_MODULES_KEY) {
                         continue;
                     }
 

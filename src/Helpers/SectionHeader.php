@@ -49,7 +49,7 @@ final class SectionHeader
             'description' => is_string($description) && $description !== ''
                 ? Text::lineBreaks($description)
                 : null,
-            'alignment' => get_sub_field('section_alignment') ?: 'center',
+            'alignment' => get_sub_field('section_alignment') ?: self::fallbackAlignment(),
         ];
     }
 
@@ -60,9 +60,7 @@ final class SectionHeader
     {
         $show = get_sub_field('show_section_header');
 
-        // Inside a tab panel the host section is left-aligned, a centered
-        // column under a left-aligned tab bar would look broken.
-        $fallback = SectionNesting::active() ? 'left' : 'center';
+        $fallback = self::fallbackAlignment();
 
         return [
             'chip' => $show ? get_sub_field('section_chip') : null,
@@ -70,5 +68,14 @@ final class SectionHeader
             'description' => $show ? Text::lineBreaks(get_sub_field('section_description')) : null,
             'alignment' => $show ? ( get_sub_field('section_alignment') ?: $fallback ) : $fallback,
         ];
+    }
+
+    /**
+     * Inside a tab panel the host section is left-aligned, a centered column
+     * under a left-aligned tab bar would look broken.
+     */
+    private static function fallbackAlignment(): string
+    {
+        return SectionNesting::active() ? 'left' : 'center';
     }
 }
