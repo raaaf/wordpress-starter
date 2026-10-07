@@ -175,7 +175,7 @@ Both switches default to off and work independently. Disabling landing mode rest
 
 37 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
 
-Grouped by function; the editor modal uses the ACF categories, see CLAUDE.md.
+Grouped by function; the editor modal uses the ACF categories, see `src/Acf/CLAUDE.md`.
 
 **Structure:** one-column, one-column-image, two-columns, two-columns-images, three-columns, three-columns-images, four-columns, four-columns-images, one-third-two-thirds, two-thirds-one-third
 

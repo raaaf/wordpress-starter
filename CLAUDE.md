@@ -2,6 +2,10 @@
 
 Guidance for Claude Code when working with this WordPress starter theme.
 
+## Produkt
+
+My own WordPress theme framework as the basis for every client project. No page builder, no Gutenberg: Classic Editor, ACF Flexible Content and a service-provider stack. Client themes are forked from this starter (see README.MD, "Create a new client project").
+
 ## Quick Reference
 
 - **Namespace:** `WordpressStarter\`
@@ -102,6 +106,19 @@ docs/                 # Documentation
 - **ACF Extended** (FREE) - Enhanced Flexible Content UX
 - **Vite 8** - Asset compilation with HMR
 
+## Wegweiser
+
+Path-bound rules live in nested `CLAUDE.md` files next to the code (loaded when a file in that directory is read):
+
+- `src/Acf/CLAUDE.md`: Flexible Content layouts and categories, field tabs, nested modules in tabs, ACF Extended, field definitions, theme options, adding a layout
+- `templates/flexible/CLAUDE.md`: Flexible template pattern
+- `src/Providers/CLAUDE.md`: Blade directives and escaping, logging, ACF textarea sanitizing, accepted kses `<form action>` risk (Audit Context)
+- `src/PostTypes/CLAUDE.md`: custom post types
+- `resources/js/CLAUDE.md`: Alpine.js components
+- `resources/css/CLAUDE.md`: design tokens (`npm run tokens`)
+- `DESIGN.md`: origin of the token values, the command chain, the mapping table
+- `README.MD`, `docs/`: architecture, deployment, security, SEO, token system
+
 ## Plugin Management
 
 Plugins are managed via **Composer** using [wpackagist.org](https://wpackagist.org).
@@ -121,212 +138,6 @@ composer require wpackagist-plugin/plugin-slug
 Plugins are installed to `wp-content/plugins/` via `composer/installers`.
 
 **Note:** ACF PRO is a premium plugin and must be installed manually.
-
-## Design Tokens
-
-Generated into `resources/css/tokens.css` from `config/design-tokens/*.tokens.json`; the design system (`raaaf/rafael-design-system`) is the source of the values; Figma is frozen and no longer a source. See [docs/DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) for full documentation. Herkunft der Werte, die Fünf-Befehle-Kette und die Mapping-Tabelle stehen in [DESIGN.md](DESIGN.md).
-
-**Update tokens:**
-
-```bash
-# config/design-tokens/*.tokens.json → resources/css/tokens.css
-npm run tokens        # Generate CSS
-npm run tokens:watch  # Watch mode
-```
-
-**Semantic tokens:** `--bg-*`, `--text-*`, `--border-*`, `--icon-*`
-
-Usage:
-
-```css
-background: var(--bg-primary);
-color: var(--text-primary);
-```
-
-## ACF Flexible Content
-
-All pages use Flexible Content as the primary content builder. 37 layouts in `templates/flexible/`.
-
-### Layout Categories (ACF Extended)
-
-| Category         | Layouts                                                                                                                                                                           |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Header           | hero                                                                                                                                                                              |
-| Layout           | one-column, one-column-image, two-columns, three-columns, four-columns, one-third-two-thirds, two-thirds-one-third, two-columns-images, three-columns-images, four-columns-images |
-| Inhalte          | accordion, tabs, cta, button, alert, quote                                                                                                                                        |
-| Medien           | image, video, gallery, before-after                                                                                                                                               |
-| Interaktiv       | testimonials, cards, stats, timeline, team, pricing-table, events                                                                                                                 |
-| Formulare        | contact-form, map, newsletter                                                                                                                                                     |
-| Beiträge         | posts, table                                                                                                                                                                      |
-| Interner Bereich | member-downloads                                                                                                                                                                  |
-| Sonstiges        | divider, logo-slider, embed                                                                                                                                                       |
-
-### Flexible Template Pattern
-
-```blade
-{{-- templates/flexible/example.blade.php --}}
-@php
-    $title = get_sub_field('title');
-    $background = get_sub_field('background_color') ?: 'primary';
-@endphp
-
-<x-section :background="$background">
-    @if($title)
-        <h2>{{ $title }}</h2>
-    @endif
-</x-section>
-```
-
-### Field Tabs
-
-`FlexibleContent::withTabs()` splits every layout's fields into two tabs,
-**Inhalt** and **Darstellung**, at registration time. The split point is the
-first field named `background_color`, `section_spacing`, `section_width` or
-`section_anchor` (`FlexibleContent::DISPLAY_FIELDS`); everything from there on
-is display.
-
-The rule lives in one place instead of in ~30 field builders. Field order and
-field names are untouched, only two markers are inserted.
-
-Skipped, on purpose:
-
-- Layouts that already group themselves with their own tabs or accordions
-  (hero, posts, map, contact-form, the three `*-columns-images`). Hero,
-  contact-form, map and posts name their display tab "Darstellung" too and
-  carry their own Inhalt tab; contact-form and map add one extra leading
-  tab ("Formular", "Karte"), posts has a middle "Anzeige" tab between Inhalt
-  and Darstellung, hero has none. The three
-  `*-columns-images` layouts use accordions and have no Darstellung tab.
-- Layouts with fewer than three fields on the content side, where a tab would
-  sit above a single control (divider), or none at all because the layout _is_
-  the display tail (member-downloads).
-- Layouts without a display tail at all, so there is nothing to separate (in
-  some themes cta and button).
-
-### Nested modules in tabs
-
-- Each tab row holds a `modules` flexible field (`FlexibleContent::NESTED_MODULES_KEY`), built from the page layouts minus `NESTED_EXCLUDED_LAYOUTS` (hero, tabs, divider, map, contact_form, newsletter, logo_slider). A denylist, so layouts added via the `_flexible_content_layouts` filter are offered too.
-- The nested copies get rewritten ACF keys (`tabsnested_` inserted after the first `_`), no display fields (background, spacing, width, anchor), a `left` default for `section_alignment`, and no empty tabs.
-- `tabs.blade.php` renders them through the normal `flexible.*` templates inside `SectionNesting::enter()/leave()`; `x-section` then outputs a plain `section-nested` div instead of the section chrome.
-- The per-tab text field is gone. `Services/TabsContentMigration` moves legacy tab text once into a leading `one_column` module (on `init`, behind an option lock, flag option `*_tabs_content_migrated`).
-- Both flexible fields use ACFE async layouts (`acfe_flexible_async`), and the member_downloads visibility filter covers both.
-
-### Background Colors
-
-All layouts support: `primary`, `secondary`, `tertiary`, `brand`, `brand-subtle`, `inverse`
-
-## ACF Extended Features
-
-ACF Extended (FREE) enhances the editing experience:
-
-- **Modal Selection** - Choose layouts in visual grid modal
-- **Modal Edit** - Edit layouts in large modal
-- **Copy/Paste** - Copy layouts between pages
-- **Layout Categories** - Organized layout picker
-- **Layout Thumbnails** - Visual previews in `resources/images/layouts/` (all 37 layouts), wired via `acfe_flexible_thumbnail`, generated by `scripts/generate-layout-thumbnails.php`
-
-Configuration in `src/Acf/AcfExtended.php`.
-
-## Blade Directives
-
-**ACF Fields:**
-
-- `@field('name')` - Escaped field
-- `@fieldRaw('name')` - HTML field (wp_kses_post)
-- `@option('name')` - Theme option (cached)
-- `@optionRaw('name')` - HTML option
-
-**Conditionals:**
-
-- `@hasfield('name')...@endhasfield`
-- `@repeater('name')...@endrepeater`
-
-**Flexible Content:**
-
-- `@flexible('field_name')...@endflexible`
-- `@layout('layout_name')...@endlayout`
-
-**Groups:**
-
-- `@group('name')...@endgroup` - Conditional block around an ACF group field
-- `@kses(...)` - Sanitize HTML via `wp_kses_post()`
-
-**Escaping (`{{ }}`):**
-
-`{{ }}` matches WordPress `esc_html()` semantics: it escapes `<>"'&`, but does not double-encode a value that already contains valid entities (`BladeServiceProvider::boot()` calls `$compiler->withoutDoubleEncoding()`). Pass raw values into `{{ }}`, never pre-escaped ones. A value already run through `esc_html()`/`wp_kses_post()` before reaching the view keeps its entities as entities instead of being re-encoded, and a raw `<` or `&` in the value is still escaped exactly once, as expected. Covered by `tests/Unit/Providers/BladeServiceProviderTest.php`.
-
-## ACF Field Definitions
-
-Single source of truth in `src/Acf/FieldDefinitions.php`:
-
-```php
-use WordpressStarter\Acf\FieldDefinitions;
-
-FieldDefinitions::textField('key', 'Label', 'name', $required);
-FieldDefinitions::wysiwygField('key', 'Label', 'name');
-FieldDefinitions::imageField('key', 'Label', 'name');
-FieldDefinitions::linkField('key', 'Label', 'name');
-FieldDefinitions::backgroundColorField('prefix');
-FieldDefinitions::repeaterField('key', 'Label', 'name', $subFields);
-```
-
-## Theme Options
-
-Available under "Theme-Einstellungen" in admin (`src/Acf/Options.php`):
-
-| Sub page         | Content                                                                                               | Capability           |
-| ---------------- | ----------------------------------------------------------------------------------------------------- | -------------------- |
-| Allgemein        | Logo, Favicon, contact info                                                                           | `edit_theme_options` |
-| Blog             | Blog listing settings                                                                                 | `edit_theme_options` |
-| Header           | Sticky header, CTA button                                                                             | `edit_theme_options` |
-| Footer           | Footer text, copyright, alert bar (Hinweisleiste)                                                     | `edit_theme_options` |
-| Social Media     | Social links repeater                                                                                 | `edit_theme_options` |
-| Interner Bereich | Member-area auth mode, shared password for protected downloads (conditional on `member_area.enabled`) | `manage_options`     |
-| Analytics        | Rybbit Analytics (DSGVO-konform, via Plugin)                                                          | `manage_options`     |
-| Werkzeuge        | Maintenance tools                                                                                     | `manage_options`     |
-| Design Tokens    | Design token overrides                                                                                | `manage_options`     |
-
-Administrators can reach all nine sub pages. Editors reach none of them by default: WordPress grants `edit_theme_options` and `manage_options` to Administrators only. If Editors should manage the five content pages (Allgemein, Blog, Header, Footer, Social Media), switching those to `edit_pages` is a product decision, not a default.
-
-## Alpine.js Components
-
-Registered via `Alpine.data()` in `resources/js/app.ts`:
-
-- `navigation` - Mobile menu with focus trap
-- `statsCounter` - Animated number counters
-- `beforeAfterSlider` - Image comparison slider
-- `memberLogin` - Member area login form
-- `downloadTable` - Member area download table
-- `styleguideSprungnavigation` - Styleguide jump navigation (active-section highlighting)
-- `styleguideModul` - Switches between the instances of a styleguide gallery module
-
-`memberLogin` and `downloadTable` are registered in `resources/js/member-area.ts` and wired in via `registerMemberAreaComponents(Alpine)` in `resources/js/app.ts`.
-
-Components using inline `x-data` (not registered via `Alpine.data`): `tabs`, `accordion`, `theme-switcher` (`templates/partials/theme-switcher.blade.php`), `footer-alert-bar` (`templates/partials/footer-alert-bar.blade.php`). The logo slider (`templates/flexible/logo-slider.blade.php`) uses inline `x-data` plus a CSS animation, pausing on hover and focus and honouring `prefers-reduced-motion`. The gallery uses medium-zoom directly, not Alpine.
-
-## Adding New Layouts
-
-1. Add layout method in `src/Acf/FlexibleContent.php`:
-
-```php
-private static function myNewLayout(): array
-{
-    return [
-        'key' => 'layout_my_new',
-        'name' => 'my_new',
-        'label' => 'Mein neues Layout',
-        'display' => 'block',
-        'sub_fields' => FieldDefinitions::myNewFields('flex_my_new'),
-        'acfe_flexible_category' => self::getCategories()['content'],
-    ];
-}
-```
-
-2. Add field definitions in `src/Acf/FieldDefinitions.php`
-
-3. Create template `templates/flexible/{name-with-hyphens}.blade.php` (underscores in the layout name become hyphens, so `my_new` is `my-new.blade.php`; a mismatched filename is skipped silently by `@includeIf`)
-
-4. Register layout in `getLayouts()` array
 
 ## Git Commit Conventions
 
@@ -401,33 +212,6 @@ On push to `master`:
 
 Users receive updates via WordPress Dashboard → Updates (powered by `ThemeUpdateProvider`).
 
-## Custom Post Types
-
-Use the abstract base class for consistent CPT registration:
-
-```php
-<?php
-
-namespace WordpressStarter\PostTypes;
-
-class Service extends AbstractPostType
-{
-    protected static string $postType = 'service';
-    protected static string $singular = 'Leistung';
-    protected static string $plural = 'Leistungen';
-    protected static string $genus = 'f'; // 'm', 'f' or 'n': drives Neuer/Neue/Neues in the labels
-    protected static string $menuName = ''; // optional sidebar label, defaults to $plural
-    protected static string $menuIcon = 'dashicons-admin-generic';
-
-    public static function registerFields(): void
-    {
-        // Register ACF fields for this CPT
-    }
-}
-```
-
-Add the class to `PostTypeServiceProvider::$postTypes`; `boot()` calls its `register()`.
-
 ## Rate Limiting
 
 Protect AJAX handlers with transient-based rate limiting:
@@ -444,18 +228,6 @@ if (!RateLimiter::check('my_action', 10, 60)) {
 RateLimiter::enforce('my_action', 10, 60);
 ```
 
-## Logging
-
-Use `LogServiceProvider` for structured logging (writes to `wp-content/debug.log`):
-
-```php
-use WordpressStarter\Providers\LogServiceProvider;
-
-LogServiceProvider::info('User logged in', ['user_id' => $userId]);
-LogServiceProvider::error('Payment failed', ['order_id' => $orderId]);
-LogServiceProvider::exception($e);
-```
-
 ## Important Notes
 
 - Service providers are listed in `Application::registerProviders()` (`PluginServiceProvider` and `DesignTokenServiceProvider` only in wp-admin)
@@ -466,14 +238,5 @@ LogServiceProvider::exception($e);
 - Clear `compiled/` if Blade cache issues
 - Plugins managed via Composer (`wpackagist-plugin/*`)
 - SVG uploads sanitized via `enshrined/svg-sanitize`
-- ACF textarea values are tag-stripped on save (`AcfServiceProvider::sanitizeTextarea`), except table cells (`*_cell_content`), which go through `wp_kses_post` minus form controls (form, input, select, option, optgroup, textarea, button). Pinned by `TextareaSanitizeTest`.
 - AJAX handlers protected by rate limiting
 - See `docs/` for detailed documentation
-
-## Audit Context
-
-**kses `<form action>` allowlist (`AcfServiceProvider::allowFormControlTags()`):** `action` bleibt bewusst im Allowlist für `<form>` in Post-Kontext, überlebt also `wp_kses_post()`. Grund: ohne `action` rendert ein Contact-Form-7-Shortcode in einem WYSIWYG-Feld als kaputtes halbes Formular (Labels und ein Textarea, aber keine Inputs, kein `<form>`-Element).
-
-Akzeptiertes Risiko, unbeschönigt: jede Rolle, die Content bearbeiten darf, kann damit ein Formular veröffentlichen, das an eine beliebige externe URL sendet. Auf Multisite ist das weiter gefasst als auf einer Einzelseite, da dort selbst Administratoren kein `unfiltered_html` haben.
-
-Das ist eine getroffene Entscheidung, kein Defekt. Ein künftiger Audit soll das nicht erneut als Sicherheitslücke melden und entfernen. Soll sich das ändern, ist das eine Produktentscheidung, kein Audit-Fix.
