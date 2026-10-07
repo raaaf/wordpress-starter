@@ -373,6 +373,14 @@ if (!function_exists('add_filter')) {
     }
 }
 
+if (!function_exists('doing_action')) {
+    // No hook runs while a unit test executes.
+    function doing_action(?string $hook = null): bool
+    {
+        return false;
+    }
+}
+
 if (!function_exists('did_action')) {
     // Tests run as if `init` already fired, so hook wiring happens immediately.
     // Seed $GLOBALS['wp_test_did_action'][$hook] = 0 to exercise the deferred branch.

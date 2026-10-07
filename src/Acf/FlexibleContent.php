@@ -160,12 +160,15 @@ class FlexibleContent
      *
      * `$_GET['post']` only carries a value on the initial edit-screen load; a
      * classic-editor save POSTs `post_ID` instead (no `?post=` in the request),
-     * which previously made this resolve to 0 during save.
+     * which previously made this resolve to 0 during save. ACF's own ajax calls
+     * (ACF Extended's async layout loading included) carry the edited post as
+     * `$_POST['post_id']`; without it the member-downloads filter would take a
+     * member page for a plain one and the added layout would come back empty.
      */
     private static function resolveEditedPostId(): int
     {
         // phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended
-        $postId = absint(wp_unslash($_POST['post_ID'] ?? $_GET['post'] ?? $_GET['post_id'] ?? 0));
+        $postId = absint(wp_unslash($_POST['post_ID'] ?? $_POST['post_id'] ?? $_GET['post'] ?? $_GET['post_id'] ?? 0));
         // phpcs:enable WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended
 
         if ($postId) {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WordpressStarter\Services;
 
 use WordpressStarter\Acf\FlexibleContent;
+use WordpressStarter\Providers\LogServiceProvider;
 use WordpressStarter\ThemeContext;
 
 /**
@@ -24,43 +25,43 @@ final class TabsContentMigration
      * Handler for init (late, after ACF registered the local fields). Runs on
      * every request, not only in wp-admin: the live pages must not lose their
      * tab text while nobody happens to open the admin. After the first run the
-     * cost is one autoloaded option read.
+     * cost is one autoloaded option read. A failure is logged and never breaks
+     * the request; the flag stays unset, so the next request tries again.
      */
     public static function maybeRun(): void
     {
-        $doneKey = ThemeContext::optionKey('tabs_content_migrated');
-
         if (self::isDone()) {
             return;
         }
 
         // Two requests must not shift the same modules twice.
         $lockKey = ThemeContext::optionKey('tabs_content_migration_lock');
+        $held = self::acquireLock($lockKey);
 
-        if (!self::lock($lockKey)) {
-            if (time() - (int) get_option($lockKey) < self::LOCK_TTL) {
-                return;
-            }
-
-            // A crashed run left the lock behind.
-            delete_option($lockKey);
-
-            if (!self::lock($lockKey)) {
-                return;
-            }
+        if ($held === null) {
+            return;
         }
 
         try {
             // The winner of an earlier race may have finished while we waited.
             wp_load_alloptions(true);
 
-            // Only after every post is done: an interrupted run resumes next time.
-            // null means it could not run at all (no one_column layout), so retry later.
-            if (!self::isDone() && self::migrate() !== null) {
-                update_option($doneKey, '1', autoload: true);
+            if (self::isDone()) {
+                return;
             }
+
+            // Only after every post is done: an interrupted run resumes next time.
+            // null means this theme has no one_column layout the text could move
+            // into; flag it anyway, or every request would take the lock again.
+            if (self::migrate() === null) {
+                LogServiceProvider::warning('Tabs content migration skipped: no one_column layout to move the text into');
+            }
+
+            update_option(ThemeContext::optionKey('tabs_content_migrated'), '1', autoload: true);
+        } catch (\Throwable $e) {
+            LogServiceProvider::error('Tabs content migration failed', ['error' => $e->getMessage()]);
         } finally {
-            delete_option($lockKey);
+            self::releaseLock($lockKey, $held);
         }
     }
 
@@ -75,14 +76,51 @@ final class TabsContentMigration
     }
 
     /**
-     * Take the lock. add_option() only inserts when the row does not exist yet,
-     * which makes it the atomic part.
+     * Take the lock; returns the value that proves ownership, null if someone
+     * else holds it. The value is "token|time": add_option() inserts only when
+     * the row does not exist yet, and a stale lock is taken over by a
+     * compare-and-swap on the old value, so two requests never both win.
      *
      * @phpstan-impure
      */
-    private static function lock(string $lockKey): bool
+    private static function acquireLock(string $lockKey): ?string
     {
-        return add_option($lockKey, time(), '', false);
+        global $wpdb;
+
+        $value = wp_generate_uuid4() . '|' . time();
+
+        if (add_option($lockKey, $value, '', false)) {
+            return $value;
+        }
+
+        wp_cache_delete($lockKey, 'options');
+        $current = get_option($lockKey);
+
+        $since = is_string($current) ? (int) substr(strrchr($current, '|') ?: '|0', 1) : time();
+
+        if (!is_string($current) || time() - $since < self::LOCK_TTL) {
+            return null;
+        }
+
+        // A crashed run left the lock behind.
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $swapped = $wpdb->update($wpdb->options, ['option_value' => $value], ['option_name' => $lockKey, 'option_value' => $current]);
+        wp_cache_delete($lockKey, 'options');
+
+        return $swapped === 1 ? $value : null;
+    }
+
+    /**
+     * Release the lock, but only while it still holds our value.
+     */
+    private static function releaseLock(string $lockKey, string $held): void
+    {
+        global $wpdb;
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->delete($wpdb->options, ['option_name' => $lockKey, 'option_value' => $held]);
+        wp_cache_delete($lockKey, 'options');
+        wp_cache_delete('notoptions', 'options');
     }
 
     /**
@@ -114,7 +152,7 @@ final class TabsContentMigration
             $meta = [];
 
             foreach (get_post_meta($postId) as $key => $values) {
-                if (preg_match('/^_?page_sections_/', (string) $key)) {
+                if (preg_match('/^_?page_sections(_|$)/', (string) $key)) {
                     $meta[$key] = maybe_unserialize($values[0] ?? '');
                 }
             }
@@ -139,7 +177,7 @@ final class TabsContentMigration
     /**
      * Operations that move the tab text of one post into modules.
      *
-     * @param array<string, mixed> $meta        Meta of the post (key => value)
+     * @param array<string, mixed> $meta        Meta of the post (key => value), incl. page_sections
      * @param string               $modulesKey  ACF key of the nested modules field
      * @param string               $contentKey  ACF key of the one_column content field
      *
@@ -152,7 +190,15 @@ final class TabsContentMigration
         $migrated = 0;
 
         foreach ($meta as $key => $content) {
-            if (!preg_match('/^(page_sections_\d+_tabs_\d+)_content$/', (string) $key, $match)) {
+            if (!preg_match('/^(page_sections_(\d+)_tabs_\d+)_content$/', (string) $key, $match)) {
+                continue;
+            }
+
+            // The key shape alone is not proof: another layout may carry a "tabs" field.
+            $sections = $meta['page_sections'] ?? [];
+            $section = (int) $match[2];
+
+            if (!is_array($sections) || ( $sections[$section] ?? null ) !== 'tabs') {
                 continue;
             }
 

@@ -26,6 +26,9 @@ final class TabsContentMigrationTest extends TestCase
      */
     private function plan(array $meta): array
     {
+        // Standard: every section in these fixtures is a tabs layout.
+        $meta += ['page_sections' => ['tabs', 'tabs', 'tabs']];
+
         return TabsContentMigration::plan($meta, FlexibleContent::NESTED_MODULES_KEY, self::CONTENT_KEY);
     }
 
@@ -115,5 +118,19 @@ final class TabsContentMigrationTest extends TestCase
             $plan['delete'],
         );
         $this->assertSame(0, $plan['migrated']);
+    }
+
+    public function testTabsKeysOfANonTabsLayoutAreLeftUntouched(): void
+    {
+        $plan = $this->plan([
+            'page_sections' => ['one_column', 'tabs'],
+            'page_sections_0_tabs_0_content' => '<p>Fremd</p>',
+            'page_sections_1_tabs_0_content' => '<p>Echt</p>',
+        ]);
+
+        $this->assertArrayNotHasKey('page_sections_0_tabs_0_modules', $plan['set']);
+        $this->assertNotContains('page_sections_0_tabs_0_content', $plan['delete']);
+        $this->assertSame('<p>Echt</p>', $plan['set']['page_sections_1_tabs_0_modules_0_content']);
+        $this->assertSame(1, $plan['migrated']);
     }
 }
