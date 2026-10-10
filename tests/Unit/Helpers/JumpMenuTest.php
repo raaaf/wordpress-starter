@@ -12,8 +12,9 @@ use WordpressStarter\Helpers\JumpMenu;
  * Tests for JumpMenu::isHidden(), which reads the RAW (unformatted) value of
  * the ACF true_false field `show_in_jump_menu`. Only an explicit off hides a
  * section ('' from update_field/seeder, '0' from the admin form). ACF injects
- * the default (1) for unsaved fields; null means the field is not registered
- * on the layout and must stay in the menu.
+ * the default (1) for unsaved fields. false and null mean the field is not
+ * registered on the layout (get_sub_field() returns false then) and must stay
+ * in the menu.
  */
 final class JumpMenuTest extends TestCase
 {
@@ -29,7 +30,6 @@ final class JumpMenuTest extends TestCase
         return [
             'int 0' => [0],
             'string 0' => ['0'],
-            'bool false' => [false],
             'empty string (update_field/seeder off)' => [''],
         ];
     }
@@ -48,6 +48,7 @@ final class JumpMenuTest extends TestCase
             'int 1' => [1],
             'string 1' => ['1'],
             'bool true' => [true],
+            'bool false (field not registered on the layout)' => [false],
         ];
     }
 }
