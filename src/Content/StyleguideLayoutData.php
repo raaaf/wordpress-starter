@@ -369,6 +369,7 @@ class StyleguideLayoutData
             'position' => 'bottom_right',
         ]);
     }
+
     /** @return array<string, mixed> */
     private function getEmbedLayoutData(): array
     {

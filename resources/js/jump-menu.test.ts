@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   collectSearchSections,
   collectSections,
+  highlightMatches,
+  revealMatch,
   searchSections,
   type JumpSection,
 } from './jump-menu';
@@ -508,5 +510,90 @@ describe('collectSearchSections text of a chapter-labelled section', () => {
       label: 'Chapter',
       text: 'Sub Body',
     });
+  });
+});
+
+describe('inherited chapter labels', () => {
+  it('does not turn a borrowed label into a label-only hit', () => {
+    const borrowed: JumpSection = {
+      id: 's1',
+      label: 'Chapter',
+      text: 'unrelated',
+      ownLabel: false,
+    };
+
+    expect(searchSections([borrowed], 'chapter')).toEqual([]);
+  });
+
+  it('still finds a section with a borrowed label through its text', () => {
+    const borrowed: JumpSection = {
+      id: 's1',
+      label: 'Chapter',
+      text: 'about a chapter',
+      ownLabel: false,
+    };
+
+    expect(searchSections([borrowed], 'chapter').map((hit) => hit.id)).toEqual(['s1']);
+  });
+
+  it("marks in collectSearchSections whether the label is the section's own", () => {
+    document.body.innerHTML = `
+      <section class="section" id="a"><h2>Chapter</h2></section>
+      <section class="section" id="b"><p>No heading</p></section>
+    `;
+
+    expect(collectSearchSections(document.body).map((s) => s.ownLabel)).toEqual([true, false]);
+  });
+});
+
+describe('highlightMatches and revealMatch use the searchable text', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  function sectionOf(html: string): Element {
+    document.body.innerHTML = `<section class="section" id="a"><h2>Title</h2>${html}</section>`;
+    return document.getElementById('a') as Element;
+  }
+
+  it('finds a match that spans several text nodes, one range per touched node', () => {
+    const section = sectionOf('<p>Hel<strong>lo wor</strong>ld</p>');
+
+    const ranges = highlightMatches(section, 'llo wor');
+
+    expect(ranges.map((range) => range.toString())).toEqual(['l', 'lo wor']);
+  });
+
+  it('ignores a match inside an excluded subtree', () => {
+    const section = sectionOf('<span class="sr-only">secret</span><p>secret too</p>');
+
+    const ranges = highlightMatches(section, 'secret');
+
+    expect(ranges.map((range) => range.startContainer.parentElement?.tagName)).toEqual(['P']);
+  });
+
+  it('does not match the label heading, which sectionText leaves out', () => {
+    const section = sectionOf('<p>Body</p>');
+
+    expect(highlightMatches(section, 'title')).toEqual([]);
+  });
+
+  it('opens the tab whose panel holds a match spanning several text nodes', () => {
+    const section = sectionOf(`
+      <div role="tablist">
+        <button role="tab" id="t1" aria-controls="p1" aria-selected="true">One</button>
+        <button role="tab" id="t2" aria-controls="p2" aria-selected="false">Two</button>
+      </div>
+      <div role="tabpanel" id="p1" aria-labelledby="t1"><p>First</p></div>
+      <div role="tabpanel" id="p2" aria-labelledby="t2" aria-hidden="true"><p>Sec<em>ond</em> panel</p></div>
+    `);
+    let clicked = '';
+    section.querySelectorAll('[role="tab"]').forEach((tab) => {
+      tab.addEventListener('click', () => (clicked = tab.id));
+    });
+
+    const target = revealMatch(section, 'ond pan');
+
+    expect({ clicked, tag: target?.tagName }).toEqual({ clicked: 't2', tag: 'EM' });
   });
 });

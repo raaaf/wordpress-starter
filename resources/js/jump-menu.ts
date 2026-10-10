@@ -13,6 +13,11 @@ export interface JumpSection {
   id: string;
   label: string;
   text: string;
+  /**
+   * False when the label is inherited from the preceding chapter. Such a section
+   * can only be found through its text, never through the borrowed label.
+   */
+  ownLabel?: boolean;
 }
 
 export interface JumpHit {
@@ -143,7 +148,7 @@ export function searchSections(sections: JumpSection[], query: string): JumpHit[
     let parts;
     if (matchIndex !== -1) {
       parts = textHit(text, matchIndex, needle.length, countOccurrences(lowerText, needle));
-    } else if (lower(section.label).includes(needle)) {
+    } else if (section.ownLabel !== false && lower(section.label).includes(needle)) {
       parts = labelHit(text);
     } else {
       continue;
@@ -207,7 +212,7 @@ export function collectSections(root: ParentNode): JumpSection[] {
   for (const element of listedSections(root)) {
     const label = ownLabel(element);
     if (label !== '') {
-      sections.push({ id: element.id, label, text: sectionText(element) });
+      sections.push({ id: element.id, label, text: sectionText(element), ownLabel: true });
     }
   }
 
@@ -223,18 +228,33 @@ export function collectSearchSections(root: ParentNode): JumpSection[] {
   let chapter = '';
 
   return listedSections(root).map((element) => {
-    chapter = ownLabel(element) || chapter;
+    const own = ownLabel(element);
+    chapter = own || chapter;
 
-    return { id: element.id, label: chapter, text: sectionText(element) };
+    return {
+      id: element.id,
+      label: chapter,
+      text: sectionText(element),
+      ownLabel: own !== '',
+    };
   });
 }
 
+/**
+ * The text nodes sectionText() would keep: the same excluded subtrees and the
+ * label heading are skipped, so a hit found in the text can be found in the DOM.
+ */
 function textNodes(root: Element): Text[] {
+  const heading = root.querySelector('h2') ?? root.querySelector('h3');
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node) =>
-      node.parentElement?.closest('script, style, noscript') === null
-        ? NodeFilter.FILTER_ACCEPT
-        : NodeFilter.FILTER_REJECT,
+    acceptNode: (node) => {
+      const parent = node.parentElement;
+      const excluded = parent?.closest(TEXT_EXCLUDED);
+
+      return (excluded && root.contains(excluded)) || (heading && heading.contains(node))
+        ? NodeFilter.FILTER_REJECT
+        : NodeFilter.FILTER_ACCEPT;
+    },
   });
   const nodes: Text[] = [];
 
@@ -252,6 +272,74 @@ function clearHighlights(): void {
 }
 
 /**
+ * Ranges of every case-insensitive match of `needle` (already normalised) in
+ * the section's searchable text, one range per touched text node.
+ *
+ * Matching runs on the concatenated, whitespace-collapsed text, like
+ * searchSections() does, so a match may span several nodes (`<strong>`) and
+ * agrees with what the hit list promised. An offset map leads back to the nodes.
+ * With `firstOnly` the search stops after the first occurrence.
+ */
+function matchRanges(root: Element, needle: string, firstOnly = false): Range[] {
+  const parts: { node: Text; start: number; end: number }[] = [];
+  let raw = '';
+  let previousBlock: Element | null = null;
+
+  for (const node of textNodes(root)) {
+    // A separator between blocks, mirroring the spaces sectionText() appends.
+    const block = node.parentElement?.closest(BLOCK_ELEMENTS) ?? null;
+    if (parts.length > 0 && block !== previousBlock) {
+      raw += ' ';
+    }
+    previousBlock = block;
+
+    parts.push({ node, start: raw.length, end: raw.length + node.data.length });
+    raw += node.data;
+  }
+
+  // Collapse whitespace runs and trim, remembering where each kept character came from.
+  const rawIndex: number[] = [];
+  let collapsed = '';
+  for (let i = 0; i < raw.length; i++) {
+    const isSpace = /\s/.test(raw[i]);
+    if (isSpace && (collapsed === '' || collapsed.endsWith(' '))) {
+      continue;
+    }
+    collapsed += isSpace ? ' ' : raw[i];
+    rawIndex.push(i);
+  }
+
+  const haystack = lower(collapsed);
+  const ranges: Range[] = [];
+
+  for (
+    let from = haystack.indexOf(needle);
+    from !== -1;
+    from = haystack.indexOf(needle, from + needle.length)
+  ) {
+    const rawStart = rawIndex[from];
+    const rawEnd = rawIndex[from + needle.length - 1] + 1;
+
+    for (const part of parts) {
+      const start = Math.max(rawStart, part.start);
+      const end = Math.min(rawEnd, part.end);
+      if (start < end) {
+        const range = document.createRange();
+        range.setStart(part.node, start - part.start);
+        range.setEnd(part.node, end - part.start);
+        ranges.push(range);
+      }
+    }
+
+    if (firstOnly && ranges.length > 0) {
+      break;
+    }
+  }
+
+  return ranges;
+}
+
+/**
  * Ranges of every case-insensitive match inside root. Paints them through the
  * CSS Custom Highlight API where available; elsewhere the ranges are returned
  * and nothing is painted.
@@ -264,20 +352,7 @@ export function highlightMatches(root: Element, query: string): Range[] {
     return [];
   }
 
-  const ranges: Range[] = [];
-
-  for (const node of textNodes(root)) {
-    const haystack = lower(node.data);
-    let from = haystack.indexOf(needle);
-
-    while (from !== -1) {
-      const range = document.createRange();
-      range.setStart(node, from);
-      range.setEnd(node, from + needle.length);
-      ranges.push(range);
-      from = haystack.indexOf(needle, from + needle.length);
-    }
-  }
+  const ranges = matchRanges(root, needle);
 
   if (ranges.length > 0 && typeof CSS !== 'undefined' && 'highlights' in CSS) {
     CSS.highlights.set(HIGHLIGHT_NAME, new Highlight(...ranges));
@@ -299,9 +374,8 @@ function controllerOf(section: Element, id: string, selector = ''): HTMLElement 
  */
 function reveal(section: Element, query: string): { target: Element | null; changed: boolean } {
   const needle = normalizeQuery(query);
-  const node =
-    needle === null ? undefined : textNodes(section).find((n) => lower(n.data).includes(needle));
-  const target = node?.parentElement ?? null;
+  const first = needle === null ? undefined : matchRanges(section, needle, true)[0];
+  const target = first?.startContainer.parentElement ?? null;
   let changed = false;
 
   for (let el: Element | null = target; el && el !== section; el = el.parentElement) {
@@ -342,7 +416,7 @@ interface JumpMenuComponent extends AlpineMagics {
   aktiv: string;
   active: boolean;
   open: boolean;
-  readonly hits: JumpHit[];
+  hits: JumpHit[];
   init(): void;
   go(id: string): void;
   goHit(hit: JumpHit): void;
@@ -370,15 +444,19 @@ export function createJumpMenuComponent(): JumpMenuComponent {
     active: false,
     open: false,
 
-    get hits(): JumpHit[] {
-      return searchSections(this.searchable, this.query);
-    },
+    hits: [],
 
     init(): void {
       host = this.$root;
       // Wait until Alpine has finished: tabs and accordions are initialised by
       // then, and the collected text is the final page.
       this.$nextTick(() => {
+        // One jump menu per page: a second instance stays invisible and sets up nothing.
+        this.active = document.querySelector('[data-jump-menu-root]') === host;
+        if (!this.active) {
+          return;
+        }
+
         const root = document.querySelector('main') ?? document;
         this.entries = collectSections(root);
         this.searchable = collectSearchSections(root);
@@ -402,16 +480,16 @@ export function createJumpMenuComponent(): JumpMenuComponent {
           }
         }
 
-        // Typing changes the content height, and with it which edge may fade.
-        this.$watch('query', () => this.$nextTick(() => this.refreshFade()));
+        // Search once per query change, not once per binding read. Typing also
+        // changes the content height, and with it which edge may fade.
+        this.$watch('query', () => {
+          this.hits = searchSections(this.searchable, this.query);
+          this.$nextTick(() => this.refreshFade());
+        });
 
-        // One jump menu per page: a second instance stays invisible.
-        this.active = document.querySelector('[data-jump-menu-root]') === host;
-
-        const stopTrackingTop =
-          this.active && host.dataset.jumpMenuPosition?.startsWith('top')
-            ? trackTopCorner(host)
-            : null;
+        const stopTrackingTop = host.dataset.jumpMenuPosition?.startsWith('top')
+          ? trackTopCorner(host)
+          : null;
 
         // Own outside-click handler: the pill sits inside the wrapper, so
         // clicking it never counts as outside and cannot undo its own toggle.

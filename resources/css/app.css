@@ -963,12 +963,15 @@ html {
 }
 
 @keyframes jump-menu-pill-in {
+  /* visibility keeps the pill out of the tab order and unclickable during the delay. */
   from {
     opacity: 0;
+    visibility: hidden;
     transform: translateY(var(--jump-menu-enter-y, 8px));
   }
   to {
     opacity: 1;
+    visibility: visible;
     transform: translateY(0);
   }
 }
@@ -981,9 +984,11 @@ html {
   @keyframes jump-menu-pill-fade {
     from {
       opacity: 0;
+      visibility: hidden;
     }
     to {
       opacity: 1;
+      visibility: visible;
     }
   }
 }
