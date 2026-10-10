@@ -71,9 +71,10 @@
                         x-transition:leave="transition-[opacity,scale] duration-[var(--dur-fast)] ease-[var(--ease-enter)]"
                         x-transition:leave-start="opacity-100 scale-100"
                         x-transition:leave-end="opacity-0 scale-[0.96] motion-reduce:scale-100"
-                        role="dialog"
+                            role="dialog"
+                        tabindex="-1"
                         aria-label="{{ $title }}"
-                        class="flex flex-col overflow-hidden border w-[min(34rem,calc(100vw-2rem))] rounded-[var(--card-radius)] border-line bg-surface shadow-[var(--rafael-shadow-card)] {{ $isTop ? 'max-h-[calc(100vh-var(--header-height,0px)-5rem)]' : 'max-h-[70vh]' }} {{ $origin }}"
+                        class="flex flex-col overflow-hidden border outline-none w-[min(34rem,calc(100vw-2rem))] rounded-[var(--card-radius)] border-line bg-surface shadow-[var(--rafael-shadow-card)] {{ $isTop ? 'max-h-[calc(100dvh-var(--header-height,0px)-5rem)]' : 'max-h-[70dvh]' }} {{ $origin }}"
                     >
                         {{-- A flex column: the search stays fixed, the results scroll below it. The scroll
                              area is its own element so the fade mask (app.css) does not clip the panel's

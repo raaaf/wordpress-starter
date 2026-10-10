@@ -1524,7 +1524,6 @@ class FieldDefinitions
                 ],
             ),
             self::sectionAnchorField($prefix),
-            self::jumpMenuVisibilityField($prefix),
         ];
     }
 

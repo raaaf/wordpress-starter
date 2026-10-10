@@ -172,20 +172,63 @@ const TEXT_EXCLUDED =
 const BLOCK_ELEMENTS =
   'h1, h2, h3, h4, h5, h6, p, div, li, dt, dd, td, th, tr, button, summary, blockquote, figcaption, br';
 
+interface TextIndex {
+  /** The searchable text, whitespace-collapsed and trimmed. */
+  text: string;
+  /** For every character of `text`, its offset in the uncollapsed text. */
+  rawIndex: number[];
+  /** The text nodes that contributed, with their offsets in the uncollapsed text. */
+  parts: { node: Text; start: number; end: number }[];
+}
+
 /**
- * The section's text without its label heading and without UI chrome. Tab
- * panels stay in: inactive ones carry aria-hidden but hold searchable copy.
+ * The one text model of a section, shared by the search (sectionText) and by
+ * highlighting and reveal (matchRanges), so a hit promised by the list is
+ * found in the DOM. Skips the label heading and the TEXT_EXCLUDED subtrees and
+ * puts a space around every block element and <br>, because adjacent blocks
+ * would otherwise glue together ("Sub" + "Body" = "SubBody"). Tab panels stay
+ * in: inactive ones carry aria-hidden but hold searchable copy.
  */
+function buildTextIndex(root: Element): TextIndex {
+  const heading = root.querySelector('h2') ?? root.querySelector('h3');
+  const parts: TextIndex['parts'] = [];
+  let raw = '';
+
+  const visit = (node: Node): void => {
+    if (node instanceof Text) {
+      parts.push({ node, start: raw.length, end: raw.length + node.data.length });
+      raw += node.data;
+      return;
+    }
+
+    if (!(node instanceof Element) || node === heading || node.matches(TEXT_EXCLUDED)) {
+      return;
+    }
+
+    const block = node.matches(BLOCK_ELEMENTS);
+    raw += block ? ' ' : '';
+    node.childNodes.forEach(visit);
+    raw += block ? ' ' : '';
+  };
+  root.childNodes.forEach(visit);
+
+  // Collapse whitespace runs and trim, remembering where each kept character came from.
+  const rawIndex: number[] = [];
+  let text = '';
+  for (let i = 0; i < raw.length; i++) {
+    const isSpace = /\s/.test(raw[i]);
+    if (isSpace && (text === '' || text.endsWith(' '))) {
+      continue;
+    }
+    text += isSpace ? ' ' : raw[i];
+    rawIndex.push(i);
+  }
+
+  return { text: text.replace(/ $/, ''), rawIndex, parts };
+}
+
 function sectionText(element: Element): string {
-  const clone = element.cloneNode(true) as Element;
-  const heading = clone.querySelector('h2') ?? clone.querySelector('h3');
-
-  heading?.remove();
-  clone.querySelectorAll(TEXT_EXCLUDED).forEach((node) => node.remove());
-  // textContent glues adjacent blocks together ("Sub" + "Body" = "SubBody").
-  clone.querySelectorAll(BLOCK_ELEMENTS).forEach((node) => node.append(' '));
-
-  return collapse(clone.textContent ?? '');
+  return buildTextIndex(element).text;
 }
 
 function listedSections(root: ParentNode): HTMLElement[] {
@@ -204,15 +247,21 @@ function ownLabel(element: Element): string {
 /**
  * Top-level sections with an id, labelled by their first h2 (fallback h3), in
  * DOM order. Sections without a heading and sections opted out via
- * data-jump-menu="hidden" are skipped.
+ * data-jump-menu="hidden" are skipped. `withText` false leaves the text empty,
+ * for callers that only need the list.
  */
-export function collectSections(root: ParentNode): JumpSection[] {
+export function collectSections(root: ParentNode, withText = true): JumpSection[] {
   const sections: JumpSection[] = [];
 
   for (const element of listedSections(root)) {
     const label = ownLabel(element);
     if (label !== '') {
-      sections.push({ id: element.id, label, text: sectionText(element), ownLabel: true });
+      sections.push({
+        id: element.id,
+        label,
+        text: withText ? sectionText(element) : '',
+        ownLabel: true,
+      });
     }
   }
 
@@ -220,49 +269,30 @@ export function collectSections(root: ParentNode): JumpSection[] {
 }
 
 /**
- * Every listed section, headed or not, for the search. A section without its
- * own heading takes the label of the closest preceding headed section (the
- * chapter it belongs to), or '' when none precedes.
+ * Every section, headed or not, for the search. Opted-out sections are searchable
+ * too (they are only left out of the list), except a section holding the jump
+ * menu itself. A section without its own heading takes the label of the closest
+ * preceding listed section with one (the chapter it belongs to), or '' when none
+ * precedes.
  */
 export function collectSearchSections(root: ParentNode): JumpSection[] {
   let chapter = '';
 
-  return listedSections(root).map((element) => {
-    const own = ownLabel(element);
-    chapter = own || chapter;
+  return Array.from(root.querySelectorAll<HTMLElement>('section.section[id]'))
+    .filter((element) => element.querySelector('[data-jump-menu-root]') === null)
+    .map((element) => {
+      const own = ownLabel(element);
+      if (own !== '' && element.dataset.jumpMenu !== 'hidden') {
+        chapter = own;
+      }
 
-    return {
-      id: element.id,
-      label: chapter,
-      text: sectionText(element),
-      ownLabel: own !== '',
-    };
-  });
-}
-
-/**
- * The text nodes sectionText() would keep: the same excluded subtrees and the
- * label heading are skipped, so a hit found in the text can be found in the DOM.
- */
-function textNodes(root: Element): Text[] {
-  const heading = root.querySelector('h2') ?? root.querySelector('h3');
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node) => {
-      const parent = node.parentElement;
-      const excluded = parent?.closest(TEXT_EXCLUDED);
-
-      return (excluded && root.contains(excluded)) || (heading && heading.contains(node))
-        ? NodeFilter.FILTER_REJECT
-        : NodeFilter.FILTER_ACCEPT;
-    },
-  });
-  const nodes: Text[] = [];
-
-  while (walker.nextNode()) {
-    nodes.push(walker.currentNode as Text);
-  }
-
-  return nodes;
+      return {
+        id: element.id,
+        label: own || chapter,
+        text: sectionText(element),
+        ownLabel: own !== '',
+      };
+    });
 }
 
 function clearHighlights(): void {
@@ -281,35 +311,8 @@ function clearHighlights(): void {
  * With `firstOnly` the search stops after the first occurrence.
  */
 function matchRanges(root: Element, needle: string, firstOnly = false): Range[] {
-  const parts: { node: Text; start: number; end: number }[] = [];
-  let raw = '';
-  let previousBlock: Element | null = null;
-
-  for (const node of textNodes(root)) {
-    // A separator between blocks, mirroring the spaces sectionText() appends.
-    const block = node.parentElement?.closest(BLOCK_ELEMENTS) ?? null;
-    if (parts.length > 0 && block !== previousBlock) {
-      raw += ' ';
-    }
-    previousBlock = block;
-
-    parts.push({ node, start: raw.length, end: raw.length + node.data.length });
-    raw += node.data;
-  }
-
-  // Collapse whitespace runs and trim, remembering where each kept character came from.
-  const rawIndex: number[] = [];
-  let collapsed = '';
-  for (let i = 0; i < raw.length; i++) {
-    const isSpace = /\s/.test(raw[i]);
-    if (isSpace && (collapsed === '' || collapsed.endsWith(' '))) {
-      continue;
-    }
-    collapsed += isSpace ? ' ' : raw[i];
-    rawIndex.push(i);
-  }
-
-  const haystack = lower(collapsed);
+  const { text, rawIndex, parts } = buildTextIndex(root);
+  const haystack = lower(text);
   const ranges: Range[] = [];
 
   for (
@@ -418,6 +421,8 @@ interface JumpMenuComponent extends AlpineMagics {
   open: boolean;
   hits: JumpHit[];
   init(): void;
+  destroy(): void;
+  loadSearchable(): void;
   go(id: string): void;
   goHit(hit: JumpHit): void;
   toggle(): void;
@@ -429,10 +434,58 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+/** The site header, not the first <header> element (articles and cards may carry one). */
+function siteHeader(): HTMLElement | null {
+  return document.querySelector<HTMLElement>('header[role="banner"]');
+}
+
+/**
+ * Marks the topmost listed section in view as current. The top margin skips the
+ * header and, in the top corners, the pill. Keeps the last value while none is
+ * in the band.
+ */
+function observeActiveEntry(entries: JumpSection[], onChange: (id: string) => void): () => void {
+  const offset =
+    parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--jump-menu-offset')) ||
+    0;
+  const top = Math.round(Math.max(0, siteHeader()?.getBoundingClientRect().bottom ?? 0) + offset);
+  const visible = new Set<string>();
+
+  const observer = new IntersectionObserver(
+    (records) => {
+      for (const record of records) {
+        if (record.isIntersecting) {
+          visible.add(record.target.id);
+        } else {
+          visible.delete(record.target.id);
+        }
+      }
+
+      // Entries are in DOM order, so the first visible one is the topmost.
+      const first = entries.find((entry) => visible.has(entry.id));
+      if (first) {
+        onChange(first.id);
+      }
+    },
+    { rootMargin: `-${top}px 0px -85% 0px`, threshold: 0 }
+  );
+
+  for (const entry of entries) {
+    const target = document.getElementById(entry.id);
+    if (target) {
+      observer.observe(target);
+    }
+  }
+
+  return () => observer.disconnect();
+}
+
 export function createJumpMenuComponent(): JumpMenuComponent {
   // $root inside a method called from x-on is the clicked element, not the
   // component root, so init() keeps the real root here.
   let host: HTMLElement;
+  // Everything init() registers, undone by destroy().
+  const cleanups: (() => void)[] = [];
 
   return {
     // Alpine magic properties ($el, $nextTick, etc.) are injected at runtime
@@ -443,13 +496,12 @@ export function createJumpMenuComponent(): JumpMenuComponent {
     aktiv: '',
     active: false,
     open: false,
-
     hits: [],
 
     init(): void {
       host = this.$root;
       // Wait until Alpine has finished: tabs and accordions are initialised by
-      // then, and the collected text is the final page.
+      // then, and the collected list is the final page.
       this.$nextTick(() => {
         // One jump menu per page: a second instance stays invisible and sets up nothing.
         this.active = document.querySelector('[data-jump-menu-root]') === host;
@@ -457,39 +509,41 @@ export function createJumpMenuComponent(): JumpMenuComponent {
           return;
         }
 
-        const root = document.querySelector('main') ?? document;
-        this.entries = collectSections(root);
-        this.searchable = collectSearchSections(root);
+        // Only the list now; the text is collected when the panel opens (see
+        // loadSearchable), so content that arrives late still counts.
+        this.entries = collectSections(document.querySelector('main') ?? document, false);
 
-        const observer = new IntersectionObserver(
-          (records) => {
-            for (const record of records) {
-              if (record.isIntersecting) {
-                this.aktiv = record.target.id;
-                break;
-              }
-            }
-          },
-          { rootMargin: '-96px 0px -85% 0px', threshold: 0 }
-        );
-
-        for (const entry of this.entries) {
-          const target = document.getElementById(entry.id);
-          if (target) {
-            observer.observe(target);
-          }
+        if (host.dataset.jumpMenuPosition?.startsWith('top')) {
+          cleanups.push(trackTopCorner(host));
         }
+
+        // The pill offset (--jump-menu-offset) is published by the ResizeObserver
+        // in trackTopCorner, so create the observer two frames later.
+        let frame = requestAnimationFrame(() => {
+          frame = requestAnimationFrame(() => {
+            cleanups.push(observeActiveEntry(this.entries, (id) => (this.aktiv = id)));
+          });
+        });
+        cleanups.push(() => cancelAnimationFrame(frame));
 
         // Search once per query change, not once per binding read. Typing also
         // changes the content height, and with it which edge may fade.
         this.$watch('query', () => {
+          if (this.searchable.length === 0) {
+            this.loadSearchable();
+          }
+
           this.hits = searchSections(this.searchable, this.query);
+          clearHighlights();
           this.$nextTick(() => this.refreshFade());
         });
 
-        const stopTrackingTop = host.dataset.jumpMenuPosition?.startsWith('top')
-          ? trackTopCorner(host)
-          : null;
+        // Highlights belong to a hit click; closing the panel any other way drops them.
+        this.$watch('open', (open: boolean) => {
+          if (!open) {
+            clearHighlights();
+          }
+        });
 
         // Own outside-click handler: the pill sits inside the wrapper, so
         // clicking it never counts as outside and cannot undo its own toggle.
@@ -500,29 +554,41 @@ export function createJumpMenuComponent(): JumpMenuComponent {
           }
         };
         document.addEventListener('click', closeOnOutsideClick);
-
-        host.addEventListener('alpine:destroyed', () => {
-          document.removeEventListener('click', closeOnOutsideClick);
-          observer.disconnect();
-          stopTrackingTop?.();
-          clearHighlights();
-        });
+        cleanups.push(() => document.removeEventListener('click', closeOnOutsideClick));
       });
+    },
+
+    destroy(): void {
+      cleanups.splice(0).forEach((cleanup) => cleanup());
+      clearHighlights();
+    },
+
+    loadSearchable(): void {
+      this.searchable = collectSearchSections(document.querySelector('main') ?? document);
+      this.hits = searchSections(this.searchable, this.query);
     },
 
     toggle(): void {
       this.open = !this.open;
 
       if (this.open) {
+        this.loadSearchable();
+
         // Move focus into the panel once x-show has displayed it.
         // After the next frame: x-show has applied display by then, and an element
         // that is still display:none silently ignores focus().
         this.$nextTick(() =>
           requestAnimationFrame(() => {
             const panel = document.getElementById(floatPanelId(host));
-            (
-              panel?.querySelector<HTMLElement>('input') ?? panel?.querySelector<HTMLElement>('a')
-            )?.focus();
+            // On touch the search field would raise the keyboard over the list,
+            // so focus the panel itself.
+            if (window.matchMedia('(pointer: coarse)').matches) {
+              panel?.focus({ preventScroll: true });
+            } else {
+              (
+                panel?.querySelector<HTMLElement>('input') ?? panel?.querySelector<HTMLElement>('a')
+              )?.focus();
+            }
             centerActiveEntry(host);
             this.refreshFade();
           })
@@ -582,7 +648,8 @@ export function createJumpMenuComponent(): JumpMenuComponent {
       setTimeout(
         () => {
           highlightMatches(section, query);
-          scrollTo(target ?? section, 'center', section);
+          // A label-only hit has no match in the text: land on the section itself.
+          scrollTo(target ?? section, target ? 'center' : 'start', section);
         },
         changed ? TAB_ANIMATION_MS : 0
       );
@@ -593,7 +660,8 @@ export function createJumpMenuComponent(): JumpMenuComponent {
 /**
  * Scrolls to the target and moves focus to the section. Focus lands on the
  * section itself (tabindex -1, preventScroll) so keyboard users continue
- * reading from there instead of from the menu.
+ * reading from there instead of from the menu. The tabindex goes again on blur,
+ * so the section does not stay a tab stop or click target.
  */
 function scrollTo(target: Element, block: ScrollLogicalPosition, section: Element = target): void {
   target.scrollIntoView({ block, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
@@ -601,6 +669,7 @@ function scrollTo(target: Element, block: ScrollLogicalPosition, section: Elemen
   if (section instanceof HTMLElement) {
     section.setAttribute('tabindex', '-1');
     section.focus({ preventScroll: true });
+    section.addEventListener('blur', () => section.removeAttribute('tabindex'), { once: true });
   }
 }
 
@@ -624,7 +693,7 @@ function floatPillId(host: HTMLElement): string {
 function trackTopCorner(host: HTMLElement): () => void {
   const ui = document.getElementById(`${host.dataset.jumpMenuId}-ui`);
   const pill = document.getElementById(`${host.dataset.jumpMenuId}-pill`);
-  const header = document.querySelector('header');
+  const header = siteHeader();
   if (!ui || !pill) {
     return () => undefined;
   }

@@ -174,4 +174,11 @@ final class MediaServiceProviderTest extends TestCase
 
         $this->assertSame('SVG konnte nicht bereinigt werden.', $result['error'] ?? null);
     }
+
+    public function testEntityTextInsideACommentKeepsTheGenericMessage(): void
+    {
+        $result = $this->sanitizeSvgUpload('not xml <<< <!-- <!ENTITY x "y"> -->');
+
+        $this->assertSame('SVG konnte nicht bereinigt werden.', $result['error'] ?? null);
+    }
 }

@@ -366,7 +366,7 @@ describe('collectSearchSections', () => {
     return collectSearchSections(document.body);
   }
 
-  it('lists section.section elements with an id in DOM order and skips data-jump-menu="hidden"', () => {
+  it('lists section.section elements with an id in DOM order, opted-out sections included', () => {
     const result = collect(`
       <section class="section" id="a"><h2>First</h2></section>
       <section class="section"><h2>No id</h2></section>
@@ -374,7 +374,16 @@ describe('collectSearchSections', () => {
       <section class="section" id="b"><h2>Second</h2></section>
     `);
 
-    expect(result.map((s) => s.id)).toEqual(['a', 'b']);
+    expect(result.map((s) => s.id)).toEqual(['a', 'off', 'b']);
+  });
+
+  it('skips a section that holds the jump menu itself', () => {
+    const result = collect(`
+      <section class="section" id="a"><h2>First</h2></section>
+      <section class="section" id="menu"><h2>Menu</h2><div data-jump-menu-root></div></section>
+    `);
+
+    expect(result.map((s) => s.id)).toEqual(['a']);
   });
 
   it('keeps sections without h2 or h3 instead of skipping them', () => {
@@ -595,5 +604,35 @@ describe('highlightMatches and revealMatch use the searchable text', () => {
     const target = revealMatch(section, 'ond pan');
 
     expect({ clicked, tag: target?.tagName }).toEqual({ clicked: 't2', tag: 'EM' });
+  });
+});
+
+describe('one text model for search, highlight and reveal', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it.each([
+    ['a <br> between the words', '<p>foo<br>bar</p>', 'foo bar', ['foo', 'bar']],
+    ['a block right after text', 'text<p>block</p>', 'text block', ['text', 'block']],
+    [
+      'nested blocks',
+      '<div><div>alpha</div><div>beta</div></div>',
+      'alpha beta',
+      ['alpha', 'beta'],
+    ],
+  ])('agrees on %s', (_name, html, query, painted) => {
+    document.body.innerHTML = `<section class="section" id="a"><h2>Title</h2>${html}</section>`;
+    const section = document.getElementById('a') as Element;
+    const [searchable] = collectSearchSections(document.body);
+
+    const [hit] = searchSections([searchable], query);
+    const ranges = highlightMatches(section, query);
+
+    expect({
+      count: hit.count,
+      painted: ranges.map((range) => range.toString()),
+      target: revealMatch(section, query) !== null,
+    }).toEqual({ count: 1, painted, target: true });
   });
 });

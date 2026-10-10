@@ -17,9 +17,11 @@
     applies: background, padding, container, anchor and animation are skipped
     and only a plain wrapper div with the class is rendered.
 
-    JumpMenu::currentHidden() (set per row by the page loop from the editor field
-    "show_in_jump_menu") adds data-jump-menu="hidden" to the <section>, which
-    keeps it out of the page's jump menu. Nested wrappers never get it.
+    The editor field "show_in_jump_menu" of the current row adds
+    data-jump-menu="hidden" to the <section>, which keeps it out of the page's
+    jump menu list. Outside a row (or on a layout without the field)
+    get_sub_field() returns false and the section stays listed. Nested wrappers
+    never get it.
 --}}
 
 @props([
@@ -96,7 +98,7 @@
 @else
 <section
     @if($anchorId) id="{{ $anchorId }}" @endif
-    @if(\WordpressStarter\Helpers\JumpMenu::currentHidden() && !$attributes->has('data-jump-menu')) data-jump-menu="hidden" @endif
+    @if(\WordpressStarter\Helpers\JumpMenu::isHidden(get_sub_field('show_in_jump_menu', false))) data-jump-menu="hidden" @endif
     @if($shouldAnimate)
         x-data="{ shown: false }"
         x-init="if (location.hash) shown = true"

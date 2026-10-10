@@ -128,7 +128,7 @@ class MediaServiceProvider extends ServiceProvider
             // The sanitizer strips the DOCTYPE before parsing, so an SVG that
             // relies on entities declared there (older Illustrator exports,
             // xmlns="&ns_svg;") cannot be parsed. Still rejected, but say why.
-            $file['error'] = stripos($content, '<!ENTITY') !== false
+            $file['error'] = preg_match('/<!DOCTYPE[^>\[]*\[[^\]]*<!ENTITY/i', $content) === 1
                 ? __('SVG enthält eigene Entity-Definitionen (z. B. ältere Illustrator-Exporte). Bitte ohne DOCTYPE neu exportieren (Illustrator: SVG 1.1, „Präsentationsattribute“).', 'wp-starter')
                 : __('SVG konnte nicht bereinigt werden.', 'wp-starter');
 

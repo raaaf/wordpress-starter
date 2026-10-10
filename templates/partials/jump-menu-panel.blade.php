@@ -30,7 +30,7 @@
     @endif
 
     <nav aria-label="{{ $title }}" @if($showSearch) x-show="query.trim().length < 2" @endif>
-        <ul class="m-0 list-none columns-1 gap-x-8 @md:columns-2 @3xl:columns-3 @5xl:columns-4">
+        <ul class="m-0 list-none columns-1 gap-x-8 @md:columns-2">
             <template x-for="entry in entries" :key="entry.id">
                 <li class="break-inside-avoid break-words">
                     <a :href="'#' + entry.id"
