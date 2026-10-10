@@ -60,6 +60,7 @@ SVG uploads are sanitized using the `enshrined/svg-sanitize` library.
 - An upload counts as SVG by its file extension (`.svg`, case-insensitive), never by the client-supplied type, which an uploader controls
 - `.svgz` is not allowed: it is not in `upload_mimes`, and gzipped SVGs cannot be sanitized
 - Sanitization runs on regular uploads and sideloads (`wp_handle_upload_prefilter`, `wp_handle_sideload_prefilter`) before the file is saved; a file that cannot be read, sanitized or written back is rejected (fails closed)
+- SVGs that declare custom DTD entities (older Illustrator exports, `xmlns="&ns_svg;"`) are rejected, because the sanitizer strips the DOCTYPE before parsing; the error asks for a re-export without DOCTYPE
 
 ### Implementation
 

@@ -51,6 +51,18 @@ final class MediaServiceProviderTest extends TestCase
         return $reflection->invoke($this->provider, $content);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    private function sanitizeSvgUpload(string $content): array
+    {
+        $path = $this->writeTempFile($content);
+        $reflection = new ReflectionMethod(MediaServiceProvider::class, 'sanitizeSvgUpload');
+        $reflection->setAccessible(true);
+
+        return $reflection->invoke($this->provider, ['name' => 'icon.svg', 'tmp_name' => $path]);
+    }
+
     private function writeTempFile(string $content): string
     {
         $path = tempnam(sys_get_temp_dir(), 'media-svg-test-');
@@ -141,5 +153,25 @@ final class MediaServiceProviderTest extends TestCase
         $sanitized = $this->sanitizeSvg('this is not xml at all <<<');
 
         $this->assertFalse($sanitized);
+    }
+
+    public function testUploadWithCustomEntityDoctypeIsRejectedWithEntityMessage(): void
+    {
+        $svg = '<?xml version="1.0"?>'
+            . '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" ['
+            . '<!ENTITY ns_svg "http://www.w3.org/2000/svg">]>'
+            . '<svg xmlns="&ns_svg;"><rect width="1" height="1"/></svg>';
+
+        $result = $this->sanitizeSvgUpload($svg);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertStringContainsString('Entity-Definitionen', $result['error']);
+    }
+
+    public function testUploadWithUnparsableContentKeepsTheGenericMessage(): void
+    {
+        $result = $this->sanitizeSvgUpload('this is not xml at all <<<');
+
+        $this->assertSame('SVG konnte nicht bereinigt werden.', $result['error'] ?? null);
     }
 }
