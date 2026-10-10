@@ -1,3 +1,10 @@
+## [2.40.2](https://github.com/raaaf/wordpress-starter/compare/v2.40.1...v2.40.2) (2026-10-10)
+
+### Bug Fixes
+
+- **flexible:** harden jump menu search, cleanup and opt-out ([82223f7](https://github.com/raaaf/wordpress-starter/commit/82223f7bba1d1b1e806999c07f663ce19666bbbf))
+- **flexible:** keep sections without the jump menu field visible ([94bd003](https://github.com/raaaf/wordpress-starter/commit/94bd003e67664e3e16d9d9191c1f1130085918f9))
+
 ## [2.40.1](https://github.com/raaaf/wordpress-starter/compare/v2.40.0...v2.40.1) (2026-10-10)
 
 ### Bug Fixes
