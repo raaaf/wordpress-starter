@@ -1,3 +1,10 @@
+## [2.40.1](https://github.com/raaaf/wordpress-starter/compare/v2.40.0...v2.40.1) (2026-10-10)
+
+### Bug Fixes
+
+- **deps:** update enshrined/svg-sanitize to 1.0 for security advisories ([48e3ca5](https://github.com/raaaf/wordpress-starter/commit/48e3ca56e3466ff143e6cff11fe332b0ee246c76))
+- **media:** explain rejected SVGs with custom entities ([be25ff1](https://github.com/raaaf/wordpress-starter/commit/be25ff12cd3f8ee9be259f8f2e855a501fde7b82))
+
 # [2.40.0](https://github.com/raaaf/wordpress-starter/compare/v2.39.2...v2.40.0) (2026-10-10)
 
 ### Bug Fixes
