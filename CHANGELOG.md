@@ -1,3 +1,13 @@
+# [2.40.0](https://github.com/raaaf/wordpress-starter/compare/v2.39.2...v2.40.0) (2026-10-10)
+
+### Bug Fixes
+
+- **flexible:** align jump menu search with reveal and highlight ([71e1952](https://github.com/raaaf/wordpress-starter/commit/71e1952596a112314254e83e6c24e6d6b05e8797))
+
+### Features
+
+- **flexible:** add jump menu module with in-page search ([9361911](https://github.com/raaaf/wordpress-starter/commit/936191152caa16cb2c28df9cdff4459eb1d55de1))
+
 ## [2.39.2](https://github.com/raaaf/wordpress-starter/compare/v2.39.1...v2.39.2) (2026-10-07)
 
 ### Bug Fixes
