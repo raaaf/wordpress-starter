@@ -12,6 +12,7 @@ Registered via `Alpine.data()` in `resources/js/app.ts`:
 - `memberLogin` - Member area login form
 - `downloadTable` - Member area download table
 - `styleguideSprungnavigation` - Styleguide jump navigation (active-section highlighting)
+- `jumpMenu` - Jump menu module: floating pill with section list and in-page search, one per page; reveals hits inside tabs and accordions (`resources/js/jump-menu.ts`)
 - `styleguideModul` - Switches between the instances of a styleguide gallery module
 
 `memberLogin` and `downloadTable` are registered in `resources/js/member-area.ts` and wired in via `registerMemberAreaComponents(Alpine)` in `resources/js/app.ts`.

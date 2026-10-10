@@ -153,7 +153,7 @@ ls -la dist/
 | 5.3 | Farben-Sektion                 | Alle Design Tokens     |     |
 | 5.4 | Typography-Sektion             | Display, H1-H5, Body   |     |
 | 5.5 | Spacing-Sektion                | Alle Abstände          |     |
-| 5.6 | Block-Übersicht                | Tabelle mit 37 Layouts |     |
+| 5.6 | Block-Übersicht                | Tabelle mit 38 Layouts |     |
 | 5.7 | Notice verschwindet            | Nach Erstellung        |     |
 
 ---
@@ -166,7 +166,7 @@ Kein Gutenberg, kein Block-Editor: Der Classic Editor bekommt sein Flexible-Cont
 | ---- | ----------------------------------- | -------------------------------------------------------------------------------------------------- | --- |
 | 6.1  | Layout hinzufügen                   | "Auswählen"-Button öffnet Modal mit 4-Spalten-Grid                                                 |     |
 | 6.2  | Kategorien im Modal                 | Header, Layout, Inhalte, Medien, Interaktiv, Formulare, Beiträge, Interner Bereich, Sonstiges      |     |
-| 6.3  | Layout-Thumbnails                   | Jedes der 37 Layouts zeigt ein Vorschaubild statt nur Text                                         |     |
+| 6.3  | Layout-Thumbnails                   | Jedes der 38 Layouts zeigt ein Vorschaubild statt nur Text                                         |     |
 | 6.4  | Layout auswählen (z. B. Hero)       | Layout wird eingefügt, Bearbeiten-Modal öffnet sich groß ("large")                                 |     |
 | 6.5  | Feld-Tabs im Modal                  | Layouts mit Tab-Split zeigen "Inhalt" und "Darstellung" als getrennte Tabs                         |     |
 | 6.6  | Layouts ohne Tab-Split              | hero, posts, map, contact-form, die drei `*-columns-images`-Layouts zeigen ihre eigene Gruppierung |     |
@@ -180,7 +180,7 @@ Kein Gutenberg, kein Block-Editor: Der Classic Editor bekommt sein Flexible-Cont
 
 ## Phase 7: Flexible-Content-Layouts im Frontend
 
-Stichprobe über die 37 Layouts aus `templates/flexible/`, je Layout mindestens ein Pflichtfeld leer lassen, um das Verhalten bei unvollständigen Daten zu prüfen.
+Stichprobe über die 38 Layouts aus `templates/flexible/`, je Layout mindestens ein Pflichtfeld leer lassen, um das Verhalten bei unvollständigen Daten zu prüfen.
 
 | #    | Layout                                 | Test                                                                           | Erwartet                                                                                                                                                                                      | ✓   |
 | ---- | -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
@@ -220,7 +220,7 @@ Stichprobe über die 37 Layouts aus `templates/flexible/`, je Layout mindestens 
 | #   | Test                                               | Erwartet                                                                                          | ✓   |
 | --- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --- |
 | 9.1 | Ansicht "Design-System" (`?ansicht=design-system`) | Zeigt Farb-Tokens, Typografie und Komponenten aus `styleguide/tokens` und `styleguide/components` |     |
-| 9.2 | Ansicht "Module" (Standard)                        | Zeigt Layout-Galerie, gruppiert nach den 37 Flexible-Content-Layouts                              |     |
+| 9.2 | Ansicht "Module" (Standard)                        | Zeigt Layout-Galerie, gruppiert nach den 38 Flexible-Content-Layouts                              |     |
 | 9.3 | Varianten-Schalter je Layout                       | Wechselt zwischen mehreren Instanzen desselben Layouts (z. B. Hero-Varianten)                     |     |
 | 9.4 | Navigation innerhalb der Seite                     | Sprungmarken/Nav führen zum passenden Abschnitt                                                   |     |
 | 9.5 | Hell/Dunkel-Umschalter auf der Seite               | Theme-Switcher im Seiten-Header schaltet sofort um, alle Module bleiben lesbar                    |     |
@@ -337,7 +337,7 @@ Stichprobe über die 37 Layouts aus `templates/flexible/`, je Layout mindestens 
 | C   | Keine JS-Fehler in Console     |        |     |
 | D   | Responsive auf Mobile getestet |        |     |
 | E   | Dark Mode funktioniert         |        |     |
-| F   | Alle 37 Layouts funktionieren  |        |     |
+| F   | Alle 38 Layouts funktionieren  |        |     |
 
 ---
 

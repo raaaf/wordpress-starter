@@ -33,6 +33,7 @@ final class FlexibleContentTabsTest extends TestCase
         'section_spacing',
         'section_width',
         'section_anchor',
+        'show_in_jump_menu',
     ];
 
     public function testDisplayFieldsSitBehindTheStyleTab(): void

@@ -73,7 +73,7 @@ npm run dev
 │   │   ├── AcfExtended.php      # ACF Extended configuration
 │   │   ├── FieldDefinitions.php # Central field definitions
 │   │   ├── Fields.php           # Field helpers
-│   │   ├── FlexibleContent.php  # 37 Flexible Content layouts
+│   │   ├── FlexibleContent.php  # 38 Flexible Content layouts
 │   │   ├── Options.php          # Theme options pages
 │   │   └── PageSettings.php     # Per-page settings (landing page mode)
 │   ├── MemberArea/              # Member area (optional)
@@ -89,7 +89,7 @@ npm run dev
 │   └── Vite.php
 └── templates/
     ├── components/        # Blade components (<x-button>, <x-section> etc.)
-    ├── flexible/          # Flexible Content templates (37 layouts)
+    ├── flexible/          # Flexible Content templates (38 layouts)
     ├── layouts/           # Base layouts
     └── partials/          # Reusable partials
 ```
@@ -173,13 +173,13 @@ Both switches default to off and work independently. Disabling landing mode rest
 
 ## Flexible Content layouts
 
-37 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
+38 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
 
 Grouped by function; the editor modal uses the ACF categories, see `src/Acf/CLAUDE.md`.
 
 **Structure:** one-column, one-column-image, two-columns, two-columns-images, three-columns, three-columns-images, four-columns, four-columns-images, one-third-two-thirds, two-thirds-one-third
 
-**Content:** hero, accordion, cta, button, image, video, divider, alert, quote, embed
+**Content:** hero, accordion, jump-menu, cta, button, image, video, divider, alert, quote, embed
 
 **Interactive:** testimonials, cards, gallery, logo-slider, tabs, stats, timeline, team, before-after, pricing-table, events
 

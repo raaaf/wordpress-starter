@@ -460,7 +460,8 @@ html {
 }
 
 .section[id] {
-  scroll-margin-top: var(--header-height, 80px);
+  /* --jump-menu-offset is set by jump-menu.ts while the pill floats in a top corner. */
+  scroll-margin-top: calc(var(--header-height, 80px) + var(--jump-menu-offset, 0px));
 }
 
 /* Make WordPress video embeds responsive and styled inside content areas */
@@ -948,6 +949,94 @@ html {
   margin-right: auto;
   padding-left: var(--wp--preset--spacing--4, 1rem);
   padding-right: var(--wp--preset--spacing--4, 1rem);
+}
+
+/* Jump menu pill: one-shot entrance, 1.2 s after it first shows. Opacity only
+   under reduced motion. */
+/* The top corners come in from the top edge. */
+.jump-menu-pill-enter[data-position^='top'] {
+  --jump-menu-enter-y: -8px;
+}
+
+.jump-menu-pill-enter {
+  animation: jump-menu-pill-in 300ms var(--ease-enter) 1200ms both;
+}
+
+@keyframes jump-menu-pill-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--jump-menu-enter-y, 8px));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jump-menu-pill-enter {
+    animation-name: jump-menu-pill-fade;
+  }
+
+  @keyframes jump-menu-pill-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* Jump menu rows (list entries, hits): one neutral fill for hover, focus and the
+   current entry. Light uses surface-tertiary; in dark mode surface-secondary is
+   the lighter step, so it swaps there (same selectors as the dark blocks above). */
+.jump-menu-row:hover,
+.jump-menu-row:focus-visible,
+.jump-menu-row[aria-current='location'] {
+  background-color: var(--color-surface-tertiary);
+}
+
+[data-theme='dark'] .jump-menu-row:hover,
+[data-theme='dark'] .jump-menu-row:focus-visible,
+[data-theme='dark'] .jump-menu-row[aria-current='location'] {
+  background-color: var(--color-surface-secondary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .jump-menu-row:hover,
+  :root:not([data-theme='light']) .jump-menu-row:focus-visible,
+  :root:not([data-theme='light']) .jump-menu-row[aria-current='location'] {
+    background-color: var(--color-surface-secondary);
+  }
+}
+
+/* Jump menu panel: the scrollbar is hidden, so fade the edge that has more content.
+   resources/js/jump-menu.ts sets data-fade-top / data-fade-bottom while scrollable. */
+.jump-menu-scroll {
+  --jump-menu-fade-top: black;
+  --jump-menu-fade-bottom: black;
+  mask-image: linear-gradient(
+    to bottom,
+    var(--jump-menu-fade-top) 0,
+    black 2rem,
+    black calc(100% - 2rem),
+    var(--jump-menu-fade-bottom) 100%
+  );
+}
+
+.jump-menu-scroll[data-fade-top] {
+  --jump-menu-fade-top: transparent;
+}
+
+.jump-menu-scroll[data-fade-bottom] {
+  --jump-menu-fade-bottom: transparent;
+}
+
+/* Jump menu search: matches painted by the CSS Custom Highlight API (resources/js/jump-menu.ts) */
+::highlight(jump-menu-search) {
+  background-color: var(--color-accent-100);
+  color: var(--color-accent-900);
 }
 
 @layer base {

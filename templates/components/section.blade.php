@@ -16,6 +16,10 @@
     Inside a tab panel (SectionNesting::active()) none of the section chrome
     applies: background, padding, container, anchor and animation are skipped
     and only a plain wrapper div with the class is rendered.
+
+    JumpMenu::currentHidden() (set per row by the page loop from the editor field
+    "show_in_jump_menu") adds data-jump-menu="hidden" to the <section>, which
+    keeps it out of the page's jump menu. Nested wrappers never get it.
 --}}
 
 @props([
@@ -92,6 +96,7 @@
 @else
 <section
     @if($anchorId) id="{{ $anchorId }}" @endif
+    @if(\WordpressStarter\Helpers\JumpMenu::currentHidden() && !$attributes->has('data-jump-menu')) data-jump-menu="hidden" @endif
     @if($shouldAnimate)
         x-data="{ shown: false }"
         x-init="if (location.hash) shown = true"

@@ -271,7 +271,7 @@ Blade templates use Laravel's Illuminate View package:
 
 ## ACF Flexible Content
 
-The page builder uses ACF Flexible Content with 37 layouts organized by category.
+The page builder uses ACF Flexible Content with 38 layouts organized by category.
 
 ### Section Header
 

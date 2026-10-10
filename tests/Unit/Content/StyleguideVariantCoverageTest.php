@@ -68,6 +68,7 @@ final class StyleguideVariantCoverageTest extends TestCase
         'section_spacing',
         'section_width',
         'section_alignment',
+        'show_in_jump_menu',
     ];
 
     public function testEveryRegisteredLayoutHasDemoData(): void

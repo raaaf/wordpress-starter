@@ -75,6 +75,7 @@ class StyleguideLayoutData
         $layouts[] = $this->getThreeColumnsImagesLayoutData();
         $layouts[] = $this->getFourColumnsImagesLayoutData();
         $layouts[] = $this->getAlertLayoutData();
+        $layouts[] = $this->getJumpMenuLayoutData();
         $layouts[] = $this->getEmbedLayoutData();
         $layouts[] = $this->getDividerLayoutData();
 
@@ -359,6 +360,15 @@ class StyleguideLayoutData
         ]);
     }
 
+    /** @return array<string, mixed> */
+    private function getJumpMenuLayoutData(): array
+    {
+        return $this->layout('jump_menu', [
+            'title' => 'Springe zu',
+            'show_search' => true,
+            'position' => 'bottom_right',
+        ]);
+    }
     /** @return array<string, mixed> */
     private function getEmbedLayoutData(): array
     {
@@ -1134,6 +1144,7 @@ class StyleguideLayoutData
             'title' => 'Nachricht gesendet',
             'content' => '<p>Der grüne Hinweis bestätigt etwas, das geklappt hat.</p>',
             'background_color' => 'primary',
+            'show_in_jump_menu' => false,
         ]);
 
         $catalog[] = $this->layout('alert', [
@@ -1149,6 +1160,27 @@ class StyleguideLayoutData
             'content' => '<p>Der rote Hinweis meldet einen Fehler und trägt role="alert".</p>',
             'dismissible' => true,
             'background_color' => 'primary',
+        ]);
+
+        // Sprungmenue ohne Suche und mit eigener Beschriftung, dazu die uebrigen Ecken
+        // (der Varianten-Test verlangt jeden Wert von show_search und position;
+        // auf der Seite zeigt nur das erste Sprungmenue etwas, diese Varianten bleiben unsichtbar).
+        $catalog[] = $this->layout('jump_menu', [
+            'title' => 'Auf dieser Seite',
+            'show_search' => false,
+            'position' => 'top_left',
+        ]);
+
+        $catalog[] = $this->layout('jump_menu', [
+            'title' => 'Springe zu',
+            'show_search' => true,
+            'position' => 'bottom_left',
+        ]);
+
+        $catalog[] = $this->layout('jump_menu', [
+            'title' => 'Springe zu',
+            'show_search' => true,
+            'position' => 'top_right',
         ]);
 
         // Einzelzitat gross und ohne Bild: die zweite Groesse und der Fall ohne

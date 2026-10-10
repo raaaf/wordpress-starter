@@ -80,7 +80,7 @@ Dies startet den Entwicklungsserver auf `http://localhost:5180` mit Hot Module R
 1. Öffne deine WordPress-Seite im Browser
 2. Erstelle eine neue Seite mit der Vorlage "Flexibler Seiteninhalt"
 3. Im Classic Editor siehst du den "Sektion hinzufügen" Button
-4. Wähle eines der 37 verfügbaren Layouts aus
+4. Wähle eines der 38 verfügbaren Layouts aus
 
 ## Erste Schritte nach der Installation
 
@@ -128,13 +128,13 @@ Hero mit, er schneidet nichts ab.
 
 ## Verfügbare Layouts
 
-Das Theme enthält 37 vorgefertigte Flexible Content Layouts:
+Das Theme enthält 38 vorgefertigte Flexible Content Layouts:
 
 | Kategorie        | Layouts                                                                                                                                                                                         |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Header           | Hero-Bereich                                                                                                                                                                                    |
 | Layout           | Eine Spalte, Zwei Spalten, Drei Spalten, Vier Spalten, 1/3 + 2/3 Spalten, 2/3 + 1/3 Spalten, Eine Spalte mit Bild, Zwei Spalten mit Bildern, Drei Spalten mit Bildern, Vier Spalten mit Bildern |
-| Inhalte          | Akkordeon (FAQ), Tabs, Handlungsaufforderung (CTA), Button, Einzelzitat, Hinweis                                                                                                                |
+| Inhalte          | Akkordeon (FAQ), Tabs, Sprungmenü, Handlungsaufforderung (CTA), Button, Einzelzitat, Hinweis                                                                                                    |
 | Medien           | Bild, Video, Bildergalerie, Vorher/Nachher Vergleich                                                                                                                                            |
 | Interaktiv       | Kundenstimmen, Karten / Features, Statistiken / Zahlen, Zeitstrahl, Team, Preistabelle, Veranstaltungen                                                                                         |
 | Formulare        | Kontaktformular, Newsletter-Anmeldung, Karte (Google Maps)                                                                                                                                      |
@@ -147,7 +147,7 @@ Das Theme enthält 37 vorgefertigte Flexible Content Layouts:
 | Datei/Ordner                   | Beschreibung                                   |
 | ------------------------------ | ---------------------------------------------- |
 | `templates/`                   | Blade-Templates                                |
-| `templates/flexible/`          | Flexible Content Layout-Templates (37 Layouts) |
+| `templates/flexible/`          | Flexible Content Layout-Templates (38 Layouts) |
 | `src/Acf/FlexibleContent.php`  | Layout-Definitionen                            |
 | `src/Acf/FieldDefinitions.php` | Feld-Definitionen                              |
 | `resources/css/`               | CSS-Quelldateien (TailwindCSS)                 |

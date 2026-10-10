@@ -216,6 +216,7 @@ class FieldDefinitions
             self::sectionSpacingField($prefix),
             self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
+            self::jumpMenuVisibilityField($prefix),
         ];
     }
 
@@ -1523,6 +1524,7 @@ class FieldDefinitions
                 ],
             ),
             self::sectionAnchorField($prefix),
+            self::jumpMenuVisibilityField($prefix),
         ];
     }
 
@@ -2253,6 +2255,7 @@ class FieldDefinitions
             self::sectionSpacingField($prefix),
             self::sectionWidthField($prefix),
             self::sectionAnchorField($prefix),
+            self::jumpMenuVisibilityField($prefix),
         ];
     }
 
@@ -4078,6 +4081,68 @@ class FieldDefinitions
             __('Optionale ID für Anker-Links (z.B. „kontakt“). Wird automatisch generiert, wenn leer.', 'wp-starter'),
             __('z.B. kontakt', 'wp-starter'),
         );
+    }
+
+    /**
+     * Get the toggle that excludes a section from the page's jump menu
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<string, mixed>
+     */
+    public static function jumpMenuVisibilityField(string $prefix): array
+    {
+        return self::trueFalseField(
+            "field_{$prefix}_show_in_jump_menu",
+            __('Im Sprungmenü zeigen', 'wp-starter'),
+            'show_in_jump_menu',
+            true,
+            __('Aus: Dieser Abschnitt erscheint nicht im Sprungmenü der Seite.', 'wp-starter'),
+        );
+    }
+
+    /**
+     * Get jump menu (Sprungmenü) fields: title, search toggle and corner, the module has no section chrome
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function jumpMenuFields(string $prefix): array
+    {
+        return [
+            array_merge(
+                self::textField(
+                    "field_{$prefix}_title",
+                    __('Beschriftung', 'wp-starter'),
+                    'title',
+                    false,
+                    '',
+                    __('Springe zu', 'wp-starter'),
+                ),
+                ['default_value' => __('Springe zu', 'wp-starter')],
+            ),
+            self::trueFalseField(
+                "field_{$prefix}_show_search",
+                __('Suche anzeigen', 'wp-starter'),
+                'show_search',
+                true,
+                __('Zeigt ein Suchfeld, das den gesamten Text dieser Seite durchsucht.', 'wp-starter'),
+            ),
+            self::buttonGroupField(
+                "field_{$prefix}_position",
+                __('Position', 'wp-starter'),
+                'position',
+                [
+                    'bottom_right' => __('Unten rechts', 'wp-starter'),
+                    'bottom_left' => __('Unten links', 'wp-starter'),
+                    'top_right' => __('Oben rechts', 'wp-starter'),
+                    'top_left' => __('Oben links', 'wp-starter'),
+                ],
+                'bottom_right',
+                __('Ecke, in der der Knopf schwebt. Oben sitzt er direkt unter dem Seitenkopf.', 'wp-starter'),
+            ),
+        ];
     }
 
     /**

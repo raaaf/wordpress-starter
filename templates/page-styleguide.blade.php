@@ -111,6 +111,7 @@
                     @php($sectionSpacing = get_sub_field('section_spacing') ?: null)
                     @php($sectionWidth = get_sub_field('section_width') ?: null)
                     @php($sectionAnchor = $customAnchor ?: str_replace('_', '-', $layout) . '-' . $anchorCounters[$layout])
+                    @php(\WordpressStarter\Helpers\JumpMenu::setCurrentHidden(\WordpressStarter\Helpers\JumpMenu::isHidden(get_sub_field('show_in_jump_menu', false))))
 
                     {{--
                         render() returns the rendered HTML as a string directly, so no
@@ -148,6 +149,7 @@
                         @php($module[$layout]['instanzen'][] = ['anchor' => $sectionAnchor, 'html' => $instanzHtml])
                     @endif
                 @endwhile
+                @php(\WordpressStarter\Helpers\JumpMenu::setCurrentHidden(false))
 
                 {{--
                     Ein Zwischentitel, auf den kein neues Modul mehr folgt, ist nach

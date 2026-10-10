@@ -67,13 +67,13 @@ src/                    # PHP source code
 ├── Providers/         # Service providers
 ├── Services/          # StyleguidePage.php, TabsContentMigration.php (one-time tab text move)
 ├── Content/           # Styleguide reference/data classes
-├── Helpers/           # Text.php, SectionHeader.php, ComponentId.php (request-scoped ids + anchor slugs), FormAttributes.php (shared form-attribute allowlist), SectionNesting.php (nesting depth, no section chrome inside tab panels)
+├── Helpers/           # Text.php, SectionHeader.php, ComponentId.php (request-scoped ids + anchor slugs), FormAttributes.php (shared form-attribute allowlist), SectionNesting.php (nesting depth, no section chrome inside tab panels), JumpMenu.php (request-scoped show_in_jump_menu flag)
 ├── RateLimiter.php    # AJAX rate limiting
 templates/             # Blade templates
 ├── layouts/          # Base layouts
 ├── partials/         # Reusable partials
 ├── components/       # Blade components
-├── flexible/         # Flexible Content layouts (37 layouts)
+├── flexible/         # Flexible Content layouts (38 layouts)
 ├── styleguide/        # Styleguide page sections (components, tokens)
 ├── page-styleguide.blade.php # Styleguide page template
 resources/

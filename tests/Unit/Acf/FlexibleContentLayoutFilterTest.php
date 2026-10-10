@@ -29,6 +29,7 @@ final class FlexibleContentLayoutFilterTest extends TestCase
         'four_columns_images',
         'accordion',
         'tabs',
+        'jump_menu',
         'cta',
         'button',
         'image',

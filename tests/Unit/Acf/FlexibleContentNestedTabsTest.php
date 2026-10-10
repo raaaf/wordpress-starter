@@ -25,10 +25,10 @@ final class FlexibleContentNestedTabsTest extends TestCase
      *
      * @var array<int, string>
      */
-    private const EXCLUDED = ['hero', 'tabs', 'divider', 'map', 'contact_form', 'newsletter', 'logo_slider'];
+    private const EXCLUDED = ['hero', 'tabs', 'divider', 'map', 'contact_form', 'newsletter', 'logo_slider', 'jump_menu'];
 
     /** @var array<int, string> */
-    private const DISPLAY_FIELDS = ['background_color', 'section_spacing', 'section_width', 'section_anchor'];
+    private const DISPLAY_FIELDS = ['background_color', 'section_spacing', 'section_width', 'section_anchor', 'show_in_jump_menu'];
 
     protected function setUp(): void
     {

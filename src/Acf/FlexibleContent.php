@@ -41,12 +41,14 @@ class FlexibleContent
         'section_spacing',
         'section_width',
         'section_anchor',
+        'show_in_jump_menu',
     ];
 
     /**
      * Layouts, die in einem Tab-Panel nicht angeboten werden: seitenweite oder
      * randlose Module brechen im Panel (hero, map, contact_form, newsletter,
-     * logo_slider, divider), Tabs in Tabs sind unbrauchbar. Eine Sperrliste statt
+     * logo_slider, divider), Tabs in Tabs sind unbrauchbar, das Sprungmenue ist
+     * Seitennavigation und gehoert nicht in ein Panel. Eine Sperrliste statt
      * einer Freigabeliste, damit auch Layouts abgeleiteter Themes angeboten werden.
      *
      * @var array<int, string>
@@ -59,6 +61,7 @@ class FlexibleContent
         'contact_form',
         'newsletter',
         'logo_slider',
+        'jump_menu',
     ];
 
     public const NESTED_MODULES_KEY = 'field_flex_tabs_tab_modules';
@@ -623,6 +626,7 @@ class FlexibleContent
             // Content and text layouts
             self::accordionLayout(),
             self::tabsLayout(),
+            self::jumpMenuLayout(),
             self::ctaLayout(),
             self::buttonLayout(),
 
@@ -1306,6 +1310,26 @@ class FlexibleContent
             'sub_fields' => FieldDefinitions::alertFields('flex_alert'),
             'acfe_flexible_category' => self::getCategories()['content'],
             'acfe_flexible_thumbnail' => 'alert.png',
+        ];
+    }
+
+    /**
+     * Jump menu (Sprungmenü) layout
+     *
+     * @return array<string, mixed>
+     */
+    private static function jumpMenuLayout(): array
+    {
+        return [
+            'key' => 'layout_jump_menu',
+            'name' => 'jump_menu',
+            'label' => __('Sprungmenü', 'wp-starter'),
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::jumpMenuFields('flex_jump_menu'),
+            // One jump menu per page.
+            'max' => 1,
+            'acfe_flexible_category' => self::getCategories()['content'],
+            'acfe_flexible_thumbnail' => 'jump_menu.png',
         ];
     }
 
