@@ -1,3 +1,9 @@
+# [2.41.0](https://github.com/raaaf/wordpress-starter/compare/v2.40.2...v2.41.0) (2026-10-14)
+
+### Features
+
+- **flexible:** add optional section header to member downloads ([0ed4c7c](https://github.com/raaaf/wordpress-starter/commit/0ed4c7cf550bfc447e62109ce768882dd5371c33))
+
 ## [2.40.2](https://github.com/raaaf/wordpress-starter/compare/v2.40.1...v2.40.2) (2026-10-10)
 
 ### Bug Fixes
