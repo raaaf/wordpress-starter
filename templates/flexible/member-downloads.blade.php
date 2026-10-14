@@ -3,9 +3,12 @@
 
     Only available on pages with page_is_member_area = true.
     Renders the downloads table component (Alpine.js + AJAX).
+    Optional section header (chip, headline, description) above the table.
 --}}
 
 @php
+    ['chip' => $chip, 'headline' => $headline, 'description' => $description, 'alignment' => $alignment]
+        = \WordpressStarter\Helpers\SectionHeader::fields();
     $background = get_sub_field('background_color') ?: 'primary';
     $isMemberAreaPage = (bool) get_field('page_is_member_area', get_the_ID());
     // page_is_member_area is only an ACF flag, not tied to a specific page
@@ -16,6 +19,7 @@
 
 @if($isMemberAreaPage && $isAuthenticated)
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background">
+    <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
     @include('member-area.downloads')
 </x-section>
 @elseif($isMemberAreaPage)

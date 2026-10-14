@@ -3803,7 +3803,7 @@ class FieldDefinitions
     /**
      * Member Downloads block fields
      *
-     * No configuration needed — the downloads component is self-contained.
+     * Has an optional section header; the downloads component itself is self-contained.
      *
      * @param string $prefix Unique prefix for the field key
      *
@@ -3811,7 +3811,10 @@ class FieldDefinitions
      */
     public static function memberDownloadsFields(string $prefix): array
     {
-        return self::displaySettingsFields($prefix);
+        return [
+            ...self::sectionHeaderFields($prefix),
+            ...self::displaySettingsFields($prefix),
+        ];
     }
 
     /**

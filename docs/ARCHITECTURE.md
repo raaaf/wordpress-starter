@@ -302,8 +302,7 @@ is renamed or reordered.
 
 A layout is skipped when it already has a `tab` or `accordion` field of its own,
 when it has no display tail at all, or when fewer than `MIN_CONTENT_FIELDS`
-fields precede that tail. The last case also covers a layout that consists of
-nothing but the tail, such as member-downloads.
+fields precede that tail.
 
 Note for derived themes: register the field group with `self::layouts()`, not
 `self::getLayouts()`. The latter bypasses both the layout filter and the tabs.

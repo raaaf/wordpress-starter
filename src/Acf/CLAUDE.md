@@ -41,8 +41,7 @@ Skipped, on purpose:
   and Darstellung, hero has none. The three
   `*-columns-images` layouts use accordions and have no Darstellung tab.
 - Layouts with fewer than three fields on the content side, where a tab would
-  sit above a single control (divider), or none at all because the layout _is_
-  the display tail (member-downloads).
+  sit above a single control (divider).
 - Layouts without a display tail at all, so there is nothing to separate (in
   some themes cta and button).
 
