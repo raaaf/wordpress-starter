@@ -1,3 +1,9 @@
+# [2.42.0](https://github.com/raaaf/wordpress-starter/compare/v2.41.0...v2.42.0) (2026-10-15)
+
+### Features
+
+- **icons:** add 94 icons to the picker and key the icon cache by the list ([d440f0d](https://github.com/raaaf/wordpress-starter/commit/d440f0d3622f1081ad39de234936c1e80992b19d))
+
 # [2.41.0](https://github.com/raaaf/wordpress-starter/compare/v2.40.2...v2.41.0) (2026-10-14)
 
 ### Features
