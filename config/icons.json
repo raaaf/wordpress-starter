@@ -13,20 +13,135 @@
   ],
   "weight": "regular",
   "icons": {
+    "airplane": {
+      "source": "phosphor",
+      "name": "airplane",
+      "label": "Flugzeug"
+    },
     "archive": {
       "source": "phosphor",
       "name": "archive",
       "label": "Archiv"
+    },
+    "arrow-circle-right": {
+      "source": "phosphor",
+      "name": "arrow-circle-right",
+      "label": "Pfeil im Kreis"
+    },
+    "arrow-down": {
+      "source": "phosphor",
+      "name": "arrow-down",
+      "label": "Pfeil runter"
+    },
+    "arrow-left": {
+      "source": "phosphor",
+      "name": "arrow-left",
+      "label": "Pfeil links"
     },
     "arrow-right": {
       "source": "phosphor",
       "name": "arrow-right",
       "label": "Pfeil nach rechts"
     },
+    "arrow-square-out": {
+      "source": "phosphor",
+      "name": "arrow-square-out",
+      "label": "Externer Link"
+    },
+    "arrow-up": {
+      "source": "phosphor",
+      "name": "arrow-up",
+      "label": "Pfeil hoch"
+    },
+    "arrow-up-right": {
+      "source": "phosphor",
+      "name": "arrow-up-right",
+      "label": "Pfeil schräg"
+    },
+    "arrows-clockwise": {
+      "source": "phosphor",
+      "name": "arrows-clockwise",
+      "label": "Aktualisieren"
+    },
+    "bank": {
+      "source": "phosphor",
+      "name": "bank",
+      "label": "Bank"
+    },
+    "bell": {
+      "source": "phosphor",
+      "name": "bell",
+      "label": "Glocke"
+    },
+    "book-open": {
+      "source": "phosphor",
+      "name": "book-open",
+      "label": "Buch"
+    },
+    "bookmark-simple": {
+      "source": "phosphor",
+      "name": "bookmark-simple",
+      "label": "Merken"
+    },
+    "briefcase": {
+      "source": "phosphor",
+      "name": "briefcase",
+      "label": "Aktentasche"
+    },
+    "buildings": {
+      "source": "phosphor",
+      "name": "buildings",
+      "label": "Gebäude"
+    },
+    "calculator": {
+      "source": "phosphor",
+      "name": "calculator",
+      "label": "Rechner"
+    },
     "calendar": {
       "source": "phosphor",
       "name": "calendar-blank",
       "label": "Kalender"
+    },
+    "calendar-check": {
+      "source": "phosphor",
+      "name": "calendar-check",
+      "label": "Termin bestätigt"
+    },
+    "camera": {
+      "source": "phosphor",
+      "name": "camera",
+      "label": "Kamera"
+    },
+    "car": {
+      "source": "phosphor",
+      "name": "car",
+      "label": "Auto"
+    },
+    "caret-double-right": {
+      "source": "phosphor",
+      "name": "caret-double-right",
+      "label": "Doppelpfeil"
+    },
+    "certificate": {
+      "source": "phosphor",
+      "name": "certificate",
+      "label": "Zertifikat"
+    },
+    "chart-bar": {
+      "source": "phosphor",
+      "name": "chart-bar",
+      "label": "Balkendiagramm"
+    },
+    "chart-line-up": {
+      "source": "phosphor",
+      "name": "chart-line-up",
+      "label": "Wachstum"
+    },
+    "chart-pie": {
+      "source": "phosphor",
+      "name": "chart-pie",
+      "label": "Kreisdiagramm"
     },
     "chat": {
       "source": "phosphor",
@@ -42,6 +157,11 @@
       "source": "phosphor",
       "name": "check-circle",
       "label": "Häkchen im Kreis"
+    },
+    "check-square": {
+      "source": "phosphor",
+      "name": "check-square",
+      "label": "Häkchen im Quadrat"
     },
     "chevron": {
       "source": "phosphor",
@@ -78,30 +198,145 @@
       "name": "x",
       "label": "Schließen"
     },
+    "coins": {
+      "source": "phosphor",
+      "name": "coins",
+      "label": "Münzen"
+    },
+    "compass": {
+      "source": "phosphor",
+      "name": "compass",
+      "label": "Kompass"
+    },
+    "copy": {
+      "source": "phosphor",
+      "name": "copy",
+      "label": "Kopieren"
+    },
+    "credit-card": {
+      "source": "phosphor",
+      "name": "credit-card",
+      "label": "Karte (Zahlung)"
+    },
+    "crown": {
+      "source": "phosphor",
+      "name": "crown",
+      "label": "Krone"
+    },
+    "currency-eur": {
+      "source": "phosphor",
+      "name": "currency-eur",
+      "label": "Euro"
+    },
+    "diamond": {
+      "source": "phosphor",
+      "name": "diamond",
+      "label": "Diamant"
+    },
+    "dots-three": {
+      "source": "phosphor",
+      "name": "dots-three",
+      "label": "Mehr"
+    },
     "download": {
       "source": "phosphor",
       "name": "download-simple",
       "label": "Download"
+    },
+    "drop": {
+      "source": "phosphor",
+      "name": "drop",
+      "label": "Tropfen"
     },
     "eye": {
       "source": "phosphor",
       "name": "eye",
       "label": "Auge"
     },
+    "eye-slash": {
+      "source": "phosphor",
+      "name": "eye-slash",
+      "label": "Auge durchgestrichen"
+    },
     "facebook": {
       "source": "phosphor",
       "name": "facebook-logo",
       "label": "Facebook"
+    },
+    "file-pdf": {
+      "source": "phosphor",
+      "name": "file-pdf",
+      "label": "PDF"
     },
     "file-text": {
       "source": "phosphor",
       "name": "file-text",
       "label": "Dokument"
     },
+    "flag": {
+      "source": "phosphor",
+      "name": "flag",
+      "label": "Flagge"
+    },
+    "folder": {
+      "source": "phosphor",
+      "name": "folder",
+      "label": "Ordner"
+    },
+    "funnel": {
+      "source": "phosphor",
+      "name": "funnel",
+      "label": "Filter"
+    },
+    "gear": {
+      "source": "phosphor",
+      "name": "gear",
+      "label": "Zahnrad"
+    },
+    "gift": {
+      "source": "phosphor",
+      "name": "gift",
+      "label": "Geschenk"
+    },
+    "globe": {
+      "source": "phosphor",
+      "name": "globe",
+      "label": "Weltkugel"
+    },
+    "graduation-cap": {
+      "source": "phosphor",
+      "name": "graduation-cap",
+      "label": "Abschluss"
+    },
+    "hand-heart": {
+      "source": "phosphor",
+      "name": "hand-heart",
+      "label": "Fürsorge"
+    },
     "handshake": {
       "source": "phosphor",
       "name": "handshake",
       "label": "Zusammenarbeit"
+    },
+    "heart": {
+      "source": "phosphor",
+      "name": "heart",
+      "label": "Herz"
+    },
+    "hourglass": {
+      "source": "phosphor",
+      "name": "hourglass",
+      "label": "Sanduhr"
+    },
+    "house": {
+      "source": "phosphor",
+      "name": "house",
+      "label": "Haus"
+    },
+    "image": {
+      "source": "phosphor",
+      "name": "image",
+      "label": "Bild"
     },
     "info": {
       "source": "phosphor",
@@ -113,20 +348,55 @@
       "name": "instagram-logo",
       "label": "Instagram"
     },
+    "key-icon": {
+      "source": "phosphor",
+      "name": "key",
+      "label": "Schlüssel"
+    },
+    "leaf": {
+      "source": "phosphor",
+      "name": "leaf",
+      "label": "Blatt"
+    },
     "lightbulb": {
       "source": "phosphor",
       "name": "lightbulb",
       "label": "Idee"
+    },
+    "lightning": {
+      "source": "phosphor",
+      "name": "lightning",
+      "label": "Blitz"
+    },
+    "link": {
+      "source": "phosphor",
+      "name": "link",
+      "label": "Link"
     },
     "linkedin": {
       "source": "phosphor",
       "name": "linkedin-logo",
       "label": "LinkedIn"
     },
+    "list": {
+      "source": "phosphor",
+      "name": "list",
+      "label": "Liste"
+    },
+    "list-checks": {
+      "source": "phosphor",
+      "name": "list-checks",
+      "label": "Checkliste"
+    },
     "lock": {
       "source": "phosphor",
       "name": "lock-simple",
       "label": "Schloss"
+    },
+    "lock-open": {
+      "source": "phosphor",
+      "name": "lock-open",
+      "label": "Schloss offen"
     },
     "logout": {
       "source": "phosphor",
@@ -148,6 +418,16 @@
       "name": "map-trifold",
       "label": "Landkarte"
     },
+    "medal": {
+      "source": "phosphor",
+      "name": "medal",
+      "label": "Medaille"
+    },
+    "megaphone": {
+      "source": "phosphor",
+      "name": "megaphone",
+      "label": "Megafon"
+    },
     "menu": {
       "source": "phosphor",
       "name": "list",
@@ -158,10 +438,50 @@
       "name": "minus",
       "label": "Minus"
     },
+    "minus-circle": {
+      "source": "phosphor",
+      "name": "minus-circle",
+      "label": "Minus im Kreis"
+    },
+    "newspaper": {
+      "source": "phosphor",
+      "name": "newspaper",
+      "label": "Zeitung"
+    },
+    "paperclip": {
+      "source": "phosphor",
+      "name": "paperclip",
+      "label": "Anhang"
+    },
+    "pause": {
+      "source": "phosphor",
+      "name": "pause",
+      "label": "Pause"
+    },
+    "pencil-simple": {
+      "source": "phosphor",
+      "name": "pencil-simple",
+      "label": "Bearbeiten"
+    },
+    "percent": {
+      "source": "phosphor",
+      "name": "percent",
+      "label": "Prozent"
+    },
     "phone": {
       "source": "phosphor",
       "name": "phone",
       "label": "Telefon"
+    },
+    "piggy-bank": {
+      "source": "phosphor",
+      "name": "piggy-bank",
+      "label": "Sparschwein"
+    },
+    "plant": {
+      "source": "phosphor",
+      "name": "plant",
+      "label": "Pflanze"
     },
     "play": {
       "source": "phosphor",
@@ -173,45 +493,195 @@
       "name": "plus",
       "label": "Plus"
     },
+    "plus-circle": {
+      "source": "phosphor",
+      "name": "plus-circle",
+      "label": "Plus im Kreis"
+    },
+    "printer": {
+      "source": "phosphor",
+      "name": "printer",
+      "label": "Drucken"
+    },
+    "puzzle-piece": {
+      "source": "phosphor",
+      "name": "puzzle-piece",
+      "label": "Puzzle"
+    },
+    "question": {
+      "source": "phosphor",
+      "name": "question",
+      "label": "Frage"
+    },
     "quotes": {
       "source": "phosphor",
       "name": "quotes",
       "label": "Anführungszeichen"
+    },
+    "receipt": {
+      "source": "phosphor",
+      "name": "receipt",
+      "label": "Beleg"
+    },
+    "rocket-launch": {
+      "source": "phosphor",
+      "name": "rocket-launch",
+      "label": "Rakete"
+    },
+    "scales": {
+      "source": "phosphor",
+      "name": "scales",
+      "label": "Waage"
+    },
+    "seal-check": {
+      "source": "phosphor",
+      "name": "seal-check",
+      "label": "Siegel"
     },
     "search": {
       "source": "phosphor",
       "name": "magnifying-glass",
       "label": "Suche"
     },
+    "share-network": {
+      "source": "phosphor",
+      "name": "share-network",
+      "label": "Teilen"
+    },
     "shield": {
       "source": "phosphor",
       "name": "shield-check",
       "label": "Schild"
+    },
+    "sign-in": {
+      "source": "phosphor",
+      "name": "sign-in",
+      "label": "Anmelden"
+    },
+    "sliders-horizontal": {
+      "source": "phosphor",
+      "name": "sliders-horizontal",
+      "label": "Einstellungen"
     },
     "smiley-sad": {
       "source": "phosphor",
       "name": "smiley-sad",
       "label": "Trauriges Gesicht"
     },
+    "sparkle": {
+      "source": "phosphor",
+      "name": "sparkle",
+      "label": "Funkeln"
+    },
+    "speaker-high": {
+      "source": "phosphor",
+      "name": "speaker-high",
+      "label": "Ton"
+    },
+    "squares-four": {
+      "source": "phosphor",
+      "name": "squares-four",
+      "label": "Raster"
+    },
     "star": {
       "source": "phosphor",
       "name": "star",
       "label": "Stern"
+    },
+    "sun": {
+      "source": "phosphor",
+      "name": "sun",
+      "label": "Sonne"
+    },
+    "tag": {
+      "source": "phosphor",
+      "name": "tag",
+      "label": "Schlagwort"
+    },
+    "target": {
+      "source": "phosphor",
+      "name": "target",
+      "label": "Ziel"
+    },
+    "thumbs-up": {
+      "source": "phosphor",
+      "name": "thumbs-up",
+      "label": "Daumen hoch"
+    },
+    "trash": {
+      "source": "phosphor",
+      "name": "trash",
+      "label": "Löschen"
+    },
+    "tree": {
+      "source": "phosphor",
+      "name": "tree",
+      "label": "Baum"
+    },
+    "trend-up": {
+      "source": "phosphor",
+      "name": "trend-up",
+      "label": "Trend"
+    },
+    "trophy": {
+      "source": "phosphor",
+      "name": "trophy",
+      "label": "Pokal"
+    },
+    "truck": {
+      "source": "phosphor",
+      "name": "truck",
+      "label": "Lieferung"
+    },
+    "upload-simple": {
+      "source": "phosphor",
+      "name": "upload-simple",
+      "label": "Upload"
     },
     "user": {
       "source": "phosphor",
       "name": "user",
       "label": "Person"
     },
+    "user-circle": {
+      "source": "phosphor",
+      "name": "user-circle",
+      "label": "Profil"
+    },
+    "users": {
+      "source": "phosphor",
+      "name": "users",
+      "label": "Gruppe"
+    },
+    "video-camera": {
+      "source": "phosphor",
+      "name": "video-camera",
+      "label": "Video"
+    },
+    "wallet": {
+      "source": "phosphor",
+      "name": "wallet",
+      "label": "Geldbörse"
+    },
     "warning": {
       "source": "phosphor",
       "name": "warning-circle",
       "label": "Warnung"
     },
+    "wrench": {
+      "source": "phosphor",
+      "name": "wrench",
+      "label": "Werkzeug"
+    },
     "x": {
       "source": "phosphor",
       "name": "x-logo",
       "label": "X"
+    },
+    "x-circle": {
+      "source": "phosphor",
+      "name": "x-circle",
+      "label": "Schließen im Kreis"
     },
     "xing": {
       "source": "simple-icons",

@@ -188,8 +188,15 @@ class Vite
      */
     private static function getThemeIcons(): array
     {
+        // Derive from the ACF field choices so both lists cannot drift apart.
+        $iconNames = array_keys(array_filter(
+            Acf\FieldDefinitions::getThemeIcons(),
+            fn (string $key) => $key !== '',
+            ARRAY_FILTER_USE_KEY,
+        ));
+
         // Try to get cached icons first
-        $cacheKey = ThemeContext::prefix() . '_theme_icons_' . wp_get_theme()->get('Version');
+        $cacheKey = ThemeContext::prefix() . '_theme_icons_' . wp_get_theme()->get('Version') . '_' . md5(implode(',', $iconNames));
         $cachedIcons = get_transient($cacheKey);
 
         if ($cachedIcons !== false && is_array($cachedIcons)) {
@@ -198,13 +205,6 @@ class Vite
 
         $iconDir = get_template_directory() . '/resources/icons/';
         $icons = [];
-
-        // Derive from the ACF field choices so both lists cannot drift apart.
-        $iconNames = array_keys(array_filter(
-            Acf\FieldDefinitions::getThemeIcons(),
-            fn (string $key) => $key !== '',
-            ARRAY_FILTER_USE_KEY,
-        ));
 
         foreach ($iconNames as $name) {
             $path = $iconDir . $name . '.svg';
@@ -218,7 +218,7 @@ class Vite
             }
         }
 
-        // Cache for 24 hours (invalidated by theme version in cache key)
+        // Cache for 24 hours (invalidated by theme version and icon list in cache key)
         set_transient($cacheKey, $icons, DAY_IN_SECONDS);
 
         return $icons;
