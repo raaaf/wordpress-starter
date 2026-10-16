@@ -50,6 +50,8 @@ Akzeptiertes Risiko, unbeschönigt: jede Rolle, die Content bearbeiten darf, kan
 
 Das ist eine getroffene Entscheidung, kein Defekt. Ein künftiger Audit soll das nicht erneut als Sicherheitslücke melden und entfernen. Soll sich das ändern, ist das eine Produktentscheidung, kein Audit-Fix.
 
+**kses SVG für [icon] (`AcfServiceProvider::allowInlineSvgIcon()`):** `svg` und `path` sind im Post-Kontext erlaubt, damit der Shortcode in WYSIWYG-Sektionen und Tabellenzellen rendert. Beim Speichern ohne `unfiltered_html` bleiben sie gesperrt (Save-Kontext: Admin, AJAX, REST, XML-RPC). Pinned by `AcfInlineSvgIconTest`.
+
 ## ACF Textarea Sanitizing
 
 - ACF textarea values are tag-stripped on save (`AcfServiceProvider::sanitizeTextarea`), except table cells (`*_cell_content`), which go through `wp_kses_post` minus form controls (form, input, select, option, optgroup, textarea, button). Pinned by `TextareaSanitizeTest`.

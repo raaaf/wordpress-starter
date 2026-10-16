@@ -228,6 +228,10 @@ class AcfServiceProvider extends ServiceProvider
      *
      * Attribute keys are lowercase because kses compares lowercased names.
      *
+     * Render-only: the [icon] shortcode expands at render time, so in a save
+     * context (admin, AJAX, REST, XML-RPC) a user without unfiltered_html gets
+     * $tags back unchanged and no svg or path is stored for them.
+     *
      * @param array<string, array<string, bool>|mixed> $tags Allowed tags.
      * @param string|array<string, mixed> $context Kses context.
      *
@@ -235,25 +239,30 @@ class AcfServiceProvider extends ServiceProvider
      */
     public static function allowInlineSvgIcon(array $tags, string|array $context): array
     {
-        if ($context === 'post') {
-            $tags['svg'] = [
-                'class' => true,
-                'aria-hidden' => true,
-                'viewbox' => true,
-                'fill' => true,
-                'xmlns' => true,
-                'width' => true,
-                'height' => true,
-                'role' => true,
-                'focusable' => true,
-            ];
-            $tags['path'] = [
-                'd' => true,
-                'fill' => true,
-                'fill-rule' => true,
-                'clip-rule' => true,
-            ];
+        if ($context !== 'post') {
+            return $tags;
         }
+
+        $isSaveContext = is_admin()
+            || wp_doing_ajax()
+            || ( defined('REST_REQUEST') && REST_REQUEST )
+            || ( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST );
+
+        if ($isSaveContext && !current_user_can('unfiltered_html')) {
+            return $tags;
+        }
+
+        $tags['svg'] = array_merge(is_array($tags['svg'] ?? null) ? $tags['svg'] : [], [
+            'class' => true,
+            'aria-hidden' => true,
+            'viewbox' => true,
+            'fill' => true,
+            'xmlns' => true,
+        ]);
+        $tags['path'] = array_merge(is_array($tags['path'] ?? null) ? $tags['path'] : [], [
+            'd' => true,
+            'fill' => true,
+        ]);
 
         return $tags;
     }
