@@ -301,7 +301,7 @@ class EditorStylesServiceProvider extends ServiceProvider
                     return;
                 }
 
-                var html = '<div style="display:flex;flex-wrap:wrap;gap:8px;max-width:580px;padding:8px;">';
+                var html = '<div style="display:flex;flex-wrap:wrap;gap:8px;max-width:580px;padding:8px;max-height:360px;overflow-y:auto;box-sizing:border-box;">';
                 data.icons.forEach(function(name) {
                     var safeName = escapeHtml(name);
                     var iconSrc = escapeHtml(data.baseUrl + encodeURIComponent(name) + '.svg');

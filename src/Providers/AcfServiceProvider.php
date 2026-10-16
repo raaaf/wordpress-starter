@@ -67,6 +67,9 @@ class AcfServiceProvider extends ServiceProvider
         // Keep the form controls of form shortcodes in kses'd WYSIWYG output.
         add_filter('wp_kses_allowed_html', [self::class, 'allowFormControlTags'], 20, 2);
 
+        // Keep the inline SVG of the [icon] shortcode in kses'd WYSIWYG output.
+        add_filter('wp_kses_allowed_html', [self::class, 'allowInlineSvgIcon'], 20, 2);
+
         // Add ACF admin styles
         $this->addAdminStyles();
 
@@ -209,6 +212,46 @@ class AcfServiceProvider extends ServiceProvider
             $tags['source'] = [
                 'src' => true,
                 'type' => true,
+            ];
+        }
+
+        return $tags;
+    }
+
+    /**
+     * Allow the inline SVG of the [icon] shortcode in post-context kses.
+     *
+     * Core's post allowlist has no <svg> or <path>, so wp_kses_post() reduces
+     * the [icon] output to an empty <span class="inline-icon"> inside WYSIWYG
+     * sections. Only what the icon files use is allowed: svg and path with
+     * presentation attributes. No use, href, style, on* or foreignObject.
+     *
+     * Attribute keys are lowercase because kses compares lowercased names.
+     *
+     * @param array<string, array<string, bool>|mixed> $tags Allowed tags.
+     * @param string|array<string, mixed> $context Kses context.
+     *
+     * @return array<string, array<string, bool>|mixed>
+     */
+    public static function allowInlineSvgIcon(array $tags, string|array $context): array
+    {
+        if ($context === 'post') {
+            $tags['svg'] = [
+                'class' => true,
+                'aria-hidden' => true,
+                'viewbox' => true,
+                'fill' => true,
+                'xmlns' => true,
+                'width' => true,
+                'height' => true,
+                'role' => true,
+                'focusable' => true,
+            ];
+            $tags['path'] = [
+                'd' => true,
+                'fill' => true,
+                'fill-rule' => true,
+                'clip-rule' => true,
             ];
         }
 
