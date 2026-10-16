@@ -1,3 +1,10 @@
+## [2.42.2](https://github.com/raaaf/wordpress-starter/compare/v2.42.1...v2.42.2) (2026-10-16)
+
+### Bug Fixes
+
+- **icons:** harden icon picker search, Enter and backdrop handling ([33c080a](https://github.com/raaaf/wordpress-starter/commit/33c080a6531c629186bb6ca14b88e6f9864788fd))
+- **icons:** replace TinyMCE icon dialog with searchable native picker ([2cb297b](https://github.com/raaaf/wordpress-starter/commit/2cb297b30f5a403f8bf12f1f2b0a9907d7faf023))
+
 ## [2.42.1](https://github.com/raaaf/wordpress-starter/compare/v2.42.0...v2.42.1) (2026-10-16)
 
 ### Bug Fixes
