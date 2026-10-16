@@ -1,3 +1,10 @@
+## [2.42.1](https://github.com/raaaf/wordpress-starter/compare/v2.42.0...v2.42.1) (2026-10-16)
+
+### Bug Fixes
+
+- **icons:** keep svg kses allowance render-only and minimal ([44b0ccd](https://github.com/raaaf/wordpress-starter/commit/44b0ccde0b43b8afe6940bf1a815ba8c16746c08))
+- **icons:** render inline SVG icons in WYSIWYG sections and make picker scrollable ([402be4b](https://github.com/raaaf/wordpress-starter/commit/402be4bfd1aaf1cced9007304481a86b07b8379d))
+
 # [2.42.0](https://github.com/raaaf/wordpress-starter/compare/v2.41.0...v2.42.0) (2026-10-15)
 
 ### Features
