@@ -37,42 +37,42 @@ final class EditorStylesServiceProviderTest extends TestCase
         parent::tearDown();
     }
 
-    public function testIconPickerPluginJsUsesNoInlineMouseHandlers(): void
+    /**
+     * The picker builds every node with createElement/textContent, so an icon
+     * name or label never passes through an HTML parser. Inline handler
+     * attributes or innerHTML would reopen that path.
+     */
+    public function testIconPickerPluginJsBuildsNoHtmlStrings(): void
     {
         $js = $this->invokeMethod($this->provider, 'getIconPickerPluginJs');
 
-        $this->assertStringNotContainsString('onmouseover="', $js);
-        $this->assertStringNotContainsString('onmouseout="', $js);
-        $this->assertStringContainsString('function escapeHtml(', $js);
+        $this->assertStringNotContainsString('onmouseover', $js);
+        $this->assertStringNotContainsString('innerHTML', $js);
+        $this->assertStringNotContainsString('insertAdjacentHTML', $js);
     }
 
     /**
-     * Keyboard/focus users must get the same hover highlight as mouse users:
-     * a mouseover/mouseout-only handler leaves the picker buttons visually
-     * unresponsive to focus.
+     * Keyboard users must get the same highlight as mouse users.
      */
-    public function testIconPickerPluginJsMirrorsMouseHandlersWithFocusHandlers(): void
+    public function testIconPickerPluginJsStylesFocusLikeHover(): void
     {
         $js = $this->invokeMethod($this->provider, 'getIconPickerPluginJs');
 
-        $this->assertStringContainsString("addEventListener('focusin'", $js);
-        $this->assertStringContainsString("addEventListener('focusout'", $js);
+        $this->assertStringContainsString('.tip-tile:hover{', $js);
+        $this->assertStringContainsString('.tip-tile:focus-visible{', $js);
     }
 
     /**
-     * The icon name is used twice per browser round-trip: once to build the
-     * <img src>, where it must be URL-encoded (not just HTML-escaped, which
-     * leaves reserved URL characters like `?`/`#` untouched), and once inside
-     * the `[icon name="..."]` shortcode built from the clicked button's
-     * data-icon attribute, where a literal `"` would close the attribute
-     * early and let extra shortcode attributes be injected.
+     * The icon name builds the <img src>, where it must be URL-encoded, and
+     * the `[icon name="..."]` shortcode, where a literal `"` would close the
+     * attribute early and let extra shortcode attributes be injected.
      */
-    public function testIconPickerPluginJsEncodesImgSrcAndEscapesShortcodeQuotes(): void
+    public function testIconPickerPluginJsEncodesImgSrcAndStripsShortcodeQuotes(): void
     {
         $js = $this->invokeMethod($this->provider, 'getIconPickerPluginJs');
 
-        $this->assertStringContainsString('encodeURIComponent(name)', $js);
-        $this->assertStringContainsString("replace(/\"/g, '&quot;')", $js);
+        $this->assertStringContainsString('encodeURIComponent(icon.slug)', $js);
+        $this->assertStringContainsString("slug.replace(/\"/g, '')", $js);
     }
 
     public function testLocalizedIconDataEscapesScriptClosingTagInIconName(): void
@@ -106,6 +106,7 @@ final class EditorStylesServiceProviderTest extends TestCase
         $decoded = json_decode($matches[1], true);
 
         $this->assertSame([$maliciousIcon], $decoded['icons']);
+        $this->assertSame([$maliciousIcon => 'Test'], $decoded['labels']);
     }
 
     /**

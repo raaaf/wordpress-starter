@@ -251,7 +251,7 @@ class EditorStylesServiceProvider extends ServiceProvider
         });
 
         add_filter('mce_external_plugins', function (array $plugins): array {
-            $plugins['themeicons'] = admin_url('admin-ajax.php?action=theme_tinymce_icon_picker');
+            $plugins['themeicons'] = admin_url('admin-ajax.php?action=theme_tinymce_icon_picker&ver=' . rawurlencode( (string) wp_get_theme()->get('Version')));
             return $plugins;
         });
 
@@ -281,13 +281,38 @@ class EditorStylesServiceProvider extends ServiceProvider
 (function() {
     if (typeof tinymce === 'undefined') { return; }
 
-    function escapeHtml(value) {
-        return String(value)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+    var STYLE_ID = 'theme-icon-picker-style';
+    var CSS = ''
+        + '.tip-dialog{width:min(760px,calc(100vw - 32px));height:min(680px,calc(100vh - 64px));padding:0;border:0;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.35);color:#1d2327;font-size:13px;overflow:hidden;}'
+        + '.tip-dialog[open]{display:flex;flex-direction:column;}'
+        + '.tip-dialog::backdrop{background:rgba(0,0,0,.55);}'
+        + '.tip-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 12px;}'
+        + '.tip-title{margin:0;font-size:16px;font-weight:600;line-height:1.3;}'
+        + '.tip-close{display:grid;place-items:center;width:32px;height:32px;margin:-4px -8px -4px 0;padding:0;border:0;border-radius:4px;background:none;color:#50575e;font-size:22px;line-height:1;cursor:pointer;}'
+        + '.tip-close:hover{background:#f0f0f1;color:#1d2327;}'
+        + '.tip-search{padding:0 20px 12px;border-bottom:1px solid #dcdcde;}'
+        + '.tip-search input{width:100%;min-height:40px;padding:0 12px;font-size:14px;border:1px solid #8c8f94;border-radius:4px;box-sizing:border-box;}'
+        + '.tip-search input:focus{border-color:#2271b1;box-shadow:0 0 0 1px #2271b1;outline:none;}'
+        + '.tip-count{margin:8px 0 0;color:#646970;font-size:12px;}'
+        + '.tip-grid{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));align-content:start;gap:8px;padding:16px 20px 20px;margin:0;list-style:none;}'
+        + '.tip-grid li{margin:0;}'
+        + '.tip-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;width:100%;height:100%;min-height:88px;padding:14px 6px 10px;border:1px solid #dcdcde;border-radius:6px;background:#fff;color:#1d2327;cursor:pointer;box-sizing:border-box;}'
+        + '.tip-tile img{width:28px;height:28px;flex:none;}'
+        + '.tip-tile span{font-size:12px;line-height:1.3;text-align:center;overflow-wrap:break-word;hyphens:auto;max-width:100%;}'
+        + '.tip-tile:hover{border-color:#2271b1;background:#f0f6fc;}'
+        + '.tip-tile:focus-visible{outline:2px solid #2271b1;outline-offset:1px;border-color:#2271b1;background:#f0f6fc;}'
+        + '.tip-empty{grid-column:1/-1;padding:32px 0;text-align:center;color:#646970;}';
+
+    function ensureStyle() {
+        if (document.getElementById(STYLE_ID)) { return; }
+        var style = document.createElement('style');
+        style.id = STYLE_ID;
+        style.textContent = CSS;
+        document.head.appendChild(style);
+    }
+
+    function normalize(value) {
+        return String(value).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
     }
 
     tinymce.PluginManager.add('themeicons', function(editor) {
@@ -300,60 +325,158 @@ class EditorStylesServiceProvider extends ServiceProvider
                     editor.windowManager.alert('Keine Icons gefunden.');
                     return;
                 }
-
-                var html = '<div style="display:flex;flex-wrap:wrap;gap:8px;max-width:580px;padding:8px;max-height:360px;overflow-y:auto;box-sizing:border-box;">';
-                data.icons.forEach(function(name) {
-                    var safeName = escapeHtml(name);
-                    var iconSrc = escapeHtml(data.baseUrl + encodeURIComponent(name) + '.svg');
-                    html += '<button type="button" class="theme-icon-picker-btn" data-icon="' + safeName + '" title="' + safeName + '" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;font-size:11px;min-width:64px;">'
-                        + '<img src="' + iconSrc + '" width="24" height="24" alt="' + safeName + '" style="opacity:0.7;">'
-                        + safeName
-                        + '</button>';
-                });
-                html += '</div>';
-
-                editor.windowManager.open({
-                    title: 'Icon auswählen',
-                    body: [{ type: 'container', html: html }],
-                    buttons: [{ text: 'Schließen', onclick: 'close' }],
-                    width: 640,
-                    height: 400,
-                    onopen: function() {
-                        var wins = editor.windowManager.getWindows();
-                        var win = wins[wins.length - 1];
-                        var container = win.find('container')[0];
-                        if (!container) { return; }
-                        var el = container.getEl();
-                        if (!el) { return; }
-                        el.addEventListener('click', function(e) {
-                            var target = e.target.closest('[data-icon]');
-                            if (target) {
-                                var shortcodeName = target.getAttribute('data-icon').replace(/"/g, '&quot;');
-                                editor.insertContent('[icon name="' + shortcodeName + '"]');
-                                editor.windowManager.close();
-                            }
-                        });
-                        el.addEventListener('mouseover', function(e) {
-                            var target = e.target.closest('.theme-icon-picker-btn');
-                            if (target) { target.style.background = '#f0f0f0'; }
-                        });
-                        el.addEventListener('mouseout', function(e) {
-                            var target = e.target.closest('.theme-icon-picker-btn');
-                            if (target) { target.style.background = '#fff'; }
-                        });
-                        el.addEventListener('focusin', function(e) {
-                            var target = e.target.closest('.theme-icon-picker-btn');
-                            if (target) { target.style.background = '#f0f0f0'; }
-                        });
-                        el.addEventListener('focusout', function(e) {
-                            var target = e.target.closest('.theme-icon-picker-btn');
-                            if (target) { target.style.background = '#fff'; }
-                        });
-                    }
-                });
+                openPicker(editor, data);
             }
         });
     });
+
+    function openPicker(editor, data) {
+        ensureStyle();
+        var labels = data.labels || {};
+        var icons = data.icons.map(function(slug) {
+            var label = labels[slug] || slug;
+            return { slug: slug, label: label, haystack: normalize(label + ' ' + slug.replace(/-/g, ' ')) };
+        }).sort(function(a, b) { return a.label.localeCompare(b.label, 'de'); });
+
+        var dialog = document.createElement('dialog');
+        dialog.className = 'tip-dialog';
+        dialog.lang = 'de';
+        dialog.setAttribute('aria-labelledby', 'tip-title');
+
+        var head = document.createElement('div');
+        head.className = 'tip-head';
+        var title = document.createElement('h2');
+        title.className = 'tip-title';
+        title.id = 'tip-title';
+        title.textContent = 'Icon einfügen';
+        var close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'tip-close';
+        close.setAttribute('aria-label', 'Schließen');
+        close.textContent = '×';
+        head.appendChild(title);
+        head.appendChild(close);
+
+        var searchWrap = document.createElement('div');
+        searchWrap.className = 'tip-search';
+        var input = document.createElement('input');
+        input.type = 'search';
+        input.placeholder = 'Suchen, z. B. Pfeil, Telefon, Haus';
+        input.setAttribute('aria-label', 'Icons durchsuchen');
+        input.autocomplete = 'off';
+        var count = document.createElement('p');
+        count.className = 'tip-count';
+        count.setAttribute('aria-live', 'polite');
+        searchWrap.appendChild(input);
+        searchWrap.appendChild(count);
+
+        var grid = document.createElement('ul');
+        grid.className = 'tip-grid';
+        var tiles = icons.map(function(icon) {
+            var li = document.createElement('li');
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'tip-tile';
+            btn.setAttribute('data-icon', icon.slug);
+            btn.title = icon.slug;
+            var img = document.createElement('img');
+            img.src = data.baseUrl + encodeURIComponent(icon.slug) + '.svg';
+            img.alt = '';
+            img.loading = 'lazy';
+            var text = document.createElement('span');
+            text.textContent = icon.label;
+            btn.appendChild(img);
+            btn.appendChild(text);
+            li.appendChild(btn);
+            grid.appendChild(li);
+            return { icon: icon, li: li, btn: btn };
+        });
+        var empty = document.createElement('li');
+        empty.className = 'tip-empty';
+        empty.hidden = true;
+        grid.appendChild(empty);
+
+        dialog.appendChild(head);
+        dialog.appendChild(searchWrap);
+        dialog.appendChild(grid);
+        document.body.appendChild(dialog);
+
+        function visibleButtons() {
+            return tiles.filter(function(t) { return !t.li.hidden; }).map(function(t) { return t.btn; });
+        }
+
+        function filter() {
+            var terms = normalize(input.value.trim()).split(/\s+/).filter(Boolean);
+            var shown = 0;
+            tiles.forEach(function(t) {
+                var match = terms.every(function(term) { return t.icon.haystack.indexOf(term) !== -1; });
+                t.li.hidden = !match;
+                if (match) { shown++; }
+            });
+            empty.hidden = shown !== 0;
+            empty.textContent = 'Kein Icon gefunden für „' + input.value.trim() + '“.';
+            count.textContent = terms.length ? shown + ' Treffer' + (shown ? ' · Enter fügt den ersten ein' : '') : icons.length + ' Icons';
+            grid.scrollTop = 0;
+        }
+
+        function insert(slug) {
+            dialog.close();
+            editor.focus();
+            editor.insertContent('[icon name="' + slug.replace(/"/g, '') + '"]');
+        }
+
+        function columns() {
+            var buttons = visibleButtons();
+            if (buttons.length < 2) { return 1; }
+            var top = buttons[0].offsetTop;
+            for (var i = 1; i < buttons.length; i++) {
+                if (buttons[i].offsetTop !== top) { return i; }
+            }
+            return buttons.length;
+        }
+
+        input.addEventListener('input', filter);
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                var first = visibleButtons()[0];
+                if (first) { insert(first.getAttribute('data-icon')); }
+            } else if (e.key === 'ArrowDown') {
+                var firstBtn = visibleButtons()[0];
+                if (firstBtn) { e.preventDefault(); firstBtn.focus(); }
+            }
+        });
+
+        grid.addEventListener('click', function(e) {
+            var target = e.target.closest('[data-icon]');
+            if (target) { insert(target.getAttribute('data-icon')); }
+        });
+
+        grid.addEventListener('keydown', function(e) {
+            var steps = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: columns(), ArrowUp: -columns() };
+            if (!(e.key in steps)) { return; }
+            var buttons = visibleButtons();
+            var index = buttons.indexOf(document.activeElement);
+            if (index === -1) { return; }
+            e.preventDefault();
+            var next = index + steps[e.key];
+            if (next < 0) { input.focus(); return; }
+            if (next < buttons.length) { buttons[next].focus(); }
+        });
+
+        close.addEventListener('click', function() { dialog.close(); });
+        dialog.addEventListener('click', function(e) {
+            if (e.target === dialog) { dialog.close(); }
+        });
+        dialog.addEventListener('close', function() {
+            dialog.remove();
+            editor.focus();
+        });
+
+        filter();
+        dialog.showModal();
+        input.focus();
+    }
 })();
 JS;
     }
@@ -368,16 +491,17 @@ JS;
                 return;
             }
 
-            $icons = array_keys(array_filter(
+            $labels = array_filter(
                 \WordpressStarter\Acf\FieldDefinitions::getThemeIcons(),
                 fn(string $key) => $key !== '',
                 ARRAY_FILTER_USE_KEY
-            ));
+            );
 
             wp_add_inline_script(
                 'editor',
                 'window.themeIconsData = ' . wp_json_encode([
-                    'icons' => $icons,
+                    'icons' => array_keys($labels),
+                    'labels' => $labels,
                     'baseUrl' => get_template_directory_uri() . '/resources/icons/',
                 ]) . ';',
                 'before'
