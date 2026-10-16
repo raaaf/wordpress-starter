@@ -312,7 +312,7 @@ class EditorStylesServiceProvider extends ServiceProvider
     }
 
     function normalize(value) {
-        return String(value).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        return String(value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\u00df/g, 'ss');
     }
 
     tinymce.PluginManager.add('themeicons', function(editor) {
@@ -437,8 +437,9 @@ class EditorStylesServiceProvider extends ServiceProvider
 
         input.addEventListener('input', filter);
         input.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.isComposing) {
                 e.preventDefault();
+                if (!input.value.trim()) { return; }
                 var first = visibleButtons()[0];
                 if (first) { insert(first.getAttribute('data-icon')); }
             } else if (e.key === 'ArrowDown') {
@@ -453,20 +454,26 @@ class EditorStylesServiceProvider extends ServiceProvider
         });
 
         grid.addEventListener('keydown', function(e) {
-            var steps = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: columns(), ArrowUp: -columns() };
-            if (!(e.key in steps)) { return; }
+            var step;
+            if (e.key === 'ArrowRight') { step = 1; }
+            else if (e.key === 'ArrowLeft') { step = -1; }
+            else if (e.key === 'ArrowDown') { step = columns(); }
+            else if (e.key === 'ArrowUp') { step = -columns(); }
+            else { return; }
             var buttons = visibleButtons();
             var index = buttons.indexOf(document.activeElement);
             if (index === -1) { return; }
             e.preventDefault();
-            var next = index + steps[e.key];
+            var next = index + step;
             if (next < 0) { input.focus(); return; }
             if (next < buttons.length) { buttons[next].focus(); }
         });
 
         close.addEventListener('click', function() { dialog.close(); });
+        var pressedOnBackdrop = false;
+        dialog.addEventListener('mousedown', function(e) { pressedOnBackdrop = e.target === dialog; });
         dialog.addEventListener('click', function(e) {
-            if (e.target === dialog) { dialog.close(); }
+            if (e.target === dialog && pressedOnBackdrop) { dialog.close(); }
         });
         dialog.addEventListener('close', function() {
             dialog.remove();
