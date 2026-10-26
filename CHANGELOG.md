@@ -1,3 +1,9 @@
+## [2.42.3](https://github.com/raaaf/wordpress-starter/compare/v2.42.2...v2.42.3) (2026-10-26)
+
+### Bug Fixes
+
+- **contact-form:** align consent and error texts, fix spacing and focus ring ([7a9d188](https://github.com/raaaf/wordpress-starter/commit/7a9d18819882e36bdb53ebbf4f37114869d30066))
+
 ## [2.42.2](https://github.com/raaaf/wordpress-starter/compare/v2.42.1...v2.42.2) (2026-10-16)
 
 ### Bug Fixes
