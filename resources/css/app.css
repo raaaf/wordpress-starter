@@ -408,7 +408,7 @@
        Offset-Ring in Weiss. Er blieb nach jedem Mausklick stehen (kein
        :focus-visible) und zeichnete auf dunklen Flaechen einen weissen
        Rahmen um die Einwilligungs-Checkbox. */
-    --tw-ring-offset-shadow: 0 0 #0000;
+    --tw-ring-offset-shadow: 0 0 transparent;
   }
 
   /* The same plugin hard-codes a white fill and a fixed grey border on
