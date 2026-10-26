@@ -404,6 +404,11 @@
     select
   ):focus {
     --tw-ring-shadow: 0 0 #0000;
+    /* Checkboxen und Radios bekommen vom Plugin zusaetzlich einen 2px
+       Offset-Ring in Weiss. Er blieb nach jedem Mausklick stehen (kein
+       :focus-visible) und zeichnete auf dunklen Flaechen einen weissen
+       Rahmen um die Einwilligungs-Checkbox. */
+    --tw-ring-offset-shadow: 0 0 #0000;
   }
 
   /* The same plugin hard-codes a white fill and a fixed grey border on
@@ -2702,13 +2707,19 @@ html {
 
 .wpcf7 form.wpcf7-form .wpcf7-not-valid-tip {
   display: flex;
-  /* flex-start lined the icon up with the top of the text instead of its
-     centre, so the "!" marker sat above the baseline. The text is a single
-     short line, so centering both against each other is correct. */
-  align-items: center;
-  gap: 0.375rem;
+  /* Oben ausgerichtet, damit das Symbol bei einer umbrechenden Meldung an
+     der ersten Zeile steht; die Mitte der ersten Zeile setzt das ::before
+     selbst per margin-top. Die Zeilenhoehe ist fest, weil diese Rechnung
+     von ihr abhaengt. */
+  align-items: flex-start;
+  /* Das Symbol steht mittig in einer Spalte so breit wie die Checkbox der
+     Einwilligung, der Text der Meldung beginnt deshalb auf derselben Linie
+     wie der Einwilligungstext. Gemessen vorher: Meldung 16px links vom
+     Einwilligungstext, beide Texte direkt untereinander. */
+  gap: calc((var(--wpcf7-choice-size) - 1rem) / 2 + var(--wpcf7-choice-gap));
   margin-top: 0.375rem;
   font-size: var(--typography-body-small-size);
+  line-height: 1.5;
   color: var(--text-error);
 }
 
@@ -2720,8 +2731,13 @@ html {
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 1.125em;
-  height: 1.125em;
+  width: 1rem;
+  height: 1rem;
+  /* Mittig zur ersten Textzeile: eine Zeile ist 1.5 x Meldungsgroesse, in
+     der Schriftgroesse des Symbols (0.75em) also 2em. Waagerecht mittig in
+     der Checkbox-Spalte, siehe gap oben. */
+  margin-top: calc((2em - 1rem) / 2);
+  margin-left: calc((var(--wpcf7-choice-size) - 1rem) / 2);
   border-radius: 50%;
   background-color: var(--bg-error-strong);
   color: var(--text-inverse);
@@ -2820,6 +2836,13 @@ html {
   }
 }
 
+/* Groesse und Abstand der Einwilligungs-Checkbox. Die Fehlermeldungen
+   rechnen mit denselben Werten, damit beide Texte auf einer Linie beginnen. */
+.wpcf7-form {
+  --wpcf7-choice-size: 1.5rem;
+  --wpcf7-choice-gap: 0.625rem;
+}
+
 /* Einwilligung (acceptance), bewusst ausserhalb jeder @layer.
 
    Contact Form 7 liefert ein eigenes, ungelayertes Stylesheet aus. Ungelayerte
@@ -2836,7 +2859,8 @@ html {
 .wpcf7-form .wpcf7-acceptance label {
   display: flex;
   align-items: flex-start;
-  gap: 0.625rem;
+  gap: var(--wpcf7-choice-gap);
+  line-height: 1.5;
   font-weight: 400;
   color: var(--text-secondary);
   cursor: pointer;
@@ -2844,14 +2868,18 @@ html {
 
 .wpcf7-form .wpcf7-acceptance input[type='checkbox'] {
   flex: none;
-  margin-top: 0.15rem;
+
+  /* Mittig zur ersten Textzeile (Zeilenhoehe 1.5, siehe Label). Vorher
+     stand das Kaestchen mit festem 0.15rem rund 2px unter der Zeilenmitte. */
+  font-size: inherit;
+  margin-top: calc((1.5em - var(--wpcf7-choice-size)) / 2);
 
   /* WCAG 2.5.8 will 24px Trefferflaeche. CF7 liefert die Checkbox in der
      Browsergroesse aus, gemessen 20x20. Die Flaeche waechst, das gezeichnete
      Kaestchen bleibt optisch gleich gross, weil accent-color und Rahmen
      unveraendert bleiben. */
-  width: 1.5rem;
-  height: 1.5rem;
+  width: var(--wpcf7-choice-size);
+  height: var(--wpcf7-choice-size);
 }
 
 /* Fusstext, bewusst ausserhalb jeder @layer.
