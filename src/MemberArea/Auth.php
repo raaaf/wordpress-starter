@@ -81,9 +81,13 @@ class Auth
             if (!is_user_logged_in()) {
                 return false;
             }
+            if (is_multisite() && !is_user_member_of_blog(get_current_user_id(), get_current_blog_id())) {
+                return false;
+            }
+            // Empty list = administrators only (they returned above).
             $allowedRoles = get_field('member_allowed_roles', 'option') ?: [];
             if (empty($allowedRoles)) {
-                return true;
+                return false;
             }
             $user = wp_get_current_user();
 

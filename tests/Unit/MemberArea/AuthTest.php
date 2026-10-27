@@ -75,4 +75,53 @@ final class AuthTest extends TestCase
         $this->assertFalse($GLOBALS['wp_mock_clear_auth_cookie_called']);
         $this->assertSame(5, $GLOBALS['wp_mock_current_user_id']);
     }
+
+    public function testEmptyAllowedRolesDeniesNonAdmin(): void
+    {
+        $this->loginAs(['subscriber']);
+        $this->setMockField('member_allowed_roles', [], 'option');
+
+        $this->assertFalse(Auth::isAuthenticated());
+    }
+
+    public function testEmptyAllowedRolesStillAllowsAdministrator(): void
+    {
+        $this->loginAs(['administrator']);
+        $this->setMockField('member_allowed_roles', [], 'option');
+        $GLOBALS['wp_mock_current_user_can'] = ['manage_options' => true];
+
+        $this->assertTrue(Auth::isAuthenticated());
+    }
+
+    public function testMultisiteRequiresMembershipOfCurrentBlog(): void
+    {
+        $this->loginAs(['subscriber']);
+        $this->setMockField('member_allowed_roles', ['subscriber'], 'option');
+        $GLOBALS['wp_mock_is_multisite'] = true;
+        $GLOBALS['wp_mock_is_user_member_of_blog'] = false;
+
+        $this->assertFalse(Auth::isAuthenticated());
+
+        $GLOBALS['wp_mock_is_user_member_of_blog'] = true;
+        $this->assertTrue(Auth::isAuthenticated());
+    }
+
+    /**
+     * @param array<int, string> $roles
+     */
+    private function loginAs(array $roles): void
+    {
+        $reflection = new \ReflectionClass(Auth::class);
+        foreach (['cachedAuthMode' => null, 'authModeCached' => false] as $property => $value) {
+            if ($reflection->hasProperty($property)) {
+                $prop = $reflection->getProperty($property);
+                $prop->setValue(null, $prop->getType()?->allowsNull() ? null : false);
+            }
+        }
+
+        $this->setMockField('member_auth_mode', 'wordpress', 'option'); // phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText -- ACF field value, not prose
+        $GLOBALS['wp_mock_current_user_id'] = 7;
+        $GLOBALS['wp_mock_is_user_logged_in'] = true;
+        $GLOBALS['wp_mock_current_user_roles'] = $roles;
+    }
 }

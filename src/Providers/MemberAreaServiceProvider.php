@@ -148,7 +148,7 @@ class MemberAreaServiceProvider extends ServiceProvider
             // unchanged from wp_signon()) uses its own message.
             $message = match ($errorCode) {
                 'member_login_failed', 'wrong_password' => __('Falsches Passwort.', 'wp-starter'),
-                'no_password' => $result->get_error_message(),
+                'no_password', 'member_login_role_not_allowed' => $result->get_error_message(),
                 default => __('Anmeldung fehlgeschlagen.', 'wp-starter'),
             };
             wp_send_json_error(['message' => $message], 401);
