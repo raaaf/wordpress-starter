@@ -643,6 +643,13 @@ if (!function_exists('is_admin')) {
     }
 }
 
+if (!function_exists('is_user_member_of_blog')) {
+    function is_user_member_of_blog(int $userId = 0, int $blogId = 0): bool
+    {
+        return $GLOBALS['wp_mock_is_user_member_of_blog'] ?? true;
+    }
+}
+
 if (!function_exists('is_multisite')) {
     function is_multisite(): bool
     {

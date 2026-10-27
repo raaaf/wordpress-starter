@@ -59,6 +59,8 @@ trait WordPressMocks
             'wp_mock_is_404' => false,
             'wp_mock_is_front_page' => false,
             'wp_mock_is_multisite' => false,
+            'wp_mock_current_user_roles' => [],
+            'wp_mock_is_user_member_of_blog' => true,
             'wp_mock_is_page' => false,
             'wp_mock_is_search' => false,
             'wp_mock_is_singular' => false,
