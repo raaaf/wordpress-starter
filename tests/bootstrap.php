@@ -594,6 +594,13 @@ if (!function_exists('wp_get_attachment_image_src')) {
     }
 }
 
+if (!function_exists('wp_get_attachment_caption')) {
+    function wp_get_attachment_caption(int $postId = 0): string|false
+    {
+        return $GLOBALS['wp_mock_attachments'][$postId]['caption'] ?? '';
+    }
+}
+
 if (!function_exists('wp_get_attachment_image')) {
     function wp_get_attachment_image(int $attachmentId, string $size = 'thumbnail', bool $icon = false, array $attr = []): string
     {
@@ -1194,6 +1201,19 @@ if (!function_exists('get_option')) {
 if (!function_exists('update_option')) {
     function update_option(string $option, mixed $value, mixed $autoload = null): bool
     {
+        $GLOBALS['wp_mock_options'][$option] = $value;
+
+        return true;
+    }
+}
+
+if (!function_exists('add_option')) {
+    // Like WordPress: fails (false) when the option already exists.
+    function add_option(string $option, mixed $value = '', string $deprecated = '', mixed $autoload = null): bool
+    {
+        if (array_key_exists($option, $GLOBALS['wp_mock_options'])) {
+            return false;
+        }
         $GLOBALS['wp_mock_options'][$option] = $value;
 
         return true;

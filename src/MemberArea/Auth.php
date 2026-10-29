@@ -152,7 +152,7 @@ class Auth
                 // retryable credential mistakes, so their message is passed through.
                 $enumerationCodes = ['invalid_username', 'incorrect_password', 'invalid_email', 'invalidcombo'];
                 if (in_array($result->get_error_code(), $enumerationCodes, true)) {
-                    return new WP_Error('member_login_failed', __('Falsches Passwort.', 'wp-starter'));
+                    return new WP_Error('member_login_failed', __('Benutzername oder Passwort ist falsch.', 'wp-starter'));
                 }
 
                 return $result;

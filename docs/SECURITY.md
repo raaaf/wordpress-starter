@@ -149,6 +149,14 @@ Table row counts are checked on the whole posted tree via `acf/validate_save_pos
 
 `Acf::registerPasswordHashing()` (`src/MemberArea/Acf.php`) validates the shared-password field on save via `acf/validate_value/key=field_member_shared_password`, rejecting `<`, `>`, `&` and leading/trailing whitespace before the value is hashed with `wp_hash_password()`. This keeps the hashed value consistent with what `Auth::getSharedPassword()` receives at login: without the check, users without `unfiltered_html` have their input run through `wp_kses_post_deep` on the ACF save path (encoding `&` to `&amp;` and stripping `<`/`>`) before hashing, while the login form submits the raw value, so the hash would never match.
 
+### SFTP Passwords and Key Rotation
+
+`MemberArea\Crypto` stores SFTP passwords as `enc:v2:<key id>:...`, encrypted with a key derived from `AUTH_KEY`/`SECURE_AUTH_KEY`. Older `enc:v1` values stay readable and are re-encrypted on the next admin request. To rotate the salts without losing the stored passwords, put the old values into `WP_STARTER_PREVIOUS_AUTH_KEYS` in `wp-config.php` (or add them via the `wp_starter_crypto_secrets` filter) before changing `AUTH_KEY`; the theme re-encrypts every password to the new key and records the key id in the option `sftp_passwords_key_id`. Remove the constant once that has happened. A password that no key can decrypt stays unreadable, the folder sync reports it instead of failing silently.
+
+### Folder Sync Lock and Errors
+
+`FolderSync::run()` takes an option lock (`add_option`, stale after 15 minutes) so the cron run and a manual sync never overlap; only the owner of the lock releases it. A manual sync while another one runs answers with HTTP 409, a cron run retries five minutes later. Connection and listing errors are collected per run (option `sftp_sync_errors`) and shown as an admin notice on the downloads screen; a failed listing no longer looks like an empty folder and therefore never deletes downloads.
+
 ### Seitenpasswort und Mitgliederbereich
 
 Ein WordPress-Seitenpasswort auf einer Mitgliederbereich-Seite ist nur eine
