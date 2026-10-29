@@ -176,12 +176,14 @@
   --bg-button-secondary-on-stone: var(--rafael-color-primary-800);
   --bg-button-secondary-on-stone-hover: var(--rafael-color-gray-800);
 
-  --card-bg: var(--bg-secondary);
+  /* Cards one step above the page, not the elevated tone: #141414 plus the
+     wash read washed out on black (Rafael, 2026-10-29). */
+  --card-bg: var(--bg-tertiary-elevated);
   --card-border: var(--border-default);
   --surface-sheen: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.015) 45%,
+    rgba(255, 255, 255, 0.035) 0%,
+    rgba(255, 255, 255, 0.01) 45%,
     transparent 80%
   );
   --page-sheen: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, transparent 50%);
@@ -266,12 +268,14 @@
     --bg-button-secondary-on-stone: var(--rafael-color-primary-800);
     --bg-button-secondary-on-stone-hover: var(--rafael-color-gray-800);
 
-    --card-bg: var(--bg-secondary);
+    /* Cards one step above the page, not the elevated tone: #141414 plus the
+       wash read washed out on black (Rafael, 2026-10-29). */
+    --card-bg: var(--bg-tertiary-elevated);
     --card-border: var(--border-default);
     --surface-sheen: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.06) 0%,
-      rgba(255, 255, 255, 0.015) 45%,
+      rgba(255, 255, 255, 0.035) 0%,
+      rgba(255, 255, 255, 0.01) 45%,
       transparent 80%
     );
     --page-sheen: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, transparent 50%);
@@ -3332,4 +3336,21 @@ html {
   .wpcf7-form .wpcf7-acceptance label a:hover {
     text-decoration-color: currentColor;
   }
+}
+
+/* Image cards in a stretched grid row: the text block after the image carries
+   its own wash, so it has to fill the rest of the card, otherwise the card's
+   own background shows as an empty band below it. Unlayered, because the card
+   carries the utility class "block". */
+.card:has(> :is(img, picture, figure, :has(> img)) ~ div) {
+  display: flex;
+  flex-direction: column;
+}
+
+.card > :is(img, picture, figure, :has(> img)) {
+  flex-shrink: 0;
+}
+
+.card > :is(img, picture, figure, :has(> img)) ~ div:last-child {
+  flex-grow: 1;
 }

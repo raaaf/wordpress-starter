@@ -5,7 +5,7 @@
  * Run: node scripts/transform-tokens.js
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-10-29T20:41:58.557Z
+ * Generated: 2026-10-29T20:58:31.275Z
  */
 
 /* ============================================
@@ -411,7 +411,7 @@
   --card-footer-padding-top: var(--rafael-spacing-4);
 
   /* Layout: one content column for every wrapper (header, sections, footer) */
-  --container-max: 68rem;
+  --container-max: 80rem;
 
   /* Section block padding: mobile to desktop, fluid like the type scale */
   --section-padding-sm: clamp(3rem, calc(2.7143rem + 1.4286vw), 4rem);

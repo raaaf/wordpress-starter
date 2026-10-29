@@ -133,7 +133,7 @@
 <x-section :background="$background" :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" class="video">
     <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
     @if($hasVideo)
-        <div class="max-w-6xl mx-auto">
+        <div>
             <div
                 class="relative overflow-hidden rounded-lg {{ $aspectClass }} bg-surface-secondary"
                 {{-- On a phone 16:9 is only about 200px tall, the consent notice needs about

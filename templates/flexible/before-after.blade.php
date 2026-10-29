@@ -34,7 +34,7 @@
         <div
             id="{{ $uniqueId }}"
             x-data="beforeAfterSlider()"
-            class="relative max-w-4xl mx-auto select-none"
+            class="relative select-none"
         >
             {{-- Bildbereich traegt das overflow-hidden jetzt selbst, nicht mehr der
                  aeussere Container: der Slider-Griff ist per inset-y-0 randbuendig

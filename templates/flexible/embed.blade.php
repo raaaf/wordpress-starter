@@ -56,7 +56,7 @@
     <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if($url !== '' && $isHttps && $isAllowedHost)
-        <div class="max-w-4xl mx-auto">
+        <div>
             <div
                 class="relative overflow-hidden rounded-[var(--card-radius)] bg-surface-secondary {{ $aspectClass }}"
                 @if(!$aspectClass) style="height: {{ $height }}px" @endif
