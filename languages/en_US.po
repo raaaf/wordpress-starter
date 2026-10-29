@@ -23,8 +23,14 @@ msgid_plural "%d Ergebnisse gefunden"
 msgstr[0] "%d result found"
 msgstr[1] "%d results found"
 
+msgid "%d Icons"
+msgstr "%d icons"
+
 msgid "%d Min. Lesezeit"
 msgstr "%d min read"
+
+msgid "%d Treffer"
+msgstr "%d matches"
 
 msgid "%d Variante"
 msgid_plural "%d Varianten"
@@ -1015,6 +1021,12 @@ msgstr "Documents"
 msgid "Dokumente werden geladen..."
 msgstr "Loading documents..."
 
+msgid "Dokumentenkategorie"
+msgstr "Document category"
+
+msgid "Dokumentenkategorien"
+msgstr "Document categories"
+
 msgid "Download-Liste"
 msgstr "Download list"
 
@@ -1158,6 +1170,9 @@ msgstr "Tighter rows. Useful from about ten rows."
 
 msgid "Englisch"
 msgstr "English"
+
+msgid "Enter fügt den ersten ein"
+msgstr "Enter inserts the first one"
 
 msgid "Entpacke und installiere..."
 msgstr "Unpacking and installing..."
@@ -1633,6 +1648,12 @@ msgstr "I agree to the processing of my details to answer the request."
 msgid "Icon"
 msgstr "Icon"
 
+msgid "Icon einfügen"
+msgstr "Insert icon"
+
+msgid "Icons durchsuchen"
+msgstr "Search icons"
+
 msgid "Im Sprungmenü zeigen"
 msgstr "Show in jump menu"
 
@@ -1840,6 +1861,9 @@ msgstr "No backup time selected."
 msgid "Kein Icon"
 msgstr "No icon"
 
+msgid "Kein Icon gefunden für „%s“."
+msgstr "No icon found for \"%s\"."
+
 msgid "Kein Passwort konfiguriert."
 msgstr "No password configured."
 
@@ -1887,6 +1911,9 @@ msgstr "No download URL found for the plugin."
 
 msgid "Keine Ergebnisse gefunden"
 msgstr "No results found"
+
+msgid "Keine Icons gefunden."
+msgstr "No icons found."
 
 msgid "Keine Treffer"
 msgstr "No matches"
@@ -1956,6 +1983,9 @@ msgstr "Customer"
 
 msgid "Kundeninformationen"
 msgstr "Customer information"
+
+msgid "Kundenstimme"
+msgstr "Testimonial"
 
 msgid "Kundenstimme hinzufügen"
 msgstr "Add testimonial"
@@ -3016,6 +3046,9 @@ msgstr "Search:"
 msgid "Suchen"
 msgstr "Search"
 
+msgid "Suchen, z. B. Pfeil, Telefon, Haus"
+msgstr "Search, e.g. arrow, phone, house"
+
 msgid "Suchen..."
 msgstr "Search..."
 
@@ -3081,6 +3114,9 @@ msgstr "Team"
 
 msgid "Team Portrait"
 msgstr "Team portrait"
+
+msgid "Teammitglied"
+msgstr "Team member"
 
 msgid "Teammitglieder"
 msgstr "Team members"
@@ -3273,6 +3309,9 @@ msgstr "Variant"
 
 msgid "Variante %d"
 msgstr "Variant %d"
+
+msgid "Veranstaltung"
+msgstr "Event"
 
 msgid "Veranstaltungen"
 msgstr "Events"

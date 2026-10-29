@@ -47,7 +47,7 @@ class TranslationFileTest extends TestCase
     {
         $messages = $this->messages();
 
-        foreach (['Nächster Termin', 'Karte laden', 'Zurück', 'Seite nicht gefunden', 'Folge uns', 'Rechtliche Links', 'Fußnavigation'] as $source) {
+        foreach (['Nächster Termin', 'Karte laden', 'Zurück', 'Seite nicht gefunden', 'Folge uns', 'Rechtliche Links', 'Fußnavigation', 'Veranstaltungen', 'Kundenstimmen', 'Dokumente', 'Teammitglieder', 'Icon einfügen'] as $source) {
             $this->assertArrayHasKey($source, $messages);
             $this->assertNotSame($source, $messages[$source]);
         }

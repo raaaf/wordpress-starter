@@ -311,18 +311,24 @@ class EditorStylesServiceProvider extends ServiceProvider
         document.head.appendChild(style);
     }
 
+    // Translated strings come from PHP (themeIconsData.i18n); German fallbacks keep it working without them.
+    function t(key, fallback) {
+        var i18n = (window.themeIconsData && window.themeIconsData.i18n) || {};
+        return i18n[key] || fallback;
+    }
+
     function normalize(value) {
         return String(value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\u00df/g, 'ss');
     }
 
     tinymce.PluginManager.add('themeicons', function(editor) {
         editor.addButton('themeicons', {
-            title: 'Icon einfügen',
+            title: t('title', 'Icon einfügen'),
             icon: 'image',
             onclick: function() {
                 var data = window.themeIconsData;
                 if (!data || !data.icons || data.icons.length === 0) {
-                    editor.windowManager.alert('Keine Icons gefunden.');
+                    editor.windowManager.alert(t('none', 'Keine Icons gefunden.'));
                     return;
                 }
                 openPicker(editor, data);
@@ -336,11 +342,11 @@ class EditorStylesServiceProvider extends ServiceProvider
         var icons = data.icons.map(function(slug) {
             var label = labels[slug] || slug;
             return { slug: slug, label: label, haystack: normalize(label + ' ' + slug.replace(/-/g, ' ')) };
-        }).sort(function(a, b) { return a.label.localeCompare(b.label, 'de'); });
+        }).sort(function(a, b) { return a.label.localeCompare(b.label, t('lang', 'de')); });
 
         var dialog = document.createElement('dialog');
         dialog.className = 'tip-dialog';
-        dialog.lang = 'de';
+        dialog.lang = t('lang', 'de');
         dialog.setAttribute('aria-labelledby', 'tip-title');
 
         var head = document.createElement('div');
@@ -348,11 +354,11 @@ class EditorStylesServiceProvider extends ServiceProvider
         var title = document.createElement('h2');
         title.className = 'tip-title';
         title.id = 'tip-title';
-        title.textContent = 'Icon einfügen';
+        title.textContent = t('title', 'Icon einfügen');
         var close = document.createElement('button');
         close.type = 'button';
         close.className = 'tip-close';
-        close.setAttribute('aria-label', 'Schließen');
+        close.setAttribute('aria-label', t('close', 'Schließen'));
         close.textContent = '×';
         head.appendChild(title);
         head.appendChild(close);
@@ -361,8 +367,8 @@ class EditorStylesServiceProvider extends ServiceProvider
         searchWrap.className = 'tip-search';
         var input = document.createElement('input');
         input.type = 'search';
-        input.placeholder = 'Suchen, z. B. Pfeil, Telefon, Haus';
-        input.setAttribute('aria-label', 'Icons durchsuchen');
+        input.placeholder = t('placeholder', 'Suchen, z. B. Pfeil, Telefon, Haus');
+        input.setAttribute('aria-label', t('search', 'Icons durchsuchen'));
         input.autocomplete = 'off';
         var count = document.createElement('p');
         count.className = 'tip-count';
@@ -414,8 +420,10 @@ class EditorStylesServiceProvider extends ServiceProvider
                 if (match) { shown++; }
             });
             empty.hidden = shown !== 0;
-            empty.textContent = 'Kein Icon gefunden für „' + input.value.trim() + '“.';
-            count.textContent = terms.length ? shown + ' Treffer' + (shown ? ' · Enter fügt den ersten ein' : '') : icons.length + ' Icons';
+            empty.textContent = t('noMatch', 'Kein Icon gefunden für „%s“.').replace('%s', input.value.trim());
+            count.textContent = terms.length
+                ? t('matches', '%d Treffer').replace('%d', shown) + (shown ? ' · ' + t('enterHint', 'Enter fügt den ersten ein') : '')
+                : t('count', '%d Icons').replace('%d', icons.length);
             grid.scrollTop = 0;
         }
 
@@ -510,6 +518,21 @@ JS;
                     'icons' => array_keys($labels),
                     'labels' => $labels,
                     'baseUrl' => get_template_directory_uri() . '/resources/icons/',
+                    'i18n' => [
+                        'lang' => substr(get_user_locale(), 0, 2),
+                        'title' => __('Icon einfügen', 'wp-starter'),
+                        'none' => __('Keine Icons gefunden.', 'wp-starter'),
+                        'close' => __('Schließen', 'wp-starter'),
+                        'placeholder' => __('Suchen, z. B. Pfeil, Telefon, Haus', 'wp-starter'),
+                        'search' => __('Icons durchsuchen', 'wp-starter'),
+                        /* translators: %s: search term */
+                        'noMatch' => __('Kein Icon gefunden für „%s“.', 'wp-starter'),
+                        /* translators: %d: number of matching icons */
+                        'matches' => __('%d Treffer', 'wp-starter'),
+                        'enterHint' => __('Enter fügt den ersten ein', 'wp-starter'),
+                        /* translators: %d: number of icons */
+                        'count' => __('%d Icons', 'wp-starter'),
+                    ],
                 ]) . ';',
                 'before'
             );

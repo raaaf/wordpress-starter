@@ -60,6 +60,13 @@ if (!function_exists('get_stylesheet')) {
     }
 }
 
+if (!function_exists('get_user_locale')) {
+    function get_user_locale(): string
+    {
+        return $GLOBALS['wp_mock_user_locale'] ?? 'de_DE';
+    }
+}
+
 if (!function_exists('get_template_directory')) {
     function get_template_directory(): string
     {
