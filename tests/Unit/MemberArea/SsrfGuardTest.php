@@ -55,9 +55,10 @@ final class SsrfGuardTest extends TestCase
     #[DataProvider('blockedHosts')]
     public function testAssertSafeUrlRejectsBlockedHosts(string $host): void
     {
-        // Bracketed IPv6 hosts keep their brackets after wp_parse_url() and are rejected as
-        // unresolvable, so only the exception type is pinned here.
+        // Bracketed IPv6 hosts are unwrapped before the check, so they hit the IP range
+        // check directly instead of a DNS lookup.
         $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('blocked IP range');
 
         $literal = str_contains($host, ':') ? '[' . $host . ']' : $host;
         SsrfGuard::assertSafeUrl('https://' . $literal . '/file.pdf');
