@@ -48,7 +48,7 @@
                             <span class="sr-only">{{ $name }}</span>
                         </label>
                     @endforeach
-                    <label class="token-swatch token-swatch--custom">
+                    <label class="token-swatch token-swatch--custom" :class="{ 'is-selected': ! @js(array_keys($swatches)).includes(accent.toUpperCase()) }">
                         <span class="sr-only">{{ __('Eigene Farbe', 'wp-starter') }}</span>
                         <input type="color" value="#FF6B35" x-model="accent" x-on:input="update()">
                     </label>

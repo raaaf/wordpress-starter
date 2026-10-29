@@ -3391,7 +3391,8 @@ html {
   cursor: pointer;
 }
 
-.token-swatch:has(input:checked) {
+.token-swatch:has(input:checked),
+.token-swatch--custom.is-selected {
   outline: 2px solid var(--text-primary);
   outline-offset: 3px;
 }
@@ -3425,7 +3426,8 @@ html {
   cursor: pointer;
 }
 
+/* Text colour, not the accent: a dark custom accent would vanish on the dark surface. */
 .token-range {
   width: 100%;
-  accent-color: var(--bg-brand);
+  accent-color: var(--text-primary);
 }

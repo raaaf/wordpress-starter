@@ -26,6 +26,11 @@
 
     $altBefore = $beforeId ? \WordpressStarter\Helpers\Text::imageAlt((int) $beforeId, $labelBefore) : $labelBefore;
     $altAfter  = $afterId  ? \WordpressStarter\Helpers\Text::imageAlt((int) $afterId,  $labelAfter)  : $labelAfter;
+
+    // Both halves get identical size and loading attributes, so the browser picks
+    // the same srcset candidate for each; otherwise core's loading optimisation
+    // could treat them differently and one side looks softer on retina screens.
+    $imageArgs = ['class' => 'block w-full', 'sizes' => '(max-width: 1024px) 100vw, 1024px', 'loading' => 'lazy'];
 @endphp
 
 @if(($hasImageBefore && $hasImageAfter) || $title || current_user_can('edit_posts'))
@@ -45,20 +50,14 @@
                  (gleiche Falle wie im Akkordeon geloest). --}}
             <div class="relative overflow-hidden rounded-[var(--card-radius)]">
                 {{-- After image (background) --}}
-                {!! wp_get_attachment_image($afterId, 'content', false, [
-                    'class'   => 'block w-full',
-                    'alt'     => $altAfter,
-                ]) !!}
+                {!! wp_get_attachment_image($afterId, 'content', false, $imageArgs + ['alt' => $altAfter]) !!}
 
                 {{-- Before image (clipped) --}}
                 <div
                     class="absolute inset-0 overflow-hidden"
                     :style="'clip-path: inset(0 ' + (100 - position) + '% 0 0)'"
                 >
-                    {!! wp_get_attachment_image($beforeId, 'content', false, [
-                        'class'   => 'block w-full',
-                        'alt'     => $altBefore,
-                    ]) !!}
+                    {!! wp_get_attachment_image($beforeId, 'content', false, $imageArgs + ['alt' => $altBefore]) !!}
                 </div>
             </div>
 
