@@ -670,7 +670,7 @@ html {
     .text-content-tertiary
   ):not(
     :is(
-      .card,
+      .card:not(.card--rule),
       .alert,
       .badge,
       .button,
@@ -685,7 +685,7 @@ html {
   ):not(
     .bg-surface-inverse
       :is(
-        .card,
+        .card:not(.card--rule),
         .alert,
         .badge,
         .button,
@@ -721,7 +721,7 @@ html {
     .text-content-tertiary
   ):not(
     :is(
-      .card,
+      .card:not(.card--rule),
       .alert,
       .badge,
       .button,
@@ -736,7 +736,7 @@ html {
   ):not(
     .bg-surface-brand
       :is(
-        .card,
+        .card:not(.card--rule),
         .alert,
         .badge,
         .button,
@@ -777,7 +777,7 @@ html {
    Statt die Ausnahmeliste weiter zu verlaengern, traegt jede Flaeche ihre
    eigene Farbe: wer einen Hintergrund setzt, setzt auch die Schrift dazu. Die
    Vererbung endet damit an der naechsten Flaeche, egal wie tief sie liegt. */
-.card,
+.card:not(.card--rule),
 .alert,
 .bg-surface,
 .bg-surface-secondary,
@@ -1216,7 +1216,7 @@ html {
       .text-h3,
       .text-h4,
       .text-h5
-    ):not(:is(.card, .alert) *) {
+    ):not(:is(.card:not(.card--rule), .alert) *) {
     color: var(--text-on-brand);
   }
 
@@ -1437,7 +1437,7 @@ html {
    ============================================ */
 
 @layer components {
-  .card,
+  .card:not(.card--rule),
   .surface-sheen {
     background-image: var(--surface-sheen);
   }
@@ -2119,8 +2119,9 @@ html {
   align-items: center;
 }
 
-/* Split variant uses CSS Grid (handled in template) */
-.hero--split {
+/* Split variant uses CSS Grid, stacked a plain flow (both handled in template) */
+.hero--split,
+.hero--stacked {
   display: block;
 }
 
@@ -2180,6 +2181,23 @@ html {
     text-decoration: underline;
     text-decoration-thickness: 2px;
     text-underline-offset: 4px;
+  }
+
+  /* Utility item (e.g. internal area): set the CSS class menu-item-utility on the
+     menu item in Appearance > Menus. A hairline divider in the middle of the
+     gap sets it apart from the page links. */
+  .desktop-nav > ul > li.menu-item-utility {
+    position: relative;
+  }
+
+  .desktop-nav > ul > li.menu-item-utility::before {
+    content: '';
+    position: absolute;
+    left: -0.75rem;
+    top: 50%;
+    height: 1.25rem;
+    border-left: var(--border-width-1, 1px) solid var(--border-default);
+    translate: 0 -50%;
   }
 
   /* Parent menu item with submenu */
@@ -2441,8 +2459,23 @@ html {
   transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
+/* The simple footer's bottom row is the quietest text of the footer. */
+.footer--simple .legal-nav a {
+  color: var(--text-tertiary);
+}
+
 .legal-nav a:hover {
   color: var(--text-primary);
+}
+
+/* 44 px finger target for the footer's contact and legal links. Only on
+   touch, so the desktop rows stay compact. */
+@media (pointer: coarse) {
+  footer :is(address a, .legal-nav a) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
 }
 
 .legal-nav .current-menu-item > a {

@@ -172,6 +172,17 @@ class Options
                     ),
                     ['wrapper' => ['width' => '50']],
                 ),
+                FieldDefinitions::numberField(
+                    'field_options_logo_height',
+                    __('Logo-Höhe im Header (px)', 'wp-starter'),
+                    'site_logo_height',
+                    48,
+                    24,
+                    56,
+                    1,
+                    'px',
+                    __('Höhe des Logos im Header. Kleiner macht den Header niedriger; 32 passt zur Schriftgröße der Navigation.', 'wp-starter'),
+                ),
                 FieldDefinitions::imageField(
                     'field_options_favicon',
                     __('Favicon', 'wp-starter'),
@@ -180,6 +191,25 @@ class Options
                     'id',
                     null,
                     __('Das Favicon für Browser-Tabs. Empfohlen: 512x512px PNG.', 'wp-starter'),
+                ),
+                FieldDefinitions::imageField(
+                    'field_options_favicon_svg',
+                    __('Favicon (SVG)', 'wp-starter'),
+                    'site_favicon_svg',
+                    false,
+                    'id',
+                    null,
+                    __('Optional: Favicon als SVG für scharfe Darstellung in aktuellen Browsern.', 'wp-starter'),
+                ),
+                FieldDefinitions::fileField(
+                    'field_options_favicon_ico',
+                    __('Favicon (ICO)', 'wp-starter'),
+                    'site_favicon_ico',
+                    false,
+                    'ico',
+                    'id',
+                    null,
+                    __('Optional: favicon.ico mit 16, 32 und 48 Pixeln für ältere Browser.', 'wp-starter'),
                 ),
                 FieldDefinitions::imageField(
                     'field_options_social_image',
@@ -227,6 +257,17 @@ class Options
                         false,
                         __('Haupttelefonnummer.', 'wp-starter'),
                         '+49 123 456789',
+                    ),
+                    ['wrapper' => ['width' => '50']],
+                ),
+                array_merge(
+                    FieldDefinitions::textField(
+                        'field_options_fax',
+                        __('Telefax', 'wp-starter'),
+                        'fax',
+                        false,
+                        __('Optional. Erscheint im Footer und in den strukturierten Daten.', 'wp-starter'),
+                        '+49 123 456780',
                     ),
                     ['wrapper' => ['width' => '50']],
                 ),
@@ -342,6 +383,26 @@ class Options
                         ],
                     ],
                 ),
+                array_merge(
+                    FieldDefinitions::linkField(
+                        'field_options_header_cta_secondary',
+                        __('Zweiter Button (optional)', 'wp-starter'),
+                        'header_cta_secondary',
+                        false,
+                        __('Umrandeter Button links neben dem CTA, z. B. für einen Login. Leer lassen, wenn nicht gebraucht.', 'wp-starter'),
+                    ),
+                    [
+                        'conditional_logic' => [
+                            [
+                                [
+                                    'field' => 'field_options_header_cta_show',
+                                    'operator' => '==',
+                                    'value' => '1',
+                                ],
+                            ],
+                        ],
+                    ],
+                ),
             ],
             'location' => [
                 [
@@ -364,12 +425,30 @@ class Options
             'key' => 'group_options_footer',
             'title' => __('Footer-Einstellungen', 'wp-starter'),
             'fields' => [
+                // === Stil ===
+                [
+                    'key' => 'field_options_footer_tab_style',
+                    'label' => __('Stil', 'wp-starter'),
+                    'type' => 'tab',
+                    'selected' => 1,
+                ],
+                FieldDefinitions::buttonGroupField(
+                    'field_options_footer_style',
+                    __('Footer-Stil', 'wp-starter'),
+                    'footer_style',
+                    [
+                        'default' => __('Standard (Spalten)', 'wp-starter'),
+                        'simple' => __('Einfach (zwei Zeilen)', 'wp-starter'),
+                    ],
+                    'default',
+                    __('Einfach zeigt Logo oder Firmenname, Kontaktdaten, Copyright und rechtliche Links in zwei kompakten Zeilen. Navigation, Footer-Text und Social Links entfallen.', 'wp-starter'),
+                ),
+
                 // === Spalte 1: Logo & Info ===
                 [
                     'key' => 'field_options_footer_tab_info',
                     'label' => __('Info-Spalte', 'wp-starter'),
                     'type' => 'tab',
-                    'selected' => 1,
                 ],
                 array_merge(
                     FieldDefinitions::trueFalseField(

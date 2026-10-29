@@ -33,6 +33,7 @@
     [$widthClass, $sizes] = match(get_sub_field('width') ?: 'default') {
         'narrow' => ['max-w-2xl', '(max-width: 672px) 100vw, 672px'],
         'wide' => ['max-w-6xl', '(max-width: 1152px) 100vw, 1152px'],
+        'full' => ['w-full', '(max-width: 1280px) 100vw, 1216px'],
         default => ['max-w-4xl', '(max-width: 896px) 100vw, 896px'],
     };
 @endphp

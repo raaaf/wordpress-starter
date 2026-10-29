@@ -73,7 +73,7 @@ npm run dev
 │   │   ├── AcfExtended.php      # ACF Extended configuration
 │   │   ├── FieldDefinitions.php # Central field definitions
 │   │   ├── Fields.php           # Field helpers
-│   │   ├── FlexibleContent.php  # 38 Flexible Content layouts
+│   │   ├── FlexibleContent.php  # 39 Flexible Content layouts
 │   │   ├── Options.php          # Theme options pages
 │   │   └── PageSettings.php     # Per-page settings (landing page mode)
 │   ├── MemberArea/              # Member area (optional)
@@ -89,7 +89,7 @@ npm run dev
 │   └── Vite.php
 └── templates/
     ├── components/        # Blade components (<x-button>, <x-section> etc.)
-    ├── flexible/          # Flexible Content templates (38 layouts)
+    ├── flexible/          # Flexible Content templates (39 layouts)
     ├── layouts/           # Base layouts
     └── partials/          # Reusable partials
 ```
@@ -173,7 +173,7 @@ Both switches default to off and work independently. Disabling landing mode rest
 
 ## Flexible Content layouts
 
-38 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
+39 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
 
 Grouped by function; the editor modal uses the ACF categories, see `src/Acf/CLAUDE.md`.
 
@@ -187,7 +187,7 @@ Grouped by function; the editor modal uses the ACF categories, see `src/Acf/CLAU
 
 **Posts:** posts, table
 
-**Internal area:** member-downloads
+**Internal area:** member-downloads, download-list
 
 ### Add a new layout
 

@@ -145,6 +145,31 @@ class FieldDefinitions
     }
 
     /**
+     * Width of a boxed module (alert, CTA) inside the container: the readable
+     * column (max-w-3xl, default) or the full container width, so the box can
+     * share both edges with a two-column module above it. Text inside a full
+     * width box keeps a readable line length.
+     *
+     * @param string $prefix Key prefix
+     *
+     * @return array<string, mixed>
+     */
+    public static function contentWidthField(string $prefix): array
+    {
+        return self::buttonGroupField(
+            "field_{$prefix}_content_width",
+            __('Boxbreite', 'wp-starter'),
+            'content_width',
+            [
+                'readable' => __('Textspalte', 'wp-starter'),
+                'container' => __('Ganze Inhaltsbreite', 'wp-starter'),
+            ],
+            'readable',
+            __('Ganze Inhaltsbreite lässt die Box mit den Kanten eines Zweispalters darüber abschließen.', 'wp-starter'),
+        );
+    }
+
+    /**
      * Get section width field definition
      *
      * Nutzt die vorhandene container-Prop von x-section. Volle Breite behaelt den
@@ -1354,12 +1379,20 @@ class FieldDefinitions
     public static function heroFields(string $prefix): array
     {
         // Conditional logic helpers
-        $showOnSplit = [
+        // Variants with their own image (split beside the text, stacked below it).
+        $showOnImage = [
             [
                 [
                     'field' => "field_{$prefix}_variant",
                     'operator' => '==',
                     'value' => 'split',
+                ],
+            ],
+            [
+                [
+                    'field' => "field_{$prefix}_variant",
+                    'operator' => '==',
+                    'value' => 'stacked',
                 ],
             ],
         ];
@@ -1374,7 +1407,7 @@ class FieldDefinitions
             ],
         ];
 
-        $showOnCenteredOrSplit = [
+        $showOnTextVariants = [
             [
                 [
                     'field' => "field_{$prefix}_variant",
@@ -1389,6 +1422,13 @@ class FieldDefinitions
                     'value' => 'split',
                 ],
             ],
+            [
+                [
+                    'field' => "field_{$prefix}_variant",
+                    'operator' => '==',
+                    'value' => 'stacked',
+                ],
+            ],
         ];
 
         return [
@@ -1401,6 +1441,7 @@ class FieldDefinitions
                     'centered' => __('Zentriert', 'wp-starter'),
                     'split' => __('Geteilt', 'wp-starter'),
                     'background' => __('Hintergrund', 'wp-starter'),
+                    'stacked' => __('Text oben, Bild darunter', 'wp-starter'),
                 ],
                 'centered',
                 __('Wähle das Layout für den Hero-Bereich.', 'wp-starter'),
@@ -1455,14 +1496,14 @@ class FieldDefinitions
                 '50',
             ),
 
-            // Bild (nur bei Split-Variante)
+            // Bild (Split- und Gestapelt-Variante)
             self::imageField(
                 "field_{$prefix}_image",
                 __('Bild', 'wp-starter'),
                 'image',
                 false,
                 'array',
-                $showOnSplit,
+                $showOnImage,
                 __('Empfohlene Größe: mindestens 960×800 Pixel (6:5).', 'wp-starter'),
             ),
 
@@ -1520,7 +1561,7 @@ class FieldDefinitions
                 self::backgroundColorField($prefix),
                 [
                     'instructions' => __('Wähle eine Hintergrundfarbe für den Hero-Bereich.', 'wp-starter'),
-                    'conditional_logic' => $showOnCenteredOrSplit,
+                    'conditional_logic' => $showOnTextVariants,
                 ],
             ),
             self::sectionAnchorField($prefix),
@@ -1879,6 +1920,7 @@ class FieldDefinitions
                 true,
                 __('Der Call-to-Action-Button mit Link und Text.', 'wp-starter'),
             ),
+            self::contentWidthField($prefix),
             ...self::displaySettingsFields($prefix),
         ];
     }
@@ -2208,9 +2250,10 @@ class FieldDefinitions
                     'narrow' => __('Schmal', 'wp-starter'),
                     'default' => __('Standard', 'wp-starter'),
                     'wide' => __('Breit', 'wp-starter'),
+                    'full' => __('Ganze Inhaltsbreite', 'wp-starter'),
                 ],
                 'default',
-                __('Schmal passt zu Hochformat und Bildschirmfotos, breit zu Panoramen.', 'wp-starter'),
+                __('Schmal passt zu Hochformat und Bildschirmfotos, breit zu Panoramen. Ganze Inhaltsbreite schließt mit den Kanten eines Zweispalters ab.', 'wp-starter'),
             ),
             ...self::displaySettingsFields($prefix),
         ];
@@ -2686,8 +2729,8 @@ class FieldDefinitions
                         "field_{$prefix}_card_title",
                         __('Titel', 'wp-starter'),
                         'title',
-                        true,
-                        __('Titel der Karte.', 'wp-starter'),
+                        false,
+                        __('Optional: Titel der Karte. Ohne Titel zeigt die Karte nur ihren Text.', 'wp-starter'),
                         __('z.B. Beratung', 'wp-starter'),
                     ),
                     self::textareaField(
@@ -2710,6 +2753,15 @@ class FieldDefinitions
                         __('Icon', 'wp-starter'),
                         'icon',
                         __('Wähle ein Icon aus dem Theme.', 'wp-starter'),
+                    ),
+                    self::imageField(
+                        "field_{$prefix}_card_logo",
+                        __('Logo', 'wp-starter'),
+                        'logo',
+                        false,
+                        'array',
+                        null,
+                        __('Optional: Produkt- oder Partnerlogo (SVG oder PNG auf hellem Grund). Ersetzt das Icon.', 'wp-starter'),
                     ),
                 ],
                 __('Karte hinzufügen', 'wp-starter'),
@@ -2737,11 +2789,109 @@ class FieldDefinitions
                     'elevated' => __('Erhöht', 'wp-starter'),
                     'outlined' => __('Umriss', 'wp-starter'),
                     'filled' => __('Gefüllt', 'wp-starter'),
+                    'rule' => __('Linie oben (ohne Karte)', 'wp-starter'),
                 ],
                 'elevated',
-                __('Erhöht trägt einen Schatten, Umriss nur eine Linie, Gefüllt eine eigene Fläche.', 'wp-starter'),
+                __('Erhöht trägt einen Schatten, Umriss nur eine Linie, Gefüllt eine eigene Fläche, Linie oben nur eine Linie über dem Text.', 'wp-starter'),
             ),
             ...self::displaySettingsFields($prefix),
+        ];
+    }
+
+    /**
+     * Get Download list layout fields
+     *
+     * @param string $prefix Key prefix
+     * @return array<int, array<string, mixed>>
+     */
+    public static function downloadListFields(string $prefix): array
+    {
+        return [
+            self::textField(
+                "field_{$prefix}_title",
+                __('Überschrift', 'wp-starter'),
+                'title',
+                false,
+                __('Optionale Überschrift über der Liste.', 'wp-starter'),
+                __('z.B. Unterlagen', 'wp-starter')
+            ),
+            ...self::sectionHeaderExtras($prefix),
+            self::repeaterField(
+                "field_{$prefix}_groups",
+                __('Gruppen', 'wp-starter'),
+                'groups',
+                [
+                    self::textField(
+                        "field_{$prefix}_group_title",
+                        __('Titel', 'wp-starter'),
+                        'title',
+                        true,
+                        __('Titel der Gruppe.', 'wp-starter'),
+                        __('z.B. Formulare', 'wp-starter')
+                    ),
+                    self::repeaterField(
+                        "field_{$prefix}_group_items",
+                        __('Dokumente', 'wp-starter'),
+                        'items',
+                        [
+                            self::textField(
+                                "field_{$prefix}_item_heading",
+                                __('Zwischenüberschrift', 'wp-starter'),
+                                'heading',
+                                false,
+                                __('Optional: kleine Überschrift über diesem Dokument, um Zeilen zu gruppieren.', 'wp-starter')
+                            ),
+                            self::textField(
+                                "field_{$prefix}_item_label",
+                                __('Bezeichnung', 'wp-starter'),
+                                'label',
+                                true,
+                                __('Name des Dokuments.', 'wp-starter'),
+                                __('z.B. Antragsformular', 'wp-starter')
+                            ),
+                            self::textField(
+                                "field_{$prefix}_item_url",
+                                __('Link', 'wp-starter'),
+                                'url',
+                                false,
+                                __('https://… oder mailto:… Ohne Link erscheint die Bezeichnung als einfacher Text.', 'wp-starter'),
+                                __('https://…', 'wp-starter')
+                            ),
+                            self::textareaField(
+                                "field_{$prefix}_item_note",
+                                __('Hinweis', 'wp-starter'),
+                                'note',
+                                2,
+                                __('Optional: kleiner Zusatztext unter der Bezeichnung.', 'wp-starter')
+                            ),
+                        ],
+                        __('Dokument hinzufügen', 'wp-starter'),
+                        1,
+                        'block',
+                        __('Zeilen dieser Gruppe.', 'wp-starter')
+                    ),
+                ],
+                __('Gruppe hinzufügen', 'wp-starter'),
+                1,
+                'block',
+                __('Jede Gruppe erscheint als eigene Karte.', 'wp-starter')
+            ),
+            self::buttonGroupField(
+                "field_{$prefix}_columns",
+                __('Spalten', 'wp-starter'),
+                'columns',
+                [
+                    '2' => '2',
+                    '3' => '3',
+                ],
+                '3',
+                __('Anzahl der Spalten für die Darstellung.', 'wp-starter')
+            ),
+            self::backgroundColorField($prefix),
+            self::sectionSpacingField($prefix),
+            self::sectionWidthField($prefix),
+            self::sectionAnchorField($prefix),
+            self::jumpMenuVisibilityField($prefix),
         ];
     }
 
@@ -3863,6 +4013,7 @@ class FieldDefinitions
                 false,
                 __('Zeigt ein Kreuz, mit dem Leser den Hinweis ausblenden. Er kommt beim nächsten Seitenaufruf wieder.', 'wp-starter'),
             ),
+            self::contentWidthField($prefix),
             ...self::displaySettingsFields($prefix),
         ];
     }

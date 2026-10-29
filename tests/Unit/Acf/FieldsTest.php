@@ -525,4 +525,53 @@ final class FieldsTest extends TestCase
 
         $this->tearDownSiteLogoMarkupGlobals();
     }
+
+    // ==========================================
+    // siteLogoHeight() method tests
+    // ==========================================
+
+    public function testSiteLogoHeightIsNullWhenUnset(): void
+    {
+        $this->assertNull(Fields::siteLogoHeight());
+    }
+
+    public function testSiteLogoHeightReturnsStoredValue(): void
+    {
+        $this->setMockField('site_logo_height', '32', 'option');
+
+        $this->assertSame(32, Fields::siteLogoHeight());
+    }
+
+    public function testSiteLogoHeightIsClampedToLowerBound(): void
+    {
+        $this->setMockField('site_logo_height', 5, 'option');
+
+        $this->assertSame(24, Fields::siteLogoHeight());
+    }
+
+    public function testSiteLogoHeightIsClampedToUpperBound(): void
+    {
+        $this->setMockField('site_logo_height', 200, 'option');
+
+        $this->assertSame(56, Fields::siteLogoHeight());
+    }
+
+    public function testHeaderLogoKeepsDefaultSizeWithoutHeightOption(): void
+    {
+        $this->setMockField('site_logo', null, 'option');
+
+        $result = Fields::siteLogoMarkup('header');
+
+        $this->assertStringContainsString('h-12 w-auto', $result);
+        $this->assertStringNotContainsString('style=', $result);
+    }
+
+    public function testHeaderLogoUsesHeightOptionButFooterLogoDoesNot(): void
+    {
+        $this->setMockField('site_logo', null, 'option');
+        $this->setMockField('site_logo_height', 32, 'option');
+
+        $this->assertStringContainsString('style="height: 32px"', Fields::siteLogoMarkup('header'));
+        $this->assertStringNotContainsString('style=', Fields::siteLogoMarkup('footer'));
+    }
 }

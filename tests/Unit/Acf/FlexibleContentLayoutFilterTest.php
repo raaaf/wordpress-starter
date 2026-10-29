@@ -54,6 +54,7 @@ final class FlexibleContentLayoutFilterTest extends TestCase
         'divider',
         'logo_slider',
         'member_downloads',
+        'download_list',
     ];
 
     protected function setUp(): void

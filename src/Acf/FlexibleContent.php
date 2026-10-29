@@ -663,6 +663,7 @@ class FlexibleContent
 
             // Member area layouts (filtered per-page via acf/load_field)
             self::memberDownloadsLayout(),
+            self::downloadListLayout(),
         ];
     }
 
@@ -1372,6 +1373,24 @@ class FlexibleContent
     // =========================================================================
     // MEMBER AREA LAYOUTS
     // =========================================================================
+
+    /**
+     * Download list layout: groups of document links as compact cards
+     *
+     * @return array<string, mixed>
+     */
+    private static function downloadListLayout(): array
+    {
+        return [
+            'key' => 'layout_download_list',
+            'name' => 'download_list',
+            'label' => __('Download-Liste', 'wp-starter'),
+            'display' => 'block',
+            'sub_fields' => FieldDefinitions::downloadListFields('flex_download_list'),
+            'acfe_flexible_category' => self::getCategories()['internal'],
+            'acfe_flexible_thumbnail' => 'member_downloads.png',
+        ];
+    }
 
     /**
      * Member Downloads layout (only visible on pages with page_is_member_area = true)

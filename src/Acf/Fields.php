@@ -346,20 +346,41 @@ class Fields
     }
 
     /**
+     * Get the header logo height in px from the ACF option site_logo_height,
+     * clamped to the field range (24 to 56). Null when unset or not numeric:
+     * the header then keeps its default size class (h-12, 48 px).
+     */
+    public static function siteLogoHeight(): ?int
+    {
+        $value = self::option('site_logo_height');
+
+        return is_numeric($value) ? max(24, min(56, (int) $value)) : null;
+    }
+
+    /**
      * Render the site logo as ready-to-use HTML: the ACF site_logo / Customizer
      * logo via wp_get_attachment_image(), or an escaped <img> text fallback when
      * none is set. Single source of truth for the fallback chain shared by the
      * header and footer partials (previously duplicated with diverging fallback
      * order between them).
      *
-     * $context only selects the size class and, for 'header', the LCP hints
+     * $context ('header', 'footer', 'footer-simple') only selects the size
+     * class and, for 'header', the LCP hints
      * (eager loading, high fetchpriority) that the header logo carries.
      */
     public static function siteLogoMarkup(string $context = 'header'): string
     {
         $isHeader = $context === 'header';
-        $sizeClass = $isHeader ? 'h-12 w-auto' : 'h-10 w-auto';
+        $sizeClass = match ($context) {
+            'header' => 'h-12 w-auto',
+            // Smaller logo for the compact simple footer
+            'footer-simple' => 'h-8 w-auto',
+            default => 'h-10 w-auto',
+        };
         $logoId = self::siteLogoId();
+        // Optional height from the ACF option; inline style beats the size class
+        $logoHeight = $isHeader ? self::siteLogoHeight() : null;
+        $heightStyle = $logoHeight !== null ? 'height: ' . $logoHeight . 'px' : '';
 
         if ($logoId) {
             $attrs = [
@@ -369,6 +390,9 @@ class Fields
                 'class' => $sizeClass,
                 'sizes' => '(max-width: 768px) 128px, 256px',
             ];
+            if ($heightStyle !== '') {
+                $attrs['style'] = $heightStyle;
+            }
             if ($isHeader) {
                 $attrs['loading'] = 'eager';
                 $attrs['fetchpriority'] = 'high';
@@ -380,7 +404,9 @@ class Fields
             }
         }
 
-        return '<img src="' . esc_url(get_template_directory_uri() . '/resources/img/default-logo.png') . '" alt="' . esc_attr(get_bloginfo('name')) . '" class="' . esc_attr($sizeClass) . '" width="50" height="50">';
+        $styleAttr = $heightStyle !== '' ? ' style="' . esc_attr($heightStyle) . '"' : '';
+
+        return '<img src="' . esc_url(get_template_directory_uri() . '/resources/img/default-logo.png') . '" alt="' . esc_attr(get_bloginfo('name')) . '" class="' . esc_attr($sizeClass) . '"' . $styleAttr . ' width="50" height="50">';
     }
 
     /**
