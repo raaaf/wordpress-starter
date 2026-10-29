@@ -526,6 +526,43 @@ final class FieldsTest extends TestCase
         $this->tearDownSiteLogoMarkupGlobals();
     }
 
+    public function testSiteLogoMarkupAddsDarkLogoWhenSet(): void
+    {
+        $this->setMockField('site_logo', ['ID' => 42, 'url' => 'https://example.com/logo.png'], 'option');
+        $this->setMockField('site_logo_dark', ['ID' => 43, 'url' => 'https://example.com/logo-dark.png'], 'option');
+        $this->setMockAttachment(42, 'logo', ['https://example.com/logo.png', 200, 80]);
+        $this->setMockAttachment(43, 'logo', ['https://example.com/logo-dark.png', 200, 80]);
+
+        $result = Fields::siteLogoMarkup('header');
+
+        $this->assertStringContainsString('https://example.com/logo-dark.png', $result);
+        // The mock ignores attributes, so the classes are covered by the default-logo test.
+        $this->assertSame(2, substr_count($result, '<img'));
+    }
+
+    public function testSiteLogoMarkupStaysSingleWithoutDarkLogo(): void
+    {
+        $this->setMockField('site_logo', ['ID' => 42, 'url' => 'https://example.com/logo.png'], 'option');
+        $this->setMockAttachment(42, 'logo', ['https://example.com/logo.png', 200, 80]);
+
+        $result = Fields::siteLogoMarkup('header');
+
+        $this->assertSame(1, substr_count($result, '<img'));
+    }
+
+    public function testSiteLogoMarkupDefaultLogoHasWhiteDarkCopy(): void
+    {
+        $this->setMockField('site_logo', null, 'option');
+
+        $result = Fields::siteLogoMarkup('header');
+
+        $this->assertStringContainsString('default-logo.png', $result);
+        $this->assertStringContainsString('default-logo-dark.png', $result);
+        $this->assertStringContainsString('h-12 w-auto site-logo--light', $result);
+        $this->assertStringContainsString('h-12 w-auto site-logo--dark', $result);
+        $this->assertFileExists(dirname(__DIR__, 3) . '/resources/img/default-logo-dark.png');
+    }
+
     // ==========================================
     // siteLogoHeight() method tests
     // ==========================================

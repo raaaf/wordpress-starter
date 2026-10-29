@@ -358,11 +358,36 @@ class Fields
     }
 
     /**
+     * Attachment ID of the optional ACF site_logo_dark option, or null.
+     */
+    public static function siteLogoDarkId(): ?int
+    {
+        if (!function_exists('get_field')) {
+            return null;
+        }
+
+        $acfLogo = self::option('site_logo_dark');
+        if (!is_array($acfLogo)) {
+            return null;
+        }
+
+        $id = $acfLogo['ID'] ?? $acfLogo['id'] ?? null;
+
+        return $id ? (int) $id : null;
+    }
+
+    /**
      * Render the site logo as ready-to-use HTML: the ACF site_logo / Customizer
      * logo via wp_get_attachment_image(), or an escaped <img> text fallback when
      * none is set. Single source of truth for the fallback chain shared by the
      * header and footer partials (previously duplicated with diverging fallback
      * order between them).
+     *
+     * Dark mode: a second image follows the first one, the ACF site_logo_dark
+     * option or, when only the default logo is in use, a white copy of it.
+     * app.css (.site-logo--light / .site-logo--dark) shows one of the two via
+     * the dark variant, so both prefers-color-scheme and the data-theme toggle
+     * switch it. A custom logo without a dark variant stays a single image.
      *
      * $context ('header', 'footer', 'footer-simple') only selects the size
      * class and, for 'header', the LCP hints
@@ -377,36 +402,66 @@ class Fields
             'footer-simple' => 'h-8 w-auto',
             default => 'h-10 w-auto',
         };
-        $logoId = self::siteLogoId();
         // Optional height from the ACF option; inline style beats the size class
         $logoHeight = $isHeader ? self::siteLogoHeight() : null;
         $heightStyle = $logoHeight !== null ? 'height: ' . $logoHeight . 'px' : '';
 
-        if ($logoId) {
-            $attrs = [
-                // Raw value: wp_get_attachment_image() escapes attributes itself,
-                // pre-escaping here would double-encode "&" and quotes.
-                'alt' => get_bloginfo('name'),
-                'class' => $sizeClass,
-                'sizes' => '(max-width: 768px) 128px, 256px',
-            ];
-            if ($heightStyle !== '') {
-                $attrs['style'] = $heightStyle;
-            }
-            if ($isHeader) {
-                $attrs['loading'] = 'eager';
-                $attrs['fetchpriority'] = 'high';
-            }
+        $darkId = self::siteLogoDarkId();
+        $lightClass = $sizeClass . ' site-logo--light';
+        $darkClass = $sizeClass . ' site-logo--dark';
 
-            $markup = wp_get_attachment_image($logoId, 'logo', false, $attrs);
-            if ($markup) {
-                return $markup;
+        $logoId = self::siteLogoId();
+        if ($logoId) {
+            $light = self::attachmentLogo($logoId, $darkId ? $lightClass : $sizeClass, $heightStyle, $isHeader);
+            if ($light !== '') {
+                if ($darkId) {
+                    // Only one of the pair is visible, so only the light one asks for high priority.
+                    $light .= self::attachmentLogo($darkId, $darkClass, $heightStyle, false);
+                }
+
+                return $light;
             }
         }
 
+        $dark = $darkId ? self::attachmentLogo($darkId, $darkClass, $heightStyle, false) : '';
+        if ($dark === '') {
+            $dark = self::defaultLogo('default-logo-dark.png', $darkClass, $heightStyle);
+        }
+
+        return self::defaultLogo('default-logo.png', $lightClass, $heightStyle) . $dark;
+    }
+
+    /**
+     * One logo attachment as <img>, empty string when WordPress returns nothing.
+     */
+    private static function attachmentLogo(int $id, string $class, string $heightStyle, bool $isHeader): string
+    {
+        $attrs = [
+            // Raw value: wp_get_attachment_image() escapes attributes itself,
+            // pre-escaping here would double-encode "&" and quotes.
+            'alt' => get_bloginfo('name'),
+            'class' => $class,
+            'sizes' => '(max-width: 768px) 128px, 256px',
+        ];
+        if ($heightStyle !== '') {
+            $attrs['style'] = $heightStyle;
+        }
+        if ($isHeader) {
+            $attrs['loading'] = 'eager';
+            $attrs['fetchpriority'] = 'high';
+        }
+
+        return (string) wp_get_attachment_image($id, 'logo', false, $attrs);
+    }
+
+    /**
+     * The bundled default logo (resources/img) as an escaped <img>.
+     */
+    private static function defaultLogo(string $file, string $class, string $heightStyle): string
+    {
         $styleAttr = $heightStyle !== '' ? ' style="' . esc_attr($heightStyle) . '"' : '';
 
-        return '<img src="' . esc_url(get_template_directory_uri() . '/resources/img/default-logo.png') . '" alt="' . esc_attr(get_bloginfo('name')) . '" class="' . esc_attr($sizeClass) . '"' . $styleAttr . ' width="50" height="50">';
+        return '<img src="' . esc_url(get_template_directory_uri() . '/resources/img/' . $file) . '" alt="' . esc_attr(get_bloginfo('name')) . '" class="' . esc_attr($class) . '"' . $styleAttr . ' width="50" height="50">';
     }
 
     /**

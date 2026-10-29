@@ -454,6 +454,23 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Site logo pair (Fields::siteLogoMarkup): the dark copy replaces the light one
+   under the dark variant, so the explicit toggle and the system setting both apply. */
+.site-logo--light {
+  @variant dark {
+    display: none;
+  }
+}
+
+.site-logo--dark {
+  display: none;
+
+  /* block, like every img after Tailwind's preflight */
+  @variant dark {
+    display: block;
+  }
+}
+
 .section[id] {
   /* --jump-menu-offset is set by jump-menu.ts while the pill floats in a top corner. */
   scroll-margin-top: calc(var(--header-height, 80px) + var(--jump-menu-offset, 0px));

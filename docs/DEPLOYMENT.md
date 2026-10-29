@@ -30,7 +30,7 @@ ls -la dist/
 
 Ensure these are configured in WordPress Admin → Theme Options:
 
-- [ ] Site logo uploaded
+- [ ] Site logo uploaded (plus "Logo (Dunkel)" for dark mode; without it the custom logo stays the same in both modes)
 - [ ] Favicon uploaded
 - [ ] Contact information filled
 - [ ] Social media links added
