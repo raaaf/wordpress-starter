@@ -354,8 +354,8 @@ class FlexibleContent
      *
      * Example in a derived theme, registered before "acf/init" runs:
      *
-     *     add_filter('goldene_strategie_flexible_content_layouts', function (array $layouts): array {
-     *         $layouts[] = self::preciousMetalsLayout();
+     *     add_filter('client_theme_flexible_content_layouts', function (array $layouts): array {
+     *         $layouts[] = self::pricingCalculatorLayout();
      *
      *         return $layouts;
      *     });

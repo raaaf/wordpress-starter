@@ -338,9 +338,9 @@ their own namespace, so every starter update collides on that one inserted line.
 Use the filter instead:
 
 ```php
-// <theme_prefix> is the theme slug with underscores, e.g. goldene_strategie.
-add_filter('goldene_strategie_flexible_content_layouts', function (array $layouts): array {
-    $layouts[] = self::preciousMetalsLayout();
+// <theme_prefix> is the theme slug with underscores, e.g. client_theme.
+add_filter('client_theme_flexible_content_layouts', function (array $layouts): array {
+    $layouts[] = self::pricingCalculatorLayout();
 
     return $layouts;
 });
