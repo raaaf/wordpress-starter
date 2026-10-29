@@ -35,7 +35,7 @@ php bin/setup.php
 
 The setup wizard:
 
-1. Sets theme name, author, text domain
+1. Sets theme name, author, text domain (source strings are German; `languages/` ships an en_US translation as `.po`, `.mo` and `.l10n.php`)
 2. Replaces the `WordpressStarter\` namespace across all files
 3. Lets you select plugins (managed via Composer)
 4. Configures initial pages and permalinks

@@ -93,7 +93,8 @@ if (!function_exists('get_reading_time')) {
         $wordCount = preg_match_all('/\p{L}+/u', $content);
         $minutes = max(1, (int) ceil($wordCount / $wordsPerMinute));
 
-        return sprintf('%d Min. Lesezeit', $minutes);
+        /* translators: %d: reading time in minutes */
+        return sprintf(__('%d Min. Lesezeit', 'wp-starter'), $minutes);
     }
 }
 

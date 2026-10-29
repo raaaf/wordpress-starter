@@ -69,6 +69,9 @@ class ThemeServiceProvider extends ServiceProvider
     private function addThemeSupport(): void
     {
         add_action('after_setup_theme', function (): void {
+            // German source strings; languages/ ships en_US (po, mo, l10n.php).
+            load_theme_textdomain('wp-starter', get_template_directory() . '/languages');
+
             add_theme_support('title-tag');
             add_theme_support('custom-logo');
             add_theme_support('html5', [

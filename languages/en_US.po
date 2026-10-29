@@ -1,0 +1,3980 @@
+# English (US) translation of the wp-starter theme. Source strings are German.
+# After editing, regenerate the binaries: wp i18n make-mo languages && wp i18n make-php languages
+msgid ""
+msgstr ""
+"Project-Id-Version: wp-starter\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Domain: wp-starter\n"
+
+msgid "%1$s von %2$s installiert"
+msgstr "%1$s of %2$s installed"
+
+msgid "%d Beitrag"
+msgid_plural "%d Beiträge"
+msgstr[0] "%d post"
+msgstr[1] "%d posts"
+
+msgid "%d Ergebnis gefunden"
+msgid_plural "%d Ergebnisse gefunden"
+msgstr[0] "%d result found"
+msgstr[1] "%d results found"
+
+msgid "%d Min. Lesezeit"
+msgstr "%d min read"
+
+msgid "%d Variante"
+msgid_plural "%d Varianten"
+msgstr[0] "%d variant"
+msgstr[1] "%d variants"
+
+msgid "%d von 5 Sternen"
+msgstr "%d out of 5 stars"
+
+msgid "%s aktualisieren"
+msgstr "Update %s"
+
+msgid "%s aktualisiert."
+msgstr "%s updated."
+
+msgid "%s als Entwurf gespeichert."
+msgstr "%s saved as draft."
+
+msgid "%s ansehen"
+msgstr "View %s"
+
+msgid "%s bearbeiten"
+msgstr "Edit %s"
+
+msgid "%s geplant."
+msgstr "%s scheduled."
+
+msgid "%s hinzufügen"
+msgstr "Add %s"
+
+msgid "%s hinzufügen oder entfernen"
+msgstr "Add or remove %s"
+
+msgid "%s mit Kommas trennen"
+msgstr "Separate %s with commas"
+
+msgid "%s privat veröffentlicht."
+msgstr "%s published privately."
+
+msgid "%s suchen"
+msgstr "Search %s"
+
+msgid "%s veröffentlicht."
+msgstr "%s published."
+
+msgid "(öffnet in neuem Tab)"
+msgstr "(opens in a new tab)"
+
+msgid "+ weitere Termine"
+msgstr "+ more events"
+
+msgid "1/3 + 2/3 Spalten"
+msgstr "1/3 + 2/3 columns"
+
+msgid "2/3 + 1/3 Spalten"
+msgstr "2/3 + 1/3 columns"
+
+msgid "<strong>Cookie-freie Website</strong><br>Dieses Theme verwendet ausschließlich DSGVO-konforme Analytics ohne Cookies. Kein Cookie-Banner erforderlich!"
+msgstr "<strong>Cookie-free website</strong><br>This theme only uses GDPR-compliant analytics without cookies. No cookie banner required!"
+
+msgid "<strong>Foto:</strong> Verwende das „Beitragsbild“ rechts für das Foto der Person."
+msgstr "<strong>Photo:</strong> Use the \"Featured image\" on the right for the person's photo."
+
+msgid "<strong>Foto:</strong> Verwende das „Beitragsbild“ rechts für das Foto des Kunden."
+msgstr "<strong>Photo:</strong> Use the \"Featured image\" on the right for the customer's photo."
+
+msgid "<strong>Kontaktdaten</strong><br>Diese Daten werden im Footer und auf der Kontaktseite verwendet. Halte sie aktuell!"
+msgstr "<strong>Contact details</strong><br>These details are used in the footer and on the contact page. Keep them up to date!"
+
+msgid "<strong>Nur die Adresse, nicht der ganze Code.</strong> Im Einbettungscode des Anbieters steht <em>src=\"…\"</em>, genau diese Adresse gehört hier hinein. Der Host muss unter <em>Theme-Einstellungen → Analytics → Externe Einbettungen</em> freigegeben sein, sonst zeigt die Seite die Einbettung nicht an."
+msgstr "<strong>Only the address, not the whole code.</strong> The provider's embed code contains <em>src=\"…\"</em>, and exactly that address goes here. The host must be allowed under <em>Theme settings → Analytics → External embeds</em>, otherwise the page does not show the embed."
+
+msgid "<strong>Rybbit Analytics</strong><br>Analytics wird über das Rybbit-Plugin konfiguriert. Gehe zu <a href=\"%s\">Einstellungen → Rybbit Analytics</a>, um deine Site ID einzutragen."
+msgstr "<strong>Rybbit Analytics</strong><br>Analytics is configured through the Rybbit plugin. Go to <a href=\"%s\">Settings → Rybbit Analytics</a> to enter your site ID."
+
+msgid "<strong>So bekommst du die Einbettungs-URL:</strong><br>1) Öffne <a href=\"https://maps.google.com\" target=\"_blank\">Google Maps</a><br>2) Suche deinen Standort<br>3) Klicke auf „Teilen“ → „Karte einbetten“<br>4) Kopiere die URL aus dem HTML-Code (beginnt mit https://www.google.com/maps/embed)"
+msgstr "<strong>How to get the embed URL:</strong><br>1) Open <a href=\"https://maps.google.com\" target=\"_blank\">Google Maps</a><br>2) Search for your location<br>3) Click \"Share\" → \"Embed a map\"<br>4) Copy the URL from the HTML code (starts with https://www.google.com/maps/embed)"
+
+msgid "<strong>So findest du die Formular-ID:</strong><br>1) Gehe zu <em>Formulare</em> im Menü<br>2) Wähle dein Formular aus<br>3) Die ID steht in der URL (z.B. post=<strong>123</strong>) oder im Shortcode"
+msgstr "<strong>How to find the form ID:</strong><br>1) Go to <em>Forms</em> in the menu<br>2) Select your form<br>3) The ID is in the URL (e.g. post=<strong>123</strong>) or in the shortcode"
+
+msgid "<strong>Social Media</strong><br>Diese Icons werden im Footer angezeigt (wenn aktiviert). Die Reihenfolge hier bestimmt die Anzeige-Reihenfolge."
+msgstr "<strong>Social media</strong><br>These icons are shown in the footer (if enabled). The order here sets the display order."
+
+msgid "<strong>Tipp:</strong> Ein CTA-Button im Header erhöht die Conversion-Rate. Verwende eine klare Handlungsaufforderung wie „Jetzt anfragen\" oder „Termin buchen\"."
+msgstr "<strong>Tip:</strong> A CTA button in the header raises the conversion rate. Use a clear call to action such as \"Request now\" or \"Book a call\"."
+
+msgid "<strong>Warum diese Liste?</strong><br>Das Modul „Einbettung\" rendert nur iframes von Hosts aus dieser Liste, die Prüfung läuft serverseitig. YouTube, Vimeo und Google Maps sind bereits freigegeben."
+msgstr "<strong>Why this list?</strong><br>The \"Embed\" module only renders iframes from hosts on this list; the check runs on the server. YouTube, Vimeo and Google Maps are already allowed."
+
+msgid "<strong>Website-Identität</strong><br>Logo und Favicon erscheinen im Header, Footer und Browser-Tab. Für beste Ergebnisse verwende SVG-Dateien oder PNGs mit transparentem Hintergrund."
+msgstr "<strong>Site identity</strong><br>Logo and favicon appear in the header, footer and browser tab. For best results use SVG files or PNGs with a transparent background."
+
+msgid "<strong>Wo finde ich die Adresse?</strong><br>Mailchimp: <em>Audience → Signup forms → Embedded form</em>, im Code steht <em>form action=\"…\"</em>. Brevo und CleverReach nennen es ebenfalls Einbettungscode. Die Anmeldung öffnet sich beim Absenden im neuen Tab beim Anbieter, dort läuft auch die Bestätigungsmail."
+msgstr "<strong>Where do I find the address?</strong><br>Mailchimp: <em>Audience → Signup forms → Embedded form</em>, the code contains <em>form action=\"…\"</em>. Brevo and CleverReach call it embed code as well. On submit, the signup opens in a new tab at the provider, which also sends the confirmation email."
+
+msgid "ACF PRO muss manuell installiert werden (Premium-Plugin)."
+msgstr "ACF PRO has to be installed manually (premium plugin)."
+
+msgid "ACF Pro ist nicht aktiv. Ohne ACF kann der Styleguide nicht umgestellt werden."
+msgstr "ACF Pro is not active. Without ACF the styleguide cannot be switched."
+
+msgid "ACF-Felder von %s"
+msgstr "ACF fields of %s"
+
+msgid "ASE: SVG/AVIF-Upload, Heartbeat optimiert, Security-Grundschutz, Admin-UI bereinigt"
+msgstr "ASE: SVG/AVIF upload, optimised heartbeat, basic security, cleaned-up admin UI"
+
+msgid "Abdunklung des Bildes"
+msgstr "Image darkening"
+
+msgid "Abmelden"
+msgstr "Log out"
+
+msgid "Abrechnungszeitraum"
+msgstr "Billing period"
+
+msgid "Abrechnungszeitraum."
+msgstr "Billing period."
+
+msgid "Absoluter Pfad auf dem Server, z.B. /dokumente/"
+msgstr "Absolute path on the server, e.g. /documents/"
+
+msgid "Abstand"
+msgstr "Spacing"
+
+msgid "Abwechselnde Hintergrundfarben für bessere Lesbarkeit."
+msgstr "Alternating background colours for better readability."
+
+msgid "Adresse"
+msgstr "Address"
+
+msgid "Adresse der Einbettung"
+msgstr "Embed address"
+
+msgid "Adresse des Anbieters"
+msgstr "Provider address"
+
+msgid "Adresse für den Kartenlink."
+msgstr "Address for the map link."
+
+msgid "Akkordeon"
+msgstr "Accordion"
+
+msgid "Akkordeon %d"
+msgstr "Accordion %d"
+
+msgid "Akkordeon (FAQ)"
+msgstr "Accordion (FAQ)"
+
+msgid "Akkordeon-Einträge"
+msgstr "Accordion items"
+
+msgid "Aktion"
+msgstr "Action"
+
+msgid "Aktionen"
+msgstr "Actions"
+
+msgid "Aktiv"
+msgstr "Active"
+
+msgid "Aktiviere Plugin..."
+msgstr "Activating plugin..."
+
+msgid "Aktivieren"
+msgstr "Activate"
+
+msgid "Aktivieren um diese Seite als Dashboard des internen Bereichs zu verwenden."
+msgstr "Enable to use this page as the dashboard of the members area."
+
+msgid "Aktivieren um diese Seite passwortgeschützt zu machen."
+msgstr "Enable to protect this page with a password."
+
+msgid "Aktiviert"
+msgstr "Enabled"
+
+msgid "Aktuell sind keine zukünftigen Termine eingetragen."
+msgstr "There are no upcoming events at the moment."
+
+msgid "Akzentfarbe"
+msgstr "Accent colour"
+
+msgid "Alle %s"
+msgstr "All %s"
+
+msgid "Alle Kategorien"
+msgstr "All categories"
+
+msgid "Alle Layouts mit ihren Varianten zeigt der <a href=\"%s\" target=\"_blank\" rel=\"noopener\">Styleguide</a>."
+msgstr "All layouts with their variants are shown in the <a href=\"%s\" target=\"_blank\" rel=\"noopener\">styleguide</a>."
+
+msgid "Alle Plugins sind aktiv!"
+msgstr "All plugins are active!"
+
+msgid "Alle Plugins sind bereits installiert!"
+msgstr "All plugins are already installed!"
+
+msgid "Alle Plugins wurden erfolgreich installiert!"
+msgstr "All plugins were installed successfully!"
+
+msgid "Alle Seiten"
+msgstr "All pages"
+
+msgid "Alle Termine ansehen"
+msgstr "View all events"
+
+msgid "Alle Typen"
+msgstr "All types"
+
+msgid "Alle ausser ausgewählte Seiten"
+msgstr "All except selected pages"
+
+msgid "Allgemein"
+msgstr "General"
+
+msgid "Allgemeine Einstellungen"
+msgstr "General settings"
+
+msgid "Als FAQ auszeichnen"
+msgstr "Mark up as FAQ"
+
+msgid "Als Landingpage anzeigen"
+msgstr "Show as landing page"
+
+msgid "Analytics"
+msgstr "Analytics"
+
+msgid "Analytics (Cookie-frei)"
+msgstr "Analytics (cookie-free)"
+
+msgid "Anker-ID"
+msgstr "Anchor ID"
+
+msgid "Anmelden"
+msgstr "Log in"
+
+msgid "Anmeldung fehlgeschlagen."
+msgstr "Login failed."
+
+msgid "Ansicht"
+msgstr "View"
+
+msgid "Anzahl"
+msgstr "Count"
+
+msgid "Anzahl der Spalten für die Darstellung."
+msgstr "Number of columns for the layout."
+
+msgid "Anzeige"
+msgstr "Display"
+
+msgid "Anzeigeoptionen"
+msgstr "Display options"
+
+msgid "Archiv-Navigation"
+msgstr "Archive navigation"
+
+msgid "Archiv:"
+msgstr "Archive:"
+
+msgid "Archiv: %s"
+msgstr "Archive: %s"
+
+msgid "Art"
+msgstr "Type"
+
+msgid "Art der Veranstaltung"
+msgstr "Type of event"
+
+msgid "Attribute: %s"
+msgstr "Attributes: %s"
+
+msgid "Auf- und zuklappbare Elemente unter dem Bild."
+msgstr "Collapsible items below the image."
+
+msgid "Aus Kundenstimmen-Verwaltung"
+msgstr "From testimonials"
+
+msgid "Aus Team-Verwaltung"
+msgstr "From team members"
+
+msgid "Aus häufig verwendeten %s wählen"
+msgstr "Choose from the most used %s"
+
+msgid "Aus: Dieser Abschnitt erscheint nicht im Sprungmenü der Seite."
+msgstr "Off: this section does not appear in the page's jump menu."
+
+msgid "Ausblenden"
+msgstr "Hide"
+
+msgid "Ausrichtung"
+msgstr "Alignment"
+
+msgid "Ausrichtung des Buttons innerhalb der Sektion."
+msgstr "Alignment of the button within the section."
+
+msgid "Ausrichtung von Overline, Überschrift und Beschreibung."
+msgstr "Alignment of overline, heading and description."
+
+msgid "Ausstehend"
+msgstr "Pending"
+
+msgid "Auswahl"
+msgstr "Selection"
+
+msgid "Auswählen"
+msgstr "Select"
+
+msgid "Auszug"
+msgstr "Excerpt"
+
+msgid "Authentifizierung"
+msgstr "Authentication"
+
+msgid "Authentifizierungs-Modus"
+msgstr "Authentication mode"
+
+msgid "Automatisch"
+msgstr "Automatic"
+
+msgid "Automatisch abspielen"
+msgstr "Autoplay"
+
+msgid "Automatisch: die Höhe folgt dem Inhalt, bei der Variante Hintergrund mit einer Mindesthöhe. Halb und Voll setzen eine Mindesthöhe aus der Bildschirmhöhe."
+msgstr "Automatic: the height follows the content, with a minimum height for the background variant. Half and full set a minimum height based on the screen height."
+
+msgid "Autor"
+msgstr "Author"
+
+msgid "Autor: %s"
+msgstr "Author: %s"
+
+msgid "Avatar"
+msgstr "Avatar"
+
+msgid "Backup erfolgreich wiederhergestellt: %s"
+msgstr "Backup restored successfully: %s"
+
+msgid "Backup wiederherstellen"
+msgstr "Restore backup"
+
+msgid "Backup wirklich wiederherstellen? Die aktuellen Token-Dateien werden überschrieben."
+msgstr "Really restore the backup? The current token files will be overwritten."
+
+msgid "Backup-Zeitpunkt auswählen"
+msgstr "Select backup time"
+
+msgid "Badge"
+msgstr "Badge"
+
+msgid "Basis-Grauton für Text, Rahmen und neutrale Elemente."
+msgstr "Base grey for text, borders and neutral elements."
+
+msgid "Bau die Seite aus Inhalts-Sektionen zusammen."
+msgstr "Build the page from content sections."
+
+msgid "Bei Hetzner Storage Box: dein Hauptbenutzer, z.B. u123456, oder ein Unterbenutzer."
+msgstr "For a Hetzner Storage Box: your main user, e.g. u123456, or a sub-user."
+
+msgid "Beim Laden werden Daten an %s übertragen."
+msgstr "Loading sends data to %s."
+
+msgid "Beitrags-Liste"
+msgstr "Post list"
+
+msgid "Beitragsnavigation"
+msgstr "Post navigation"
+
+msgid "Beitragstyp"
+msgstr "Post type"
+
+msgid "Beiträge"
+msgstr "Posts"
+
+msgid "Beliebte %s"
+msgstr "Popular %s"
+
+msgid "Benutzername"
+msgstr "Username"
+
+msgid "Benutzername oder Passwort ist falsch."
+msgstr "Username or password is incorrect."
+
+msgid "Bereichs-Einleitung"
+msgstr "Section intro"
+
+msgid "Berufliche Informationen"
+msgstr "Professional information"
+
+msgid "Beschreibung"
+msgstr "Description"
+
+msgid "Beschreibungstext"
+msgstr "Description text"
+
+msgid "Beschriftung"
+msgstr "Label"
+
+msgid "Beschriftung des Buttons"
+msgstr "Button label"
+
+msgid "Beschriftung für Screenreader"
+msgstr "Label for screen readers"
+
+msgid "Bestimmt Farbe und Symbol."
+msgstr "Sets colour and icon."
+
+msgid "Bestimmt das Standard-Farbschema der Website. „Systemeinstellung\" passt sich automatisch an die Browser-/OS-Einstellung des Besuchers an."
+msgstr "Sets the default colour scheme of the website. \"System setting\" follows the visitor's browser or OS setting automatically."
+
+msgid "Bestimmt die Höhe des Videofensters."
+msgstr "Sets the height of the video frame."
+
+msgid "Bestimmt, in welcher Sprache die Untertitel im Player angeboten werden."
+msgstr "Sets the language in which the player offers subtitles."
+
+msgid "Besucher kann den Hinweis ausblenden (localStorage, 7 Tage)."
+msgstr "Visitors can dismiss the notice (localStorage, 7 days)."
+
+msgid "Betreff"
+msgstr "Subject"
+
+msgid "Betreff:"
+msgstr "Subject:"
+
+msgid "Bewertung"
+msgstr "Rating"
+
+msgid "Bewertung von 1 bis 5 Sternen (optional). 0 – keine Bewertung."
+msgstr "Rating from 1 to 5 stars (optional). 0 means no rating."
+
+msgid "Bezeichnung"
+msgstr "Name"
+
+msgid "Bild"
+msgstr "Image"
+
+msgid "Bild %d"
+msgstr "Image %d"
+
+msgid "Bild für die Spalte."
+msgstr "Image for the column."
+
+msgid "Bild für die dritte Spalte."
+msgstr "Image for the third column."
+
+msgid "Bild für die erste Spalte."
+msgstr "Image for the first column."
+
+msgid "Bild für die linke Spalte."
+msgstr "Image for the left column."
+
+msgid "Bild für die mittlere Spalte."
+msgstr "Image for the middle column."
+
+msgid "Bild für die rechte Spalte."
+msgstr "Image for the right column."
+
+msgid "Bild für die vierte Spalte."
+msgstr "Image for the fourth column."
+
+msgid "Bild für die zweite Spalte."
+msgstr "Image for the second column."
+
+msgid "Bild vergrößern: %s"
+msgstr "Enlarge image: %s"
+
+msgid "Bildbreite"
+msgstr "Image width"
+
+msgid "Bilder"
+msgstr "Images"
+
+msgid "Bildergalerie"
+msgstr "Image gallery"
+
+msgid "Bildunterschrift anzeigen"
+msgstr "Show image caption"
+
+msgid "Bildvergleich: Nutze die Pfeiltasten, um zwischen Vorher und Nachher zu wechseln"
+msgstr "Image comparison: use the arrow keys to switch between before and after"
+
+msgid "Bildüberschrift"
+msgstr "Image title"
+
+msgid "Bildüberschrift %d"
+msgstr "Image title %d"
+
+msgid "Bitte alle Felder ausfüllen."
+msgstr "Please fill in all fields."
+
+msgid "Bitte füge Kundenstimmen hinzu oder wähle eine Quelle mit Einträgen."
+msgstr "Please add testimonials or choose a source with entries."
+
+msgid "Bitte füge Tabellenzeilen hinzu."
+msgstr "Please add table rows."
+
+msgid "Bitte füge Teammitglieder hinzu oder wähle eine Quelle mit Einträgen."
+msgstr "Please add team members or choose a source with entries."
+
+msgid "Bitte füge ein Vorher- und Nachher-Bild hinzu."
+msgstr "Please add a before and an after image."
+
+msgid "Bitte füge eine Google Maps Embed-URL ein."
+msgstr "Please add a Google Maps embed URL."
+
+msgid "Bitte füge eine Video-URL ein oder lade eine Videodatei hoch."
+msgstr "Please add a video URL or upload a video file."
+
+msgid "Bitte füge mindestens ein Bild hinzu."
+msgstr "Please add at least one image."
+
+msgid "Bitte füge mindestens ein Ereignis hinzu."
+msgstr "Please add at least one event."
+
+msgid "Bitte füge mindestens ein Preispaket hinzu."
+msgstr "Please add at least one pricing plan."
+
+msgid "Bitte füge mindestens eine Gruppe hinzu."
+msgstr "Please add at least one group."
+
+msgid "Bitte füge mindestens eine Karte hinzu."
+msgstr "Please add at least one card."
+
+msgid "Bitte füge mindestens eine Kennzahl hinzu."
+msgstr "Please add at least one figure."
+
+msgid "Bitte füge mindestens einen Akkordeon-Eintrag hinzu."
+msgstr "Please add at least one accordion item."
+
+msgid "Bitte füge mindestens einen Tab hinzu."
+msgstr "Please add at least one tab."
+
+msgid "Bitte geben Sie das Passwort erneut ein."
+msgstr "Please enter the password again."
+
+msgid "Bitte gib die https-Adresse aus dem Einbettungscode deines Newsletter-Anbieters an."
+msgstr "Please enter the https address from your newsletter provider's embed code."
+
+msgid "Bitte gib eine gültige E-Mail-Adresse ein."
+msgstr "Please enter a valid email address."
+
+msgid "Bitte gib eine gültige URL ein."
+msgstr "Please enter a valid URL."
+
+msgid "Bitte melde dich an, um auf den internen Bereich zuzugreifen."
+msgstr "Please log in to access the members area."
+
+msgid "Bitte melde dich an, um diese Downloads zu sehen."
+msgstr "Please log in to see these downloads."
+
+msgid "Bitte mindestens eine Datei auswählen."
+msgstr "Please select at least one file."
+
+msgid "Bitte nutze nur Buchstaben, Ziffern, Unterstrich, Bindestrich und eckige Klammern."
+msgstr "Please only use letters, digits, underscore, hyphen and square brackets."
+
+msgid "Bitte prüf die markierten Felder."
+msgstr "Please check the marked fields."
+
+msgid "Bitte stimm der Verarbeitung deiner Daten zu."
+msgstr "Please agree to the processing of your data."
+
+msgid "Bitte trage die https-Adresse aus dem Einbettungscode deines Newsletter-Anbieters ein."
+msgstr "Please enter the https address from your newsletter provider's embed code."
+
+msgid "Bitte trage eine https-Adresse ein. Der Einbettungscode des Anbieters enthält sie im src-Attribut."
+msgstr "Please enter an https address. The provider's embed code contains it in the src attribute."
+
+msgid "Bitte trage nur die ID aus dem Shortcode ein (Buchstaben, Ziffern, Bindestrich)."
+msgstr "Please only enter the ID from the shortcode (letters, digits, hyphen)."
+
+msgid "Bitte wähle ein Formular aus."
+msgstr "Please select a form."
+
+msgid "Bitte wähle ein gültiges Datum."
+msgstr "Please choose a valid date."
+
+msgid "Bitte wähle eine gültige Uhrzeit."
+msgstr "Please choose a valid time."
+
+msgid "Blendet Navigation, Brotkrumen, Fußnavigation und Social-Links aus. Logo, Kontakt und rechtliche Links bleiben standardmäßig sichtbar."
+msgstr "Hides navigation, breadcrumbs, footer navigation and social links. Logo, contact and legal links stay visible by default."
+
+msgid "Blog"
+msgstr "Blog"
+
+msgid "Blog-Beiträge"
+msgstr "Blog posts"
+
+msgid "Blog-Beschreibung"
+msgstr "Blog description"
+
+msgid "Blog-Einstellungen"
+msgstr "Blog settings"
+
+msgid "Blog-Navigation"
+msgstr "Blog navigation"
+
+msgid "Blog-Titel"
+msgstr "Blog title"
+
+msgid "Body"
+msgstr "Body"
+
+msgid "Body Large"
+msgstr "Body Large"
+
+msgid "Body Small"
+msgstr "Body Small"
+
+msgid "Boxbreite"
+msgstr "Box width"
+
+msgid "Breadcrumb"
+msgstr "Breadcrumb"
+
+msgid "Breit"
+msgstr "Wide"
+
+msgid "Breite"
+msgstr "Width"
+
+msgid "Build läuft, bitte warten"
+msgstr "Build running, please wait"
+
+msgid "Button"
+msgstr "Button"
+
+msgid "Button nimmt die volle verfügbare Breite ein."
+msgstr "The button takes the full available width."
+
+msgid "Buttons"
+msgstr "Buttons"
+
+msgid "CSS neu generieren"
+msgstr "Regenerate CSS"
+
+msgid "CTA-Button"
+msgstr "CTA button"
+
+msgid "CTA-Button anzeigen"
+msgstr "Show CTA button"
+
+msgid "Call-to-Action-Button für dieses Paket."
+msgstr "Call-to-action button for this plan."
+
+msgid "Caption"
+msgstr "Caption"
+
+msgid "Code"
+msgstr "Code"
+
+msgid "Contact Form 7 Plugin ist nicht installiert."
+msgstr "The Contact Form 7 plugin is not installed."
+
+msgid "Contact Form 7: Auto-Formatierung deaktiviert, Assets-Laden optimiert"
+msgstr "Contact Form 7: auto formatting disabled, asset loading optimised"
+
+msgid "Container"
+msgstr "Container"
+
+msgid "Content-Setup"
+msgstr "Content setup"
+
+msgid "Cookie-Gültigkeit (Stunden)"
+msgstr "Cookie lifetime (hours)"
+
+msgid "Copyright-Text"
+msgstr "Copyright text"
+
+msgid "Dark Mode (Semantische Tokens)"
+msgstr "Dark mode (semantic tokens)"
+
+msgid "Darstellung"
+msgstr "Appearance"
+
+msgid "Das Datum der Veranstaltung."
+msgstr "The date of the event."
+
+msgid "Das Favicon für Browser-Tabs. Empfohlen: 512x512px PNG."
+msgstr "The favicon for browser tabs. Recommended: 512x512px PNG."
+
+msgid "Das Hauptlogo der Website."
+msgstr "The main logo of the website."
+
+msgid "Das Logo (idealerweise mit transparentem Hintergrund)."
+msgstr "The logo (ideally with a transparent background)."
+
+msgid "Das Passwort darf keine spitzen Klammern oder & enthalten."
+msgstr "The password must not contain angle brackets or &."
+
+msgid "Das SFTP-Passwort wurde nicht gespeichert: AUTH_KEY ist in der wp-config.php nicht konfiguriert. Bitte AUTH_KEY setzen und das Passwort erneut eingeben."
+msgstr "The SFTP password was not saved: AUTH_KEY is not configured in wp-config.php. Please set AUTH_KEY and enter the password again."
+
+msgid "Das Theme benötigt folgende Plugins"
+msgstr "The theme needs the following plugins"
+
+msgid "Das Theme findet keine eindeutige Styleguide-Seite. Öffne die richtige Seite, wähle dort das Template „Styleguide“ aus und versuche es dann erneut."
+msgstr "The theme cannot find a unique styleguide page. Open the right page, select the \"Styleguide\" template there and try again."
+
+msgid "Das Video beginnt nach dem Ende von vorn. Gilt nicht für YouTube und Vimeo."
+msgstr "The video starts over when it ends. Does not apply to YouTube and Vimeo."
+
+msgid "Das Video konnte nicht geladen werden."
+msgstr "The video could not be loaded."
+
+msgid "Das Zitat oder die Bewertung des Kunden."
+msgstr "The customer's quote or review."
+
+msgid "Das action-Attribut aus dem Einbettungscode."
+msgstr "The action attribute from the embed code."
+
+msgid "Das anzuzeigende Bild."
+msgstr "The image to display."
+
+msgid "Das „Nachher“-Bild (rechts). Sollte gleiche Maße haben."
+msgstr "The \"after\" image (right). Should have the same dimensions."
+
+msgid "Das „Vorher“-Bild (links)."
+msgstr "The \"before\" image (left)."
+
+msgid "Datei"
+msgstr "File"
+
+msgid "Datei konnte nicht abgerufen werden."
+msgstr "The file could not be retrieved."
+
+msgid "Datei nicht gefunden."
+msgstr "File not found."
+
+msgid "Datei nicht verfügbar."
+msgstr "File not available."
+
+msgid "Dateiname"
+msgstr "File name"
+
+msgid "Dateisystem konnte nicht initialisiert werden."
+msgstr "The file system could not be initialised."
+
+msgid "Dateityp filtern"
+msgstr "Filter file type"
+
+msgid "Datenquelle"
+msgstr "Data source"
+
+msgid "Datenschutzbestimmungen von"
+msgstr "Privacy policy of"
+
+msgid "Datenschutzerklärung"
+msgstr "Privacy policy"
+
+msgid "Datum"
+msgstr "Date"
+
+msgid "Deaktivieren um den internen Bereich komplett auszuschalten — keine geschützten Seiten, kein Login."
+msgstr "Disable to switch the members area off completely: no protected pages, no login."
+
+msgid "Definiere die Spalten der Tabelle."
+msgstr "Define the columns of the table."
+
+msgid "Dein Browser kann dieses Video nicht abspielen."
+msgstr "Your browser cannot play this video."
+
+msgid "Deine Nachricht"
+msgstr "Your message"
+
+msgid "Demo-Inhalte"
+msgstr "Demo content"
+
+msgid "Der Blog enthält noch keine Beiträge."
+msgstr "The blog has no posts yet."
+
+msgid "Der Button mit Link und Text."
+msgstr "The button with link and text."
+
+msgid "Der Call-to-Action-Button mit Link und Text."
+msgstr "The call-to-action button with link and text."
+
+msgid "Der Copyright-Hinweis. {year} wird automatisch durch das aktuelle Jahr ersetzt."
+msgstr "The copyright notice. {year} is replaced with the current year automatically."
+
+msgid "Der Design-Umschalter benötigt JavaScript."
+msgstr "The design switcher needs JavaScript."
+
+msgid "Der Name des Kunden/der Kundin."
+msgstr "The customer's name."
+
+msgid "Der Preis inkl. Währung."
+msgstr "The price including currency."
+
+msgid "Der Server hat die Synchronisierung nicht abgeschlossen. Versuche es erneut. Bleibt der Fehler, wende dich an den Administrator."
+msgstr "The server did not finish the sync. Try again. If the error persists, contact the administrator."
+
+msgid "Der Styleguide zeigt alle verfügbaren Design-Elemente des Themes: Farben, Typografie, Abstände, Komponenten und ACF-Block-Beispiele."
+msgstr "The styleguide shows every design element of the theme: colours, typography, spacing, components and ACF block examples."
+
+msgid "Der Styleguide zeigt die Design-System-Referenz noch als kopiertes HTML. Die neue Fassung rendert sie aus den echten Komponenten, bleibt damit automatisch aktuell und behaelt die Layout-Galerie."
+msgstr "The styleguide still shows the design system reference as copied HTML. The new version renders it from the real components, so it stays up to date automatically and keeps the layout gallery."
+
+msgid "Der Text des Hinweises."
+msgstr "The text of the notice."
+
+msgid "Der Textinhalt dieser Sektion."
+msgstr "The text content of this section."
+
+msgid "Der Titel des Tabs (im Tab-Button sichtbar)."
+msgstr "The tab title (visible in the tab button)."
+
+msgid "Der Wortlaut ohne Anführungszeichen, die setzt das Layout."
+msgstr "The wording without quotation marks; the layout adds them."
+
+msgid "Der ausgeklappte Inhalt des Akkordeon-Eintrags."
+msgstr "The expanded content of the accordion item."
+
+msgid "Der ausgeklappte Inhalt."
+msgstr "The expanded content."
+
+msgid "Der erste Eintrag ist beim Laden der Seite aufgeklappt."
+msgstr "The first item is expanded when the page loads."
+
+msgid "Der klickbare Titel des Akkordeon-Eintrags."
+msgstr "The clickable title of the accordion item."
+
+msgid "Der vollständige Firmenname für Impressum und Footer."
+msgstr "The full company name for the legal notice and footer."
+
+msgid "Design Tokens"
+msgstr "Design tokens"
+
+msgid "Design Tokens aktualisiert und Build abgeschlossen (%ss)"
+msgstr "Design tokens updated and build finished (%ss)"
+
+msgid "Design Tokens werden aktualisiert..."
+msgstr "Updating design tokens..."
+
+msgid "Design-System"
+msgstr "Design system"
+
+msgid "DesignTokenServiceProvider nicht geladen."
+msgstr "DesignTokenServiceProvider not loaded."
+
+msgid "Detaillierte Beschreibung des Ereignisses."
+msgstr "Detailed description of the event."
+
+msgid "Details"
+msgstr "Details"
+
+msgid "Details zum Teammitglied"
+msgstr "Team member details"
+
+msgid "Details zum Testimonial"
+msgstr "Testimonial details"
+
+msgid "Deutsch"
+msgstr "German"
+
+msgid "Dezent"
+msgstr "Subtle"
+
+msgid "Dicke Linie darunter"
+msgstr "Thick line below"
+
+msgid "Die Anmeldung benötigt JavaScript."
+msgstr "Login needs JavaScript."
+
+msgid "Die Hauptakzentfarbe. Wird für CTAs, Links und interaktive Elemente verwendet."
+msgstr "The main accent colour. Used for CTAs, links and interactive elements."
+
+msgid "Die Hauptmarkenfarbe. Oft für Headlines, Navigation und wichtige UI-Elemente."
+msgstr "The main brand colour. Often used for headlines, navigation and important UI elements."
+
+msgid "Die Hauptüberschrift des Call-to-Action-Bereichs."
+msgstr "The main heading of the call-to-action section."
+
+msgid "Die Hauptüberschrift des Hero-Bereichs."
+msgstr "The main heading of the hero section."
+
+msgid "Die Installation hat zu lange gedauert. Bitte versuch es erneut."
+msgstr "The installation took too long. Please try again."
+
+msgid "Die Karte konnte nicht geladen werden."
+msgstr "The map could not be loaded."
+
+msgid "Die Kundenstimme bzw. Kundenbewertung."
+msgstr "The testimonial or customer review."
+
+msgid "Die Liste stellt Bild und Text nebeneinander und ignoriert die Spaltenzahl."
+msgstr "The list places image and text side by side and ignores the column count."
+
+msgid "Die Nachricht konnte nicht gesendet werden. Bitte versuch es später erneut."
+msgstr "The message could not be sent. Please try again later."
+
+msgid "Die Nachricht wurde als Spam eingestuft und nicht gesendet."
+msgstr "The message was classified as spam and not sent."
+
+msgid "Die Pruefsumme des Theme-Updates stimmt nicht mit dem veroeffentlichten Release ueberein. Das Update wurde abgebrochen."
+msgstr "The checksum of the theme update does not match the published release. The update was cancelled."
+
+msgid "Die Styleguide-Seite konnte nicht angelegt werden. Versuche es unter Theme-Einstellungen – Werkzeuge erneut."
+msgstr "The styleguide page could not be created. Try again under Theme settings – Tools."
+
+msgid "Die Synchronisierung ist fehlgeschlagen. Prüfe Host, Benutzername, Passwort und Pfad und versuche es erneut."
+msgstr "The sync failed. Check host, username, password and path and try again."
+
+msgid "Die Tabelle bekommt eine eigene Scrollfläche, die Kopfzeile bleibt darin stehen."
+msgstr "The table gets its own scroll area, the header row stays in place inside it."
+
+msgid "Die Theme-Einstellungen aus dem Setup-Wizard wurden noch nicht importiert."
+msgstr "The theme settings from the setup wizard have not been imported yet."
+
+msgid "Die Uhrzeit der Veranstaltung (optional)."
+msgstr "The time of the event (optional)."
+
+msgid "Die angeforderte Seite existiert nicht oder wurde verschoben."
+msgstr "The requested page does not exist or has been moved."
+
+msgid "Die anzuzeigende Zahl (wird animiert)."
+msgstr "The number to display (animated)."
+
+msgid "Die https-Adresse aus dem src-Attribut des Anbieters."
+msgstr "The https address from the provider's src attribute."
+
+msgid "Die vollständige Adresse (für den „Route planen“-Link)."
+msgstr "The full address (for the \"Plan route\" link)."
+
+msgid "Die vollständige Geschäftsadresse."
+msgstr "The full business address."
+
+msgid "Diese E-Mail-Adresse sieht nicht richtig aus."
+msgstr "This email address does not look right."
+
+msgid "Diese Farben werden automatisch in eine vollständige Farbpalette (50-900) umgewandelt."
+msgstr "These colours are converted into a full colour palette (50-900) automatically."
+
+msgid "Diese Seite ist ein internes Werkzeug und für dich nicht sichtbar."
+msgstr "This page is an internal tool and not visible to you."
+
+msgid "Diese Seite ist passwortgeschützt. Bitte gib das Passwort ein."
+msgstr "This page is password protected. Please enter the password."
+
+msgid "Diese URL ist nicht erlaubt."
+msgstr "This URL is not allowed."
+
+msgid "Dieser Block wird nur auf Seiten mit \"page_is_member_area\" angezeigt."
+msgstr "This block is only shown on pages with \"page_is_member_area\"."
+
+msgid "Dieses Dokument wurde bereits synchronisiert. Neue Dateien im konfigurierten Ordner werden einmal täglich automatisch importiert."
+msgstr "This document has already been synced. New files in the configured folder are imported automatically once a day."
+
+msgid "Dieses Dokument wurde noch nicht synchronisiert. Dateien aus dem konfigurierten Ordner werden beim nächsten täglichen Abgleich importiert, oder sofort mit dem Button unten."
+msgstr "This document has not been synced yet. Files from the configured folder are imported at the next daily sync, or right away with the button below."
+
+msgid "Dieses Feld ist ein Pflichtfeld."
+msgstr "This field is required."
+
+msgid "Dieses Paket als „Empfohlen“ hervorheben."
+msgstr "Highlight this plan as \"Recommended\"."
+
+msgid "Direkte E-Mail-Adresse."
+msgstr "Direct email address."
+
+msgid "Direkte Farbanpassung"
+msgstr "Direct colour adjustment"
+
+msgid "Direkte URL zur Datei (muss https:// verwenden)."
+msgstr "Direct URL to the file (must use https://)."
+
+msgid "Direkter Link zu einer Videodatei (MP4, WebM, OGG)."
+msgstr "Direct link to a video file (MP4, WebM, OGG)."
+
+msgid "Display"
+msgstr "Display"
+
+msgid "Dokument"
+msgstr "Document"
+
+msgid "Dokument hinzufügen"
+msgstr "Add document"
+
+msgid "Dokument nicht gefunden."
+msgstr "Document not found."
+
+msgid "Dokumente"
+msgstr "Documents"
+
+msgid "Dokumente werden geladen..."
+msgstr "Loading documents..."
+
+msgid "Download-Liste"
+msgstr "Download list"
+
+msgid "Downloads (Interner Bereich)"
+msgstr "Downloads (members area)"
+
+msgid "Downloads durchsuchen"
+msgstr "Search downloads"
+
+msgid "Drei Spalten"
+msgstr "Three columns"
+
+msgid "Drei Spalten mit Bildern"
+msgstr "Three columns with images"
+
+msgid "Du hast keine Berechtigung für diese Aktion."
+msgstr "You are not allowed to do this."
+
+msgid "Du hast keine Berechtigung, Plugins zu aktivieren."
+msgstr "You are not allowed to activate plugins."
+
+msgid "Du hast keine Berechtigung, Plugins zu installieren."
+msgstr "You are not allowed to install plugins."
+
+msgid "Du hast keine Berechtigung, Seiten zu bearbeiten."
+msgstr "You are not allowed to edit pages."
+
+msgid "Du hast keine Berechtigung, Seiten zu erstellen."
+msgstr "You are not allowed to create pages."
+
+msgid "Du hast keine Berechtigung, Seiten zu löschen."
+msgstr "You are not allowed to delete pages."
+
+msgid "Du hast keinen Zugriff auf den Administrationsbereich."
+msgstr "You do not have access to the admin area."
+
+msgid "Du kannst die Einstellungen jederzeit in den jeweiligen Plugin-Optionen ändern."
+msgstr "You can change the settings at any time in the plugin options."
+
+msgid "Du kannst einzelne Dateien oder alle drei gleichzeitig hochladen. Ein Backup wird automatisch erstellt."
+msgstr "You can upload single files or all three at once. A backup is created automatically."
+
+msgid "Dunkel"
+msgstr "Dark"
+
+msgid "Dunkel (Dark Mode)"
+msgstr "Dark (dark mode)"
+
+msgid "Dunkel (Invers)"
+msgstr "Dark (inverse)"
+
+msgid "E-Mail"
+msgstr "Email"
+
+msgid "E-Mail senden"
+msgstr "Send email"
+
+msgid "E-Mail-Adresse"
+msgstr "Email address"
+
+msgid "E-Mail:"
+msgstr "Email:"
+
+msgid "Ecke, in der der Knopf schwebt. Oben sitzt er direkt unter dem Seitenkopf."
+msgstr "Corner in which the button floats. At the top it sits right below the page header."
+
+msgid "Ein Fehler ist aufgetreten."
+msgstr "An error occurred."
+
+msgid "Ein Host pro Zeile, ohne https:// und ohne Pfad. Internationalisierte Hosts müssen in Punycode-Form (xn--...) eingetragen werden. Der eigene Host der Seite ist nie erlaubt."
+msgstr "One host per line, without https:// and without a path. Internationalised hosts must be entered in punycode form (xn--...). The site's own host is never allowed."
+
+msgid "Einbettung"
+msgstr "Embed"
+
+msgid "Einblicke, Neuigkeiten und Wissenswertes..."
+msgstr "Insights, news and things worth knowing..."
+
+msgid "Eine Spalte"
+msgstr "One column"
+
+msgid "Eine Spalte mit Bild"
+msgstr "One column with image"
+
+msgid "Eine Synchronisation läuft bereits. Bitte in ein paar Minuten erneut versuchen."
+msgstr "A sync is already running. Please try again in a few minutes."
+
+msgid "Eine ergänzende Farbe für sekundäre Elemente und Variationen."
+msgstr "A complementary colour for secondary elements and variations."
+
+msgid "Einfach (zwei Zeilen)"
+msgstr "Simple (two rows)"
+
+msgid "Einfach zeigt Logo oder Firmenname, Kontaktdaten, Copyright und rechtliche Links in zwei kompakten Zeilen. Navigation, Footer-Text und Social Links entfallen."
+msgstr "Simple shows logo or company name, contact details, copyright and legal links in two compact rows. Navigation, footer text and social links are left out."
+
+msgid "Eingabe löschen"
+msgstr "Clear input"
+
+msgid "Eingebetteter Inhalt"
+msgstr "Embedded content"
+
+msgid "Einleitungstext"
+msgstr "Intro text"
+
+msgid "Einleitungstext unter dem Titel."
+msgstr "Intro text below the title."
+
+msgid "Einstellungen jetzt importieren"
+msgstr "Import settings now"
+
+msgid "Eintrag"
+msgstr "Item"
+
+msgid "Eintrag hinzufügen"
+msgstr "Add item"
+
+msgid "Einträge"
+msgstr "Items"
+
+msgid "Einträge pro Seite"
+msgstr "Items per page"
+
+msgid "Einwilligung Datenschutz:"
+msgstr "Privacy consent:"
+
+msgid "Einzelzitat"
+msgstr "Single quote"
+
+msgid "Empfohlen"
+msgstr "Recommended"
+
+msgid "Empfohlene Größe: mindestens 1920×1080 Pixel (16:9)."
+msgstr "Recommended size: at least 1920×1080 pixels (16:9)."
+
+msgid "Empfohlene Größe: mindestens 960×800 Pixel (6:5)."
+msgstr "Recommended size: at least 960×800 pixels (6:5)."
+
+msgid "Engere Zeilen. Sinnvoll ab etwa zehn Zeilen."
+msgstr "Tighter rows. Useful from about ten rows."
+
+msgid "Englisch"
+msgstr "English"
+
+msgid "Entpacke und installiere..."
+msgstr "Unpacking and installing..."
+
+msgid "Ereignis"
+msgstr "Event"
+
+msgid "Ereignis hinzufügen"
+msgstr "Add event"
+
+msgid "Ereignisse"
+msgstr "Events"
+
+msgid "Erfolg"
+msgstr "Success"
+
+msgid "Erfolg (Success)"
+msgstr "Success"
+
+msgid "Erfolgreich"
+msgstr "Successful"
+
+msgid "Erforderlich"
+msgstr "Required"
+
+msgid "Erforderliche Plugins fehlen"
+msgstr "Required plugins are missing"
+
+msgid "Ergebnisse für:"
+msgstr "Results for:"
+
+msgid "Erhöht"
+msgstr "Elevated"
+
+msgid "Erhöht trägt einen Schatten, Umriss nur eine Linie, Gefüllt eine eigene Fläche, Linie oben nur eine Linie über dem Text."
+msgstr "Elevated has a shadow, Outline only a line, Filled its own surface, Line on top only a line above the text."
+
+msgid "Erlaubt: PDF, Word, Excel, ZIP"
+msgstr "Allowed: PDF, Word, Excel, ZIP"
+
+msgid "Erlaubte Hosts"
+msgstr "Allowed hosts"
+
+msgid "Erlaubte Rollen"
+msgstr "Allowed roles"
+
+msgid "Erneut versuchen"
+msgstr "Try again"
+
+msgid "Erstellt Beispiel-Blogbeiträge zum Testen des Blog-Layouts."
+msgstr "Creates sample blog posts to test the blog layout."
+
+msgid "Erstellt Standardseiten und richtet die Navigation ein."
+msgstr "Creates default pages and sets up the navigation."
+
+msgid "Ersten Eintrag geöffnet zeigen"
+msgstr "Show first item expanded"
+
+msgid "Erweitert (ohne Figma)"
+msgstr "Advanced (without Figma)"
+
+msgid "Es gelten die"
+msgstr "Subject to the"
+
+msgid "Es gelten unsere"
+msgstr "Subject to our"
+
+msgid "Es gilt unsere Datenschutzerklärung."
+msgstr "Our privacy policy applies."
+
+msgid "Es sind %d empfohlene Plugins für das WP-Starter Theme verfügbar."
+msgstr "%d recommended plugins are available for the WP Starter theme."
+
+msgid "Es sind noch keine Beiträge in diesem Bereich vorhanden."
+msgstr "There are no posts in this section yet."
+
+msgid "Es sind noch keine Inhalte vorhanden."
+msgstr "There is no content yet."
+
+msgid "Exportiere Design-Tokens aus Figma, lade sie hier hoch und generiere das CSS. Dies ist der empfohlene Weg für konsistente Design-Systeme."
+msgstr "Export design tokens from Figma, upload them here and generate the CSS. This is the recommended way for consistent design systems."
+
+msgid "Externe Einbettungen"
+msgstr "External embeds"
+
+msgid "Externe URL"
+msgstr "External URL"
+
+msgid "Externer Link"
+msgstr "External link"
+
+msgid "Facebook"
+msgstr "Facebook"
+
+msgid "Falsches Passwort."
+msgstr "Wrong password."
+
+msgid "Farbe für Erfolgsmeldungen und positive Aktionen."
+msgstr "Colour for success messages and positive actions."
+
+msgid "Farbe für Fehlermeldungen und kritische Aktionen."
+msgstr "Colour for error messages and critical actions."
+
+msgid "Farbe für Warnungen und Hinweise."
+msgstr "Colour for warnings and notices."
+
+msgid "Farben für Feedback und Statusmeldungen. Light/Dark-Varianten werden automatisch generiert."
+msgstr "Colours for feedback and status messages. Light and dark variants are generated automatically."
+
+msgid "Farbschema"
+msgstr "Colour scheme"
+
+msgid "Favicon"
+msgstr "Favicon"
+
+msgid "Favicon (ICO)"
+msgstr "Favicon (ICO)"
+
+msgid "Favicon (SVG)"
+msgstr "Favicon (SVG)"
+
+msgid "Fehlende Kategorie: %s"
+msgstr "Missing category: %s"
+
+msgid "Fehlende Sektion: %s"
+msgstr "Missing section: %s"
+
+msgid "Fehlender Hex-Wert für: %s"
+msgstr "Missing hex value for: %s"
+
+msgid "Fehlender Wert für: %s"
+msgstr "Missing value for: %s"
+
+msgid "Fehler"
+msgstr "Error"
+
+msgid "Fehler (Error)"
+msgstr "Error"
+
+msgid "Fehler - Erneut versuchen"
+msgstr "Error - try again"
+
+msgid "Fehler bei der Token-Transformation."
+msgstr "Error during token transformation."
+
+msgid "Fehlgeschlagen"
+msgstr "Failed"
+
+msgid "Feld"
+msgstr "Field"
+
+msgid "Felder anzeigen"
+msgstr "Show fields"
+
+msgid "Fertig – Seite wird neu geladen…"
+msgstr "Done – reloading the page…"
+
+msgid "Feste Höhe"
+msgstr "Fixed height"
+
+msgid "Feste Höhe für Anbieter, die kein Verhältnis vertragen, etwa Buchungskalender."
+msgstr "Fixed height for providers that do not cope with a ratio, such as booking calendars."
+
+msgid "Figma-Workflow"
+msgstr "Figma workflow"
+
+msgid "Filter zurücksetzen"
+msgstr "Reset filters"
+
+msgid "Findet die Veranstaltung vor Ort, online oder beides statt?"
+msgstr "Does the event take place on site, online or both?"
+
+msgid "Firmenname"
+msgstr "Company name"
+
+msgid "Firmenname anzeigen"
+msgstr "Show company name"
+
+msgid "Folge uns"
+msgstr "Follow us"
+
+msgid "Footer"
+msgstr "Footer"
+
+msgid "Footer Menu"
+msgstr "Footer Menu"
+
+msgid "Footer-Einstellungen"
+msgstr "Footer settings"
+
+msgid "Footer-Stil"
+msgstr "Footer style"
+
+msgid "Footer-Text"
+msgstr "Footer text"
+
+msgid "Formular"
+msgstr "Form"
+
+msgid "Formular-ID"
+msgstr "Form ID"
+
+msgid "Formulare"
+msgstr "Forms"
+
+msgid "Foto"
+msgstr "Photo"
+
+msgid "Französisch"
+msgstr "French"
+
+msgid "Funktion oder Organisation."
+msgstr "Role or organisation."
+
+msgid "Fußnavigation"
+msgstr "Footer navigation"
+
+msgid "Füge Datenzeilen hinzu. Jede Zeile braucht genau so viele Zellen wie Spalten definiert sind, sonst kannst du die Seite nicht speichern."
+msgstr "Add data rows. Every row needs exactly as many cells as there are columns, otherwise you cannot save the page."
+
+msgid "Füge Ereignisse in chronologischer Reihenfolge hinzu."
+msgstr "Add events in chronological order."
+
+msgid "Füge Kennzahlen hinzu (empfohlen: 3–4)."
+msgstr "Add figures (recommended: 3–4)."
+
+msgid "Füge Kundenstimmen und Bewertungen hinzu."
+msgstr "Add testimonials and reviews."
+
+msgid "Füge Partner- oder Kundenlogos hinzu."
+msgstr "Add partner or customer logos."
+
+msgid "Füge Preispakete hinzu (empfohlen: 3 Pakete)."
+msgstr "Add pricing plans (recommended: 3 plans)."
+
+msgid "Füge Teammitglieder hinzu."
+msgstr "Add team members."
+
+msgid "Füge beliebig viele Karten hinzu."
+msgstr "Add as many cards as you like."
+
+msgid "Füge beliebig viele auf- und zuklappbare Elemente hinzu."
+msgstr "Add as many collapsible items as you like."
+
+msgid "Füge die YouTube- oder Vimeo-URL ein."
+msgstr "Paste the YouTube or Vimeo URL."
+
+msgid "Füge mindestens 2 Tabs hinzu."
+msgstr "Add at least 2 tabs."
+
+msgid "Für deine Suche konnten leider keine passenden Inhalte gefunden werden. Versuch es mit anderen Suchbegriffen."
+msgstr "Sorry, nothing matched your search. Try different search terms."
+
+msgid "Für dunkle Hintergründe."
+msgstr "For dark backgrounds."
+
+msgid "Galerie (Quadrat)"
+msgstr "Gallery (square)"
+
+msgid "Galeriebild"
+msgstr "Gallery image"
+
+msgid "Ganze Inhaltsbreite"
+msgstr "Full content width"
+
+msgid "Ganze Inhaltsbreite lässt die Box mit den Kanten eines Zweispalters darüber abschließen."
+msgstr "Full content width lines the box up with the edges of a two-column layout above."
+
+msgid "Gefüllt"
+msgstr "Filled"
+
+msgid "Gemeinsames Passwort"
+msgstr "Shared password"
+
+msgid "Geschützt"
+msgstr "Protected"
+
+msgid "Geschützte Seite"
+msgstr "Protected page"
+
+msgid "Gesendet am [_date] um [_time] von [_site_title] ([_site_url])"
+msgstr "Sent on [_date] at [_time] from [_site_title] ([_site_url])"
+
+msgid "Gestreifte Zeilen"
+msgstr "Striped rows"
+
+msgid "Geteilt"
+msgstr "Split"
+
+msgid "Ghost"
+msgstr "Ghost"
+
+msgid "Gibt FAQPage-Auszeichnung für Suchmaschinen aus. Nur einschalten, wenn die Einträge wirklich Fragen und Antworten sind."
+msgstr "Outputs FAQPage markup for search engines. Only switch it on if the items really are questions and answers."
+
+msgid "Google"
+msgstr "Google"
+
+msgid "Google Maps Einbettungs-URL"
+msgstr "Google Maps embed URL"
+
+msgid "Google Maps Karte"
+msgstr "Google Maps map"
+
+msgid "Google Maps Link"
+msgstr "Google Maps link"
+
+msgid "Grauton"
+msgstr "Grey"
+
+msgid "Groß"
+msgstr "Large"
+
+msgid "Groß setzt das Zitat als eigenständigen Blickfang."
+msgstr "Large sets the quote as a standalone eye-catcher."
+
+msgid "Gruppe hinzufügen"
+msgstr "Add group"
+
+msgid "Gruppen"
+msgstr "Groups"
+
+msgid "Größe"
+msgstr "Size"
+
+msgid "Größe des Buttons."
+msgstr "Size of the button."
+
+msgid "H2-Überschrift. Nutze [br] für Zeilenumbrüche."
+msgstr "H2 heading. Use [br] for line breaks."
+
+msgid "Halber Bildschirm"
+msgstr "Half screen"
+
+msgid "Handlungsaufforderung (CTA)"
+msgstr "Call to action (CTA)"
+
+msgid "Haupt-Button (auffällig)."
+msgstr "Main button (prominent)."
+
+msgid "Haupt-E-Mail-Adresse."
+msgstr "Main email address."
+
+msgid "Hauptnavigation"
+msgstr "Main navigation"
+
+msgid "Haupttelefonnummer."
+msgstr "Main phone number."
+
+msgid "Header"
+msgstr "Header"
+
+msgid "Header Menu"
+msgstr "Header Menu"
+
+msgid "Header bleibt beim Scrollen oben fixiert."
+msgstr "The header stays fixed at the top while scrolling."
+
+msgid "Header-Einstellungen"
+msgstr "Header settings"
+
+msgid "Heading 1"
+msgstr "Heading 1"
+
+msgid "Heading 2"
+msgstr "Heading 2"
+
+msgid "Heading 3"
+msgstr "Heading 3"
+
+msgid "Heading 4"
+msgstr "Heading 4"
+
+msgid "Heading 5"
+msgstr "Heading 5"
+
+msgid "Hell"
+msgstr "Light"
+
+msgid "Hell (Light Mode)"
+msgstr "Light (light mode)"
+
+msgid "Hero / Zweispaltig"
+msgstr "Hero / two columns"
+
+msgid "Hero Hintergrund (Vollbild)"
+msgstr "Hero background (full screen)"
+
+msgid "Hero-Bereich"
+msgstr "Hero section"
+
+msgid "Herunterladen"
+msgstr "Download"
+
+msgid "Hervorheben"
+msgstr "Highlight"
+
+msgid "Hier kannst du Farben direkt anpassen, ohne Figma zu verwenden. Nach dem Speichern werden die Token-Dateien automatisch aktualisiert und das CSS neu generiert."
+msgstr "Adjust colours directly here, without Figma. After saving, the token files are updated and the CSS is regenerated automatically."
+
+msgid "Hintergrund"
+msgstr "Background"
+
+msgid "Hintergrundbild"
+msgstr "Background image"
+
+msgid "Hintergrundfarbe"
+msgstr "Background colour"
+
+msgid "Hinweis"
+msgstr "Notice"
+
+msgid "Hinweis hinzufügen"
+msgstr "Add notice"
+
+msgid "Hinweis schließen"
+msgstr "Close notice"
+
+msgid "Hinweis unter dem Feld"
+msgstr "Hint below the field"
+
+msgid "Hinweise"
+msgstr "Notices"
+
+msgid "Hinweise in der Datenschutzerklärung."
+msgstr "Notes in the privacy policy."
+
+msgid "Hinweise werden zwischen Seiteninhalt und Footer angezeigt. Ideal für rechtliche Hinweise, Risikobelehrungen oder temporäre Mitteilungen. Bei Textänderung erscheint ein zuvor geschlossener Hinweis erneut."
+msgstr "Notices appear between page content and footer. Ideal for legal notes, risk disclosures or temporary announcements. When the text changes, a previously closed notice appears again."
+
+msgid "Hinweisleiste"
+msgstr "Notice bar"
+
+msgid "Hinweistext"
+msgstr "Notice text"
+
+msgid "Hochgeladene Datei"
+msgstr "Uploaded file"
+
+msgid "Host-Key neu vertrauen"
+msgstr "Trust host key again"
+
+msgid "Host:"
+msgstr "Host:"
+
+msgid "Hostname des SFTP-Servers, z.B. sftp.example.com oder storagebox.hetzner.de"
+msgstr "Host name of the SFTP server, e.g. sftp.example.com or storagebox.hetzner.de"
+
+msgid "Hybrid"
+msgstr "Hybrid"
+
+msgid "Höhe"
+msgstr "Height"
+
+msgid "Höhe der Karte in Pixeln."
+msgstr "Height of the map in pixels."
+
+msgid "Höhe des Logos im Header. Kleiner macht den Header niedriger; 32 passt zur Schriftgröße der Navigation."
+msgstr "Height of the logo in the header. Smaller makes the header lower; 32 matches the navigation font size."
+
+msgid "Höhe in Pixel (Standard: 50)"
+msgstr "Height in pixels (default: 50)"
+
+msgid "Höhe in Pixeln"
+msgstr "Height in pixels"
+
+msgid "Ich habe die %s gelesen und stimme der Verarbeitung meiner Daten zu."
+msgstr "I have read the %s and agree to the processing of my data."
+
+msgid "Ich stimme der Verarbeitung meiner Angaben zur Beantwortung der Anfrage zu."
+msgstr "I agree to the processing of my details to answer the request."
+
+msgid "Icon"
+msgstr "Icon"
+
+msgid "Im Sprungmenü zeigen"
+msgstr "Show in jump menu"
+
+msgid "In %s einfügen"
+msgstr "Insert into %s"
+
+msgid "In Schleife abspielen"
+msgstr "Play in a loop"
+
+msgid "In diesem Archiv sind noch keine Beiträge vorhanden."
+msgstr "There are no posts in this archive yet."
+
+msgid "Info-Spalte"
+msgstr "Info column"
+
+msgid "Inhalt"
+msgstr "Content"
+
+msgid "Inhalt %d"
+msgstr "Content %d"
+
+msgid "Inhalt anzeigen"
+msgstr "Show content"
+
+msgid "Inhalt der Spalte"
+msgstr "Column content"
+
+msgid "Inhalt der Zelle (HTML erlaubt)."
+msgstr "Cell content (HTML allowed)."
+
+msgid "Inhalt der breiten linken Spalte (ca. 2/3 der Breite)."
+msgstr "Content of the wide left column (about 2/3 of the width)."
+
+msgid "Inhalt der breiten rechten Spalte (ca. 2/3 der Breite)."
+msgstr "Content of the wide right column (about 2/3 of the width)."
+
+msgid "Inhalt der dritten Spalte (1/3 Breite)."
+msgstr "Content of the third column (1/3 width)."
+
+msgid "Inhalt der dritten Spalte (1/4 Breite)."
+msgstr "Content of the third column (1/4 width)."
+
+msgid "Inhalt der ersten Spalte (1/3 Breite)."
+msgstr "Content of the first column (1/3 width)."
+
+msgid "Inhalt der ersten Spalte (1/4 Breite)."
+msgstr "Content of the first column (1/4 width)."
+
+msgid "Inhalt der linken Spalte (50% Breite)."
+msgstr "Content of the left column (50% width)."
+
+msgid "Inhalt der mittleren Spalte (1/3 Breite)."
+msgstr "Content of the middle column (1/3 width)."
+
+msgid "Inhalt der rechten Spalte (50% Breite)."
+msgstr "Content of the right column (50% width)."
+
+msgid "Inhalt der schmalen linken Spalte (ca. 1/3 der Breite)."
+msgstr "Content of the narrow left column (about 1/3 of the width)."
+
+msgid "Inhalt der schmalen rechten Spalte (ca. 1/3 der Breite)."
+msgstr "Content of the narrow right column (about 1/3 of the width)."
+
+msgid "Inhalt der vierten Spalte (1/4 Breite)."
+msgstr "Content of the fourth column (1/4 width)."
+
+msgid "Inhalt der zweiten Spalte (1/4 Breite)."
+msgstr "Content of the second column (1/4 width)."
+
+msgid "Inhalt laden"
+msgstr "Load content"
+
+msgid "Inhalt wird geladen..."
+msgstr "Loading content..."
+
+msgid "Inhalte"
+msgstr "Content"
+
+msgid "Inhaltsbereich (groß)"
+msgstr "Content area (large)"
+
+msgid "Inhaltsspalte"
+msgstr "Content column"
+
+msgid "Instagram"
+msgstr "Instagram"
+
+msgid "Installation abgeschlossen"
+msgstr "Installation finished"
+
+msgid "Installation fehlgeschlagen."
+msgstr "Installation failed."
+
+msgid "Installation gestartet"
+msgstr "Installation started"
+
+msgid "Installation läuft..."
+msgstr "Installing..."
+
+msgid "Installationsfortschritt"
+msgstr "Installation progress"
+
+msgid "Installieren & Aktivieren"
+msgstr "Install & activate"
+
+msgid "Interaktiv"
+msgstr "Interactive"
+
+msgid "Interne Kennung, die diese Datei dem Ordner zuordnet. Nicht ändern."
+msgstr "Internal ID that links this file to the folder. Do not change."
+
+msgid "Interner Bereich"
+msgstr "Members area"
+
+msgid "Interner Bereich aktiv"
+msgstr "Members area active"
+
+msgid "Interner Bereich ist deaktiviert."
+msgstr "The members area is disabled."
+
+msgid "Interner Bereich — Einstellungen"
+msgstr "Members area — settings"
+
+msgid "Invertiert"
+msgstr "Inverted"
+
+msgid "Italienisch"
+msgstr "Italian"
+
+msgid "JSON muss ein Objekt sein"
+msgstr "JSON must be an object"
+
+msgid "Ja"
+msgstr "Yes"
+
+msgid "Jahr / Datum"
+msgstr "Year / date"
+
+msgid "Jahr: %s"
+msgstr "Year: %s"
+
+msgid "Jede Gruppe erscheint als eigene Karte."
+msgstr "Each group appears as its own card."
+
+msgid "Jetzt synchronisieren"
+msgstr "Sync now"
+
+msgid "Jobtitel oder Rolle im Unternehmen."
+msgstr "Job title or role in the company."
+
+msgid "Jobtitel oder Rolle."
+msgstr "Job title or role."
+
+msgid "Jobtitel und/oder Firmenname."
+msgstr "Job title and/or company name."
+
+msgid "Jährlich"
+msgstr "Yearly"
+
+msgid "Kanal hinzufügen"
+msgstr "Add channel"
+
+msgid "Karte"
+msgstr "Map"
+
+msgid "Karte (16:9)"
+msgstr "Map (16:9)"
+
+msgid "Karte (Google Maps)"
+msgstr "Map (Google Maps)"
+
+msgid "Karte hinzufügen"
+msgstr "Add card"
+
+msgid "Karte laden"
+msgstr "Load map"
+
+msgid "Karte wird geladen..."
+msgstr "Loading map..."
+
+msgid "Karte öffnen"
+msgstr "Open map"
+
+msgid "Karten"
+msgstr "Cards"
+
+msgid "Karten / Features"
+msgstr "Cards / features"
+
+msgid "Kartenstil"
+msgstr "Card style"
+
+msgid "Kategorie"
+msgstr "Category"
+
+msgid "Kategorie filtern"
+msgstr "Filter category"
+
+msgid "Kategorie: %s"
+msgstr "Category: %s"
+
+msgid "Kein Backup-Zeitpunkt ausgewählt."
+msgstr "No backup time selected."
+
+msgid "Kein Icon"
+msgstr "No icon"
+
+msgid "Kein Passwort konfiguriert."
+msgstr "No password configured."
+
+msgid "Kein Plugin angegeben."
+msgstr "No plugin given."
+
+msgid "Kein Zugang — fehlende Berechtigung."
+msgstr "No access: missing permission."
+
+msgid "Kein Zugriff auf den internen Bereich."
+msgstr "No access to the members area."
+
+msgid "Keine"
+msgstr "None"
+
+msgid "Keine %s gefunden"
+msgstr "No %s found"
+
+msgid "Keine %s im Papierkorb"
+msgstr "No %s in the trash"
+
+msgid "Keine Backup-Dateien für diesen Zeitpunkt gefunden."
+msgstr "No backup files found for this time."
+
+msgid "Keine Backups vorhanden. Backups werden automatisch erstellt, wenn Tokens geändert werden."
+msgstr "No backups yet. Backups are created automatically when tokens change."
+
+msgid "Keine Beiträge gefunden"
+msgstr "No posts found"
+
+msgid "Keine Berechtigung."
+msgstr "Not allowed."
+
+msgid "Keine Datei hinterlegt."
+msgstr "No file stored."
+
+msgid "Keine Dateien zum Upload ausgewählt."
+msgstr "No files selected for upload."
+
+msgid "Keine Dokumente gefunden."
+msgstr "No documents found."
+
+msgid "Keine Download-URL für das Plugin gefunden."
+msgstr "No download URL found for the plugin."
+
+msgid "Keine Ergebnisse gefunden"
+msgstr "No results found"
+
+msgid "Keine Treffer"
+msgstr "No matches"
+
+msgid "Keine URL hinterlegt."
+msgstr "No URL stored."
+
+msgid "Keine Veranstaltungen geplant"
+msgstr "No events planned"
+
+msgid "Keine Verbindung zum Server. Prüfe deine Internetverbindung und versuche es erneut."
+msgstr "No connection to the server. Check your internet connection and try again."
+
+msgid "Keine gültigen Farbwerte zum Synchronisieren."
+msgstr "No valid colour values to sync."
+
+msgid "Klein"
+msgstr "Small"
+
+msgid "Klicke auf den Button unten, um die CSS-Tokens manuell neu zu generieren."
+msgstr "Click the button below to regenerate the CSS tokens manually."
+
+msgid "Klicken oder Enter zum Vergrößern"
+msgstr "Click or press Enter to enlarge"
+
+msgid "Kompakt"
+msgstr "Compact"
+
+msgid "Konnte %s nicht speichern"
+msgstr "Could not save %s"
+
+msgid "Konnte %s nicht wiederherstellen"
+msgstr "Could not restore %s"
+
+msgid "Konnte Datei %s nicht lesen"
+msgstr "Could not read file %s"
+
+msgid "Konnte Token-Datei nicht lesen."
+msgstr "Could not read the token file."
+
+msgid "Konnte Token-Datei nicht schreiben."
+msgstr "Could not write the token file."
+
+msgid "Konnte Token-Daten nicht kodieren."
+msgstr "Could not encode the token data."
+
+msgid "Kontakt"
+msgstr "Contact"
+
+msgid "Kontakt-Überschrift"
+msgstr "Contact heading"
+
+msgid "Kontaktdaten"
+msgstr "Contact details"
+
+msgid "Kontaktdaten anzeigen"
+msgstr "Show contact details"
+
+msgid "Kontaktformular"
+msgstr "Contact form"
+
+msgid "Kopfzeile mitscrollen"
+msgstr "Scroll header row along"
+
+msgid "Kunde"
+msgstr "Customer"
+
+msgid "Kundeninformationen"
+msgstr "Customer information"
+
+msgid "Kundenstimme hinzufügen"
+msgstr "Add testimonial"
+
+msgid "Kundenstimmen"
+msgstr "Testimonials"
+
+msgid "Kurzbeschreibung"
+msgstr "Short description"
+
+msgid "Kurzbeschreibung für den Teaser (optional)."
+msgstr "Short description for the teaser (optional)."
+
+msgid "Kurzbiografie"
+msgstr "Short bio"
+
+msgid "Kurze Beschreibung der Person."
+msgstr "Short description of the person."
+
+msgid "Kurze Beschreibung."
+msgstr "Short description."
+
+msgid "Kurzer Beschreibungstext unter der Überschrift."
+msgstr "Short description text below the heading."
+
+msgid "Kurzer Satz zu Datenschutz und Abmeldung."
+msgstr "Short sentence on privacy and unsubscribing."
+
+msgid "Kurzer Text, der zum Handeln auffordert."
+msgstr "Short text that invites action."
+
+msgid "Kurzer Titel des Ereignisses."
+msgstr "Short title of the event."
+
+msgid "Label Nachher"
+msgstr "After label"
+
+msgid "Label Vorher"
+msgstr "Before label"
+
+msgid "Lade Plugin von WordPress.org herunter..."
+msgstr "Downloading plugin from WordPress.org..."
+
+msgid "Lade die Dateien herunter, bearbeite sie in einem Texteditor und lade sie unten wieder hoch."
+msgstr "Download the files, edit them in a text editor and upload them again below."
+
+msgid "Lade eine MP4-, WebM- oder OGG-Datei hoch."
+msgstr "Upload an MP4, WebM or OGG file."
+
+msgid "Layout"
+msgstr "Layout"
+
+msgid "Leer lassen für „Anmelden“."
+msgstr "Leave empty for \"Log in\"."
+
+msgid "Legal Menu"
+msgstr "Legal Menu"
+
+msgid "Leistungen"
+msgstr "Services"
+
+msgid "Letztes Backup: %s"
+msgstr "Last backup: %s"
+
+msgid "Light Mode (Semantische Tokens)"
+msgstr "Light mode (semantic tokens)"
+
+msgid "Linie"
+msgstr "Line"
+
+msgid "Linie oben (ohne Karte)"
+msgstr "Line on top (no card)"
+
+msgid "Linie: dünne Trennlinie. Punkte: drei zentrierte Punkte. Welle: geschwungene Kante zwischen zwei Flächen. Abstand: nur Leerraum, ohne sichtbares Element."
+msgstr "Line: thin divider. Dots: three centred dots. Wave: curved edge between two surfaces. Space: only white space, no visible element."
+
+msgid "Link"
+msgstr "Link"
+
+msgid "Link und Text für den Header-CTA-Button."
+msgstr "Link and text for the header CTA button."
+
+msgid "Link zu allen Veranstaltungen"
+msgstr "Link to all events"
+
+msgid "Link zum LinkedIn-Profil."
+msgstr "Link to the LinkedIn profile."
+
+msgid "Link zum Xing-Profil."
+msgstr "Link to the Xing profile."
+
+msgid "Link zur Google Maps Position (für „Anfahrt\" Button)."
+msgstr "Link to the Google Maps location (for the \"Directions\" button)."
+
+msgid "Link zur Original-Bewertung (z.B. Google, Trustpilot)."
+msgstr "Link to the original review (e.g. Google, Trustpilot)."
+
+msgid "Linke Spalte (breit)"
+msgstr "Left column (wide)"
+
+msgid "Linke Spalte (schmal)"
+msgstr "Left column (narrow)"
+
+msgid "LinkedIn"
+msgstr "LinkedIn"
+
+msgid "Links neben der Tabelle"
+msgstr "Left of the table"
+
+msgid "Linksbündig"
+msgstr "Left aligned"
+
+msgid "Liste"
+msgstr "List"
+
+msgid "Liste der enthaltenen Leistungen (als Aufzählung)."
+msgstr "List of included services (as bullet points)."
+
+msgid "Liste filtern: %s"
+msgstr "Filter list: %s"
+
+msgid "Liste: %s"
+msgstr "List: %s"
+
+msgid "Listennavigation: %s"
+msgstr "List navigation: %s"
+
+msgid "Login"
+msgstr "Login"
+
+msgid "Login-Beschreibung"
+msgstr "Login description"
+
+msgid "Login-Überschrift"
+msgstr "Login heading"
+
+msgid "Logo"
+msgstr "Logo"
+
+msgid "Logo (Dunkel)"
+msgstr "Logo (dark)"
+
+msgid "Logo anzeigen"
+msgstr "Show logo"
+
+msgid "Logo hinzufügen"
+msgstr "Add logo"
+
+msgid "Logo-Höhe im Header (px)"
+msgstr "Logo height in the header (px)"
+
+msgid "Logo-Slider"
+msgstr "Logo slider"
+
+msgid "Logolauf anhalten"
+msgstr "Pause logo marquee"
+
+msgid "Logolauf fortsetzen"
+msgstr "Resume logo marquee"
+
+msgid "Logos"
+msgstr "Logos"
+
+msgid "Logos automatisch durchlaufen lassen."
+msgstr "Scroll the logos automatically."
+
+msgid "Manuell eingeben"
+msgstr "Enter manually"
+
+msgid "Manuell: du pflegst die Personen hier im Layout. Aus der Verwaltung: es werden automatisch alle veröffentlichten Einträge unter Team gezeigt, sortiert nach dem Feld Reihenfolge."
+msgstr "Manual: you maintain the people here in the layout. From the admin: all published entries under Team are shown automatically, sorted by the Order field."
+
+msgid "Manuell: du pflegst die Stimmen hier im Layout. Aus der Verwaltung: es werden automatisch alle veröffentlichten Einträge unter Kundenstimmen gezeigt, neueste zuerst."
+msgstr "Manual: you maintain the testimonials here in the layout. From the admin: all published entries under Testimonials are shown automatically, newest first."
+
+msgid "Markenfarbe"
+msgstr "Brand colour"
+
+msgid "Markenfarbe (helle Tönung)"
+msgstr "Brand colour (light tint)"
+
+msgid "Markenfarben"
+msgstr "Brand colours"
+
+msgid "Mediathek"
+msgstr "Media library"
+
+msgid "Medien"
+msgstr "Media"
+
+msgid "Mehr erfahren"
+msgstr "Learn more"
+
+msgid "Mehr zu %s"
+msgstr "More about %s"
+
+msgid "Mehrere Seiten kommen als Styleguide in Frage. Öffne die richtige Seite und wähle dort das Template \"Styleguide\" aus; automatisch wird hier nichts geändert."
+msgstr "Several pages qualify as the styleguide. Open the right page and select the \"Styleguide\" template there; nothing is changed automatically here."
+
+msgid "Mehrere gleichzeitig offen"
+msgstr "Several open at once"
+
+msgid "Menü"
+msgstr "Menu"
+
+msgid "Menü schließen"
+msgstr "Close menu"
+
+msgid "Menü öffnen"
+msgstr "Open menu"
+
+msgid "Mit Rahmen"
+msgstr "With border"
+
+msgid "Mit dem Absenden stimmst du der Verarbeitung deiner E-Mail-Adresse zu."
+msgstr "By submitting you agree to the processing of your email address."
+
+msgid "Mitglied hinzufügen"
+msgstr "Add member"
+
+msgid "Mittel"
+msgstr "Medium"
+
+msgid "Mobile Navigation"
+msgstr "Mobile navigation"
+
+msgid "Modul auswählen"
+msgstr "Select module"
+
+msgid "Modul hinzufügen"
+msgstr "Add module"
+
+msgid "Module"
+msgstr "Modules"
+
+msgid "Monat: %s"
+msgstr "Month: %s"
+
+msgid "Monatlich"
+msgstr "Monthly"
+
+msgid "Musterfirma GmbH"
+msgstr "Example Company Ltd"
+
+msgid "Musterstraße 123\n12345 Musterstadt"
+msgstr "123 Example Street\n12345 Example City"
+
+msgid "Musterstraße 123, 12345 Musterstadt"
+msgstr "123 Example Street, 12345 Example City"
+
+msgid "Möchtest du eine Styleguide-Seite erstellen? Sie enthält alle verfügbaren Farben, Typografie, Abstände und Block-Beispiele als visuelle Referenz."
+msgstr "Would you like to create a styleguide page? It contains all available colours, typography, spacing and block examples as a visual reference."
+
+msgid "Nachher"
+msgstr "After"
+
+msgid "Nachher-Bild"
+msgstr "After image"
+
+msgid "Nachricht senden"
+msgstr "Send message"
+
+msgid "Nachricht:"
+msgstr "Message:"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Name der Person."
+msgstr "Name of the person."
+
+msgid "Name der Spalte."
+msgstr "Name of the column."
+
+msgid "Name des Dokuments."
+msgstr "Name of the document."
+
+msgid "Name des E-Mail-Feldes"
+msgstr "Name of the email field"
+
+msgid "Name des Pakets."
+msgstr "Name of the plan."
+
+msgid "Name des Partners (für Barrierefreiheit)."
+msgstr "Name of the partner (for accessibility)."
+
+msgid "Name:"
+msgstr "Name:"
+
+msgid "Navigation"
+msgstr "Navigation"
+
+msgid "Navigation anzeigen"
+msgstr "Show navigation"
+
+msgid "Nein, danke"
+msgstr "No, thanks"
+
+msgid "Netzwerkfehler"
+msgstr "Network error"
+
+msgid "Netzwerkfehler bei der Installation. Bitte versuch es erneut."
+msgstr "Network error during installation. Please try again."
+
+msgid "Netzwerkfehler. Bitte erneut versuchen."
+msgstr "Network error. Please try again."
+
+msgid "Neu"
+msgstr "New"
+
+msgid "Neu installiert und aktiviert"
+msgstr "Newly installed and activated"
+
+msgid "Neue %s"
+msgstr "New %s"
+
+msgid "Neue %s hinzufügen"
+msgstr "Add new %s"
+
+msgid "Neue Nachricht über das Kontaktformular:"
+msgstr "New message via the contact form:"
+
+msgid "Neuen %s hinzufügen"
+msgstr "Add new %s"
+
+msgid "Neuer %s"
+msgstr "New %s"
+
+msgid "Neuer %s Name"
+msgstr "New %s name"
+
+msgid "Neues %s"
+msgstr "New %s"
+
+msgid "Neues %s hinzufügen"
+msgstr "Add new %s"
+
+msgid "Neues Passwort eingeben…"
+msgstr "Enter new password…"
+
+msgid "Neues Testimonial"
+msgstr "New testimonial"
+
+msgid "Neueste zuerst"
+msgstr "Newest first"
+
+msgid "Newsletter-Anmeldung"
+msgstr "Newsletter signup"
+
+msgid "Nicht authentifiziert."
+msgstr "Not authenticated."
+
+msgid "Nicht verfügbar"
+msgstr "Not available"
+
+msgid "Noch kein Backup vorhanden"
+msgstr "No backup yet"
+
+msgid "Node.js nicht gefunden. Bitte führe \"npm run tokens && npm run build\" manuell aus."
+msgstr "Node.js not found. Please run \"npm run tokens && npm run build\" manually."
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Nur ausgewählte Seiten"
+msgstr "Selected pages only"
+
+msgid "Nur bei fester Höhe."
+msgstr "Only with a fixed height."
+
+msgid "Nur die Zahl aus der URL des Formulars. Vorbelegt ist das Formular, das das Theme beim Aktivieren von Contact Form 7 angelegt hat."
+msgstr "Only the number from the form's URL. Preset is the form the theme created when Contact Form 7 was activated."
+
+msgid "Nur für dich sichtbar: Der Host %s ist nicht in den Theme-Einstellungen freigegeben. Trage ihn dort ein, sonst bleibt die Fläche für Besucher leer."
+msgstr "Only visible to you: the host %s is not allowed in the theme settings. Add it there, otherwise the area stays empty for visitors."
+
+msgid "Nur für dich sichtbar: Diese Google-Maps-Adresse ist nicht in den Theme-Einstellungen freigegeben. Trage den Host dort ein, sonst bleibt die Fläche für Besucher leer."
+msgstr "Only visible to you: this Google Maps address is not allowed in the theme settings. Add the host there, otherwise the area stays empty for visitors."
+
+msgid "Nur nötig, wenn der Umschalter unten aktiv ist."
+msgstr "Only needed if the switch below is on."
+
+msgid "Nutze [br] für einen manuellen Zeilenumbruch."
+msgstr "Use [br] for a manual line break."
+
+msgid "Nächste Seite"
+msgstr "Next page"
+
+msgid "Nächster Beitrag"
+msgstr "Next post"
+
+msgid "Nächster Termin"
+msgstr "Next event"
+
+msgid "Oben links"
+msgstr "Top left"
+
+msgid "Oben rechts"
+msgstr "Top right"
+
+msgid "Ohne"
+msgstr "None"
+
+msgid "Ohne diese Option schließt sich der offene Eintrag, sobald ein anderer geöffnet wird."
+msgstr "Without this option the open item closes as soon as another one opens."
+
+msgid "Online"
+msgstr "Online"
+
+msgid "Optional, z.B. Anmeldung oder Livestream."
+msgstr "Optional, e.g. registration or livestream."
+
+msgid "Optional. Erscheint im Footer und in den strukturierten Daten."
+msgstr "Optional. Appears in the footer and in the structured data."
+
+msgid "Optional. Erscheint unter der Veranstaltungsliste, z.B. zu einer Seite mit allen Veranstaltungen."
+msgstr "Optional. Appears below the event list, e.g. linking to a page with all events."
+
+msgid "Optional: Favicon als SVG für scharfe Darstellung in aktuellen Browsern."
+msgstr "Optional: favicon as SVG for a sharp display in current browsers."
+
+msgid "Optional: Module, die unter dem Text dieses Tabs erscheinen."
+msgstr "Optional: modules that appear below the text of this tab."
+
+msgid "Optional: Nur Beiträge aus dieser Kategorie anzeigen."
+msgstr "Optional: only show posts from this category."
+
+msgid "Optional: Produkt- oder Partnerlogo (SVG oder PNG auf hellem Grund). Ersetzt das Icon."
+msgstr "Optional: product or partner logo (SVG or PNG on a light background). Replaces the icon."
+
+msgid "Optional: Titel der Karte. Ohne Titel zeigt die Karte nur ihren Text."
+msgstr "Optional: card title. Without a title the card only shows its text."
+
+msgid "Optional: favicon.ico mit 16, 32 und 48 Pixeln für ältere Browser."
+msgstr "Optional: favicon.ico with 16, 32 and 48 pixels for older browsers."
+
+msgid "Optional: kleine Überschrift über diesem Dokument, um Zeilen zu gruppieren."
+msgstr "Optional: small heading above this document to group rows."
+
+msgid "Optional: kleiner Zusatztext unter der Bezeichnung."
+msgstr "Optional: small extra text below the label."
+
+msgid "Optionale Beschreibung unter der Überschrift."
+msgstr "Optional description below the heading."
+
+msgid "Optionale Einleitung unter der Überschrift."
+msgstr "Optional intro below the heading."
+
+msgid "Optionale ID für Anker-Links (z.B. „kontakt“). Wird automatisch generiert, wenn leer."
+msgstr "Optional ID for anchor links (e.g. \"contact\"). Generated automatically if empty."
+
+msgid "Optionale Textspalte neben der Tabelle. Die Tabelle nimmt dann 2/3 der Breite ein."
+msgstr "Optional text column next to the table. The table then takes 2/3 of the width."
+
+msgid "Optionale fette Zeile über dem Text."
+msgstr "Optional bold line above the text."
+
+msgid "Optionale kurze Beschreibung."
+msgstr "Optional short description."
+
+msgid "Optionale Überschrift über dem %s Bild."
+msgstr "Optional heading above the %s image."
+
+msgid "Optionale Überschrift über dem Akkordeon."
+msgstr "Optional heading above the accordion."
+
+msgid "Optionale Überschrift über dem Bild."
+msgstr "Optional heading above the image."
+
+msgid "Optionale Überschrift über dem Logo-Slider."
+msgstr "Optional heading above the logo slider."
+
+msgid "Optionale Überschrift über dem Team."
+msgstr "Optional heading above the team."
+
+msgid "Optionale Überschrift über dem Vergleich."
+msgstr "Optional heading above the comparison."
+
+msgid "Optionale Überschrift über dem Video."
+msgstr "Optional heading above the video."
+
+msgid "Optionale Überschrift über dem Zeitstrahl."
+msgstr "Optional heading above the timeline."
+
+msgid "Optionale Überschrift über den Beiträgen."
+msgstr "Optional heading above the posts."
+
+msgid "Optionale Überschrift über den Karten."
+msgstr "Optional heading above the cards."
+
+msgid "Optionale Überschrift über den Kundenstimmen."
+msgstr "Optional heading above the testimonials."
+
+msgid "Optionale Überschrift über den Statistiken."
+msgstr "Optional heading above the statistics."
+
+msgid "Optionale Überschrift über den Tabs."
+msgstr "Optional heading above the tabs."
+
+msgid "Optionale Überschrift über den Veranstaltungen."
+msgstr "Optional heading above the events."
+
+msgid "Optionale Überschrift über der Einbettung."
+msgstr "Optional heading above the embed."
+
+msgid "Optionale Überschrift über der Galerie."
+msgstr "Optional heading above the gallery."
+
+msgid "Optionale Überschrift über der Karte."
+msgstr "Optional heading above the map."
+
+msgid "Optionale Überschrift über der Liste."
+msgstr "Optional heading above the list."
+
+msgid "Optionale Überschrift über der Preistabelle."
+msgstr "Optional heading above the pricing table."
+
+msgid "Optionale Überschrift über der Tabelle."
+msgstr "Optional heading above the table."
+
+msgid "Optionaler Badge-Text über der Überschrift."
+msgstr "Optional badge text above the heading."
+
+msgid "Optionaler Link zu mehr Informationen."
+msgstr "Optional link to more information."
+
+msgid "Optionaler Link zur Partner-Website."
+msgstr "Optional link to the partner website."
+
+msgid "Optionaler Link, z.B. zu einer Anmeldeseite."
+msgstr "Optional link, e.g. to a registration page."
+
+msgid "Optionaler Text im Footer (z.B. Firmenbeschreibung)."
+msgstr "Optional text in the footer (e.g. company description)."
+
+msgid "Optionaler Text über dem Formular."
+msgstr "Optional text above the form."
+
+msgid "Optionaler Text über den Veranstaltungen."
+msgstr "Optional text above the events."
+
+msgid "Optionaler Titel für Screenreader und Suchmaschinen. Leer lassen verwendet eine allgemeine Beschreibung."
+msgstr "Optional title for screen readers and search engines. Leave empty to use a general description."
+
+msgid "Optionaler zweiter Button daneben. Er tritt immer sekundär auf."
+msgstr "Optional second button next to it. It always appears as secondary."
+
+msgid "Optionales Badge über der Überschrift."
+msgstr "Optional badge above the heading."
+
+msgid "Optionales Bild zum Ereignis."
+msgstr "Optional image for the event."
+
+msgid "Optionales Foto der Person. Wird als kleiner Kreis dargestellt, quadratische Bilder empfohlen."
+msgstr "Optional photo of the person. Shown as a small circle, square images recommended."
+
+msgid "Optionales Icon für dieses Ereignis."
+msgstr "Optional icon for this event."
+
+msgid "Optionales Icon neben dem Tab-Titel."
+msgstr "Optional icon next to the tab title."
+
+msgid "Optionales Icon vor dem Titel."
+msgstr "Optional icon before the title."
+
+msgid "Optionales Portrait neben dem Zitat."
+msgstr "Optional portrait next to the quote."
+
+msgid "Optionales Suffix nach der Zahl."
+msgstr "Optional suffix after the number."
+
+msgid "Optischer Stil des Buttons."
+msgstr "Visual style of the button."
+
+msgid "Original-Bewertung ansehen"
+msgstr "View original review"
+
+msgid "Ort / Adresse"
+msgstr "Location / address"
+
+msgid "Overline"
+msgstr "Overline"
+
+msgid "Paket hinzufügen"
+msgstr "Add plan"
+
+msgid "Paketname"
+msgstr "Plan name"
+
+msgid "Partner-Logos Karussell"
+msgstr "Partner logo carousel"
+
+msgid "Passwort"
+msgstr "Password"
+
+msgid "Passwort: ein gemeinsames Passwort für alle. WordPress: jeder Nutzer meldet sich mit seinem WP-Konto an."
+msgstr "Password: one shared password for everyone. WordPress: every user logs in with their WP account."
+
+msgid "Person"
+msgstr "Person"
+
+msgid "Pfad:"
+msgstr "Path:"
+
+msgid "Pflicht"
+msgstr "Required"
+
+msgid "Pflichtangabe, ohne sie kann die Karte nichts anzeigen. Der Block blendet automatisch einen DSGVO-Hinweis vor."
+msgstr "Required, without it the map cannot show anything. The block adds a GDPR notice in front automatically."
+
+msgid "Pflichtfeld"
+msgstr "Required field"
+
+msgid "Pinterest"
+msgstr "Pinterest"
+
+msgid "Plattform"
+msgstr "Platform"
+
+msgid "Plugin erfolgreich aktiviert."
+msgstr "Plugin activated successfully."
+
+msgid "Plugin erfolgreich installiert und aktiviert."
+msgstr "Plugin installed and activated successfully."
+
+msgid "Plugin erfolgreich installiert."
+msgstr "Plugin installed successfully."
+
+msgid "Plugin ist bereits aktiv."
+msgstr "The plugin is already active."
+
+msgid "Plugin ist bereits installiert."
+msgstr "The plugin is already installed."
+
+msgid "Plugin-Datei nicht gefunden."
+msgstr "Plugin file not found."
+
+msgid "Plugins aktivieren (%d)"
+msgstr "Activate plugins (%d)"
+
+msgid "Plugins anzeigen & installieren"
+msgstr "Show & install plugins"
+
+msgid "Plugins werden über Composer verwaltet. Führ \"composer install\" aus, um die konfigurierten Plugins zu installieren."
+msgstr "Plugins are managed with Composer. Run \"composer install\" to install the configured plugins."
+
+msgid "Portraitfoto im Hochformat, empfohlen 4:5 (z.B. 640×800 Pixel). Der Zuschnitt erfolgt von oben, damit das Gesicht im Bild bleibt."
+msgstr "Portrait photo in upright format, 4:5 recommended (e.g. 640×800 pixels). It is cropped from the top so the face stays in the picture."
+
+msgid "Position"
+msgstr "Position"
+
+msgid "Position / Firma"
+msgstr "Position / company"
+
+msgid "Position / Unternehmen"
+msgstr "Position / company"
+
+msgid "Position oder Firmenname."
+msgstr "Position or company name."
+
+msgid "Preis"
+msgstr "Price"
+
+msgid "Preis im Jahrestarif"
+msgstr "Yearly price"
+
+msgid "Preise jährlich"
+msgstr "Yearly prices"
+
+msgid "Preise monatlich"
+msgstr "Monthly prices"
+
+msgid "Preispakete"
+msgstr "Pricing plans"
+
+msgid "Preistabelle"
+msgstr "Pricing table"
+
+msgid "Premium"
+msgstr "Premium"
+
+msgid "Primary"
+msgstr "Primary"
+
+msgid "Primitives (Basis-Farben, Spacing, etc.)"
+msgstr "Primitives (base colours, spacing, etc.)"
+
+msgid "Primär"
+msgstr "Primary"
+
+msgid "Primärer Button"
+msgstr "Primary button"
+
+msgid "Primärfarbe"
+msgstr "Primary colour"
+
+msgid "Profil-URL"
+msgstr "Profile URL"
+
+msgid "Punkte"
+msgstr "Dots"
+
+msgid "Quell-URL"
+msgstr "Source URL"
+
+msgid "Quelle"
+msgstr "Source"
+
+msgid "Quelle (optional)"
+msgstr "Source (optional)"
+
+msgid "Rahmen anzeigen"
+msgstr "Show border"
+
+msgid "Raster"
+msgstr "Grid"
+
+msgid "Rechte Spalte (breit)"
+msgstr "Right column (wide)"
+
+msgid "Rechte Spalte (schmal)"
+msgstr "Right column (narrow)"
+
+msgid "Rechtliche Links"
+msgstr "Legal links"
+
+msgid "Rechtliches Menü anzeigen"
+msgstr "Show legal menu"
+
+msgid "Rechts neben der Tabelle"
+msgstr "Right of the table"
+
+msgid "Rechtsbündig"
+msgstr "Right aligned"
+
+msgid "Reduzierten Footer anzeigen"
+msgstr "Show reduced footer"
+
+msgid "Reihenfolge"
+msgstr "Order"
+
+msgid "Reihenfolge der ausgegebenen Beiträge."
+msgstr "Order of the posts shown."
+
+msgid "Remote-Datei"
+msgstr "Remote file"
+
+msgid "Remote-Pfad"
+msgstr "Remote path"
+
+msgid "Rolle"
+msgstr "Role"
+
+msgid "Route planen"
+msgstr "Plan route"
+
+msgid "SFTP-Benutzername"
+msgstr "SFTP username"
+
+msgid "SFTP-Host"
+msgstr "SFTP host"
+
+msgid "SFTP-Import"
+msgstr "SFTP import"
+
+msgid "SFTP-Kennung"
+msgstr "SFTP ID"
+
+msgid "SFTP-Konfiguration unvollständig."
+msgstr "SFTP configuration incomplete."
+
+msgid "SFTP-Ordner"
+msgstr "SFTP folder"
+
+msgid "SFTP-Passwort"
+msgstr "SFTP password"
+
+msgid "SFTP-Port"
+msgstr "SFTP port"
+
+msgid "SFTP-Quelle"
+msgstr "SFTP source"
+
+msgid "SFTP-Sync-Konfiguration"
+msgstr "SFTP sync configuration"
+
+msgid "SSH-Host-Key von %s hat sich geändert. Wenn der Wechsel erwartet war (Serverumzug), Host-Key neu vertrauen."
+msgstr "The SSH host key of %s has changed. If the change was expected (server move), trust the host key again."
+
+msgid "SVG enthält eigene Entity-Definitionen (z. B. ältere Illustrator-Exporte). Bitte ohne DOCTYPE neu exportieren (Illustrator: SVG 1.1, „Präsentationsattribute“)."
+msgstr "The SVG contains its own entity definitions (e.g. older Illustrator exports). Please export it again without a DOCTYPE (Illustrator: SVG 1.1, \"Presentation attributes\")."
+
+msgid "SVG konnte nicht bereinigt werden."
+msgstr "The SVG could not be sanitised."
+
+msgid "SVG konnte nicht gelesen werden."
+msgstr "The SVG could not be read."
+
+msgid "SVG konnte nicht gespeichert werden."
+msgstr "The SVG could not be saved."
+
+msgid "SVG uploads are only allowed for administrators."
+msgstr "SVG uploads are only allowed for administrators."
+
+msgid "Sanfte Einblend-Animationen beim Scrollen. Automatisch deaktiviert bei „reduzierte Bewegung\"."
+msgstr "Gentle fade-in animations while scrolling. Disabled automatically with \"reduced motion\"."
+
+msgid "Schlagwort: %s"
+msgstr "Tag: %s"
+
+msgid "Schliessbar"
+msgstr "Dismissible"
+
+msgid "Schließbar"
+msgstr "Dismissible"
+
+msgid "Schließen"
+msgstr "Close"
+
+msgid "Schmal"
+msgstr "Narrow"
+
+msgid "Schmal passt zu Hochformat und Bildschirmfotos, breit zu Panoramen. Ganze Inhaltsbreite schließt mit den Kanten eines Zweispalters ab."
+msgstr "Narrow suits portrait images and screenshots, wide suits panoramas. Full content width lines up with the edges of a two-column layout."
+
+msgid "Scroll-Animationen"
+msgstr "Scroll animations"
+
+msgid "Secondary"
+msgstr "Secondary"
+
+msgid "Seite"
+msgstr "Page"
+
+msgid "Seite durchsuchen"
+msgstr "Search the site"
+
+msgid "Seite durchsuchen…"
+msgstr "Search the site…"
+
+msgid "Seite nicht gefunden"
+msgstr "Page not found"
+
+msgid "Seite vorher ansehen"
+msgstr "Preview page"
+
+msgid "Seite wird neu geladen..."
+msgstr "Reloading the page..."
+
+msgid "Seiten"
+msgstr "Pages"
+
+msgid "Seiteneinstellungen"
+msgstr "Page settings"
+
+msgid "Seiteninhalt"
+msgstr "Page content"
+
+msgid "Seitenverhältnis"
+msgstr "Aspect ratio"
+
+msgid "Seitenweiten Hinweis ausblenden"
+msgstr "Hide site-wide notice"
+
+msgid "Sektion auswählen"
+msgstr "Select section"
+
+msgid "Sektion hinzufügen"
+msgstr "Add section"
+
+msgid "Sektionen"
+msgstr "Sections"
+
+msgid "Sektionskopf anzeigen"
+msgstr "Show section header"
+
+msgid "Sekundär"
+msgstr "Secondary"
+
+msgid "Sekundär (Hellgrau)"
+msgstr "Secondary (light grey)"
+
+msgid "Sekundärer Button"
+msgstr "Secondary button"
+
+msgid "Sekundärfarbe"
+msgstr "Secondary colour"
+
+msgid "Setup-Konfiguration gefunden!"
+msgstr "Setup configuration found!"
+
+msgid "Sicherheitsüberprüfung fehlgeschlagen."
+msgstr "Security check failed."
+
+msgid "Sichtbarkeit"
+msgstr "Visibility"
+
+msgid "Social Links anzeigen"
+msgstr "Show social links"
+
+msgid "Social Media"
+msgstr "Social media"
+
+msgid "Social Media Kanäle"
+msgstr "Social media channels"
+
+msgid "Social Media Links"
+msgstr "Social media links"
+
+msgid "Social Sharing Bild"
+msgstr "Social sharing image"
+
+msgid "Social-Überschrift"
+msgstr "Social heading"
+
+msgid "Sonstiges"
+msgstr "Other"
+
+msgid "Sortierreihenfolge (niedrigere Zahlen zuerst)."
+msgstr "Sort order (lower numbers first)."
+
+msgid "Sortierung"
+msgstr "Sorting"
+
+msgid "Spalte %d"
+msgstr "Column %d"
+
+msgid "Spalte 1"
+msgstr "Column 1"
+
+msgid "Spalte 1 (links)"
+msgstr "Column 1 (left)"
+
+msgid "Spalte 2"
+msgstr "Column 2"
+
+msgid "Spalte 2 (rechts)"
+msgstr "Column 2 (right)"
+
+msgid "Spalte 3"
+msgstr "Column 3"
+
+msgid "Spalte 4"
+msgstr "Column 4"
+
+msgid "Spalte hinzufügen"
+msgstr "Add column"
+
+msgid "Spalten"
+msgstr "Columns"
+
+msgid "Spaltenname"
+msgstr "Column name"
+
+msgid "Spaltenüberschriften"
+msgstr "Column headings"
+
+msgid "Spanisch"
+msgstr "Spanish"
+
+msgid "Sprache der Untertitel"
+msgstr "Subtitle language"
+
+msgid "Springe zu"
+msgstr "Jump to"
+
+msgid "Sprungmenü"
+msgstr "Jump menu"
+
+msgid "Standard"
+msgstr "Default"
+
+msgid "Standard (Figma)"
+msgstr "Default (Figma)"
+
+msgid "Standard (Spalten)"
+msgstr "Default (columns)"
+
+msgid "Standard (Weiß)"
+msgstr "Default (white)"
+
+msgid "Standard: 22"
+msgstr "Default: 22"
+
+msgid "Standardbild für Social Media Vorschauen (Facebook, Twitter, LinkedIn). Empfohlene Größe: 1200×630 Pixel (1.91:1). Mindestens 600×315 Pixel. Max. 5 MB. Formate: JPG oder PNG."
+msgstr "Default image for social media previews (Facebook, Twitter, LinkedIn). Recommended size: 1200×630 pixels (1.91:1). At least 600×315 pixels. Max. 5 MB. Formats: JPG or PNG."
+
+msgid "Standbild vor dem Abspielen, bei YouTube und Vimeo bis zur Einwilligung sichtbar (ohne Bild eine graue Fläche). Empfohlen: 16:9, mindestens 1280×720 Pixel."
+msgstr "Still image before playback, visible for YouTube and Vimeo until consent is given (grey area without an image). Recommended: 16:9, at least 1280×720 pixels."
+
+msgid "Startet stumm, anders lassen Browser kein automatisches Abspielen zu. Gilt nicht für YouTube und Vimeo."
+msgstr "Starts muted, otherwise browsers do not allow autoplay. Does not apply to YouTube and Vimeo."
+
+msgid "Startseite"
+msgstr "Home"
+
+msgid "Statistik"
+msgstr "Statistic"
+
+msgid "Statistik hinzufügen"
+msgstr "Add statistic"
+
+msgid "Statistiken"
+msgstr "Statistics"
+
+msgid "Statistiken / Zahlen"
+msgstr "Statistics / figures"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Statusfarben"
+msgstr "Status colours"
+
+msgid "Steht im Einbettungscode als name des E-Mail-Feldes. Mailchimp und Brevo nutzen EMAIL."
+msgstr "Appears in the embed code as the name of the email field. Mailchimp and Brevo use EMAIL."
+
+msgid "Stellt alle Token-Dateien vom gewählten Zeitpunkt wieder her."
+msgstr "Restores all token files from the selected time."
+
+msgid "Stellt alle Token-Dateien vom gewählten Zeitpunkt wieder her. Die aktuellen Dateien werden überschrieben."
+msgstr "Restores all token files from the selected time. The current files are overwritten."
+
+msgid "Sterne-Bewertung"
+msgstr "Star rating"
+
+msgid "Sticky Header"
+msgstr "Sticky header"
+
+msgid "Stil"
+msgstr "Style"
+
+msgid "Styleguide"
+msgstr "Styleguide"
+
+msgid "Styleguide Demo-Video"
+msgstr "Styleguide demo video"
+
+msgid "Styleguide Portrait"
+msgstr "Styleguide portrait"
+
+msgid "Styleguide umstellen"
+msgstr "Switch styleguide"
+
+msgid "Styleguide-Seite erstellen"
+msgstr "Create styleguide page"
+
+msgid "Suchbegriff"
+msgstr "Search term"
+
+msgid "Suche anzeigen"
+msgstr "Show search"
+
+msgid "Suche:"
+msgstr "Search:"
+
+msgid "Suchen"
+msgstr "Search"
+
+msgid "Suchen..."
+msgstr "Search..."
+
+msgid "Suchen…"
+msgstr "Search…"
+
+msgid "Suchergebnis-Navigation"
+msgstr "Search results navigation"
+
+msgid "Suchergebnisse"
+msgstr "Search results"
+
+msgid "Suchergebnisse für: %s"
+msgstr "Search results for: %s"
+
+msgid "Suffix"
+msgstr "Suffix"
+
+msgid "Sync"
+msgstr "Sync"
+
+msgid "Synchronisation abgeschlossen."
+msgstr "Sync finished."
+
+msgid "Synchronisation des internen Bereichs fehlgeschlagen"
+msgstr "Sync of the members area failed"
+
+msgid "Synchronisiere…"
+msgstr "Syncing…"
+
+msgid "Synchronisiert"
+msgstr "Synced"
+
+msgid "System"
+msgstr "System"
+
+msgid "Systemeinstellung folgen"
+msgstr "Follow system setting"
+
+msgid "Tab"
+msgstr "Tab"
+
+msgid "Tab hinzufügen"
+msgstr "Add tab"
+
+msgid "Tab-Titel"
+msgstr "Tab title"
+
+msgid "Tabelle"
+msgstr "Table"
+
+msgid "Tabelle: Zeile %1$d passt nicht zur Spaltenzahl (Zellen in der Zeile: %2$d, Spalten in der Tabelle: %3$d). Ergänze oder entferne Zellen in dieser Zeile."
+msgstr "Table: row %1$d does not match the column count (cells in the row: %2$d, columns in the table: %3$d). Add or remove cells in this row."
+
+msgid "Tabs"
+msgstr "Tabs"
+
+msgid "Tag: %s"
+msgstr "Tag: %s"
+
+msgid "Team"
+msgstr "Team"
+
+msgid "Team Portrait"
+msgstr "Team portrait"
+
+msgid "Teammitglieder"
+msgstr "Team members"
+
+msgid "Telefax"
+msgstr "Fax"
+
+msgid "Telefon"
+msgstr "Phone"
+
+msgid "Telefonnummer (optional)."
+msgstr "Phone number (optional)."
+
+msgid "Termin"
+msgstr "Event"
+
+msgid "Tertiär (Grau)"
+msgstr "Tertiary (grey)"
+
+msgid "Text"
+msgstr "Text"
+
+msgid "Text der Kundenstimme"
+msgstr "Testimonial text"
+
+msgid "Text für das Nachher-Label."
+msgstr "Text for the after label."
+
+msgid "Text für das Vorher-Label."
+msgstr "Text for the before label."
+
+msgid "Text oben, Bild darunter"
+msgstr "Text on top, image below"
+
+msgid "Text unter dem %s Bild."
+msgstr "Text below the %s image."
+
+msgid "Text unter dem Bild."
+msgstr "Text below the image."
+
+msgid "Textausrichtung des Sektionskopfs."
+msgstr "Text alignment of the section header."
+
+msgid "Textblock"
+msgstr "Text block"
+
+msgid "Textspalte"
+msgstr "Text column"
+
+msgid "Theme Setup"
+msgstr "Theme Setup"
+
+msgid "Theme-Einstellungen"
+msgstr "Theme settings"
+
+msgid "Theme-Einstellungen wurden aus der Setup-Konfiguration importiert!"
+msgstr "Theme settings were imported from the setup configuration!"
+
+msgid "Threads"
+msgstr "Threads"
+
+msgid "TikTok"
+msgstr "TikTok"
+
+msgid "Titel"
+msgstr "Title"
+
+msgid "Titel A bis Z"
+msgstr "Title A to Z"
+
+msgid "Titel der Gruppe."
+msgstr "Title of the group."
+
+msgid "Token-Datei nicht gefunden."
+msgstr "Token file not found."
+
+msgid "Token-Dateien herunterladen"
+msgstr "Download token files"
+
+msgid "Token-Dateien hochladen"
+msgstr "Upload token files"
+
+msgid "Token-Transformation erfolgreich, aber Build fehlgeschlagen."
+msgstr "Token transformation succeeded, but the build failed."
+
+msgid "Token-Upload fehlgeschlagen:"
+msgstr "Token upload failed:"
+
+msgid "Tokens hochladen und anwenden"
+msgstr "Upload and apply tokens"
+
+msgid "Transform-Script nicht gefunden."
+msgstr "Transform script not found."
+
+msgid "Treffer"
+msgstr "Matches"
+
+msgid "Trenner / Abstand"
+msgstr "Divider / spacing"
+
+msgid "Trennt diese Zeile mit einer kräftigen Linie von der nächsten."
+msgstr "Separates this row from the next with a strong line."
+
+msgid "Typ"
+msgstr "Type"
+
+msgid "Typografie"
+msgstr "Typography"
+
+msgid "Uhrzeit"
+msgstr "Time"
+
+msgid "Umrandeter Button links neben dem CTA, z. B. für einen Login. Leer lassen, wenn nicht gebraucht."
+msgstr "Outlined button to the left of the CTA, e.g. for a login. Leave empty if not needed."
+
+msgid "Umriss"
+msgstr "Outline"
+
+msgid "Umschalter Monat und Jahr"
+msgstr "Month and year switch"
+
+msgid "Unbekannter Fehler"
+msgstr "Unknown error"
+
+msgid "Unbekannter Quelltyp."
+msgstr "Unknown source type."
+
+msgid "Unbekannter Token-Typ"
+msgstr "Unknown token type"
+
+msgid "Ungültige Anfrage."
+msgstr "Invalid request."
+
+msgid "Ungültige Download-ID."
+msgstr "Invalid download ID."
+
+msgid "Ungültige Farbwerte übersprungen: %s"
+msgstr "Invalid colour values skipped: %s"
+
+msgid "Ungültige Farbwerte: %s"
+msgstr "Invalid colour values: %s"
+
+msgid "Ungültiger Dateityp für %s"
+msgstr "Invalid file type for %s"
+
+msgid "Ungültiger Hex-Wert für %1$s: %2$s"
+msgstr "Invalid hex value for %1$s: %2$s"
+
+msgid "Ungültiger Plugin-Slug."
+msgstr "Invalid plugin slug."
+
+msgid "Ungültiger Token-Typ."
+msgstr "Invalid token type."
+
+msgid "Ungültiger Zeitstempel."
+msgstr "Invalid timestamp."
+
+msgid "Ungültiges JSON in Token-Datei."
+msgstr "Invalid JSON in token file."
+
+msgid "Ungültiges JSON: %s"
+msgstr "Invalid JSON: %s"
+
+msgid "Ungültiges URL-Schema."
+msgstr "Invalid URL scheme."
+
+msgid "Unten links"
+msgstr "Bottom left"
+
+msgid "Unten rechts"
+msgstr "Bottom right"
+
+msgid "Untere Leiste"
+msgstr "Bottom bar"
+
+msgid "Untermenü schließen"
+msgstr "Close submenu"
+
+msgid "Untermenü öffnen"
+msgstr "Open submenu"
+
+msgid "Untertitel (WebVTT)"
+msgstr "Subtitles (WebVTT)"
+
+msgid "Upload-Fehler für %1$s: Code %2$s"
+msgstr "Upload error for %1$s: code %2$s"
+
+msgid "Variante"
+msgstr "Variant"
+
+msgid "Variante %d"
+msgstr "Variant %d"
+
+msgid "Veranstaltungen"
+msgstr "Events"
+
+msgid "Veranstaltungsdetails"
+msgstr "Event details"
+
+msgid "Verfügbar"
+msgstr "Available"
+
+msgid "Verfügbare Dokumente"
+msgstr "Available documents"
+
+msgid "Verstrichene Zeit:"
+msgstr "Elapsed time:"
+
+msgid "Vertikaler Innenabstand dieses Abschnitts."
+msgstr "Vertical padding of this section."
+
+msgid "Verwendet Daten aus den <a href=\"%s\">allgemeinen Einstellungen</a> (Kontaktdaten Tab)."
+msgstr "Uses data from the <a href=\"%s\">general settings</a> (Contact details tab)."
+
+msgid "Verwendet Icons aus den <a href=\"%s\">Social Media Einstellungen</a>."
+msgstr "Uses icons from the <a href=\"%s\">social media settings</a>."
+
+msgid "Video"
+msgstr "Video"
+
+msgid "Video herunterladen"
+msgstr "Download video"
+
+msgid "Video laden"
+msgstr "Load video"
+
+msgid "Video wird geladen…"
+msgstr "Loading video…"
+
+msgid "Video-Datei"
+msgstr "Video file"
+
+msgid "Video-Datei-URL"
+msgstr "Video file URL"
+
+msgid "Video-Quelle"
+msgstr "Video source"
+
+msgid "Video-Titel"
+msgstr "Video title"
+
+msgid "Video-URL"
+msgstr "Video URL"
+
+msgid "Video-URL nicht erkannt. Unterstützt werden YouTube und Vimeo."
+msgstr "Video URL not recognised. YouTube and Vimeo are supported."
+
+msgid "Video: %s"
+msgstr "Video: %s"
+
+msgid "Vielen Dank, deine Nachricht ist angekommen. Wir melden uns."
+msgstr "Thank you, your message has arrived. We will get back to you."
+
+msgid "Vier Spalten"
+msgstr "Four columns"
+
+msgid "Vier Spalten mit Bildern"
+msgstr "Four columns with images"
+
+msgid "Vimeo-Video"
+msgstr "Vimeo video"
+
+msgid "Volle Breite"
+msgstr "Full width"
+
+msgid "Volle Breite nutzt die ganze Fensterbreite statt der Textspalte."
+msgstr "Full width uses the whole window width instead of the text column."
+
+msgid "Voller Bildschirm"
+msgstr "Full screen"
+
+msgid "Vollständiger Name."
+msgstr "Full name."
+
+msgid "Vor Ort"
+msgstr "On site"
+
+msgid "Vorher"
+msgstr "Before"
+
+msgid "Vorher-Bild"
+msgstr "Before image"
+
+msgid "Vorher/Nachher Vergleich"
+msgstr "Before/after comparison"
+
+msgid "Vorherige Seite"
+msgstr "Previous page"
+
+msgid "Vorheriger Beitrag"
+msgstr "Previous post"
+
+msgid "Vorschaubild"
+msgstr "Preview image"
+
+msgid "WP-Optimize: Page-Caching (12h), woechentliche DB-Bereinigung, Bildkompression (85%)"
+msgstr "WP-Optimize: page caching (12h), weekly database cleanup, image compression (85%)"
+
+msgid "WP-Starter Theme Setup"
+msgstr "WP Starter theme setup"
+
+msgid "WP-Starter: Plugins wurden automatisch konfiguriert"
+msgstr "WP Starter: plugins were configured automatically"
+
+msgid "Warnung"
+msgstr "Warning"
+
+msgid "Warnung (Warning)"
+msgstr "Warning"
+
+msgid "Was Leser erwartet und wie oft."
+msgstr "What readers can expect and how often."
+
+msgid "Was diese Zahl bedeutet."
+msgstr "What this number means."
+
+msgid "Was in dem Fenster steckt. Ohne diese Angabe hört ein Screenreader nur „Frame“."
+msgstr "What is inside the frame. Without this, a screen reader only announces \"frame\"."
+
+msgid "WebP Express: behält seine eigenen Standardeinstellungen, bitte im Plugin selbst konfigurieren"
+msgstr "WebP Express: keeps its own defaults, please configure it in the plugin itself"
+
+msgid "WebVTT-Datei (.vtt) mit den Untertiteln, nötig für gehörlose und schwerhörige Nutzer (WCAG 1.2.2). Bei YouTube und Vimeo gelten die Untertitel des Anbieters."
+msgstr "WebVTT file (.vtt) with the subtitles, needed for deaf and hard of hearing users (WCAG 1.2.2). For YouTube and Vimeo the provider's subtitles apply."
+
+msgid "Website"
+msgstr "Website"
+
+msgid "Website besuchen"
+msgstr "Visit website"
+
+msgid "Website-Identität"
+msgstr "Site identity"
+
+msgid "Weiter"
+msgstr "Next"
+
+msgid "Weitere Termine"
+msgstr "More events"
+
+msgid "Weiterlesen"
+msgstr "Read more"
+
+msgid "Weiterlesen:"
+msgstr "Read more:"
+
+msgid "Welche WordPress-Rollen haben Zugang? Leer = alle angemeldeten Benutzer."
+msgstr "Which WordPress roles have access? Empty = all logged-in users."
+
+msgid "Welcher Beitragstyp angezeigt werden soll."
+msgstr "Which post type to show."
+
+msgid "Welches Menü anzeigen."
+msgstr "Which menu to show."
+
+msgid "Welle"
+msgstr "Wave"
+
+msgid "Wer das gesagt hat."
+msgstr "Who said it."
+
+msgid "Werkzeuge"
+msgstr "Tools"
+
+msgid "Wie lange bleibt ein Benutzer nach dem Login eingeloggt."
+msgstr "How long a user stays logged in after login."
+
+msgid "Wie stark das Bild abgedunkelt wird. 20% = Bild dominiert, 100% = Bild kaum sichtbar. Der Text steht immer hell auf dem abgedunkelten Bild, deshalb wird es unter 40% auf hellen Motiven knapp."
+msgstr "How much the image is darkened. 20% = the image dominates, 100% = the image is barely visible. The text is always light on the darkened image, so below 40% it gets tight on light motifs."
+
+msgid "Wie viele Beiträge angezeigt werden sollen."
+msgstr "How many posts to show."
+
+msgid "Wiederherstellen"
+msgstr "Restore"
+
+msgid "Willkommen beim WP-Starter Theme!"
+msgstr "Welcome to the WP Starter theme!"
+
+msgid "Willkommen im internen Bereich. Hier findest du alle Dokumente…"
+msgstr "Welcome to the members area. Here you will find all documents…"
+
+msgid "Wird aktiviert..."
+msgstr "Activating..."
+
+msgid "Wird als Kleingedrucktes über dem Footer angezeigt."
+msgstr "Shown as small print above the footer."
+
+msgid "Wird geladen …"
+msgstr "Loading …"
+
+msgid "Wird geprüft…"
+msgstr "Checking…"
+
+msgid "Wird installiert..."
+msgstr "Installing..."
+
+msgid "Wird nach dem Login unterhalb der Überschrift angezeigt."
+msgstr "Shown below the heading after login."
+
+msgid "Wird verschlüsselt gespeichert. Leer lassen um nicht zu ändern."
+msgstr "Stored encrypted. Leave empty to keep it unchanged."
+
+msgid "Wird verschlüsselt in der Datenbank gespeichert."
+msgstr "Stored encrypted in the database."
+
+msgid "WordPress-Benutzer"
+msgstr "WordPress users"
+
+msgid "Wähle das Layout für den Hero-Bereich."
+msgstr "Choose the layout for the hero section."
+
+msgid "Wähle die Bilder für die Galerie. Klick auf ein Bild öffnet die Lightbox."
+msgstr "Choose the images for the gallery. Clicking an image opens the lightbox."
+
+msgid "Wähle die Hintergrundfarbe für diesen Abschnitt."
+msgstr "Choose the background colour for this section."
+
+msgid "Wähle ein Icon aus dem Theme."
+msgstr "Choose an icon from the theme."
+
+msgid "Wähle eine Hintergrundfarbe für den Hero-Bereich."
+msgstr "Choose a background colour for the hero section."
+
+msgid "Wähle, woher das Video kommt."
+msgstr "Choose where the video comes from."
+
+msgid "X (Twitter)"
+msgstr "X (Twitter)"
+
+msgid "XING"
+msgstr "XING"
+
+msgid "Xing"
+msgstr "Xing"
+
+msgid "Yoast SEO: Breadcrumbs aktiv, XML-Sitemap aktiv, Schema auf Organisation"
+msgstr "Yoast SEO: breadcrumbs on, XML sitemap on, schema set to organisation"
+
+msgid "YouTube"
+msgstr "YouTube"
+
+msgid "YouTube / Vimeo"
+msgstr "YouTube / Vimeo"
+
+msgid "YouTube-Video"
+msgstr "YouTube video"
+
+msgid "Zahl"
+msgstr "Number"
+
+msgid "Zeigt Adresse, Telefon und E-Mail."
+msgstr "Shows address, phone and email."
+
+msgid "Zeigt Badge, Überschrift und Beschreibung über dem Inhalt an."
+msgstr "Shows badge, heading and description above the content."
+
+msgid "Zeigt Rahmenlinien um die Zellen."
+msgstr "Shows borders around the cells."
+
+msgid "Zeigt das Footer-Navigationsmenü."
+msgstr "Shows the footer navigation menu."
+
+msgid "Zeigt das Legal-Menü (Impressum, Datenschutz) in der unteren Leiste."
+msgstr "Shows the legal menu (legal notice, privacy) in the bottom bar."
+
+msgid "Zeigt das Site-Logo im Footer."
+msgstr "Shows the site logo in the footer."
+
+msgid "Zeigt das Veröffentlichungsdatum an."
+msgstr "Shows the publication date."
+
+msgid "Zeigt den Autorennamen an."
+msgstr "Shows the author name."
+
+msgid "Zeigt den Firmennamen."
+msgstr "Shows the company name."
+
+msgid "Zeigt die Kontaktdaten aus den Theme-Einstellungen an."
+msgstr "Shows the contact details from the theme settings."
+
+msgid "Zeigt die Social Media Icons im Footer."
+msgstr "Shows the social media icons in the footer."
+
+msgid "Zeigt die in der Mediathek hinterlegte Bildunterschrift."
+msgstr "Shows the caption stored in the media library."
+
+msgid "Zeigt ein Kreuz, mit dem Leser den Hinweis ausblenden. Er kommt beim nächsten Seitenaufruf wieder."
+msgstr "Shows a cross that lets readers hide the notice. It comes back on the next page view."
+
+msgid "Zeigt ein Suchfeld, das den gesamten Text dieser Seite durchsucht."
+msgstr "Shows a search field that searches the whole text of this page."
+
+msgid "Zeigt einen Call-to-Action Button im Header."
+msgstr "Shows a call-to-action button in the header."
+
+msgid "Zeigt einen Link zum Planen der Route an."
+msgstr "Shows a link to plan the route."
+
+msgid "Zeigt einen dezenten Rahmen um das Bild."
+msgstr "Shows a subtle border around the image."
+
+msgid "Zeigt einen kurzen Textauszug an."
+msgstr "Shows a short excerpt."
+
+msgid "Zeigt über den Paketen einen Umschalter. Pakete ohne Jahrespreis behalten ihren Monatspreis."
+msgstr "Shows a switch above the plans. Plans without a yearly price keep their monthly price."
+
+msgid "Zeile hinzufügen"
+msgstr "Add row"
+
+msgid "Zeilen"
+msgstr "Rows"
+
+msgid "Zeilen dieser Gruppe."
+msgstr "Rows of this group."
+
+msgid "Zeitpunkt des Ereignisses."
+msgstr "Time of the event."
+
+msgid "Zeitraum"
+msgstr "Period"
+
+msgid "Zeitraum im Jahrestarif"
+msgstr "Yearly period"
+
+msgid "Zeitstrahl"
+msgstr "Timeline"
+
+msgid "Zeitüberschreitung"
+msgstr "Timeout"
+
+msgid "Zelle hinzufügen"
+msgstr "Add cell"
+
+msgid "Zellen"
+msgstr "Cells"
+
+msgid "Zentriert"
+msgstr "Centred"
+
+msgid "Zitat"
+msgstr "Quote"
+
+msgid "Zu diesem %s hochgeladen"
+msgstr "Uploaded to this %s"
+
+msgid "Zu dieser %s hochgeladen"
+msgstr "Uploaded to this %s"
+
+msgid "Zu viele Anfragen. Bitte versuche es später erneut."
+msgstr "Too many requests. Please try again later."
+
+msgid "Zu viele Anfragen. Bitte warte eine Minute."
+msgstr "Too many requests. Please wait a minute."
+
+msgid "Zu viele Synchronisierungen in kurzer Zeit. Bitte in einer Minute erneut speichern."
+msgstr "Too many syncs in a short time. Please save again in a minute."
+
+msgid "Zugang Interner Bereich"
+msgstr "Members area access"
+
+msgid "Zugangskontrolle"
+msgstr "Access control"
+
+msgid "Zuletzt geändert"
+msgstr "Last modified"
+
+msgid "Zum Abspielen des Videos wird ein externer Dienst geladen."
+msgstr "Playing the video loads an external service."
+
+msgid "Zum Abspielen des Videos wird eine Datei von einem externen Server geladen."
+msgstr "Playing the video loads a file from an external server."
+
+msgid "Zum Anzeigen der Karte wird Google Maps geladen."
+msgstr "Showing the map loads Google Maps."
+
+msgid "Zum Dashboard"
+msgstr "Go to dashboard"
+
+msgid "Zum Inhalt springen"
+msgstr "Skip to content"
+
+msgid "Zum Theme Setup"
+msgstr "Go to theme setup"
+
+msgid "Zur Anmeldung"
+msgstr "Go to login"
+
+msgid "Zur Startseite"
+msgstr "Go to home page"
+
+msgid "Zurück"
+msgstr "Back"
+
+msgid "Zurück zu %s"
+msgstr "Back to %s"
+
+msgid "Zurück zur Startseite"
+msgstr "Back to home page"
+
+msgid "Zurück zur Übersicht"
+msgstr "Back to overview"
+
+msgid "Zustände"
+msgstr "States"
+
+msgid "Zwei Spalten"
+msgstr "Two columns"
+
+msgid "Zwei Spalten mit Bildern"
+msgstr "Two columns with images"
+
+msgid "Zweimal täglich"
+msgstr "Twice a day"
+
+msgid "Zweiter Button"
+msgstr "Second button"
+
+msgid "Zweiter Button (dezent, Umriss-Stil)."
+msgstr "Second button (subtle, outline style)."
+
+msgid "Zweiter Button (optional)"
+msgstr "Second button (optional)"
+
+msgid "Zwischenüberschrift"
+msgstr "Subheading"
+
+msgid "an"
+msgstr "on"
+
+msgid "auch online"
+msgstr "also online"
+
+msgid "aus"
+msgstr "off"
+
+msgid "dark.tokens.json"
+msgstr "dark.tokens.json"
+
+msgid "dritten"
+msgstr "third"
+
+msgid "ersten"
+msgstr "first"
+
+msgid "https://…"
+msgstr "https://…"
+
+msgid "https://… oder mailto:… Ohne Link erscheint die Bezeichnung als einfacher Text."
+msgstr "https://… or mailto:… Without a link the label appears as plain text."
+
+msgid "iThemes Security: Brute-Force-Schutz, WordPress-Härtung, Datei-Schutz, Ban-Listen aktiv"
+msgstr "iThemes Security: brute force protection, WordPress hardening, file protection, ban lists active"
+
+msgid "light.tokens.json"
+msgstr "light.tokens.json"
+
+msgid "name@beispiel.de"
+msgstr "name@example.com"
+
+msgid "primitives.tokens.json"
+msgstr "primitives.tokens.json"
+
+msgid "vierten"
+msgstr "fourth"
+
+msgid "von"
+msgstr "by"
+
+msgid "z.B. +, %, Jahre"
+msgstr "e.g. +, %, years"
+
+msgid "z.B. / Monat"
+msgstr "e.g. / month"
+
+msgid "z.B. 123"
+msgstr "e.g. 123"
+
+msgid "z.B. 2020"
+msgstr "e.g. 2020"
+
+msgid "z.B. 490 €"
+msgstr "e.g. €490"
+
+msgid "z.B. 49 €"
+msgstr "e.g. €49"
+
+msgid "z.B. Abmeldung jederzeit über den Link in jeder E-Mail."
+msgstr "e.g. Unsubscribe at any time via the link in every email."
+
+msgid "z.B. Aktuelle Neuigkeiten"
+msgstr "e.g. Latest news"
+
+msgid "z.B. Anmelden"
+msgstr "e.g. Log in"
+
+msgid "z.B. Antragsformular"
+msgstr "e.g. Application form"
+
+msgid "z.B. Auf dem Laufenden bleiben"
+msgstr "e.g. Stay up to date"
+
+msgid "z.B. Basic, Professional"
+msgstr "e.g. Basic, Professional"
+
+msgid "z.B. Beratung"
+msgstr "e.g. Consulting"
+
+msgid "z.B. Bitte beachten"
+msgstr "e.g. Please note"
+
+msgid "z.B. Das Leitbild in zwei Minuten"
+msgstr "e.g. Our mission in two minutes"
+
+msgid "z.B. Das Team hat uns den Start ermöglicht."
+msgstr "e.g. The team made our start possible."
+
+msgid "z.B. Das sagen unsere Kunden"
+msgstr "e.g. What our customers say"
+
+msgid "z.B. Die Zusammenarbeit war hervorragend …"
+msgstr "e.g. Working together was excellent …"
+
+msgid "z.B. Die Zusammenarbeit war hervorragend…"
+msgstr "e.g. Working together was excellent…"
+
+msgid "z.B. Firmengründung"
+msgstr "e.g. Company founded"
+
+msgid "z.B. Formulare"
+msgstr "e.g. Forms"
+
+msgid "z.B. Geschäftsführer"
+msgstr "e.g. Managing director"
+
+msgid "z.B. Geschäftsführer, Musterfirma GmbH"
+msgstr "e.g. Managing director, Example Company Ltd"
+
+msgid "z.B. Geschäftsführerin"
+msgstr "e.g. Managing director"
+
+msgid "z.B. Häufige Fragen"
+msgstr "e.g. Frequently asked questions"
+
+msgid "z.B. Jahr"
+msgstr "e.g. year"
+
+msgid "z.B. Jetzt starten!"
+msgstr "e.g. Get started now!"
+
+msgid "z.B. Königstraße 1, 90762 Fürth"
+msgstr "e.g. 1 King Street, 90762 Fürth"
+
+msgid "z.B. Maria Beispiel"
+msgstr "e.g. Maria Example"
+
+msgid "z.B. Max Mustermann"
+msgstr "e.g. John Doe"
+
+msgid "z.B. Musterfirma GmbH"
+msgstr "e.g. Example Company Ltd"
+
+msgid "z.B. NEU, Coming Soon…"
+msgstr "e.g. NEW, Coming soon…"
+
+msgid "z.B. Preisübersicht"
+msgstr "e.g. Pricing overview"
+
+msgid "z.B. Produkt, Preis, Menge"
+msgstr "e.g. Product, Price, Quantity"
+
+msgid "z.B. Schreib uns"
+msgstr "e.g. Write to us"
+
+msgid "z.B. Schreib uns für ein unverbindliches Angebot."
+msgstr "e.g. Write to us for a free quote."
+
+msgid "z.B. Seit 2020 im Unternehmen..."
+msgstr "e.g. With the company since 2020..."
+
+msgid "z.B. Seit 2020 im Unternehmen…"
+msgstr "e.g. With the company since 2020…"
+
+msgid "z.B. So findest du uns"
+msgstr "e.g. How to find us"
+
+msgid "z.B. Termin buchen"
+msgstr "e.g. Book a call"
+
+msgid "z.B. Terminbuchung"
+msgstr "e.g. Appointment booking"
+
+msgid "z.B. Unser Team"
+msgstr "e.g. Our team"
+
+msgid "z.B. Unser neues Haus"
+msgstr "e.g. Our new building"
+
+msgid "z.B. Unsere Geschichte"
+msgstr "e.g. Our story"
+
+msgid "z.B. Unsere Leistungen"
+msgstr "e.g. Our services"
+
+msgid "z.B. Unsere Pakete"
+msgstr "e.g. Our plans"
+
+msgid "z.B. Unsere Partner"
+msgstr "e.g. Our partners"
+
+msgid "z.B. Unsere Projekte"
+msgstr "e.g. Our projects"
+
+msgid "z.B. Unterlagen"
+msgstr "e.g. Documents"
+
+msgid "z.B. Veranstaltungen"
+msgstr "e.g. Events"
+
+msgid "z.B. Viermal im Jahr ein kurzer Bericht."
+msgstr "e.g. A short report four times a year."
+
+msgid "z.B. Vorher vs. Nachher"
+msgstr "e.g. Before vs. after"
+
+msgid "z.B. Wie funktioniert…?"
+msgstr "e.g. How does … work?"
+
+msgid "z.B. Willkommen bei…"
+msgstr "e.g. Welcome to…"
+
+msgid "z.B. Wir beraten dich umfassend…"
+msgstr "e.g. We advise you comprehensively…"
+
+msgid "z.B. Wir helfen dir…"
+msgstr "e.g. We help you…"
+
+msgid "z.B. Zahlen & Fakten"
+msgstr "e.g. Facts & figures"
+
+msgid "z.B. Zufriedene Kunden"
+msgstr "e.g. Happy customers"
+
+msgid "z.B. kontakt"
+msgstr "e.g. contact"
+
+msgid "z.B. Übersicht"
+msgstr "e.g. Overview"
+
+msgid "zweiten"
+msgstr "second"
+
+msgid "© {year} Firmenname. Alle Rechte vorbehalten."
+msgstr "© {year} Company name. All rights reserved."
+
+msgid "Älteste zuerst"
+msgstr "Oldest first"
+
+msgid "Übergeordnete %s"
+msgstr "Parent %s"
+
+msgid "Übergeordnete %s:"
+msgstr "Parent %s:"
+
+msgid "Übergeordneter %s:"
+msgstr "Parent %s:"
+
+msgid "Übergeordnetes %s:"
+msgstr "Parent %s:"
+
+msgid "Überschrift"
+msgstr "Heading"
+
+msgid "Überschrift der Blog-Seite. Leer lassen für Standard „Blog\"."
+msgstr "Heading of the blog page. Leave empty for the default \"Blog\"."
+
+msgid "Überschrift für den Kontaktbereich."
+msgstr "Heading for the contact section."
+
+msgid "Überschrift über dem Menü."
+msgstr "Heading above the menu."
+
+msgid "Überschrift über den Icons."
+msgstr "Heading above the icons."
+
+msgid "Überschrift über den Kontaktdaten."
+msgstr "Heading above the contact details."
+
+msgid "Überschrift über der Anmeldung."
+msgstr "Heading above the login."
+
+msgid "– Kein Icon –"
+msgstr "– No icon –"
+
+msgid "„Route planen“-Link anzeigen"
+msgstr "Show \"Plan route\" link"
