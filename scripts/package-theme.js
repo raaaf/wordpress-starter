@@ -91,6 +91,8 @@ async function packageTheme() {
       'resources/fonts',
       'resources/favicons',
       'assets/images',
+      // Styleguide demo video (WelcomeServiceProvider::importDemoVideo).
+      'assets/videos',
       'acf-json',
       'languages',
     ];
