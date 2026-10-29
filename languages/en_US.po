@@ -2659,6 +2659,9 @@ msgstr "Optional suffix after the number."
 msgid "Optischer Stil des Buttons."
 msgstr "Visual style of the button."
 
+msgid "Original"
+msgstr "Original"
+
 msgid "Original-Bewertung ansehen"
 msgstr "View original review"
 
@@ -2787,6 +2790,12 @@ msgstr "Profile URL"
 
 msgid "Punkte"
 msgstr "Dots"
+
+msgid "Quadrat"
+msgstr "Square"
+
+msgid "Quadrat und 16:10 schneiden die Vorschau zu, Original zeigt das ganze Bild, etwa für Bildschirmfotos. Die Lightbox zeigt immer das ganze Bild."
+msgstr "Square and 16:10 crop the preview, Original shows the whole image, e.g. for screenshots. The lightbox always shows the whole image."
 
 msgid "Quell-URL"
 msgstr "Source URL"
@@ -3451,6 +3460,9 @@ msgstr "Available"
 msgid "Verfügbare Dokumente"
 msgstr "Available documents"
 
+msgid "Vergrößern per Klick"
+msgstr "Zoom on click"
+
 msgid "Verläufe"
 msgstr "Gradients"
 
@@ -4113,6 +4125,9 @@ msgstr "© {year} Company name. All rights reserved."
 
 msgid "Älteste zuerst"
 msgstr "Oldest first"
+
+msgid "Öffnet das Bild in voller Größe in der Lightbox, wie in der Galerie. Sinnvoll für Bildschirmfotos und Details."
+msgstr "Opens the image at full size in the lightbox, like in the gallery. Useful for screenshots and details."
 
 msgid "Über die Breite"
 msgstr "Full width"

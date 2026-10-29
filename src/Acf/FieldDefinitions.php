@@ -2242,6 +2242,14 @@ class FieldDefinitions
                 __('Zeigt die in der Mediathek hinterlegte Bildunterschrift.', 'wp-starter'),
                 '50',
             ),
+            self::trueFalseField(
+                "field_{$prefix}_zoom",
+                __('Vergrößern per Klick', 'wp-starter'),
+                'zoom',
+                false,
+                __('Öffnet das Bild in voller Größe in der Lightbox, wie in der Galerie. Sinnvoll für Bildschirmfotos und Details.', 'wp-starter'),
+                '50',
+            ),
             self::buttonGroupField(
                 "field_{$prefix}_width",
                 __('Bildbreite', 'wp-starter'),
@@ -2938,6 +2946,18 @@ class FieldDefinitions
                 ],
                 '3',
                 __('Anzahl der Spalten für die Darstellung.', 'wp-starter'),
+            ),
+            self::buttonGroupField(
+                "field_{$prefix}_aspect_ratio",
+                __('Seitenverhältnis', 'wp-starter'),
+                'aspect_ratio',
+                [
+                    'square' => __('Quadrat', 'wp-starter'),
+                    '16-10' => '16:10',
+                    'original' => __('Original', 'wp-starter'),
+                ],
+                'square',
+                __('Quadrat und 16:10 schneiden die Vorschau zu, Original zeigt das ganze Bild, etwa für Bildschirmfotos. Die Lightbox zeigt immer das ganze Bild.', 'wp-starter'),
             ),
             ...self::displaySettingsFields($prefix),
         ];

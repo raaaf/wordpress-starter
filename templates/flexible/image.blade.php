@@ -13,6 +13,7 @@
     $imageId = get_sub_field('image');
     $showBorder = get_sub_field('show_border');
     $showCaption = get_sub_field('show_caption');
+    $zoom = (bool) get_sub_field('zoom');
     $background = get_sub_field('background_color') ?: 'primary';
 
     $caption = '';
@@ -52,11 +53,25 @@
              Logik ab, inklusive fetchpriority="high" fuers erste Bild.
              Weglassen ist der Fix. Die rohen img-Tags im URL-Fallback
              behalten ihr lazy: dort laeuft der Kern gar nicht. --}}
+        @php($zoomFull = $zoom ? wp_get_attachment_image_src($imageId, 'full') : false)
+        @if($zoomFull)
+            {{-- Same lightbox as the gallery (initGalleryZoom in app.ts): the button
+                 carries keyboard access, the image the zoom source. --}}
+            <button type="button" class="block w-full rounded-[var(--card-radius)] cursor-zoom-in focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]" aria-label="{{ sprintf(__('Bild vergrößern: %s', 'wp-starter'), \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $caption) ?: __('Bild', 'wp-starter')) }}">
+                {!! wp_get_attachment_image($imageId, 'content', false, [
+                    'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $caption),
+                    'class' => 'w-full rounded-[var(--card-radius)] gallery-zoom ' . $borderClass,
+                    'sizes' => $sizes,
+                    'data-zoom-src' => $zoomFull[0],
+                ]) !!}
+            </button>
+        @else
         {!! wp_get_attachment_image($imageId, 'content', false, [
             'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $caption),
             'class' => 'w-full rounded-[var(--card-radius)] ' . $borderClass,
             'sizes' => $sizes,
         ]) !!}
+        @endif
 
         @if($showCaption && ($caption || $alt))
             <figcaption class="mt-4 text-body-small text-content-secondary text-center">

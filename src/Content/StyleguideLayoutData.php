@@ -1320,6 +1320,24 @@ class StyleguideLayoutData
             'background_color' => 'primary',
         ]);
 
+        // Zoom auf dem Einzelbild, Galerie in 16:10 und im Original-Seitenverhaeltnis.
+        $catalog[] = $this->layout('image', [
+            'image' => $this->imageId(4),
+            'show_border' => true,
+            'show_caption' => false,
+            'zoom' => true,
+            'background_color' => 'secondary',
+        ]);
+
+        foreach (['16-10' => 'secondary', 'original' => 'primary'] as $ratio => $background) {
+            $catalog[] = $this->layout('gallery', [
+                'images' => array_values(array_filter([$this->imageId(1), $this->imageId(2), $this->imageId(3)])),
+                'columns' => '3',
+                'aspect_ratio' => $ratio,
+                'background_color' => $background,
+            ]);
+        }
+
         // Lange Tabelle: kompakt und mit mitscrollender Kopfzeile. Kurz reicht
         // dafuer nicht, die Kopfzeile bliebe sichtbar, ohne je zu kleben.
         $catalog[] = $this->layout('table', [
