@@ -31,7 +31,7 @@
                             <img src="{{ esc_url($card['logo']['url']) }}" alt="" class="w-auto h-auto max-h-16 max-w-44" loading="lazy" decoding="async">
                         </div>
                     @elseif(!empty($card['icon']))
-                        <div class="flex items-center justify-center w-16 h-16 mb-6 rounded-lg bg-[var(--bg-brand-tint)] border border-line-brand text-content-brand [&_svg]:text-content-brand">
+                        <div class="flex items-center justify-center w-16 h-16 mb-6 rounded-lg bg-[var(--rafael-color-ds-accent-base)] text-[var(--rafael-color-ds-accent-ink)] [&_svg]:text-[var(--rafael-color-ds-accent-ink)]">
                             <x-icon :name="$card['icon']" size="xl" />
                         </div>
                     @endif

@@ -1073,9 +1073,8 @@ html {
   }
 
   /* Page-Frame Rule (rafaelalex.de design system, section 2): the page
-     background carries a noise-textured SVG plus two diagonal radial
-     gradients in Signal Orange, a property of the body, not a layout
-     choice. Cells sit on top transparently. */
+     background carries a noise-textured SVG and the page sheen, a property of
+     the body, not a layout choice. Cells sit on top transparently. */
   /* Colaborate ships in light and regular only, Cal Sans Text in light,
      regular and medium. Without this, every <strong>, <b> and heavy utility
      would get a synthetic bold from the browser, which is the one look these
@@ -1091,38 +1090,13 @@ html {
     font-weight: var(--typography-body-weight);
     line-height: var(--typography-body-line-height);
     color: var(--text-primary);
+    /* Plain ground: black and white only, no orange wash behind the page. */
     background:
       var(--noise-texture) repeat,
       var(--page-sheen) no-repeat 0 0 / 100% 100vh,
-      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.04) 0%, transparent 60%) fixed,
-      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.03) 0%, transparent 50%)
-        fixed,
       var(--bg-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }
-
-  :root[data-theme='light'] body {
-    background:
-      var(--noise-texture) repeat,
-      var(--page-sheen) no-repeat 0 0 / 100% 100vh,
-      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.03) 0%, transparent 60%) fixed,
-      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.02) 0%, transparent 50%)
-        fixed,
-      var(--bg-primary);
-  }
-
-  @media (prefers-color-scheme: light) {
-    :root:not([data-theme='dark']) body {
-      background:
-        var(--noise-texture) repeat,
-        var(--page-sheen) no-repeat 0 0 / 100% 100vh,
-        radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.03) 0%, transparent 60%)
-          fixed,
-        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.02) 0%, transparent 50%)
-          fixed,
-        var(--bg-primary);
-    }
   }
 
   /* ============================================
@@ -3262,18 +3236,6 @@ html {
 @media (hover: hover) and (pointer: fine) {
   .bg-surface-tertiary .button--secondary:hover {
     background-color: var(--bg-button-secondary-on-stone-hover);
-  }
-}
-
-/* Dark mode keeps orange to a faint accent: the brand surface is a raised
-   neutral panel there, so it needs a hairline to separate from the page. */
-:root[data-theme='dark'] .bg-surface-brand {
-  box-shadow: inset 0 0 0 1px var(--border-default);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .bg-surface-brand {
-    box-shadow: inset 0 0 0 1px var(--border-default);
   }
 }
 

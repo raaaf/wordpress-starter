@@ -12,7 +12,7 @@
  * than dark mode rules in app.css
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-10-29T20:08:29.677Z
+ * Generated: 2026-10-29T20:41:58.565Z
  */
 
 /* ============================================
@@ -440,7 +440,7 @@
   --bg-tertiary: var(--rafael-color-ds-surface-stone-light);
   --bg-inverse: var(--rafael-color-black);
   --bg-brand: var(--rafael-color-accent-500);
-  --bg-brand-subtle: #FAEFE9;
+  --bg-brand-subtle: var(--rafael-color-ds-surface-stone-light);
   --bg-brand-hover: var(--rafael-color-accent-600);
   --bg-success: var(--rafael-color-ds-semantic-available-tint-light);
   --bg-success-strong: var(--rafael-color-success-dark);
@@ -452,7 +452,7 @@
   --bg-brand-secondary-subtle: var(--rafael-color-primary-50);
   --bg-brand-secondary-hover: var(--rafael-color-primary-900);
   --bg-accent: var(--rafael-color-ds-button-primary-fill-light);
-  --bg-accent-subtle: #FAEFE9;
+  --bg-accent-subtle: var(--rafael-color-ds-surface-stone-light);
   --bg-accent-hover: var(--rafael-color-ds-button-primary-fill-hover-light);
   --bg-brand-active: var(--rafael-color-accent-600);
   --bg-disabled: var(--rafael-color-gray-100);
@@ -467,7 +467,7 @@
   --text-secondary: var(--rafael-color-ds-text-secondary-light);
   --text-tertiary: var(--rafael-color-ds-text-tertiary-light);
   --text-inverse: var(--rafael-color-gray-50);
-  --text-brand: var(--rafael-color-accent-700);
+  --text-brand: var(--rafael-color-ds-text-primary-light);
   --text-link: var(--rafael-color-ds-text-primary-light);
   --text-success: var(--rafael-color-ds-semantic-available-text-light);
   --text-warning: var(--rafael-color-ds-semantic-warning-text-light);
@@ -559,7 +559,7 @@
     --bg-tertiary: var(--rafael-color-ds-surface-stone-light) !important;
     --bg-inverse: var(--rafael-color-black) !important;
     --bg-brand: var(--rafael-color-accent-500) !important;
-    --bg-brand-subtle: #FAEFE9 !important;
+    --bg-brand-subtle: var(--rafael-color-ds-surface-stone-light) !important;
     --bg-brand-hover: var(--rafael-color-accent-600) !important;
     --bg-success: var(--rafael-color-ds-semantic-available-tint-light) !important;
     --bg-success-strong: var(--rafael-color-success-dark) !important;
@@ -571,7 +571,7 @@
     --bg-brand-secondary-subtle: var(--rafael-color-primary-50) !important;
     --bg-brand-secondary-hover: var(--rafael-color-primary-900) !important;
     --bg-accent: var(--rafael-color-ds-button-primary-fill-light) !important;
-    --bg-accent-subtle: #FAEFE9 !important;
+    --bg-accent-subtle: var(--rafael-color-ds-surface-stone-light) !important;
     --bg-accent-hover: var(--rafael-color-ds-button-primary-fill-hover-light) !important;
     --bg-brand-active: var(--rafael-color-accent-600) !important;
     --bg-disabled: var(--rafael-color-gray-100) !important;
@@ -586,7 +586,7 @@
     --text-secondary: var(--rafael-color-ds-text-secondary-light) !important;
     --text-tertiary: var(--rafael-color-ds-text-tertiary-light) !important;
     --text-inverse: var(--rafael-color-gray-50) !important;
-    --text-brand: var(--rafael-color-accent-700) !important;
+    --text-brand: var(--rafael-color-ds-text-primary-light) !important;
     --text-link: var(--rafael-color-ds-text-primary-light) !important;
     --text-success: var(--rafael-color-ds-semantic-available-text-light) !important;
     --text-warning: var(--rafael-color-ds-semantic-warning-text-light) !important;

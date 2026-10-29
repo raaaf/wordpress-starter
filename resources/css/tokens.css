@@ -5,7 +5,7 @@
  * Run: node scripts/transform-tokens.js
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-10-29T20:08:29.672Z
+ * Generated: 2026-10-29T20:41:58.557Z
  */
 
 /* ============================================
@@ -434,7 +434,7 @@
   --bg-tertiary: var(--rafael-color-ds-surface-stone-light);
   --bg-inverse: var(--rafael-color-black);
   --bg-brand: var(--rafael-color-accent-500);
-  --bg-brand-subtle: #FAEFE9;
+  --bg-brand-subtle: var(--rafael-color-ds-surface-stone-light);
   --bg-brand-hover: var(--rafael-color-accent-600);
   --bg-success: var(--rafael-color-ds-semantic-available-tint-light);
   --bg-success-strong: var(--rafael-color-success-dark);
@@ -446,7 +446,7 @@
   --bg-brand-secondary-subtle: var(--rafael-color-primary-50);
   --bg-brand-secondary-hover: var(--rafael-color-primary-900);
   --bg-accent: var(--rafael-color-ds-button-primary-fill-light);
-  --bg-accent-subtle: #FAEFE9;
+  --bg-accent-subtle: var(--rafael-color-ds-surface-stone-light);
   --bg-accent-hover: var(--rafael-color-ds-button-primary-fill-hover-light);
   --bg-brand-active: var(--rafael-color-accent-600);
   --bg-disabled: var(--rafael-color-gray-100);
@@ -461,7 +461,7 @@
   --text-secondary: var(--rafael-color-ds-text-secondary-light);
   --text-tertiary: var(--rafael-color-ds-text-tertiary-light);
   --text-inverse: var(--rafael-color-gray-50);
-  --text-brand: var(--rafael-color-accent-700);
+  --text-brand: var(--rafael-color-ds-text-primary-light);
   --text-link: var(--rafael-color-ds-text-primary-light);
   --text-success: var(--rafael-color-ds-semantic-available-text-light);
   --text-warning: var(--rafael-color-ds-semantic-warning-text-light);
@@ -545,9 +545,9 @@
   --bg-secondary: var(--rafael-color-ds-surface-elevated-dark);
   --bg-tertiary: var(--rafael-color-ds-surface-stone-dark);
   --bg-inverse: var(--rafael-color-gray-50);
-  --bg-brand: var(--rafael-color-ds-surface-elevated-dark);
-  --bg-brand-subtle: #140904;
-  --bg-brand-hover: var(--rafael-color-primary-800);
+  --bg-brand: var(--rafael-color-accent-500);
+  --bg-brand-subtle: var(--rafael-color-ds-surface-elevated-dark);
+  --bg-brand-hover: var(--rafael-color-accent-600);
   --bg-success: var(--rafael-color-ds-semantic-available-tint-dark);
   --bg-success-strong: var(--rafael-color-success);
   --bg-warning: var(--rafael-color-ds-semantic-warning-tint-dark);
@@ -558,9 +558,9 @@
   --bg-brand-secondary-subtle: var(--rafael-color-secondary-900);
   --bg-brand-secondary-hover: var(--rafael-color-secondary-400);
   --bg-accent: var(--rafael-color-ds-button-primary-fill-dark);
-  --bg-accent-subtle: #140904;
+  --bg-accent-subtle: var(--rafael-color-ds-surface-elevated-dark);
   --bg-accent-hover: var(--rafael-color-ds-button-primary-fill-hover-dark);
-  --bg-brand-active: var(--rafael-color-primary-800);
+  --bg-brand-active: var(--rafael-color-accent-600);
   --bg-disabled: var(--rafael-color-gray-800);
   --bg-on-color: var(--rafael-color-white);
   --bg-overlay: rgba(0, 0, 0, 0.70);
@@ -583,8 +583,8 @@
   --text-link-hover: var(--rafael-color-ds-surface-elevated-light);
   --text-disabled: var(--rafael-color-ds-text-muted-dark);
   --text-on-color: var(--rafael-color-white);
-  --text-on-brand: var(--rafael-color-ds-text-primary-dark);
-  --text-on-accent: var(--rafael-color-ds-text-primary-dark);
+  --text-on-brand: var(--rafael-color-ds-accent-ink);
+  --text-on-accent: var(--rafael-color-ds-accent-ink);
   --text-placeholder: var(--rafael-color-ds-text-tertiary-dark);
   --text-button-primary: var(--rafael-color-ds-button-primary-label-dark);
 
@@ -592,7 +592,7 @@
   --border-default: var(--rafael-color-ds-border-default-dark);
   --border-strong: var(--rafael-color-white-alpha-15);
   --border-subtle: var(--rafael-color-ds-border-subtle-dark);
-  --border-brand: var(--rafael-color-white-alpha-15);
+  --border-brand: var(--rafael-color-accent-500);
   --border-focus: var(--rafael-color-ds-accent-text-dark);
   --border-success: var(--rafael-color-ds-semantic-available-dark);
   --border-warning: var(--rafael-color-ds-semantic-warning-dark);
@@ -653,9 +653,9 @@
   --bg-secondary: var(--rafael-color-ds-surface-elevated-dark);
   --bg-tertiary: var(--rafael-color-ds-surface-stone-dark);
   --bg-inverse: var(--rafael-color-gray-50);
-  --bg-brand: var(--rafael-color-ds-surface-elevated-dark);
-  --bg-brand-subtle: #140904;
-  --bg-brand-hover: var(--rafael-color-primary-800);
+  --bg-brand: var(--rafael-color-accent-500);
+  --bg-brand-subtle: var(--rafael-color-ds-surface-elevated-dark);
+  --bg-brand-hover: var(--rafael-color-accent-600);
   --bg-success: var(--rafael-color-ds-semantic-available-tint-dark);
   --bg-success-strong: var(--rafael-color-success);
   --bg-warning: var(--rafael-color-ds-semantic-warning-tint-dark);
@@ -666,9 +666,9 @@
   --bg-brand-secondary-subtle: var(--rafael-color-secondary-900);
   --bg-brand-secondary-hover: var(--rafael-color-secondary-400);
   --bg-accent: var(--rafael-color-ds-button-primary-fill-dark);
-  --bg-accent-subtle: #140904;
+  --bg-accent-subtle: var(--rafael-color-ds-surface-elevated-dark);
   --bg-accent-hover: var(--rafael-color-ds-button-primary-fill-hover-dark);
-  --bg-brand-active: var(--rafael-color-primary-800);
+  --bg-brand-active: var(--rafael-color-accent-600);
   --bg-disabled: var(--rafael-color-gray-800);
   --bg-on-color: var(--rafael-color-white);
   --bg-overlay: rgba(0, 0, 0, 0.70);
@@ -691,8 +691,8 @@
   --text-link-hover: var(--rafael-color-ds-surface-elevated-light);
   --text-disabled: var(--rafael-color-ds-text-muted-dark);
   --text-on-color: var(--rafael-color-white);
-  --text-on-brand: var(--rafael-color-ds-text-primary-dark);
-  --text-on-accent: var(--rafael-color-ds-text-primary-dark);
+  --text-on-brand: var(--rafael-color-ds-accent-ink);
+  --text-on-accent: var(--rafael-color-ds-accent-ink);
   --text-placeholder: var(--rafael-color-ds-text-tertiary-dark);
   --text-button-primary: var(--rafael-color-ds-button-primary-label-dark);
 
@@ -700,7 +700,7 @@
   --border-default: var(--rafael-color-ds-border-default-dark);
   --border-strong: var(--rafael-color-white-alpha-15);
   --border-subtle: var(--rafael-color-ds-border-subtle-dark);
-  --border-brand: var(--rafael-color-white-alpha-15);
+  --border-brand: var(--rafael-color-accent-500);
   --border-focus: var(--rafael-color-ds-accent-text-dark);
   --border-success: var(--rafael-color-ds-semantic-available-dark);
   --border-warning: var(--rafael-color-ds-semantic-warning-dark);
