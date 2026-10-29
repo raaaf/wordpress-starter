@@ -60,6 +60,8 @@
             <div
                 class="relative overflow-hidden rounded-[var(--card-radius)] bg-surface-secondary {{ $aspectClass }}"
                 @if(!$aspectClass) style="height: {{ $height }}px" @endif
+                {{-- Same pre-load minimum height as video.blade.php: the consent notice is taller than a 16:9 box on phones. --}}
+                :class="loaded ? '' : 'max-sm:min-h-72 max-sm:aspect-auto'"
                 x-data="{ loaded: false, iframeLoaded: false }"
                 x-ref="embedContainer"
                 tabindex="-1"

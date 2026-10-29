@@ -120,6 +120,7 @@ final class ThemeUpdateProviderTest extends TestCase
     {
         // Older releases were published without a checksum asset: a 404 (or
         // any other non-200/error) must not abort the update, only warn.
+        $this->expectErrorLog();
         $file = $this->seedDownload('theme package contents');
 
         $GLOBALS['wp_mock_remote_responses']['https://example.com/wp-starter.zip.sha256'] = [

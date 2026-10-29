@@ -10,7 +10,9 @@ use WordpressStarter\ThemeContext;
 /**
  * Provides simple logging functionality for the theme
  *
- * Writes to WordPress debug.log when WP_DEBUG_LOG is enabled.
+ * Warnings, errors and critical messages always go to the server PHP error log
+ * (debug.log when WP_DEBUG_LOG is enabled); debug and info messages only when
+ * WP_DEBUG_LOG is enabled.
  * Optionally integrates with external services like Sentry.
  */
 class LogServiceProvider extends ServiceProvider
@@ -24,10 +26,8 @@ class LogServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Register error handler for uncaught exceptions
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            add_action('shutdown', [$this, 'logFatalErrors']);
-        }
+        // Fatal errors are logged on production too, not only with WP_DEBUG
+        add_action('shutdown', [$this, 'logFatalErrors']);
     }
 
     /**
@@ -114,8 +114,8 @@ class LogServiceProvider extends ServiceProvider
             $level = 'info';
         }
 
-        // Only log if WP_DEBUG_LOG is enabled
-        if (!defined('WP_DEBUG_LOG') || !WP_DEBUG_LOG) {
+        // debug and info only when WP_DEBUG_LOG is enabled
+        if (in_array($level, ['debug', 'info'], true) && ( !defined('WP_DEBUG_LOG') || !WP_DEBUG_LOG )) {
             return;
         }
 

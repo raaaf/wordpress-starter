@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\Helpers\Text;
+
 /**
  * Theme Service Provider
  *
@@ -25,6 +27,18 @@ class ThemeServiceProvider extends ServiceProvider
         $this->addTemplateFilter();
         $this->registerBladePageTemplates();
         $this->dropProtectedTitlePrefix();
+        $this->applyTypography();
+    }
+
+    /**
+     * German typography glue for editor text. Late priority so it runs after
+     * wpautop and shortcodes; Text::typography() is idempotent, so ACF's
+     * internal the_content pass on WYSIWYG values does no harm.
+     */
+    private function applyTypography(): void
+    {
+        add_filter('the_content', [Text::class, 'typography'], 20);
+        add_filter('acf/format_value/type=wysiwyg', [Text::class, 'typography'], 20);
     }
 
     /**

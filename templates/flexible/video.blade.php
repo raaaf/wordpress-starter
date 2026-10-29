@@ -136,6 +136,11 @@
         <div class="max-w-6xl mx-auto">
             <div
                 class="relative overflow-hidden rounded-lg {{ $aspectClass }} bg-surface-secondary"
+                {{-- On a phone 16:9 is only about 200px tall, the consent notice needs about
+                     260px: icon and button were cut off and the video could not be loaded.
+                     Until loaded, a minimum height applies, afterwards the chosen aspect
+                     ratio again. --}}
+                :class="loaded ? '' : 'max-sm:min-h-72 max-sm:aspect-auto'"
                 x-data="{ loaded: {{ $selfHosted && !$fileUrlGated ? 'true' : 'false' }}, iframeLoaded: false, iframeError: false }"
                 x-ref="videoContainer"
                 tabindex="-1"

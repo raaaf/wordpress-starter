@@ -16,7 +16,72 @@ class Text
             return '';
         }
 
-        return wp_kses(str_replace('[br]', '<br>', $text), ['br' => []]);
+        return self::typography(wp_kses(str_replace('[br]', '<br>', $text), ['br' => []]));
+    }
+
+    /**
+     * File type label of a download URL: the uppercase extension of the URL path
+     * when it is a known document type, otherwise an empty string.
+     */
+    public static function fileType(string $url): string
+    {
+        $path = parse_url($url, PHP_URL_PATH);
+        if (!is_string($path)) {
+            return '';
+        }
+
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        return in_array($extension, ['pdf', 'docx', 'doc', 'xlsx', 'jpg', 'png', 'zip'], true)
+            ? strtoupper($extension)
+            : '';
+    }
+
+    /**
+     * German typography glue for text nodes: a number never ends a line before its
+     * unit, "p. a." and "z. B." stay together, % takes a no-break space and
+     * " - " between words becomes an en dash. Tags and attributes are left alone,
+     * so URLs and class names keep their hyphens and spaces. The contents of
+     * script, style, pre, code and textarea are left alone too.
+     *
+     * Also hooked on acf/format_value, which can pass null or false: anything
+     * that is not a string is returned unchanged.
+     */
+    public static function typography(mixed $html): mixed
+    {
+        if (!is_string($html)) {
+            return $html;
+        }
+
+        $parts = preg_split('/(<[^>]*>)/', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if ($parts === false) {
+            return $html;
+        }
+
+        // Name of the raw element (script, code, ...) whose contents are being skipped.
+        $raw = null;
+
+        foreach ($parts as $i => $part) {
+            // Odd indexes are the captured tags.
+            if ($i % 2 === 1) {
+                if ($raw === null && preg_match('/^<(script|style|pre|code|textarea)\b/i', $part, $m) === 1 && !str_ends_with($part, '/>')) {
+                    $raw = strtolower($m[1]);
+                } elseif ($raw !== null && preg_match('/^<\/' . $raw . '\b/i', $part) === 1) {
+                    $raw = null;
+                }
+                continue;
+            }
+            if ($part === '' || $raw !== null) {
+                continue;
+            }
+            $part = preg_replace('/(?<=\d) (?=(?:Jahren|Jahre|kWh|MWp|kg|EUR|€)(?![\p{L}]))/u', "\u{00A0}", $part) ?? $part;
+            $part = preg_replace('/\bp\. a\./u', "p.\u{00A0}a.", $part) ?? $part;
+            $part = preg_replace('/\bz\. B\./u', "z.\u{00A0}B.", $part) ?? $part;
+            $part = preg_replace('/(?<=\d) (?=[%‰])/u', "\u{00A0}", $part) ?? $part;
+            $parts[$i] = str_replace(' - ', ' – ', $part);
+        }
+
+        return implode('', $parts);
     }
 
     /**
