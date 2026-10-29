@@ -725,7 +725,7 @@ const COMPONENT_TOKENS = `
   --card-footer-padding-top: var(--rafael-spacing-4);
 
   /* Layout: one content column for every wrapper (header, sections, footer) */
-  --container-max: 80rem;
+  --container-max: 64rem;
 
   /* Section block padding: mobile to desktop, fluid like the type scale */
   --section-padding-sm: ${fluidClamp(48, 64)};
