@@ -1,0 +1,193 @@
+// Token playground on the design system page (templates/styleguide/playground.blade.php).
+// Writes CSS custom properties inline on <html>, so every token-driven element on
+// the page follows. Nothing is stored: a reload or "Reset" brings the theme back.
+
+import type { AlpineMagics } from '../../src/types/alpine';
+
+export const DEFAULT_ACCENT = '#FF6B35';
+export const DEFAULT_RADIUS = 1;
+export const MAX_RADIUS = 4;
+export const DEFAULT_SCALE = 1;
+export const CARD_RADIUS_CAP = 48;
+
+const RADIUS_TOKENS: Record<string, number> = {
+  sm: 6,
+  default: 6,
+  md: 8,
+  lg: 12,
+  xl: 16,
+  '2xl': 20,
+  '3xl': 24,
+};
+
+const FONT_SIZE_TOKENS = ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl'];
+
+function channels(hex: string): [number, number, number] | null {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+/** WCAG 2 relative luminance of a #rrggbb colour. */
+export function luminance(hex: string): number {
+  const rgb = channels(hex);
+  if (!rgb) return 0;
+  const [r, g, b] = rgb.map((c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+export function contrastRatio(a: string, b: string): number {
+  const la = luminance(a);
+  const lb = luminance(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/** Black or white text on `accent`, whichever contrasts more, with its ratio. */
+export function inkFor(accent: string): { ink: '#000000' | '#FFFFFF'; ratio: number } {
+  const black = contrastRatio(accent, '#000000');
+  const white = contrastRatio(accent, '#FFFFFF');
+  return black >= white ? { ink: '#000000', ratio: black } : { ink: '#FFFFFF', ratio: white };
+}
+
+/**
+ * Inline custom properties for one playground state. `fontSizes` holds the
+ * theme's own font-size values, read before any override, so the scale wraps
+ * them instead of replacing the fluid clamp() formulas.
+ */
+export function playgroundVariables(
+  accent: string,
+  radius: number,
+  scale: number,
+  fontSizes: Record<string, string>
+): Record<string, string> {
+  const vars: Record<string, string> = {};
+  const deep = `color-mix(in oklch, ${accent}, black 18%)`;
+
+  vars['--rafael-color-accent-400'] = `color-mix(in oklch, ${accent}, white 18%)`;
+  vars['--rafael-color-accent-500'] = accent;
+  vars['--rafael-color-accent-600'] = deep;
+  vars['--rafael-color-accent-700'] = `color-mix(in oklch, ${accent}, black 30%)`;
+  vars['--rafael-color-accent-800'] = `color-mix(in oklch, ${accent}, black 45%)`;
+  vars['--rafael-color-ds-accent-base'] = accent;
+  vars['--rafael-color-ds-accent-deep'] = deep;
+  vars['--rafael-color-ds-accent-hover-fill-light'] = deep;
+  vars['--rafael-color-ds-accent-hover-fill-dark'] = accent;
+  vars['--rafael-color-ds-accent-text-dark'] = accent;
+  vars['--rafael-color-ds-accent-ink'] = inkFor(accent).ink;
+
+  // Pill turns the small radii (inputs, badges) fully round. Card-sized radii
+  // stop at CARD_RADIUS_CAP, a 999px card would clip its own corner content.
+  const pill = radius >= MAX_RADIUS;
+  for (const [name, base] of Object.entries(RADIUS_TOKENS)) {
+    const scaled = Math.min(Math.round(base * radius * 10) / 10, CARD_RADIUS_CAP);
+    vars[`--rafael-radius-${name}`] = pill && base <= 8 ? '999px' : `${scaled}px`;
+  }
+  // Square means square everywhere, including the pill-shaped buttons.
+  vars['--rafael-radius-full'] = radius <= 0 ? '0px' : '999px';
+
+  for (const name of FONT_SIZE_TOKENS) {
+    const original = fontSizes[name];
+    if (original) vars[`--rafael-font-size-${name}`] = `calc(${original} * ${scale})`;
+  }
+
+  return vars;
+}
+
+export function readFontSizes(style: CSSStyleDeclaration): Record<string, string> {
+  const sizes: Record<string, string> = {};
+  for (const name of FONT_SIZE_TOKENS) {
+    const value = style.getPropertyValue(`--rafael-font-size-${name}`).trim();
+    if (value) sizes[name] = value;
+  }
+  return sizes;
+}
+
+export interface TokenPlaygroundComponent extends AlpineMagics {
+  accent: string;
+  radius: number;
+  scale: number;
+  fontSizes: Record<string, string>;
+  applied: string[];
+  readonly ink: string;
+  readonly contrast: string;
+  readonly radiusLabel: string;
+  readonly scaleLabel: string;
+  init(): void;
+  update(): void;
+  reset(): void;
+}
+
+/**
+ * Alpine component. `labels` carries the translated strings from the template,
+ * so the TypeScript side stays free of copy.
+ */
+export function createTokenPlaygroundComponent(
+  labels: Record<string, string> = {}
+): TokenPlaygroundComponent {
+  const t = (key: string, fallback: string) => labels[key] ?? fallback;
+
+  return {
+    ...({} as AlpineMagics),
+    accent: DEFAULT_ACCENT,
+    radius: DEFAULT_RADIUS,
+    scale: DEFAULT_SCALE,
+    fontSizes: {},
+    applied: [],
+
+    get ink() {
+      return inkFor(this.accent).ink;
+    },
+
+    get contrast() {
+      const { ink, ratio } = inkFor(this.accent);
+      const colour = ink === '#000000' ? t('black', 'black') : t('white', 'white');
+      return t('contrast', '%1$s text, contrast %2$s:1')
+        .replace('%1$s', colour)
+        .replace('%2$s', ratio.toFixed(1));
+    },
+
+    get radiusLabel() {
+      if (this.radius <= 0) return t('square', 'Square');
+      if (this.radius >= MAX_RADIUS) return t('pill', 'Pill');
+      return `${Math.round(this.radius * 100)} %`;
+    },
+
+    get scaleLabel() {
+      return `${Math.round(16 * this.scale * 10) / 10} px`;
+    },
+
+    init() {
+      this.fontSizes = readFontSizes(getComputedStyle(document.documentElement));
+    },
+
+    update() {
+      const root = document.documentElement;
+      root.classList.add('token-playground-live');
+      const vars = playgroundVariables(
+        this.accent,
+        Number(this.radius),
+        Number(this.scale),
+        this.fontSizes
+      );
+      for (const [name, value] of Object.entries(vars)) {
+        root.style.setProperty(name, value);
+      }
+      this.applied = Object.keys(vars);
+    },
+
+    reset() {
+      const root = document.documentElement;
+      for (const name of this.applied) {
+        root.style.removeProperty(name);
+      }
+      this.applied = [];
+      this.accent = DEFAULT_ACCENT;
+      this.radius = DEFAULT_RADIUS;
+      this.scale = DEFAULT_SCALE;
+    },
+  };
+}

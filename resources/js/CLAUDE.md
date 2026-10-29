@@ -8,7 +8,9 @@ Registered via `Alpine.data()` in `resources/js/app.ts`:
 
 - `navigation` - Mobile menu with focus trap
 - `statsCounter` - Animated number counters
-- `beforeAfterSlider` - Image comparison slider
+- `beforeAfterSlider` - Image comparison slider, with an optional one-time intro sweep (`resources/js/motion.ts`)
+- `themeSwitcher` - Light/dark/system switcher (`templates/partials/theme-switcher.blade.php`); reveals the new scheme as a circle via the View Transitions API (`resources/js/motion.ts`), instant with reduced motion
+- `tokenPlayground` - Accent, radius and type-scale playground on the Design System page template (`resources/js/token-playground.ts`); writes CSS variables inline on `<html>`, stores nothing
 - `memberLogin` - Member area login form
 - `downloadTable` - Member area download table
 - `styleguideSprungnavigation` - Styleguide jump navigation (active-section highlighting)
@@ -17,4 +19,4 @@ Registered via `Alpine.data()` in `resources/js/app.ts`:
 
 `memberLogin` and `downloadTable` are registered in `resources/js/member-area.ts` and wired in via `registerMemberAreaComponents(Alpine)` in `resources/js/app.ts`.
 
-Components using inline `x-data` (not registered via `Alpine.data`): `tabs`, `accordion`, `theme-switcher` (`templates/partials/theme-switcher.blade.php`), `footer-alert-bar` (`templates/partials/footer-alert-bar.blade.php`). The logo slider (`templates/flexible/logo-slider.blade.php`) uses inline `x-data` plus a CSS animation, pausing on hover and focus and honouring `prefers-reduced-motion`. The gallery uses medium-zoom directly, not Alpine.
+Components using inline `x-data` (not registered via `Alpine.data`): `tabs`, `accordion`, `footer-alert-bar` (`templates/partials/footer-alert-bar.blade.php`). The logo slider (`templates/flexible/logo-slider.blade.php`) uses inline `x-data` plus a CSS animation, pausing on hover and focus and honouring `prefers-reduced-motion`. The gallery uses medium-zoom directly, not Alpine.

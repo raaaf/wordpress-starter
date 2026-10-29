@@ -13,6 +13,7 @@ import {
   prefersReducedMotion,
   transitionColorScheme,
 } from './motion';
+import { createTokenPlaygroundComponent } from './token-playground';
 
 // Declare localized strings from WordPress (object name is fixed as 'themeStrings' for all themes)
 declare const themeStrings:
@@ -646,6 +647,7 @@ Alpine.data('navigation', createNavigationComponent);
 Alpine.data('statsCounter', (target: number) => createStatsCounterComponent(target));
 Alpine.data('beforeAfterSlider', createBeforeAfterComponent);
 Alpine.data('themeSwitcher', createThemeSwitcherComponent);
+Alpine.data('tokenPlayground', createTokenPlaygroundComponent);
 Alpine.data('styleguideModul', createStyleguideModulComponent);
 Alpine.data('jumpMenu', createJumpMenuComponent);
 

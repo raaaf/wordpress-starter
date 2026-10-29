@@ -13,6 +13,9 @@ msgstr ""
 msgid " Prozent Nachher"
 msgstr " percent after"
 
+msgid "%1$s Text, Kontrast %2$s:1"
+msgstr "%1$s text, contrast %2$s:1"
+
 msgid "%1$s von %2$s installiert"
 msgstr "%1$s of %2$s installed"
 
@@ -233,6 +236,9 @@ msgstr "Accent link"
 
 msgid "Akzentfarbe"
 msgstr "Accent colour"
+
+msgid "Akzentfarbe, Ecken und Schriftgröße live umstellen. Die ganze Seite folgt, weil alles an denselben Tokens hängt."
+msgstr "Change the accent colour, corners and font size live. The whole page follows, because everything hangs on the same tokens."
 
 msgid "Alle %s"
 msgstr "All %s"
@@ -666,6 +672,9 @@ msgstr "Please choose a valid time."
 msgid "Bitte wählen"
 msgstr "Please choose"
 
+msgid "Blau"
+msgstr "Blue"
+
 msgid "Blendet Navigation, Brotkrumen, Fußnavigation und Social-Links aus. Logo, Kontakt und rechtliche Links bleiben standardmäßig sichtbar."
 msgstr "Hides navigation, breadcrumbs, footer navigation and social links. Logo, contact and legal links stay visible by default."
 
@@ -719,6 +728,9 @@ msgstr "The button takes the full available width."
 
 msgid "Buttons"
 msgstr "Buttons"
+
+msgid "Buttons, Karten, Badges und Ecken lesen alle dieselben Tokens."
+msgstr "Buttons, cards, badges and corners all read the same tokens."
 
 msgid "CSS neu generieren"
 msgstr "Regenerate CSS"
@@ -1173,6 +1185,18 @@ msgstr "Email:"
 msgid "Ecke, in der der Knopf schwebt. Oben sitzt er direkt unter dem Seitenkopf."
 msgstr "Corner in which the button floats. At the top it sits right below the page header."
 
+msgid "Ecken"
+msgstr "Corners"
+
+msgid "Eckig"
+msgstr "Square"
+
+msgid "Eigene Farbe"
+msgstr "Custom colour"
+
+msgid "Ein Akzent, viele Flächen."
+msgstr "One accent, many surfaces."
+
 msgid "Ein Fehler ist aufgetreten."
 msgstr "An error occurred."
 
@@ -1566,6 +1590,9 @@ msgstr "Full content width lines the box up with the edges of a two-column layou
 msgid "Gefüllt"
 msgstr "Filled"
 
+msgid "Gelb"
+msgstr "Yellow"
+
 msgid "Gemeinsames Passwort"
 msgstr "Shared password"
 
@@ -1628,6 +1655,9 @@ msgstr "Size of the button."
 
 msgid "Größen. Sichtbar 32, 40 und 48 Pixel hoch; die Trefferfläche misst am Finger überall mindestens 44 Pixel."
 msgstr "Sizes. Visibly 32, 40 and 48 pixels tall; on touch the target is at least 44 pixels everywhere."
+
+msgid "Grün"
+msgstr "Green"
 
 msgid "H2-Überschrift. Nutze [br] für Zeilenumbrüche."
 msgstr "H2 heading. Use [br] for line breaks."
@@ -2730,6 +2760,9 @@ msgstr "Optional suffix after the number."
 msgid "Optischer Stil des Buttons."
 msgstr "Visual style of the button."
 
+msgid "Orange (Standard)"
+msgstr "Orange (default)"
+
 msgid "Original"
 msgstr "Original"
 
@@ -2771,6 +2804,9 @@ msgstr "Required, without it the map cannot show anything. The block adds a GDPR
 
 msgid "Pflichtfeld"
 msgstr "Required field"
+
+msgid "Pille"
+msgstr "Pill"
 
 msgid "Pinterest"
 msgstr "Pinterest"
@@ -2931,6 +2967,9 @@ msgstr "Remote path"
 msgid "Rolle"
 msgstr "Role"
 
+msgid "Rot"
+msgstr "Red"
+
 msgid "Route planen"
 msgstr "Plan route"
 
@@ -3008,6 +3047,12 @@ msgstr "Narrow"
 
 msgid "Schmal passt zu Hochformat und Bildschirmfotos, breit zu Panoramen. Ganze Inhaltsbreite schließt mit den Kanten eines Zweispalters ab."
 msgstr "Narrow suits portrait images and screenshots, wide suits panoramas. Full content width lines up with the edges of a two-column layout."
+
+msgid "Schriftgröße"
+msgstr "Font size"
+
+msgid "Schwarzer"
+msgstr "Black"
 
 msgid "Scroll-Animationen"
 msgstr "Scroll animations"
@@ -3143,6 +3188,9 @@ msgstr "Column headings"
 
 msgid "Spanisch"
 msgstr "Spanish"
+
+msgid "Spielwiese"
+msgstr "Playground"
 
 msgid "Sprache der Untertitel"
 msgstr "Subtitle language"
@@ -3609,6 +3657,9 @@ msgstr "Four columns with images"
 msgid "Vimeo-Video"
 msgstr "Vimeo video"
 
+msgid "Violett"
+msgstr "Violet"
+
 msgid "Volle Breite"
 msgstr "Full width"
 
@@ -3641,6 +3692,9 @@ msgstr "Previous page"
 
 msgid "Vorheriger Beitrag"
 msgstr "Previous post"
+
+msgid "Vorschau"
+msgstr "Preview"
 
 msgid "Vorschaubild"
 msgstr "Preview image"
@@ -3695,6 +3749,9 @@ msgstr "Read more"
 
 msgid "Weiterlesen:"
 msgstr "Read more:"
+
+msgid "Weißer"
+msgstr "White"
 
 msgid "Welche WordPress-Rollen haben Zugang? Leer = alle angemeldeten Benutzer."
 msgstr "Which WordPress roles have access? Empty = all logged-in users."
@@ -3957,6 +4014,9 @@ msgstr "Back to home page"
 msgid "Zurück zur Übersicht"
 msgstr "Back to overview"
 
+msgid "Zurücksetzen"
+msgstr "Reset"
+
 msgid "Zustände"
 msgstr "States"
 
@@ -4211,6 +4271,9 @@ msgstr "© {year} Company name. All rights reserved."
 
 msgid "Älteste zuerst"
 msgstr "Oldest first"
+
+msgid "Ändert nur deine Ansicht, gespeichert wird nichts."
+msgstr "Only changes your view, nothing is saved."
 
 msgid "Öffnet das Bild in voller Größe in der Lightbox, wie in der Galerie. Sinnvoll für Bildschirmfotos und Details."
 msgstr "Opens the image at full size in the lightbox, like in the gallery. Useful for screenshots and details."
