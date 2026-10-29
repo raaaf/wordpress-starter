@@ -171,7 +171,19 @@ class PluginInstaller
     {
         $skin = self::createQuietSkin();
         $upgrader = new \Plugin_Upgrader($skin);
-        $result = $upgrader->install($downloadLink);
+
+        // INTENTIONAL: output is buffered and discarded. On a non-English site
+        // install() fires upgrader_process_complete, where core starts
+        // Language_Pack_Upgrader::async_upgrade() with its own skin; it prints
+        // "<p>Einige Übersetzungen benötigen eine Aktualisierung …</p>" in front
+        // of the JSON and the setup page reports a successful install as a
+        // network error. Errors still reach the caller via $result and the skin.
+        ob_start();
+        try {
+            $result = $upgrader->install($downloadLink);
+        } finally {
+            ob_end_clean();
+        }
 
         return ['result' => $result, 'skin' => $skin];
     }
