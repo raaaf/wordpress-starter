@@ -16,7 +16,7 @@
 
 <x-section anchor="{{ StyleguidePage::DESIGN_SYSTEM_ANCHORS['components'] }}" background="secondary" padding="lg" class="styleguide-components">
     <x-section-header
-        chip="Design System"
+        :chip="($overline ?? true) ? 'Design System' : null"
         :headline="__('Komponenten', 'wp-starter')"
         :description="__('Gerendert aus den Blade-Komponenten selbst. Was hier steht, ist der aktuelle Stand.', 'wp-starter')"
     />

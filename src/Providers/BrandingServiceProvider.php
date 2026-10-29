@@ -211,7 +211,9 @@ class BrandingServiceProvider extends ServiceProvider
      */
     public static function iconUrl(int $attachmentId, int $size): ?string
     {
-        $original = wp_get_attachment_url($attachmentId);
+        // With the WebP conversion the main file is WebP as well; the uploaded
+        // PNG then only lives on as original_image.
+        $original = wp_get_original_image_url($attachmentId) ?: wp_get_attachment_url($attachmentId);
         $subSize = wp_get_attachment_image_url($attachmentId, [$size, $size]);
 
         if (!$subSize) {

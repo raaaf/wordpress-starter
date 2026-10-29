@@ -606,6 +606,13 @@ if (!function_exists('wp_get_attachment_image_src')) {
     }
 }
 
+if (!function_exists('wp_get_original_image_url')) {
+    function wp_get_original_image_url(int $attachmentId): string|false
+    {
+        return $GLOBALS['wp_mock_attachments'][$attachmentId]['original'][0] ?? false;
+    }
+}
+
 if (!function_exists('wp_get_attachment_url')) {
     function wp_get_attachment_url(int $attachmentId = 0): string|false
     {

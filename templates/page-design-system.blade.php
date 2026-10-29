@@ -16,7 +16,7 @@
         @if(post_password_required())
             @include('partials.password-form')
         @else
-            <header class="page-header max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-4 flex flex-wrap items-end justify-between gap-6">
+            <header class="page-header max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-4">
                 <div>
                     <h1 class="m-0">{{ get_the_title() }}</h1>
                     @if(get_the_content())
@@ -25,11 +25,11 @@
                         </x-prose>
                     @endif
                 </div>
-                @include('partials.theme-switcher')
             </header>
 
-            @include('styleguide.tokens')
-            @include('styleguide.components')
+            {{-- The page h1 already names the design system, so no overline per section. --}}
+            @include('styleguide.tokens', ['overline' => false])
+            @include('styleguide.components', ['overline' => false])
         @endif
     </article>
     @endwhile

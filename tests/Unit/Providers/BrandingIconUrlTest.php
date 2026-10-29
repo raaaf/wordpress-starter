@@ -29,6 +29,18 @@ final class BrandingIconUrlTest extends TestCase
         $this->assertSame('https://example.com/favicon.png', BrandingServiceProvider::iconUrl(7, 180));
     }
 
+    public function testConvertedMainFileFallsBackToTheUploadedPng(): void
+    {
+        // The WebP conversion replaces the main file too; the PNG survives as original_image.
+        $GLOBALS['wp_mock_attachments'][7] = [
+            'original' => ['https://example.com/favicon-512.png', 512, 512],
+            'full' => ['https://example.com/favicon-512.webp', 512, 512],
+            '180x180' => ['https://example.com/favicon-512-300x300.webp', 300, 300],
+        ];
+
+        $this->assertSame('https://example.com/favicon-512.png', BrandingServiceProvider::iconUrl(7, 180));
+    }
+
     public function testSubSizeInTheSameFormatIsKept(): void
     {
         $GLOBALS['wp_mock_attachments'][7] = [

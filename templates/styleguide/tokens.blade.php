@@ -15,7 +15,7 @@
 
 <x-section anchor="{{ StyleguidePage::DESIGN_SYSTEM_ANCHORS['tokens'] }}" background="primary" padding="lg" class="styleguide-tokens">
     <x-section-header
-        chip="Design System"
+        :chip="($overline ?? true) ? 'Design System' : null"
         headline="Tokens"
         :description="__('Farben, Typografie, Schatten und Abstände, direkt aus den aktiven Design-Tokens gezeichnet.', 'wp-starter')"
     />
