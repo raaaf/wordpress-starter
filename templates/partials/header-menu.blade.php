@@ -9,6 +9,7 @@
     $showCta = $showCta && !$isLandingPage;
     $showPrimary = $showCta && is_array($headerCta) && !empty($headerCta['url']);
     $showSecondary = $showCta && is_array($headerCtaSecondary) && !empty($headerCtaSecondary['url']);
+    $showThemeSwitcher = (bool) \WordpressStarter\Acf\Fields::option('header_theme_switcher', true);
 @endphp
 
 <div x-data="navigation" @keydown.window="handleKeydown($event)" class="relative">
@@ -44,6 +45,13 @@
                 </div>
             @endunless
         </div>
+
+        <div class="flex items-center gap-2 md:gap-3">
+        {{-- Colour scheme switcher (icons), all widths; the partial renders
+             nothing unless the colour scheme option follows the system. --}}
+        @if($showThemeSwitcher)
+            @include('partials.theme-switcher', ['compact' => true])
+        @endif
 
         {{-- Mobile menu button - visible below md --}}
         @unless($isLandingPage)
@@ -88,6 +96,7 @@
                 @endif
             </div>
         @endif
+        </div>
     </div>
 
     {{-- Mobile navigation --}}

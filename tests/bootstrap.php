@@ -595,9 +595,21 @@ if (!function_exists('wp_get_attachment_metadata')) {
 }
 
 if (!function_exists('wp_get_attachment_image_src')) {
-    function wp_get_attachment_image_src(int $attachmentId, string $size = 'thumbnail'): array|false
+    /**
+     * @param string|array{0: int, 1: int} $size An array size is looked up as "WxH".
+     */
+    function wp_get_attachment_image_src(int $attachmentId, string|array $size = 'thumbnail'): array|false
     {
-        return $GLOBALS['wp_mock_attachments'][$attachmentId][$size] ?? false;
+        $key = is_array($size) ? $size[0] . 'x' . $size[1] : $size;
+
+        return $GLOBALS['wp_mock_attachments'][$attachmentId][$key] ?? false;
+    }
+}
+
+if (!function_exists('wp_get_attachment_url')) {
+    function wp_get_attachment_url(int $attachmentId = 0): string|false
+    {
+        return $GLOBALS['wp_mock_attachments'][$attachmentId]['full'][0] ?? false;
     }
 }
 
@@ -1251,7 +1263,10 @@ if (!function_exists('add_settings_error')) {
 
 // Image functions
 if (!function_exists('wp_get_attachment_image_url')) {
-    function wp_get_attachment_image_url(int $attachmentId, string $size = 'thumbnail'): string|false
+    /**
+     * @param string|array{0: int, 1: int} $size
+     */
+    function wp_get_attachment_image_url(int $attachmentId, string|array $size = 'thumbnail'): string|false
     {
         $src = wp_get_attachment_image_src($attachmentId, $size);
 

@@ -355,6 +355,16 @@ class Options
                 ),
                 array_merge(
                     FieldDefinitions::trueFalseField(
+                        'field_options_header_theme_switcher',
+                        __('Farbschema-Umschalter anzeigen', 'wp-starter'),
+                        'header_theme_switcher',
+                        true,
+                        __('Zeigt im Header einen Umschalter für Hell, Dunkel und System. Nur sichtbar, wenn das Farbschema auf „Systemeinstellung folgen“ steht.', 'wp-starter'),
+                    ),
+                    ['wrapper' => ['width' => '50']],
+                ),
+                array_merge(
+                    FieldDefinitions::trueFalseField(
                         'field_options_header_cta_show',
                         __('CTA-Button anzeigen', 'wp-starter'),
                         'header_cta_show',

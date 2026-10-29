@@ -88,6 +88,9 @@ msgstr "1/3 + 2/3 columns"
 msgid "2/3 + 1/3 Spalten"
 msgstr "2/3 + 1/3 columns"
 
+msgid "<code>x-grid</code> mit vier Spalten. <code>x-section</code> rahmt jeden Abschnitt dieser Seite, <code>x-prose</code> die Fließtextbereiche der Flexible-Layouts."
+msgstr "<code>x-grid</code> with four columns. <code>x-section</code> frames every section of this page, <code>x-prose</code> the body text areas of the flexible layouts."
+
 msgid "<strong>Cookie-freie Website</strong><br>Dieses Theme verwendet ausschließlich DSGVO-konforme Analytics ohne Cookies. Kein Cookie-Banner erforderlich!"
 msgstr "<strong>Cookie-free website</strong><br>This theme only uses GDPR-compliant analytics without cookies. No cookie banner required!"
 
@@ -157,6 +160,9 @@ msgstr "Absolute path on the server, e.g. /documents/"
 msgid "Abstand"
 msgstr "Spacing"
 
+msgid "Abstände"
+msgstr "Spacing"
+
 msgid "Abwechselnde Hintergrundfarben für bessere Lesbarkeit."
 msgstr "Alternating background colours for better readability."
 
@@ -210,6 +216,9 @@ msgstr "Enabled"
 
 msgid "Aktuell sind keine zukünftigen Termine eingetragen."
 msgstr "There are no upcoming events at the moment."
+
+msgid "Akzent-Link"
+msgstr "Accent link"
 
 msgid "Akzentfarbe"
 msgstr "Accent colour"
@@ -304,6 +313,12 @@ msgstr "Type of event"
 msgid "Attribute: %s"
 msgstr "Attributes: %s"
 
+msgid "Auf der Markenfläche"
+msgstr "On the brand surface"
+
+msgid "Auf der inversen Fläche"
+msgstr "On the inverse surface"
+
 msgid "Auf- und zuklappbare Elemente unter dem Bild."
 msgstr "Collapsible items below the image."
 
@@ -393,6 +408,9 @@ msgstr "For a Hetzner Storage Box: your main user, e.g. u123456, or a sub-user."
 
 msgid "Beim Laden werden Daten an %s übertragen."
 msgstr "Loading sends data to %s."
+
+msgid "Beispieltext"
+msgstr "Sample text"
 
 msgid "Beitrags-Liste"
 msgstr "Post list"
@@ -577,6 +595,9 @@ msgstr "Please enter a valid email address."
 msgid "Bitte gib eine gültige URL ein."
 msgstr "Please enter a valid URL."
 
+msgid "Bitte korrigier diese Eingabe."
+msgstr "Please correct this entry."
+
 msgid "Bitte melde dich an, um auf den internen Bereich zuzugreifen."
 msgstr "Please log in to access the members area."
 
@@ -591,6 +612,9 @@ msgstr "Please only use letters, digits, underscore, hyphen and square brackets.
 
 msgid "Bitte prüf die markierten Felder."
 msgstr "Please check the marked fields."
+
+msgid "Bitte prüf diese Angabe."
+msgstr "Please check this entry."
 
 msgid "Bitte stimm der Verarbeitung deiner Daten zu."
 msgstr "Please agree to the processing of your data."
@@ -612,6 +636,9 @@ msgstr "Please choose a valid date."
 
 msgid "Bitte wähle eine gültige Uhrzeit."
 msgstr "Please choose a valid time."
+
+msgid "Bitte wählen"
+msgstr "Please choose"
 
 msgid "Blendet Navigation, Brotkrumen, Fußnavigation und Social-Links aus. Logo, Kontakt und rechtliche Links bleiben standardmäßig sichtbar."
 msgstr "Hides navigation, breadcrumbs, footer navigation and social links. Logo, contact and legal links stay visible by default."
@@ -790,6 +817,9 @@ msgstr "Date"
 msgid "Deaktivieren um den internen Bereich komplett auszuschalten — keine geschützten Seiten, kein Login."
 msgstr "Disable to switch the members area off completely: no protected pages, no login."
 
+msgid "Deaktiviert"
+msgstr "Disabled"
+
 msgid "Definiere die Spalten der Tabelle."
 msgstr "Define the columns of the table."
 
@@ -894,6 +924,9 @@ msgstr "Subtle"
 
 msgid "Dicke Linie darunter"
 msgstr "Thick line below"
+
+msgid "Die Aktion war erfolgreich."
+msgstr "The action was successful."
 
 msgid "Die Anmeldung benötigt JavaScript."
 msgstr "Login needs JavaScript."
@@ -1078,6 +1111,9 @@ msgstr "Dark (dark mode)"
 msgid "Dunkel (Invers)"
 msgstr "Dark (inverse)"
 
+msgid "Dunkler Link"
+msgstr "Dark link"
+
 msgid "E-Mail"
 msgstr "Email"
 
@@ -1095,6 +1131,12 @@ msgstr "Corner in which the button floats. At the top it sits right below the pa
 
 msgid "Ein Fehler ist aufgetreten."
 msgstr "An error occurred."
+
+msgid "Ein Hinweis mit neutraler Information."
+msgstr "A notice with neutral information."
+
+msgid "Ein Hinweis unter dem Feld."
+msgstr "A hint below the field."
 
 msgid "Ein Host pro Zeile, ohne https:// und ohne Pfad. Internationalisierte Hosts müssen in Punycode-Form (xn--...) eingetragen werden. Der eigene Host der Seite ist nie erlaubt."
 msgstr "One host per line, without https:// and without a path. Internationalised hosts must be entered in punycode form (xn--...). The site's own host is never allowed."
@@ -1252,6 +1294,9 @@ msgstr "There are no posts in this section yet."
 msgid "Es sind noch keine Inhalte vorhanden."
 msgstr "There is no content yet."
 
+msgid "Etwas ist schiefgelaufen."
+msgstr "Something went wrong."
+
 msgid "Exportiere Design-Tokens aus Figma, lade sie hier hoch und generiere das CSS. Dies ist der empfohlene Weg für konsistente Design-Systeme."
 msgstr "Export design tokens from Figma, upload them here and generate the CSS. This is the recommended way for consistent design systems."
 
@@ -1282,8 +1327,14 @@ msgstr "Colour for warnings and notices."
 msgid "Farben für Feedback und Statusmeldungen. Light/Dark-Varianten werden automatisch generiert."
 msgstr "Colours for feedback and status messages. Light and dark variants are generated automatically."
 
+msgid "Farben, Typografie, Schatten und Abstände, direkt aus den aktiven Design-Tokens gezeichnet."
+msgstr "Colours, typography, shadows and spacing, drawn straight from the active design tokens."
+
 msgid "Farbschema"
 msgstr "Colour scheme"
+
+msgid "Farbschema-Umschalter anzeigen"
+msgstr "Show colour scheme switcher"
 
 msgid "Favicon"
 msgstr "Favicon"
@@ -1318,6 +1369,9 @@ msgstr "Error - try again"
 msgid "Fehler bei der Token-Transformation."
 msgstr "Error during token transformation."
 
+msgid "Fehlerzustand"
+msgstr "Error state"
+
 msgid "Fehlgeschlagen"
 msgstr "Failed"
 
@@ -1351,6 +1405,12 @@ msgstr "Company name"
 msgid "Firmenname anzeigen"
 msgstr "Show company name"
 
+msgid "Flächen"
+msgstr "Surfaces"
+
+msgid "Fokus"
+msgstr "Focus"
+
 msgid "Folge uns"
 msgstr "Follow us"
 
@@ -1371,6 +1431,9 @@ msgstr "Footer text"
 
 msgid "Formular"
 msgstr "Form"
+
+msgid "Formular-Elemente"
+msgstr "Form elements"
 
 msgid "Formular-ID"
 msgstr "Form ID"
@@ -1447,6 +1510,9 @@ msgstr "Filled"
 msgid "Gemeinsames Passwort"
 msgstr "Shared password"
 
+msgid "Gerendert aus den Blade-Komponenten selbst. Was hier steht, ist der aktuelle Stand."
+msgstr "Rendered from the Blade components themselves. What you see here is the current state."
+
 msgid "Geschützt"
 msgstr "Protected"
 
@@ -1500,6 +1566,9 @@ msgstr "Size"
 
 msgid "Größe des Buttons."
 msgstr "Size of the button."
+
+msgid "Größen. Sichtbar 32, 40 und 48 Pixel hoch; die Trefferfläche misst am Finger überall mindestens 44 Pixel."
+msgstr "Sizes. Visibly 32, 40 and 48 pixels tall; on touch the target is at least 44 pixels everywhere."
 
 msgid "H2-Überschrift. Nutze [br] für Zeilenumbrüche."
 msgstr "H2 heading. Use [br] for line breaks."
@@ -1831,6 +1900,15 @@ msgstr "Add card"
 msgid "Karte laden"
 msgstr "Load map"
 
+msgid "Karte mit Hintergrundfarbe und Rahmen."
+msgstr "Card with background colour and border."
+
+msgid "Karte mit Rahmen und leichtem Schatten."
+msgstr "Card with border and a light shadow."
+
+msgid "Karte ohne Rahmen, die über den Schatten steht."
+msgstr "Card without a border that stands out through its shadow."
+
 msgid "Karte wird geladen..."
 msgstr "Loading map..."
 
@@ -1942,6 +2020,9 @@ msgstr "Click or press Enter to enlarge"
 msgid "Kompakt"
 msgstr "Compact"
 
+msgid "Komponenten"
+msgstr "Components"
+
 msgid "Konnte %s nicht speichern"
 msgstr "Could not save %s"
 
@@ -2038,6 +2119,9 @@ msgstr "Upload an MP4, WebM or OGG file."
 msgid "Layout"
 msgstr "Layout"
 
+msgid "Layout-Helfer"
+msgstr "Layout helpers"
+
 msgid "Leer lassen für „Anmelden“."
 msgstr "Leave empty for \"Log in\"."
 
@@ -2094,6 +2178,9 @@ msgstr "LinkedIn"
 
 msgid "Links neben der Tabelle"
 msgstr "Left of the table"
+
+msgid "Links und Icons"
+msgstr "Links and icons"
 
 msgid "Linksbündig"
 msgstr "Left aligned"
@@ -2188,6 +2275,12 @@ msgstr "Several pages qualify as the styleguide. Open the right page and select 
 msgid "Mehrere gleichzeitig offen"
 msgstr "Several open at once"
 
+msgid "Mehrzeilig"
+msgstr "Multi-line"
+
+msgid "Mehrzeiliger Text..."
+msgstr "Multi-line text..."
+
 msgid "Menü"
 msgstr "Menu"
 
@@ -2196,6 +2289,12 @@ msgstr "Close menu"
 
 msgid "Menü öffnen"
 msgstr "Open menu"
+
+msgid "Mit Icon"
+msgstr "With icon"
+
+msgid "Mit Punkt"
+msgstr "With dot"
 
 msgid "Mit Rahmen"
 msgstr "With border"
@@ -2698,6 +2797,18 @@ msgstr "Source"
 msgid "Quelle (optional)"
 msgstr "Source (optional)"
 
+msgid "Radien"
+msgstr "Radii"
+
+msgid "Radio eins"
+msgstr "Radio one"
+
+msgid "Radio zwei"
+msgstr "Radio two"
+
+msgid "Rahmen"
+msgstr "Borders"
+
 msgid "Rahmen anzeigen"
 msgstr "Show border"
 
@@ -2793,6 +2904,12 @@ msgstr "SVG uploads are only allowed for administrators."
 
 msgid "Sanfte Einblend-Animationen beim Scrollen. Automatisch deaktiviert bei „reduzierte Bewegung\"."
 msgstr "Gentle fade-in animations while scrolling. Disabled automatically with \"reduced motion\"."
+
+msgid "Schalter"
+msgstr "Switch"
+
+msgid "Schatten"
+msgstr "Shadows"
 
 msgid "Schlagwort: %s"
 msgstr "Tag: %s"
@@ -3163,6 +3280,12 @@ msgstr "Text alignment of the section header."
 msgid "Textblock"
 msgstr "Text block"
 
+msgid "Textfarben"
+msgstr "Text colours"
+
+msgid "Textfeld"
+msgstr "Text field"
+
 msgid "Textspalte"
 msgstr "Text column"
 
@@ -3247,6 +3370,9 @@ msgstr "Unknown source type."
 msgid "Unbekannter Token-Typ"
 msgstr "Unknown token type"
 
+msgid "Ungültig"
+msgstr "Invalid"
+
 msgid "Ungültige Anfrage."
 msgstr "Invalid request."
 
@@ -3325,6 +3451,9 @@ msgstr "Available"
 msgid "Verfügbare Dokumente"
 msgstr "Available documents"
 
+msgid "Verläufe"
+msgstr "Gradients"
+
 msgid "Verstrichene Zeit:"
 msgstr "Elapsed time:"
 
@@ -3396,6 +3525,9 @@ msgstr "Full name."
 
 msgid "Vor Ort"
 msgstr "On site"
+
+msgid "Vorausgewählt"
+msgstr "Preselected"
 
 msgid "Vorher"
 msgstr "Before"
@@ -3624,6 +3756,9 @@ msgstr "Shows a subtle border around the image."
 
 msgid "Zeigt einen kurzen Textauszug an."
 msgstr "Shows a short excerpt."
+
+msgid "Zeigt im Header einen Umschalter für Hell, Dunkel und System. Nur sichtbar, wenn das Farbschema auf „Systemeinstellung folgen“ steht."
+msgstr "Shows a switcher for light, dark and system in the header. Only visible when the colour scheme is set to \"Follow system setting\"."
 
 msgid "Zeigt über den Paketen einen Umschalter. Pakete ohne Jahrespreis behalten ihren Monatspreis."
 msgstr "Shows a switch above the plans. Plans without a yearly price keep their monthly price."
@@ -3978,6 +4113,9 @@ msgstr "© {year} Company name. All rights reserved."
 
 msgid "Älteste zuerst"
 msgstr "Oldest first"
+
+msgid "Über die Breite"
+msgstr "Full width"
 
 msgid "Übergeordnete %s"
 msgstr "Parent %s"

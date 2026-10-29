@@ -501,11 +501,10 @@ JS;
      */
     private function localizeIconData(): void
     {
-        add_action('admin_enqueue_scripts', function (string $hook): void {
-            if (!str_contains($hook, 'post') && $hook !== 'post.php' && $hook !== 'post-new.php') {
-                return;
-            }
-
+        // Every admin screen: the button sits on every TinyMCE (mce_buttons), the
+        // ACF options pages included. The inline script only prints where the
+        // "editor" script is enqueued, so other screens get nothing.
+        add_action('admin_enqueue_scripts', function (): void {
             $labels = array_filter(
                 \WordpressStarter\Acf\FieldDefinitions::getThemeIcons(),
                 fn(string $key) => $key !== '',

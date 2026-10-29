@@ -39,20 +39,16 @@ class BrandingServiceProvider extends ServiceProvider
      */
     private function addFaviconSupport(): void
     {
-        // Override WordPress site icon with ACF favicon
+        // Site icon URLs: the ACF favicon wins over the core site icon, and a
+        // sub-size in another format than the upload is replaced by the original.
         add_filter('get_site_icon_url', function (string $url, int $size, int $blogId): string {
-            if (!function_exists('get_field')) {
+            $faviconId = function_exists('get_field') ? (int) \WordpressStarter\Acf\Fields::option('site_favicon', 0) : 0;
+            $iconId = $faviconId ?: (int) get_option('site_icon', 0);
+            if (!$iconId) {
                 return $url;
             }
 
-            $faviconId = \WordpressStarter\Acf\Fields::option('site_favicon');
-            if (!$faviconId) {
-                return $url;
-            }
-
-            $faviconUrl = wp_get_attachment_image_url($faviconId, [$size, $size]);
-
-            return $faviconUrl ?: $url;
+            return self::iconUrl($iconId, $size) ?: $url;
         }, 10, 3);
 
         // Add favicon meta tags if ACF favicon is set
@@ -81,7 +77,7 @@ class BrandingServiceProvider extends ServiceProvider
             ];
 
             foreach ($faviconSizes as $size => $attrs) {
-                $faviconUrl = wp_get_attachment_image_url($faviconId, [$size, $size]);
+                $faviconUrl = self::iconUrl( (int) $faviconId, $size);
                 if (!$faviconUrl) {
                     continue;
                 }
@@ -198,11 +194,40 @@ class BrandingServiceProvider extends ServiceProvider
             $icons[$image[0]] = [
                 'src' => $image[0],
                 'sizes' => $image[1] . 'x' . $image[2],
-                'type' => (string) ( get_post_mime_type($attachmentId) ?: 'image/png' ),
+                // Type of the served file: sub-sizes of a PNG upload can be WebP.
+                'type' => self::extension($image[0]) === 'webp' ? 'image/webp' : (string) ( get_post_mime_type($attachmentId) ?: 'image/png' ),
             ];
         }
 
         return array_values($icons);
+    }
+
+    /**
+     * URL of an icon attachment for the given square size. Uploads are turned
+     * into WebP sub-sizes (ImageServiceProvider), but iOS ignores WebP touch
+     * icons and the link tags announce PNG. A sub-size whose format differs
+     * from the original upload is therefore replaced by the original file,
+     * which the browser scales down.
+     */
+    public static function iconUrl(int $attachmentId, int $size): ?string
+    {
+        $original = wp_get_attachment_url($attachmentId);
+        $subSize = wp_get_attachment_image_url($attachmentId, [$size, $size]);
+
+        if (!$subSize) {
+            return $original ?: null;
+        }
+
+        if ($original && self::extension($subSize) !== self::extension($original)) {
+            return $original;
+        }
+
+        return $subSize;
+    }
+
+    private static function extension(string $url): string
+    {
+        return strtolower(pathinfo( (string) parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
     }
 
     /**

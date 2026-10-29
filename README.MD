@@ -223,6 +223,8 @@ border-color: var(--border-default);
 
 Dark mode via `<html data-theme="dark">` or automatically through `prefers-color-scheme`.
 
+With the colour scheme option on "follow system", the header shows an icon switcher for light, dark and system (option "Show colour scheme switcher"). The page template **Design System** (`page-design-system.blade.php`) renders the token and component reference publicly; the **Styleguide** template adds the module gallery and stays visible to editors only.
+
 ## Custom post types
 
 ```php
