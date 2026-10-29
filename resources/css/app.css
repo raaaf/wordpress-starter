@@ -2459,8 +2459,9 @@ html {
 /* Footer nav link styles */
 .footer-nav a {
   display: inline-block;
-  /* WCAG 2.5.8 24px target-size floor; matches .desktop-nav > ul > li > a. */
-  padding: 0.5rem 0;
+  /* WCAG 2.5.8 24px target-size floor (20px line + 2 x 4px), with space-y-1 a
+     32px rhythm; touch devices get the 44px target below. */
+  padding: 0.25rem 0;
   color: var(--text-secondary);
   transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
@@ -2508,7 +2509,7 @@ html {
 /* 44 px finger target for the footer's contact and legal links. Only on
    touch, so the desktop rows stay compact. */
 @media (pointer: coarse) {
-  footer :is(address a, .legal-nav a) {
+  footer :is(address a, .legal-nav a, .footer-nav a) {
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
