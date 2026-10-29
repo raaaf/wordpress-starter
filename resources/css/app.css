@@ -3355,3 +3355,12 @@ html {
 .card > :is(img, picture, figure, :has(> img)) ~ div:last-child {
   flex-grow: 1;
 }
+
+/* Colour scheme change (transitionColorScheme in resources/js/motion.ts): the
+   new scheme is revealed by a growing clip-path circle, so the default
+   cross-fade of the root snapshots is switched off. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}

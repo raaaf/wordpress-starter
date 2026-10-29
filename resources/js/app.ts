@@ -7,6 +7,12 @@ import { registerMemberAreaComponents } from './member-area';
 import { createStatsCounterCore, type StatsCounterCore } from './stats-counter';
 import { initColumnHeadingAlignment } from './column-headings';
 import { createJumpMenuComponent } from './jump-menu';
+import {
+  INTRO_DURATION_MS,
+  introPosition,
+  prefersReducedMotion,
+  transitionColorScheme,
+} from './motion';
 
 // Declare localized strings from WordPress (object name is fixed as 'themeStrings' for all themes)
 declare const themeStrings:
@@ -382,8 +388,11 @@ export async function initGalleryZoom(): Promise<void> {
 // Before/After Slider Component
 // ============================================
 
-export interface BeforeAfterComponent {
+export interface BeforeAfterComponent extends AlpineMagics {
   position: number;
+  intro: boolean;
+  init(): void;
+  stopIntro(): void;
   handleMouseDown(event: MouseEvent): void;
   handleTouchStart(event: TouchEvent): void;
 }
@@ -393,12 +402,58 @@ function calculateSliderPosition(clientX: number, rect: DOMRect): number {
   return Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
 }
 
-export function createBeforeAfterComponent(): BeforeAfterComponent {
+export function createBeforeAfterComponent(intro = false): BeforeAfterComponent {
+  let frame = 0;
+  let observer: IntersectionObserver | null = null;
+
   return {
+    ...({} as AlpineMagics),
     position: 50,
+    intro,
+
+    // Intro: once the slider is half in view, the handle sweeps 50 -> 15 -> 85 -> 50
+    // to show that it moves. Skipped with reduced motion, stopped by any input.
+    init() {
+      if (
+        !this.intro ||
+        prefersReducedMotion() ||
+        typeof IntersectionObserver === 'undefined' ||
+        !this.$el
+      ) {
+        return;
+      }
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          observer?.disconnect();
+          observer = null;
+
+          const start = performance.now();
+          const step = (now: number) => {
+            const progress = (now - start) / INTRO_DURATION_MS;
+            this.position = introPosition(progress);
+            frame = progress < 1 ? requestAnimationFrame(step) : 0;
+          };
+          frame = requestAnimationFrame(step);
+        },
+        { threshold: 0.5 }
+      );
+      observer.observe(this.$el);
+    },
+
+    stopIntro() {
+      observer?.disconnect();
+      observer = null;
+      if (frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    },
 
     handleMouseDown(event: MouseEvent) {
       event.preventDefault();
+      this.stopIntro();
       // Find the main container (the element with x-data)
       const handle = (event.target as HTMLElement).closest('.before-after-handle');
       const container = handle?.parentElement;
@@ -421,6 +476,7 @@ export function createBeforeAfterComponent(): BeforeAfterComponent {
 
     handleTouchStart(event: TouchEvent) {
       event.preventDefault();
+      this.stopIntro();
       // Find the main container (the element with x-data)
       const handle = (event.target as HTMLElement).closest('.before-after-handle');
       const container = handle?.parentElement;
@@ -440,6 +496,71 @@ export function createBeforeAfterComponent(): BeforeAfterComponent {
 
       document.addEventListener('touchmove', onMove as EventListener);
       document.addEventListener('touchend', onEnd);
+    },
+  };
+}
+
+// ============================================
+// Colour Scheme Switcher
+// ============================================
+
+export type ColorMode = 'system' | 'light' | 'dark';
+
+export interface ThemeSwitcherComponent extends AlpineMagics {
+  storageKey: string;
+  mode: ColorMode;
+  werte: ColorMode[];
+  apply(next: ColorMode, origin?: HTMLElement | null): void;
+  waehlen(index: number): void;
+}
+
+/**
+ * Three-way colour scheme switcher (templates/partials/theme-switcher.blade.php).
+ * The storage key comes from data-theme-storage-key on <html>, shared with the
+ * anti-flash script in header.blade.php. The change is revealed as a circle
+ * from the pressed button (transitionColorScheme), instantly without motion.
+ */
+export function createThemeSwitcherComponent(): ThemeSwitcherComponent {
+  const storageKey = document.documentElement.dataset.themeStorageKey || 'wp-starter-theme';
+  let stored: string | null;
+  try {
+    stored = localStorage.getItem(storageKey);
+  } catch {
+    stored = null;
+  }
+
+  return {
+    ...({} as AlpineMagics),
+    storageKey,
+    mode: stored === 'light' || stored === 'dark' ? stored : 'system',
+    werte: ['system', 'light', 'dark'],
+
+    apply(next: ColorMode, origin: HTMLElement | null = null) {
+      if (next === this.mode) return;
+
+      transitionColorScheme(() => {
+        this.mode = next;
+        try {
+          if (next === 'system') {
+            localStorage.removeItem(this.storageKey);
+          } else {
+            localStorage.setItem(this.storageKey, next);
+          }
+        } catch {
+          // Storage blocked: the choice still applies to this page view.
+        }
+        if (next === 'system') {
+          document.documentElement.removeAttribute('data-theme');
+        } else {
+          document.documentElement.setAttribute('data-theme', next);
+        }
+      }, origin);
+    },
+
+    waehlen(index: number) {
+      const button = (this.$refs.optionen as HTMLElement).children[index] as HTMLElement;
+      this.apply(this.werte[index], button);
+      button.focus();
     },
   };
 }
@@ -524,6 +645,7 @@ Alpine.plugin(intersect);
 Alpine.data('navigation', createNavigationComponent);
 Alpine.data('statsCounter', (target: number) => createStatsCounterComponent(target));
 Alpine.data('beforeAfterSlider', createBeforeAfterComponent);
+Alpine.data('themeSwitcher', createThemeSwitcherComponent);
 Alpine.data('styleguideModul', createStyleguideModulComponent);
 Alpine.data('jumpMenu', createJumpMenuComponent);
 

@@ -46,28 +46,10 @@
              uebernimmt. --}}
         x-cloak
         x-ref="optionen"
-        x-data="{
-            {{-- Storage key comes from data-theme-storage-key on <html> (set in
-                 header.blade.php), the single source shared with its inline
-                 anti-flash script. --}}
-            storageKey: document.documentElement.dataset.themeStorageKey || 'wp-starter-theme',
-            mode: localStorage.getItem(document.documentElement.dataset.themeStorageKey || 'wp-starter-theme') || 'system',
-            werte: ['system', 'light', 'dark'],
-            apply(next) {
-                this.mode = next;
-                if (next === 'system') {
-                    localStorage.removeItem(this.storageKey);
-                    document.documentElement.removeAttribute('data-theme');
-                } else {
-                    localStorage.setItem(this.storageKey, next);
-                    document.documentElement.setAttribute('data-theme', next);
-                }
-            },
-            waehlen(index) {
-                this.apply(this.werte[index]);
-                this.$refs.optionen.children[index].focus();
-            }
-        }"
+        {{-- Logic in createThemeSwitcherComponent (resources/js/app.ts): storage
+             key from data-theme-storage-key on <html>, circle reveal from the
+             pressed button, instant switch with reduced motion. --}}
+        x-data="themeSwitcher"
         {{-- Pfeiltasten mit Umlauf statt nur Klick: sonst ist per Tastatur nur
              die gerade aktive Option erreichbar (WCAG 2.1.1). --}}
         x-on:keydown.arrow-right.prevent="waehlen((werte.indexOf(mode) + 1) % werte.length)"
@@ -87,7 +69,7 @@
                 tabindex="{{ $value === 'system' ? '0' : '-1' }}"
                 x-bind:aria-checked="mode === '{{ $value }}' ? 'true' : 'false'"
                 x-bind:tabindex="mode === '{{ $value }}' ? '0' : '-1'"
-                x-on:click="apply('{{ $value }}')"
+                x-on:click="apply('{{ $value }}', $el)"
                 {{-- font-semibold ist der farbunabhaengige Hinweis auf die
                      ausgewaehlte Option, aria-checked traegt sie fuer AT. --}}
                 @if($compact)

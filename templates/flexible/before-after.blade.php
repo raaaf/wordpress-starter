@@ -9,8 +9,10 @@
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
-    $labelBefore = get_sub_field('label_before') ?: 'Vorher';
-    $labelAfter = get_sub_field('label_after') ?: 'Nachher';
+    $labelBefore = get_sub_field('label_before') ?: __('Vorher', 'wp-starter');
+    $labelAfter = get_sub_field('label_after') ?: __('Nachher', 'wp-starter');
+    // Unset (layouts saved before the field existed) counts as on.
+    $intro = get_sub_field('intro_animation') !== false;
     $background = get_sub_field('background_color') ?: 'primary';
     $uniqueId = 'before-after-' . uniqid();
 
@@ -33,7 +35,7 @@
     @if($hasImageBefore && $hasImageAfter)
         <div
             id="{{ $uniqueId }}"
-            x-data="beforeAfterSlider()"
+            x-data="beforeAfterSlider({{ $intro ? 'true' : 'false' }})"
             class="relative select-none"
         >
             {{-- Bildbereich traegt das overflow-hidden jetzt selbst, nicht mehr der
@@ -67,7 +69,8 @@
                 :aria-valuenow="Math.round(position)"
                 aria-valuemin="0"
                 aria-valuemax="100"
-                :aria-valuetext="Math.round(position) + ' Prozent Nachher'"
+                :aria-valuetext="Math.round(position) + '{{ esc_js(__(' Prozent Nachher', 'wp-starter')) }}'"
+                @keydown="stopIntro()"
                 aria-label="{{ __('Bildvergleich: Nutze die Pfeiltasten, um zwischen Vorher und Nachher zu wechseln', 'wp-starter') }}"
                 class="group absolute inset-y-0 w-12 -translate-x-1/2 cursor-ew-resize before-after-handle focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] rounded-full"
                 :style="'left: ' + position + '%'"

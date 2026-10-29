@@ -932,14 +932,17 @@ class Options
             );
             $statusMessage = self::renderNoticeBox(
                 'error',
-                '⚠ Styleguide-Seite liegt im Papierkorb',
+                '⚠ ' . esc_html__('Styleguide-Seite liegt im Papierkorb', 'wp-starter'),
                 sprintf(
                     '<p style="margin: 10px 0 0 0;">
-                        <a href="%s" class="button button-primary">Wiederherstellen</a>
-                        <a href="%s" class="button" onclick="return confirm(\'Styleguide-Seite endgültig löschen?\');">Endgültig löschen</a>
+                        <a href="%s" class="button button-primary">%s</a>
+                        <a href="%s" class="button" onclick="return confirm(\'%s\');">%s</a>
                     </p>',
                     esc_url($restoreUrl),
+                    esc_html__('Wiederherstellen', 'wp-starter'),
                     esc_url($deleteUrl),
+                    esc_js(__('Styleguide-Seite endgültig löschen?', 'wp-starter')),
+                    esc_html__('Endgültig löschen', 'wp-starter'),
                 ),
             );
         } elseif ($resolvedPageId > 0) {
@@ -947,14 +950,16 @@ class Options
             $viewUrl = get_permalink($resolvedPageId);
             $statusMessage = self::renderNoticeBox(
                 'success',
-                '✓ Styleguide-Seite existiert',
+                '✓ ' . esc_html__('Styleguide-Seite existiert', 'wp-starter'),
                 sprintf(
                     '<p style="margin: 10px 0 0 0; display: flex; gap: 8px; flex-wrap: wrap;">
-                        <a href="%s" class="button">Bearbeiten</a>
-                        <a href="%s" class="button" target="_blank">Ansehen</a>
+                        <a href="%s" class="button">%s</a>
+                        <a href="%s" class="button" target="_blank">%s</a>
                     </p>',
                     esc_url($editUrl ?? ''),
+                    esc_html__('Bearbeiten', 'wp-starter'),
                     esc_url($viewUrl ?? ''),
+                    esc_html__('Ansehen', 'wp-starter'),
                 ),
             );
         } else {
@@ -969,12 +974,13 @@ class Options
             );
             $statusMessage = self::renderNoticeBox(
                 'warning',
-                'Keine Styleguide-Seite vorhanden',
+                esc_html__('Keine Styleguide-Seite vorhanden', 'wp-starter'),
                 sprintf(
                     '<p style="margin: 10px 0 0 0;">
-                        <a href="%s" class="button button-primary">Styleguide-Seite erstellen</a>
+                        <a href="%s" class="button button-primary">%s</a>
                     </p>',
                     esc_url($createUrl),
+                    esc_html__('Styleguide-Seite erstellen', 'wp-starter'),
                 ),
             );
         }
@@ -986,13 +992,17 @@ class Options
         );
         $regenerateMessage = sprintf(
             '<div style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
-                <p style="margin: 0;"><strong>Styleguide neu generieren</strong></p>
-                <p style="margin: 10px 0; color: #6c757d;">Erstellt die Styleguide-Seite neu mit allen aktuellen Design-Tokens und Block-Beispielen. Die bestehende Seite wird ersetzt.</p>
+                <p style="margin: 0;"><strong>%s</strong></p>
+                <p style="margin: 10px 0; color: #6c757d;">%s</p>
                 <p style="margin: 0;">
-                    <a href="%s" class="button" onclick="return confirm(\'Styleguide-Seite wirklich neu erstellen? Die bestehende Seite wird gelöscht.\');">Neu generieren</a>
+                    <a href="%s" class="button" onclick="return confirm(\'%s\');">%s</a>
                 </p>
             </div>',
+            esc_html__('Styleguide neu generieren', 'wp-starter'),
+            esc_html__('Erstellt die Styleguide-Seite neu mit allen aktuellen Design-Tokens und Block-Beispielen. Die bestehende Seite wird ersetzt.', 'wp-starter'),
             esc_url($regenerateUrl),
+            esc_js(__('Styleguide-Seite wirklich neu erstellen? Die bestehende Seite wird gelöscht.', 'wp-starter')),
+            esc_html__('Neu generieren', 'wp-starter'),
         );
 
         // Content Setup section
@@ -1005,24 +1015,28 @@ class Options
         if ($contentSetupComplete) {
             $contentSetupMessage = self::renderNoticeBox(
                 'success',
-                '✓ Content-Setup wurde bereits ausgeführt',
+                '✓ ' . esc_html__('Content-Setup wurde bereits ausgeführt', 'wp-starter'),
                 sprintf(
                     '<p style="margin: 10px 0 0 0;">
-                        <a href="%s" class="button" onclick="return confirm(\'Content-Setup wirklich erneut ausführen? Bestehende Seiten bleiben erhalten, fehlende werden erstellt.\');">Erneut ausführen</a>
+                        <a href="%s" class="button" onclick="return confirm(\'%s\');">%s</a>
                     </p>',
                     esc_url($contentSetupUrl),
+                    esc_js(__('Content-Setup wirklich erneut ausführen? Bestehende Seiten bleiben erhalten, fehlende werden erstellt.', 'wp-starter')),
+                    esc_html__('Erneut ausführen', 'wp-starter'),
                 ),
             );
         } else {
             $contentSetupMessage = self::renderNoticeBox(
                 'warning',
-                'Content-Setup wurde noch nicht ausgeführt',
+                esc_html__('Content-Setup wurde noch nicht ausgeführt', 'wp-starter'),
                 sprintf(
-                    '<p style="margin: 10px 0; color: #856404;">Erstellt Standardseiten (Startseite, Über uns, Kontakt, etc.) und richtet Menüs ein.</p>
+                    '<p style="margin: 10px 0; color: #856404;">%s</p>
                     <p style="margin: 10px 0 0 0;">
-                        <a href="%s" class="button button-primary">Content-Setup jetzt ausführen</a>
+                        <a href="%s" class="button button-primary">%s</a>
                     </p>',
+                    esc_html__('Erstellt Standardseiten (Startseite, Über uns, Kontakt, etc.) und richtet Menüs ein.', 'wp-starter'),
                     esc_url($contentSetupUrl),
+                    esc_html__('Content-Setup jetzt ausführen', 'wp-starter'),
                 ),
             );
         }
@@ -1150,29 +1164,39 @@ class Options
         if ($postCount > 0) {
             return self::renderNoticeBox(
                 'success',
-                sprintf('✓ %d Demo-Blogbeiträge vorhanden', $postCount),
+                '✓ ' . esc_html(sprintf(
+                    /* translators: %d: number of demo blog posts */
+                    _n('%d Demo-Blogbeitrag vorhanden', '%d Demo-Blogbeiträge vorhanden', $postCount, 'wp-starter'),
+                    $postCount,
+                )),
                 sprintf(
                     '<div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">
-                        <a href="%s" class="button button-primary">5 weitere generieren</a>
-                        <a href="%s" class="button" onclick="return confirm(\'Alle Demo-Beiträge wirklich löschen?\');">Alle Demo-Beiträge löschen</a>
-                        <a href="%s" class="button">Beiträge ansehen</a>
+                        <a href="%s" class="button button-primary">%s</a>
+                        <a href="%s" class="button" onclick="return confirm(\'%s\');">%s</a>
+                        <a href="%s" class="button">%s</a>
                     </div>',
                     esc_url($generateUrl),
+                    esc_html__('5 weitere generieren', 'wp-starter'),
                     esc_url($deleteUrl),
+                    esc_js(__('Alle Demo-Beiträge wirklich löschen?', 'wp-starter')),
+                    esc_html__('Alle Demo-Beiträge löschen', 'wp-starter'),
                     esc_url(admin_url('edit.php')),
+                    esc_html__('Beiträge ansehen', 'wp-starter'),
                 ),
             );
         }
 
         return self::renderNoticeBox(
             'warning',
-            'Keine Demo-Blogbeiträge vorhanden',
+            esc_html__('Keine Demo-Blogbeiträge vorhanden', 'wp-starter'),
             sprintf(
-                '<p style="margin: 10px 0; color: #856404;">Erstellt 5 Beispiel-Blogbeiträge mit realistischem Inhalt zum Testen.</p>
+                '<p style="margin: 10px 0; color: #856404;">%s</p>
                 <p style="margin: 10px 0 0 0;">
-                    <a href="%s" class="button button-primary">Demo-Beiträge erstellen</a>
+                    <a href="%s" class="button button-primary">%s</a>
                 </p>',
+                esc_html__('Erstellt 5 Beispiel-Blogbeiträge mit realistischem Inhalt zum Testen.', 'wp-starter'),
                 esc_url($generateUrl),
+                esc_html__('Demo-Beiträge erstellen', 'wp-starter'),
             ),
         );
     }

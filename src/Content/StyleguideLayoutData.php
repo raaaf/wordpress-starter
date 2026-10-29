@@ -1185,6 +1185,14 @@ class StyleguideLayoutData
             'background_color' => 'primary',
         ]);
 
+        // Vergleich ohne Intro: der Regler steht von Anfang an still in der Mitte.
+        $catalog[] = $this->layout('before_after', [
+            'image_before' => $this->imageId(3),
+            'image_after' => $this->imageId(4),
+            'intro_animation' => false,
+            'background_color' => 'secondary',
+        ]);
+
         $catalog[] = $this->layout('button', [
             'button' => self::link('Termin vereinbaren', self::DEMO_CONTACT_URL),
             'button_secondary' => self::link('Unterlagen ansehen', 'https://example.org/downloads'),

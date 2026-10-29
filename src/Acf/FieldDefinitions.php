@@ -3827,6 +3827,13 @@ class FieldDefinitions
                 null,
                 ['width' => '50'],
             ),
+            self::trueFalseField(
+                "field_{$prefix}_intro_animation",
+                __('Intro-Animation', 'wp-starter'),
+                'intro_animation',
+                true,
+                __('Der Regler fährt beim ersten Erscheinen einmal hin und her, damit klar ist, dass er sich bewegen lässt. Entfällt bei reduzierter Bewegung und stoppt bei jeder Eingabe.', 'wp-starter'),
+            ),
             ...self::displaySettingsFields($prefix),
         ];
     }

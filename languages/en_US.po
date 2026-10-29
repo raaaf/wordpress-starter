@@ -10,6 +10,9 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Domain: wp-starter\n"
 
+msgid " Prozent Nachher"
+msgstr " percent after"
+
 msgid "%1$s von %2$s installiert"
 msgstr "%1$s of %2$s installed"
 
@@ -17,6 +20,11 @@ msgid "%d Beitrag"
 msgid_plural "%d Beiträge"
 msgstr[0] "%d post"
 msgstr[1] "%d posts"
+
+msgid "%d Demo-Blogbeitrag vorhanden"
+msgid_plural "%d Demo-Blogbeiträge vorhanden"
+msgstr[0] "%d demo blog post available"
+msgstr[1] "%d demo blog posts available"
 
 msgid "%d Ergebnis gefunden"
 msgid_plural "%d Ergebnisse gefunden"
@@ -87,6 +95,9 @@ msgstr "1/3 + 2/3 columns"
 
 msgid "2/3 + 1/3 Spalten"
 msgstr "2/3 + 1/3 columns"
+
+msgid "5 weitere generieren"
+msgstr "Generate 5 more"
 
 msgid "<code>x-grid</code> mit vier Spalten. <code>x-section</code> rahmt jeden Abschnitt dieser Seite, <code>x-prose</code> die Fließtextbereiche der Flexible-Layouts."
 msgstr "<code>x-grid</code> with four columns. <code>x-section</code> frames every section of this page, <code>x-prose</code> the body text areas of the flexible layouts."
@@ -226,6 +237,12 @@ msgstr "Accent colour"
 msgid "Alle %s"
 msgstr "All %s"
 
+msgid "Alle Demo-Beiträge löschen"
+msgstr "Delete all demo posts"
+
+msgid "Alle Demo-Beiträge wirklich löschen?"
+msgstr "Really delete all demo posts?"
+
 msgid "Alle Kategorien"
 msgstr "All categories"
 
@@ -279,6 +296,9 @@ msgstr "Log in"
 
 msgid "Anmeldung fehlgeschlagen."
 msgstr "Login failed."
+
+msgid "Ansehen"
+msgstr "View"
 
 msgid "Ansicht"
 msgstr "View"
@@ -403,6 +423,9 @@ msgstr "Base grey for text, borders and neutral elements."
 msgid "Bau die Seite aus Inhalts-Sektionen zusammen."
 msgstr "Build the page from content sections."
 
+msgid "Bearbeiten"
+msgstr "Edit"
+
 msgid "Bei Hetzner Storage Box: dein Hauptbenutzer, z.B. u123456, oder ein Unterbenutzer."
 msgstr "For a Hetzner Storage Box: your main user, e.g. u123456, or a sub-user."
 
@@ -423,6 +446,9 @@ msgstr "Post type"
 
 msgid "Beiträge"
 msgstr "Posts"
+
+msgid "Beiträge ansehen"
+msgstr "View posts"
 
 msgid "Beliebte %s"
 msgstr "Popular %s"
@@ -724,6 +750,18 @@ msgstr "Container"
 msgid "Content-Setup"
 msgstr "Content setup"
 
+msgid "Content-Setup jetzt ausführen"
+msgstr "Run content setup now"
+
+msgid "Content-Setup wirklich erneut ausführen? Bestehende Seiten bleiben erhalten, fehlende werden erstellt."
+msgstr "Really run the content setup again? Existing pages are kept, missing ones are created."
+
+msgid "Content-Setup wurde bereits ausgeführt"
+msgstr "Content setup has already run"
+
+msgid "Content-Setup wurde noch nicht ausgeführt"
+msgstr "Content setup has not run yet"
+
 msgid "Cookie-Gültigkeit (Stunden)"
 msgstr "Cookie lifetime (hours)"
 
@@ -829,6 +867,9 @@ msgstr "Your browser cannot play this video."
 msgid "Deine Nachricht"
 msgstr "Your message"
 
+msgid "Demo-Beiträge erstellen"
+msgstr "Create demo posts"
+
 msgid "Demo-Inhalte"
 msgstr "Demo content"
 
@@ -852,6 +893,9 @@ msgstr "The customer's name."
 
 msgid "Der Preis inkl. Währung."
 msgstr "The price including currency."
+
+msgid "Der Regler fährt beim ersten Erscheinen einmal hin und her, damit klar ist, dass er sich bewegen lässt. Entfällt bei reduzierter Bewegung und stoppt bei jeder Eingabe."
+msgstr "The handle sweeps back and forth once when it first comes into view, so it is clear that it can be moved. Skipped with reduced motion and stops on any input."
 
 msgid "Der Server hat die Synchronisierung nicht abgeschlossen. Versuche es erneut. Bleibt der Fehler, wende dich an den Administrator."
 msgstr "The server did not finish the sync. Try again. If the error persists, contact the administrator."
@@ -1207,6 +1251,9 @@ msgstr "Recommended size: at least 1920×1080 pixels (16:9)."
 msgid "Empfohlene Größe: mindestens 960×800 Pixel (6:5)."
 msgstr "Recommended size: at least 960×800 pixels (6:5)."
 
+msgid "Endgültig löschen"
+msgstr "Delete permanently"
+
 msgid "Engere Zeilen. Sinnvoll ab etwa zehn Zeilen."
 msgstr "Tighter rows. Useful from about ten rows."
 
@@ -1261,14 +1308,26 @@ msgstr "Allowed hosts"
 msgid "Erlaubte Rollen"
 msgstr "Allowed roles"
 
+msgid "Erneut ausführen"
+msgstr "Run again"
+
 msgid "Erneut versuchen"
 msgstr "Try again"
+
+msgid "Erstellt 5 Beispiel-Blogbeiträge mit realistischem Inhalt zum Testen."
+msgstr "Creates 5 sample blog posts with realistic content for testing."
 
 msgid "Erstellt Beispiel-Blogbeiträge zum Testen des Blog-Layouts."
 msgstr "Creates sample blog posts to test the blog layout."
 
+msgid "Erstellt Standardseiten (Startseite, Über uns, Kontakt, etc.) und richtet Menüs ein."
+msgstr "Creates the default pages (Home, About, Contact, etc.) and sets up the menus."
+
 msgid "Erstellt Standardseiten und richtet die Navigation ein."
 msgstr "Creates default pages and sets up the navigation."
+
+msgid "Erstellt die Styleguide-Seite neu mit allen aktuellen Design-Tokens und Block-Beispielen. Die bestehende Seite wird ersetzt."
+msgstr "Rebuilds the styleguide page with all current design tokens and block examples. The existing page is replaced."
 
 msgid "Ersten Eintrag geöffnet zeigen"
 msgstr "Show first item expanded"
@@ -1846,6 +1905,9 @@ msgstr "The members area is disabled."
 msgid "Interner Bereich — Einstellungen"
 msgstr "Members area — settings"
 
+msgid "Intro-Animation"
+msgstr "Intro animation"
+
 msgid "Invertiert"
 msgstr "Inverted"
 
@@ -1981,6 +2043,9 @@ msgstr "No file stored."
 msgid "Keine Dateien zum Upload ausgewählt."
 msgstr "No files selected for upload."
 
+msgid "Keine Demo-Blogbeiträge vorhanden"
+msgstr "No demo blog posts yet"
+
 msgid "Keine Dokumente gefunden."
 msgstr "No documents found."
 
@@ -1992,6 +2057,9 @@ msgstr "No results found"
 
 msgid "Keine Icons gefunden."
 msgstr "No icons found."
+
+msgid "Keine Styleguide-Seite vorhanden"
+msgstr "No styleguide page yet"
 
 msgid "Keine Treffer"
 msgstr "No matches"
@@ -2394,6 +2462,9 @@ msgstr "Network error. Please try again."
 
 msgid "Neu"
 msgstr "New"
+
+msgid "Neu generieren"
+msgstr "Regenerate"
 
 msgid "Neu installiert und aktiviert"
 msgstr "Newly installed and activated"
@@ -3154,11 +3225,26 @@ msgstr "Styleguide demo video"
 msgid "Styleguide Portrait"
 msgstr "Styleguide portrait"
 
+msgid "Styleguide neu generieren"
+msgstr "Regenerate styleguide"
+
 msgid "Styleguide umstellen"
 msgstr "Switch styleguide"
 
+msgid "Styleguide-Seite endgültig löschen?"
+msgstr "Delete the styleguide page permanently?"
+
 msgid "Styleguide-Seite erstellen"
 msgstr "Create styleguide page"
+
+msgid "Styleguide-Seite existiert"
+msgstr "Styleguide page exists"
+
+msgid "Styleguide-Seite liegt im Papierkorb"
+msgstr "Styleguide page is in the trash"
+
+msgid "Styleguide-Seite wirklich neu erstellen? Die bestehende Seite wird gelöscht."
+msgstr "Really rebuild the styleguide page? The existing page will be deleted."
 
 msgid "Suchbegriff"
 msgstr "Search term"
