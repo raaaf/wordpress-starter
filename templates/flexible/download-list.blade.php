@@ -40,7 +40,7 @@
                                 @if($url !== '')
                                     <a href="{{ esc_url($url) }}"
                                        @if($isExternal) target="_blank" rel="noopener noreferrer" @endif
-                                       class="block min-h-11 py-2 rounded-sm text-content-link hover:text-content-link-hover transition-colors duration-200 focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus-ring)]">
+                                       class="block min-h-11 py-2 rounded-sm text-content-link hover:text-content-link-hover transition-colors duration-200 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
                                         {{-- Titel links, Dateityp-Pill rechts; h-[1lh] zentriert die Pill an der ersten Titelzeile, auch wenn der Titel umbricht. Der Hinweis steht unter dem Titel. --}}
                                         <span class="flex justify-between gap-3">
                                             <span class="underline underline-offset-4 min-w-0">{{ $item['label'] ?? '' }}</span>

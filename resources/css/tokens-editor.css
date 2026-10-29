@@ -12,7 +12,7 @@
  * than dark mode rules in app.css
  *
  * Source: config/design-tokens/*.tokens.json
- * Generated: 2026-10-07T17:26:05.992Z
+ * Generated: 2026-10-29T20:08:29.677Z
  */
 
 /* ============================================
@@ -92,27 +92,27 @@
   --rafael-color-accent-800: #9C3008;
   --rafael-color-accent-900: #742406;
   --rafael-color-ds-surface-ground-light: #FAFAF9;
-  --rafael-color-ds-surface-ground-dark: #08090A;
+  --rafael-color-ds-surface-ground-dark: #000000;
   --rafael-color-ds-surface-elevated-light: #FFFFFF;
-  --rafael-color-ds-surface-elevated-dark: #1C1F23;
+  --rafael-color-ds-surface-elevated-dark: #141414;
   --rafael-color-ds-surface-stone-light: #F4F3F2;
-  --rafael-color-ds-surface-stone-dark: #0F1012;
+  --rafael-color-ds-surface-stone-dark: #070707;
   --rafael-color-ds-surface-stone-deep-light: #E7E5E4;
-  --rafael-color-ds-surface-stone-deep-dark: #16181B;
+  --rafael-color-ds-surface-stone-deep-dark: #0E0E0E;
   --rafael-color-ds-text-primary-light: #1C1917;
-  --rafael-color-ds-text-primary-dark: #FFFFFF;
+  --rafael-color-ds-text-primary-dark: #EDEDED;
   --rafael-color-ds-text-secondary-light: #44403C;
-  --rafael-color-ds-text-secondary-dark: #D0D6E0;
+  --rafael-color-ds-text-secondary-dark: #C2C2C2;
   --rafael-color-ds-text-tertiary-light: #6B6560;
-  --rafael-color-ds-text-tertiary-dark: #9AA3B0;
+  --rafael-color-ds-text-tertiary-dark: #8F8F8F;
   --rafael-color-ds-text-muted-light: #8C8580;
-  --rafael-color-ds-text-muted-dark: #6B7380;
+  --rafael-color-ds-text-muted-dark: #7E7E7E;
   --rafael-color-ds-border-subtle-light: rgba(0, 0, 0, 0.08);
-  --rafael-color-ds-border-subtle-dark: rgba(208, 214, 224, 0.10);
+  --rafael-color-ds-border-subtle-dark: rgba(255, 255, 255, 0.07);
   --rafael-color-ds-border-default-light: rgba(0, 0, 0, 0.10);
-  --rafael-color-ds-border-default-dark: rgba(208, 214, 224, 0.14);
-  --rafael-color-ds-accent-text-light: #C4451D;
-  --rafael-color-ds-accent-text-dark: #FF8A5C;
+  --rafael-color-ds-border-default-dark: rgba(255, 255, 255, 0.10);
+  --rafael-color-ds-accent-text-light: #1C1917;
+  --rafael-color-ds-accent-text-dark: #FF6B35;
   --rafael-color-ds-accent-ink: #1C1917;
   --rafael-color-ds-accent-base: #FF6B35;
   --rafael-color-ds-accent-deep: #D54A1A;
@@ -136,12 +136,12 @@
   --rafael-color-ds-semantic-warning-tint-dark: #2F2515;
   --rafael-color-ds-semantic-danger-tint-light: #F5D9D6;
   --rafael-color-ds-semantic-danger-tint-dark: #2F1919;
-  --rafael-color-ds-button-primary-fill-light: #FBE6DE;
-  --rafael-color-ds-button-primary-fill-dark: #341B12;
-  --rafael-color-ds-button-primary-fill-hover-light: #FBD8CA;
-  --rafael-color-ds-button-primary-fill-hover-dark: #4D2416;
-  --rafael-color-ds-button-primary-label-light: #A83614;
-  --rafael-color-ds-button-primary-label-dark: #FF8A5C;
+  --rafael-color-ds-button-primary-fill-light: #1C1917;
+  --rafael-color-ds-button-primary-fill-dark: #E8E8E6;
+  --rafael-color-ds-button-primary-fill-hover-light: #2E2A27;
+  --rafael-color-ds-button-primary-fill-hover-dark: #F5F5F3;
+  --rafael-color-ds-button-primary-label-light: #FFFFFF;
+  --rafael-color-ds-button-primary-label-dark: #1C1917;
 
   /* Spacing */
   --rafael-spacing-0: 0px;
@@ -180,25 +180,26 @@
   --rafael-font-size-xs: 0.8125rem;
   --rafael-font-size-sm: 0.875rem;
   --rafael-font-size-base: 1rem;
-  --rafael-font-size-lg: clamp(1.0625rem, calc(1.05rem + 0.0625vw), 1.125rem);
-  --rafael-font-size-xl: clamp(1.125rem, calc(1.1rem + 0.125vw), 1.25rem);
-  --rafael-font-size-2xl: clamp(1.25rem, calc(1.175rem + 0.375vw), 1.625rem);
-  --rafael-font-size-3xl: clamp(1.75rem, calc(1.6875rem + 0.3125vw), 2.0625rem);
-  --rafael-font-size-4xl: clamp(2.125rem, calc(2.0125rem + 0.5625vw), 2.6875rem);
-  --rafael-font-size-5xl: clamp(2.25rem, calc(2rem + 1.25vw), 3.5rem);
-  --rafael-font-size-6xl: clamp(2.5rem, calc(2.1rem + 2vw), 4.5rem);
+  --rafael-font-size-lg: clamp(1.0625rem, calc(1.0446rem + 0.0893vw), 1.125rem);
+  --rafael-font-size-xl: clamp(1.1875rem, calc(1.1696rem + 0.0893vw), 1.25rem);
+  --rafael-font-size-2xl: clamp(1.25rem, calc(1.2143rem + 0.1786vw), 1.375rem);
+  --rafael-font-size-3xl: clamp(1.3125rem, calc(1.2589rem + 0.2679vw), 1.5rem);
+  --rafael-font-size-4xl: clamp(1.8125rem, calc(1.4732rem + 1.6964vw), 3rem);
+  --rafael-font-size-5xl: clamp(2.125rem, calc(1.7321rem + 1.9643vw), 3.5rem);
+  --rafael-font-size-6xl: clamp(2.375rem, calc(1.9107rem + 2.3214vw), 4rem);
 
   /* Font Weight */
   --rafael-font-weight-regular: 400;
   --rafael-font-weight-medium: 500;
-  --rafael-font-weight-semibold: 400;
-  --rafael-font-weight-bold: 400;
+  --rafael-font-weight-semibold: 600;
+  --rafael-font-weight-bold: 600;
   --rafael-font-weight-light: 300;
 
   /* Font Family */
   --rafael-font-family-headline: "Colaborate";
-  --rafael-font-family-body: "Inter";
+  --rafael-font-family-body: "Cal Sans Text";
   --rafael-font-family-mono: "JetBrains Mono";
+  --rafael-font-family-ui: "Cal Sans UI";
 
   /* Border Width */
   --border-width-0: 0px;
@@ -246,8 +247,8 @@
 
   /* Motion */
   --ease-standard: cubic-bezier(0.44, 0, 0.56, 1);
-  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
-  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-enter: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-exit: cubic-bezier(0.32, 0.72, 0, 1);
   --dur-fast: 150ms;
   --dur-base: 200ms;
   --dur-medium: 300ms;
@@ -264,69 +265,84 @@
      Standard typography styles using primitives
      ============================================ */
 
-  /* Display - 6xl / Regular (for hero headlines) */
+  /* Faces follow the design system's roles: display, h1 and h2 are the display
+     face (Colaborate Light), h3 to h5 the section/title roles (Cal Sans Text
+     Medium), running text Cal Sans Text Light, small UI text Cal Sans UI. */
+
+  /* Display - 6xl / Colaborate Light (hero headlines) */
+  --typography-display-family: var(--rafael-font-family-headline);
   --typography-display-size: var(--rafael-font-size-6xl);
-  --typography-display-weight: var(--rafael-font-weight-regular);
-  --typography-display-line-height: clamp(2.5rem, calc(2.1rem + 2vw), 4.5rem);
+  --typography-display-weight: var(--rafael-font-weight-light);
+  --typography-display-line-height: clamp(2.7312rem, calc(2.2545rem + 2.3839vw), 4.4rem);
   --typography-display-letter-spacing: -0.02em;
 
-  /* Heading 1 - 4xl / Regular */
-  --typography-h1-size: var(--rafael-font-size-4xl);
-  --typography-h1-weight: var(--rafael-font-weight-regular);
-  --typography-h1-line-height: clamp(2.125rem, calc(2.0125rem + 0.5625vw), 2.6875rem);
+  /* Heading 1 - 5xl / Colaborate Light */
+  --typography-h1-family: var(--rafael-font-family-headline);
+  --typography-h1-size: var(--rafael-font-size-5xl);
+  --typography-h1-weight: var(--rafael-font-weight-light);
+  --typography-h1-line-height: clamp(2.55rem, calc(2.1586rem + 1.9571vw), 3.92rem);
   --typography-h1-letter-spacing: -0.02em;
 
-  /* Heading 2 - 3xl / Regular */
-  --typography-h2-size: var(--rafael-font-size-3xl);
-  --typography-h2-weight: var(--rafael-font-weight-regular);
-  --typography-h2-line-height: clamp(1.75rem, calc(1.6875rem + 0.3125vw), 2.0625rem);
+  /* Heading 2 - 4xl / Colaborate Light */
+  --typography-h2-family: var(--rafael-font-family-headline);
+  --typography-h2-size: var(--rafael-font-size-4xl);
+  --typography-h2-weight: var(--rafael-font-weight-light);
+  --typography-h2-line-height: clamp(2.2656rem, calc(1.8415rem + 2.1205vw), 3.75rem);
   --typography-h2-letter-spacing: -0.02em;
 
-  /* Heading 3 - 2xl / Regular */
+  /* Heading 3 - 2xl / Cal Sans Text Medium (section) */
+  --typography-h3-family: var(--rafael-font-family-body);
   --typography-h3-size: var(--rafael-font-size-2xl);
-  --typography-h3-weight: var(--rafael-font-weight-regular);
-  --typography-h3-line-height: clamp(1.25rem, calc(1.175rem + 0.375vw), 1.625rem);
-  --typography-h3-letter-spacing: -0.02em;
+  --typography-h3-weight: var(--rafael-font-weight-medium);
+  --typography-h3-line-height: clamp(1.625rem, calc(1.5786rem + 0.2321vw), 1.7875rem);
+  --typography-h3-letter-spacing: 0px;
 
-  /* Heading 4 - xl / Regular */
+  /* Heading 4 - xl / Cal Sans Text Medium (title) */
+  --typography-h4-family: var(--rafael-font-family-body);
   --typography-h4-size: var(--rafael-font-size-xl);
-  --typography-h4-weight: var(--rafael-font-weight-regular);
-  --typography-h4-line-height: 1;
+  --typography-h4-weight: var(--rafael-font-weight-medium);
+  --typography-h4-line-height: 1.3;
   --typography-h4-letter-spacing: 0px;
 
-  /* Heading 5 - lg / Regular */
+  /* Heading 5 - lg / Cal Sans Text Medium */
+  --typography-h5-family: var(--rafael-font-family-body);
   --typography-h5-size: var(--rafael-font-size-lg);
-  --typography-h5-weight: var(--rafael-font-weight-regular);
-  --typography-h5-line-height: 1.5;
+  --typography-h5-weight: var(--rafael-font-weight-medium);
+  --typography-h5-line-height: 1.3;
   --typography-h5-letter-spacing: 0px;
 
-  /* Body Large - lg / Regular */
-  --typography-body-large-size: var(--rafael-font-size-lg);
-  --typography-body-large-weight: var(--rafael-font-weight-regular);
-  --typography-body-large-line-height: 1.6;
+  /* Body Large - 3xl / Cal Sans Text Light (lead) */
+  --typography-body-large-family: var(--rafael-font-family-body);
+  --typography-body-large-size: var(--rafael-font-size-3xl);
+  --typography-body-large-weight: var(--rafael-font-weight-light);
+  --typography-body-large-line-height: 1.3;
   --typography-body-large-letter-spacing: 0px;
 
-  /* Body - base / Regular */
-  --typography-body-size: var(--rafael-font-size-base);
-  --typography-body-weight: var(--rafael-font-weight-regular);
+  /* Body - lg / Cal Sans Text Light */
+  --typography-body-family: var(--rafael-font-family-body);
+  --typography-body-size: var(--rafael-font-size-lg);
+  --typography-body-weight: var(--rafael-font-weight-light);
   --typography-body-line-height: 1.5;
   --typography-body-letter-spacing: 0px;
 
-  /* Body Small - sm / Regular */
+  /* Body Small - sm / Cal Sans UI Regular (small) */
+  --typography-body-small-family: var(--rafael-font-family-ui);
   --typography-body-small-size: var(--rafael-font-size-sm);
   --typography-body-small-weight: var(--rafael-font-weight-regular);
-  --typography-body-small-line-height: 1.5;
+  --typography-body-small-line-height: 1.45;
   --typography-body-small-letter-spacing: 0px;
 
-  /* Caption - xs / Regular */
+  /* Caption - xs / Cal Sans UI Regular (micro) */
+  --typography-caption-family: var(--rafael-font-family-ui);
   --typography-caption-size: var(--rafael-font-size-xs);
   --typography-caption-weight: var(--rafael-font-weight-regular);
-  --typography-caption-line-height: 1.4;
+  --typography-caption-line-height: 1.3;
   --typography-caption-letter-spacing: 0px;
 
-  /* Overline - xs / Regular / Uppercase */
+  /* Overline - xs / Cal Sans UI SemiBold / Uppercase (eyebrow) */
+  --typography-overline-family: var(--rafael-font-family-ui);
   --typography-overline-size: var(--rafael-font-size-xs);
-  --typography-overline-weight: var(--rafael-font-weight-regular);
+  --typography-overline-weight: var(--rafael-font-weight-semibold);
   --typography-overline-line-height: 1.4;
   --typography-overline-letter-spacing: 0.08em;
   --typography-overline-transform: uppercase;
@@ -352,17 +368,17 @@
      scale (md = 44px, the thumbable minimum). */
   --button-sm-padding-x: var(--rafael-spacing-3);
   --button-sm-padding-y: 4px;
-  --button-sm-radius: var(--rafael-radius-md);
+  --button-sm-radius: var(--rafael-radius-full);
   --button-sm-min-height: 2.25rem;
   --button-sm-gap: var(--rafael-spacing-1-5);
   --button-md-padding-x: var(--rafael-spacing-5);
   --button-md-padding-y: var(--rafael-spacing-2-5);
-  --button-md-radius: var(--rafael-radius-md);
+  --button-md-radius: var(--rafael-radius-full);
   --button-md-min-height: 2.75rem;
   --button-md-gap: var(--rafael-spacing-2);
   --button-lg-padding-x: var(--rafael-spacing-6);
   --button-lg-padding-y: var(--rafael-spacing-3);
-  --button-lg-radius: var(--rafael-radius-md);
+  --button-lg-radius: var(--rafael-radius-full);
   --button-lg-min-height: 3.25rem;
   --button-lg-gap: var(--rafael-spacing-2-5);
 
@@ -397,9 +413,18 @@
   --card-radius: var(--rafael-radius-lg);
   --card-padding: var(--rafael-spacing-5);
   --card-gap: var(--rafael-spacing-4);
-  --card-media-radius: var(--rafael-radius-md);
+  --card-media-radius: var(--rafael-radius-lg);
   --card-footer-gap: var(--rafael-spacing-3);
   --card-footer-padding-top: var(--rafael-spacing-4);
+
+  /* Layout: one content column for every wrapper (header, sections, footer) */
+  --container-max: 68rem;
+
+  /* Section block padding: mobile to desktop, fluid like the type scale */
+  --section-padding-sm: clamp(3rem, calc(2.7143rem + 1.4286vw), 4rem);
+  --section-padding-md: clamp(4rem, calc(3.7143rem + 1.4286vw), 5rem);
+  --section-padding-lg: clamp(5rem, calc(4.4286rem + 2.8571vw), 7rem);
+  --section-padding-xl: clamp(7rem, calc(6.1429rem + 4.2857vw), 10rem);
 
 }
 
@@ -415,7 +440,7 @@
   --bg-tertiary: var(--rafael-color-ds-surface-stone-light);
   --bg-inverse: var(--rafael-color-black);
   --bg-brand: var(--rafael-color-accent-500);
-  --bg-brand-subtle: var(--rafael-color-accent-50);
+  --bg-brand-subtle: #FAEFE9;
   --bg-brand-hover: var(--rafael-color-accent-600);
   --bg-success: var(--rafael-color-ds-semantic-available-tint-light);
   --bg-success-strong: var(--rafael-color-success-dark);
@@ -426,9 +451,9 @@
   --bg-brand-secondary: var(--rafael-color-primary-800);
   --bg-brand-secondary-subtle: var(--rafael-color-primary-50);
   --bg-brand-secondary-hover: var(--rafael-color-primary-900);
-  --bg-accent: var(--rafael-color-ds-accent-text-light);
-  --bg-accent-subtle: var(--rafael-color-accent-50);
-  --bg-accent-hover: var(--rafael-color-ds-accent-hover-fill-light);
+  --bg-accent: var(--rafael-color-ds-button-primary-fill-light);
+  --bg-accent-subtle: #FAEFE9;
+  --bg-accent-hover: var(--rafael-color-ds-button-primary-fill-hover-light);
   --bg-brand-active: var(--rafael-color-accent-600);
   --bg-disabled: var(--rafael-color-gray-100);
   --bg-on-color: var(--rafael-color-white);
@@ -443,13 +468,13 @@
   --text-tertiary: var(--rafael-color-ds-text-tertiary-light);
   --text-inverse: var(--rafael-color-gray-50);
   --text-brand: var(--rafael-color-accent-700);
-  --text-link: var(--rafael-color-ds-accent-text-light);
+  --text-link: var(--rafael-color-ds-text-primary-light);
   --text-success: var(--rafael-color-ds-semantic-available-text-light);
   --text-warning: var(--rafael-color-ds-semantic-warning-text-light);
   --text-error: var(--rafael-color-ds-semantic-danger-text-light);
   --text-brand-secondary: var(--rafael-color-primary-800);
-  --text-accent: var(--rafael-color-ds-accent-text-light);
-  --text-link-hover: var(--rafael-color-accent-800);
+  --text-accent: var(--rafael-color-ds-button-primary-fill-light);
+  --text-link-hover: var(--rafael-color-ds-text-primary-light);
   --text-disabled: var(--rafael-color-ds-text-muted-light);
   --text-on-color: var(--rafael-color-white);
   --text-on-brand: var(--rafael-color-ds-accent-ink);
@@ -469,7 +494,7 @@
   --border-brand-secondary: var(--rafael-color-primary-800);
   --border-accent: var(--rafael-color-ds-accent-text-light);
   --border-disabled: var(--rafael-color-gray-200);
-  --border-control: var(--rafael-color-ds-border-default-light);
+  --border-control: #857F7A;
 
   /* Icon */
   --icon-primary: var(--rafael-color-ds-text-primary-light);
@@ -483,7 +508,7 @@
   --icon-warning: var(--rafael-color-ds-semantic-warning-text-light);
   --icon-error: var(--rafael-color-ds-semantic-danger-text-light);
   --icon-on-color: var(--rafael-color-white);
-  --icon-on-accent: var(--rafael-color-ds-accent-ink);
+  --icon-on-accent: var(--rafael-color-ds-button-primary-label-light);
 
   /* Ring */
   --ring-focus: var(--rafael-color-ds-accent-text-light);
@@ -534,7 +559,7 @@
     --bg-tertiary: var(--rafael-color-ds-surface-stone-light) !important;
     --bg-inverse: var(--rafael-color-black) !important;
     --bg-brand: var(--rafael-color-accent-500) !important;
-    --bg-brand-subtle: var(--rafael-color-accent-50) !important;
+    --bg-brand-subtle: #FAEFE9 !important;
     --bg-brand-hover: var(--rafael-color-accent-600) !important;
     --bg-success: var(--rafael-color-ds-semantic-available-tint-light) !important;
     --bg-success-strong: var(--rafael-color-success-dark) !important;
@@ -545,9 +570,9 @@
     --bg-brand-secondary: var(--rafael-color-primary-800) !important;
     --bg-brand-secondary-subtle: var(--rafael-color-primary-50) !important;
     --bg-brand-secondary-hover: var(--rafael-color-primary-900) !important;
-    --bg-accent: var(--rafael-color-ds-accent-text-light) !important;
-    --bg-accent-subtle: var(--rafael-color-accent-50) !important;
-    --bg-accent-hover: var(--rafael-color-ds-accent-hover-fill-light) !important;
+    --bg-accent: var(--rafael-color-ds-button-primary-fill-light) !important;
+    --bg-accent-subtle: #FAEFE9 !important;
+    --bg-accent-hover: var(--rafael-color-ds-button-primary-fill-hover-light) !important;
     --bg-brand-active: var(--rafael-color-accent-600) !important;
     --bg-disabled: var(--rafael-color-gray-100) !important;
     --bg-on-color: var(--rafael-color-white) !important;
@@ -562,13 +587,13 @@
     --text-tertiary: var(--rafael-color-ds-text-tertiary-light) !important;
     --text-inverse: var(--rafael-color-gray-50) !important;
     --text-brand: var(--rafael-color-accent-700) !important;
-    --text-link: var(--rafael-color-ds-accent-text-light) !important;
+    --text-link: var(--rafael-color-ds-text-primary-light) !important;
     --text-success: var(--rafael-color-ds-semantic-available-text-light) !important;
     --text-warning: var(--rafael-color-ds-semantic-warning-text-light) !important;
     --text-error: var(--rafael-color-ds-semantic-danger-text-light) !important;
     --text-brand-secondary: var(--rafael-color-primary-800) !important;
-    --text-accent: var(--rafael-color-ds-accent-text-light) !important;
-    --text-link-hover: var(--rafael-color-accent-800) !important;
+    --text-accent: var(--rafael-color-ds-button-primary-fill-light) !important;
+    --text-link-hover: var(--rafael-color-ds-text-primary-light) !important;
     --text-disabled: var(--rafael-color-ds-text-muted-light) !important;
     --text-on-color: var(--rafael-color-white) !important;
     --text-on-brand: var(--rafael-color-ds-accent-ink) !important;
@@ -588,7 +613,7 @@
     --border-brand-secondary: var(--rafael-color-primary-800) !important;
     --border-accent: var(--rafael-color-ds-accent-text-light) !important;
     --border-disabled: var(--rafael-color-gray-200) !important;
-    --border-control: var(--rafael-color-ds-border-default-light) !important;
+    --border-control: #857F7A !important;
 
   /* Icon - Light Mode (forced) */
     --icon-primary: var(--rafael-color-ds-text-primary-light) !important;
@@ -602,5 +627,5 @@
     --icon-warning: var(--rafael-color-ds-semantic-warning-text-light) !important;
     --icon-error: var(--rafael-color-ds-semantic-danger-text-light) !important;
     --icon-on-color: var(--rafael-color-white) !important;
-    --icon-on-accent: var(--rafael-color-ds-accent-ink) !important;
+    --icon-on-accent: var(--rafael-color-ds-button-primary-label-light) !important;
 }

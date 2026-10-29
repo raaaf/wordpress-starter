@@ -2,28 +2,58 @@
   "headline": {
     "source": "local",
     "family": "Colaborate",
+    "license": "SIL OFL 1.1 (resources/fonts/OFL-Colaborate.txt)",
     "files": [
       {
-        "path": "/Users/rafael/Local Sites/wordpress/app/public/wp-content/themes/wordpress-starter-theme/resources/fonts/ColabReg-webfont.woff2",
-        "weight": 400
+        "path": "resources/fonts/colaborate-300.woff2",
+        "weight": 300
       },
       {
-        "path": "/Users/rafael/Local Sites/wordpress/app/public/wp-content/themes/wordpress-starter-theme/resources/fonts/colabthi-webfont.woff2",
-        "weight": 300
+        "path": "resources/fonts/ColabReg-webfont.woff2",
+        "weight": 400
       }
     ]
   },
   "body": {
-    "source": "google",
-    "family": "Inter",
-    "weights": [400, 500]
+    "source": "local",
+    "family": "Cal Sans Text",
+    "license": "SIL OFL 1.1 (resources/fonts/OFL-CalSans.txt)",
+    "files": [
+      {
+        "path": "resources/fonts/cal-sans-text-300.woff2",
+        "weight": 300
+      },
+      {
+        "path": "resources/fonts/cal-sans-text-400.woff2",
+        "weight": 400
+      },
+      {
+        "path": "resources/fonts/cal-sans-text-500.woff2",
+        "weight": 500
+      }
+    ]
+  },
+  "ui": {
+    "source": "local",
+    "family": "Cal Sans UI",
+    "license": "SIL OFL 1.1 (resources/fonts/OFL-CalSans.txt)",
+    "files": [
+      {
+        "path": "resources/fonts/cal-sans-ui-400.woff2",
+        "weight": 400
+      },
+      {
+        "path": "resources/fonts/cal-sans-ui-600.woff2",
+        "weight": 600
+      }
+    ]
   },
   "mono": {
     "source": "local",
     "family": "JetBrains Mono",
     "files": [
       {
-        "path": "/Users/rafael/Local Sites/wordpress/app/public/wp-content/themes/wordpress-starter-theme/resources/fonts/jetbrains-mono-v18-latin-regular.woff2",
+        "path": "resources/fonts/jetbrains-mono-v18-latin-regular.woff2",
         "weight": 400
       }
     ]

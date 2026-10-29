@@ -57,8 +57,8 @@
         $isLandingPage = \WordpressStarter\Acf\PageSettings::isLandingPage();
     @endphp
 
-    <header class="bg-surface {{ $headerSticky ? 'sticky top-0 z-50 shadow-sm' : '' }}" role="banner">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header class="bg-surface/92 backdrop-blur-md {{ $headerSticky ? 'sticky top-0 z-50' : '' }}" role="banner">
+        <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8">
             @if($isLandingPage)
                 <div>
                     @include('partials.header-menu')

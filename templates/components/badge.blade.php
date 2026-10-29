@@ -25,11 +25,14 @@
     // being duplicated across all three variant maps below.
     $variant = $variant === 'accent' ? 'brand' : $variant;
 
-    // Sizes from Figma tokens - subtle border radius per Figma design
+    // Sizes from the tokens. Every badge gets "badge--trim": where the browser
+    // supports text-box, the label is trimmed to cap height and baseline and
+    // centred exactly, whatever the face's line metrics (app.css). Elsewhere
+    // the plain padding applies.
     $sizes = [
-        'sm' => 'px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] text-xs gap-[var(--badge-sm-gap)] rounded-full',
-        'md' => 'px-[var(--badge-md-padding-x)] py-[var(--badge-md-padding-y)] text-sm gap-[var(--badge-md-gap)] rounded-full',
-        'lg' => 'px-[var(--badge-lg-padding-x)] py-[var(--badge-lg-padding-y)] text-base gap-[var(--badge-lg-gap)] rounded-full',
+        'sm' => 'badge--trim px-[var(--badge-sm-padding-x)] py-[var(--badge-sm-padding-y)] [--badge-py:var(--badge-sm-padding-y)] text-xs gap-[var(--badge-sm-gap)] rounded-full',
+        'md' => 'badge--trim px-[var(--badge-md-padding-x)] py-[var(--badge-md-padding-y)] [--badge-py:var(--badge-md-padding-y)] text-sm gap-[var(--badge-md-gap)] rounded-full',
+        'lg' => 'badge--trim px-[var(--badge-lg-padding-x)] py-[var(--badge-lg-padding-y)] [--badge-py:var(--badge-lg-padding-y)] text-base gap-[var(--badge-lg-gap)] rounded-full',
     ];
 
     $iconSizes = [
@@ -89,7 +92,7 @@
         <x-icon name="{{ $iconLeft }}" class="{{ $iconSize }}" />
     @endif
 
-    {{ $slot }}
+    <span class="badge__label">{{ $slot }}</span>
 
     @if($iconRight)
         <x-icon name="{{ $iconRight }}" class="{{ $iconSize }}" />

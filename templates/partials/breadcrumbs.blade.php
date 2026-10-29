@@ -21,10 +21,13 @@
     }
 @endphp
 
+{{-- The trail is for screen readers and search engines only: sr-only, never display:none,
+     and it shows while a keyboard user tabs through its links. The bar itself is visible only when it carries
+     the logout button. The BreadcrumbList JSON-LD comes from SeoServiceProvider and is unaffected. --}}
 @if($showBreadcrumbs)
-    <div class="bg-surface border-b border-line">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-            <nav class="breadcrumbs" aria-label="{{ __('Breadcrumb', 'wp-starter') }}">
+    <div class="{{ $isAuthenticated ? 'bg-surface border-b border-line' : 'focus-within:bg-surface focus-within:border-b focus-within:border-line' }}">
+        <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 {{ $isAuthenticated ? 'py-3' : 'focus-within:py-3' }} flex items-center justify-between gap-4">
+            <nav class="breadcrumbs sr-only focus-within:not-sr-only" aria-label="{{ __('Breadcrumb', 'wp-starter') }}">
                 @if($hasYoast)
                     <?php yoast_breadcrumb(); ?>
                 @else
@@ -53,7 +56,7 @@
                     :title="__('Abmelden', 'wp-starter')"
                     variant="secondary"
                     size="sm"
-                    class="shrink-0"
+                    class="shrink-0 ml-auto"
                 />
             @endif
         </div>

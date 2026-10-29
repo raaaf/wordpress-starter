@@ -12,7 +12,7 @@
 @endphp
 
 <div x-data="navigation" @keydown.window="handleKeydown($event)" class="relative">
-    <div class="flex items-center justify-between py-6">
+    <div class="flex items-center justify-between min-h-[68px] py-2">
         {{-- Left side: Logo + Desktop Navigation --}}
         <div class="flex items-center gap-8">
             @php
@@ -34,7 +34,7 @@
                     @php(
                     wp_nav_menu([
                         'container' => false,
-                        'menu_class' => 'flex space-x-6',
+                        'menu_class' => 'flex gap-1',
                         'theme_location' => 'header-menu',
                         'li_class' => 'relative',
                         'fallback_cb' => false,

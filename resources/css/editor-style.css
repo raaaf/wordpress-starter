@@ -91,7 +91,7 @@ body.mce-content-body h2 {
 }
 
 body.mce-content-body h3 {
-  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--typography-h3-family), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h3-size);
   font-weight: var(--typography-h3-weight);
   line-height: var(--typography-h3-line-height);
@@ -101,7 +101,7 @@ body.mce-content-body h3 {
 }
 
 body.mce-content-body h4 {
-  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--typography-h4-family), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h4-size);
   font-weight: var(--typography-h4-weight);
   line-height: var(--typography-h4-line-height);
@@ -112,7 +112,7 @@ body.mce-content-body h4 {
 
 body.mce-content-body h5,
 body.mce-content-body h6 {
-  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--typography-h5-family), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h5-size);
   font-weight: var(--typography-h5-weight);
   line-height: var(--typography-h5-line-height);
@@ -265,7 +265,7 @@ body.mce-content-body .text-h2 {
 }
 
 body.mce-content-body .text-h3 {
-  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--typography-h3-family), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h3-size);
   font-weight: var(--typography-h3-weight);
   line-height: var(--typography-h3-line-height);
@@ -273,7 +273,7 @@ body.mce-content-body .text-h3 {
 }
 
 body.mce-content-body .text-h4 {
-  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--typography-h4-family), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h4-size);
   font-weight: var(--typography-h4-weight);
   line-height: var(--typography-h4-line-height);
@@ -281,7 +281,7 @@ body.mce-content-body .text-h4 {
 }
 
 body.mce-content-body .text-h5 {
-  font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--typography-h5-family), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--typography-h5-size);
   font-weight: var(--typography-h5-weight);
   line-height: var(--typography-h5-line-height);

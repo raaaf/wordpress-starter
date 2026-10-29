@@ -52,8 +52,8 @@
     $showBrand = !$reduceFooter && ($showLogo || ($showCompany && $company));
     $showSimpleContact = !$reduceFooter && $showContact && ($simpleAddress || $phone || $fax || $email);
 @endphp
-<footer class="footer--simple bg-surface border-t border-line">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-5">
+<footer class="footer--simple bg-surface-tertiary">
+    <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-5">
         @if($showBrand || $showSimpleContact)
             {{-- Row 1: brand, then all contact details in one line. --}}
             <div class="flex flex-col lg:flex-row lg:items-center gap-x-10 gap-y-4 mb-4">
@@ -116,9 +116,9 @@
     </div>
 </footer>
 @else
-<footer class="bg-surface border-t border-line">
+<footer class="bg-surface-tertiary">
     @if(!$reduceFooter)
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+    <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div class="grid grid-cols-1 md:grid-cols-2 {{ $isLandingPage ? 'lg:grid-cols-2' : 'lg:grid-cols-4' }} gap-8 lg:gap-12">
             {{-- Logo / Company Info / Footer Text --}}
             <div class="lg:col-span-1">
@@ -241,7 +241,7 @@
 
     {{-- Bottom Bar --}}
     <div @if(!$reduceFooter) class="border-t border-line" @endif>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 {{-- Copyright --}}
                 <p class="text-content-secondary text-sm">

@@ -35,7 +35,7 @@ class ImageServiceProvider extends ServiceProvider
             // Content images (max-w-4xl = 896px, 2x retina)
             add_image_size('content', 1792, 0, false);
 
-            // Hero split / two-column (50% of max-w-7xl = 640px, 2x retina)
+            // Hero split / two-column (50% of the 68rem container = 544px, 2x retina)
             add_image_size('hero-split', 1280, 0, false);
 
             // Hero background - full-width background image (2x retina for 1440px screens)

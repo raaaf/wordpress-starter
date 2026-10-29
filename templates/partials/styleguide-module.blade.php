@@ -43,7 +43,7 @@
          Streifen in der Akzentfarbe am linken Rand markieren die Leiste jetzt
          als Rahmen, unabhängig davon, welche Fläche das Modul darunter wählt. --}}
     <div class="border-b-2 border-l-4 bg-surface-secondary border-line border-l-line-brand">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div class="flex flex-wrap items-baseline gap-2 m-0 text-body-small text-content-secondary">
                 <h3 class="font-normal text-content m-0">{{ $modul['label'] }}</h3>
                 <span class="text-code">{{ $layout }}</span>

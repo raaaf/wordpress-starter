@@ -482,14 +482,19 @@ describe('buildTypographyTokens with a design-system export', () => {
     expect(css).toContain('--typography-overline-letter-spacing: 0.08em;');
     expect(css).toContain('--typography-h4-letter-spacing: 0px;');
 
-    const h2Line = fluidLineHeight('3xl', lineHeight.section, lineHeight.section);
+    // The export is the desktop ratio; the mobile end keeps the table's looser value.
+    const h2Line = fluidLineHeight(
+      '4xl',
+      Math.max(HEADING_LINE_HEIGHTS.h2.mobile, lineHeight.section),
+      lineHeight.section
+    );
     expect(css).toContain(`--typography-h2-line-height: ${h2Line};`);
   });
 
   it('falls back to the HEADING_LINE_HEIGHTS constants when the export has no groups', () => {
     const css = buildTypographyTokens();
     const h2Line = fluidLineHeight(
-      '3xl',
+      '4xl',
       HEADING_LINE_HEIGHTS.h2.mobile,
       HEADING_LINE_HEIGHTS.h2.desktop
     );

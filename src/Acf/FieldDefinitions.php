@@ -1603,8 +1603,8 @@ class FieldDefinitions
                 'center' => __('Zentriert', 'wp-starter'),
                 'left' => __('Linksbündig', 'wp-starter'),
             ],
-            'center',
-            __('Ausrichtung von Badge, Überschrift und Beschreibung.', 'wp-starter'),
+            'left',
+            __('Ausrichtung von Overline, Überschrift und Beschreibung.', 'wp-starter'),
         );
         $alignment['wrapper'] = ['width' => '50'];
 

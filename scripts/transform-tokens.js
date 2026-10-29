@@ -94,12 +94,12 @@ const FLUID_SIZES = {
   sm: { min: 14, max: 14 },
   base: { min: 16, max: 16 },
   lg: { min: 17, max: 18 },
-  xl: { min: 18, max: 20 },
-  '2xl': { min: 20, max: 26 },
-  '3xl': { min: 28, max: 33 },
-  '4xl': { min: 34, max: 43 },
-  '5xl': { min: 36, max: 56 },
-  '6xl': { min: 40, max: 72 },
+  xl: { min: 19, max: 20 },
+  '2xl': { min: 20, max: 22 },
+  '3xl': { min: 21, max: 24 },
+  '4xl': { min: 29, max: 48 },
+  '5xl': { min: 34, max: 56 },
+  '6xl': { min: 38, max: 64 },
 };
 
 /**
@@ -125,7 +125,9 @@ function assertFluidMaxMatchesExport(fontSize = {}) {
 }
 
 const VIEWPORT_MIN = 320;
-const VIEWPORT_MAX = 1920;
+// 1440, not 1920: the content column stops growing at 68rem, so headings that kept
+// scaling past a laptop width only grew away from the text beside them.
+const VIEWPORT_MAX = 1440;
 const ROOT_PX = 16;
 
 /**
@@ -484,11 +486,11 @@ function generateCssImportant(tokens, prefix = '') {
  * always resolves to the same number, which is more confusing than a second shape.
  */
 const HEADING_LINE_HEIGHTS = {
-  display: { key: '6xl', mobile: 1.2, desktop: 1.2 },
-  h1: { key: '4xl', mobile: 1.2, desktop: 1.2 },
-  h2: { key: '3xl', mobile: 1.2, desktop: 1.2 },
-  h3: { key: '2xl', mobile: 1.4, desktop: 1.4 },
-  h4: { static: 1.4 },
+  display: { key: '6xl', mobile: 1.15, desktop: 1.1 },
+  h1: { key: '5xl', mobile: 1.2, desktop: 1.12 },
+  h2: { key: '4xl', mobile: 1.25, desktop: 1.25 },
+  h3: { key: '2xl', mobile: 1.3, desktop: 1.3 },
+  h4: { static: 1.3 },
   h5: { static: 1.4 },
   body: { static: 1.5 },
 };
@@ -499,24 +501,28 @@ const HEADING_LINE_HEIGHTS = {
  * (display/section/title/lead/body/small/micro); a role missing from it
  * (older export, test fixtures) keeps its HEADING_LINE_HEIGHTS constant.
  *
- * display/h1 share `lineHeight.display`, h2 gets `lineHeight.section`, h3/h4
- * get `lineHeight.title`, h5 gets `lineHeight.lead`, body gets
- * `lineHeight.body` — the same role mapping the design system itself
- * describes for these roles.
+ * display/h1 share `lineHeight.display`, h2 gets `lineHeight.section`, h3/h4/h5
+ * get `lineHeight.title` (all three are the design system's section/title face),
+ * body gets `lineHeight.body`. The exported value is the desktop ratio; the
+ * mobile ratio never sits below it, so a long German compound that wraps on a
+ * phone keeps the looser leading of the table. h1 keeps the 1.12 floor above.
  */
 function resolveHeadingLineHeights(lineHeight = {}) {
-  const fluid = (fallback, value) =>
-    typeof value === 'number' ? { key: fallback.key, mobile: value, desktop: value } : fallback;
+  const fluid = (fallback, value, floor = 0) => {
+    if (typeof value !== 'number') return fallback;
+    const desktop = Math.max(value, floor);
+    return { key: fallback.key, mobile: Math.max(fallback.mobile, desktop), desktop };
+  };
   const staticRatio = (fallback, value) =>
     typeof value === 'number' ? { static: value } : fallback;
 
   return {
     display: fluid(HEADING_LINE_HEIGHTS.display, lineHeight.display),
-    h1: fluid(HEADING_LINE_HEIGHTS.h1, lineHeight.display),
+    h1: fluid(HEADING_LINE_HEIGHTS.h1, lineHeight.display, HEADING_LINE_HEIGHTS.h1.desktop),
     h2: fluid(HEADING_LINE_HEIGHTS.h2, lineHeight.section),
     h3: fluid(HEADING_LINE_HEIGHTS.h3, lineHeight.title),
     h4: staticRatio(HEADING_LINE_HEIGHTS.h4, lineHeight.title),
-    h5: staticRatio(HEADING_LINE_HEIGHTS.h5, lineHeight.lead),
+    h5: staticRatio(HEADING_LINE_HEIGHTS.h5, lineHeight.title),
     body: staticRatio(HEADING_LINE_HEIGHTS.body, lineHeight.body),
   };
 }
@@ -547,6 +553,7 @@ function buildTypographyTokens(lineHeight = {}, tracking = {}) {
   const h5Lh = headings.h5.static;
   const bodyLh = headings.body.static;
   const captionLh = typeof lineHeight.micro === 'number' ? lineHeight.micro : 1.4;
+  const smallLh = typeof lineHeight.small === 'number' ? lineHeight.small : 1.5;
   const {
     heading: headingTracking,
     body: bodyTracking,
@@ -559,69 +566,84 @@ function buildTypographyTokens(lineHeight = {}, tracking = {}) {
      Standard typography styles using primitives
      ============================================ */
 
-  /* Display - 6xl / Regular (for hero headlines) */
+  /* Faces follow the design system's roles: display, h1 and h2 are the display
+     face (Colaborate Light), h3 to h5 the section/title roles (Cal Sans Text
+     Medium), running text Cal Sans Text Light, small UI text Cal Sans UI. */
+
+  /* Display - 6xl / Colaborate Light (hero headlines) */
+  --typography-display-family: var(--rafael-font-family-headline);
   --typography-display-size: var(--rafael-font-size-6xl);
-  --typography-display-weight: var(--rafael-font-weight-regular);
+  --typography-display-weight: var(--rafael-font-weight-light);
   --typography-display-line-height: ${displayLh};
   --typography-display-letter-spacing: ${headingTracking};
 
-  /* Heading 1 - 4xl / Regular */
-  --typography-h1-size: var(--rafael-font-size-4xl);
-  --typography-h1-weight: var(--rafael-font-weight-regular);
+  /* Heading 1 - 5xl / Colaborate Light */
+  --typography-h1-family: var(--rafael-font-family-headline);
+  --typography-h1-size: var(--rafael-font-size-5xl);
+  --typography-h1-weight: var(--rafael-font-weight-light);
   --typography-h1-line-height: ${h1Lh};
   --typography-h1-letter-spacing: ${headingTracking};
 
-  /* Heading 2 - 3xl / Regular */
-  --typography-h2-size: var(--rafael-font-size-3xl);
-  --typography-h2-weight: var(--rafael-font-weight-regular);
+  /* Heading 2 - 4xl / Colaborate Light */
+  --typography-h2-family: var(--rafael-font-family-headline);
+  --typography-h2-size: var(--rafael-font-size-4xl);
+  --typography-h2-weight: var(--rafael-font-weight-light);
   --typography-h2-line-height: ${h2Lh};
   --typography-h2-letter-spacing: ${headingTracking};
 
-  /* Heading 3 - 2xl / Regular */
+  /* Heading 3 - 2xl / Cal Sans Text Medium (section) */
+  --typography-h3-family: var(--rafael-font-family-body);
   --typography-h3-size: var(--rafael-font-size-2xl);
-  --typography-h3-weight: var(--rafael-font-weight-regular);
+  --typography-h3-weight: var(--rafael-font-weight-medium);
   --typography-h3-line-height: ${h3Lh};
-  --typography-h3-letter-spacing: ${headingTracking};
+  --typography-h3-letter-spacing: ${bodyTracking};
 
-  /* Heading 4 - xl / Regular */
+  /* Heading 4 - xl / Cal Sans Text Medium (title) */
+  --typography-h4-family: var(--rafael-font-family-body);
   --typography-h4-size: var(--rafael-font-size-xl);
-  --typography-h4-weight: var(--rafael-font-weight-regular);
+  --typography-h4-weight: var(--rafael-font-weight-medium);
   --typography-h4-line-height: ${h4Lh};
   --typography-h4-letter-spacing: ${bodyTracking};
 
-  /* Heading 5 - lg / Regular */
+  /* Heading 5 - lg / Cal Sans Text Medium */
+  --typography-h5-family: var(--rafael-font-family-body);
   --typography-h5-size: var(--rafael-font-size-lg);
-  --typography-h5-weight: var(--rafael-font-weight-regular);
+  --typography-h5-weight: var(--rafael-font-weight-medium);
   --typography-h5-line-height: ${h5Lh};
   --typography-h5-letter-spacing: ${bodyTracking};
 
-  /* Body Large - lg / Regular */
-  --typography-body-large-size: var(--rafael-font-size-lg);
-  --typography-body-large-weight: var(--rafael-font-weight-regular);
-  --typography-body-large-line-height: 1.6;
+  /* Body Large - 3xl / Cal Sans Text Light (lead) */
+  --typography-body-large-family: var(--rafael-font-family-body);
+  --typography-body-large-size: var(--rafael-font-size-3xl);
+  --typography-body-large-weight: var(--rafael-font-weight-light);
+  --typography-body-large-line-height: 1.3;
   --typography-body-large-letter-spacing: ${bodyTracking};
 
-  /* Body - base / Regular */
-  --typography-body-size: var(--rafael-font-size-base);
-  --typography-body-weight: var(--rafael-font-weight-regular);
+  /* Body - lg / Cal Sans Text Light */
+  --typography-body-family: var(--rafael-font-family-body);
+  --typography-body-size: var(--rafael-font-size-lg);
+  --typography-body-weight: var(--rafael-font-weight-light);
   --typography-body-line-height: ${bodyLh};
   --typography-body-letter-spacing: ${bodyTracking};
 
-  /* Body Small - sm / Regular */
+  /* Body Small - sm / Cal Sans UI Regular (small) */
+  --typography-body-small-family: var(--rafael-font-family-ui);
   --typography-body-small-size: var(--rafael-font-size-sm);
   --typography-body-small-weight: var(--rafael-font-weight-regular);
-  --typography-body-small-line-height: 1.5;
+  --typography-body-small-line-height: ${smallLh};
   --typography-body-small-letter-spacing: ${bodyTracking};
 
-  /* Caption - xs / Regular */
+  /* Caption - xs / Cal Sans UI Regular (micro) */
+  --typography-caption-family: var(--rafael-font-family-ui);
   --typography-caption-size: var(--rafael-font-size-xs);
   --typography-caption-weight: var(--rafael-font-weight-regular);
   --typography-caption-line-height: ${captionLh};
   --typography-caption-letter-spacing: ${bodyTracking};
 
-  /* Overline - xs / Regular / Uppercase */
+  /* Overline - xs / Cal Sans UI SemiBold / Uppercase (eyebrow) */
+  --typography-overline-family: var(--rafael-font-family-ui);
   --typography-overline-size: var(--rafael-font-size-xs);
-  --typography-overline-weight: var(--rafael-font-weight-regular);
+  --typography-overline-weight: var(--rafael-font-weight-semibold);
   --typography-overline-line-height: 1.4;
   --typography-overline-letter-spacing: ${labelTracking};
   --typography-overline-transform: uppercase;
@@ -653,17 +675,17 @@ const COMPONENT_TOKENS = `
      scale (md = 44px, the thumbable minimum). */
   --button-sm-padding-x: var(--rafael-spacing-3);
   --button-sm-padding-y: 4px;
-  --button-sm-radius: var(--rafael-radius-md);
+  --button-sm-radius: var(--rafael-radius-full);
   --button-sm-min-height: 2.25rem;
   --button-sm-gap: var(--rafael-spacing-1-5);
   --button-md-padding-x: var(--rafael-spacing-5);
   --button-md-padding-y: var(--rafael-spacing-2-5);
-  --button-md-radius: var(--rafael-radius-md);
+  --button-md-radius: var(--rafael-radius-full);
   --button-md-min-height: 2.75rem;
   --button-md-gap: var(--rafael-spacing-2);
   --button-lg-padding-x: var(--rafael-spacing-6);
   --button-lg-padding-y: var(--rafael-spacing-3);
-  --button-lg-radius: var(--rafael-radius-md);
+  --button-lg-radius: var(--rafael-radius-full);
   --button-lg-min-height: 3.25rem;
   --button-lg-gap: var(--rafael-spacing-2-5);
 
@@ -698,9 +720,18 @@ const COMPONENT_TOKENS = `
   --card-radius: var(--rafael-radius-lg);
   --card-padding: var(--rafael-spacing-5);
   --card-gap: var(--rafael-spacing-4);
-  --card-media-radius: var(--rafael-radius-md);
+  --card-media-radius: var(--rafael-radius-lg);
   --card-footer-gap: var(--rafael-spacing-3);
   --card-footer-padding-top: var(--rafael-spacing-4);
+
+  /* Layout: one content column for every wrapper (header, sections, footer) */
+  --container-max: 68rem;
+
+  /* Section block padding: mobile to desktop, fluid like the type scale */
+  --section-padding-sm: ${fluidClamp(48, 64)};
+  --section-padding-md: ${fluidClamp(64, 80)};
+  --section-padding-lg: ${fluidClamp(80, 112)};
+  --section-padding-xl: ${fluidClamp(112, 160)};
 `;
 
 /**

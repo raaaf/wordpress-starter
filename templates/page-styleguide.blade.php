@@ -30,7 +30,7 @@
 @section('content')
     @if(!current_user_can('edit_pages'))
         <h1 class="sr-only">{{ get_the_title() }}</h1>
-        <p class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <p class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {{ __('Diese Seite ist ein internes Werkzeug und für dich nicht sichtbar.', 'wp-starter') }}
         </p>
     @else
@@ -38,7 +38,7 @@
         @if(post_password_required())
             @include('partials.password-form')
         @else
-            <header class="page-header max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-wrap items-center justify-between gap-4">
+            <header class="page-header max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-wrap items-center justify-between gap-4">
                 <h1 class="m-0">{{ get_the_title() }}</h1>
                 @include('partials.theme-switcher')
             </header>

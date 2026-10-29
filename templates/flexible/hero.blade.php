@@ -111,10 +111,10 @@
             <div class="absolute inset-0 bg-surface-brand"></div>
         @endif
 
-        <div class="hero-reveal relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center text-center w-full">
+        <div class="hero-reveal relative z-10 max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center text-center w-full">
             <div class="max-w-3xl">
                 @if($badge)
-                    <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
+                    <span class="hero__overline text-overline text-content-secondary mb-4">{{ $badge }}</span>
                 @endif
 
                 @if($title)
@@ -165,7 +165,7 @@
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
                 @if($badge)
-                    <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
+                    <span class="hero__overline text-overline text-content-secondary mb-4">{{ $badge }}</span>
                 @endif
 
                 @if($title)
@@ -234,7 +234,7 @@
         @if($hasText)
             <div>
                 @if($badge)
-                    <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
+                    <span class="hero__overline text-overline text-content-secondary mb-4">{{ $badge }}</span>
                 @endif
 
                 @if($title)
@@ -299,7 +299,7 @@
     <x-section :anchor="$sectionAnchor" :background="$background_color" :padding="$isTitleOnly ? 'md' : 'xl'" class="hero hero--centered {{ $heroHeightClass }}">
         <div class="max-w-3xl mx-auto text-center">
             @if($badge)
-                <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
+                <span class="hero__overline text-overline text-content-secondary mb-4">{{ $badge }}</span>
             @endif
 
             {{-- Der untere Abstand gehoert zum Folgeelement, nicht zur Ueberschrift:
