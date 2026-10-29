@@ -14,6 +14,12 @@ namespace WordpressStarter\Providers;
  */
 class BrandingServiceProvider extends ServiceProvider
 {
+    /** Path of the per-site web manifest, relative to the site home. */
+    public const MANIFEST_PATH = '/site.webmanifest';
+
+    /** Browser chrome colour, same as the light theme-color meta in partials/header.blade.php. */
+    public const MANIFEST_THEME_COLOR = '#F5F5F5';
+
     public function register(): void
     {
         // No bindings required
@@ -22,6 +28,8 @@ class BrandingServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->addFaviconSupport();
+        $this->addIconLinkSupport();
+        $this->addManifestSupport();
         $this->addLoginLogoSupport();
         $this->syncAcfWithWordPress();
     }
@@ -83,6 +91,153 @@ class BrandingServiceProvider extends ServiceProvider
                     . ' sizes="' . absint($size) . 'x' . absint($size) . '" href="' . esc_url($faviconUrl) . '">' . "\n";
             }
         }, 1);
+    }
+
+    /**
+     * Link tags WordPress' own site icon output does not cover: the SVG and
+     * multi-size ICO favicon (ACF site_favicon_svg / site_favicon_ico) and the
+     * web manifest. The PNG icons and apple-touch-icon stay with wp_site_icon().
+     */
+    private function addIconLinkSupport(): void
+    {
+        add_action('wp_head', function (): void {
+            if (!function_exists('get_field')) {
+                return;
+            }
+
+            $svgId = (int) \WordpressStarter\Acf\Fields::option('site_favicon_svg', 0);
+            $icoId = (int) \WordpressStarter\Acf\Fields::option('site_favicon_ico', 0);
+            $svg = $svgId ? wp_get_attachment_url($svgId) : false;
+            $ico = $icoId ? wp_get_attachment_url($icoId) : false;
+            $hasIcon = has_site_icon() || \WordpressStarter\Acf\Fields::option('site_favicon');
+
+            // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- every URL is passed through esc_url() in iconLinks()
+            echo self::iconLinks(
+                $svg ?: null,
+                $ico ?: null,
+                $hasIcon ? home_url(self::MANIFEST_PATH) : null
+            );
+            // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+        }, 2);
+    }
+
+    /**
+     * HTML for the extra icon links. Each argument is optional, an empty value
+     * outputs nothing for that tag.
+     */
+    public static function iconLinks(?string $svgUrl, ?string $icoUrl, ?string $manifestUrl): string
+    {
+        $html = '';
+        if ($icoUrl) {
+            $html .= '<link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="' . esc_url($icoUrl) . '">' . "\n";
+        }
+        if ($svgUrl) {
+            $html .= '<link rel="icon" type="image/svg+xml" sizes="any" href="' . esc_url($svgUrl) . '">' . "\n";
+        }
+        if ($manifestUrl) {
+            $html .= '<link rel="manifest" href="' . esc_url($manifestUrl) . '">' . "\n";
+        }
+
+        return $html;
+    }
+
+    /**
+     * Serve /site.webmanifest per site (a JSON file cannot live in the media
+     * library, and every blog of the network needs its own name and icons).
+     */
+    private function addManifestSupport(): void
+    {
+        add_action('template_redirect', function (): void {
+            $requestUri = isset($_SERVER['REQUEST_URI'])
+                ? sanitize_text_field(wp_unslash( (string) $_SERVER['REQUEST_URI']))
+                : '';
+            $homePath = (string) ( parse_url(home_url('/'), PHP_URL_PATH) ?: '/' );
+
+            if (!self::isManifestRequest($requestUri, $homePath)) {
+                return;
+            }
+
+            $iconId = (int) ( get_option('site_icon') ?: \WordpressStarter\Acf\Fields::option('site_favicon', 0) );
+            $companyName = \WordpressStarter\Acf\Fields::option('company_name');
+            $siteName = (string) get_bloginfo('name');
+
+            $manifest = self::buildManifest(
+                is_string($companyName) && $companyName !== '' ? $companyName : $siteName,
+                $siteName,
+                home_url('/'),
+                $this->manifestIcons($iconId)
+            );
+
+            status_header(200);
+            header('Content-Type: application/manifest+json; charset=utf-8');
+            header('Cache-Control: public, max-age=3600');
+            echo wp_json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            exit;
+        }, 0);
+    }
+
+    /**
+     * 192 and 512 px entries of the site icon, with the size of the file that
+     * is really served (WordPress falls back to the full image when no
+     * intermediate size exists, so the declared size must come from the file).
+     *
+     * @return array<int, array{src: string, sizes: string, type: string}>
+     */
+    private function manifestIcons(int $attachmentId): array
+    {
+        if ($attachmentId <= 0) {
+            return [];
+        }
+
+        $icons = [];
+        foreach ([192, 512] as $size) {
+            $image = wp_get_attachment_image_src($attachmentId, [$size, $size]);
+            if (!$image) {
+                continue;
+            }
+            $icons[$image[0]] = [
+                'src' => $image[0],
+                'sizes' => $image[1] . 'x' . $image[2],
+                'type' => (string) ( get_post_mime_type($attachmentId) ?: 'image/png' ),
+            ];
+        }
+
+        return array_values($icons);
+    }
+
+    /**
+     * True when the request path is this site's manifest (also under a
+     * sub-directory home like /blog/), ignoring query string and case.
+     */
+    public static function isManifestRequest(string $requestUri, string $homePath): bool
+    {
+        $path = strtolower( (string) parse_url($requestUri, PHP_URL_PATH));
+
+        return $path === strtolower(rtrim($homePath, '/') . self::MANIFEST_PATH);
+    }
+
+    /**
+     * @param array<int, array{src: string, sizes: string, type: string}> $icons
+     *
+     * @return array<string, mixed>
+     */
+    public static function buildManifest(string $name, string $shortName, string $startUrl, array $icons): array
+    {
+        $manifest = [
+            'name' => $name,
+            'short_name' => $shortName !== '' ? $shortName : $name,
+            'start_url' => $startUrl,
+            'scope' => $startUrl,
+            'display' => 'browser',
+            'theme_color' => self::MANIFEST_THEME_COLOR,
+            'background_color' => '#ffffff',
+        ];
+
+        if ($icons !== []) {
+            $manifest['icons'] = $icons;
+        }
+
+        return $manifest;
     }
 
     /**

@@ -24,6 +24,7 @@ use WordpressStarter\Providers\MenuServiceProvider;
 use WordpressStarter\Providers\PluginConfiguratorServiceProvider;
 use WordpressStarter\Providers\PluginServiceProvider;
 use WordpressStarter\Providers\PostTypeServiceProvider;
+use WordpressStarter\Providers\RedirectServiceProvider;
 use WordpressStarter\Providers\SecurityServiceProvider;
 use WordpressStarter\Providers\SeoServiceProvider;
 use WordpressStarter\Providers\ServiceProvider;
@@ -81,6 +82,7 @@ class Application
             EditorIntegrationServiceProvider::class,
             BrandingServiceProvider::class,
             SeoServiceProvider::class,
+            RedirectServiceProvider::class,
             LlmsTxtProvider::class,
             ImageServiceProvider::class,
             ThemeUpdateProvider::class,

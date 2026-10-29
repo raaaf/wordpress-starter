@@ -144,6 +144,7 @@ final class ApplicationTest extends TestCase
             \WordpressStarter\Providers\AssetOptimizationServiceProvider::class,
             \WordpressStarter\Providers\EditorIntegrationServiceProvider::class,
             \WordpressStarter\Providers\BrandingServiceProvider::class,
+            \WordpressStarter\Providers\RedirectServiceProvider::class,
             \WordpressStarter\Providers\EditorStylesServiceProvider::class,
         ];
 

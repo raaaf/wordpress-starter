@@ -38,6 +38,7 @@ Output when company info is configured in Theme Options:
   "url": "https://example.com",
   "logo": "https://example.com/logo.png",
   "telephone": "+49 123 456789",
+  "faxNumber": "+49 123 456780",
   "email": "info@example.com",
   "address": {
     "@type": "PostalAddress",
@@ -74,7 +75,7 @@ Output on single blog posts:
 
 #### BreadcrumbList Schema
 
-Output on all pages except front page:
+Output on all pages except front page. When Yoast SEO is active, Yoast's own BreadcrumbList is used and the theme's is skipped, so there is only one:
 
 ```json
 {
@@ -161,6 +162,18 @@ Automatically generated for social sharing:
 <meta property="article:published_time" content="2024-01-15T10:00:00+00:00" />
 <meta property="article:modified_time" content="2024-01-16T14:30:00+00:00" />
 <meta property="article:author" content="Author Name" />
+```
+
+### Fallbacks with Yoast SEO
+
+When Yoast SEO is active and a page has no own social image, the theme adds one in this order: the social sharing image from the theme options, the first image of the page sections, then the raster site logo (an SVG logo is never used, social networks do not render it). On password protected pages the section image is skipped. A page without a Yoast meta description gets the theme's description; a Yoast description always wins.
+
+## Redirects
+
+`RedirectServiceProvider` reads the option `wp_starter_redirects` (array of old path => new URL) and answers with a 301, but only when WordPress would otherwise return a 404, so a redirect never shadows a real page. Useful after a relaunch:
+
+```bash
+wp option update wp_starter_redirects '{"/alte-seite/":"/neue-seite/"}' --format=json
 ```
 
 ## Twitter Card Tags
@@ -321,12 +334,11 @@ The theme is optimized for Core Web Vitals:
 
 ### Preloading
 
-Critical assets are preloaded in `header.blade.php`:
+Critical assets are preloaded in `header.blade.php`. `Vite::modulePreloadTags()` emits a `modulepreload` link for the app entry and every chunk it imports (recursively, each once), so the browser fetches the whole module graph in parallel instead of discovering imports one level at a time:
 
 ```html
-<link rel="preload" href="/dist/app.css" as="style" />
-<link rel="preload" href="/dist/app.js" as="script" />
-<link rel="preload" href="/fonts/main.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="modulepreload" href="/dist/assets/app-[hash].js" />
+<link rel="modulepreload" href="/dist/assets/vendor-[hash].js" />
 ```
 
 ## Yoast SEO Integration

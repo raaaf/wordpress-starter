@@ -493,4 +493,82 @@ final class SeoServiceProviderTest extends TestCase
 
         return substr($output, $ldJsonStart, $ldJsonEnd - $ldJsonStart);
     }
+
+    public function testOgFallbackOrderIsOptionThenSectionThenRasterLogo(): void
+    {
+        $this->assertSame('opt.jpg', SeoServiceProvider::pickFallbackImageUrl('opt.jpg', 'sec.jpg', 'logo.png'));
+        $this->assertSame('sec.jpg', SeoServiceProvider::pickFallbackImageUrl(null, 'sec.jpg', 'logo.png'));
+        $this->assertSame('logo.png', SeoServiceProvider::pickFallbackImageUrl('', null, 'logo.png'));
+    }
+
+    public function testOgFallbackNeverUsesSvgLogo(): void
+    {
+        $this->assertNull(SeoServiceProvider::pickFallbackImageUrl(null, null, 'https://x.test/logo.svg'));
+        $this->assertNull(SeoServiceProvider::pickFallbackImageUrl(null, null, null));
+    }
+
+    public function testYoastDescriptionWinsOverThemeDescription(): void
+    {
+        $this->assertSame('Yoast', SeoServiceProvider::pickDescription('Yoast', 'Theme'));
+        $this->assertSame('Theme', SeoServiceProvider::pickDescription('  ', 'Theme'));
+    }
+
+    public function testYoastOgImageSkipsSectionImageOnProtectedPage(): void
+    {
+        $this->defineYoast();
+        $this->setSectionImageFixture();
+        $GLOBALS['wp_mock_password_required'] = true;
+
+        $this->assertSame([], $this->collectOgImages());
+    }
+
+    public function testYoastOgImageUsesSectionImageOnPublicPage(): void
+    {
+        $this->defineYoast();
+        $this->setSectionImageFixture();
+
+        $this->assertSame(['https://x.test/section.jpg'], $this->collectOgImages());
+    }
+
+    private function defineYoast(): void
+    {
+        if (!defined('WPSEO_VERSION')) {
+            define('WPSEO_VERSION', '1.0');
+        }
+    }
+
+    private function setSectionImageFixture(): void
+    {
+        $GLOBALS['wp_mock_is_singular'] = true;
+        $GLOBALS['wp_mock_queried_object_id'] = 4711;
+        $GLOBALS['wp_mock_attachments'][77]['full'] = ['https://x.test/section.jpg', 800, 600];
+        $this->setMockField('page_sections', [['acf_fc_layout' => 'hero', 'image' => '77']], 4711);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function collectOgImages(): array
+    {
+        $this->provider->boot();
+
+        $container = new class() {
+            /** @var array<int, string> */
+            public array $urls = [];
+
+            public function has_images(): bool
+            {
+                return $this->urls !== [];
+            }
+
+            public function add_image_by_url(string $url): void
+            {
+                $this->urls[] = $url;
+            }
+        };
+
+        apply_filters('wpseo_add_opengraph_images', $container);
+
+        return $container->urls;
+    }
 }

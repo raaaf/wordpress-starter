@@ -24,17 +24,14 @@
         </script>
     @endif
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {{-- Browser chrome colour per scheme. Values are --bg-primary from
-         resources/css/tokens.css (light: --rafael-color-gray-100 #F5F5F5, dark:
-         --rafael-color-black #000000), the same token bg-surface resolves to. --}}
-    <meta name="theme-color" content="#F5F5F5" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    {{-- Browser chrome colour: per scheme when following the system, else only the fixed one. --}}
+    {!! \WordpressStarter\Helpers\ColorScheme::themeColorMeta($colorScheme) !!}
     <link rel="pingback" href="{{ esc_url(get_bloginfo('pingback_url')) }}">
 
     {{-- Preload critical assets. Font preloads are emitted by AssetOptimizationServiceProvider::addResourcePreloading. --}}
     @if(!WP_DEBUG || !\WordpressStarter\Vite::isDevServerRunning())
-        <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/css/app.css') }}" as="style">
-        <link rel="preload" href="{{ \WordpressStarter\Vite::getAssetUrl('resources/js/app.ts') }}" as="script" crossorigin>
+        {{-- The stylesheet is a blocking <link rel=stylesheet>, so no separate preload for it. --}}
+        {!! \WordpressStarter\Vite::modulePreloadTags() !!}
     @endif
 
     {{-- Remove no-js class when JS is enabled --}}
