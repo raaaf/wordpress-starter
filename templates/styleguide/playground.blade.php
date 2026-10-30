@@ -23,8 +23,6 @@
         'white' => __('Weißer', 'wp-starter'),
         /* translators: 1: "Schwarzer" or "Weißer", 2: contrast ratio such as 4.5 */
         'contrast' => __('%1$s Text, Kontrast %2$s:1', 'wp-starter'),
-        'square' => __('Eckig', 'wp-starter'),
-        'pill' => __('Pille', 'wp-starter'),
     ];
 @endphp
 
@@ -58,10 +56,10 @@
 
             <div class="mt-8">
                 <div class="flex items-baseline justify-between gap-4 mb-2">
-                    <label for="token-radius" class="text-body-small text-content-secondary">{{ __('Ecken', 'wp-starter') }}</label>
-                    <output for="token-radius" class="text-body-small text-content tabular-nums" x-text="radiusLabel">100 %</output>
+                    <label for="token-radius" class="text-body-small text-content-secondary">{{ __('Eckenradius der Karten', 'wp-starter') }}</label>
+                    <output for="token-radius" class="text-body-small text-content tabular-nums" x-text="radiusLabel">12 px</output>
                 </div>
-                <input id="token-radius" type="range" min="0" max="4" step="0.25" value="1" class="token-range" x-model.number="radius" x-on:input="update()" :aria-valuetext="radiusLabel">
+                <input id="token-radius" type="range" min="0" max="48" step="2" value="12" class="token-range" x-model.number="radius" x-on:input="update()" :aria-valuetext="radiusLabel">
             </div>
 
             <div class="mt-8">

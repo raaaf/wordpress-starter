@@ -40,8 +40,8 @@ describe('playgroundVariables', () => {
     expect(vars['--rafael-color-ds-accent-ink']).toBe('#FFFFFF');
   });
 
-  it('scales radii, squares everything at 0 and makes pills at the maximum', () => {
-    expect(playgroundVariables(DEFAULT_ACCENT, 2, 1, sizes)['--rafael-radius-lg']).toBe('24px');
+  it('scales all radii with the card radius in px, squares everything at 0 and makes pills at the maximum', () => {
+    expect(playgroundVariables(DEFAULT_ACCENT, 24, 1, sizes)['--rafael-radius-lg']).toBe('24px');
     const square = playgroundVariables(DEFAULT_ACCENT, 0, 1, sizes);
     expect(square['--rafael-radius-lg']).toBe('0px');
     expect(square['--rafael-radius-full']).toBe('0px');
@@ -50,6 +50,7 @@ describe('playgroundVariables', () => {
     expect(pill['--rafael-radius-lg']).toBe('48px');
     expect(pill['--rafael-radius-3xl']).toBe('48px');
     expect(pill['--rafael-radius-full']).toBe('999px');
+    expect(playgroundVariables(DEFAULT_ACCENT, 24, 1, sizes)['--rafael-radius-sm']).toBe('12px');
   });
 
   it('wraps the theme font sizes instead of replacing them', () => {

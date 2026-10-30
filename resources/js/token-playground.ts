@@ -5,8 +5,9 @@
 import type { AlpineMagics } from '../../src/types/alpine';
 
 export const DEFAULT_ACCENT = '#FF6B35';
-export const DEFAULT_RADIUS = 1;
-export const MAX_RADIUS = 4;
+// Card radius in px: the slider's unit. The theme's card radius (radius-lg) is 12px.
+export const DEFAULT_RADIUS = 12;
+export const MAX_RADIUS = 48;
 export const DEFAULT_SCALE = 1;
 export const CARD_RADIUS_CAP = 48;
 
@@ -81,9 +82,11 @@ export function playgroundVariables(
 
   // Pill turns the small radii (inputs, badges) fully round. Card-sized radii
   // stop at CARD_RADIUS_CAP, a 999px card would clip its own corner content.
+  // Every radius scales with the card radius, so their proportions stay.
+  const factor = radius / RADIUS_TOKENS.lg;
   const pill = radius >= MAX_RADIUS;
   for (const [name, base] of Object.entries(RADIUS_TOKENS)) {
-    const scaled = Math.min(Math.round(base * radius * 10) / 10, CARD_RADIUS_CAP);
+    const scaled = Math.min(Math.round(base * factor * 10) / 10, CARD_RADIUS_CAP);
     vars[`--rafael-radius-${name}`] = pill && base <= 8 ? '999px' : `${scaled}px`;
   }
   // Square means square everywhere, including the pill-shaped buttons.
@@ -151,9 +154,7 @@ export function createTokenPlaygroundComponent(
     },
 
     get radiusLabel() {
-      if (this.radius <= 0) return t('square', 'Square');
-      if (this.radius >= MAX_RADIUS) return t('pill', 'Pill');
-      return `${Math.round(this.radius * 100)} %`;
+      return `${this.radius} px`;
     },
 
     get scaleLabel() {

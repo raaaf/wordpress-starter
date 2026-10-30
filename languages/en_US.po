@@ -1188,6 +1188,9 @@ msgstr "Corner in which the button floats. At the top it sits right below the pa
 msgid "Ecken"
 msgstr "Corners"
 
+msgid "Eckenradius der Karten"
+msgstr "Card corner radius"
+
 msgid "Eckig"
 msgstr "Square"
 
