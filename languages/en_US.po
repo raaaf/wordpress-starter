@@ -2892,6 +2892,9 @@ msgstr "Plugin installed and activated successfully."
 msgid "Plugin erfolgreich installiert."
 msgstr "Plugin installed successfully."
 
+msgid "Plugin hochladen"
+msgstr "Upload plugin"
+
 msgid "Plugin ist bereits aktiv."
 msgstr "The plugin is already active."
 

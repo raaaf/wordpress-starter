@@ -97,5 +97,7 @@ final class ChildThemeModeTest extends TestCase
         $this->assertStringContainsString('status_header(503)', $page);
         $this->assertStringContainsString('noindex', $page);
         $this->assertStringContainsString("current_user_can('activate_plugins')", $page);
+        $this->assertStringContainsString("current_user_can('install_plugins')", $page);
+        $this->assertStringContainsString("admin_url('plugin-install.php?tab=upload')", $page);
     }
 }

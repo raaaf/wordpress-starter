@@ -969,6 +969,7 @@ return [
     'Plugin erfolgreich aktiviert.' => 'Plugin activated successfully.',
     'Plugin erfolgreich installiert und aktiviert.' => 'Plugin installed and activated successfully.',
     'Plugin erfolgreich installiert.' => 'Plugin installed successfully.',
+    'Plugin hochladen' => 'Upload plugin',
     'Plugin ist bereits aktiv.' => 'The plugin is already active.',
     'Plugin ist bereits installiert.' => 'The plugin is already installed.',
     'Plugin-Datei nicht gefunden.' => 'Plugin file not found.',

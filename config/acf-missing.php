@@ -7,8 +7,9 @@
  * Every Blade template reads ACF fields, so without the plugin each page
  * view would fail. This page answers 503 instead: search engines retry
  * later rather than indexing an error, and visitors see a short note.
- * Administrators also get the reason and a link; the backend shows the
- * missing plugin as a notice (PluginServiceProvider).
+ * Users who may activate or install plugins also get the reason and links.
+ * Only frontend templates land here (template_include), so wp-admin stays
+ * reachable and shows the missing plugin as a notice (PluginServiceProvider).
  */
 
 declare(strict_types=1);
@@ -40,10 +41,18 @@ $wpStarterSiteName = get_bloginfo('name');
     <main>
         <h1><?php echo esc_html($wpStarterSiteName); ?></h1>
         <p><?php esc_html_e('Diese Website wird gerade eingerichtet. Bitte versuche es später noch einmal.', 'wp-starter'); ?></p>
-        <?php if (current_user_can('activate_plugins')) : ?>
+        <?php if (current_user_can('activate_plugins') || current_user_can('install_plugins')) : ?>
             <p>
                 <?php esc_html_e('Hinweis für Administratoren: Das Theme braucht das Plugin Advanced Custom Fields PRO. Bitte installieren und aktivieren.', 'wp-starter'); ?>
-                <a href="<?php echo esc_url(admin_url('plugins.php')); ?>"><?php esc_html_e('Zu den Plugins', 'wp-starter'); ?></a>
+            </p>
+            <p>
+                <?php if (current_user_can('activate_plugins')) : ?>
+                    <a href="<?php echo esc_url(admin_url('plugins.php')); ?>"><?php esc_html_e('Zu den Plugins', 'wp-starter'); ?></a>
+                <?php endif; ?>
+                <?php if (current_user_can('install_plugins')) : ?>
+                    <?php // ACF PRO is not on wordpress.org, so the upload tab, not the search. ?>
+                    <a href="<?php echo esc_url(admin_url('plugin-install.php?tab=upload')); ?>"><?php esc_html_e('Plugin hochladen', 'wp-starter'); ?></a>
+                <?php endif; ?>
             </p>
         <?php endif; ?>
     </main>
