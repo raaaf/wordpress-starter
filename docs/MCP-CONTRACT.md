@@ -6,8 +6,7 @@ write page content over MCP. It knows nothing about this theme's ACF structure a
 slug, so it stays the same in every theme forked with `bin/setup.php`.
 
 While the plugin is active, the theme options menu links to its page (`Acf\Options::addMcpPluginLink()`, capability
-`edit_pages`: editors start their own connection there). Editors lack `edit_theme_options`, so WordPress shows them the
-theme options menu with only this entry.
+`edit_theme_options` like the menu itself). Editors reach the page through Werkzeuge > Claude, which the plugin registers.
 
 ## Version 1
 

@@ -130,8 +130,10 @@ class Options
                 'theme-options',
                 __('Claude', 'wp-starter'),
                 '<span class="dashicons dashicons-admin-generic" style="font-size: 16px; width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></span>' . esc_html__('Claude', 'wp-starter'),
-                // Editors start their own connection there; the plugin checks admin parts itself.
-                'edit_pages',
+                // Same capability as the theme options menu: editors reach the
+                // page through Werkzeuge > Claude, registered by the plugin,
+                // and would otherwise see a theme options menu with one entry.
+                'edit_theme_options',
                 'tools.php?page=wpsmcp',
             );
         }, 100);
