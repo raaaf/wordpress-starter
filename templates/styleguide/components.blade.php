@@ -162,17 +162,17 @@
         <x-card
             variant="default"
             :title="__('Standard', 'wp-starter')"
-            :description="__('Karte mit Rahmen und leichtem Schatten.', 'wp-starter')"
+            :description="__('Rahmen auf der Fläche der Sektion.', 'wp-starter')"
         />
         <x-card
             variant="elevated"
             title="Elevated"
-            :description="__('Karte ohne Rahmen, die über den Schatten steht.', 'wp-starter')"
+            :description="__('Ohne Rahmen, hebt sich über einen eigenen Farbton ab.', 'wp-starter')"
         />
         <x-card
             variant="filled"
             title="Filled"
-            :description="__('Karte mit Hintergrundfarbe und Rahmen.', 'wp-starter')"
+            :description="__('Eigene Fläche eine Stufe über der Sektion, mit Rahmen.', 'wp-starter')"
         />
     </x-grid>
 

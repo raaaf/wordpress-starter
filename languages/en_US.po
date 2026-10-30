@@ -1194,6 +1194,9 @@ msgstr "Square"
 msgid "Eigene Farbe"
 msgstr "Custom colour"
 
+msgid "Eigene Fläche eine Stufe über der Sektion, mit Rahmen."
+msgstr "Its own surface one step above the section, with a border."
+
 msgid "Ein Akzent, viele Flächen."
 msgstr "One accent, many surfaces."
 
@@ -1320,8 +1323,8 @@ msgstr "Results for:"
 msgid "Erhöht"
 msgstr "Elevated"
 
-msgid "Erhöht trägt einen Schatten, Umriss nur eine Linie, Gefüllt eine eigene Fläche, Linie oben nur eine Linie über dem Text."
-msgstr "Elevated has a shadow, Outline only a line, Filled its own surface, Line on top only a line above the text."
+msgid "Erhöht hebt sich über einen eigenen Farbton ab, Umriss trägt nur eine Linie, Gefüllt eine eigene Fläche mit Linie, Linie oben nur eine Linie über dem Text. Schatten erscheinen erst beim Überfahren verlinkter Karten."
+msgstr "Raised lifts off through a tone of its own, Outline has just a line, Filled its own surface with a line, Top rule just a line above the text. Shadows only appear when hovering linked cards."
 
 msgid "Erlaubt: PDF, Word, Excel, ZIP"
 msgstr "Allowed: PDF, Word, Excel, ZIP"
@@ -1992,15 +1995,6 @@ msgstr "Add card"
 msgid "Karte laden"
 msgstr "Load map"
 
-msgid "Karte mit Hintergrundfarbe und Rahmen."
-msgstr "Card with background colour and border."
-
-msgid "Karte mit Rahmen und leichtem Schatten."
-msgstr "Card with border and a light shadow."
-
-msgid "Karte ohne Rahmen, die über den Schatten steht."
-msgstr "Card without a border that stands out through its shadow."
-
 msgid "Karte wird geladen..."
 msgstr "Loading map..."
 
@@ -2589,6 +2583,9 @@ msgstr "Top right"
 msgid "Ohne"
 msgstr "None"
 
+msgid "Ohne Rahmen, hebt sich über einen eigenen Farbton ab."
+msgstr "No border, lifted by a tone of its own."
+
 msgid "Ohne diese Option schließt sich der offene Eintrag, sobald ein anderer geöffnet wird."
 msgstr "Without this option the open item closes as soon as another one opens."
 
@@ -2927,6 +2924,9 @@ msgstr "Borders"
 
 msgid "Rahmen anzeigen"
 msgstr "Show border"
+
+msgid "Rahmen auf der Fläche der Sektion."
+msgstr "A hairline on the section's own surface."
 
 msgid "Raster"
 msgstr "Grid"

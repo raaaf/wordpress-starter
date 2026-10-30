@@ -338,6 +338,19 @@
   --card-bg: var(--bg-secondary);
 }
 
+/* Card variant "elevated": raised by tone instead of a shadow (flat at rest).
+   A touch of the text colour over the elevated surface, so it lifts off every
+   section in both modes: a light grey on light, a lighter grey on black. No
+   line at rest, also not the dark-mode card border above; the brand line on
+   hover stays. */
+.card-raised {
+  background-color: color-mix(in oklch, var(--text-primary) 8%, var(--bg-secondary));
+}
+
+:root .card.card-raised:not(:hover) {
+  border-color: transparent;
+}
+
 /* ============================================
    MOTION VOCABULARY
    ============================================ */

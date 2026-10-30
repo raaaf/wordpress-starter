@@ -2800,7 +2800,7 @@ class FieldDefinitions
                     'rule' => __('Linie oben (ohne Karte)', 'wp-starter'),
                 ],
                 'elevated',
-                __('Erhöht trägt einen Schatten, Umriss nur eine Linie, Gefüllt eine eigene Fläche, Linie oben nur eine Linie über dem Text.', 'wp-starter'),
+                __('Erhöht hebt sich über einen eigenen Farbton ab, Umriss trägt nur eine Linie, Gefüllt eine eigene Fläche mit Linie, Linie oben nur eine Linie über dem Text. Schatten erscheinen erst beim Überfahren verlinkter Karten.', 'wp-starter'),
             ),
             ...self::displaySettingsFields($prefix),
         ];

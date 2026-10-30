@@ -19,9 +19,9 @@
     @param int $level - Title heading level, 2-4 (default: 3)
     @param bool $eager - Load the image eagerly with high fetch priority instead of lazy (use for above-the-fold cards)
 
-    States from Figma:
-    - Default: Subtle shadow
-    - Hover: Brand border, enhanced shadow
+    States:
+    - Rest: flat, no shadow (edge and fill only, see $variants)
+    - Hover: Brand border, shadow
     - Active: Pressed effect with inner shadow
     - Focus: Focus ring for accessibility
     - Selected: Brand border, enhanced shadow (persistent)
@@ -49,8 +49,12 @@
 @php
     // Variants from Figma - use semantic token fallbacks instead of hardcoded hex values
     $variants = [
-        'default' => 'bg-[var(--card-bg,var(--bg-primary))] border border-[var(--card-border,var(--border-default))]',
-        'elevated' => 'border border-line bg-[var(--card-bg,var(--bg-secondary))]',
+        // Flat at rest (no shadow before hover), so the three boxed variants
+        // differ by edge and fill only: default is a hairline on the section's
+        // own surface, elevated a raised tone without a line (.card-raised in
+        // app.css), filled the card surface one step above the section plus line.
+        'default' => 'bg-transparent border border-[var(--card-border,var(--border-default))]',
+        'elevated' => 'card-raised border border-transparent',
         'outlined' => 'bg-[var(--card-bg,var(--bg-primary))] border border-line',
         // Gefuellt heisst: eine Stufe ueber der Sektion, nicht fix
         // bg-surface-secondary. Der feste Wert liess die Karte auf jeder Sektion
