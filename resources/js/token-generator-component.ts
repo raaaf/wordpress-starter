@@ -37,7 +37,10 @@ export function normalizeHex(input: string): string | null {
 }
 
 export interface TokenGeneratorConfig {
-  baseUrl: string;
+  /** REST base URL (DesignTokenRestProvider::endpoint()); the file name is appended. */
+  endpoint: string;
+  /** Start colours read on the server, so pickers and palettes show before any fetch. */
+  initial?: Record<string, string>;
   labels?: Record<string, string>;
 }
 
@@ -49,7 +52,7 @@ export interface TokenGeneratorComponent extends AlpineMagics {
   preview: { light: Record<string, string>; dark: Record<string, string> };
   readonly changed: string[];
   init(): void;
-  load(): Promise<void>;
+  load(): Promise<boolean>;
   shades(name: string): Array<{ shade: string; hex: string }>;
   setColor(name: string, value: string, target?: HTMLInputElement): void;
   update(): void;
@@ -77,13 +80,14 @@ export function createTokenGeneratorComponent(
   let base: TokenFiles | null = null;
   let applied: string[] = [];
   let frame = 0;
+  let loading: Promise<boolean> | null = null;
 
   return {
     ...({} as AlpineMagics),
     state: 'idle',
     message: '',
-    colors: {},
-    initial: {},
+    colors: { ...config.initial },
+    initial: { ...config.initial },
     preview: { light: {}, dark: {} },
 
     get changed() {
@@ -93,48 +97,45 @@ export function createTokenGeneratorComponent(
     },
 
     init() {
-      // The files only load when the section comes near the viewport.
-      if (!('IntersectionObserver' in window)) {
-        void this.load();
-        return;
-      }
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries.some((entry) => entry.isIntersecting)) {
-            observer.disconnect();
-            void this.load();
-          }
-        },
-        { rootMargin: '400px 0px' }
-      );
-      observer.observe(this.$el);
+      // Nothing loads with the page: the template calls load() on the first
+      // pointer or focus interaction with the generator.
     },
 
-    async load() {
-      if (this.state === 'loading' || this.state === 'ready') return;
-      this.state = 'loading';
-      try {
-        const [primitives, light, dark] = await Promise.all(
-          TOKEN_FILES.map(async (file) => {
-            const response = await fetch(`${config.baseUrl}${file}.tokens.json`);
-            if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
-            return response.json();
-          })
-        );
-        base = { primitives, light, dark };
-        const initial: Record<string, string> = {};
-        for (const name of COLOR_NAMES) initial[name] = currentColor(base, name) ?? '#000000';
-        this.initial = initial;
-        this.colors = { ...initial };
-        this.preview = {
-          light: previewVariables(base, 'light'),
-          dark: previewVariables(base, 'dark'),
-        };
-        this.state = 'ready';
-      } catch {
-        this.state = 'error';
-        this.message = t('loadError', 'The token files could not be loaded.');
-      }
+    load() {
+      loading ??= (async () => {
+        this.state = 'loading';
+        try {
+          const [primitives, light, dark] = await Promise.all(
+            TOKEN_FILES.map(async (file) => {
+              const response = await fetch(`${config.endpoint}${file}`, {
+                credentials: 'omit',
+                headers: { Accept: 'application/json' },
+              });
+              if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
+              return response.json();
+            })
+          );
+          base = { primitives, light, dark };
+          // The files are the reference for "changed"; edits made while loading stay.
+          const initial: Record<string, string> = {};
+          for (const name of COLOR_NAMES) {
+            initial[name] = currentColor(base, name) ?? this.initial[name] ?? '#000000';
+          }
+          for (const name of COLOR_NAMES) {
+            if (!this.colors[name] || this.colors[name] === this.initial[name]) {
+              this.colors[name] = initial[name];
+            }
+          }
+          this.initial = initial;
+          this.state = 'ready';
+          return true;
+        } catch {
+          this.state = 'error';
+          this.message = t('loadError', 'The token files could not be loaded.');
+          return false;
+        }
+      })();
+      return loading;
     },
 
     shades(name) {
@@ -163,7 +164,11 @@ export function createTokenGeneratorComponent(
       // Colour pickers fire on every pointer move: one update per frame.
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        if (!base) return;
+        if (!base) {
+          // First change before the files are here: apply once they are.
+          void this.load().then((ok) => ok && this.update());
+          return;
+        }
         const generated = generateFiles(base, this.colors, this.initial);
         const vars = pageVariables(base, generated);
         const root = document.documentElement;
@@ -185,17 +190,13 @@ export function createTokenGeneratorComponent(
       for (const name of applied) root.style.removeProperty(name);
       applied = [];
       this.colors = { ...this.initial };
-      if (base) {
-        this.preview = {
-          light: previewVariables(base, 'light'),
-          dark: previewVariables(base, 'dark'),
-        };
-      }
+      // Empty: the preview cards fall back to the page's own tokens (data-theme per card).
+      this.preview = { light: {}, dark: {} };
       this.message = t('resetDone', 'Colours reset.');
     },
 
     async download(kind) {
-      if (!base) return;
+      if (!(await this.load()) || !base) return;
       const files = generateFiles(base, this.colors, this.initial);
       const json = (name: TokenFileName) => toJson(files[name]);
       try {

@@ -4,8 +4,10 @@
     Eigene Farben wählen, Paletten und Seite folgen live, die Token-Dateien
     gibt es als Download. Läuft komplett im Browser
     (resources/js/token-generator-component.ts): Ausgangspunkt sind die
-    Token-Dateien dieser Website aus config/design-tokens/, gespeichert oder
-    an einen Server geschickt wird nichts.
+    Token-Dateien dieser Website, geholt über die REST-Route aus
+    DesignTokenRestProvider (config/ ist auf vielen Hostern fürs Web gesperrt),
+    und erst bei der ersten Interaktion. Gespeichert oder an einen Server
+    geschickt wird nichts.
 --}}
 
 @php
@@ -21,7 +23,8 @@
         'error' => __('Fehler', 'wp-starter'),
     ];
     $config = [
-        'baseUrl' => get_template_directory_uri() . '/config/design-tokens/',
+        'endpoint' => \WordpressStarter\Providers\DesignTokenRestProvider::endpoint(),
+        'initial' => \WordpressStarter\Helpers\DesignTokenFiles::baseColors(),
         'labels' => [
             'loadError' => __('Die Token-Dateien konnten nicht geladen werden. Bitte die Seite neu laden.', 'wp-starter'),
             'invalid' => __('Bitte eine Farbe als #RRGGBB eingeben.', 'wp-starter'),
@@ -50,10 +53,16 @@
         :description="__('Eigene Farben wählen: Paletten, Vorschau und diese Seite folgen sofort. Danach die Token-Dateien für dein Theme herunterladen.', 'wp-starter')"
     />
 
-    <div x-data="tokenGenerator(@js($config))" class="flex flex-col gap-6">
+    <div
+        x-data="tokenGenerator(@js($config))"
+        x-on:pointerenter.once="load()"
+        x-on:focusin.once="load()"
+        x-on:pointerdown.once="load()"
+        class="flex flex-col gap-6"
+    >
         <x-card variant="outlined" padding="none" class="p-6">
             @foreach(['palette' => [__('Paletten', 'wp-starter'), $paletteNames], 'status' => [__('Statusfarben', 'wp-starter'), $statusNames]] as $group => [$legend, $names])
-                <fieldset class="{{ $loop->first ? 'm-0' : 'mx-0 mb-0 mt-8' }} p-0 border-0" x-bind:disabled="state !== 'ready'">
+                <fieldset class="{{ $loop->first ? 'm-0' : 'mx-0 mb-0 mt-8' }} p-0 border-0" x-bind:disabled="state === 'error'">
                     <legend class="mb-4 text-body-small text-content-secondary">{{ $legend }}</legend>
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 {{ $group === 'palette' ? 'lg:grid-cols-4' : 'lg:grid-cols-3' }}">
                         @foreach($names as $name => $label)
@@ -103,7 +112,7 @@
         {{-- Light and dark side by side, coloured from the generated token files. --}}
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             @foreach($previews as $mode => $modeLabel)
-                <div class="token-gen-preview" x-bind:style="preview.{{ $mode }}">
+                <div class="token-gen-preview" data-theme="{{ $mode }}" x-bind:style="preview.{{ $mode }}">
                     <p class="m-0 text-overline token-gen-preview__muted">{{ $modeLabel }}</p>
                     <div class="token-gen-preview__card">
                         <p class="m-0 text-h4">{{ __('Ein Akzent, viele Flächen.', 'wp-starter') }}</p>
@@ -135,10 +144,10 @@
                     </p>
                 </div>
                 <div class="flex flex-col items-start gap-3 lg:items-end">
-                    <x-button :title="__('Alles als ZIP', 'wp-starter')" x-on:click="download('zip')" x-bind:disabled="state !== 'ready'" />
+                    <x-button :title="__('Alles als ZIP', 'wp-starter')" x-on:click="download('zip')" x-bind:disabled="state === 'error'" />
                     <div class="flex flex-wrap gap-2 lg:justify-end">
                         @foreach($files as $kind => $fileName)
-                            <x-button :title="$fileName" variant="secondary" size="sm" x-on:click="download('{{ $kind }}')" x-bind:disabled="state !== 'ready'" />
+                            <x-button :title="$fileName" variant="secondary" size="sm" x-on:click="download('{{ $kind }}')" x-bind:disabled="state === 'error'" />
                         @endforeach
                     </div>
                 </div>

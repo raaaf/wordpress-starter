@@ -1571,6 +1571,21 @@ if (!class_exists('WP_REST_Response')) {
         {
             return $this->status;
         }
+
+        /** @var array<string, string> */
+        private array $headers = [];
+
+        /** @param array<string, string> $headers */
+        public function set_headers(array $headers): void
+        {
+            $this->headers = $headers;
+        }
+
+        /** @return array<string, string> */
+        public function get_headers(): array
+        {
+            return $this->headers;
+        }
     }
 }
 
@@ -1615,6 +1630,36 @@ if (!class_exists('WP_REST_Request')) {
         {
             return $this->route;
         }
+
+        /** @var array<string, string> */
+        private array $headers = [];
+
+        public function set_header(string $key, string $value): void
+        {
+            $this->headers[strtolower(str_replace('-', '_', $key))] = $value;
+        }
+
+        public function get_header(string $key): ?string
+        {
+            return $this->headers[strtolower(str_replace('-', '_', $key))] ?? null;
+        }
+    }
+}
+
+if (!function_exists('register_rest_route')) {
+    /** Records the route so tests can call its callback. */
+    function register_rest_route(string $namespace, string $route, array $args = []): bool
+    {
+        $GLOBALS['wp_mock_rest_routes'][$namespace . $route] = $args;
+
+        return true;
+    }
+}
+
+if (!function_exists('rest_url')) {
+    function rest_url(string $path = ''): string
+    {
+        return ( $GLOBALS['wp_mock_rest_url'] ?? 'https://example.com/wp-json/' ) . ltrim($path, '/');
     }
 }
 

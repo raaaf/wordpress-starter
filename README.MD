@@ -137,6 +137,7 @@ The providers are listed in `Application::registerProviders()`; `PluginServicePr
 | `WelcomeServiceProvider`            | Welcome notice, styleguide page, ACF options prefill                           |
 | `SeoServiceProvider`                | JSON-LD, OG tags, canonical URLs, robots meta                                  |
 | `DesignTokenServiceProvider`        | Token file upload/download/validation, CSS regeneration                        |
+| `DesignTokenRestProvider`           | Public read-only REST route with the three token files for the token generator |
 | `CronServiceProvider`               | Transient and revision cleanup                                                 |
 | `LogServiceProvider`                | Structured logging to debug.log                                                |
 | `ThemeUpdateProvider`               | GitHub-based theme updates                                                     |

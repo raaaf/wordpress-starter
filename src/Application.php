@@ -11,6 +11,7 @@ use WordpressStarter\Providers\AssetOptimizationServiceProvider;
 use WordpressStarter\Providers\BladeServiceProvider;
 use WordpressStarter\Providers\BrandingServiceProvider;
 use WordpressStarter\Providers\CronServiceProvider;
+use WordpressStarter\Providers\DesignTokenRestProvider;
 use WordpressStarter\Providers\DesignTokenServiceProvider;
 use WordpressStarter\Providers\EditorIntegrationServiceProvider;
 use WordpressStarter\Providers\EditorStylesServiceProvider;
@@ -92,6 +93,7 @@ class Application
             EditorStylesServiceProvider::class,
             IconShortcodeServiceProvider::class,
             MemberAreaServiceProvider::class,
+            DesignTokenRestProvider::class, // not admin-gated: REST requests are frontend requests
         ];
 
         // Admin-only providers: every hook they register is admin-side
