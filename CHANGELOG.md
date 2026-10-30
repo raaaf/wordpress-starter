@@ -1,3 +1,47 @@
+# [2.43.0](https://github.com/raaaf/wordpress-starter/compare/v2.42.4...v2.43.0) (2026-10-30)
+
+### Bug Fixes
+
+- black and white surfaces, full orange icon tiles and CTA ([d0ccf4f](https://github.com/raaaf/wordpress-starter/commit/d0ccf4f8a1f53a33052559dd5b80d9a3c523146b))
+- column footer follows its visible columns and one left edge ([db4cb41](https://github.com/raaaf/wordpress-starter/commit/db4cb412c3b9bcd593d82b88d3506e613fd9e55e))
+- drop the sheen on default cards, neutral filled card description ([56524fe](https://github.com/raaaf/wordpress-starter/commit/56524fec158405bec968a511cdc3f809f2ec0b85))
+- load token generator files through a REST route ([f2ede89](https://github.com/raaaf/wordpress-starter/commit/f2ede898ffb87943abb48f6254f19439f9e7a11e))
+- make the card variants distinguishable while flat at rest ([930e798](https://github.com/raaaf/wordpress-starter/commit/930e7985dd1bb3f68b099c912982fc4c010e7834))
+- max-w-7xl container, darker dark cards, no empty band in image cards ([fc5bf0b](https://github.com/raaaf/wordpress-starter/commit/fc5bf0b54973d9ed610bba6c190e9f3aa3474a87)), closes [#0E0E0E](https://github.com/raaaf/wordpress-starter/issues/0E0E0E)
+- MCP contract reads drafts, Claude link for editors ([525d5af](https://github.com/raaaf/wordpress-starter/commit/525d5af5b3807d32585027e0fa7767adf02c55be))
+- **member-area:** check bracketed IPv6 URL hosts as IP literals ([cc33269](https://github.com/raaaf/wordpress-starter/commit/cc33269599c1e1cbb71db5273fd0674dbbbf78ce))
+- **member-area:** rotate encryption keys, lock and report folder sync ([ffb0f6a](https://github.com/raaaf/wordpress-starter/commit/ffb0f6a725981ec77eb3db9a8695de84805aab3d))
+- module container max-w-5xl (64rem) ([48dafb9](https://github.com/raaaf/wordpress-starter/commit/48dafb97d1a5956c5dea6262737085d868eaf63e))
+- page headers on a flat surface band ([0ee8ea3](https://github.com/raaaf/wordpress-starter/commit/0ee8ea36a0e918c2d2e930286cd97bb199f3fc7b))
+- playground custom swatch state, visible sliders, matching before/after image sizes ([86d50bf](https://github.com/raaaf/wordpress-starter/commit/86d50bf1667ccc6808572f1b9743212e89780f31))
+- playground font size as S/M/L/XL, hover only on hover devices ([6b82657](https://github.com/raaaf/wordpress-starter/commit/6b8265731274de7ee08f4c0f10b715f5d634e728))
+- PNG favicon from original_image, design system page without duplicates ([39d8b2b](https://github.com/raaaf/wordpress-starter/commit/39d8b2b9270bd490fdfd45dc9988a622ed7e2255))
+- pricing features align with the plan title, timeline image fills its card ([413b965](https://github.com/raaaf/wordpress-starter/commit/413b965db279e0bfb4285e933c23340bde1119ed))
+- screen reader numbers, logging, typography and smaller frontend fixes ([eab6bd1](https://github.com/raaaf/wordpress-starter/commit/eab6bd1a5bb61e431d268e0287dc518dbcc8a353))
+- show the Claude menu link only with edit_theme_options ([0795ae1](https://github.com/raaaf/wordpress-starter/commit/0795ae1eba40a22c9d81596f2d9e59d4507ee4b4))
+- translate custom post type names and the icon picker ([bc35113](https://github.com/raaaf/wordpress-starter/commit/bc35113bcaa5b7246d108decd750340ed96bc397))
+
+### Features
+
+- child theme readiness (contract v1) ([a6aada6](https://github.com/raaaf/wordpress-starter/commit/a6aada6035a92147b8036fbb88de6b686adfce69))
+- circle colour scheme transition, before/after intro, translatable tools page ([6ec5784](https://github.com/raaaf/wordpress-starter/commit/6ec578411485f15298e6ffbf41d0ec27c10edc15))
+- corner slider in px ([78e38cc](https://github.com/raaaf/wordpress-starter/commit/78e38cc68731dc5f7df8627a2f7da9d7484483c5))
+- dark mode logo from the site_logo_dark option ([12d246d](https://github.com/raaaf/wordpress-starter/commit/12d246de4ce487b233db25ec43aba47b2954f33f))
+- design system fonts, colours and the scape layout ([85e5c73](https://github.com/raaaf/wordpress-starter/commit/85e5c73b17b13650038dc44585522e276ed97a89))
+- download list, rule cards, stacked hero, header and footer options ([66d6c2c](https://github.com/raaaf/wordpress-starter/commit/66d6c2c100c0b1c5635d2aa95867bf0dd76f7d21))
+- English (en_US) translation of the theme ([d801faa](https://github.com/raaaf/wordpress-starter/commit/d801faa6823b99f55dc55b635da0aed325b9beda))
+- favicons and manifest, SEO fallbacks, redirects, modulepreload ([b703091](https://github.com/raaaf/wordpress-starter/commit/b703091628ab3b847bf751c58203f69413f612bc))
+- gallery aspect ratio, zoom on the image module, compact image captions ([acd598a](https://github.com/raaaf/wordpress-starter/commit/acd598ad1a48bb0f944ed3912c58820ecc620aef))
+- header colour scheme switcher, public design system page, PNG favicons ([3b1e57c](https://github.com/raaaf/wordpress-starter/commit/3b1e57c4f447d0cd0f5e243bb906078eb7ef9636))
+- link plugin upload on the ACF-missing page ([e58055f](https://github.com/raaaf/wordpress-starter/commit/e58055f66a2b60d301724d37f75bd3a5478a07fe))
+- MCP contract for the Claude plugin (version 1) ([3f6eafe](https://github.com/raaaf/wordpress-starter/commit/3f6eafec096f8917511670a3c8eb57d294c08f2f))
+- public token generator on the design system page ([fcb57d8](https://github.com/raaaf/wordpress-starter/commit/fcb57d87ac2515f2969cd4a940f45c371ec97cd0)), closes [#token-generator](https://github.com/raaaf/wordpress-starter/issues/token-generator)
+- require checksum and offline signature for theme updates ([e95d55f](https://github.com/raaaf/wordpress-starter/commit/e95d55fba1bc4094143361bd0755c4b2f7be66fc))
+- segmented buttons instead of sliders in the playground ([5092aa8](https://github.com/raaaf/wordpress-starter/commit/5092aa8db236f8f53edefb3393598519f60a5fa7))
+- separate button corner radius slider in the playground ([b4daaf9](https://github.com/raaaf/wordpress-starter/commit/b4daaf9d0dcf012dcfc36ce239c0ea8a13c80e4a))
+- token generator option for accent primary buttons ([599d64f](https://github.com/raaaf/wordpress-starter/commit/599d64f8d1c1de0433bce5544f0a2dbb380bd45b))
+- token playground on the design system page ([61b4a8b](https://github.com/raaaf/wordpress-starter/commit/61b4a8ba75580c0c2562db9c64ed24fc9f0f5966))
+
 ## [2.42.4](https://github.com/raaaf/wordpress-starter/compare/v2.42.3...v2.42.4) (2026-10-30)
 
 ### Bug Fixes
