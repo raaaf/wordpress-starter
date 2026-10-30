@@ -6,11 +6,14 @@ namespace WordpressStarter;
 
 use Closure;
 use Illuminate\Container\Container;
+use WordpressStarter\Mcp\ContractProvider;
 use WordpressStarter\Providers\AcfServiceProvider;
 use WordpressStarter\Providers\AssetOptimizationServiceProvider;
 use WordpressStarter\Providers\BladeServiceProvider;
 use WordpressStarter\Providers\BrandingServiceProvider;
+use WordpressStarter\Providers\ChildThemeServiceProvider;
 use WordpressStarter\Providers\CronServiceProvider;
+use WordpressStarter\Providers\DesignTokenRestProvider;
 use WordpressStarter\Providers\DesignTokenServiceProvider;
 use WordpressStarter\Providers\EditorIntegrationServiceProvider;
 use WordpressStarter\Providers\EditorStylesServiceProvider;
@@ -24,6 +27,7 @@ use WordpressStarter\Providers\MenuServiceProvider;
 use WordpressStarter\Providers\PluginConfiguratorServiceProvider;
 use WordpressStarter\Providers\PluginServiceProvider;
 use WordpressStarter\Providers\PostTypeServiceProvider;
+use WordpressStarter\Providers\RedirectServiceProvider;
 use WordpressStarter\Providers\SecurityServiceProvider;
 use WordpressStarter\Providers\SeoServiceProvider;
 use WordpressStarter\Providers\ServiceProvider;
@@ -81,6 +85,7 @@ class Application
             EditorIntegrationServiceProvider::class,
             BrandingServiceProvider::class,
             SeoServiceProvider::class,
+            RedirectServiceProvider::class,
             LlmsTxtProvider::class,
             ImageServiceProvider::class,
             ThemeUpdateProvider::class,
@@ -90,6 +95,9 @@ class Application
             EditorStylesServiceProvider::class,
             IconShortcodeServiceProvider::class,
             MemberAreaServiceProvider::class,
+            DesignTokenRestProvider::class, // not admin-gated: REST requests are frontend requests
+            ChildThemeServiceProvider::class, // not admin-gated: enqueues the child tokens on the frontend, imports logos on acf/init
+            ContractProvider::class, // not admin-gated: the MCP plugin asks for the contract in REST requests
         ];
 
         // Admin-only providers: every hook they register is admin-side

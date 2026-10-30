@@ -152,35 +152,38 @@
      <input type="checkbox"> rendered as a white block on the dark page. */
   color-scheme: light;
   accent-color: var(--bg-accent);
+
+  /* Design-kit secondary button: stone in light, elevated in dark (see the
+     dark blocks below). Stone-deep on hover. */
+  --bg-button-secondary: var(--bg-tertiary);
+  --bg-button-secondary-hover: var(--bg-tertiary-elevated);
+  --bg-button-secondary-on-stone: var(--bg-tertiary-elevated);
+  --bg-button-secondary-on-stone-hover: color-mix(
+    in srgb,
+    var(--bg-tertiary-elevated) 85%,
+    var(--text-primary)
+  );
 }
 
 [data-theme='dark'] {
-  /* ------------------------------------------------------------------
-     Dunkelmodus-Flaechen, Vorbild Linear.
+  /* Dark surfaces follow the design kit: a black ground, neutral steps
+     (stone #070707, stone-deep #0E0E0E, elevated #141414) and white hairlines
+     at 7 to 10 %, the Vercel/Linear look. No blue tint any more. The values
+     live in the token export; only the secondary button needs its own pair,
+     because the kit fills it with the elevated tone in dark and stone in light. */
+  --bg-button-secondary: var(--rafael-color-ds-surface-elevated-dark);
+  --bg-button-secondary-hover: var(--rafael-color-primary-800);
+  --bg-button-secondary-on-stone: var(--rafael-color-primary-800);
+  --bg-button-secondary-on-stone-hover: var(--rafael-color-gray-800);
 
-     Vorher: Grundton #171717, naechste Stufe #262626, dann #404040. Die
-     Spruenge waren ungleich, die Flaechen neutral grau, und Karten trugen
-     dieselbe Farbe wie ihre Sektion. Getragen wurde die Abgrenzung allein von
-     Raendern, gemessen 1.6:1 gegen den Untergrund. Das Ergebnis wirkte flach
-     und hart zugleich.
-
-     Jetzt: sehr dunkler, leicht kuehler Grundton und kleine, gleichmaessige
-     Stufen. Elevation entsteht ueber Helligkeit, nicht ueber Linien, deshalb
-     duerfen die Raender wieder dezent sein. Die Werte sind bewusst als Hex
-     notiert und nicht aus der Grau-Rampe abgeleitet: die Rampe ist neutral,
-     dieser Modus braucht den leichten Blaustich, der dunkle Flaechen ruhig
-     wirken laesst.
-
-     Nur fuer dieses Theme gemessen. Nicht in die Kundenthemes kopieren, deren
-     Akzentrampen laufen gegenlaeufig. --------------------------------- */
-  --bg-brand-subtle: #1d1210;
-
-  --card-bg: var(--bg-secondary);
+  /* Cards one step above the page, not the elevated tone: #141414 plus the
+     wash read washed out on black (Rafael, 2026-10-29). */
+  --card-bg: var(--bg-tertiary-elevated);
   --card-border: var(--border-default);
   --surface-sheen: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.015) 45%,
+    rgba(255, 255, 255, 0.035) 0%,
+    rgba(255, 255, 255, 0.01) 45%,
     transparent 80%
   );
   --page-sheen: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, transparent 50%);
@@ -255,32 +258,24 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    /* ------------------------------------------------------------------
-       Dunkelmodus-Flaechen, Vorbild Linear.
-  
-       Vorher: Grundton #171717, naechste Stufe #262626, dann #404040. Die
-       Spruenge waren ungleich, die Flaechen neutral grau, und Karten trugen
-       dieselbe Farbe wie ihre Sektion. Getragen wurde die Abgrenzung allein von
-       Raendern, gemessen 1.6:1 gegen den Untergrund. Das Ergebnis wirkte flach
-       und hart zugleich.
-  
-       Jetzt: sehr dunkler, leicht kuehler Grundton und kleine, gleichmaessige
-       Stufen. Elevation entsteht ueber Helligkeit, nicht ueber Linien, deshalb
-       duerfen die Raender wieder dezent sein. Die Werte sind bewusst als Hex
-       notiert und nicht aus der Grau-Rampe abgeleitet: die Rampe ist neutral,
-       dieser Modus braucht den leichten Blaustich, der dunkle Flaechen ruhig
-       wirken laesst.
-  
-       Nur fuer dieses Theme gemessen. Nicht in die Kundenthemes kopieren, deren
-       Akzentrampen laufen gegenlaeufig. --------------------------------- */
-    --bg-brand-subtle: #1d1210;
+    /* Dark surfaces follow the design kit: a black ground, neutral steps
+       (stone #070707, stone-deep #0E0E0E, elevated #141414) and white hairlines
+       at 7 to 10 %, the Vercel/Linear look. No blue tint any more. The values
+       live in the token export; only the secondary button needs its own pair,
+       because the kit fills it with the elevated tone in dark and stone in light. */
+    --bg-button-secondary: var(--rafael-color-ds-surface-elevated-dark);
+    --bg-button-secondary-hover: var(--rafael-color-primary-800);
+    --bg-button-secondary-on-stone: var(--rafael-color-primary-800);
+    --bg-button-secondary-on-stone-hover: var(--rafael-color-gray-800);
 
-    --card-bg: var(--bg-secondary);
+    /* Cards one step above the page, not the elevated tone: #141414 plus the
+       wash read washed out on black (Rafael, 2026-10-29). */
+    --card-bg: var(--bg-tertiary-elevated);
     --card-border: var(--border-default);
     --surface-sheen: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.06) 0%,
-      rgba(255, 255, 255, 0.015) 45%,
+      rgba(255, 255, 255, 0.035) 0%,
+      rgba(255, 255, 255, 0.01) 45%,
       transparent 80%
     );
     --page-sheen: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, transparent 50%);
@@ -343,22 +338,23 @@
   --card-bg: var(--bg-secondary);
 }
 
-/* Im Dunkelmodus ist --bg-secondary eine Stufe DUNKLER als --bg-tertiary
-   (vertieft statt erhoben) -- die Karte wuerde also in die Flaeche absinken
-   statt sich abzuheben. Eine Stufe ueber tertiary existiert nicht, daher hier
-   ein eigener Zwischenwert. Nur fuer dieses Theme gemessen, Client-Themes
-   leiten ihren eigenen Wert ab. Hellmodus unveraendert (siehe Regel oben). */
-
-[data-theme='dark'] .bg-surface-tertiary {
-  --card-surface: var(--bg-tertiary-elevated);
-  --card-bg: var(--bg-tertiary-elevated);
+/* Card variant "elevated": raised by tone instead of a shadow (flat at rest).
+   A touch of the text colour over the elevated surface, so it lifts off every
+   section in both modes: a light grey on light, a lighter grey on black. No
+   line at rest, also not the dark-mode card border above; the brand line on
+   hover stays. */
+.card-raised {
+  background-color: color-mix(in oklch, var(--text-primary) 8%, var(--bg-secondary));
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .bg-surface-tertiary {
-    --card-surface: var(--bg-tertiary-elevated);
-    --card-bg: var(--bg-tertiary-elevated);
-  }
+:root .card.card-raised:not(:hover) {
+  border-color: transparent;
+}
+
+/* Card variant "default": lies on the section's own surface, so without the
+   surface sheen the .card base adds in @layer components. */
+.card-plain {
+  background-image: none;
 }
 
 /* ============================================
@@ -422,17 +418,34 @@
     color: var(--bg-accent);
   }
 
-  /* The DS never puts white on an accent fill (raw accent fails AA, see the
-     checkbox-mark contract pairing in theme-hub's contract.ts); the mark is
-     accent.ink instead. A data URI cannot read a custom property, so the hex
-     is literal here and recorded in DESIGN.md — copied shapes, plugin's own
-     white swapped for #1C1917. */
+  /* Checked controls follow the design-kit toggle: the fill is the primary
+     button fill (ink in light, #E8E8E6 in dark) and the mark is the primary
+     button label on it (white in light, ink in dark). A data URI cannot read a
+     custom property, so both marks are literal here and recorded in DESIGN.md. */
   :is([type='checkbox'], [type='radio']):checked {
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='%231C1917' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='%23FFFFFF' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
   }
 
   [type='radio']:checked {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='%23FFFFFF' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='8' cy='8' r='3'/%3E%3C/svg%3E");
+  }
+
+  :root[data-theme='dark'] :is([type='checkbox'], [type='radio']):checked {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='%231C1917' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+  }
+
+  :root[data-theme='dark'] [type='radio']:checked {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='%231C1917' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='8' cy='8' r='3'/%3E%3C/svg%3E");
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) :is([type='checkbox'], [type='radio']):checked {
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='%231C1917' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+    }
+
+    :root:not([data-theme='light']) [type='radio']:checked {
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='%231C1917' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='8' cy='8' r='3'/%3E%3C/svg%3E");
+    }
   }
 
   :is([type='checkbox'], [type='radio']):disabled {
@@ -462,6 +475,23 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+/* Site logo pair (Fields::siteLogoMarkup): the dark copy replaces the light one
+   under the dark variant, so the explicit toggle and the system setting both apply. */
+.site-logo--light {
+  @variant dark {
+    display: none;
+  }
+}
+
+.site-logo--dark {
+  display: none;
+
+  /* block, like every img after Tailwind's preflight */
+  @variant dark {
+    display: block;
+  }
 }
 
 .section[id] {
@@ -572,6 +602,7 @@ html {
   }
 
   .prose :is(h3) {
+    font-family: var(--typography-h3-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h3-size);
     font-weight: var(--typography-h3-weight);
     line-height: var(--typography-h3-line-height);
@@ -579,6 +610,7 @@ html {
   }
 
   .prose :is(h4) {
+    font-family: var(--typography-h4-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h4-size);
     font-weight: var(--typography-h4-weight);
     line-height: var(--typography-h4-line-height);
@@ -586,6 +618,7 @@ html {
   }
 
   .prose :is(h5, h6) {
+    font-family: var(--typography-h5-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h5-size);
     font-weight: var(--typography-h5-weight);
     line-height: var(--typography-h5-line-height);
@@ -670,7 +703,7 @@ html {
     .text-content-tertiary
   ):not(
     :is(
-      .card,
+      .card:not(.card--rule),
       .alert,
       .badge,
       .button,
@@ -685,7 +718,7 @@ html {
   ):not(
     .bg-surface-inverse
       :is(
-        .card,
+        .card:not(.card--rule),
         .alert,
         .badge,
         .button,
@@ -721,7 +754,7 @@ html {
     .text-content-tertiary
   ):not(
     :is(
-      .card,
+      .card:not(.card--rule),
       .alert,
       .badge,
       .button,
@@ -736,7 +769,7 @@ html {
   ):not(
     .bg-surface-brand
       :is(
-        .card,
+        .card:not(.card--rule),
         .alert,
         .badge,
         .button,
@@ -777,7 +810,7 @@ html {
    Statt die Ausnahmeliste weiter zu verlaengern, traegt jede Flaeche ihre
    eigene Farbe: wer einen Hintergrund setzt, setzt auch die Schrift dazu. Die
    Vererbung endet damit an der naechsten Flaeche, egal wie tief sie liegt. */
-.card,
+.card:not(.card--rule),
 .alert,
 .bg-surface,
 .bg-surface-secondary,
@@ -948,8 +981,8 @@ html {
 }
 
 /* Ensure content within full-width blocks stays readable */
-.alignfull > .max-w-7xl,
-.alignwide > .max-w-7xl {
+.alignfull > .max-w-\[var\(--container-max\)\],
+.alignwide > .max-w-\[var\(--container-max\)\] {
   margin-left: auto;
   margin-right: auto;
   padding-left: var(--wp--preset--spacing--4, 1rem);
@@ -1001,22 +1034,38 @@ html {
 /* Jump menu rows (list entries, hits): one neutral fill for hover, focus and the
    current entry. Light uses surface-tertiary; in dark mode surface-secondary is
    the lighter step, so it swaps there (same selectors as the dark blocks above). */
-.jump-menu-row:hover,
 .jump-menu-row:focus-visible,
 .jump-menu-row[aria-current='location'] {
   background-color: var(--color-surface-tertiary);
 }
 
-[data-theme='dark'] .jump-menu-row:hover,
+/* Hover only where a pointer can hover: touch would keep it after a tap. */
+@media (hover: hover) and (pointer: fine) {
+  .jump-menu-row:hover {
+    background-color: var(--color-surface-tertiary);
+  }
+}
+
 [data-theme='dark'] .jump-menu-row:focus-visible,
 [data-theme='dark'] .jump-menu-row[aria-current='location'] {
   background-color: var(--color-surface-secondary);
 }
 
+@media (hover: hover) and (pointer: fine) {
+  [data-theme='dark'] .jump-menu-row:hover {
+    background-color: var(--color-surface-secondary);
+  }
+}
+
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .jump-menu-row:hover,
   :root:not([data-theme='light']) .jump-menu-row:focus-visible,
   :root:not([data-theme='light']) .jump-menu-row[aria-current='location'] {
+    background-color: var(--color-surface-secondary);
+  }
+}
+
+@media (prefers-color-scheme: dark) and (hover: hover) and (pointer: fine) {
+  :root:not([data-theme='light']) .jump-menu-row:hover {
     background-color: var(--color-surface-secondary);
   }
 }
@@ -1064,50 +1113,30 @@ html {
   }
 
   /* Page-Frame Rule (rafaelalex.de design system, section 2): the page
-     background carries a noise-textured SVG plus two diagonal radial
-     gradients in Signal Orange, a property of the body, not a layout
-     choice. Cells sit on top transparently. */
-  /* Colaborate ships in light and regular only. Without this, every
-     <strong>, <b> and heavy utility would get a synthetic bold from the
-     browser, which is the one look the typeface must not have. */
+     background carries a noise-textured SVG and the page sheen, a property of
+     the body, not a layout choice. Cells sit on top transparently. */
+  /* Colaborate ships in light and regular only, Cal Sans Text in light,
+     regular and medium. Without this, every <strong>, <b> and heavy utility
+     would get a synthetic bold from the browser, which is the one look these
+     typefaces must not have. */
   html {
     font-synthesis-weight: none;
   }
 
+  /* Running text is the design system's body role: Cal Sans Text Light. */
   body {
+    font-family: var(--typography-body-family), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--typography-body-size);
+    font-weight: var(--typography-body-weight);
+    line-height: var(--typography-body-line-height);
     color: var(--text-primary);
+    /* Plain ground: black and white only, no orange wash behind the page. */
     background:
       var(--noise-texture) repeat,
       var(--page-sheen) no-repeat 0 0 / 100% 100vh,
-      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.04) 0%, transparent 60%) fixed,
-      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.03) 0%, transparent 50%)
-        fixed,
       var(--bg-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }
-
-  :root[data-theme='light'] body {
-    background:
-      var(--noise-texture) repeat,
-      var(--page-sheen) no-repeat 0 0 / 100% 100vh,
-      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.03) 0%, transparent 60%) fixed,
-      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.02) 0%, transparent 50%)
-        fixed,
-      var(--bg-primary);
-  }
-
-  @media (prefers-color-scheme: light) {
-    :root:not([data-theme='dark']) body {
-      background:
-        var(--noise-texture) repeat,
-        var(--page-sheen) no-repeat 0 0 / 100% 100vh,
-        radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 107, 53, 0.03) 0%, transparent 60%)
-          fixed,
-        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 107, 53, 0.02) 0%, transparent 50%)
-          fixed,
-        var(--bg-primary);
-    }
   }
 
   /* ============================================
@@ -1117,7 +1146,7 @@ html {
 
   h1,
   .text-h1 {
-    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--typography-h1-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h1-size);
     font-weight: var(--typography-h1-weight);
     line-height: var(--typography-h1-line-height);
@@ -1130,7 +1159,7 @@ html {
 
   h2,
   .text-h2 {
-    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--typography-h2-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h2-size);
     font-weight: var(--typography-h2-weight);
     line-height: var(--typography-h2-line-height);
@@ -1143,7 +1172,7 @@ html {
 
   h3,
   .text-h3 {
-    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--typography-h3-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h3-size);
     font-weight: var(--typography-h3-weight);
     line-height: var(--typography-h3-line-height);
@@ -1156,7 +1185,7 @@ html {
 
   h4,
   .text-h4 {
-    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--typography-h4-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h4-size);
     font-weight: var(--typography-h4-weight);
     line-height: var(--typography-h4-line-height);
@@ -1169,7 +1198,7 @@ html {
 
   h5,
   .text-h5 {
-    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--typography-h5-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-h5-size);
     font-weight: var(--typography-h5-weight);
     line-height: var(--typography-h5-line-height);
@@ -1180,10 +1209,10 @@ html {
     margin-bottom: 0.5em;
   }
 
-  /* h6 no longer shares h5's size — it steps down to the body size so the
-     level is told apart without weight (weight is fixed at 400 theme-wide). */
+  /* h6 no longer shares h5's size — it steps down to the body size and the
+     secondary colour, so the level is told apart from h5 at the same weight. */
   h6 {
-    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--typography-h5-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-body-size);
     font-weight: var(--typography-h5-weight);
     line-height: var(--typography-h5-line-height);
@@ -1216,7 +1245,7 @@ html {
       .text-h3,
       .text-h4,
       .text-h5
-    ):not(:is(.card, .alert) *) {
+    ):not(:is(.card:not(.card--rule), .alert) *) {
     color: var(--text-on-brand);
   }
 
@@ -1277,11 +1306,28 @@ html {
     border-radius: 0;
   }
 
+  /* Strong text stays in the running face, one weight up (Text Medium). */
+  :is(strong, b) {
+    font-weight: var(--rafael-font-weight-medium);
+  }
+
   /* Only underline links inside prose content - WCAG 2.1 SC 1.4.1 */
   /* Button classes are excluded — they handle their own text-decoration */
+  /* Design-kit link: the text keeps the text colour, the 2px underline carries
+     the Signal orange. Orange text never sits on a light surface (orange rule
+     R2), an orange line does. */
   .prose a:not(.no-underline, .button-primary, .button-secondary, .button-ghost) {
     text-decoration: underline;
+    text-decoration-color: var(--rafael-color-ds-accent-base);
+    text-decoration-thickness: 2px;
     text-underline-offset: 4px;
+  }
+
+  /* Colour stays; the underline turns to the text colour as the hover cue. */
+  @media (hover: hover) and (pointer: fine) {
+    .prose a:not(.no-underline, .button-primary, .button-secondary, .button-ghost):hover {
+      text-decoration-color: currentColor;
+    }
   }
 
   /* Focus-visible styles - WCAG 2.1 SC 2.4.7 and 2.4.13: Visible focus indicator.
@@ -1361,7 +1407,7 @@ html {
 @layer utilities {
   /* Display Heading - 60px / Bold */
   .text-display {
-    font-family: var(--rafael-font-family-headline), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--typography-display-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-display-size);
     font-weight: var(--typography-display-weight);
     line-height: var(--typography-display-line-height);
@@ -1374,7 +1420,7 @@ html {
 
   /* Body Large - 18px / Regular - Intro text */
   .text-body-large {
-    font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--typography-body-large-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-body-large-size);
     font-weight: var(--typography-body-large-weight);
     line-height: var(--typography-body-large-line-height);
@@ -1383,7 +1429,7 @@ html {
 
   /* Body - 16px / Regular - Standard text */
   .text-body {
-    font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--typography-body-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-body-size);
     font-weight: var(--typography-body-weight);
     line-height: var(--typography-body-line-height);
@@ -1392,7 +1438,7 @@ html {
 
   /* Body Small - 14px / Regular - Secondary text */
   .text-body-small {
-    font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--typography-body-small-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-body-small-size);
     font-weight: var(--typography-body-small-weight);
     line-height: var(--typography-body-small-line-height);
@@ -1401,7 +1447,7 @@ html {
 
   /* Caption - 12px / Regular - Meta info */
   .text-caption {
-    font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--typography-caption-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-caption-size);
     font-weight: var(--typography-caption-weight);
     line-height: var(--typography-caption-line-height);
@@ -1410,7 +1456,7 @@ html {
 
   /* Overline - 12px / Semibold / Uppercase */
   .text-overline {
-    font-family: var(--rafael-font-family-body), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--typography-overline-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-overline-size);
     font-weight: var(--typography-overline-weight);
     line-height: var(--typography-overline-line-height);
@@ -1437,7 +1483,7 @@ html {
    ============================================ */
 
 @layer components {
-  .card,
+  .card:not(.card--rule),
   .surface-sheen {
     background-image: var(--surface-sheen);
   }
@@ -1969,27 +2015,26 @@ html {
     transform: scale(0.97);
   }
 
+  /* Design-kit secondary button: stone fill, no border, no shadow; the fill
+     steps to stone-deep on hover and press. */
   .prose a.button-secondary,
   .button-secondary {
-    background-color: var(--color-surface-secondary);
+    background-color: var(--bg-button-secondary);
     color: var(--color-content);
-    border: 1px solid var(--color-line);
-    box-shadow: var(--rafael-shadow-button);
+    border: 1px solid transparent;
   }
 
   .prose a.button-secondary:hover,
   .button-secondary:hover {
-    border-color: var(--color-line-strong);
-    box-shadow: var(--rafael-shadow-button-hover);
+    background-color: var(--bg-button-secondary-hover);
     color: var(--color-content);
     text-decoration: none;
   }
 
   .prose a.button-secondary:active,
   .button-secondary:active {
-    background-color: var(--color-surface-tertiary);
-    box-shadow: var(--rafael-shadow-inner);
-    transform: scale(0.98);
+    background-color: var(--bg-button-secondary-hover);
+    transform: scale(0.97);
   }
 
   .prose a.button-ghost,
@@ -2119,8 +2164,9 @@ html {
   align-items: center;
 }
 
-/* Split variant uses CSS Grid (handled in template) */
-.hero--split {
+/* Split variant uses CSS Grid, stacked a plain flow (both handled in template) */
+.hero--split,
+.hero--stacked {
   display: block;
 }
 
@@ -2157,29 +2203,56 @@ html {
 /* Desktop Navigation - Dropdown Submenus */
 @media (min-width: 768px) {
   /* Desktop nav link styles */
+  /* Soft pills: the link carries its own padding, the hover fills it in stone. */
   .desktop-nav > ul > li > a {
     display: block;
-    padding: 0.5rem 0;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--rafael-radius-md);
     color: var(--text-secondary);
+    font-size: var(--rafael-font-size-sm);
     font-weight: 400;
-    transition: color var(--motion-enter-duration) var(--motion-enter-ease);
+    transition:
+      color var(--motion-enter-duration) var(--motion-enter-ease),
+      background-color var(--motion-enter-duration) var(--motion-enter-ease);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .desktop-nav > ul > li > a:hover {
       color: var(--text-primary);
+      background-color: var(--bg-tertiary);
     }
   }
 
+  /* The current item is ink with a Signal underline (orange rule R2: never
+     orange text on a light surface). */
   .desktop-nav > ul > li.current-menu-item > a,
   .desktop-nav > ul > li.current-menu-ancestor > a {
-    color: var(--text-brand);
-    /* Colour alone is not a signal here: --text-brand and --text-secondary sit
-       at almost the same lightness, so in greyscale or with a colour vision
-       deficiency the current page is indistinguishable. WCAG 1.4.1. */
+    color: var(--text-primary);
+    /* Colour alone is not a signal here: --text-primary and --text-secondary sit
+       close together, so in greyscale or with a colour vision deficiency the
+       current page is indistinguishable without the underline. WCAG 1.4.1. */
     text-decoration: underline;
+    text-decoration-color: var(--rafael-color-ds-accent-base);
     text-decoration-thickness: 2px;
     text-underline-offset: 4px;
+  }
+
+  /* Utility item (e.g. internal area): set the CSS class menu-item-utility on the
+     menu item in Appearance > Menus. A hairline divider in the middle of the
+     gap sets it apart from the page links. */
+  .desktop-nav > ul > li.menu-item-utility {
+    position: relative;
+    margin-left: 1rem;
+  }
+
+  .desktop-nav > ul > li.menu-item-utility::before {
+    content: '';
+    position: absolute;
+    left: -0.625rem;
+    top: 50%;
+    height: 1.25rem;
+    border-left: var(--border-width-1, 1px) solid var(--border-default);
+    translate: 0 -50%;
   }
 
   /* Parent menu item with submenu */
@@ -2280,11 +2353,10 @@ html {
   }
 
   .desktop-nav .sub-menu .current-menu-item > a {
-    color: var(--text-brand);
-    /* Colour alone is not a signal here: --text-brand and --text-secondary sit
-       at almost the same lightness, so in greyscale or with a colour vision
-       deficiency the current page is indistinguishable. WCAG 1.4.1. */
+    color: var(--text-primary);
+    /* Colour alone is not a signal: the underline marks the current page. WCAG 1.4.1. */
     text-decoration: underline;
+    text-decoration-color: var(--rafael-color-ds-accent-base);
     text-decoration-thickness: 2px;
     text-underline-offset: 4px;
   }
@@ -2326,11 +2398,10 @@ html {
 
 .mobile-nav > ul > li.current-menu-item > a,
 .mobile-nav > ul > li.current-menu-ancestor > a {
-  color: var(--text-brand);
-  /* Colour alone is not a signal here: --text-brand and --text-secondary sit
-     at almost the same lightness, so in greyscale or with a colour vision
-     deficiency the current page is indistinguishable. WCAG 1.4.1. */
+  color: var(--text-primary);
+  /* Colour alone is not a signal: the underline marks the current page. WCAG 1.4.1. */
   text-decoration: underline;
+  text-decoration-color: var(--rafael-color-ds-accent-base);
   text-decoration-thickness: 2px;
   text-underline-offset: 4px;
 }
@@ -2392,11 +2463,10 @@ html {
 }
 
 .mobile-nav .sub-menu .current-menu-item > a {
-  color: var(--text-brand);
-  /* Colour alone is not a signal here: --text-brand and --text-secondary sit
-     at almost the same lightness, so in greyscale or with a colour vision
-     deficiency the current page is indistinguishable. WCAG 1.4.1. */
+  color: var(--text-primary);
+  /* Colour alone is not a signal: the underline marks the current page. WCAG 1.4.1. */
   text-decoration: underline;
+  text-decoration-color: var(--rafael-color-ds-accent-base);
   text-decoration-thickness: 2px;
   text-underline-offset: 4px;
 }
@@ -2408,14 +2478,17 @@ html {
 /* Footer nav link styles */
 .footer-nav a {
   display: inline-block;
-  /* WCAG 2.5.8 24px target-size floor; matches .desktop-nav > ul > li > a. */
-  padding: 0.5rem 0;
+  /* WCAG 2.5.8 24px target-size floor (20px line + 2 x 4px), with space-y-1 a
+     32px rhythm; touch devices get the 44px target below. */
+  padding: 0.25rem 0;
   color: var(--text-secondary);
   transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
-.footer-nav a:hover {
-  color: var(--text-primary);
+@media (hover: hover) and (pointer: fine) {
+  .footer-nav a:hover {
+    color: var(--text-primary);
+  }
 }
 
 .footer-nav .current-menu-item > a {
@@ -2441,8 +2514,25 @@ html {
   transition: color var(--motion-enter-duration) var(--motion-enter-ease);
 }
 
-.legal-nav a:hover {
-  color: var(--text-primary);
+/* The simple footer's bottom row is the quietest text of the footer. */
+.footer--simple .legal-nav a {
+  color: var(--text-tertiary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .legal-nav a:hover {
+    color: var(--text-primary);
+  }
+}
+
+/* 44 px finger target for the footer's contact and legal links. Only on
+   touch, so the desktop rows stay compact. */
+@media (pointer: coarse) {
+  footer :is(address a, .legal-nav a, .footer-nav a) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
 }
 
 .legal-nav .current-menu-item > a {
@@ -2600,12 +2690,16 @@ html {
 
 /* Derselbe Fall am Seitenkopf: dessen Polster und das der ersten Sektion
    stapelten sich zu einem Loch zwischen Titel und Inhalt. Auch hier nur, wenn
-   beide dieselbe Flaeche tragen. */
-.page-header:has(+ .section.bg-surface) {
-  padding-bottom: 0;
+   beide dieselbe Flaeche tragen. Der Kopf liegt dafuer in einem flachen
+   .page-header-band (bg-surface): transparent zeigte er die Rausch-Textur und
+   den Seitenschimmer des body und endete mit harter Kante ueber der flachen
+   Sektion. 16px Kopf plus 32px Sektion ergeben 48px bis zur naechsten
+   Ueberschrift. */
+.page-header-band:has(+ .section.bg-surface) > .page-header {
+  padding-bottom: 1rem;
 }
 
-.page-header + .section.bg-surface {
+.page-header-band + .section.bg-surface {
   padding-top: 2rem;
 }
 
@@ -3038,8 +3132,7 @@ html {
 }
 
 .zeige-hover .button--secondary {
-  background-color: var(--bg-secondary);
-  border-color: var(--border-strong);
+  background-color: var(--bg-button-secondary-hover);
 }
 
 /* Ghost underlines its label on hover, the surface stays untouched. */
@@ -3066,7 +3159,7 @@ html {
 }
 
 .zeige-aktiv :is(.button--secondary) {
-  background-color: var(--bg-tertiary);
+  background-color: var(--bg-button-secondary-hover);
 }
 
 .zeige-aktiv .button--ghost {
@@ -3080,4 +3173,464 @@ html {
 .zeige-aktiv .button--primary {
   background-color: var(--bg-button-primary-hover);
   color: var(--text-button-primary);
+}
+
+/* ============================================
+   DESIGN SYSTEM ROLES AND SCAPE LAYOUT
+   Faces, section header, overlines and surfaces from the design kit
+   (rafael-design-system) and the scape rework of the client themes.
+   Unlayered on purpose: these rules have to win over the utilities the
+   components already carry (font-normal on buttons, for example).
+   ============================================ */
+
+/* Small UI text is the design system's UI face (Cal Sans UI): button labels,
+   badges, navigation and form labels. Running text stays in Cal Sans Text. */
+:is(
+  .button,
+  .button-primary,
+  .button-secondary,
+  .button-ghost,
+  .button-danger,
+  .badge,
+  .desktop-nav a,
+  .mobile-nav a,
+  .footer-nav a,
+  .legal-nav a,
+  label,
+  legend
+) {
+  font-family: var(--rafael-font-family-ui), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Button labels take the strong UI face (Cal Sans UI SemiBold), like the kit. */
+:is(.button, .button-primary, .button-secondary, .button-ghost, .button-danger) {
+  font-weight: var(--rafael-font-weight-semibold);
+  letter-spacing: 0;
+}
+
+/* Section header: the title is the h2 role, the description the lead role.
+   Both stop at 42.25rem (676 px), so a long title or lead never runs across
+   the whole 68rem column. */
+.section-title {
+  font-family: var(--typography-h2-family), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--typography-h2-size);
+  font-weight: var(--typography-h2-weight);
+  line-height: var(--typography-h2-line-height);
+  letter-spacing: var(--typography-h2-letter-spacing);
+  text-wrap: balance;
+  max-width: 42.25rem;
+}
+
+.section-header.items-center .section-title {
+  margin-inline: auto;
+}
+
+.section-header__description {
+  font-size: var(--typography-body-large-size);
+  font-weight: var(--typography-body-large-weight);
+  line-height: var(--typography-body-large-line-height);
+  max-width: 42.25rem;
+  text-wrap: pretty;
+}
+
+/* Overlines (eyebrows) are grey on every surface, never orange (orange rule R2).
+   On a coloured or image surface they follow the text colour of that surface. */
+.hero__overline {
+  display: block;
+}
+
+.bg-surface-brand :is(.section-header__overline, .hero__overline) {
+  color: color-mix(in oklch, var(--text-on-brand) 72%, transparent);
+}
+
+.hero--background .hero__overline,
+.hero.bg-surface-inverse .hero__overline,
+.bg-surface-inverse .section-header__overline {
+  color: color-mix(in oklch, var(--text-inverse) 80%, transparent);
+}
+
+.hero--background .hero__overline {
+  color: color-mix(in oklch, var(--text-on-color) 92%, transparent);
+}
+
+/* Headings never hyphenate automatically: a split title reads as a typo.
+   Balanced wrapping keeps lines even, overflow-wrap still stops a very long
+   word from leaving the column. */
+:is(.section-title, h1, h2, h3, h4, h5, h6) {
+  hyphens: manual;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+/* Where the browser can limit hyphenation to long words, headings hyphenate
+   very long compounds instead of breaking them without a hyphen. Words under
+   18 letters move to the next line whole. */
+@supports (hyphenate-limit-chars: 18 8 8) {
+  :is(.section-title, h1, h2, h3, h4, h5, h6) {
+    hyphens: auto;
+    hyphenate-limit-chars: 18 8 8;
+  }
+}
+
+/* Secondary button on a stone section: the fill steps one level deeper, the
+   stone fill would otherwise vanish into the section. */
+.bg-surface-tertiary .button--secondary {
+  background-color: var(--bg-button-secondary-on-stone);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bg-surface-tertiary .button--secondary:hover {
+    background-color: var(--bg-button-secondary-on-stone-hover);
+  }
+}
+
+/* Badge labels are trimmed to cap height and baseline where text-box exists;
+   the padding adds back half of the trimmed space on both sides, so the badge
+   keeps its height and the label sits exactly in the middle. */
+@supports (text-box: trim-both cap alphabetic) {
+  .badge--trim {
+    padding-block: calc(var(--badge-py, var(--badge-md-padding-y)) + (1lh - 1cap) / 2);
+  }
+
+  .badge--trim > .badge__label {
+    text-box: trim-both cap alphabetic;
+  }
+}
+
+/* Running text directly under the header (text module without image) follows
+   at 20 px (24 from md) instead of the gap meant for grids (cards, team,
+   stats), where a single paragraph looked cut off from its title. */
+.one-column .section-header {
+  margin-bottom: 1.25rem;
+
+  @media (min-width: 768px) {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* A button module on the same surface belongs to the section above: its
+   buttons sit 32 px (mobile 24) under the content instead of the full
+   section padding. Light only: dark surfaces are told apart by tone alone. */
+:root[data-theme='light']
+  :is(
+    .section.bg-surface:not(.hero, .divider):has(+ .section.bg-surface.button-block-section),
+    .section.bg-surface-secondary:not(.hero, .divider):has(
+        + .section.bg-surface-secondary.button-block-section
+      ),
+    .section.bg-surface-tertiary:not(.hero, .divider):has(
+        + .section.bg-surface-tertiary.button-block-section
+      )
+  ) {
+  padding-bottom: 1.5rem;
+
+  @media (min-width: 768px) {
+    padding-bottom: 2rem;
+  }
+}
+
+@media not (prefers-color-scheme: dark) {
+  :root:not([data-theme='dark'])
+    :is(
+      .section.bg-surface:not(.hero, .divider):has(+ .section.bg-surface.button-block-section),
+      .section.bg-surface-secondary:not(.hero, .divider):has(
+          + .section.bg-surface-secondary.button-block-section
+        ),
+      .section.bg-surface-tertiary:not(.hero, .divider):has(
+          + .section.bg-surface-tertiary.button-block-section
+        )
+    ) {
+    padding-bottom: 1.5rem;
+
+    @media (min-width: 768px) {
+      padding-bottom: 2rem;
+    }
+  }
+}
+
+/* The privacy link in the consent text has the text colour, so the underline
+   is its only cue (WCAG 1.4.1); it carries the Signal orange like prose links. */
+.wpcf7-form .wpcf7-acceptance label a {
+  text-decoration: underline;
+  text-decoration-color: var(--rafael-color-ds-accent-base);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .wpcf7-form .wpcf7-acceptance label a:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+/* Image cards in a stretched grid row: the text block after the image carries
+   its own wash, so it has to fill the rest of the card, otherwise the card's
+   own background shows as an empty band below it. Unlayered, because the card
+   carries the utility class "block". */
+.card:has(> :is(img, picture, figure, :has(> img)) ~ div) {
+  display: flex;
+  flex-direction: column;
+}
+
+.card > :is(img, picture, figure, :has(> img)) {
+  flex-shrink: 0;
+}
+
+.card > :is(img, picture, figure, :has(> img)) ~ div:last-child {
+  flex-grow: 1;
+}
+
+/* Colour scheme change (transitionColorScheme in resources/js/motion.ts): the
+   new scheme is revealed by a growing clip-path circle, so the default
+   cross-fade of the root snapshots is switched off. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Token playground (templates/styleguide/playground.blade.php). While it is in
+   use, colour, radius and size changes ease in instead of jumping. :where()
+   keeps the specificity at zero, so components with their own transition
+   utilities keep theirs. */
+@media (prefers-reduced-motion: no-preference) {
+  :where(.token-playground-live) :where(body, body *) {
+    transition:
+      background-color 300ms var(--motion-enter-ease),
+      color 300ms var(--motion-enter-ease),
+      border-color 300ms var(--motion-enter-ease),
+      border-radius 300ms var(--motion-enter-ease),
+      font-size 300ms var(--motion-enter-ease);
+  }
+}
+
+/* Badges use Tailwind's rounded-full, not a token; while the playground is in
+   use they follow the button radius slider like the buttons do. */
+.token-playground-live .badge--trim {
+  border-radius: var(--rafael-radius-full);
+}
+
+.token-swatch {
+  position: relative;
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  background: var(--swatch, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--text-primary) 15%, transparent);
+  cursor: pointer;
+}
+
+.token-swatch:has(input:checked),
+.token-swatch--custom.is-selected {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 3px;
+}
+
+.token-swatch:has(input:focus-visible) {
+  outline: 3px solid var(--ring-focus);
+  outline-offset: 3px;
+}
+
+/* Custom colour: the native picker fills the swatch, its own chrome hidden. */
+.token-swatch--custom {
+  background: conic-gradient(
+    from 0deg,
+    #f43f5e,
+    #f59e0b,
+    #22c55e,
+    #06b6d4,
+    #6366f1,
+    #d946ef,
+    #f43f5e
+  );
+  overflow: hidden;
+}
+
+.token-swatch--custom input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Token generator (templates/styleguide/generator.blade.php). The picker is a
+   swatch like the playground's; the shade strip and the preview cards read
+   custom properties the component sets from the generated token files. */
+.token-gen-picker {
+  flex: none;
+  overflow: hidden;
+}
+
+.token-gen-picker input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.token-gen-picker:has(input:focus-visible) {
+  outline: 3px solid var(--ring-focus);
+  outline-offset: 3px;
+}
+
+.token-gen-hex {
+  width: 7.5rem;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-control, var(--border-default));
+  border-radius: var(--rafael-radius-sm, 4px);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--typography-body-small-size, 0.875rem);
+  text-transform: uppercase;
+}
+
+.token-gen-hex:focus-visible {
+  outline: 3px solid var(--ring-focus);
+  outline-offset: 2px;
+}
+
+.token-gen-shades {
+  display: flex;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  border-radius: var(--rafael-radius-sm, 4px);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--text-primary) 10%, transparent);
+}
+
+.token-gen-shades li {
+  flex: 1 1 0;
+  height: 2rem;
+  margin: 0;
+  background: var(--swatch, transparent);
+}
+
+.token-gen-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: var(--card-radius);
+  background: var(--gp-bg, var(--bg-primary));
+  color: var(--gp-text, var(--text-primary));
+  box-shadow: inset 0 0 0 1px var(--gp-border, var(--border-default));
+}
+
+.token-gen-preview__card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: var(--card-radius);
+  background: var(--gp-card, var(--bg-secondary));
+  box-shadow: inset 0 0 0 1px var(--gp-border, var(--border-default));
+}
+
+.token-gen-preview .text-h4 {
+  color: var(--gp-text, var(--text-primary));
+}
+
+.token-gen-preview__muted {
+  color: var(--gp-muted, var(--text-secondary));
+}
+
+.token-gen-preview__accent {
+  color: var(--gp-accent, var(--text-accent));
+  font-weight: 600;
+}
+
+.token-gen-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border-radius: var(--rafael-radius-full, 999px);
+  font-size: var(--typography-body-small-size, 0.875rem);
+  font-weight: 600;
+}
+
+.token-gen-pill--sm {
+  min-height: 2rem;
+  padding: 0 0.75rem;
+}
+
+.token-gen-pill--button {
+  background: var(--gp-button, var(--bg-button-primary));
+  color: var(--gp-button-ink, var(--text-button-primary));
+}
+
+.token-gen-pill--brand {
+  background: var(--gp-brand, var(--bg-brand));
+  color: var(--gp-on-brand, var(--text-on-brand));
+}
+
+.token-gen-pill--brand-2 {
+  background: var(--gp-brand-2, var(--bg-brand-secondary));
+  color: var(--gp-brand-2-ink, var(--text-on-color));
+}
+
+.token-gen-pill--success {
+  background: var(--gp-success, var(--bg-success-strong));
+  color: var(--gp-success-ink, var(--text-on-color));
+}
+
+.token-gen-pill--warning {
+  background: var(--gp-warning, var(--bg-warning-strong));
+  color: var(--gp-warning-ink, var(--text-on-color));
+}
+
+.token-gen-pill--error {
+  background: var(--gp-error, var(--bg-error-strong));
+  color: var(--gp-error-ink, var(--text-on-color));
+}
+
+/* Segmented choice (radio group): wraps at narrow widths instead of
+   scrolling, the chosen step is filled. */
+.token-segments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.token-segment {
+  cursor: pointer;
+}
+
+.token-segment span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  font-size: var(--typography-body-small-size, 0.875rem);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  transition:
+    background-color 150ms var(--motion-enter-ease),
+    color 150ms var(--motion-enter-ease);
+}
+
+@media (hover: hover) {
+  .token-segment:hover span {
+    border-color: var(--text-primary);
+  }
+}
+
+.token-segment input:checked + span {
+  background-color: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+.token-segment input:focus-visible + span {
+  outline: 3px solid var(--ring-focus);
+  outline-offset: 2px;
 }

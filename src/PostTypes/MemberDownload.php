@@ -17,6 +17,11 @@ class MemberDownload extends AbstractPostType
 
     protected static string $plural = 'Dokumente';
 
+    protected static function names(): array
+    {
+        return [__('Dokument', 'wp-starter'), __('Dokumente', 'wp-starter')];
+    }
+
     protected static string $menuIcon = 'dashicons-download';
 
     protected static int $menuPosition = 30;

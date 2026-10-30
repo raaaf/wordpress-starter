@@ -60,6 +60,27 @@ if (!function_exists('get_stylesheet')) {
     }
 }
 
+if (!function_exists('get_stylesheet_directory')) {
+    function get_stylesheet_directory(): string
+    {
+        return $GLOBALS['wp_mock_stylesheet_directory'] ?? get_template_directory();
+    }
+}
+
+if (!function_exists('get_stylesheet_directory_uri')) {
+    function get_stylesheet_directory_uri(): string
+    {
+        return $GLOBALS['wp_mock_stylesheet_directory_uri'] ?? get_template_directory_uri();
+    }
+}
+
+if (!function_exists('get_user_locale')) {
+    function get_user_locale(): string
+    {
+        return $GLOBALS['wp_mock_user_locale'] ?? 'de_DE';
+    }
+}
+
 if (!function_exists('get_template_directory')) {
     function get_template_directory(): string
     {
@@ -360,6 +381,52 @@ if (!function_exists('add_action')) {
     }
 }
 
+if (!function_exists('has_action')) {
+    // Priority of $callback on $hook, false when it is not hooked (like core).
+    function has_action(string $hook, mixed $callback = false): int|bool
+    {
+        foreach ($GLOBALS['wp_mock_hooks']['actions'][$hook] ?? [] as $action) {
+            if ($callback === false || $action['callback'] === $callback) {
+                return $callback === false ? true : $action['priority'];
+            }
+        }
+
+        return false;
+    }
+}
+
+if (!function_exists('remove_action')) {
+    function remove_action(string $hook, mixed $callback, int $priority = 10): bool
+    {
+        foreach ($GLOBALS['wp_mock_hooks']['actions'][$hook] ?? [] as $i => $action) {
+            if ($action['callback'] === $callback && $action['priority'] === $priority) {
+                unset($GLOBALS['wp_mock_hooks']['actions'][$hook][$i]);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+if (!function_exists('wp_is_post_revision')) {
+    function wp_is_post_revision(mixed $post): int|false
+    {
+        return $GLOBALS['wp_mock_revisions'][ (int) $post] ?? false;
+    }
+}
+
+if (!function_exists('add_submenu_page')) {
+    // Records every call in wp_mock_submenu_pages.
+    function add_submenu_page(string $parent, string $pageTitle, string $menuTitle, string $capability, string $menuSlug, mixed $callback = '', mixed $position = null): string
+    {
+        $GLOBALS['wp_mock_submenu_pages'][] = compact('parent', 'pageTitle', 'menuTitle', 'capability', 'menuSlug');
+
+        return $menuSlug;
+    }
+}
+
 if (!function_exists('add_filter')) {
     function add_filter(string $hook, mixed $callback, int $priority = 10, int $args = 1): bool
     {
@@ -523,6 +590,16 @@ if (!function_exists('get_field')) {
     }
 }
 
+if (!function_exists('update_field')) {
+    // Records into wp_mock_updated_fields (by field key, so get_field() does not see it).
+    function update_field(string $selector, mixed $value, mixed $postId = false): bool
+    {
+        $GLOBALS['wp_mock_updated_fields'][] = ['selector' => $selector, 'value' => $value, 'post_id' => $postId];
+
+        return true;
+    }
+}
+
 if (!function_exists('get_fields')) {
     function get_fields(mixed $postId = false): array|false
     {
@@ -588,9 +665,35 @@ if (!function_exists('wp_get_attachment_metadata')) {
 }
 
 if (!function_exists('wp_get_attachment_image_src')) {
-    function wp_get_attachment_image_src(int $attachmentId, string $size = 'thumbnail'): array|false
+    /**
+     * @param string|array{0: int, 1: int} $size An array size is looked up as "WxH".
+     */
+    function wp_get_attachment_image_src(int $attachmentId, string|array $size = 'thumbnail'): array|false
     {
-        return $GLOBALS['wp_mock_attachments'][$attachmentId][$size] ?? false;
+        $key = is_array($size) ? $size[0] . 'x' . $size[1] : $size;
+
+        return $GLOBALS['wp_mock_attachments'][$attachmentId][$key] ?? false;
+    }
+}
+
+if (!function_exists('wp_get_original_image_url')) {
+    function wp_get_original_image_url(int $attachmentId): string|false
+    {
+        return $GLOBALS['wp_mock_attachments'][$attachmentId]['original'][0] ?? false;
+    }
+}
+
+if (!function_exists('wp_get_attachment_url')) {
+    function wp_get_attachment_url(int $attachmentId = 0): string|false
+    {
+        return $GLOBALS['wp_mock_attachments'][$attachmentId]['full'][0] ?? false;
+    }
+}
+
+if (!function_exists('wp_get_attachment_caption')) {
+    function wp_get_attachment_caption(int $postId = 0): string|false
+    {
+        return $GLOBALS['wp_mock_attachments'][$postId]['caption'] ?? '';
     }
 }
 
@@ -1128,7 +1231,7 @@ if (!function_exists('the_post')) {
 
 // Theme functions
 if (!function_exists('wp_get_theme')) {
-    function wp_get_theme(): object
+    function wp_get_theme(?string $stylesheet = null): object
     {
         return new class() {
             public function get(string $header): string
@@ -1200,6 +1303,19 @@ if (!function_exists('update_option')) {
     }
 }
 
+if (!function_exists('add_option')) {
+    // Like WordPress: fails (false) when the option already exists.
+    function add_option(string $option, mixed $value = '', string $deprecated = '', mixed $autoload = null): bool
+    {
+        if (array_key_exists($option, $GLOBALS['wp_mock_options'])) {
+            return false;
+        }
+        $GLOBALS['wp_mock_options'][$option] = $value;
+
+        return true;
+    }
+}
+
 if (!function_exists('delete_option')) {
     function delete_option(string $option): bool
     {
@@ -1224,7 +1340,10 @@ if (!function_exists('add_settings_error')) {
 
 // Image functions
 if (!function_exists('wp_get_attachment_image_url')) {
-    function wp_get_attachment_image_url(int $attachmentId, string $size = 'thumbnail'): string|false
+    /**
+     * @param string|array{0: int, 1: int} $size
+     */
+    function wp_get_attachment_image_url(int $attachmentId, string|array $size = 'thumbnail'): string|false
     {
         $src = wp_get_attachment_image_src($attachmentId, $size);
 
@@ -1298,6 +1417,67 @@ if (!function_exists('register_taxonomy')) {
     }
 }
 
+// Media library functions. Tests point wp_mock_upload_path at a temp dir;
+// inserted attachments are recorded in wp_mock_attachments.
+if (!function_exists('wp_upload_dir')) {
+    function wp_upload_dir(): array
+    {
+        $path = $GLOBALS['wp_mock_upload_path'] ?? sys_get_temp_dir();
+
+        return ['path' => $path, 'url' => 'https://example.com/wp-content/uploads', 'error' => false];
+    }
+}
+
+if (!function_exists('wp_unique_filename')) {
+    function wp_unique_filename(string $dir, string $filename): string
+    {
+        $name = pathinfo($filename, PATHINFO_FILENAME);
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $candidate = $filename;
+        for ($i = 1; file_exists($dir . '/' . $candidate); $i++) {
+            $candidate = "{$name}-{$i}." . $ext;
+        }
+
+        return $candidate;
+    }
+}
+
+if (!function_exists('wp_insert_attachment')) {
+    function wp_insert_attachment(array $args, string|false $file = false): int
+    {
+        $GLOBALS['wp_mock_attachments'] ??= [];
+        $id = 1000 + count($GLOBALS['wp_mock_attachments']);
+        $GLOBALS['wp_mock_attachments'][$id] = ['args' => $args, 'file' => $file];
+
+        return $id;
+    }
+}
+
+if (!function_exists('wp_generate_attachment_metadata')) {
+    function wp_generate_attachment_metadata(int $attachmentId, string $file): array
+    {
+        return ['file' => basename($file)];
+    }
+}
+
+if (!function_exists('wp_update_attachment_metadata')) {
+    function wp_update_attachment_metadata(int $attachmentId, array $data): bool
+    {
+        $GLOBALS['wp_mock_attachment_metadata'][$attachmentId] = $data;
+
+        return true;
+    }
+}
+
+if (!function_exists('wp_delete_file')) {
+    function wp_delete_file(string $file): void
+    {
+        if (is_file($file)) {
+            unlink($file);
+        }
+    }
+}
+
 // Current user functions
 if (!function_exists('current_user_can')) {
     function current_user_can(string $capability): bool
@@ -1337,7 +1517,7 @@ if (!function_exists('get_post')) {
             return null;
         }
 
-        return (object) array_merge(['ID' => $id, 'post_type' => 'page', 'post_status' => 'publish'], $data);
+        return (object) array_merge(['ID' => $id, 'post_type' => 'page', 'post_status' => 'publish', 'post_password' => ''], $data);
     }
 }
 
@@ -1522,6 +1702,21 @@ if (!class_exists('WP_REST_Response')) {
         {
             return $this->status;
         }
+
+        /** @var array<string, string> */
+        private array $headers = [];
+
+        /** @param array<string, string> $headers */
+        public function set_headers(array $headers): void
+        {
+            $this->headers = $headers;
+        }
+
+        /** @return array<string, string> */
+        public function get_headers(): array
+        {
+            return $this->headers;
+        }
     }
 }
 
@@ -1566,6 +1761,36 @@ if (!class_exists('WP_REST_Request')) {
         {
             return $this->route;
         }
+
+        /** @var array<string, string> */
+        private array $headers = [];
+
+        public function set_header(string $key, string $value): void
+        {
+            $this->headers[strtolower(str_replace('-', '_', $key))] = $value;
+        }
+
+        public function get_header(string $key): ?string
+        {
+            return $this->headers[strtolower(str_replace('-', '_', $key))] ?? null;
+        }
+    }
+}
+
+if (!function_exists('register_rest_route')) {
+    /** Records the route so tests can call its callback. */
+    function register_rest_route(string $namespace, string $route, array $args = []): bool
+    {
+        $GLOBALS['wp_mock_rest_routes'][$namespace . $route] = $args;
+
+        return true;
+    }
+}
+
+if (!function_exists('rest_url')) {
+    function rest_url(string $path = ''): string
+    {
+        return ( $GLOBALS['wp_mock_rest_url'] ?? 'https://example.com/wp-json/' ) . ltrim($path, '/');
     }
 }
 

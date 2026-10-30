@@ -175,8 +175,119 @@ class SeoServiceProvider extends ServiceProvider
             });
 
             $this->addYoastDescriptionGate();
+            $this->addYoastFallbacks();
         }
     }
+
+    /**
+     * Yoast stays in charge of og:image and the meta description, the theme
+     * only fills the gap when Yoast would output nothing.
+     */
+    private function addYoastFallbacks(): void
+    {
+        add_filter('wpseo_add_opengraph_images', function ($imageContainer) {
+            if (!is_object($imageContainer) || !method_exists($imageContainer, 'has_images')
+                || !method_exists($imageContainer, 'add_image_by_url') || $imageContainer->has_images()) {
+                return $imageContainer;
+            }
+
+            $options = $this->getThemeOptions();
+            $url = self::pickFallbackImageUrl(
+                $this->imageUrl($options['social_sharing_image'] ?? null),
+                is_singular() && !$this->isCurrentPageProtected() ? $this->firstSectionImageUrl( (int) get_queried_object_id()) : null,
+                Fields::siteLogoUrl()
+            );
+
+            if ($url !== null) {
+                $imageContainer->add_image_by_url($url);
+            }
+
+            return $imageContainer;
+        });
+
+        add_filter('wpseo_metadesc', function ($description): string {
+            // The gate at priority 10 already swapped in the tagline; do not
+            // derive a description from a protected page's content again.
+            if ($this->isCurrentPageProtected()) {
+                return (string) $description;
+            }
+
+            return self::pickDescription( (string) $description, $this->getMetaDescription());
+        }, 11);
+    }
+
+    /**
+     * Same decision as the description gate: a protected page must not leak
+     * its content (text or images) into meta tags for anonymous visitors.
+     */
+    private function isCurrentPageProtected(): bool
+    {
+        return Access::isProtectedForCurrentVisitor( (int) get_queried_object_id());
+    }
+
+    /**
+     * Order: theme option default social image, first section image of the
+     * page, site logo (raster only: SVG is not accepted as og:image).
+     */
+    public static function pickFallbackImageUrl(?string $optionImage, ?string $sectionImage, ?string $logoUrl): ?string
+    {
+        foreach ([$optionImage, $sectionImage] as $candidate) {
+            if (is_string($candidate) && $candidate !== '') {
+                return $candidate;
+            }
+        }
+
+        if (is_string($logoUrl) && $logoUrl !== ''
+            && !preg_match('/\.svgz?(\?|$)/i', $logoUrl)) {
+            return $logoUrl;
+        }
+
+        return null;
+    }
+
+    public static function pickDescription(string $yoastDescription, string $themeDescription): string
+    {
+        return trim($yoastDescription) !== '' ? $yoastDescription : $themeDescription;
+    }
+
+    private function imageUrl(mixed $image): ?string
+    {
+        if (is_array($image)) {
+            $image = $image['ID'] ?? $image['id'] ?? $image['url'] ?? null;
+        }
+
+        if (is_string($image) && !ctype_digit($image)) {
+            return $image !== '' ? $image : null;
+        }
+
+        if (is_numeric($image) && (int) $image > 0) {
+            $src = wp_get_attachment_image_src( (int) $image, 'full');
+
+            return $src ? (string) $src[0] : null;
+        }
+
+        return null;
+    }
+
+    private function firstSectionImageUrl(int $postId): ?string
+    {
+        // Unformatted: image fields come back as attachment IDs instead of
+        // fully formatted arrays, which skips building every nested field.
+        $sections = function_exists('get_field') ? get_field('page_sections', $postId, false) : null;
+
+        foreach (is_array($sections) ? $sections : [] as $section) {
+            foreach (['background_image', 'image'] as $key) {
+                $url = is_array($section) ? $this->imageUrl($section[$key] ?? null) : null;
+
+                if ($url !== null) {
+                    return $url;
+                }
+            }
+        }
+
+        return null;
+    }
+
 
     /**
      * Yoast builds its own description/og:description/twitter:description from
@@ -283,7 +394,7 @@ class SeoServiceProvider extends ServiceProvider
                 $allOptions = [];
             }
 
-            $fieldNames = ['company_name', 'address', 'phone', 'email', 'site_logo', 'site_favicon', 'social_sharing_image'];
+            $fieldNames = ['company_name', 'address', 'phone', 'fax', 'email', 'site_logo', 'site_favicon', 'social_sharing_image'];
             foreach ($fieldNames as $fieldName) {
                 $options[$fieldName] = $allOptions[$fieldName] ?? null;
             }
@@ -310,6 +421,10 @@ class SeoServiceProvider extends ServiceProvider
 
             if ($phone && empty($data['telephone'])) {
                 $data['telephone'] = $phone;
+            }
+            $fax = $themeOptions['fax'] ?? null;
+            if ($fax && empty($data['faxNumber'])) {
+                $data['faxNumber'] = $fax;
             }
             if ($email && empty($data['email'])) {
                 $data['email'] = $email;
@@ -375,6 +490,9 @@ class SeoServiceProvider extends ServiceProvider
 
                 if ($phone) {
                     $orgSchema['telephone'] = $phone;
+                }
+                if (!empty($themeOptions['fax'])) {
+                    $orgSchema['faxNumber'] = $themeOptions['fax'];
                 }
                 if ($email) {
                     $orgSchema['email'] = $email;
@@ -448,6 +566,11 @@ class SeoServiceProvider extends ServiceProvider
         return $schema;
     }
 
+    public static function shouldOutputBreadcrumbSchema(bool $yoastActive): bool
+    {
+        return !$yoastActive;
+    }
+
     /**
      * Echo a JSON-LD <script> block with the CSP nonce applied.
      *
@@ -468,14 +591,15 @@ class SeoServiceProvider extends ServiceProvider
     /**
      * Add BreadcrumbList JSON-LD schema for better SEO
      *
-     * Generates structured data for breadcrumbs when Yoast SEO is not handling it,
-     * or provides an enhanced schema even when Yoast is active.
+     * Generates structured data for breadcrumbs only when Yoast SEO is not
+     * active: Yoast already emits a BreadcrumbList in its graph, a second one
+     * is a duplicate.
      */
     private function addBreadcrumbSchema(): void
     {
         add_action('wp_head', function (): void {
-            // Skip on front page - no breadcrumbs needed
-            if (is_front_page()) {
+            // Skip on front page (no breadcrumbs needed) and when Yoast emits its own
+            if (is_front_page() || !self::shouldOutputBreadcrumbSchema(YoastSeoConfigurator::isPluginActive())) {
                 return;
             }
 

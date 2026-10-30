@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\Helpers\Text;
+use WordpressStarter\ThemeContext;
+
 /**
  * Theme Service Provider
  *
@@ -25,6 +28,18 @@ class ThemeServiceProvider extends ServiceProvider
         $this->addTemplateFilter();
         $this->registerBladePageTemplates();
         $this->dropProtectedTitlePrefix();
+        $this->applyTypography();
+    }
+
+    /**
+     * German typography glue for editor text. Late priority so it runs after
+     * wpautop and shortcodes; Text::typography() is idempotent, so ACF's
+     * internal the_content pass on WYSIWYG values does no harm.
+     */
+    private function applyTypography(): void
+    {
+        add_filter('the_content', [Text::class, 'typography'], 20);
+        add_filter('acf/format_value/type=wysiwyg', [Text::class, 'typography'], 20);
     }
 
     /**
@@ -47,7 +62,7 @@ class ThemeServiceProvider extends ServiceProvider
     {
         $transientKey = \WordpressStarter\ThemeContext::prefix() . '_theme_version';
         if (!get_transient($transientKey)) {
-            $theme_version = wp_get_theme()->get('Version');
+            $theme_version = wp_get_theme(get_template())->get('Version');
             set_transient($transientKey, $theme_version, DAY_IN_SECONDS);
         }
     }
@@ -55,6 +70,9 @@ class ThemeServiceProvider extends ServiceProvider
     private function addThemeSupport(): void
     {
         add_action('after_setup_theme', function (): void {
+            // German source strings; languages/ ships en_US (po, mo, l10n.php).
+            load_theme_textdomain('wp-starter', get_template_directory() . '/languages');
+
             add_theme_support('title-tag');
             add_theme_support('custom-logo');
             add_theme_support('html5', [
@@ -72,6 +90,12 @@ class ThemeServiceProvider extends ServiceProvider
     private function addTemplateFilter(): void
     {
         add_filter('template_include', function (string $template): string {
+            // Without ACF every Blade template would fail on its first field
+            // read; a plain 503 page explains it instead.
+            if (!self::acfAvailable()) {
+                return get_template_directory() . '/config/acf-missing.php';
+            }
+
             $blade = $GLOBALS['blade'] ?? null;
 
             if (!$blade) {
@@ -92,6 +116,18 @@ class ThemeServiceProvider extends ServiceProvider
     }
 
     /**
+     * True when the ACF functions the templates call exist. Filterable, so a
+     * site can force the fallback page (or tests can simulate a missing ACF).
+     */
+    public static function acfAvailable(): bool
+    {
+        return (bool) apply_filters(
+            ThemeContext::prefix() . '_acf_available',
+            function_exists('get_field') && function_exists('have_rows'),
+        );
+    }
+
+    /**
      * Register Blade page templates with WordPress
      *
      * Scans templates directory for .blade.php files with "Template Name:" comment
@@ -102,7 +138,7 @@ class ThemeServiceProvider extends ServiceProvider
     {
         add_filter('theme_page_templates', function (array $templates): array {
             // Try to get cached template list first
-            $cacheKey = 'blade_page_templates_' . wp_get_theme()->get('Version');
+            $cacheKey = 'blade_page_templates_' . wp_get_theme(get_template())->get('Version');
             $cachedTemplates = get_transient($cacheKey);
 
             if ($cachedTemplates !== false && is_array($cachedTemplates)) {

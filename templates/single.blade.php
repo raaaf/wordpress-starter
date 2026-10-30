@@ -38,7 +38,7 @@
                 $hasNext = !empty($nextPost);
             @endphp
             @if ($hasPrev || $hasNext)
-                <nav class="container mx-auto max-w-7xl px-4 pb-16 md:pb-24 pt-8 border-t border-line" aria-label="{{ __('Beitragsnavigation', 'wp-starter') }}">
+                <nav class="container mx-auto max-w-[var(--container-max)] px-4 pb-16 md:pb-24 pt-8 border-t border-line" aria-label="{{ __('Beitragsnavigation', 'wp-starter') }}">
                     <div class="flex justify-between items-start gap-8">
                         <div class="flex-1">
                             @if ($hasPrev)

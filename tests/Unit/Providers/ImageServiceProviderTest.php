@@ -16,7 +16,6 @@ final class ImageServiceProviderTest extends TestCase
     private function extractAttr(string $tag, string $attr): string
     {
         $reflection = new ReflectionMethod(ImageServiceProvider::class, 'extractAttr');
-        $reflection->setAccessible(true);
 
         return $reflection->invoke(null, $tag, $attr);
     }
@@ -54,7 +53,6 @@ final class ImageServiceProviderTest extends TestCase
     private function extractClass(string $tag): string
     {
         $reflection = new ReflectionMethod(ImageServiceProvider::class, 'extractClass');
-        $reflection->setAccessible(true);
 
         return $reflection->invoke(null, $tag);
     }

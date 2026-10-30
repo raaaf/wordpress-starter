@@ -62,6 +62,7 @@ class Options
         // Ohne eigene capability erbten beide edit_posts, jeder Redakteur kam ran.
         self::addSubPage(__('Werkzeuge', 'wp-starter'), 'tools', 'dashicons-admin-tools', 'manage_options');
         self::addSubPage(__('Design Tokens', 'wp-starter'), 'tokens', 'dashicons-art', 'manage_options');
+        self::addMcpPluginLink();
 
         // Register field groups directly (we're already in acf/init)
         self::registerFieldGroups();
@@ -110,6 +111,32 @@ class Options
         ];
 
         acf_add_options_sub_page($config);
+    }
+
+    /**
+     * Link to the MCP plugin's page (Werkzeuge > Claude) in the theme options
+     * menu, only while the plugin is active. The plugin reads the theme
+     * through Mcp\ContractProvider; the page itself belongs to the plugin.
+     */
+    private static function addMcpPluginLink(?bool $pluginActive = null): void
+    {
+        if (!( $pluginActive ?? defined('WPSMCP_VERSION') )) {
+            return;
+        }
+
+        // admin_menu runs after acf/init, when the theme-options parent exists.
+        add_action('admin_menu', static function (): void {
+            add_submenu_page(
+                'theme-options',
+                __('Claude', 'wp-starter'),
+                '<span class="dashicons dashicons-admin-generic" style="font-size: 16px; width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></span>' . esc_html__('Claude', 'wp-starter'),
+                // Same capability as the theme options menu: editors reach the
+                // page through Werkzeuge > Claude, registered by the plugin,
+                // and would otherwise see a theme options menu with one entry.
+                'edit_theme_options',
+                'tools.php?page=wpsmcp',
+            );
+        }, 100);
     }
 
     /**
@@ -172,6 +199,17 @@ class Options
                     ),
                     ['wrapper' => ['width' => '50']],
                 ),
+                FieldDefinitions::numberField(
+                    'field_options_logo_height',
+                    __('Logo-Höhe im Header (px)', 'wp-starter'),
+                    'site_logo_height',
+                    48,
+                    24,
+                    56,
+                    1,
+                    'px',
+                    __('Höhe des Logos im Header. Kleiner macht den Header niedriger; 32 passt zur Schriftgröße der Navigation.', 'wp-starter'),
+                ),
                 FieldDefinitions::imageField(
                     'field_options_favicon',
                     __('Favicon', 'wp-starter'),
@@ -180,6 +218,25 @@ class Options
                     'id',
                     null,
                     __('Das Favicon für Browser-Tabs. Empfohlen: 512x512px PNG.', 'wp-starter'),
+                ),
+                FieldDefinitions::imageField(
+                    'field_options_favicon_svg',
+                    __('Favicon (SVG)', 'wp-starter'),
+                    'site_favicon_svg',
+                    false,
+                    'id',
+                    null,
+                    __('Optional: Favicon als SVG für scharfe Darstellung in aktuellen Browsern.', 'wp-starter'),
+                ),
+                FieldDefinitions::fileField(
+                    'field_options_favicon_ico',
+                    __('Favicon (ICO)', 'wp-starter'),
+                    'site_favicon_ico',
+                    false,
+                    'ico',
+                    'id',
+                    null,
+                    __('Optional: favicon.ico mit 16, 32 und 48 Pixeln für ältere Browser.', 'wp-starter'),
                 ),
                 FieldDefinitions::imageField(
                     'field_options_social_image',
@@ -227,6 +284,17 @@ class Options
                         false,
                         __('Haupttelefonnummer.', 'wp-starter'),
                         '+49 123 456789',
+                    ),
+                    ['wrapper' => ['width' => '50']],
+                ),
+                array_merge(
+                    FieldDefinitions::textField(
+                        'field_options_fax',
+                        __('Telefax', 'wp-starter'),
+                        'fax',
+                        false,
+                        __('Optional. Erscheint im Footer und in den strukturierten Daten.', 'wp-starter'),
+                        '+49 123 456780',
                     ),
                     ['wrapper' => ['width' => '50']],
                 ),
@@ -314,6 +382,16 @@ class Options
                 ),
                 array_merge(
                     FieldDefinitions::trueFalseField(
+                        'field_options_header_theme_switcher',
+                        __('Farbschema-Umschalter anzeigen', 'wp-starter'),
+                        'header_theme_switcher',
+                        true,
+                        __('Zeigt im Header einen Umschalter für Hell, Dunkel und System. Nur sichtbar, wenn das Farbschema auf „Systemeinstellung folgen“ steht.', 'wp-starter'),
+                    ),
+                    ['wrapper' => ['width' => '50']],
+                ),
+                array_merge(
+                    FieldDefinitions::trueFalseField(
                         'field_options_header_cta_show',
                         __('CTA-Button anzeigen', 'wp-starter'),
                         'header_cta_show',
@@ -329,6 +407,26 @@ class Options
                         'header_cta',
                         false,
                         __('Link und Text für den Header-CTA-Button.', 'wp-starter'),
+                    ),
+                    [
+                        'conditional_logic' => [
+                            [
+                                [
+                                    'field' => 'field_options_header_cta_show',
+                                    'operator' => '==',
+                                    'value' => '1',
+                                ],
+                            ],
+                        ],
+                    ],
+                ),
+                array_merge(
+                    FieldDefinitions::linkField(
+                        'field_options_header_cta_secondary',
+                        __('Zweiter Button (optional)', 'wp-starter'),
+                        'header_cta_secondary',
+                        false,
+                        __('Umrandeter Button links neben dem CTA, z. B. für einen Login. Leer lassen, wenn nicht gebraucht.', 'wp-starter'),
                     ),
                     [
                         'conditional_logic' => [
@@ -364,12 +462,30 @@ class Options
             'key' => 'group_options_footer',
             'title' => __('Footer-Einstellungen', 'wp-starter'),
             'fields' => [
+                // === Stil ===
+                [
+                    'key' => 'field_options_footer_tab_style',
+                    'label' => __('Stil', 'wp-starter'),
+                    'type' => 'tab',
+                    'selected' => 1,
+                ],
+                FieldDefinitions::buttonGroupField(
+                    'field_options_footer_style',
+                    __('Footer-Stil', 'wp-starter'),
+                    'footer_style',
+                    [
+                        'default' => __('Standard (Spalten)', 'wp-starter'),
+                        'simple' => __('Einfach (zwei Zeilen)', 'wp-starter'),
+                    ],
+                    'default',
+                    __('Einfach zeigt Logo oder Firmenname, Kontaktdaten, Copyright und rechtliche Links in zwei kompakten Zeilen. Navigation, Footer-Text und Social Links entfallen.', 'wp-starter'),
+                ),
+
                 // === Spalte 1: Logo & Info ===
                 [
                     'key' => 'field_options_footer_tab_info',
                     'label' => __('Info-Spalte', 'wp-starter'),
                     'type' => 'tab',
-                    'selected' => 1,
                 ],
                 array_merge(
                     FieldDefinitions::trueFalseField(
@@ -843,14 +959,17 @@ class Options
             );
             $statusMessage = self::renderNoticeBox(
                 'error',
-                '⚠ Styleguide-Seite liegt im Papierkorb',
+                '⚠ ' . esc_html__('Styleguide-Seite liegt im Papierkorb', 'wp-starter'),
                 sprintf(
                     '<p style="margin: 10px 0 0 0;">
-                        <a href="%s" class="button button-primary">Wiederherstellen</a>
-                        <a href="%s" class="button" onclick="return confirm(\'Styleguide-Seite endgültig löschen?\');">Endgültig löschen</a>
+                        <a href="%s" class="button button-primary">%s</a>
+                        <a href="%s" class="button" onclick="return confirm(\'%s\');">%s</a>
                     </p>',
                     esc_url($restoreUrl),
+                    esc_html__('Wiederherstellen', 'wp-starter'),
                     esc_url($deleteUrl),
+                    esc_js(__('Styleguide-Seite endgültig löschen?', 'wp-starter')),
+                    esc_html__('Endgültig löschen', 'wp-starter'),
                 ),
             );
         } elseif ($resolvedPageId > 0) {
@@ -858,14 +977,16 @@ class Options
             $viewUrl = get_permalink($resolvedPageId);
             $statusMessage = self::renderNoticeBox(
                 'success',
-                '✓ Styleguide-Seite existiert',
+                '✓ ' . esc_html__('Styleguide-Seite existiert', 'wp-starter'),
                 sprintf(
                     '<p style="margin: 10px 0 0 0; display: flex; gap: 8px; flex-wrap: wrap;">
-                        <a href="%s" class="button">Bearbeiten</a>
-                        <a href="%s" class="button" target="_blank">Ansehen</a>
+                        <a href="%s" class="button">%s</a>
+                        <a href="%s" class="button" target="_blank">%s</a>
                     </p>',
                     esc_url($editUrl ?? ''),
+                    esc_html__('Bearbeiten', 'wp-starter'),
                     esc_url($viewUrl ?? ''),
+                    esc_html__('Ansehen', 'wp-starter'),
                 ),
             );
         } else {
@@ -880,12 +1001,13 @@ class Options
             );
             $statusMessage = self::renderNoticeBox(
                 'warning',
-                'Keine Styleguide-Seite vorhanden',
+                esc_html__('Keine Styleguide-Seite vorhanden', 'wp-starter'),
                 sprintf(
                     '<p style="margin: 10px 0 0 0;">
-                        <a href="%s" class="button button-primary">Styleguide-Seite erstellen</a>
+                        <a href="%s" class="button button-primary">%s</a>
                     </p>',
                     esc_url($createUrl),
+                    esc_html__('Styleguide-Seite erstellen', 'wp-starter'),
                 ),
             );
         }
@@ -897,13 +1019,17 @@ class Options
         );
         $regenerateMessage = sprintf(
             '<div style="padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
-                <p style="margin: 0;"><strong>Styleguide neu generieren</strong></p>
-                <p style="margin: 10px 0; color: #6c757d;">Erstellt die Styleguide-Seite neu mit allen aktuellen Design-Tokens und Block-Beispielen. Die bestehende Seite wird ersetzt.</p>
+                <p style="margin: 0;"><strong>%s</strong></p>
+                <p style="margin: 10px 0; color: #6c757d;">%s</p>
                 <p style="margin: 0;">
-                    <a href="%s" class="button" onclick="return confirm(\'Styleguide-Seite wirklich neu erstellen? Die bestehende Seite wird gelöscht.\');">Neu generieren</a>
+                    <a href="%s" class="button" onclick="return confirm(\'%s\');">%s</a>
                 </p>
             </div>',
+            esc_html__('Styleguide neu generieren', 'wp-starter'),
+            esc_html__('Erstellt die Styleguide-Seite neu mit allen aktuellen Design-Tokens und Block-Beispielen. Die bestehende Seite wird ersetzt.', 'wp-starter'),
             esc_url($regenerateUrl),
+            esc_js(__('Styleguide-Seite wirklich neu erstellen? Die bestehende Seite wird gelöscht.', 'wp-starter')),
+            esc_html__('Neu generieren', 'wp-starter'),
         );
 
         // Content Setup section
@@ -916,24 +1042,28 @@ class Options
         if ($contentSetupComplete) {
             $contentSetupMessage = self::renderNoticeBox(
                 'success',
-                '✓ Content-Setup wurde bereits ausgeführt',
+                '✓ ' . esc_html__('Content-Setup wurde bereits ausgeführt', 'wp-starter'),
                 sprintf(
                     '<p style="margin: 10px 0 0 0;">
-                        <a href="%s" class="button" onclick="return confirm(\'Content-Setup wirklich erneut ausführen? Bestehende Seiten bleiben erhalten, fehlende werden erstellt.\');">Erneut ausführen</a>
+                        <a href="%s" class="button" onclick="return confirm(\'%s\');">%s</a>
                     </p>',
                     esc_url($contentSetupUrl),
+                    esc_js(__('Content-Setup wirklich erneut ausführen? Bestehende Seiten bleiben erhalten, fehlende werden erstellt.', 'wp-starter')),
+                    esc_html__('Erneut ausführen', 'wp-starter'),
                 ),
             );
         } else {
             $contentSetupMessage = self::renderNoticeBox(
                 'warning',
-                'Content-Setup wurde noch nicht ausgeführt',
+                esc_html__('Content-Setup wurde noch nicht ausgeführt', 'wp-starter'),
                 sprintf(
-                    '<p style="margin: 10px 0; color: #856404;">Erstellt Standardseiten (Startseite, Über uns, Kontakt, etc.) und richtet Menüs ein.</p>
+                    '<p style="margin: 10px 0; color: #856404;">%s</p>
                     <p style="margin: 10px 0 0 0;">
-                        <a href="%s" class="button button-primary">Content-Setup jetzt ausführen</a>
+                        <a href="%s" class="button button-primary">%s</a>
                     </p>',
+                    esc_html__('Erstellt Standardseiten (Startseite, Über uns, Kontakt, etc.) und richtet Menüs ein.', 'wp-starter'),
                     esc_url($contentSetupUrl),
+                    esc_html__('Content-Setup jetzt ausführen', 'wp-starter'),
                 ),
             );
         }
@@ -1061,29 +1191,39 @@ class Options
         if ($postCount > 0) {
             return self::renderNoticeBox(
                 'success',
-                sprintf('✓ %d Demo-Blogbeiträge vorhanden', $postCount),
+                '✓ ' . esc_html(sprintf(
+                    /* translators: %d: number of demo blog posts */
+                    _n('%d Demo-Blogbeitrag vorhanden', '%d Demo-Blogbeiträge vorhanden', $postCount, 'wp-starter'),
+                    $postCount,
+                )),
                 sprintf(
                     '<div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">
-                        <a href="%s" class="button button-primary">5 weitere generieren</a>
-                        <a href="%s" class="button" onclick="return confirm(\'Alle Demo-Beiträge wirklich löschen?\');">Alle Demo-Beiträge löschen</a>
-                        <a href="%s" class="button">Beiträge ansehen</a>
+                        <a href="%s" class="button button-primary">%s</a>
+                        <a href="%s" class="button" onclick="return confirm(\'%s\');">%s</a>
+                        <a href="%s" class="button">%s</a>
                     </div>',
                     esc_url($generateUrl),
+                    esc_html__('5 weitere generieren', 'wp-starter'),
                     esc_url($deleteUrl),
+                    esc_js(__('Alle Demo-Beiträge wirklich löschen?', 'wp-starter')),
+                    esc_html__('Alle Demo-Beiträge löschen', 'wp-starter'),
                     esc_url(admin_url('edit.php')),
+                    esc_html__('Beiträge ansehen', 'wp-starter'),
                 ),
             );
         }
 
         return self::renderNoticeBox(
             'warning',
-            'Keine Demo-Blogbeiträge vorhanden',
+            esc_html__('Keine Demo-Blogbeiträge vorhanden', 'wp-starter'),
             sprintf(
-                '<p style="margin: 10px 0; color: #856404;">Erstellt 5 Beispiel-Blogbeiträge mit realistischem Inhalt zum Testen.</p>
+                '<p style="margin: 10px 0; color: #856404;">%s</p>
                 <p style="margin: 10px 0 0 0;">
-                    <a href="%s" class="button button-primary">Demo-Beiträge erstellen</a>
+                    <a href="%s" class="button button-primary">%s</a>
                 </p>',
+                esc_html__('Erstellt 5 Beispiel-Blogbeiträge mit realistischem Inhalt zum Testen.', 'wp-starter'),
                 esc_url($generateUrl),
+                esc_html__('Demo-Beiträge erstellen', 'wp-starter'),
             ),
         );
     }
@@ -1155,6 +1295,12 @@ class Options
      */
     private static function registerDesignTokensFields(): void
     {
+        if (\WordpressStarter\Providers\DesignTokenServiceProvider::tokensFromChildTheme()) {
+            self::registerChildThemeTokensNotice();
+
+            return;
+        }
+
         acf_add_local_field_group([
             'key' => 'group_options_design_tokens',
             'title' => __('Design Tokens', 'wp-starter'),
@@ -1321,6 +1467,43 @@ class Options
                     '#EF4444',
                     false,
                     __('Farbe für Fehlermeldungen und kritische Aktionen.', 'wp-starter'),
+                ),
+            ],
+            'location' => [
+                [
+                    [
+                        'param' => 'options_page',
+                        'operator' => '==',
+                        'value' => 'theme-options-tokens',
+                    ],
+                ],
+            ],
+            'menu_order' => 0,
+            'position' => 'normal',
+            'style' => 'default',
+            'label_placement' => 'top',
+            'instruction_placement' => 'label',
+        ]);
+    }
+
+    /**
+     * Design Tokens page in child mode: the child theme supplies the tokens,
+     * so the page only says where they come from and how to change them.
+     * Upload, restore and the colour pickers are left out (read-only).
+     */
+    private static function registerChildThemeTokensNotice(): void
+    {
+        acf_add_local_field_group([
+            'key' => 'group_options_design_tokens',
+            'title' => __('Design Tokens', 'wp-starter'),
+            'fields' => [
+                FieldDefinitions::infoBoxField(
+                    'field_tokens_child_theme_info',
+                    '<strong>' . esc_html__('Tokens aus dem Child-Theme', 'wp-starter') . '</strong><br>' .
+                    esc_html__('Farben und Schriften kommen aus dem aktiven Child-Theme, deshalb lassen sie sich hier nicht bearbeiten. Neue Tokens erzeugst du im Token-Generator und spielst sie als neues Child-Theme ein.', 'wp-starter') .
+                    '<br><a href="' . esc_url( (string) apply_filters(ThemeContext::prefix() . '_token_generator_url', home_url('/design-system/#token-generator'))) . '">' .
+                    esc_html__('Zum Token-Generator', 'wp-starter') . '</a>',
+                    'warning',
                 ),
             ],
             'location' => [

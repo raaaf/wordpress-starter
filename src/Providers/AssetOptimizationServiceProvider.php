@@ -207,7 +207,8 @@ class AssetOptimizationServiceProvider extends ServiceProvider
             // a weight that is not used above the fold delays the ones that are,
             // which showed up as a 0.765 CLS on a client page.
             $criticalFonts = [
-                'ColabReg-webfont.woff2', // Colaborate Regular (headlines and body)
+                'colaborate-300.woff2', // Colaborate Light (hero and page headlines)
+                'cal-sans-text-300.woff2', // Cal Sans Text Light (running text)
             ];
 
             foreach ($criticalFonts as $font) {

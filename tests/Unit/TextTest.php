@@ -80,4 +80,84 @@ final class TextTest extends TestCase
         $this->assertSame('Häufige Fragen zu uns', Text::plain('Häufige<br>Fragen <br /> zu <strong>uns</strong>'));
         $this->assertSame('', Text::plain(null));
     }
+
+    public function testNumberAndUnitAreGlued(): void
+    {
+        $nbsp = "\u{00A0}";
+        $this->assertSame("25{$nbsp}Jahren und 10{$nbsp}Jahre", Text::typography('25 Jahren und 10 Jahre'));
+        $this->assertSame("5{$nbsp}kWh, 3{$nbsp}MWp, 2{$nbsp}kg, 9{$nbsp}€, 4{$nbsp}EUR", Text::typography('5 kWh, 3 MWp, 2 kg, 9 €, 4 EUR'));
+    }
+
+    public function testNumberBeforeOtherWordsStaysSeparate(): void
+    {
+        $this->assertSame('25 Jahrhunderte', Text::typography('25 Jahrhunderte'));
+        $this->assertSame('Jahre 25', Text::typography('Jahre 25'));
+    }
+
+    public function testAbbreviationsAreGlued(): void
+    {
+        $nbsp = "\u{00A0}";
+        $this->assertSame("p.{$nbsp}a. und z.{$nbsp}B. so", Text::typography('p. a. und z. B. so'));
+    }
+
+    public function testPercentTakesNarrowNoBreakSpace(): void
+    {
+        $this->assertSame("7\u{00A0}% und 3\u{00A0}‰", Text::typography('7 % und 3 ‰'));
+    }
+
+    public function testSpacedHyphenBecomesEnDash(): void
+    {
+        $this->assertSame('Solar – Wind', Text::typography('Solar - Wind'));
+        $this->assertSame('E-Mail und Mit-Arbeiter', Text::typography('E-Mail und Mit-Arbeiter'));
+    }
+
+    public function testTagsAndAttributesStayUntouched(): void
+    {
+        $html = '<a href="/a - b?x=5 kg" class="z. B. p. a.">5 kg - gut</a>';
+        $this->assertSame(
+            "<a href=\"/a - b?x=5 kg\" class=\"z. B. p. a.\">5\u{00A0}kg – gut</a>",
+            Text::typography($html)
+        );
+    }
+
+    public function testTypographyReturnsNonStringsUnchanged(): void
+    {
+        $this->assertNull(Text::typography(null));
+        $this->assertFalse(Text::typography(false));
+    }
+
+    public function testTypographySkipsRawElementContents(): void
+    {
+        $this->assertSame('<script>a - b</script> x – y', Text::typography('<script>a - b</script> x - y'));
+        $this->assertSame('<CODE>a - b</CODE> x – y', Text::typography('<CODE>a - b</CODE> x - y'));
+        $this->assertSame('<pre>a - b <code>c - d</code> e - f</pre> x – y', Text::typography('<pre>a - b <code>c - d</code> e - f</pre> x - y'));
+    }
+
+    public function testLineBreaksAppliesTypography(): void
+    {
+        $this->assertSame("10\u{00A0}Jahre<br>Solar – Wind", Text::lineBreaks('10 Jahre[br]Solar - Wind'));
+    }
+
+    public function testFileTypeReturnsTheUppercaseKnownExtension(): void
+    {
+        $this->assertSame('PDF', Text::fileType('https://example.test/a/form.pdf'));
+        $this->assertSame('DOCX', Text::fileType('https://example.test/a/form.DOCX'));
+    }
+
+    public function testFileTypeIgnoresTheQueryString(): void
+    {
+        $this->assertSame('PDF', Text::fileType('https://example.test/form.pdf?v=3'));
+        $this->assertSame('', Text::fileType('https://example.test/download?file=form.pdf'));
+    }
+
+    public function testFileTypeIsEmptyForUnknownOrMissingExtensions(): void
+    {
+        $this->assertSame('', Text::fileType('https://example.test/page.html'));
+        $this->assertSame('', Text::fileType('https://example.test/page'));
+    }
+
+    public function testFileTypeIsEmptyForMailto(): void
+    {
+        $this->assertSame('', Text::fileType('mailto:info@example.test'));
+    }
 }

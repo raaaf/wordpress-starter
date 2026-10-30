@@ -21,7 +21,7 @@
 
 <nav
     aria-label="{{ __('Ansicht', 'wp-starter') }}"
-    class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6"
+    class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 pb-6"
 >
     <div class="inline-flex items-center gap-1 p-1 border rounded-full border-line bg-surface-secondary">
         @foreach($ansichten as $wert => $beschriftung)

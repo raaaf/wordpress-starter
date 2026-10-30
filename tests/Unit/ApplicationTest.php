@@ -35,7 +35,6 @@ final class ApplicationTest extends TestCase
     {
         $reflection = new ReflectionClass(Application::class);
         $property = $reflection->getProperty('instance');
-        $property->setAccessible(true);
         $property->setValue(null, null);
     }
 
@@ -144,6 +143,7 @@ final class ApplicationTest extends TestCase
             \WordpressStarter\Providers\AssetOptimizationServiceProvider::class,
             \WordpressStarter\Providers\EditorIntegrationServiceProvider::class,
             \WordpressStarter\Providers\BrandingServiceProvider::class,
+            \WordpressStarter\Providers\RedirectServiceProvider::class,
             \WordpressStarter\Providers\EditorStylesServiceProvider::class,
         ];
 

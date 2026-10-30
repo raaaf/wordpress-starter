@@ -32,6 +32,7 @@ class MemberAreaServiceProvider extends ServiceProvider
         $this->registerLogoutHandler();
         $this->registerCronJobs();
         $this->registerPasswordEncryption();
+        $this->registerSyncErrorNotice();
         $this->registerHostKeyRetrust();
         $this->registerUserRole();
         $this->registerDownloadCacheInvalidation();
@@ -142,12 +143,13 @@ class MemberAreaServiceProvider extends ServiceProvider
             $errorCode = $result->get_error_code();
             // Auth::login() already collapses the enumeration-relevant wp_signon()
             // codes (invalid_username / invalid_email / incorrect_password / invalidcombo)
-            // into 'member_login_failed', and password mode returns 'wrong_password' —
-            // both are wrong-credential cases and get the same generic message. Any
+            // into 'member_login_failed' (username or password, never saying which), and
+            // password mode, which has no username, returns 'wrong_password'. Any
             // other WP_Error (e.g. 'no_password', or a structural code passed through
             // unchanged from wp_signon()) uses its own message.
             $message = match ($errorCode) {
-                'member_login_failed', 'wrong_password' => __('Falsches Passwort.', 'wp-starter'),
+                'member_login_failed' => __('Benutzername oder Passwort ist falsch.', 'wp-starter'),
+                'wrong_password' => __('Falsches Passwort.', 'wp-starter'),
                 'no_password' => $result->get_error_message(),
                 default => __('Anmeldung fehlgeschlagen.', 'wp-starter'),
             };
@@ -218,7 +220,9 @@ class MemberAreaServiceProvider extends ServiceProvider
             wp_send_json_error(['message' => __('Ungültige Anfrage.', 'wp-starter')], 403);
         }
 
-        FolderSync::run();
+        if (!FolderSync::run()) {
+            wp_send_json_error(['message' => __('Eine Synchronisation läuft bereits. Bitte in ein paar Minuten erneut versuchen.', 'wp-starter')], 409);
+        }
 
         wp_send_json_success(['message' => __('Synchronisation abgeschlossen.', 'wp-starter')]);
     }
@@ -231,7 +235,12 @@ class MemberAreaServiceProvider extends ServiceProvider
             }
         });
 
-        add_action('member_area_sync_folders', [FolderSync::class, 'run']);
+        add_action('member_area_sync_folders', static function (): void {
+            if (!FolderSync::run()) {
+                // Lock held by another sync: retry in five minutes
+                wp_schedule_single_event(time() + 300, 'member_area_sync_folders');
+            }
+        });
 
         // Auto-sync when a new SFTP parent entry is saved
         add_action('save_post_member_download', function (int $postId): void {
@@ -271,21 +280,68 @@ class MemberAreaServiceProvider extends ServiceProvider
         });
     }
 
+    private function registerSyncErrorNotice(): void
+    {
+        add_action('admin_notices', static function (): void {
+            if (!current_user_can('manage_options')) {
+                return;
+            }
+
+            $screen = get_current_screen();
+            if (!$screen || $screen->post_type !== 'member_download') {
+                return;
+            }
+
+            $errors = array_slice(FolderSync::lastErrors(), 0, 5);
+            if ($errors === []) {
+                return;
+            }
+
+            echo '<div class="notice notice-error"><p><strong>'
+                . esc_html__('Synchronisation des internen Bereichs fehlgeschlagen', 'wp-starter')
+                . '</strong></p><ul>';
+            foreach ($errors as $error) {
+                echo '<li>' . esc_html(sprintf(
+                    '%s %s: %s (%s)',
+                    $error['host'],
+                    $error['path'],
+                    $error['message'],
+                    wp_date('d.m.Y H:i', $error['time'])
+                )) . '</li>';
+            }
+            echo '</ul></div>';
+        });
+    }
+
     private function registerPasswordEncryption(): void
     {
-        // One-time migration: encrypt any existing plaintext passwords on first admin load.
+        // Migration: (re-)encrypt stored passwords whenever the current key id differs
+        // from the stored one (first run, plaintext, legacy enc:v1, or a rotated AUTH_KEY).
         // Skip on AJAX (admin-ajax.php also fires admin_init, incl. unauthenticated requests)
         // and require manage_options, so the meta_query batch loop never runs on member AJAX.
         add_action('admin_init', static function (): void {
             if (wp_doing_ajax() || !current_user_can('manage_options')) {
                 return;
             }
-            if (get_option(ThemeContext::optionKey('sftp_passwords_encrypted')) === '1') {
+
+            $keyOption = ThemeContext::optionKey('sftp_passwords_key_id');
+
+            try {
+                $currentKid = Crypto::currentKeyId();
+            } catch (RuntimeException $e) {
+                // AUTH_KEY not configured — skip, but make the condition visible
+                LogServiceProvider::warning('SFTP password migration skipped', ['error' => $e->getMessage()]);
+
+                return;
+            }
+
+            if (get_option($keyOption) === $currentKid) {
                 return;
             }
 
             $batchSize = 100;
             $paged = 1;
+            $anyFailed = false;
 
             do {
                 $posts = get_posts([
@@ -302,29 +358,30 @@ class MemberAreaServiceProvider extends ServiceProvider
 
                 foreach ($posts as $postId) {
                     $pw = get_post_meta($postId, 'download_sftp_password', true);
-                    if (!is_string($pw) || $pw === '' || Crypto::isEncrypted($pw)) {
+                    if (!is_string($pw) || !Crypto::needsReencrypt($pw)) {
                         continue;
                     }
 
-                    try {
-                        update_post_meta($postId, 'download_sftp_password', Crypto::encrypt($pw));
-                    } catch (RuntimeException $e) {
-                        // AUTH_KEY not configured — skip, but make the condition visible
-                        LogServiceProvider::warning('SFTP password migration skipped', [
-                            'post_id' => $postId,
-                            'error' => $e->getMessage(),
-                        ]);
+                    $plain = Crypto::decrypt($pw);
+                    if ($plain === null) {
+                        LogServiceProvider::warning('SFTP password could not be decrypted for re-encryption', ['post_id' => $postId]);
+                        $anyFailed = true;
+                        continue;
                     }
+
+                    update_post_meta($postId, 'download_sftp_password', Crypto::encrypt($plain));
                 }
 
                 $postsCount = count($posts);
                 $paged++;
             } while ($postsCount === $batchSize);
 
-            // Only mark the migration done once every batch has been processed —
-            // if this admin_init run is interrupted mid-loop, the flag stays unset
-            // and the next admin_init run resumes (already-encrypted values are skipped above).
-            update_option(ThemeContext::optionKey('sftp_passwords_encrypted'), '1', autoload: false);
+            // Only store the key id once every batch has been processed and every value
+            // was readable: an interrupted run or a value under an unknown key keeps the
+            // old id, so the next admin_init retries (current-key values are skipped above).
+            if (!$anyFailed) {
+                update_option($keyOption, $currentKid, autoload: false);
+            }
         });
 
         // Encrypt the SFTP password when ACF saves the field

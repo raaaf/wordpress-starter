@@ -27,7 +27,6 @@ final class MediaServiceProviderTest extends TestCase
     private function looksLikeSvgContent(string $path): bool
     {
         $reflection = new ReflectionMethod(MediaServiceProvider::class, 'looksLikeSvgContent');
-        $reflection->setAccessible(true);
 
         return $reflection->invoke($this->provider, $path);
     }
@@ -35,7 +34,6 @@ final class MediaServiceProviderTest extends TestCase
     private function isSvgUpload(string $filename): bool
     {
         $reflection = new ReflectionMethod(MediaServiceProvider::class, 'isSvgUpload');
-        $reflection->setAccessible(true);
 
         return $reflection->invoke($this->provider, $filename);
     }
@@ -46,7 +44,6 @@ final class MediaServiceProviderTest extends TestCase
     private function sanitizeSvg(string $content)
     {
         $reflection = new ReflectionMethod(MediaServiceProvider::class, 'sanitizeSvg');
-        $reflection->setAccessible(true);
 
         return $reflection->invoke($this->provider, $content);
     }
@@ -58,7 +55,6 @@ final class MediaServiceProviderTest extends TestCase
     {
         $path = $this->writeTempFile($content);
         $reflection = new ReflectionMethod(MediaServiceProvider::class, 'sanitizeSvgUpload');
-        $reflection->setAccessible(true);
 
         return $reflection->invoke($this->provider, ['name' => 'icon.svg', 'tmp_name' => $path]);
     }

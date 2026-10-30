@@ -67,16 +67,17 @@ Service providers are the central place for bootstrapping theme functionality.
 | `MenuServiceProvider`               | Navigation menus                                                               |
 | `ThemeServiceProvider`              | Core theme features, template routing                                          |
 | `ImageServiceProvider`              | Custom image sizes                                                             |
-| `SeoServiceProvider`                | JSON-LD, OG tags, canonical URLs, robots meta                                  |
+| `SeoServiceProvider`                | JSON-LD, OG tags, canonical URLs, robots meta, Yoast image fallback            |
+| `RedirectServiceProvider`           | 301 redirects from the option `wp_starter_redirects`, only on a 404            |
 | `ThemeUpdateProvider`               | GitHub-based updates                                                           |
 | `PostTypeServiceProvider`           | Custom post types and taxonomies                                               |
 | `MemberAreaServiceProvider`         | Member area (login, downloads, SFTP sync)                                      |
 | `PluginConfiguratorServiceProvider` | Auto-configuration of plugins on activation                                    |
 | `DesignTokenServiceProvider`        | Token file upload/download/validation, CSS regeneration                        |
 | `CronServiceProvider`               | Transient and revision cleanup                                                 |
-| `LogServiceProvider`                | Structured logging to debug.log                                                |
+| `LogServiceProvider`                | Structured logging (warnings always, info/debug with WP_DEBUG_LOG)             |
 | `AssetOptimizationServiceProvider`  | Defers non-critical scripts, preloads fonts/styles, inlines above-the-fold CSS |
-| `BrandingServiceProvider`           | Favicon, login logo, syncs ACF branding with WP core custom_logo/site_icon     |
+| `BrandingServiceProvider`           | Favicons (PNG, SVG, ICO), web manifest, login logo, custom_logo/site_icon sync |
 | `EditorIntegrationServiceProvider`  | Disables Gutenberg and unused editor features, removes Global Styles output    |
 | `EditorStylesServiceProvider`       | Editor stylesheet, style-select toolbar, custom formats, icon picker           |
 | `IconShortcodeServiceProvider`      | Renders inline SVG icons via `[icon name="..."]` shortcode                     |
@@ -271,7 +272,7 @@ Blade templates use Laravel's Illuminate View package:
 
 ## ACF Flexible Content
 
-The page builder uses ACF Flexible Content with 38 layouts organized by category.
+The page builder uses ACF Flexible Content with 39 layouts organized by category.
 
 ### Section Header
 

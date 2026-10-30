@@ -124,7 +124,6 @@ final class NamespaceConsistencyTest extends TestCase
     public function testLooksLikeProjectNamespaceDetectsAllForeignForks(string $foreignNamespace): void
     {
         $method = new \ReflectionMethod($this, 'looksLikeProjectNamespace');
-        $method->setAccessible(true);
 
         $this->assertTrue(
             $method->invoke($this, $foreignNamespace),

@@ -221,6 +221,7 @@ final class TemplateRenderTest extends TestCase
         'index', // have_posts() not mocked
         'layouts.app', // wp_date() not mocked
         'member-area.login-page', // wp_date() not mocked
+        'page-design-system', // have_posts() not mocked
         'page-member-area', // wp_date() not mocked (partials.footer-menu)
         'page-styleguide', // sanitize_key() not mocked
         'page', // have_posts() not mocked
@@ -816,7 +817,6 @@ final class TemplateRenderTest extends TestCase
     private function invokeIsMockGap(string $message): bool
     {
         $method = new ReflectionMethod($this, 'isMockGap');
-        $method->setAccessible(true);
 
         return $method->invoke($this, $message);
     }

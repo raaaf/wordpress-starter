@@ -855,6 +855,16 @@ class StyleguideLayoutData
             'background_color' => 'primary',
         ]);
 
+        $catalog[] = $this->layout('hero', [
+            'variant' => 'stacked',
+            'badge' => 'Variante',
+            'title' => 'Hero, gestapelt',
+            'copy' => 'Text und Buttons oben, das Bild läuft darunter über die volle Inhaltsbreite.',
+            'image' => $this->imageId(3),
+            'cta_primary' => self::link('Primär', '#'),
+            'background_color' => 'secondary',
+        ]);
+
         // --- Sektionskopf an, Ausrichtung links -------------------------------
         // Beide Werte fehlen in der kuratierten Galerie, weil dort der Default
         // greift. Je Layout eine Instanz deckt beide ab.
@@ -1018,6 +1028,14 @@ class StyleguideLayoutData
             'background_color' => 'inverse',
         ]);
 
+        $catalog[] = $this->layout('cta', [
+            'title' => 'CTA über die ganze Inhaltsbreite',
+            'content' => 'Die Karte schließt mit den Kanten eines Zweispalters ab, der Text bleibt bei höchstens 80 Zeichen.',
+            'button' => self::link('Kontakt aufnehmen', self::DEMO_CONTACT_URL),
+            'content_width' => 'container',
+            'background_color' => 'primary',
+        ]);
+
         // Akkordeon mit allen drei Schaltern anders herum als im Standardfall
         // darueber: erster Eintrag offen, mehrere gleichzeitig offen, und ohne
         // FAQ-Auszeichnung, weil das hier keine Fragen und Antworten sind.
@@ -1056,6 +1074,43 @@ class StyleguideLayoutData
             'card_style' => 'filled',
             'background_color' => 'primary',
         ]);
+
+        $catalog[] = $this->layout('cards', [
+            'title' => 'Karten mit Linie',
+            'cards' => [
+                ['icon' => 'check', 'title' => 'Linie', 'content' => 'Keine Fläche, nur eine Haarlinie über dem Inhalt.', 'link' => null],
+                ['icon' => 'star', 'title' => 'Linie', 'content' => 'Der Text steht auf der Achse der Sektion.', 'link' => null],
+                ['icon' => 'shield', 'title' => 'Linie', 'content' => 'Passt zu ruhigen Seiten mit viel Weißraum.', 'link' => null],
+            ],
+            'columns' => '3',
+            'card_style' => 'rule',
+            'background_color' => 'primary',
+        ]);
+
+        $downloadGroups = [
+            [
+                'title' => 'Formulare',
+                'items' => [
+                    ['heading' => '', 'label' => 'Antragsformular', 'url' => 'https://example.com/antrag.pdf', 'note' => 'Stand Januar 2026'],
+                    ['heading' => 'Für Partner', 'label' => 'Präsentation – in Kürze verfügbar', 'url' => '', 'note' => ''],
+                ],
+            ],
+            [
+                'title' => 'Kontakt',
+                'items' => [
+                    ['heading' => '', 'label' => 'Support schreiben', 'url' => 'mailto:support@example.com', 'note' => ''],
+                ],
+            ],
+        ];
+
+        foreach (['2', '3'] as $downloadColumns) {
+            $catalog[] = $this->layout('download_list', [
+                'title' => "Download-Liste, {$downloadColumns} Spalten",
+                'groups' => $downloadGroups,
+                'columns' => $downloadColumns,
+                'background_color' => 'primary',
+            ]);
+        }
 
         // Beitraege als Liste und die beiden Sortierungen neben "Neueste zuerst",
         // die der Standardfall oben schon zeigt.
@@ -1130,6 +1185,14 @@ class StyleguideLayoutData
             'background_color' => 'primary',
         ]);
 
+        // Vergleich ohne Intro: der Regler steht von Anfang an still in der Mitte.
+        $catalog[] = $this->layout('before_after', [
+            'image_before' => $this->imageId(3),
+            'image_after' => $this->imageId(4),
+            'intro_animation' => false,
+            'background_color' => 'secondary',
+        ]);
+
         $catalog[] = $this->layout('button', [
             'button' => self::link('Termin vereinbaren', self::DEMO_CONTACT_URL),
             'button_secondary' => self::link('Unterlagen ansehen', 'https://example.org/downloads'),
@@ -1152,6 +1215,14 @@ class StyleguideLayoutData
             'variant' => 'warning',
             'title' => 'Frist läuft ab',
             'content' => '<p>Der gelbe Hinweis warnt, ohne einen Fehler zu melden.</p>',
+            'background_color' => 'primary',
+        ]);
+
+        $catalog[] = $this->layout('alert', [
+            'variant' => 'info',
+            'title' => 'Ganze Inhaltsbreite',
+            'content' => '<p>Dieser Hinweis schließt mit den Kanten eines Zweispalters darüber ab.</p>',
+            'content_width' => 'container',
             'background_color' => 'primary',
         ]);
 
@@ -1248,6 +1319,32 @@ class StyleguideLayoutData
             'section_width' => 'full',
             'background_color' => 'secondary',
         ]);
+
+        $catalog[] = $this->layout('image', [
+            'image' => $this->imageId(3),
+            'show_border' => false,
+            'show_caption' => false,
+            'width' => 'full',
+            'background_color' => 'primary',
+        ]);
+
+        // Zoom auf dem Einzelbild, Galerie in 16:10 und im Original-Seitenverhaeltnis.
+        $catalog[] = $this->layout('image', [
+            'image' => $this->imageId(4),
+            'show_border' => true,
+            'show_caption' => false,
+            'zoom' => true,
+            'background_color' => 'secondary',
+        ]);
+
+        foreach (['16-10' => 'secondary', 'original' => 'primary'] as $ratio => $background) {
+            $catalog[] = $this->layout('gallery', [
+                'images' => array_values(array_filter([$this->imageId(1), $this->imageId(2), $this->imageId(3)])),
+                'columns' => '3',
+                'aspect_ratio' => $ratio,
+                'background_color' => $background,
+            ]);
+        }
 
         // Lange Tabelle: kompakt und mit mitscrollender Kopfzeile. Kurz reicht
         // dafuer nicht, die Kopfzeile bliebe sichtbar, ohne je zu kleben.

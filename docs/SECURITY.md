@@ -149,6 +149,14 @@ Table row counts are checked on the whole posted tree via `acf/validate_save_pos
 
 `Acf::registerPasswordHashing()` (`src/MemberArea/Acf.php`) validates the shared-password field on save via `acf/validate_value/key=field_member_shared_password`, rejecting `<`, `>`, `&` and leading/trailing whitespace before the value is hashed with `wp_hash_password()`. This keeps the hashed value consistent with what `Auth::getSharedPassword()` receives at login: without the check, users without `unfiltered_html` have their input run through `wp_kses_post_deep` on the ACF save path (encoding `&` to `&amp;` and stripping `<`/`>`) before hashing, while the login form submits the raw value, so the hash would never match.
 
+### SFTP Passwords and Key Rotation
+
+`MemberArea\Crypto` stores SFTP passwords as `enc:v2:<key id>:...`, encrypted with a key derived from `AUTH_KEY`/`SECURE_AUTH_KEY`. Older `enc:v1` values stay readable and are re-encrypted on the next admin request. To rotate the salts without losing the stored passwords, put the old values into `WP_STARTER_PREVIOUS_AUTH_KEYS` in `wp-config.php` (or add them via the `wp_starter_crypto_secrets` filter) before changing `AUTH_KEY`; the theme re-encrypts every password to the new key and records the key id in the option `sftp_passwords_key_id`. Remove the constant once that has happened. A password that no key can decrypt stays unreadable, the folder sync reports it instead of failing silently.
+
+### Folder Sync Lock and Errors
+
+`FolderSync::run()` takes an option lock (`add_option`, stale after 15 minutes) so the cron run and a manual sync never overlap; only the owner of the lock releases it. A manual sync while another one runs answers with HTTP 409, a cron run retries five minutes later. Connection and listing errors are collected per run (option `sftp_sync_errors`) and shown as an admin notice on the downloads screen; a failed listing no longer looks like an empty folder and therefore never deletes downloads.
+
 ### Seitenpasswort und Mitgliederbereich
 
 Ein WordPress-Seitenpasswort auf einer Mitgliederbereich-Seite ist nur eine
@@ -213,6 +221,20 @@ register_rest_route('theme/v1', '/options', [
     },
 ]);
 ```
+
+The one public route is `DesignTokenRestProvider` (`GET /wp-json/{prefix}/v1/design-tokens/{primitives|light|dark}`,
+`permission_callback` `__return_true`, marked `INTENTIONAL`). It serves exactly those three token files, the
+theme's published design values, for the token generator on the design system page; the file name is an
+allowlist, never a path. Hosts may keep `config/` blocked for the web, the generator does not need it.
+
+### Child theme files
+
+A generated child theme is data, not code: its `functions.php` stays empty and the parent reads its
+`settings.json` (`Support\ChildThemeSettings`, see [CHILD-THEMES.md](CHILD-THEMES.md)). Every path in that
+file is resolved relative to the child folder, must still lie inside it after `realpath()` (so `../` and
+symlinks out of the folder are refused) and may only end in `css`, `svg`, `png` or `woff2`. Logos are copied
+into the media library once per build; SVGs go through the same sanitizer as uploads (`Support\SvgSanitizer`)
+and are dropped when they cannot be sanitized.
 
 ### Sensitive Data Filtering
 
@@ -307,16 +329,36 @@ These files should not be web-accessible:
 ## Update Integrity
 
 Theme updates come through `ThemeUpdateProvider` (`src/Providers/ThemeUpdateProvider.php`)
-via plugin-update-checker from GitHub releases. The release pipeline
-(`.github/workflows/release.yml`) stores a `.sha256` file next to the release zip
-as a second release asset (`shasum -a 256` output).
+via plugin-update-checker from GitHub releases. Before installation,
+`ThemeUpdateProvider::verifyPackageChecksum()` hooks into the WordPress core filter
+`upgrader_pre_download`, downloads the zip itself and checks two release assets. Both
+are mandatory; a missing or wrong asset aborts the installation with a `WP_Error` and
+deletes the download.
 
-Before installation, `ThemeUpdateProvider::verifyPackageChecksum()` hooks into the
-WordPress core filter `upgrader_pre_download`, downloads the zip itself and
-compares its hash against the `.sha256` file of the same release. If the checksum
-does not match, the installation is aborted with a `WP_Error`. If the `.sha256`
-file is missing (older releases from before this change), the update is not
-blocked but logged as a warning via `LogServiceProvider::warning()`.
+1. **Checksum** (`<zip>.sha256`, `shasum -a 256` output, written by
+   `.github/workflows/release.yml`): catches a broken or swapped download. It proves
+   nothing about who built the zip, because whoever can replace the zip can replace
+   the checksum too.
+2. **Signature** (`<zip>.sig`, base64 Ed25519 over the zip bytes): must verify against
+   one of `ThemeUpdateProvider::RELEASE_PUBLIC_KEYS`. The private key is generated and
+   kept offline (`php scripts/release-signing.php keygen`) and never reaches GitHub, so
+   neither a compromised GitHub account nor a compromised CI run can ship an update
+   that installs. While the key list is empty, no update installs.
+
+The release job runs in the GitHub environment `release`; with required reviewers set
+there, it waits for an approval before it tags and publishes. A fresh release is not
+installable until the maintainer signs it locally and attaches the `.sig` (the job
+summary prints the commands):
+
+```sh
+gh release download v1.2.3 -p 'wp-starter-1.2.3.zip' -p 'wp-starter-1.2.3.zip.sha256'
+shasum -a 256 -c wp-starter-1.2.3.zip.sha256
+php scripts/release-signing.php sign wp-starter-1.2.3.zip ~/.config/wp-starter/release.key
+gh release upload v1.2.3 wp-starter-1.2.3.zip.sig
+```
+
+Key rotation: add the new public key to `RELEASE_PUBLIC_KEYS`, ship that release signed
+with the old key, then sign with the new key and drop the old entry.
 
 ## Contact Form Spam Protection
 

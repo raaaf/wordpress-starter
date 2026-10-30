@@ -2,7 +2,7 @@
     Cards / Features - Flexible Content Layout
 
     Uses shared components: x-section, x-section-header, x-grid, x-card, x-link
-    Fields: title, cards (repeater: icon, title, content, link), columns, card_style, background_color
+    Fields: title, cards (repeater: icon, logo, title, content, link), columns, card_style, background_color
 --}}
 
 @php
@@ -19,12 +19,19 @@
     <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
 
     @if(!empty($cards))
-        <x-grid :cols="$columns" gap="lg">
+        <x-grid :cols="$columns" :gap="$cardStyle === 'rule' ? 'rule' : 'lg'">
             @foreach($cards as $card)
                 <x-card :variant="$cardStyle" padding="lg" class="h-full">
-                    {{-- Icon --}}
-                    @if(!empty($card['icon']))
-                        <div class="flex items-center justify-center w-16 h-16 mb-6 rounded-lg bg-[var(--bg-brand-tint)] border border-line-brand text-content-brand [&_svg]:text-content-brand">
+                    {{-- Logo replaces the icon. The box has the icon's height, so logo
+                         and icon cards line up; the width cap evens out the optical size
+                         of wide and compact logos. The title names the product, so the
+                         logo is decorative. --}}
+                    @if(!empty($card['logo']['url']))
+                        <div class="flex items-center h-16 mb-6">
+                            <img src="{{ esc_url($card['logo']['url']) }}" alt="" class="w-auto h-auto max-h-16 max-w-44" loading="lazy" decoding="async">
+                        </div>
+                    @elseif(!empty($card['icon']))
+                        <div class="flex items-center justify-center w-16 h-16 mb-6 rounded-lg bg-[var(--rafael-color-ds-accent-base)] text-[var(--rafael-color-ds-accent-ink)] [&_svg]:text-[var(--rafael-color-ds-accent-ink)]">
                             <x-icon :name="$card['icon']" size="xl" />
                         </div>
                     @endif

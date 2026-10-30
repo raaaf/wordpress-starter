@@ -9,8 +9,10 @@
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
-    $labelBefore = get_sub_field('label_before') ?: 'Vorher';
-    $labelAfter = get_sub_field('label_after') ?: 'Nachher';
+    $labelBefore = get_sub_field('label_before') ?: __('Vorher', 'wp-starter');
+    $labelAfter = get_sub_field('label_after') ?: __('Nachher', 'wp-starter');
+    // Unset (layouts saved before the field existed) counts as on.
+    $intro = get_sub_field('intro_animation') !== false;
     $background = get_sub_field('background_color') ?: 'primary';
     $uniqueId = 'before-after-' . uniqid();
 
@@ -24,6 +26,11 @@
 
     $altBefore = $beforeId ? \WordpressStarter\Helpers\Text::imageAlt((int) $beforeId, $labelBefore) : $labelBefore;
     $altAfter  = $afterId  ? \WordpressStarter\Helpers\Text::imageAlt((int) $afterId,  $labelAfter)  : $labelAfter;
+
+    // Both halves get identical size and loading attributes, so the browser picks
+    // the same srcset candidate for each; otherwise core's loading optimisation
+    // could treat them differently and one side looks softer on retina screens.
+    $imageArgs = ['class' => 'block w-full', 'sizes' => '(max-width: 1024px) 100vw, 1024px', 'loading' => 'lazy'];
 @endphp
 
 @if(($hasImageBefore && $hasImageAfter) || $title || current_user_can('edit_posts'))
@@ -33,8 +40,8 @@
     @if($hasImageBefore && $hasImageAfter)
         <div
             id="{{ $uniqueId }}"
-            x-data="beforeAfterSlider()"
-            class="relative max-w-4xl mx-auto select-none"
+            x-data="beforeAfterSlider({{ $intro ? 'true' : 'false' }})"
+            class="relative select-none"
         >
             {{-- Bildbereich traegt das overflow-hidden jetzt selbst, nicht mehr der
                  aeussere Container: der Slider-Griff ist per inset-y-0 randbuendig
@@ -43,20 +50,14 @@
                  (gleiche Falle wie im Akkordeon geloest). --}}
             <div class="relative overflow-hidden rounded-[var(--card-radius)]">
                 {{-- After image (background) --}}
-                {!! wp_get_attachment_image($afterId, 'content', false, [
-                    'class'   => 'block w-full',
-                    'alt'     => $altAfter,
-                ]) !!}
+                {!! wp_get_attachment_image($afterId, 'content', false, $imageArgs + ['alt' => $altAfter]) !!}
 
                 {{-- Before image (clipped) --}}
                 <div
                     class="absolute inset-0 overflow-hidden"
                     :style="'clip-path: inset(0 ' + (100 - position) + '% 0 0)'"
                 >
-                    {!! wp_get_attachment_image($beforeId, 'content', false, [
-                        'class'   => 'block w-full',
-                        'alt'     => $altBefore,
-                    ]) !!}
+                    {!! wp_get_attachment_image($beforeId, 'content', false, $imageArgs + ['alt' => $altBefore]) !!}
                 </div>
             </div>
 
@@ -67,7 +68,8 @@
                 :aria-valuenow="Math.round(position)"
                 aria-valuemin="0"
                 aria-valuemax="100"
-                :aria-valuetext="Math.round(position) + ' Prozent Nachher'"
+                :aria-valuetext="Math.round(position) + '{{ esc_js(__(' Prozent Nachher', 'wp-starter')) }}'"
+                @keydown="stopIntro()"
                 aria-label="{{ __('Bildvergleich: Nutze die Pfeiltasten, um zwischen Vorher und Nachher zu wechseln', 'wp-starter') }}"
                 class="group absolute inset-y-0 w-12 -translate-x-1/2 cursor-ew-resize before-after-handle focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] rounded-full"
                 :style="'left: ' + position + '%'"

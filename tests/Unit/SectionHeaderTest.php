@@ -69,20 +69,28 @@ final class SectionHeaderTest extends TestCase
         $this->assertNull($ergebnis['chip']);
         $this->assertNull($ergebnis['headline']);
         $this->assertNull($ergebnis['description']);
-        $this->assertSame('center', $ergebnis['alignment']);
+        $this->assertSame('left', $ergebnis['alignment']);
     }
 
-    public function testFaelltAufZentriertZurueckOhneAusrichtung(): void
+    public function testFaelltAufLinksZurueckOhneAusrichtung(): void
     {
         $ergebnis = $this->mitFeldern([
             'show_section_header' => true,
             'section_alignment' => '',
         ]);
 
-        $this->assertSame('center', $ergebnis['alignment']);
+        $this->assertSame('left', $ergebnis['alignment']);
     }
 
-    public function testFaelltImModulAufLinksZurueckAberRedakteurWahlGewinnt(): void
+    public function testLiestAusrichtungAuchBeiAusgeblendetemKopf(): void
+    {
+        $ergebnis = $this->mitFeldern(['show_section_header' => false, 'section_alignment' => 'left']);
+
+        $this->assertSame('left', $ergebnis['alignment']);
+        $this->assertNull($ergebnis['headline']);
+    }
+
+    public function testRedakteurWahlGewinntImModulUndOhneWahlStehtLinks(): void
     {
         SectionNesting::enter();
 
@@ -112,7 +120,7 @@ final class SectionHeaderTest extends TestCase
         }
 
         $this->assertSame('left', $imModul);
-        $this->assertSame('center', SectionHeader::extras('Titel')['alignment']);
+        $this->assertSame('left', SectionHeader::extras('Titel')['alignment']);
     }
 
     public function testLiefertImmerAlleVierSchluessel(): void

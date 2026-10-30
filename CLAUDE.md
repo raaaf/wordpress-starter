@@ -67,13 +67,13 @@ src/                    # PHP source code
 ├── Providers/         # Service providers
 ├── Services/          # StyleguidePage.php, TabsContentMigration.php (one-time tab text move)
 ├── Content/           # Styleguide reference/data classes
-├── Helpers/           # Text.php, SectionHeader.php, ComponentId.php (request-scoped ids + anchor slugs), FormAttributes.php (shared form-attribute allowlist), SectionNesting.php (nesting depth, no section chrome inside tab panels), JumpMenu.php (request-scoped show_in_jump_menu flag)
+├── Helpers/           # Text.php, SectionHeader.php, ComponentId.php (request-scoped ids + anchor slugs), FormAttributes.php (shared form-attribute allowlist), SectionNesting.php (nesting depth, no section chrome inside tab panels), JumpMenu.php (request-scoped show_in_jump_menu flag), ColorScheme.php (theme-color meta), TeamMember.php (skips empty spacer members)
 ├── RateLimiter.php    # AJAX rate limiting
 templates/             # Blade templates
 ├── layouts/          # Base layouts
 ├── partials/         # Reusable partials
 ├── components/       # Blade components
-├── flexible/         # Flexible Content layouts (38 layouts)
+├── flexible/         # Flexible Content layouts (39 layouts)
 ├── styleguide/        # Styleguide page sections (components, tokens)
 ├── page-styleguide.blade.php # Styleguide page template
 resources/
@@ -116,6 +116,8 @@ Path-bound rules live in nested `CLAUDE.md` files next to the code (loaded when 
 - `src/PostTypes/CLAUDE.md`: custom post types
 - `resources/js/CLAUDE.md`: Alpine.js components
 - `resources/css/CLAUDE.md`: design tokens (`npm run tokens`)
+- `docs/MCP-CONTRACT.md`: filter `wp_starter_mcp_contract` (version 1) for the Claude MCP plugin, writable layout allowlist
+- `docs/CHILD-THEMES.md`: child contract v1 (settings.json the parent reads), what the parent does in child mode
 - `DESIGN.md`: origin of the token values, the command chain, the mapping table
 - `README.MD`, `docs/`: architecture, deployment, security, SEO, token system
 

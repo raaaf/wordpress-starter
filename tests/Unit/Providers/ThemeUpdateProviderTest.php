@@ -9,13 +9,18 @@ use WordpressStarter\Providers\ThemeUpdateProvider;
 use WP_Error;
 
 /**
- * Tests for the release-checksum verification hooked into
+ * Tests for the release checksum and signature verification hooked into
  * ThemeUpdateProvider::verifyPackageChecksum() before a theme package is
- * installed (see docs/SECURITY.md "Update-Integritaet").
+ * installed (see docs/SECURITY.md "Update Integrity"). Both assets are
+ * mandatory.
  */
 final class ThemeUpdateProviderTest extends TestCase
 {
     private ThemeUpdateProvider $provider;
+
+    private const PACKAGE = 'https://example.com/wp-starter.zip';
+
+    private string $secretKey = '';
 
     /** @var string[] */
     private array $tempFiles = [];
@@ -24,6 +29,13 @@ final class ThemeUpdateProviderTest extends TestCase
     {
         parent::setUp();
         $this->provider = new ThemeUpdateProvider();
+
+        // A throwaway signing key per test; the real one stays offline.
+        $pair = sodium_crypto_sign_keypair();
+        $this->secretKey = sodium_crypto_sign_secretkey($pair);
+        $this->resetStaticProperties(ThemeUpdateProvider::class, [
+            'publicKeysOverride' => [base64_encode(sodium_crypto_sign_publickey($pair))],
+        ]);
     }
 
     protected function tearDown(): void
@@ -32,6 +44,7 @@ final class ThemeUpdateProviderTest extends TestCase
             @unlink($path);
         }
         $this->tempFiles = [];
+        $this->resetStaticProperties(ThemeUpdateProvider::class, ['publicKeysOverride' => null]);
         parent::tearDown();
     }
 
@@ -50,6 +63,34 @@ final class ThemeUpdateProviderTest extends TestCase
         $GLOBALS['wp_mock_download_url_result'] = $path;
 
         return $path;
+    }
+
+    /** Seeds a download plus a matching checksum and, optionally, a signature. */
+    private function seedRelease(string $content, ?string $signature = null): string
+    {
+        $file = $this->seedDownload($content);
+        $GLOBALS['wp_mock_remote_responses'][self::PACKAGE . '.sha256'] = [
+            'response' => ['code' => 200],
+            'body' => hash_file('sha256', $file) . '  wp-starter.zip',
+        ];
+        if ($signature !== null) {
+            $GLOBALS['wp_mock_remote_responses'][self::PACKAGE . '.sig'] = [
+                'response' => ['code' => 200],
+                'body' => $signature . "\n",
+            ];
+        }
+
+        return $file;
+    }
+
+    private function sign(string $content): string
+    {
+        return base64_encode(sodium_crypto_sign_detached($content, $this->secretKey));
+    }
+
+    private function verify(): mixed
+    {
+        return $this->provider->verifyPackageChecksum(false, self::PACKAGE, new \WP_Upgrader(), ['theme' => 'wp-starter']);
     }
 
     public function testIgnoresPackagesForOtherThemes(): void
@@ -76,24 +117,12 @@ final class ThemeUpdateProviderTest extends TestCase
         $this->assertSame('/already/downloaded/file.zip', $result);
     }
 
-    public function testMatchingChecksumReturnsDownloadedFile(): void
+    public function testMatchingChecksumAndSignatureReturnDownloadedFile(): void
     {
-        $file = $this->seedDownload('theme package contents');
-        $hash = hash_file('sha256', $file);
+        $file = $this->seedRelease('theme package contents', $this->sign('theme package contents'));
 
-        $GLOBALS['wp_mock_remote_responses']['https://example.com/wp-starter.zip.sha256'] = [
-            'response' => ['code' => 200],
-            'body' => "{$hash}  wp-starter.zip",
-        ];
-
-        $result = $this->provider->verifyPackageChecksum(
-            false,
-            'https://example.com/wp-starter.zip',
-            new \WP_Upgrader(),
-            ['theme' => 'wp-starter']
-        );
-
-        $this->assertSame($file, $result);
+        $this->assertSame($file, $this->verify());
+        $this->assertFileExists($file);
     }
 
     public function testMismatchedChecksumReturnsWpError(): void
@@ -116,25 +145,89 @@ final class ThemeUpdateProviderTest extends TestCase
         $this->assertSame('theme_update_checksum_mismatch', $result->get_error_code());
     }
 
-    public function testMissingChecksumAssetContinuesAndReturnsDownloadedFile(): void
+    public function testMissingChecksumAssetAbortsTheUpdate(): void
     {
-        // Older releases were published without a checksum asset: a 404 (or
-        // any other non-200/error) must not abort the update, only warn.
+        $this->expectErrorLog();
         $file = $this->seedDownload('theme package contents');
 
-        $GLOBALS['wp_mock_remote_responses']['https://example.com/wp-starter.zip.sha256'] = [
+        $GLOBALS['wp_mock_remote_responses'][self::PACKAGE . '.sha256'] = [
             'response' => ['code' => 404],
             'body' => '',
         ];
 
-        $result = $this->provider->verifyPackageChecksum(
-            false,
-            'https://example.com/wp-starter.zip',
-            new \WP_Upgrader(),
-            ['theme' => 'wp-starter']
-        );
+        $result = $this->verify();
 
-        $this->assertSame($file, $result);
+        $this->assertInstanceOf(WP_Error::class, $result);
+        $this->assertSame('theme_update_checksum_missing', $result->get_error_code());
+        $this->assertFileDoesNotExist($file, 'the unverified download is deleted');
+    }
+
+    public function testMissingSignatureAbortsTheUpdate(): void
+    {
+        $this->expectErrorLog();
+        $file = $this->seedRelease('theme package contents');
+
+        $result = $this->verify();
+
+        $this->assertInstanceOf(WP_Error::class, $result);
+        $this->assertSame('theme_update_signature_missing', $result->get_error_code());
+        $this->assertFileDoesNotExist($file);
+    }
+
+    public function testSignatureOfOtherContentIsRejected(): void
+    {
+        $this->seedRelease('theme package contents', $this->sign('other contents'));
+
+        $result = $this->verify();
+
+        $this->assertInstanceOf(WP_Error::class, $result);
+        $this->assertSame('theme_update_signature_invalid', $result->get_error_code());
+    }
+
+    public function testSignatureByAnUnknownKeyIsRejected(): void
+    {
+        $foreign = sodium_crypto_sign_secretkey(sodium_crypto_sign_keypair());
+        $this->seedRelease('theme package contents', base64_encode(sodium_crypto_sign_detached('theme package contents', $foreign)));
+
+        $result = $this->verify();
+
+        $this->assertInstanceOf(WP_Error::class, $result);
+        $this->assertSame('theme_update_signature_invalid', $result->get_error_code());
+    }
+
+    public function testSecondKeyAllowsRotation(): void
+    {
+        $old = sodium_crypto_sign_keypair();
+        $this->resetStaticProperties(ThemeUpdateProvider::class, [
+            'publicKeysOverride' => [
+                base64_encode(sodium_crypto_sign_publickey($old)),
+                base64_encode(sodium_crypto_sign_publickey_from_secretkey($this->secretKey)),
+            ],
+        ]);
+        $file = $this->seedRelease('theme package contents', $this->sign('theme package contents'));
+
+        $this->assertSame($file, $this->verify());
+    }
+
+    public function testShippedKeysAreEd25519PublicKeys(): void
+    {
+        $keys = ( new \ReflectionClassConstant(ThemeUpdateProvider::class, 'RELEASE_PUBLIC_KEYS') )->getValue();
+
+        $this->assertNotEmpty($keys, 'without a key no update installs');
+        foreach ($keys as $key) {
+            $this->assertSame(SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES, strlen( (string) base64_decode($key, true)));
+        }
+    }
+
+    public function testWithoutConfiguredKeyNoUpdateInstalls(): void
+    {
+        $this->resetStaticProperties(ThemeUpdateProvider::class, ['publicKeysOverride' => []]);
+        $this->seedRelease('theme package contents', $this->sign('theme package contents'));
+
+        $result = $this->verify();
+
+        $this->assertInstanceOf(WP_Error::class, $result);
+        $this->assertSame('theme_update_no_signing_key', $result->get_error_code());
     }
 
     public function testFilterAcceptsCoreArgumentOrder(): void

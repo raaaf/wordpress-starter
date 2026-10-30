@@ -84,4 +84,30 @@ final class ContactForm7ConfiguratorTest extends TestCase
 
         $this->assertStringContainsString('name="your-website"', $output);
     }
+
+    private const PLUGIN_HONEYPOT = '<span id="wpcf7-x-wrapper" class="wpcf7-form-control-wrap cf7apps-honeypot-wrap birthplace-676-wrap" >'
+        . '<label for="wpcf7-x-field" class="hp-message">Bitte lasse dieses Feld leer.</label>'
+        . '<input id="wpcf7-x-field"  class="wpcf7-form-control wpcf7-text" type="text" name="birthplace-676" value="" autocomplete="new-password" tabindex="1000" data-cf7apps-tabindex="1000" /></span>';
+
+    public function testHoneypotLosesPositiveTabindexAndIsHiddenFromScreenReaders(): void
+    {
+        $output = ContactForm7Configurator::hideHoneypotFromAssistiveTech(self::PLUGIN_HONEYPOT);
+
+        $this->assertStringNotContainsString('tabindex="1000"', $output);
+        $this->assertStringNotContainsString('data-cf7apps-tabindex', $output);
+        $this->assertStringContainsString('tabindex="-1" aria-hidden="true" />', $output);
+        $this->assertStringContainsString('birthplace-676-wrap" aria-hidden="true">', $output);
+    }
+
+    public function testOtherFieldsStayUntouchedByHoneypotHiding(): void
+    {
+        $other = '<span class="wpcf7-form-control-wrap"><input type="text" name="plz" tabindex="3"></span>';
+
+        $this->assertSame($other, ContactForm7Configurator::hideHoneypotFromAssistiveTech($other));
+    }
+
+    public function testDefaultFormValidatesAcceptanceOnSubmit(): void
+    {
+        $this->assertSame('acceptance_as_validation: on', ContactForm7Configurator::defaultAdditionalSettings());
+    }
 }

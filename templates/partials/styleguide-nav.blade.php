@@ -56,7 +56,7 @@
 @endphp
 
 @if(!empty($sprungziele))
-    <details class="group sticky z-30 mx-auto mb-8 max-w-7xl px-4 sm:px-6 lg:px-8 top-[calc(var(--header-height,80px)+0.5rem)]">
+    <details class="group sticky z-30 mx-auto mb-8 max-w-[var(--container-max)] px-4 sm:px-6 lg:px-8 top-[calc(var(--header-height,80px)+0.5rem)]">
         <summary class="inline-flex items-center gap-2 px-4 py-2 text-sm font-normal border rounded-full cursor-pointer select-none border-line bg-surface text-content shadow-[var(--rafael-shadow-button)] hover:bg-surface-secondary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]">
             {{ __('Springe zu', 'wp-starter') }}
             {{-- Dreht mit dem Aufklappzustand: vorher zeigte der Pfeil auch bei
