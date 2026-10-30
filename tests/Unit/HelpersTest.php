@@ -139,7 +139,6 @@ final class HelpersTest extends TestCase
     private function unsetConfigKey(string $key): void
     {
         $property = new \ReflectionProperty(Config::class, 'config');
-        $property->setAccessible(true);
         $value = $property->getValue();
         unset($value[$key]);
         $property->setValue(null, $value);

@@ -39,7 +39,6 @@ abstract class TestCase extends BaseTestCase
     protected function invokeStaticMethod(string $class, string $method, array $args = []): mixed
     {
         $reflection = new ReflectionMethod($class, $method);
-        $reflection->setAccessible(true);
 
         return $reflection->invoke(null, ...$args);
     }
@@ -52,7 +51,6 @@ abstract class TestCase extends BaseTestCase
     protected function invokeMethod(object $instance, string $method, array $args = []): mixed
     {
         $reflection = new ReflectionMethod($instance, $method);
-        $reflection->setAccessible(true);
 
         return $reflection->invoke($instance, ...$args);
     }
@@ -68,7 +66,6 @@ abstract class TestCase extends BaseTestCase
 
         foreach ($propertiesToValues as $property => $value) {
             $reflectionProperty = $reflection->getProperty($property);
-            $reflectionProperty->setAccessible(true);
             $reflectionProperty->setValue(null, $value);
         }
     }

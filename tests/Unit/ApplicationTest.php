@@ -35,7 +35,6 @@ final class ApplicationTest extends TestCase
     {
         $reflection = new ReflectionClass(Application::class);
         $property = $reflection->getProperty('instance');
-        $property->setAccessible(true);
         $property->setValue(null, null);
     }
 

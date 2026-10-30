@@ -133,11 +133,9 @@ trait WordPressMocks
         $reflection = new ReflectionClass(\WordpressStarter\Config::class);
 
         $configProperty = $reflection->getProperty('config');
-        $configProperty->setAccessible(true);
         $configProperty->setValue(null, []);
 
         $loadedProperty = $reflection->getProperty('loaded');
-        $loadedProperty->setAccessible(true);
         $loadedProperty->setValue(null, false);
     }
 
@@ -149,7 +147,6 @@ trait WordPressMocks
         $reflection = new ReflectionClass(\WordpressStarter\Services\StyleguidePage::class);
 
         $cachedResultsProperty = $reflection->getProperty('cachedResults');
-        $cachedResultsProperty->setAccessible(true);
         $cachedResultsProperty->setValue(null, []);
     }
 

@@ -37,7 +37,6 @@ final class DownloadQueryTest extends TestCase
     private function buildItems(array $posts): array
     {
         $reflection = new ReflectionMethod(DownloadQuery::class, 'buildItems');
-        $reflection->setAccessible(true);
 
         return $reflection->invoke(null, $posts);
     }

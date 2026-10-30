@@ -817,7 +817,6 @@ final class TemplateRenderTest extends TestCase
     private function invokeIsMockGap(string $message): bool
     {
         $method = new ReflectionMethod($this, 'isMockGap');
-        $method->setAccessible(true);
 
         return $method->invoke($this, $message);
     }
