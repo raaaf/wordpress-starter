@@ -10,13 +10,14 @@ Design System (tokens/src) → theme-hub design-system → config/design-tokens/
 
 ## Dateien
 
-| Datei                                         | Beschreibung                                                                               |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `config/design-tokens/primitives.tokens.json` | Basis-Werte: Farben, Spacing, Radius, Typography, Border Width, Opacity, Sizing, Gradients |
-| `config/design-tokens/light.tokens.json`      | Semantische Tokens für Light Mode                                                          |
-| `config/design-tokens/dark.tokens.json`       | Semantische Tokens für Dark Mode                                                           |
-| `scripts/transform-tokens.js`                 | Konvertiert JSON → CSS                                                                     |
-| `resources/css/tokens.css`                    | Generierte CSS Custom Properties                                                           |
+| Datei                                         | Beschreibung                                                                                                                     |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `config/design-tokens/primitives.tokens.json` | Basis-Werte: Farben, Spacing, Radius, Typography, Border Width, Opacity, Sizing, Gradients                                       |
+| `config/design-tokens/light.tokens.json`      | Semantische Tokens für Light Mode                                                                                                |
+| `config/design-tokens/dark.tokens.json`       | Semantische Tokens für Dark Mode                                                                                                 |
+| `scripts/transform-tokens.js`                 | Konvertiert JSON → CSS                                                                                                           |
+| `scripts/tokens-core.js`                      | Reine Transform-Funktionen ohne Node-APIs, genutzt von `transform-tokens.js` und vom Token-Generator auf der Design-System-Seite |
+| `resources/css/tokens.css`                    | Generierte CSS Custom Properties                                                                                                 |
 
 ## Workflow
 

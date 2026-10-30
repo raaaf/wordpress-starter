@@ -3455,6 +3455,137 @@ html {
   cursor: pointer;
 }
 
+/* Token generator (templates/styleguide/generator.blade.php). The picker is a
+   swatch like the playground's; the shade strip and the preview cards read
+   custom properties the component sets from the generated token files. */
+.token-gen-picker {
+  flex: none;
+  overflow: hidden;
+}
+
+.token-gen-picker input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.token-gen-picker:has(input:focus-visible) {
+  outline: 3px solid var(--ring-focus);
+  outline-offset: 3px;
+}
+
+.token-gen-hex {
+  width: 7.5rem;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-control, var(--border-default));
+  border-radius: var(--rafael-radius-sm, 4px);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--typography-body-small-size, 0.875rem);
+  text-transform: uppercase;
+}
+
+.token-gen-hex:focus-visible {
+  outline: 3px solid var(--ring-focus);
+  outline-offset: 2px;
+}
+
+.token-gen-shades {
+  display: flex;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  border-radius: var(--rafael-radius-sm, 4px);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--text-primary) 10%, transparent);
+}
+
+.token-gen-shades li {
+  flex: 1 1 0;
+  height: 2rem;
+  margin: 0;
+  background: var(--swatch, transparent);
+}
+
+.token-gen-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: var(--card-radius);
+  background: var(--gp-bg, var(--bg-primary));
+  color: var(--gp-text, var(--text-primary));
+  box-shadow: inset 0 0 0 1px var(--gp-border, var(--border-default));
+}
+
+.token-gen-preview__card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: var(--card-radius);
+  background: var(--gp-card, var(--bg-secondary));
+  box-shadow: inset 0 0 0 1px var(--gp-border, var(--border-default));
+}
+
+.token-gen-preview .text-h4 {
+  color: var(--gp-text, var(--text-primary));
+}
+
+.token-gen-preview__muted {
+  color: var(--gp-muted, var(--text-secondary));
+}
+
+.token-gen-preview__accent {
+  color: var(--gp-accent, var(--text-accent));
+  font-weight: 600;
+}
+
+.token-gen-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border-radius: var(--rafael-radius-full, 999px);
+  font-size: var(--typography-body-small-size, 0.875rem);
+  font-weight: 600;
+}
+
+.token-gen-pill--sm {
+  min-height: 2rem;
+  padding: 0 0.75rem;
+}
+
+.token-gen-pill--brand {
+  background: var(--gp-brand, var(--bg-brand));
+  color: var(--gp-on-brand, var(--text-on-brand));
+}
+
+.token-gen-pill--brand-2 {
+  background: var(--gp-brand-2, var(--bg-brand-secondary));
+  color: var(--gp-brand-2-ink, var(--text-on-color));
+}
+
+.token-gen-pill--success {
+  background: var(--gp-success, var(--bg-success-strong));
+  color: var(--gp-success-ink, var(--text-on-color));
+}
+
+.token-gen-pill--warning {
+  background: var(--gp-warning, var(--bg-warning-strong));
+  color: var(--gp-warning-ink, var(--text-on-color));
+}
+
+.token-gen-pill--error {
+  background: var(--gp-error, var(--bg-error-strong));
+  color: var(--gp-error-ink, var(--text-on-color));
+}
+
 /* Segmented choice (radio group): wraps at narrow widths instead of
    scrolling, the chosen step is filled. */
 .token-segments {

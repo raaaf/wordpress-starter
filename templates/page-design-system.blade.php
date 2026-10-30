@@ -33,6 +33,7 @@
 
             {{-- The page h1 already names the design system, so no overline per section. --}}
             @include('styleguide.playground')
+            @include('styleguide.generator')
             @include('styleguide.tokens', ['overline' => false])
             @include('styleguide.components', ['overline' => false])
         @endif

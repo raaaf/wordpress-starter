@@ -87,6 +87,9 @@ msgstr "Search %s"
 msgid "%s veröffentlicht."
 msgstr "%s published."
 
+msgid "%s, Farbwähler"
+msgstr "%s, colour picker"
+
 msgid "(öffnet in neuem Tab)"
 msgstr "(opens in a new tab)"
 
@@ -174,6 +177,9 @@ msgstr "Absolute path on the server, e.g. /documents/"
 msgid "Abstand"
 msgstr "Spacing"
 
+msgid "Abstufungen %s"
+msgstr "%s shades"
+
 msgid "Abstände"
 msgstr "Spacing"
 
@@ -231,6 +237,9 @@ msgstr "Enabled"
 msgid "Aktuell sind keine zukünftigen Termine eingetragen."
 msgstr "There are no upcoming events at the moment."
 
+msgid "Akzent"
+msgstr "Accent"
+
 msgid "Akzent-Link"
 msgstr "Accent link"
 
@@ -239,6 +248,9 @@ msgstr "Accent colour"
 
 msgid "Akzentfarbe, Ecken und Schriftgröße live umstellen. Die ganze Seite folgt, weil alles an denselben Tokens hängt."
 msgstr "Change the accent colour, corners and font size live. The whole page follows, because everything hangs on the same tokens."
+
+msgid "Akzenttext"
+msgstr "Accent text"
 
 msgid "Alle %s"
 msgstr "All %s"
@@ -275,6 +287,9 @@ msgstr "All types"
 
 msgid "Alle ausser ausgewählte Seiten"
 msgstr "All except selected pages"
+
+msgid "Alles als ZIP"
+msgstr "Download all as ZIP"
 
 msgid "Allgemein"
 msgstr "General"
@@ -572,6 +587,9 @@ msgstr "Image title %d"
 
 msgid "Bitte alle Felder ausfüllen."
 msgstr "Please fill in all fields."
+
+msgid "Bitte eine Farbe als #RRGGBB eingeben."
+msgstr "Please enter a colour as #RRGGBB."
 
 msgid "Bitte füge Kundenstimmen hinzu oder wähle eine Quelle mit Einträgen."
 msgstr "Please add testimonials or choose a source with entries."
@@ -900,6 +918,9 @@ msgstr "The copyright notice. {year} is replaced with the current year automatic
 msgid "Der Design-Umschalter benötigt JavaScript."
 msgstr "The design switcher needs JavaScript."
 
+msgid "Der Download konnte nicht erstellt werden."
+msgstr "The download could not be created."
+
 msgid "Der Name des Kunden/der Kundin."
 msgstr "The customer's name."
 
@@ -957,6 +978,9 @@ msgstr "Updating design tokens..."
 msgid "Design-System"
 msgstr "Design system"
 
+msgid "Design-Tokens aus dem Token-Generator."
+msgstr "Design tokens from the token generator."
+
 msgid "DesignTokenServiceProvider nicht geladen."
 msgstr "DesignTokenServiceProvider not loaded."
 
@@ -1002,6 +1026,9 @@ msgstr "The main heading of the hero section."
 msgid "Die Installation hat zu lange gedauert. Bitte versuch es erneut."
 msgstr "The installation took too long. Please try again."
 
+msgid "Die JSON-Dateien nach <code>config/design-tokens/</code> legen und <code>npm run tokens</code> ausführen, oder sie im WordPress-Backend unter <em>Design tokens</em> hochladen. Das ZIP enthält alles in der Ordnerstruktur des Themes."
+msgstr "Put the JSON files into <code>config/design-tokens/</code> and run <code>npm run tokens</code>, or upload them in wp-admin under <em>Design tokens</em>. The ZIP holds everything in the theme's folder structure."
+
 msgid "Die Karte konnte nicht geladen werden."
 msgstr "The map could not be loaded."
 
@@ -1031,6 +1058,9 @@ msgstr "The table gets its own scroll area, the header row stays in place inside
 
 msgid "Die Theme-Einstellungen aus dem Setup-Wizard wurden noch nicht importiert."
 msgstr "The theme settings from the setup wizard have not been imported yet."
+
+msgid "Die Token-Dateien konnten nicht geladen werden. Bitte die Seite neu laden."
+msgstr "The token files could not be loaded. Please reload the page."
 
 msgid "Die Uhrzeit der Veranstaltung (optional)."
 msgstr "The time of the event (optional)."
@@ -1116,6 +1146,9 @@ msgstr "Document category"
 msgid "Dokumentenkategorien"
 msgstr "Document categories"
 
+msgid "Download gestartet."
+msgstr "Download started."
+
 msgid "Download-Liste"
 msgstr "Download list"
 
@@ -1199,6 +1232,9 @@ msgstr "Square"
 
 msgid "Eigene Farbe"
 msgstr "Custom colour"
+
+msgid "Eigene Farben wählen: Paletten, Vorschau und diese Seite folgen sofort. Danach die Token-Dateien für dein Theme herunterladen."
+msgstr "Pick your own colours: palettes, preview and this page follow instantly. Then download the token files for your theme."
 
 msgid "Eigene Fläche, die sich von der Sektion absetzt, mit Rahmen."
 msgstr "Its own surface, set apart from the section, with a border."
@@ -1418,6 +1454,9 @@ msgstr "Colour for warnings and notices."
 
 msgid "Farben für Feedback und Statusmeldungen. Light/Dark-Varianten werden automatisch generiert."
 msgstr "Colours for feedback and status messages. Light and dark variants are generated automatically."
+
+msgid "Farben zurückgesetzt."
+msgstr "Colours reset."
 
 msgid "Farben, Typografie, Schatten und Abstände, direkt aus den aktiven Design-Tokens gezeichnet."
 msgstr "Colours, typography, shadows and spacing, drawn straight from the active design tokens."
@@ -1640,6 +1679,9 @@ msgstr "Google Maps map"
 
 msgid "Google Maps Link"
 msgstr "Google Maps link"
+
+msgid "Grau"
+msgstr "Grey"
 
 msgid "Grauton"
 msgstr "Grey"
@@ -2784,6 +2826,9 @@ msgstr "Add plan"
 msgid "Paketname"
 msgstr "Plan name"
 
+msgid "Paletten"
+msgstr "Palettes"
+
 msgid "Partner-Logos Karussell"
 msgstr "Partner logo carousel"
 
@@ -3132,6 +3177,9 @@ msgstr "Security check failed."
 msgid "Sichtbarkeit"
 msgstr "Visibility"
 
+msgid "So sehen Flächen, Text und Statusfarben mit deinen Tokens aus."
+msgstr "How surfaces, text and status colours look with your tokens."
+
 msgid "Social Links anzeigen"
 msgstr "Show social links"
 
@@ -3470,6 +3518,12 @@ msgstr "Download token files"
 
 msgid "Token-Dateien hochladen"
 msgstr "Upload token files"
+
+msgid "Token-Dateien werden geladen …"
+msgstr "Loading token files …"
+
+msgid "Token-Generator"
+msgstr "Token generator"
 
 msgid "Token-Transformation erfolgreich, aber Build fehlgeschlagen."
 msgstr "Token transformation succeeded, but the build failed."
@@ -4055,6 +4109,9 @@ msgstr "also online"
 
 msgid "aus"
 msgstr "off"
+
+msgid "config/ und resources/ in den Theme-Ordner kopieren und npm run tokens ausführen, oder die drei JSON-Dateien im WordPress-Backend unter Design tokens hochladen."
+msgstr "Copy config/ and resources/ into the theme folder and run npm run tokens, or upload the three JSON files in wp-admin under Design tokens."
 
 msgid "dark.tokens.json"
 msgstr "dark.tokens.json"

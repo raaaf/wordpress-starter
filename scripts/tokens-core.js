@@ -1,0 +1,1217 @@
+/**
+ * Token transform core: token JSON in, CSS out, no file system.
+ *
+ * Shared by scripts/transform-tokens.js (npm run tokens, writes the files)
+ * and the public token generator on the design system page
+ * (resources/js/token-generator.ts), which builds tokens.css in the browser.
+ * Keep it free of Node APIs so both can import it.
+ */
+
+// Fluid typography configuration.
+//
+// `min` is the mobile floor at VIEWPORT_MIN and lives here: no token defines it.
+// `max` is the desktop value and MUST equal primitives.fontSize, which is where
+// the design system writes it. That was only ever a comment before, and three
+// entries had drifted from it: xs said 12 against a token of 13, 3xl said 32
+// against 36, 4xl said 44 against 48. The page rendered the table, not the
+// design system. `assertFluidMaxMatchesExport` now stops the build instead.
+//
+// xs/sm/base stay non-fluid (min === max) for reading stability; lg and above
+// scale for headline breathing room.
+const FLUID_SIZES = {
+  xs: { min: 13, max: 13 },
+  sm: { min: 14, max: 14 },
+  base: { min: 16, max: 16 },
+  lg: { min: 17, max: 18 },
+  xl: { min: 19, max: 20 },
+  '2xl': { min: 20, max: 22 },
+  '3xl': { min: 21, max: 24 },
+  '4xl': { min: 29, max: 48 },
+  '5xl': { min: 34, max: 56 },
+  '6xl': { min: 38, max: 64 },
+};
+
+/**
+ * The desktop end of every clamp is the design system's value, not this file's.
+ * A mismatch means a token moved and the table did not follow, which is exactly
+ * how xs, 3xl and 4xl came to render a size nobody had chosen.
+ */
+function assertFluidMaxMatchesExport(fontSize = {}) {
+  const wrong = [];
+  for (const [key, config] of Object.entries(FLUID_SIZES)) {
+    const px = fontSize[key]?.$value;
+    if (typeof px === 'number' && px !== config.max) {
+      wrong.push(`${key}: Tabelle ${config.max}px, Export ${px}px`);
+    }
+  }
+  if (wrong.length > 0) {
+    throw new Error(
+      `transform-tokens: FLUID_SIZES weicht vom Token-Export ab:\n  ${wrong.join('\n  ')}\n` +
+        '  Der Export ist die Quelle. Trage die Werte dort nach oder hier.'
+    );
+  }
+}
+
+const VIEWPORT_MIN = 320;
+// 1440, not 1920: the content column stops growing at 68rem, so headings that kept
+// scaling past a laptop width only grew away from the text beside them.
+const VIEWPORT_MAX = 1440;
+const ROOT_PX = 16;
+
+/**
+ * Generate a fluid clamp() value in rem that scales linearly between
+ * VIEWPORT_MIN and VIEWPORT_MAX viewport widths.
+ * Returns a static rem string when minPx === maxPx (no scaling needed).
+ */
+/**
+ * Format a number with up to 4 decimal places, trimming trailing zeros.
+ * Keeps generated CSS readable: `2.375rem` instead of `2.3750rem`.
+ */
+function fmt(n) {
+  return n.toFixed(4).replace(/\.?0+$/, '');
+}
+
+function fluidClamp(minPx, maxPx, minVw = VIEWPORT_MIN, maxVw = VIEWPORT_MAX, rootPx = ROOT_PX) {
+  if (minPx === maxPx) {
+    return `${fmt(minPx / rootPx)}rem`;
+  }
+  const minRem = minPx / rootPx;
+  const maxRem = maxPx / rootPx;
+  const vwCoef = (100 * (maxPx - minPx)) / (maxVw - minVw);
+  const remIntercept = (minPx - (vwCoef / 100) * minVw) / rootPx;
+  return `clamp(${fmt(minRem)}rem, calc(${fmt(remIntercept)}rem + ${fmt(vwCoef)}vw), ${fmt(maxRem)}rem)`;
+}
+
+/**
+ * Generate a fluid line-height that shrinks (as a ratio) while the viewport grows.
+ *
+ * Emitted as a LENGTH, not as a unitless number. A unitless line-height cannot be
+ * made fluid: `calc(1.44 - 0.0125vw)` subtracts a length from a plain number, which
+ * is invalid, so the whole declaration is dropped and the element silently inherits
+ * the body line-height. That is what shipped between 2026-04-16 and this fix — every
+ * display/h1/h2/h3 rendered at 1.5 instead of the intended 1.1 to 1.35.
+ *
+ * Because the level's font-size is itself a known clamp, the ratio can be pinned at
+ * both ends by scaling the size endpoints: mobileLh applies at VIEWPORT_MIN,
+ * desktopLh at VIEWPORT_MAX. In between, size and line-height are both linear in vw,
+ * so the ratio moves monotonically between the two, which is the intent.
+ *
+ * @param {string} sizeKey  key into FLUID_SIZES, e.g. '6xl'
+ * @param {number} mobileLh ratio at VIEWPORT_MIN
+ * @param {number} desktopLh ratio at VIEWPORT_MAX
+ */
+function fluidLineHeight(sizeKey, mobileLh, desktopLh, minVw = VIEWPORT_MIN, maxVw = VIEWPORT_MAX) {
+  const size = FLUID_SIZES[sizeKey];
+  if (!size) throw new Error(`fluidLineHeight: unknown size key "${sizeKey}"`);
+  const minPx = size.min * mobileLh;
+  const maxPx = size.max * desktopLh;
+  return fluidClamp(minPx, maxPx, minVw, maxVw);
+}
+
+/**
+ * Guard against Figma-sourced strings being interpolated raw into generated CSS.
+ * Token names/paths must only ever produce `--foo-bar` style identifiers;
+ * anything else could break out of the declaration it is placed in.
+ */
+function assertSafeVarNameSegment(raw, context) {
+  if (!/^[a-zA-Z0-9-]+$/.test(raw)) {
+    throw new Error(
+      `transform-tokens: unsafe variable name "${raw}" in ${context} (allowed: a-z A-Z 0-9 -)`
+    );
+  }
+  return raw;
+}
+
+/**
+ * Decode CSS escape sequences (`\XX` hex or `\` + any char) so a value that
+ * spells out a dangerous token via CSS escaping (e.g. `\75rl(` for `url(`)
+ * cannot slip past the plain-text checks below.
+ */
+function decodeCssEscapes(str) {
+  return str
+    .replace(/\\([0-9a-f]{1,6})\s?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\\(.)/g, '$1');
+}
+
+/**
+ * Guard against Figma-sourced values that could inject additional CSS
+ * declarations or break out into surrounding markup when interpolated.
+ */
+function assertSafeCssValue(value, context) {
+  // Primitives like fontWeight/opacity are extracted as raw numbers (unit '').
+  // A number has no .includes()/regex methods, but it also can't carry an
+  // injection payload, so stringify it before running the checks below.
+  const str = decodeCssEscapes(String(value));
+  if (
+    /[;{}]/.test(str) ||
+    str.includes('</') ||
+    str.includes('*/') ||
+    str.includes('/*') ||
+    str.includes('@') ||
+    /url\s*\(/i.test(str) ||
+    /expression\s*\(/i.test(str)
+  ) {
+    throw new Error(`transform-tokens: unsafe CSS value in ${context}: "${str}"`);
+  }
+  return value;
+}
+
+/**
+ * Primitive families emitted with the "rafael-" prefix (see toCssVarName
+ * call sites below). An alias that targets one of these primitives has to
+ * be rewritten to the prefixed name too, or the resulting var() points at
+ * a CSS custom property that no longer exists.
+ */
+const RAFAEL_PREFIXED_FAMILIES = [
+  'font-family',
+  'font-weight',
+  'font-size',
+  'shadow-color',
+  'shadow',
+  'color',
+  'spacing',
+  'radius',
+  'opacity',
+];
+
+function withRafaelPrefix(varName) {
+  for (const family of RAFAEL_PREFIXED_FAMILIES) {
+    if (varName === family || varName.startsWith(`${family}-`)) {
+      return `rafael-${varName}`;
+    }
+  }
+  return varName;
+}
+
+/**
+ * Extract CSS var() reference from Figma token alias data.
+ * Converts aliasData.targetVariableName (e.g. "color/accent/500")
+ * to var(--rafael-color-accent-500). Falls back to resolved hex value.
+ */
+function extractColorAsReference(token) {
+  if (!token || token.$type !== 'color') return null;
+
+  const aliasData = token.$extensions?.['com.figma.aliasData'];
+  if (aliasData?.targetVariableName) {
+    const varName = assertSafeVarNameSegment(
+      aliasData.targetVariableName.replace(/\//g, '-'),
+      'aliasData.targetVariableName'
+    );
+    return `var(--${withRafaelPrefix(varName)})`;
+  }
+
+  // Fallback to resolved hex value if no alias
+  return extractColorValue(token);
+}
+
+/**
+ * Extract hex color value from Figma token $value object
+ * Handles both simple values and complex color objects with alpha
+ */
+/**
+ * A shadow token into a `box-shadow` value.
+ *
+ * The token carries its layers as objects so a consumer that is not CSS, the
+ * Figma plugin above all, can read them. An empty list is the flat-at-rest
+ * case and means `none`, not a missing token.
+ */
+function extractShadow(token) {
+  if (!token || token.$type !== 'shadow' || !Array.isArray(token.$value)) return null;
+  if (token.$value.length === 0) return 'none';
+  return token.$value
+    .map(
+      ({ inset, offsetX, offsetY, blur, spread, color }) =>
+        `${inset ? 'inset ' : ''}${offsetX} ${offsetY} ${blur} ${spread} ${color}`
+    )
+    .join(', ');
+}
+
+function extractColorValue(token) {
+  if (!token || token.$type !== 'color') return null;
+
+  const value = token.$value;
+
+  // Handle alias references like "{color.accent.500}"
+  if (typeof value === 'string' && value.startsWith('{')) {
+    return null; // Skip aliases, we use resolved values
+  }
+
+  // Handle complex color object with components
+  if (typeof value === 'object' && value.hex) {
+    const hex = value.hex;
+    const alpha = value.alpha ?? 1;
+
+    if (alpha < 1) {
+      // Convert hex + alpha to rgba
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(2)})`;
+    }
+
+    return hex;
+  }
+
+  return null;
+}
+
+/**
+ * Extract numeric value (spacing, radius, fontSize, etc.)
+ */
+function extractNumericValue(token, unit = 'px') {
+  if (!token) return null;
+
+  const value = token.$value;
+
+  if (typeof value === 'number') {
+    return unit ? `${value}${unit}` : value;
+  }
+
+  return null;
+}
+
+/**
+ * Extract string value (fontFamily)
+ * Wraps font family names in quotes for CSS compatibility
+ */
+function extractStringValue(token) {
+  if (!token || token.$type !== 'string') return null;
+  const raw = String(token.$value);
+  assertSafeCssValue(raw, 'fontFamily value');
+  // Escape backslashes first, then double quotes, before wrapping in CSS
+  // quotes. Reversing the order lets a trailing backslash in the source value
+  // escape the closing quote instead of itself.
+  const escaped = raw.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `"${escaped}"`;
+}
+
+/**
+ * Extract color value or resolve alias references to var().
+ * Handles primitive gradient tokens where $value is "{color.accent.500}".
+ */
+function extractColorOrAlias(token) {
+  if (!token || token.$type !== 'color') return null;
+
+  const value = token.$value;
+
+  // Handle alias references like "{color.accent.500}"
+  if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
+    const path = value.slice(1, -1); // Remove braces
+    const varName = assertSafeVarNameSegment(path.replace(/\./g, '-'), 'gradient alias path'); // dots to dashes
+    return `var(--${withRafaelPrefix(varName)})`;
+  }
+
+  // Fall back to regular color extraction
+  return extractColorValue(token);
+}
+
+/**
+ * Recursively process nested token structure
+ * Returns flat object with CSS variable names as keys
+ */
+function flattenTokens(obj, prefix = '', processor = extractColorValue) {
+  const result = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    // Handle $root special case (Figma uses this for base values in nested objects).
+    // MUST run before the generic "$"-prefixed metadata skip below, since "$root"
+    // itself starts with "$" and would otherwise never be reached.
+    if (key === '$root') {
+      const processed = processor(value);
+      if (processed !== null) {
+        result[prefix.replace(/-$/, '')] = processed;
+      }
+      continue;
+    }
+
+    // Skip metadata keys
+    if (key.startsWith('$')) continue;
+
+    const newPrefix = prefix ? `${prefix}-${key}` : key;
+
+    if (value && typeof value === 'object' && !value.$type) {
+      // Nested object, recurse
+      Object.assign(result, flattenTokens(value, newPrefix, processor));
+    } else if (value && value.$type) {
+      // Token node
+      const processed = processor(value);
+      if (processed !== null) {
+        result[newPrefix] = processed;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Convert token name to CSS variable name
+ * e.g., "gray-50" -> "--color-gray-50"
+ */
+function toCssVarName(name, prefix = '') {
+  const varName = assertSafeVarNameSegment(
+    name.toLowerCase().replace(/\s+/g, '-'),
+    `token name "${name}"`
+  );
+  return prefix ? `--${prefix}-${varName}` : `--${varName}`;
+}
+
+/**
+ * Generate CSS from flattened tokens
+ */
+function generateCss(tokens, prefix = '') {
+  return Object.entries(tokens)
+    .map(([name, value]) => {
+      assertSafeCssValue(value, `token "${name}"`);
+      return `  ${toCssVarName(name, prefix)}: ${value};`;
+    })
+    .join('\n');
+}
+
+/**
+ * Generate CSS with !important from flattened tokens
+ * Used for editor styles to override dark mode rules
+ */
+function generateCssImportant(tokens, prefix = '') {
+  return Object.entries(tokens)
+    .map(([name, value]) => {
+      assertSafeCssValue(value, `token "${name}"`);
+      return `    ${toCssVarName(name, prefix)}: ${value} !important;`;
+    })
+    .join('\n');
+}
+
+/**
+ * Standard typography tokens (not from Figma, but needed for consistency).
+ *
+ * FLOOR: the headline face (ColaborateLight) measures 1.022em from the top of A-umlaut
+ * to the bottom of a descender, and its font bounding box is 1.05em. A line-height
+ * below roughly 1.10 therefore crowds umlauts against the line above — which German
+ * headlines hit constantly. 1.12 is the tightest value used here, leaving about a
+ * tenth of an em of air. A client theme that swaps the headline face has to re-measure
+ * this; see MIN_HEADING_LINE_HEIGHT in transform-tokens.test.js.
+ *
+ * Leading is optical, not proportional: the bigger the type, the smaller the ratio
+ * has to be to look the same. So the ratio falls as the level rises, and it falls
+ * again as the viewport grows, because the type grows with it. Both ends of the
+ * range are monotonic across levels — the previous table was not, h2 sat tighter
+ * than both h1 and h3.
+ *
+ * Body stays at 1.5. Every heading is meaningfully tighter than that, which is what
+ * makes a wrapped headline read as one block instead of as a short paragraph.
+ *
+ * The mobile -> desktop ratio curve is HEADING_LINE_HEIGHTS below (single source of
+ * truth, also imported by transform-tokens.test.js so a curve change cannot drift
+ * silently past the regression suite). h4 stays static at 1.38 and h5 at 1.42, the
+ * size barely scales at those levels, so no fluid ratio is needed. There is no h6
+ * entry: no --typography-h6-* token exists, h6 reuses the h5 token in CSS (see
+ * resources/css/app.css).
+ *
+ * display/h1/h2/h3 are fluid: font-size scales meaningfully, so mobile/desktop
+ * ratio endpoints are given and interpolated via fluidLineHeight(). h4/h5/body are
+ * static: a single `static` ratio, applied as-is regardless of viewport. Forcing
+ * the static ones into the fluid shape would need a fake key/mobile/desktop that
+ * always resolves to the same number, which is more confusing than a second shape.
+ */
+const HEADING_LINE_HEIGHTS = {
+  display: { key: '6xl', mobile: 1.15, desktop: 1.1 },
+  h1: { key: '5xl', mobile: 1.2, desktop: 1.12 },
+  h2: { key: '4xl', mobile: 1.25, desktop: 1.25 },
+  h3: { key: '2xl', mobile: 1.3, desktop: 1.3 },
+  h4: { static: 1.3 },
+  h5: { static: 1.4 },
+  body: { static: 1.5 },
+};
+
+/**
+ * Override HEADING_LINE_HEIGHTS with ratios exported from the design system,
+ * where present. `lineHeight` is the flattened `primitives.lineHeight.*` map
+ * (display/section/title/lead/body/small/micro); a role missing from it
+ * (older export, test fixtures) keeps its HEADING_LINE_HEIGHTS constant.
+ *
+ * display/h1 share `lineHeight.display`, h2 gets `lineHeight.section`, h3/h4/h5
+ * get `lineHeight.title` (all three are the design system's section/title face),
+ * body gets `lineHeight.body`. The exported value is the desktop ratio; the
+ * mobile ratio never sits below it, so a long German compound that wraps on a
+ * phone keeps the looser leading of the table. h1 keeps the 1.12 floor above.
+ */
+function resolveHeadingLineHeights(lineHeight = {}) {
+  const fluid = (fallback, value, floor = 0) => {
+    if (typeof value !== 'number') return fallback;
+    const desktop = Math.max(value, floor);
+    return { key: fallback.key, mobile: Math.max(fallback.mobile, desktop), desktop };
+  };
+  const staticRatio = (fallback, value) =>
+    typeof value === 'number' ? { static: value } : fallback;
+
+  return {
+    display: fluid(HEADING_LINE_HEIGHTS.display, lineHeight.display),
+    h1: fluid(HEADING_LINE_HEIGHTS.h1, lineHeight.display, HEADING_LINE_HEIGHTS.h1.desktop),
+    h2: fluid(HEADING_LINE_HEIGHTS.h2, lineHeight.section),
+    h3: fluid(HEADING_LINE_HEIGHTS.h3, lineHeight.title),
+    h4: staticRatio(HEADING_LINE_HEIGHTS.h4, lineHeight.title),
+    h5: staticRatio(HEADING_LINE_HEIGHTS.h5, lineHeight.title),
+    body: staticRatio(HEADING_LINE_HEIGHTS.body, lineHeight.body),
+  };
+}
+
+/**
+ * Letter-spacing per typography role. `tracking` is the flattened
+ * `primitives.tracking.*` map (default/heading/label); falls back to the
+ * existing constants (all 0, overline 0.08em) when a key is absent.
+ */
+function resolveTracking(tracking = {}) {
+  const heading = tracking.heading ?? 0;
+  const body = tracking.default ?? 0;
+  const label = tracking.label ?? '0.08em';
+  return { heading, body, label };
+}
+
+function buildTypographyTokens(lineHeight = {}, tracking = {}) {
+  const headings = resolveHeadingLineHeights(lineHeight);
+  const displayLh = fluidLineHeight(
+    headings.display.key,
+    headings.display.mobile,
+    headings.display.desktop
+  );
+  const h1Lh = fluidLineHeight(headings.h1.key, headings.h1.mobile, headings.h1.desktop);
+  const h2Lh = fluidLineHeight(headings.h2.key, headings.h2.mobile, headings.h2.desktop);
+  const h3Lh = fluidLineHeight(headings.h3.key, headings.h3.mobile, headings.h3.desktop);
+  const h4Lh = headings.h4.static;
+  const h5Lh = headings.h5.static;
+  const bodyLh = headings.body.static;
+  const captionLh = typeof lineHeight.micro === 'number' ? lineHeight.micro : 1.4;
+  const smallLh = typeof lineHeight.small === 'number' ? lineHeight.small : 1.5;
+  const {
+    heading: headingTracking,
+    body: bodyTracking,
+    label: labelTracking,
+  } = resolveTracking(tracking);
+
+  return `
+  /* ============================================
+     TYPOGRAPHY COMPOSITE TOKENS
+     Standard typography styles using primitives
+     ============================================ */
+
+  /* Faces follow the design system's roles: display, h1 and h2 are the display
+     face (Colaborate Light), h3 to h5 the section/title roles (Cal Sans Text
+     Medium), running text Cal Sans Text Light, small UI text Cal Sans UI. */
+
+  /* Display - 6xl / Colaborate Light (hero headlines) */
+  --typography-display-family: var(--rafael-font-family-headline);
+  --typography-display-size: var(--rafael-font-size-6xl);
+  --typography-display-weight: var(--rafael-font-weight-light);
+  --typography-display-line-height: ${displayLh};
+  --typography-display-letter-spacing: ${headingTracking};
+
+  /* Heading 1 - 5xl / Colaborate Light */
+  --typography-h1-family: var(--rafael-font-family-headline);
+  --typography-h1-size: var(--rafael-font-size-5xl);
+  --typography-h1-weight: var(--rafael-font-weight-light);
+  --typography-h1-line-height: ${h1Lh};
+  --typography-h1-letter-spacing: ${headingTracking};
+
+  /* Heading 2 - 4xl / Colaborate Light */
+  --typography-h2-family: var(--rafael-font-family-headline);
+  --typography-h2-size: var(--rafael-font-size-4xl);
+  --typography-h2-weight: var(--rafael-font-weight-light);
+  --typography-h2-line-height: ${h2Lh};
+  --typography-h2-letter-spacing: ${headingTracking};
+
+  /* Heading 3 - 2xl / Cal Sans Text Medium (section) */
+  --typography-h3-family: var(--rafael-font-family-body);
+  --typography-h3-size: var(--rafael-font-size-2xl);
+  --typography-h3-weight: var(--rafael-font-weight-medium);
+  --typography-h3-line-height: ${h3Lh};
+  --typography-h3-letter-spacing: ${bodyTracking};
+
+  /* Heading 4 - xl / Cal Sans Text Medium (title) */
+  --typography-h4-family: var(--rafael-font-family-body);
+  --typography-h4-size: var(--rafael-font-size-xl);
+  --typography-h4-weight: var(--rafael-font-weight-medium);
+  --typography-h4-line-height: ${h4Lh};
+  --typography-h4-letter-spacing: ${bodyTracking};
+
+  /* Heading 5 - lg / Cal Sans Text Medium */
+  --typography-h5-family: var(--rafael-font-family-body);
+  --typography-h5-size: var(--rafael-font-size-lg);
+  --typography-h5-weight: var(--rafael-font-weight-medium);
+  --typography-h5-line-height: ${h5Lh};
+  --typography-h5-letter-spacing: ${bodyTracking};
+
+  /* Body Large - 3xl / Cal Sans Text Light (lead) */
+  --typography-body-large-family: var(--rafael-font-family-body);
+  --typography-body-large-size: var(--rafael-font-size-3xl);
+  --typography-body-large-weight: var(--rafael-font-weight-light);
+  --typography-body-large-line-height: 1.3;
+  --typography-body-large-letter-spacing: ${bodyTracking};
+
+  /* Body - lg / Cal Sans Text Light */
+  --typography-body-family: var(--rafael-font-family-body);
+  --typography-body-size: var(--rafael-font-size-lg);
+  --typography-body-weight: var(--rafael-font-weight-light);
+  --typography-body-line-height: ${bodyLh};
+  --typography-body-letter-spacing: ${bodyTracking};
+
+  /* Body Small - sm / Cal Sans UI Regular (small) */
+  --typography-body-small-family: var(--rafael-font-family-ui);
+  --typography-body-small-size: var(--rafael-font-size-sm);
+  --typography-body-small-weight: var(--rafael-font-weight-regular);
+  --typography-body-small-line-height: ${smallLh};
+  --typography-body-small-letter-spacing: ${bodyTracking};
+
+  /* Caption - xs / Cal Sans UI Regular (micro) */
+  --typography-caption-family: var(--rafael-font-family-ui);
+  --typography-caption-size: var(--rafael-font-size-xs);
+  --typography-caption-weight: var(--rafael-font-weight-regular);
+  --typography-caption-line-height: ${captionLh};
+  --typography-caption-letter-spacing: ${bodyTracking};
+
+  /* Overline - xs / Cal Sans UI SemiBold / Uppercase (eyebrow) */
+  --typography-overline-family: var(--rafael-font-family-ui);
+  --typography-overline-size: var(--rafael-font-size-xs);
+  --typography-overline-weight: var(--rafael-font-weight-semibold);
+  --typography-overline-line-height: 1.4;
+  --typography-overline-letter-spacing: ${labelTracking};
+  --typography-overline-transform: uppercase;
+
+  /* Code - sm / Regular */
+  --typography-code-size: var(--rafael-font-size-sm);
+  --typography-code-weight: var(--rafael-font-weight-regular);
+  --typography-code-line-height: 1.5;
+  --typography-code-letter-spacing: ${bodyTracking};
+`;
+}
+
+/**
+ * Standard component tokens (shadows, button sizes, etc.)
+ * Can be overridden by Figma exports if needed
+ */
+const COMPONENT_TOKENS = `
+  /* ============================================
+     COMPONENT TOKENS
+     Shadows and component-specific values
+     ============================================ */
+
+  /* Shadows live in the token export now, emitted per appearance with the
+     semantic roles below. The three focus rings stay in app.css, which is
+     where their current values are authored. */
+
+  /* Button Sizes */
+  /* Pill CTAs: radius is full on every size. Heights follow the rafaelalex.de
+     scale (md = 44px, the thumbable minimum). */
+  --button-sm-padding-x: var(--rafael-spacing-3);
+  --button-sm-padding-y: 4px;
+  --button-sm-radius: var(--rafael-radius-full);
+  --button-sm-min-height: 2.25rem;
+  --button-sm-gap: var(--rafael-spacing-1-5);
+  --button-md-padding-x: var(--rafael-spacing-5);
+  --button-md-padding-y: var(--rafael-spacing-2-5);
+  --button-md-radius: var(--rafael-radius-full);
+  --button-md-min-height: 2.75rem;
+  --button-md-gap: var(--rafael-spacing-2);
+  --button-lg-padding-x: var(--rafael-spacing-6);
+  --button-lg-padding-y: var(--rafael-spacing-3);
+  --button-lg-radius: var(--rafael-radius-full);
+  --button-lg-min-height: 3.25rem;
+  --button-lg-gap: var(--rafael-spacing-2-5);
+
+  /* Input Sizes */
+  --input-sm-padding-x: var(--rafael-spacing-2-5);
+  --input-sm-padding-y: var(--rafael-spacing-1-5);
+  --input-sm-radius: var(--rafael-radius-sm);
+  --input-md-padding-x: var(--rafael-spacing-3);
+  --input-md-padding-y: var(--rafael-spacing-2-5);
+  --input-md-radius: var(--rafael-radius-md);
+  --input-lg-padding-x: var(--rafael-spacing-4);
+  --input-lg-padding-y: var(--rafael-spacing-3);
+  --input-lg-radius: var(--rafael-radius-lg);
+
+  /* Badge Sizes */
+  --badge-sm-padding-x: var(--rafael-spacing-1-5);
+  --badge-sm-padding-y: var(--rafael-spacing-0-5);
+  --badge-sm-radius: var(--rafael-radius-sm);
+  --badge-sm-gap: var(--rafael-spacing-1);
+  --badge-md-padding-x: var(--rafael-spacing-2-5);
+  --badge-md-padding-y: var(--rafael-spacing-1);
+  --badge-md-radius: var(--rafael-radius-md);
+  --badge-md-gap: var(--rafael-spacing-1-5);
+  --badge-lg-padding-x: var(--rafael-spacing-3);
+  --badge-lg-padding-y: var(--rafael-spacing-1-5);
+  --badge-lg-radius: var(--rafael-radius-md);
+  --badge-lg-gap: var(--rafael-spacing-2);
+
+  /* Card Tokens */
+  --card-bg: var(--bg-primary);
+  --card-border: var(--border-default);
+  --card-radius: var(--rafael-radius-lg);
+  --card-padding: var(--rafael-spacing-5);
+  --card-gap: var(--rafael-spacing-4);
+  --card-media-radius: var(--rafael-radius-lg);
+  --card-footer-gap: var(--rafael-spacing-3);
+  --card-footer-padding-top: var(--rafael-spacing-4);
+
+  /* Layout: one content column for every wrapper (header, sections, footer) */
+  --container-max: 64rem;
+
+  /* Section block padding: mobile to desktop, fluid like the type scale */
+  --section-padding-sm: ${fluidClamp(48, 64)};
+  --section-padding-md: ${fluidClamp(64, 80)};
+  --section-padding-lg: ${fluidClamp(80, 112)};
+  --section-padding-xl: ${fluidClamp(112, 160)};
+`;
+
+/**
+ * Validation and auto-fix for generated CSS
+ */
+function validateAndFix(css) {
+  const warnings = [];
+  const criticalWarnings = [];
+  const fixes = [];
+  let fixedCss = css;
+
+  // 1. Check for unquoted font-family values (multi-word fonts need quotes)
+  const fontFamilyRegex = /--rafael-font-family-\w+:\s*([^;]+);/g;
+  let match;
+  while ((match = fontFamilyRegex.exec(css)) !== null) {
+    const value = match[1].trim();
+    // Font names with spaces that aren't quoted
+    if (/[A-Z][a-z]+[A-Z]/.test(value) && !value.startsWith('"') && !value.startsWith("'")) {
+      warnings.push(`Unquoted font family: ${value}`);
+      const quotedValue = `"${value}"`;
+      fixedCss = fixedCss.replace(match[0], match[0].replace(value, quotedValue));
+      fixes.push(`Auto-fixed: Quoted font family "${value}"`);
+    }
+  }
+
+  // 2. Check for invalid color values (exclude border-width which is not a color)
+  const colorRegex =
+    /--(?:rafael-color|bg|text|border-(?!width)[\w-]*|border-default|icon)-[\w-]*:\s*([^;]+);/g;
+  while ((match = colorRegex.exec(css)) !== null) {
+    const value = match[1].trim();
+    // Skip CSS variable references
+    if (value.startsWith('var(')) continue;
+    // Skip valid hex colors
+    if (/^#[0-9A-Fa-f]{3,8}$/.test(value)) continue;
+    // Skip valid rgba/rgb
+    if (/^rgba?\([^)]+\)$/.test(value)) continue;
+    // Skip valid named colors (for status colors)
+    if (/^(transparent|inherit|currentColor)$/.test(value)) continue;
+
+    // If none of the above, it might be invalid
+    if (!/^(var\(|#|rgba?|transparent|inherit)/.test(value)) {
+      warnings.push(`Potentially invalid color value: ${match[0].substring(0, 50)}...`);
+    }
+  }
+
+  // 3. Check for px values that should be rem (font-size).
+  // Negative lookahead prevents matching inside clamp()/calc() expressions from
+  // the fluid typography pipeline. Offset-based replace avoids substring collisions
+  // when the same --rafael-font-size-* line would appear twice anywhere in the CSS.
+  const fontSizeRegex = /--rafael-font-size-(\w+):\s*(?!clamp)(\d+)px;/g;
+  let fontSizeDelta = 0;
+  while ((match = fontSizeRegex.exec(css)) !== null) {
+    const pxValue = parseInt(match[2]);
+    const remValue = (pxValue / 16).toFixed(4).replace(/\.?0+$/, '');
+    const replacement = `--rafael-font-size-${match[1]}: ${remValue}rem;`;
+    warnings.push(`Font size in px: ${match[2]}px (should be ${remValue}rem for accessibility)`);
+    const start = match.index + fontSizeDelta;
+    fixedCss = fixedCss.slice(0, start) + replacement + fixedCss.slice(start + match[0].length);
+    fontSizeDelta += replacement.length - match[0].length;
+    fixes.push(`Auto-fixed: Converted ${match[2]}px to ${remValue}rem`);
+  }
+
+  // 4. Check for missing required tokens
+  const requiredTokens = [
+    '--rafael-font-family-headline',
+    '--rafael-font-family-body',
+    '--rafael-color-white',
+    '--rafael-color-gray-50',
+    '--rafael-color-gray-900',
+    '--bg-primary',
+    '--text-primary',
+    '--border-default',
+  ];
+
+  for (const token of requiredTokens) {
+    if (!css.includes(token + ':')) {
+      warnings.push(`Missing required token: ${token}`);
+      criticalWarnings.push(`Missing required token: ${token}`);
+    }
+  }
+
+  // 5. Check for Tailwind opacity modifier syntax that won't work with CSS variables
+  const opacityModifierRegex = /[\w-]+\/\d+/g;
+  while ((match = opacityModifierRegex.exec(css)) !== null) {
+    warnings.push(`Tailwind opacity modifier in CSS won't work: ${match[0]}`);
+  }
+
+  return { css: fixedCss, warnings, criticalWarnings, fixes };
+}
+
+/**
+ * Build tokens.css and tokens-editor.css from the three token files.
+ *
+ * @param {object} primitives primitives.tokens.json
+ * @param {object} lightTokens light.tokens.json
+ * @param {object} darkTokens dark.tokens.json
+ * @param {{ log?: (msg: string) => void, now?: Date }} [options]
+ */
+function buildTokenCss(
+  primitives,
+  lightTokens,
+  darkTokens,
+  { log = () => {}, now = new Date() } = {}
+) {
+  log('Processing primitives...');
+
+  // Process primitives - colors
+  // NOTE on gray / primary / secondary ramps:
+  // All three ramps are neutral-gray-toned and export near-identical hex values in the
+  // starter theme. This is INTENTIONAL: primary/secondary are Figma variable aliases
+  // providing semantic re-theming hooks for client forks. A client theme swaps
+  // --rafael-color-primary-* or --rafael-color-secondary-* to brand colors without touching gray.
+  // app.css references --rafael-color-primary-* explicitly, confirming the ramps are in active use.
+  // Do NOT deduplicate or remove any of the three ramps.
+  const primitiveColors = flattenTokens(primitives.color || {}, '', extractColorValue);
+
+  // Process primitives - spacing (convert to rem)
+  const primitiveSpacing = flattenTokens(primitives.spacing || {}, '', (token) =>
+    extractNumericValue(token, 'px')
+  );
+
+  // Process primitives - radius
+  const primitiveRadius = flattenTokens(primitives.radius || {}, '', (token) =>
+    extractNumericValue(token, 'px')
+  );
+
+  // Process primitives - fontSize as fluid clamp() values between VIEWPORT_MIN and VIEWPORT_MAX.
+  // Figma provides the current (desktop) px value. FLUID_SIZES provides both:
+  //   - min: mobile floor (must not shrink below this at small viewports)
+  //   - max: desktop ceiling (config.max takes precedence; falls back to Figma px so that
+  //          for most keys config.max === Figma px, avoiding any unintended drift)
+  // xs/sm have min===current and max===current+1 (gentle 1px clamp without shrinking).
+  // Unknown keys (not in FLUID_SIZES) fall back to a static rem value.
+  assertFluidMaxMatchesExport(primitives.fontSize);
+
+  const primitiveFontSize = {};
+  for (const [key, token] of Object.entries(primitives.fontSize || {})) {
+    if (key.startsWith('$')) continue;
+    const px = token?.$value;
+    if (typeof px !== 'number') continue;
+    const config = FLUID_SIZES[key];
+    primitiveFontSize[key] = config
+      ? fluidClamp(config.min, config.max ?? px)
+      : `${(px / ROOT_PX).toFixed(4).replace(/\.?0+$/, '')}rem`;
+  }
+
+  // Process primitives - fontWeight
+  const primitiveFontWeight = flattenTokens(primitives.fontWeight || {}, '', (token) =>
+    extractNumericValue(token, '')
+  );
+
+  // Process primitives - fontFamily
+  const primitiveFontFamily = {};
+  if (primitives.fontFamily) {
+    for (const [key, value] of Object.entries(primitives.fontFamily)) {
+      if (key.startsWith('$')) continue;
+      const fontValue = extractStringValue(value);
+      if (fontValue) {
+        primitiveFontFamily[key] = fontValue;
+      }
+    }
+  }
+
+  // Process primitives - borderWidth
+  const primitiveBorderWidth = flattenTokens(primitives.borderWidth || {}, '', (token) =>
+    extractNumericValue(token, 'px')
+  );
+
+  // Process primitives - opacity (values 0-100, stored as-is)
+  const primitiveOpacity = flattenTokens(primitives.opacity || {}, '', (token) =>
+    extractNumericValue(token, '')
+  );
+
+  // Process primitives - sizing (icon sizes)
+  const primitiveSizing = flattenTokens(primitives.sizing || {}, '', (token) =>
+    extractNumericValue(token, 'px')
+  );
+
+  // Process primitives - gradient (alias references to color tokens)
+  const primitiveGradient = flattenTokens(primitives.gradient || {}, '', extractColorOrAlias);
+
+  // Process primitives - motion. Ease is a cubic-bezier() string passed through
+  // as-is (not quoted like fontFamily); durations are plain ms numbers, unit
+  // added here. Emitted as --ease-* / --dur-* rather than --motion-*, since
+  // that is how app.css consumes them (var(--dur-base) var(--ease-standard)).
+  const primitiveMotionEase = flattenTokens(primitives.motion?.ease || {}, '', (token) => {
+    if (!token || token.$type !== 'string') return null;
+    return assertSafeCssValue(String(token.$value), 'motion ease value');
+  });
+  const primitiveMotionDuration = flattenTokens(primitives.motion?.duration || {}, '', (token) =>
+    extractNumericValue(token, 'ms')
+  );
+
+  // Process primitives - a11y (tap target, focus ring width/offset, all px)
+  const primitiveA11y = flattenTokens(primitives.a11y || {}, '', (token) =>
+    extractNumericValue(token, 'px')
+  );
+
+  // Process primitives - lineHeight (unitless ratios feeding the heading/body
+  // typography composite tokens below). Not emitted as their own CSS vars —
+  // only used to resolve HEADING_LINE_HEIGHTS overrides via buildTypographyTokens().
+  const primitiveLineHeight = flattenTokens(primitives.lineHeight || {}, '', (token) =>
+    extractNumericValue(token, '')
+  );
+
+  // Process primitives - tracking (letter-spacing em/px strings). Passed through
+  // as-is, like motion ease, since the unit varies per role (0px vs -0.02em).
+  const primitiveTracking = flattenTokens(primitives.tracking || {}, '', (token) => {
+    if (!token || token.$type !== 'string') return null;
+    return assertSafeCssValue(String(token.$value), 'tracking value');
+  });
+
+  log('Processing semantic tokens (light mode)...');
+
+  // Process semantic tokens - light mode (use var() references to primitives)
+  const lightBg = flattenTokens(lightTokens.bg || {}, '', extractColorAsReference);
+  const lightText = flattenTokens(lightTokens.text || {}, '', extractColorAsReference);
+  const lightBorder = flattenTokens(lightTokens.border || {}, '', extractColorAsReference);
+  const lightIcon = flattenTokens(lightTokens.icon || {}, '', extractColorAsReference);
+  // `ring` is its own group because the focus ring is not a border: it sits
+  // outside the control, does not take part in layout, and has to stay legible
+  // on every surface the control can sit on.
+  const lightRing = flattenTokens(lightTokens.ring || {}, '', extractColorAsReference);
+  const lightShadowInk = flattenTokens(lightTokens.shadow?.color || {}, '', extractColorValue);
+  const lightShadow = flattenTokens(lightTokens.shadow || {}, '', extractShadow);
+
+  log('Processing semantic tokens (dark mode)...');
+
+  // Process semantic tokens - dark mode (use var() references to primitives)
+  const darkBg = flattenTokens(darkTokens.bg || {}, '', extractColorAsReference);
+  const darkText = flattenTokens(darkTokens.text || {}, '', extractColorAsReference);
+  const darkBorder = flattenTokens(darkTokens.border || {}, '', extractColorAsReference);
+  const darkIcon = flattenTokens(darkTokens.icon || {}, '', extractColorAsReference);
+  const darkRing = flattenTokens(darkTokens.ring || {}, '', extractColorAsReference);
+  const darkShadowInk = flattenTokens(darkTokens.shadow?.color || {}, '', extractColorValue);
+  const darkShadow = flattenTokens(darkTokens.shadow || {}, '', extractShadow);
+
+  log('Generating CSS...');
+
+  // Generate CSS output
+  let css = `/**
+ * Design Tokens - Generated from config/design-tokens/*.tokens.json by npm run tokens
+ *
+ * DO NOT EDIT THIS FILE DIRECTLY!
+ * Run: node scripts/transform-tokens.js
+ *
+ * Source: config/design-tokens/*.tokens.json
+ * Generated: ${now.toISOString()}
+ */
+
+/* ============================================
+   PRIMITIVE TOKENS
+   Base values that semantic tokens reference
+   ============================================ */
+
+:root {
+  /* Colors - Primitives */
+${generateCss(primitiveColors, 'rafael-color')}
+
+  /* Spacing */
+${generateCss(primitiveSpacing, 'rafael-spacing')}
+
+  /* Border Radius */
+${generateCss(primitiveRadius, 'rafael-radius')}
+
+  /* Font Size */
+${generateCss(primitiveFontSize, 'rafael-font-size')}
+
+  /* Font Weight */
+${generateCss(primitiveFontWeight, 'rafael-font-weight')}
+
+  /* Font Family */
+${generateCss(primitiveFontFamily, 'rafael-font-family')}
+
+  /* Border Width */
+${generateCss(primitiveBorderWidth, 'border-width')}
+
+  /* Opacity */
+${generateCss(primitiveOpacity, 'rafael-opacity')}
+
+  /* Sizing */
+${generateCss(primitiveSizing, 'sizing')}
+
+  /* Gradients */
+${generateCss(primitiveGradient, 'gradient')}
+
+  /* Motion */
+${generateCss(primitiveMotionEase, 'ease')}
+${generateCss(primitiveMotionDuration, 'dur')}
+
+  /* Accessibility */
+${generateCss(primitiveA11y, 'a11y')}
+${buildTypographyTokens(primitiveLineHeight, primitiveTracking)}
+${COMPONENT_TOKENS}
+}
+
+/* ============================================
+   SEMANTIC TOKENS - Light Mode (Default)
+   Use these for theming components
+   ============================================ */
+
+:root,
+[data-theme="light"] {
+  /* Background */
+${generateCss(lightBg, 'bg')}
+
+  /* Text */
+${generateCss(lightText, 'text')}
+
+  /* Border */
+${generateCss(lightBorder, 'border')}
+
+  /* Icon */
+${generateCss(lightIcon, 'icon')}
+
+  /* Ring */
+${generateCss(lightRing, 'ring')}
+
+  /* Shadow */
+${generateCss(lightShadowInk, 'rafael-shadow-color')}
+${generateCss(lightShadow, 'rafael-shadow')}
+}
+
+/* ============================================
+   SEMANTIC TOKENS - Dark Mode
+   Activated via data-theme or prefers-color-scheme
+   ============================================ */
+
+[data-theme="dark"] {
+  /* Background */
+${generateCss(darkBg, 'bg')}
+
+  /* Text */
+${generateCss(darkText, 'text')}
+
+  /* Border */
+${generateCss(darkBorder, 'border')}
+
+  /* Icon */
+${generateCss(darkIcon, 'icon')}
+
+  /* Ring */
+${generateCss(darkRing, 'ring')}
+
+  /* Shadow */
+${generateCss(darkShadowInk, 'rafael-shadow-color')}
+${generateCss(darkShadow, 'rafael-shadow')}
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    /* Background */
+${generateCss(darkBg, 'bg')}
+
+    /* Text */
+${generateCss(darkText, 'text')}
+
+    /* Border */
+${generateCss(darkBorder, 'border')}
+
+    /* Icon */
+${generateCss(darkIcon, 'icon')}
+
+    /* Ring */
+${generateCss(darkRing, 'ring')}
+
+  /* Shadow */
+${generateCss(darkShadowInk, 'rafael-shadow-color')}
+${generateCss(darkShadow, 'rafael-shadow')}
+  }
+}
+`;
+
+  // Validate and auto-fix
+  log('\nValidating generated CSS...');
+  const { css: validatedCss, warnings, criticalWarnings, fixes } = validateAndFix(css);
+
+  if (fixes.length > 0) {
+    log('\n✅ Auto-fixes applied:');
+    fixes.forEach((fix) => log(`   ${fix}`));
+    css = validatedCss;
+  }
+
+  if (warnings.length > 0) {
+    log('\n⚠️  Warnings:');
+    warnings.forEach((warning) => log(`   ${warning}`));
+  }
+
+  if (warnings.length === 0 && fixes.length === 0) {
+    log('✅ All tokens validated successfully!');
+  }
+
+  // Generate editor-only tokens (light mode only, no dark mode)
+  // Semantic tokens are scoped to .editor-styles-wrapper for higher specificity
+  // This ensures they override any dark mode rules from app.css
+  const editorCss = `/**
+ * Design Tokens (Editor Only) - Generated from config/design-tokens/*.tokens.json by npm run tokens
+ *
+ * DO NOT EDIT THIS FILE DIRECTLY!
+ * Run: node scripts/transform-tokens.js
+ *
+ * This file contains ONLY light mode tokens for the Gutenberg editor.
+ * It ensures the editor always displays in light mode regardless of system preferences.
+ *
+ * Primitives are on :root (referenced by var() everywhere)
+ * Semantic tokens are scoped to .editor-styles-wrapper for higher specificity
+ * than dark mode rules in app.css
+ *
+ * Source: config/design-tokens/*.tokens.json
+ * Generated: ${now.toISOString()}
+ */
+
+/* ============================================
+   PRIMITIVE TOKENS
+   Base values that semantic tokens reference
+   ============================================ */
+
+:root {
+  /* Colors - Primitives */
+${generateCss(primitiveColors, 'rafael-color')}
+
+  /* Spacing */
+${generateCss(primitiveSpacing, 'rafael-spacing')}
+
+  /* Border Radius */
+${generateCss(primitiveRadius, 'rafael-radius')}
+
+  /* Font Size */
+${generateCss(primitiveFontSize, 'rafael-font-size')}
+
+  /* Font Weight */
+${generateCss(primitiveFontWeight, 'rafael-font-weight')}
+
+  /* Font Family */
+${generateCss(primitiveFontFamily, 'rafael-font-family')}
+
+  /* Border Width */
+${generateCss(primitiveBorderWidth, 'border-width')}
+
+  /* Opacity */
+${generateCss(primitiveOpacity, 'rafael-opacity')}
+
+  /* Sizing */
+${generateCss(primitiveSizing, 'sizing')}
+
+  /* Gradients */
+${generateCss(primitiveGradient, 'gradient')}
+
+  /* Motion */
+${generateCss(primitiveMotionEase, 'ease')}
+${generateCss(primitiveMotionDuration, 'dur')}
+
+  /* Accessibility */
+${generateCss(primitiveA11y, 'a11y')}
+${buildTypographyTokens(primitiveLineHeight, primitiveTracking)}
+${COMPONENT_TOKENS}
+}
+
+/* ============================================
+   SEMANTIC TOKENS - Light Mode Only (on :root)
+   Fallback for elements outside .editor-styles-wrapper
+   ============================================ */
+
+:root {
+  /* Background */
+${generateCss(lightBg, 'bg')}
+
+  /* Text */
+${generateCss(lightText, 'text')}
+
+  /* Border */
+${generateCss(lightBorder, 'border')}
+
+  /* Icon */
+${generateCss(lightIcon, 'icon')}
+
+  /* Ring */
+${generateCss(lightRing, 'ring')}
+
+  /* Shadow */
+${generateCss(lightShadowInk, 'rafael-shadow-color')}
+${generateCss(lightShadow, 'rafael-shadow')}
+}
+
+/* ============================================
+   SEMANTIC TOKENS - Editor Scoped (Force Light Mode)
+   Uses doubled selector for higher specificity and !important
+   to override any dark mode rules from app.css/tokens.css.
+   color-scheme: light signals to the browser that this element
+   is always in light mode (affects scrollbars, form controls, etc.).
+   The @media block has been removed — the bare doubled selector already
+   covers both light and dark system preferences with !important.
+   ============================================ */
+
+.editor-styles-wrapper.editor-styles-wrapper {
+  color-scheme: light;
+
+  /* Background - Light Mode (forced) */
+${generateCssImportant(lightBg, 'bg')}
+
+  /* Text - Light Mode (forced) */
+${generateCssImportant(lightText, 'text')}
+
+  /* Border - Light Mode (forced) */
+${generateCssImportant(lightBorder, 'border')}
+
+  /* Icon - Light Mode (forced) */
+${generateCssImportant(lightIcon, 'icon')}
+}
+`;
+
+  // Stats
+  const stats = {
+    primitiveColors: Object.keys(primitiveColors).length,
+    spacing: Object.keys(primitiveSpacing).length,
+    radius: Object.keys(primitiveRadius).length,
+    fontSize: Object.keys(primitiveFontSize).length,
+    fontWeight: Object.keys(primitiveFontWeight).length,
+    fontFamily: Object.keys(primitiveFontFamily).length,
+    borderWidth: Object.keys(primitiveBorderWidth).length,
+    opacity: Object.keys(primitiveOpacity).length,
+    sizing: Object.keys(primitiveSizing).length,
+    gradient: Object.keys(primitiveGradient).length,
+    lightSemanticColors:
+      Object.keys(lightBg).length +
+      Object.keys(lightText).length +
+      Object.keys(lightBorder).length +
+      Object.keys(lightIcon).length,
+    darkSemanticColors:
+      Object.keys(darkBg).length +
+      Object.keys(darkText).length +
+      Object.keys(darkBorder).length +
+      Object.keys(darkIcon).length,
+  };
+
+  return { css, editorCss, warnings, criticalWarnings, fixes, stats };
+}
+
+export {
+  buildTokenCss,
+  fluidClamp,
+  fluidLineHeight,
+  FLUID_SIZES,
+  assertFluidMaxMatchesExport,
+  HEADING_LINE_HEIGHTS,
+  VIEWPORT_MIN,
+  VIEWPORT_MAX,
+  ROOT_PX,
+  flattenTokens,
+  extractColorValue,
+  extractStringValue,
+  assertSafeVarNameSegment,
+  assertSafeCssValue,
+  buildTypographyTokens,
+};
