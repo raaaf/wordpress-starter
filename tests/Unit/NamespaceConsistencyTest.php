@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Tests\Support\ForkNamespaces;
 
 /**
  * Tests that all namespace references consistently use the project namespace.
@@ -96,7 +97,7 @@ final class NamespaceConsistencyTest extends TestCase
             }
         }
 
-        // Check for inline fully-qualified namespace references (e.g. \\GoldeneStrategie\\Foo::bar()).
+        // Check for inline fully-qualified namespace references (e.g. \\ClientTheme\\Foo::bar()).
         // These survive a propagation sweep even with no `use` statement carrying them,
         // so `\\WordpressStarter\\` stays allowed but every other fork's namespace is flagged.
         preg_match_all('/\\\\([A-Za-z][A-Za-z0-9_]*)\\\\([A-Za-z0-9_\\\\]+)/', $content, $inlineMatches, PREG_SET_ORDER);
@@ -114,11 +115,9 @@ final class NamespaceConsistencyTest extends TestCase
      */
     public static function foreignNamespaceProvider(): iterable
     {
-        yield 'goldene-strategie' => ['GoldeneStrategie'];
-        yield 'stiftungs-navigator' => ['StiftungsNavigator'];
-        yield 'moenius' => ['moenius'];
-        yield 'siera' => ['Siera'];
-        yield 'fim-vertrieb' => ['FIMVertrieb'];
+        foreach (ForkNamespaces::FIXTURES as $namespace) {
+            yield $namespace => [$namespace];
+        }
     }
 
     #[DataProvider('foreignNamespaceProvider')]
@@ -429,7 +428,7 @@ final class NamespaceConsistencyTest extends TestCase
         }
 
         // Explicit list first: the PascalCase heuristic below misses forks whose
-        // namespace doesn't have a second capital letter (Siera, FIMVertrieb, moenius).
+        // namespace doesn't have a second capital letter (Nordlicht, XYZVertrieb, kundentheme).
         if (in_array($name, $this->knownForeignNamespaces(), true)) {
             return true;
         }
@@ -448,13 +447,7 @@ final class NamespaceConsistencyTest extends TestCase
      */
     private function knownForeignNamespaces(): array
     {
-        return [
-            'GoldeneStrategie',
-            'StiftungsNavigator',
-            'moenius',
-            'Siera',
-            'FIMVertrieb',
-        ];
+        return ForkNamespaces::all();
     }
 
     /**

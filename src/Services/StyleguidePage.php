@@ -14,7 +14,7 @@ use WordpressStarter\ThemeContext;
  * where several of these themes have been activated over time — every dev and
  * staging box — that leaves a spread of stale pointers. Measured on one such site:
  *
- *   siera_theme_styleguide_page_id      = 580   -> a page in the trash
+ *   client_theme_styleguide_page_id     = 580   -> a page in the trash
  *   wp_starter_styleguide_page_id       = 455   -> a page that no longer exists
  *   wordpress_starter_theme_..._page_id = unset -> while the page was sitting there
  *

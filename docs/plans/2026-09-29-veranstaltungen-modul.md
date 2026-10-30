@@ -13,7 +13,7 @@
 - Geplant bei Commit `2cf05500`, 2026-09-29
 - Repo: `wordpress-starter-theme` (eigenes Git-Repo unter `app/public/wp-content/themes/wordpress-starter-theme`)
 - Status: Implementiert (2026-09-29), noch uncommitted im Working Tree
-- **Ausdruecklich nur dieser Schritt:** kein Rollout auf die 5 Kundenthemes (goldene-strategie, stiftungs-navigator, moenius, siera-theme, fim-vertrieb). Das ist ein spaeterer, separater Schritt.
+- **Ausdruecklich nur dieser Schritt:** kein Rollout auf die 5 Kundenthemes. Das ist ein spaeterer, separater Schritt.
 - **Live-Walkthrough-Fund (nach Executor-APPROVE):** `FieldDefinitions::dateField()` (Schritt 3) setzte `'save_format' => 'Ymd'`. In ACF Pro 6.8.10 ist `save_format` ein reiner Pre-5.0-Kompatibilitaetsschalter: er schaltet einen alten JS/PHP-Formatpfad ein, der PHP-Datumstoken nicht versteht und beim Speichern ueber die echte Editor-UI Muell erzeugte (`20261002` wurde zu `Y102`). ACF speichert `date_picker`-Werte intern immer als `Ymd`, `save_format` war unnoetig. Fix: `save_format` entfernt, nur `return_format => 'Ymd'` bleibt. Direkt behoben (ein Schluessel in einer Datei, Ursache bereits eindeutig lokalisiert), verifiziert mit einem frischen Testtermin über die echte wp-admin-UI. `composer test`/`composer lint` danach erneut gruen.
 
 ## Problem
@@ -38,7 +38,7 @@ Ein neues Flexible-Content-Layout "Veranstaltungen" steht im Starter-Theme zur V
 
 ## Out of Scope (Files)
 
-- `app/public/wp-content/themes/{goldene-strategie,stiftungs-navigator,moenius,siera-theme,fim-vertrieb}/**` — Kundenthemes, ausdruecklich spaeterer Schritt.
+- `app/public/wp-content/themes/<kundentheme>/**` — Kundenthemes, ausdruecklich spaeterer Schritt.
 - `templates/flexible/timeline.blade.php`, `templates/flexible/team.blade.php`, `templates/flexible/testimonials.blade.php` — aehnliche, aber unveraenderte Layouts. Nur als Referenz gelesen.
 - `resources/images/layouts/*.png` (bestehende) — nur eine neue Datei `events.png` kommt hinzu, keine bestehende wird veraendert.
 - `.claude/plans/logs/**`, `docs/plans/**` (ausser dieser Datei) — Planungsartefakte, nicht Teil der Umsetzung.
@@ -262,7 +262,7 @@ Sortierung nach Datum: ACF `date_picker` speichert das Datum als `Ymd`-String (S
 
 ## Wartungshinweise
 
-- Ein Rollout auf die 5 Kundenthemes ist ein separater, spaeterer Schritt (Ausblick, nicht Teil dieses Plans). Vor dem Rollout: pruefen, ob `moenius`/`fim-vertrieb` (Mitgliederbereich) zusaetzliche Felder brauchen (z.B. Sichtbarkeit nur fuer eingeloggte Mitglieder) — das war in diesem Plan ausdruecklich nicht Scope.
+- Ein Rollout auf die 5 Kundenthemes ist ein separater, spaeterer Schritt (Ausblick, nicht Teil dieses Plans). Vor dem Rollout: pruefen, ob Kundenthemes mit Mitgliederbereich zusaetzliche Felder brauchen (z.B. Sichtbarkeit nur fuer eingeloggte Mitglieder) — das war in diesem Plan ausdruecklich nicht Scope.
 - Die Sync-Regel aus dem Projekt-Gedaechtnis ("Aenderungen an gemeinsamen Dateien immer auf alle 6 Themes anwenden") gilt fuer dieses neue Modul noch nicht, da es zum Zeitpunkt dieses Plans nur im Starter existiert.
 
 ## Nachträge nach der Umsetzung

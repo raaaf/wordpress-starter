@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionMethod;
+use Tests\Support\ForkNamespaces;
 use Throwable;
 use WordpressStarter\Application;
 
@@ -28,15 +29,6 @@ use WordpressStarter\Application;
  */
 final class TemplateRenderTest extends TestCase
 {
-    /** Namespaces of the other themes in the fork family — must never leak in. */
-    private const FOREIGN_NAMESPACES = [
-        'GoldeneStrategie\\',
-        'StiftungsNavigator\\',
-        'moenius\\',
-        'Siera\\',
-        'FIMVertrieb\\',
-    ];
-
     /** Default view data so standalone renders of partials do not fatal on required params. */
     private const VIEW_DATA = [
         'layoutCounters' => [],
@@ -777,9 +769,10 @@ final class TemplateRenderTest extends TestCase
                 continue;
             }
 
-            foreach (self::FOREIGN_NAMESPACES as $namespace) {
-                if (str_contains($content, $namespace)) {
-                    $offenders[] = $path . ' — references ' . rtrim($namespace, '\\');
+            // Namespaces of the other themes in the fork family must never leak in.
+            foreach (ForkNamespaces::all() as $namespace) {
+                if (str_contains($content, $namespace . '\\')) {
+                    $offenders[] = $path . ' — references ' . $namespace;
                 }
             }
         }
