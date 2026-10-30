@@ -3561,6 +3561,11 @@ html {
   padding: 0 0.75rem;
 }
 
+.token-gen-pill--button {
+  background: var(--gp-button, var(--bg-button-primary));
+  color: var(--gp-button-ink, var(--text-button-primary));
+}
+
 .token-gen-pill--brand {
   background: var(--gp-brand, var(--bg-brand));
   color: var(--gp-on-brand, var(--text-on-brand));

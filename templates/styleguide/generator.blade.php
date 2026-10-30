@@ -100,6 +100,20 @@
                 </fieldset>
             @endforeach
 
+            {{-- Neutral is the theme's look (ink buttons); accent fills them with
+                 the accent, label black or white by contrast (applyAccentButtons). --}}
+            <fieldset class="mx-0 mb-0 mt-8 p-0 border-0" x-bind:disabled="state === 'error'">
+                <legend class="mb-3 text-body-small text-content-secondary">{{ __('Primär-Buttons', 'wp-starter') }}</legend>
+                <div class="token-segments">
+                    @foreach(['neutral' => __('Neutral', 'wp-starter'), 'accent' => __('Akzentfarbe', 'wp-starter')] as $value => $text)
+                        <label class="token-segment">
+                            <input type="radio" name="token-gen-buttons" value="{{ $value }}" class="sr-only" x-model="buttons" x-on:change="update()" @checked($value === 'neutral')>
+                            <span>{{ $text }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </fieldset>
+
             <div class="flex flex-wrap items-center justify-between gap-4 mt-8">
                 <p class="m-0 text-body-small text-content-secondary" aria-live="polite">
                     <span x-show="state === 'loading'">{{ __('Token-Dateien werden geladen …', 'wp-starter') }}</span>
@@ -118,7 +132,8 @@
                         <p class="m-0 text-h4">{{ __('Ein Akzent, viele Flächen.', 'wp-starter') }}</p>
                         <p class="m-0 text-body-small token-gen-preview__muted">{{ __('So sehen Flächen, Text und Statusfarben mit deinen Tokens aus.', 'wp-starter') }}</p>
                         <div class="flex flex-wrap items-center gap-3">
-                            <span class="token-gen-pill token-gen-pill--brand">{{ __('Button', 'wp-starter') }}</span>
+                            <span class="token-gen-pill token-gen-pill--button">{{ __('Button', 'wp-starter') }}</span>
+                            <span class="token-gen-pill token-gen-pill--brand">{{ __('Akzent', 'wp-starter') }}</span>
                             <span class="token-gen-pill token-gen-pill--brand-2">{{ __('Sekundär', 'wp-starter') }}</span>
                             <span class="token-gen-preview__accent">{{ __('Akzenttext', 'wp-starter') }}</span>
                         </div>

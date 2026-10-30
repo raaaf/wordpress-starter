@@ -333,7 +333,8 @@ export function syncAccentRoles(files: TokenFiles, accent: string): void {
 export function generateFiles(
   base: TokenFiles,
   colors: Record<string, string>,
-  initial: Record<string, string>
+  initial: Record<string, string>,
+  buttons: ButtonStyle = 'neutral'
 ): TokenFiles {
   const changed = (name: string) =>
     !!colors[name] && colors[name].toUpperCase() !== (initial[name] ?? '').toUpperCase();
@@ -344,7 +345,50 @@ export function generateFiles(
 
   const files = applyColors(base, palette, status);
   if (palette.accent && hexToRgb(palette.accent)) syncAccentRoles(files, palette.accent);
+  if (buttons === 'accent') applyAccentButtons(files);
   return files;
+}
+
+/** Primary buttons: neutral (ink, the theme default) or filled with the accent. */
+export type ButtonStyle = 'neutral' | 'accent';
+
+/**
+ * Fills the primary buttons with the accent in both modes by pointing their
+ * three semantic tokens (bg.button-primary, bg.button-primary-hover,
+ * text.button-primary) at accent primitives. The label is color/black or
+ * color/white, whichever has more contrast on accent 500; the hover moves one
+ * shade away from the label (400 under black, 600 under white), so hovering
+ * never lowers the contrast.
+ *
+ * INTENTIONAL: the color/ds/button/primary-* primitives stay as they are.
+ * They also feed bg.accent (checked controls, filled badges), text.accent and
+ * icon.on-accent, which are paired with neutral text; filling them with the
+ * accent broke contrast there (dark badges with dark text on the accent).
+ */
+export function applyAccentButtons(files: TokenFiles): void {
+  const p = files.primitives;
+  const fill = hexOfToken(colorTokenAt(p, ['accent', '500']));
+  if (!fill) return;
+  const ink = inkFor(fill).ink;
+  const hoverShade = ink === '#000000' ? '400' : '600';
+  const targets: Record<string, string[]> = {
+    'button-primary': ['accent', '500'],
+    'button-primary-hover': ['accent', hoverShade],
+  };
+
+  for (const mode of ['light', 'dark'] as const) {
+    const point = (category: string, name: string, path: string[]) => {
+      const token = (files[mode][category] as Json | undefined)?.[name] as Json | undefined;
+      const alias = (token?.$extensions as Json | undefined)?.['com.figma.aliasData'] as
+        Json | undefined;
+      const primitive = colorTokenAt(p, path);
+      if (!token || !alias || !primitive) return;
+      alias.targetVariableName = ['color', ...path].join('/');
+      token.$value = structuredClone(primitive.$value);
+    };
+    for (const [name, path] of Object.entries(targets)) point('bg', name, path);
+    point('text', 'button-primary', [ink === '#000000' ? 'black' : 'white']);
+  }
 }
 
 function cssColor(value: Json | undefined): string | null {
@@ -407,6 +451,37 @@ export function semanticColor(
   return cssColor(token.$value as Json | undefined);
 }
 
+/**
+ * Semantic tokens whose alias target differs between `base` and `files`, per
+ * mode, as tokens-core writes them (text.accent is --text-accent pointing at
+ * var(--rafael-color-...)). Inline primitives cannot express a re-pointed
+ * alias, so the component writes these into a mode-scoped style element.
+ */
+export function semanticOverrides(
+  base: TokenFiles,
+  files: TokenFiles
+): Record<'light' | 'dark', Record<string, string>> {
+  const result = { light: {}, dark: {} } as Record<'light' | 'dark', Record<string, string>>;
+  const aliasOf = (node: unknown) =>
+    (
+      ((node as Json | undefined)?.$extensions as Json | undefined)?.['com.figma.aliasData'] as
+        Json | undefined
+    )?.targetVariableName;
+  for (const mode of ['light', 'dark'] as const) {
+    for (const [category, group] of Object.entries(files[mode])) {
+      if (category.startsWith('$') || !group || typeof group !== 'object') continue;
+      for (const [name, token] of Object.entries(group as Json)) {
+        const before = aliasOf((base[mode][category] as Json | undefined)?.[name]);
+        const after = aliasOf(token);
+        if (typeof after === 'string' && after !== before && after.startsWith('color/')) {
+          result[mode][`--${category}-${name}`] = `var(--rafael-${after.split('/').join('-')})`;
+        }
+      }
+    }
+  }
+  return result;
+}
+
 const PREVIEW_TOKENS: Record<string, string> = {
   '--gp-bg': 'bg.primary',
   '--gp-card': 'bg.secondary',
@@ -417,6 +492,8 @@ const PREVIEW_TOKENS: Record<string, string> = {
   '--gp-on-brand': 'text.on-brand',
   '--gp-brand-2': 'bg.brand-secondary',
   '--gp-accent': 'text.accent',
+  '--gp-button': 'bg.button-primary',
+  '--gp-button-ink': 'text.button-primary',
   '--gp-success': 'bg.success-strong',
   '--gp-warning': 'bg.warning-strong',
   '--gp-error': 'bg.error-strong',

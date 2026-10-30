@@ -12,9 +12,12 @@ import {
   hexToRgb,
   pageVariables,
   previewVariables,
+  semanticOverrides,
+  type ButtonStyle,
   toJson,
   type TokenFiles,
 } from './token-generator';
+import { inkFor } from './token-playground';
 import { createZip } from './zip';
 
 export const TOKEN_FILES = ['primitives', 'light', 'dark'] as const;
@@ -50,6 +53,7 @@ export interface TokenGeneratorComponent extends AlpineMagics {
   colors: Record<string, string>;
   initial: Record<string, string>;
   preview: { light: Record<string, string>; dark: Record<string, string> };
+  buttons: ButtonStyle;
   readonly changed: string[];
   init(): void;
   load(): Promise<boolean>;
@@ -72,6 +76,67 @@ function saveFile(name: string, content: BlobPart, type: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+const INK_FILLS: Record<string, string> = {
+  '--gp-brand-2-ink': '.token-gen-pill--brand-2',
+  '--gp-success-ink': '.token-gen-pill--success',
+  '--gp-warning-ink': '.token-gen-pill--warning',
+  '--gp-error-ink': '.token-gen-pill--error',
+};
+
+/** Black or white ink for the preview fills, from their rendered colour. */
+function inkFromDom(root: HTMLElement, mode: 'light' | 'dark'): Record<string, string> {
+  const card = root.querySelector(`.token-gen-preview[data-theme="${mode}"]`);
+  const vars: Record<string, string> = {};
+  if (!card) return vars;
+  for (const [name, selector] of Object.entries(INK_FILLS)) {
+    const el = card.querySelector(selector);
+    const match = el && /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(getComputedStyle(el).backgroundColor);
+    if (!match) continue;
+    const hex =
+      '#' +
+      match
+        .slice(1, 4)
+        .map((n) => Number(n).toString(16).padStart(2, '0'))
+        .join('');
+    vars[name] = inkFor(hex).ink;
+  }
+  return vars;
+}
+
+const OVERRIDES_ID = 'token-generator-overrides';
+
+/**
+ * Re-pointed semantic aliases for the live page, scoped to the mode they
+ * belong to (same conditions as the light and dark blocks in tokens.css).
+ */
+function writeOverrides(overrides: Record<'light' | 'dark', Record<string, string>>): void {
+  const block = (vars: Record<string, string>) =>
+    Object.entries(vars)
+      .map(([name, value]) => `${name}:${value};`)
+      .join('');
+  const light = block(overrides.light);
+  const dark = block(overrides.dark);
+  let style = document.getElementById(OVERRIDES_ID);
+  if (!light && !dark) {
+    style?.remove();
+    return;
+  }
+  if (!style) {
+    style = document.createElement('style');
+    style.id = OVERRIDES_ID;
+    document.head.append(style);
+  }
+  style.textContent =
+    (light
+      ? `[data-theme="light"]{${light}}` +
+        `@media not (prefers-color-scheme: dark){:root:not([data-theme="dark"]){${light}}}`
+      : '') +
+    (dark
+      ? `[data-theme="dark"]{${dark}}` +
+        `@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){${dark}}}`
+      : '');
+}
+
 export function createTokenGeneratorComponent(
   config: TokenGeneratorConfig
 ): TokenGeneratorComponent {
@@ -89,16 +154,21 @@ export function createTokenGeneratorComponent(
     colors: { ...config.initial },
     initial: { ...config.initial },
     preview: { light: {}, dark: {} },
+    buttons: 'neutral',
 
     get changed() {
-      return COLOR_NAMES.filter(
+      const colors = COLOR_NAMES.filter(
         (name) => this.colors[name] && this.colors[name] !== this.initial[name]
       );
+      return this.buttons === 'neutral' ? colors : [...colors, 'buttons'];
     },
 
     init() {
       // Nothing loads with the page: the template calls load() on the first
-      // pointer or focus interaction with the generator.
+      // pointer or focus interaction with the generator. Until then the
+      // preview cards show the page's own tokens; only the ink on the fills
+      // without a semantic text colour is worked out here from the DOM.
+      this.preview = { light: inkFromDom(this.$el, 'light'), dark: inkFromDom(this.$el, 'dark') };
     },
 
     load() {
@@ -169,13 +239,14 @@ export function createTokenGeneratorComponent(
           void this.load().then((ok) => ok && this.update());
           return;
         }
-        const generated = generateFiles(base, this.colors, this.initial);
+        const generated = generateFiles(base, this.colors, this.initial, this.buttons);
         const vars = pageVariables(base, generated);
         const root = document.documentElement;
         root.classList.add('token-playground-live');
         for (const name of applied) if (!(name in vars)) root.style.removeProperty(name);
         for (const [name, value] of Object.entries(vars)) root.style.setProperty(name, value);
         applied = Object.keys(vars);
+        writeOverrides(semanticOverrides(base, generated));
         this.preview = {
           light: previewVariables(generated, 'light'),
           dark: previewVariables(generated, 'dark'),
@@ -189,15 +260,21 @@ export function createTokenGeneratorComponent(
       const root = document.documentElement;
       for (const name of applied) root.style.removeProperty(name);
       applied = [];
+      writeOverrides({ light: {}, dark: {} });
       this.colors = { ...this.initial };
-      // Empty: the preview cards fall back to the page's own tokens (data-theme per card).
-      this.preview = { light: {}, dark: {} };
+      this.buttons = 'neutral';
+      if (base) {
+        this.preview = {
+          light: previewVariables(base, 'light'),
+          dark: previewVariables(base, 'dark'),
+        };
+      }
       this.message = t('resetDone', 'Colours reset.');
     },
 
     async download(kind) {
       if (!(await this.load()) || !base) return;
-      const files = generateFiles(base, this.colors, this.initial);
+      const files = generateFiles(base, this.colors, this.initial, this.buttons);
       const json = (name: TokenFileName) => toJson(files[name]);
       try {
         if (kind !== 'css' && kind !== 'zip') {

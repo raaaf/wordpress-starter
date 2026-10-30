@@ -11,6 +11,7 @@ import {
   paletteTokens,
   previewVariables,
   semanticColor,
+  semanticOverrides,
   toJson,
   type TokenFiles,
 } from './token-generator';
@@ -201,5 +202,50 @@ describe('normalizeHex', () => {
     expect(normalizeHex('#0f0')).toBe('#00FF00');
     expect(normalizeHex(' 2563eb ')).toBe('#2563EB');
     expect(normalizeHex('blue')).toBeNull();
+  });
+});
+
+describe('primary buttons in the accent', () => {
+  const initial = { accent: '#FF6B35' };
+
+  it('stays neutral by default', () => {
+    const files = base();
+    expect(generateFiles(files, initial, initial)).toEqual(files);
+  });
+
+  it('fills the buttons with the accent and keeps AA for the label, rest and hover', () => {
+    for (const accent of ['#FF6B35', '#2563EB', '#FACC15', '#059669', '#808080']) {
+      const result = generateFiles(base(), { accent }, initial, 'accent');
+      for (const mode of ['light', 'dark'] as const) {
+        const fill = semanticColor(result, mode, 'bg.button-primary') as string;
+        const hover = semanticColor(result, mode, 'bg.button-primary-hover') as string;
+        const label = semanticColor(result, mode, 'text.button-primary') as string;
+        expect(fill, accent).toBe(accent);
+        expect(['#000000', '#FFFFFF']).toContain(label);
+        expect(contrastRatio(fill, label), accent).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(hover, label), accent).toBeGreaterThanOrEqual(
+          contrastRatio(fill, label)
+        );
+      }
+    }
+  });
+
+  it('leaves checked controls, accent text and the design-system primitives alone', () => {
+    const files = base();
+    const result = generateFiles(files, initial, initial, 'accent');
+    expect(result.primitives).toEqual(files.primitives);
+    for (const mode of ['light', 'dark'] as const) {
+      for (const path of ['bg.accent', 'text.accent', 'icon.on-accent']) {
+        expect(semanticColor(result, mode, path)).toBe(semanticColor(files, mode, path));
+      }
+    }
+    const overrides = semanticOverrides(files, result);
+    expect(overrides.light).toEqual({
+      '--bg-button-primary': 'var(--rafael-color-accent-500)',
+      '--bg-button-primary-hover': 'var(--rafael-color-accent-400)',
+      '--text-button-primary': 'var(--rafael-color-black)',
+    });
+    expect(overrides.dark).toEqual(overrides.light);
+    expect(semanticOverrides(files, files)).toEqual({ light: {}, dark: {} });
   });
 });

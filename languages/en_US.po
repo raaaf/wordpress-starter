@@ -2574,6 +2574,9 @@ msgstr "New testimonial"
 msgid "Neueste zuerst"
 msgstr "Newest first"
 
+msgid "Neutral"
+msgstr "Neutral"
+
 msgid "Newsletter-Anmeldung"
 msgstr "Newsletter signup"
 
@@ -2933,6 +2936,9 @@ msgstr "Primitives (base colours, spacing, etc.)"
 
 msgid "Primär"
 msgstr "Primary"
+
+msgid "Primär-Buttons"
+msgstr "Primary buttons"
 
 msgid "Primärer Button"
 msgstr "Primary button"
