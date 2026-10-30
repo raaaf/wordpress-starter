@@ -142,7 +142,7 @@ The providers are listed in `Application::registerProviders()`; `PluginServicePr
 | `Mcp\ContractProvider`              | Answers `wp_starter_mcp_contract`: page structure for the Claude MCP plugin    |
 | `CronServiceProvider`               | Transient and revision cleanup                                                 |
 | `LogServiceProvider`                | Structured logging to debug.log                                                |
-| `ThemeUpdateProvider`               | GitHub-based theme updates                                                     |
+| `ThemeUpdateProvider`               | GitHub-based theme updates, checksum and offline signature required            |
 | `AssetOptimizationServiceProvider`  | Defers non-critical scripts, preloads fonts/styles, inlines above-the-fold CSS |
 | `BrandingServiceProvider`           | Favicon, login logo, syncs ACF branding with WP core custom_logo/site_icon     |
 | `EditorIntegrationServiceProvider`  | Disables Gutenberg and unused editor features, removes Global Styles output    |

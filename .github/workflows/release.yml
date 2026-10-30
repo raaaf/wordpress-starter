@@ -57,6 +57,10 @@ jobs:
     name: Release
     needs: test
     runs-on: ubuntu-latest
+    # Required reviewer: the job waits until a reviewer of the "release"
+    # environment approves it (Settings > Environments > release > Required
+    # reviewers). Without that setting the environment adds no gate.
+    environment: release
     permissions:
       contents: write
       issues: write
@@ -138,3 +142,21 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           ZIP=$(ls wp-theme/*.zip | head -1)
           gh release upload "v${VERSION}" "${ZIP}" "${ZIP}.sha256" --clobber
+
+      - name: Signing reminder
+        if: steps.semantic.outputs.released == 'true'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          ZIP=$(basename "$(ls wp-theme/*.zip | head -1)")
+          {
+            echo "## v${VERSION} still needs its signature"
+            echo
+            echo "Sites refuse this update until \`${ZIP}.sig\` is attached. The key stays offline, so sign locally:"
+            echo
+            echo '```sh'
+            echo "gh release download v${VERSION} -p '${ZIP}' -p '${ZIP}.sha256'"
+            echo "shasum -a 256 -c ${ZIP}.sha256"
+            echo "php scripts/release-signing.php sign ${ZIP} ~/.config/wp-starter/release.key"
+            echo "gh release upload v${VERSION} ${ZIP}.sig"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

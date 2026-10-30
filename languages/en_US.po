@@ -1053,6 +1053,9 @@ msgstr "The message was classified as spam and not sent."
 msgid "Die Pruefsumme des Theme-Updates stimmt nicht mit dem veroeffentlichten Release ueberein. Das Update wurde abgebrochen."
 msgstr "The checksum of the theme update does not match the published release. The update was cancelled."
 
+msgid "Die Signatur des Theme-Updates ist ungültig. Das Update wurde abgebrochen."
+msgstr "The signature of the theme update is invalid. The update was cancelled."
+
 msgid "Die Styleguide-Seite konnte nicht angelegt werden. Versuche es unter Theme-Einstellungen – Werkzeuge erneut."
 msgstr "The styleguide page could not be created. Try again under Theme settings – Tools."
 
@@ -1121,6 +1124,9 @@ msgstr "This field is required."
 
 msgid "Dieses Paket als „Empfohlen“ hervorheben."
 msgstr "Highlight this plan as \"Recommended\"."
+
+msgid "Dieses Theme-Update ist noch nicht signiert. Das Update wurde abgebrochen; bitte später erneut versuchen."
+msgstr "This theme update is not signed yet. The update was cancelled; please try again later."
 
 msgid "Direkte E-Mail-Adresse."
 msgstr "Direct email address."
@@ -1892,6 +1898,9 @@ msgstr "Play in a loop"
 
 msgid "In diesem Archiv sind noch keine Beiträge vorhanden."
 msgstr "There are no posts in this archive yet."
+
+msgid "In diesem Theme ist kein Schlüssel zum Prüfen der Update-Signatur hinterlegt. Das Update wurde abgebrochen."
+msgstr "This theme has no key to verify the update signature. The update was cancelled."
 
 msgid "Info-Spalte"
 msgstr "Info column"
@@ -4052,6 +4061,9 @@ msgstr "Go to plugins"
 
 msgid "Zu diesem %s hochgeladen"
 msgstr "Uploaded to this %s"
+
+msgid "Zu diesem Theme-Update ist keine Prüfsumme veröffentlicht. Das Update wurde abgebrochen."
+msgstr "No checksum has been published for this theme update. The update was cancelled."
 
 msgid "Zu dieser %s hochgeladen"
 msgstr "Uploaded to this %s"
