@@ -53,7 +53,7 @@
         // differ by edge and fill only: default is a hairline on the section's
         // own surface, elevated a raised tone without a line (.card-raised in
         // app.css), filled the card surface one step above the section plus line.
-        'default' => 'bg-transparent border border-[var(--card-border,var(--border-default))]',
+        'default' => 'card-plain bg-transparent border border-[var(--card-border,var(--border-default))]',
         'elevated' => 'card-raised border border-transparent',
         'outlined' => 'bg-[var(--card-bg,var(--bg-primary))] border border-line',
         // Gefuellt heisst: eine Stufe ueber der Sektion, nicht fix

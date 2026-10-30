@@ -401,7 +401,7 @@ return [
     'Ecken' => 'Corners',
     'Eckig' => 'Square',
     'Eigene Farbe' => 'Custom colour',
-    'Eigene Fläche eine Stufe über der Sektion, mit Rahmen.' => 'Its own surface one step above the section, with a border.',
+    'Eigene Fläche, die sich von der Sektion absetzt, mit Rahmen.' => 'Its own surface, set apart from the section, with a border.',
     'Ein Akzent, viele Flächen.' => 'One accent, many surfaces.',
     'Ein Fehler ist aufgetreten.' => 'An error occurred.',
     'Ein Hinweis mit neutraler Information.' => 'A notice with neutral information.',

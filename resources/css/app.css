@@ -351,6 +351,12 @@
   border-color: transparent;
 }
 
+/* Card variant "default": lies on the section's own surface, so without the
+   surface sheen the .card base adds in @layer components. */
+.card-plain {
+  background-image: none;
+}
+
 /* ============================================
    MOTION VOCABULARY
    ============================================ */

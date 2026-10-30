@@ -172,7 +172,7 @@
         <x-card
             variant="filled"
             title="Filled"
-            :description="__('Eigene Fläche eine Stufe über der Sektion, mit Rahmen.', 'wp-starter')"
+            :description="__('Eigene Fläche, die sich von der Sektion absetzt, mit Rahmen.', 'wp-starter')"
         />
     </x-grid>
 

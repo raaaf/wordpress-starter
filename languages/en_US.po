@@ -1194,8 +1194,8 @@ msgstr "Square"
 msgid "Eigene Farbe"
 msgstr "Custom colour"
 
-msgid "Eigene Fläche eine Stufe über der Sektion, mit Rahmen."
-msgstr "Its own surface one step above the section, with a border."
+msgid "Eigene Fläche, die sich von der Sektion absetzt, mit Rahmen."
+msgstr "Its own surface, set apart from the section, with a border."
 
 msgid "Ein Akzent, viele Flächen."
 msgstr "One accent, many surfaces."
