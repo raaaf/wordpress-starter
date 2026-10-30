@@ -3478,8 +3478,10 @@ html {
     color 150ms var(--motion-enter-ease);
 }
 
-.token-segment:hover span {
-  border-color: var(--text-primary);
+@media (hover: hover) {
+  .token-segment:hover span {
+    border-color: var(--text-primary);
+  }
 }
 
 .token-segment input:checked + span {

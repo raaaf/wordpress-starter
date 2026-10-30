@@ -34,7 +34,9 @@
         ],
         'scale' => [
             'label' => __('Schriftgröße', 'wp-starter'),
-            'options' => ['0.875' => '14 px', '1' => '16 px', '1.125' => '18 px', '1.25' => '20 px'],
+            // Steps, not px: the fluid type sizes are scaled, so a px label would
+            // not match what is rendered at every viewport width.
+            'options' => ['0.875' => 'S', '1' => 'M', '1.125' => 'L', '1.25' => 'XL'],
             'default' => 1,
         ],
     ];
