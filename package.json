@@ -54,7 +54,7 @@
     "@types/alpinejs__collapse": "^3.13.4",
     "@types/alpinejs__intersect": "^3.13.4",
     "@types/wordpress__blocks": "^15.17.0",
-    "@vitest/coverage-v8": "^4.0.17",
+    "@vitest/coverage-v8": "^5.0.5",
     "@vitest/ui": "^4.0.17",
     "archiver": "^8.0.0",
     "conventional-changelog-conventionalcommits": "^10.3.0",
