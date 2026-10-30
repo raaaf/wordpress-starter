@@ -1268,6 +1268,12 @@ class Options
      */
     private static function registerDesignTokensFields(): void
     {
+        if (\WordpressStarter\Providers\DesignTokenServiceProvider::tokensFromChildTheme()) {
+            self::registerChildThemeTokensNotice();
+
+            return;
+        }
+
         acf_add_local_field_group([
             'key' => 'group_options_design_tokens',
             'title' => __('Design Tokens', 'wp-starter'),
@@ -1434,6 +1440,43 @@ class Options
                     '#EF4444',
                     false,
                     __('Farbe für Fehlermeldungen und kritische Aktionen.', 'wp-starter'),
+                ),
+            ],
+            'location' => [
+                [
+                    [
+                        'param' => 'options_page',
+                        'operator' => '==',
+                        'value' => 'theme-options-tokens',
+                    ],
+                ],
+            ],
+            'menu_order' => 0,
+            'position' => 'normal',
+            'style' => 'default',
+            'label_placement' => 'top',
+            'instruction_placement' => 'label',
+        ]);
+    }
+
+    /**
+     * Design Tokens page in child mode: the child theme supplies the tokens,
+     * so the page only says where they come from and how to change them.
+     * Upload, restore and the colour pickers are left out (read-only).
+     */
+    private static function registerChildThemeTokensNotice(): void
+    {
+        acf_add_local_field_group([
+            'key' => 'group_options_design_tokens',
+            'title' => __('Design Tokens', 'wp-starter'),
+            'fields' => [
+                FieldDefinitions::infoBoxField(
+                    'field_tokens_child_theme_info',
+                    '<strong>' . esc_html__('Tokens aus dem Child-Theme', 'wp-starter') . '</strong><br>' .
+                    esc_html__('Farben und Schriften kommen aus dem aktiven Child-Theme, deshalb lassen sie sich hier nicht bearbeiten. Neue Tokens erzeugst du im Token-Generator und spielst sie als neues Child-Theme ein.', 'wp-starter') .
+                    '<br><a href="' . esc_url( (string) apply_filters(ThemeContext::prefix() . '_token_generator_url', home_url('/design-system/#token-generator'))) . '">' .
+                    esc_html__('Zum Token-Generator', 'wp-starter') . '</a>',
+                    'warning',
                 ),
             ],
             'location' => [

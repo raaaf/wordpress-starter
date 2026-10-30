@@ -49,6 +49,11 @@ trait WordPressMocks
             'wp_mock_template_directory_uri' => 'https://example.com/wp-content/themes/wp-starter',
             'wp_mock_template' => null,
             'wp_mock_stylesheet' => null,
+            'wp_mock_stylesheet_directory' => null,
+            'wp_mock_stylesheet_directory_uri' => null,
+            'wp_mock_updated_fields' => [],
+            'wp_mock_upload_path' => null,
+            'wp_mock_attachment_metadata' => [],
             'wp_mock_theme_mods' => [],
             'wp_mock_current_blog_id' => 1,
             'wp_mock_current_row' => null,
@@ -118,6 +123,9 @@ trait WordPressMocks
         // incrementing into the next.
         \WordpressStarter\Helpers\ComponentId::reset();
         \WordpressStarter\MemberArea\Access::resetFlagCache();
+
+        // Reset the cached child theme settings.json (read once per request).
+        \WordpressStarter\Support\ChildThemeSettings::reset();
 
         // Reset Security's test-only header emitter seam: otherwise a test
         // that calls Security::setHeaderEmitter() would leak its closure into

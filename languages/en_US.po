@@ -804,6 +804,9 @@ msgstr "Dark mode (semantic tokens)"
 msgid "Darstellung"
 msgstr "Appearance"
 
+msgid "Das Child-Theme nutzt Vertragsversion %1$d, dieses Theme kennt bis Version %2$d. Bekannte Einstellungen werden übernommen, neuere ignoriert. Bitte das Parent-Theme aktualisieren."
+msgstr "The child theme uses contract version %1$d, this theme supports up to version %2$d. Known settings are applied, newer ones are ignored. Please update the parent theme."
+
 msgid "Das Datum der Veranstaltung."
 msgstr "The date of the event."
 
@@ -1074,6 +1077,9 @@ msgstr "The number to display (animated)."
 msgid "Die https-Adresse aus dem src-Attribut des Anbieters."
 msgstr "The https address from the provider's src attribute."
 
+msgid "Die settings.json des Child-Themes ist ungültig oder nennt keine Vertragsversion. Das Child-Theme wird ignoriert, bis die Datei neu erzeugt ist."
+msgstr "The child theme's settings.json is invalid or names no contract version. The child theme is ignored until the file is generated again."
+
 msgid "Die vollständige Adresse (für den „Route planen“-Link)."
 msgstr "The full address (for the \"Plan route\" link)."
 
@@ -1094,6 +1100,9 @@ msgstr "This page is password protected. Please enter the password."
 
 msgid "Diese URL ist nicht erlaubt."
 msgstr "This URL is not allowed."
+
+msgid "Diese Website wird gerade eingerichtet. Bitte versuche es später noch einmal."
+msgstr "This website is being set up. Please try again later."
 
 msgid "Dieser Block wird nur auf Seiten mit \"page_is_member_area\" angezeigt."
 msgstr "This block is only shown on pages with \"page_is_member_area\"."
@@ -1455,6 +1464,9 @@ msgstr "Colour for warnings and notices."
 msgid "Farben für Feedback und Statusmeldungen. Light/Dark-Varianten werden automatisch generiert."
 msgstr "Colours for feedback and status messages. Light and dark variants are generated automatically."
 
+msgid "Farben und Schriften kommen aus dem aktiven Child-Theme, deshalb lassen sie sich hier nicht bearbeiten. Neue Tokens erzeugst du im Token-Generator und spielst sie als neues Child-Theme ein."
+msgstr "Colours and fonts come from the active child theme, so they cannot be edited here. Create new tokens in the token generator and install them as a new child theme."
+
 msgid "Farben zurückgesetzt."
 msgstr "Colours reset."
 
@@ -1793,6 +1805,9 @@ msgstr "Background colour"
 
 msgid "Hinweis"
 msgstr "Notice"
+
+msgid "Hinweis für Administratoren: Das Theme braucht das Plugin Advanced Custom Fields PRO. Bitte installieren und aktivieren."
+msgstr "Note for administrators: the theme needs the Advanced Custom Fields PRO plugin. Please install and activate it."
 
 msgid "Hinweis hinzufügen"
 msgstr "Add notice"
@@ -2353,6 +2368,9 @@ msgid "Logo"
 msgstr "Logo"
 
 msgid "Logo (Dunkel)"
+msgstr "Logo (dark)"
+
+msgid "Logo (dunkel)"
 msgstr "Logo (dark)"
 
 msgid "Logo anzeigen"
@@ -3537,6 +3555,9 @@ msgstr "Token transformation succeeded, but the build failed."
 msgid "Token-Upload fehlgeschlagen:"
 msgstr "Token upload failed:"
 
+msgid "Tokens aus dem Child-Theme"
+msgstr "Tokens from the child theme"
+
 msgid "Tokens hochladen und anwenden"
 msgstr "Upload and apply tokens"
 
@@ -4020,6 +4041,9 @@ msgstr "Centred"
 msgid "Zitat"
 msgstr "Quote"
 
+msgid "Zu den Plugins"
+msgstr "Go to plugins"
+
 msgid "Zu diesem %s hochgeladen"
 msgstr "Uploaded to this %s"
 
@@ -4061,6 +4085,9 @@ msgstr "Skip to content"
 
 msgid "Zum Theme Setup"
 msgstr "Go to theme setup"
+
+msgid "Zum Token-Generator"
+msgstr "Open the token generator"
 
 msgid "Zur Anmeldung"
 msgstr "Go to login"

@@ -103,6 +103,16 @@ final class ThemeContext
     }
 
     /**
+     * True when a child theme of this theme is active: get_stylesheet() names
+     * the child, get_template() this parent. The parent then reads the
+     * child's settings.json (Support\ChildThemeSettings).
+     */
+    public static function isChildActive(): bool
+    {
+        return get_stylesheet() !== get_template();
+    }
+
+    /**
      * One-time migration of legacy wp_starter_* option keys to theme-specific keys.
      * Runs on first boot() after a theme update. Old keys are preserved for rollback safety.
      */

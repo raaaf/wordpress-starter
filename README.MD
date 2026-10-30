@@ -124,7 +124,7 @@ The providers are listed in `Application::registerProviders()`; `PluginServicePr
 
 | Provider                            | Responsibility                                                                 |
 | ----------------------------------- | ------------------------------------------------------------------------------ |
-| `ThemeServiceProvider`              | Theme support, theme version, template routing                                 |
+| `ThemeServiceProvider`              | Theme support, theme version, template routing, fallback page without ACF      |
 | `BladeServiceProvider`              | Blade engine, cache directory                                                  |
 | `AcfServiceProvider`                | ACF fields, Blade directives, REST API                                         |
 | `MenuServiceProvider`               | Register nav menus                                                             |
@@ -138,6 +138,7 @@ The providers are listed in `Application::registerProviders()`; `PluginServicePr
 | `SeoServiceProvider`                | JSON-LD, OG tags, canonical URLs, robots meta                                  |
 | `DesignTokenServiceProvider`        | Token file upload/download/validation, CSS regeneration                        |
 | `DesignTokenRestProvider`           | Public read-only REST route with the three token files for the token generator |
+| `ChildThemeServiceProvider`         | Applies a generated child theme: tokens, fonts, editor tokens, logo import     |
 | `CronServiceProvider`               | Transient and revision cleanup                                                 |
 | `LogServiceProvider`                | Structured logging to debug.log                                                |
 | `ThemeUpdateProvider`               | GitHub-based theme updates                                                     |

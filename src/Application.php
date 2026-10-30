@@ -10,6 +10,7 @@ use WordpressStarter\Providers\AcfServiceProvider;
 use WordpressStarter\Providers\AssetOptimizationServiceProvider;
 use WordpressStarter\Providers\BladeServiceProvider;
 use WordpressStarter\Providers\BrandingServiceProvider;
+use WordpressStarter\Providers\ChildThemeServiceProvider;
 use WordpressStarter\Providers\CronServiceProvider;
 use WordpressStarter\Providers\DesignTokenRestProvider;
 use WordpressStarter\Providers\DesignTokenServiceProvider;
@@ -94,6 +95,7 @@ class Application
             IconShortcodeServiceProvider::class,
             MemberAreaServiceProvider::class,
             DesignTokenRestProvider::class, // not admin-gated: REST requests are frontend requests
+            ChildThemeServiceProvider::class, // not admin-gated: enqueues the child tokens on the frontend, imports logos on acf/init
         ];
 
         // Admin-only providers: every hook they register is admin-side

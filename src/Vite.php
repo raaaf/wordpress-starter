@@ -196,7 +196,7 @@ class Vite
         ));
 
         // Try to get cached icons first
-        $cacheKey = ThemeContext::prefix() . '_theme_icons_' . wp_get_theme()->get('Version') . '_' . md5(implode(',', $iconNames));
+        $cacheKey = ThemeContext::prefix() . '_theme_icons_' . wp_get_theme(get_template())->get('Version') . '_' . md5(implode(',', $iconNames));
         $cachedIcons = get_transient($cacheKey);
 
         if ($cachedIcons !== false && is_array($cachedIcons)) {

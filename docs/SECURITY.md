@@ -227,6 +227,15 @@ The one public route is `DesignTokenRestProvider` (`GET /wp-json/{prefix}/v1/des
 theme's published design values, for the token generator on the design system page; the file name is an
 allowlist, never a path. Hosts may keep `config/` blocked for the web, the generator does not need it.
 
+### Child theme files
+
+A generated child theme is data, not code: its `functions.php` stays empty and the parent reads its
+`settings.json` (`Support\ChildThemeSettings`, see [CHILD-THEMES.md](CHILD-THEMES.md)). Every path in that
+file is resolved relative to the child folder, must still lie inside it after `realpath()` (so `../` and
+symlinks out of the folder are refused) and may only end in `css`, `svg`, `png` or `woff2`. Logos are copied
+into the media library once per build; SVGs go through the same sanitizer as uploads (`Support\SvgSanitizer`)
+and are dropped when they cannot be sanitized.
+
 ### Sensitive Data Filtering
 
 ```php

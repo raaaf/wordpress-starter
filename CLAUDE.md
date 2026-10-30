@@ -116,6 +116,7 @@ Path-bound rules live in nested `CLAUDE.md` files next to the code (loaded when 
 - `src/PostTypes/CLAUDE.md`: custom post types
 - `resources/js/CLAUDE.md`: Alpine.js components
 - `resources/css/CLAUDE.md`: design tokens (`npm run tokens`)
+- `docs/CHILD-THEMES.md`: child contract v1 (settings.json the parent reads), what the parent does in child mode
 - `DESIGN.md`: origin of the token values, the command chain, the mapping table
 - `README.MD`, `docs/`: architecture, deployment, security, SEO, token system
 

@@ -7,6 +7,7 @@ namespace WordpressStarter\Providers;
 use WordpressStarter\ColorPaletteGenerator;
 use WordpressStarter\DesignTokenValidator;
 use WordpressStarter\RateLimiter;
+use WordpressStarter\Support\ChildThemeSettings;
 use WordpressStarter\ThemeContext;
 
 /**
@@ -124,8 +125,25 @@ class DesignTokenServiceProvider extends ServiceProvider
         'error' => 'field_tokens_error_color',
     ];
 
+    /**
+     * True when an active child theme supplies the token stylesheet. Its
+     * tokens then override the parent's, so editing the parent's token files
+     * here would change nothing visible: the page is read-only and points to
+     * the public token generator instead (Acf\Options).
+     */
+    public static function tokensFromChildTheme(): bool
+    {
+        return ChildThemeSettings::tokensCss() !== null;
+    }
+
     public function register(): void
     {
+        // INTENTIONAL: no write handlers (upload, restore, regenerate, apply
+        // colours, AJAX) in child mode, see tokensFromChildTheme().
+        if (self::tokensFromChildTheme()) {
+            return;
+        }
+
         // Handle non-AJAX token actions (downloads, regenerate)
         add_action('admin_init', [$this, 'handleTokenActions'], 1);
 
@@ -136,6 +154,10 @@ class DesignTokenServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (self::tokensFromChildTheme()) {
+            return;
+        }
+
         // Add hook to sync colors when ACF options are saved
         add_action('acf/save_post', [$this, 'maybeSyncColorsOnSave'], 20);
 

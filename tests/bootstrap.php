@@ -60,6 +60,20 @@ if (!function_exists('get_stylesheet')) {
     }
 }
 
+if (!function_exists('get_stylesheet_directory')) {
+    function get_stylesheet_directory(): string
+    {
+        return $GLOBALS['wp_mock_stylesheet_directory'] ?? get_template_directory();
+    }
+}
+
+if (!function_exists('get_stylesheet_directory_uri')) {
+    function get_stylesheet_directory_uri(): string
+    {
+        return $GLOBALS['wp_mock_stylesheet_directory_uri'] ?? get_template_directory_uri();
+    }
+}
+
 if (!function_exists('get_user_locale')) {
     function get_user_locale(): string
     {
@@ -527,6 +541,16 @@ if (!function_exists('get_field')) {
         $key = $postId !== false ? "{$field}:{$postId}" : $field;
 
         return $GLOBALS['wp_mock_fields'][$key] ?? $GLOBALS['wp_mock_fields'][$field] ?? null;
+    }
+}
+
+if (!function_exists('update_field')) {
+    // Records into wp_mock_updated_fields (by field key, so get_field() does not see it).
+    function update_field(string $selector, mixed $value, mixed $postId = false): bool
+    {
+        $GLOBALS['wp_mock_updated_fields'][] = ['selector' => $selector, 'value' => $value, 'post_id' => $postId];
+
+        return true;
     }
 }
 
@@ -1161,7 +1185,7 @@ if (!function_exists('the_post')) {
 
 // Theme functions
 if (!function_exists('wp_get_theme')) {
-    function wp_get_theme(): object
+    function wp_get_theme(?string $stylesheet = null): object
     {
         return new class() {
             public function get(string $header): string
@@ -1344,6 +1368,67 @@ if (!function_exists('register_taxonomy')) {
     function register_taxonomy(string $taxonomy, array|string $objectType, array $args = []): void
     {
         $GLOBALS['wp_mock_taxonomies'][$taxonomy] = $args;
+    }
+}
+
+// Media library functions. Tests point wp_mock_upload_path at a temp dir;
+// inserted attachments are recorded in wp_mock_attachments.
+if (!function_exists('wp_upload_dir')) {
+    function wp_upload_dir(): array
+    {
+        $path = $GLOBALS['wp_mock_upload_path'] ?? sys_get_temp_dir();
+
+        return ['path' => $path, 'url' => 'https://example.com/wp-content/uploads', 'error' => false];
+    }
+}
+
+if (!function_exists('wp_unique_filename')) {
+    function wp_unique_filename(string $dir, string $filename): string
+    {
+        $name = pathinfo($filename, PATHINFO_FILENAME);
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $candidate = $filename;
+        for ($i = 1; file_exists($dir . '/' . $candidate); $i++) {
+            $candidate = "{$name}-{$i}." . $ext;
+        }
+
+        return $candidate;
+    }
+}
+
+if (!function_exists('wp_insert_attachment')) {
+    function wp_insert_attachment(array $args, string|false $file = false): int
+    {
+        $GLOBALS['wp_mock_attachments'] ??= [];
+        $id = 1000 + count($GLOBALS['wp_mock_attachments']);
+        $GLOBALS['wp_mock_attachments'][$id] = ['args' => $args, 'file' => $file];
+
+        return $id;
+    }
+}
+
+if (!function_exists('wp_generate_attachment_metadata')) {
+    function wp_generate_attachment_metadata(int $attachmentId, string $file): array
+    {
+        return ['file' => basename($file)];
+    }
+}
+
+if (!function_exists('wp_update_attachment_metadata')) {
+    function wp_update_attachment_metadata(int $attachmentId, array $data): bool
+    {
+        $GLOBALS['wp_mock_attachment_metadata'][$attachmentId] = $data;
+
+        return true;
+    }
+}
+
+if (!function_exists('wp_delete_file')) {
+    function wp_delete_file(string $file): void
+    {
+        if (is_file($file)) {
+            unlink($file);
+        }
     }
 }
 

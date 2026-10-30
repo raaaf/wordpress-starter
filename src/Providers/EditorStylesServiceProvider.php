@@ -251,7 +251,7 @@ class EditorStylesServiceProvider extends ServiceProvider
         });
 
         add_filter('mce_external_plugins', function (array $plugins): array {
-            $plugins['themeicons'] = admin_url('admin-ajax.php?action=theme_tinymce_icon_picker&ver=' . rawurlencode( (string) wp_get_theme()->get('Version')));
+            $plugins['themeicons'] = admin_url('admin-ajax.php?action=theme_tinymce_icon_picker&ver=' . rawurlencode( (string) wp_get_theme(get_template())->get('Version')));
             return $plugins;
         });
 
