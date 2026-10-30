@@ -3451,8 +3451,44 @@ html {
   cursor: pointer;
 }
 
-/* Text colour, not the accent: a dark custom accent would vanish on the dark surface. */
-.token-range {
-  width: 100%;
-  accent-color: var(--text-primary);
+/* Segmented choice (radio group): wraps at narrow widths instead of
+   scrolling, the chosen step is filled. */
+.token-segments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.token-segment {
+  cursor: pointer;
+}
+
+.token-segment span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  font-size: var(--typography-body-small-size, 0.875rem);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  transition:
+    background-color 150ms var(--motion-enter-ease),
+    color 150ms var(--motion-enter-ease);
+}
+
+.token-segment:hover span {
+  border-color: var(--text-primary);
+}
+
+.token-segment input:checked + span {
+  background-color: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+.token-segment input:focus-visible + span {
+  outline: 3px solid var(--ring-focus);
+  outline-offset: 2px;
 }

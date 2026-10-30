@@ -18,10 +18,29 @@
         '#E11D48' => __('Rot', 'wp-starter'),
         '#FACC15' => __('Gelb', 'wp-starter'),
     ];
+    // Fixed steps instead of sliders: round values only. The keys are what the
+    // component receives (px for radii, a factor for the type scale); 34 is the
+    // pill step of the button radius (BUTTON_PILL in token-playground.ts).
+    $segments = [
+        'radius' => [
+            'label' => __('Eckenradius der Karten', 'wp-starter'),
+            'options' => [0 => '0 px', 6 => '6 px', 12 => '12 px', 24 => '24 px', 48 => '48 px'],
+            'default' => 12,
+        ],
+        'buttonRadius' => [
+            'label' => __('Eckenradius der Buttons', 'wp-starter'),
+            'options' => [0 => '0 px', 6 => '6 px', 12 => '12 px', 34 => __('Pille', 'wp-starter')],
+            'default' => 34,
+        ],
+        'scale' => [
+            'label' => __('Schriftgröße', 'wp-starter'),
+            'options' => ['0.875' => '14 px', '1' => '16 px', '1.125' => '18 px', '1.25' => '20 px'],
+            'default' => 1,
+        ],
+    ];
     $labels = [
         'black' => __('Schwarzer', 'wp-starter'),
         'white' => __('Weißer', 'wp-starter'),
-        'pill' => __('Pille', 'wp-starter'),
         /* translators: 1: "Schwarzer" or "Weißer", 2: contrast ratio such as 4.5 */
         'contrast' => __('%1$s Text, Kontrast %2$s:1', 'wp-starter'),
     ];
@@ -55,29 +74,19 @@
                 <p class="mt-3 mb-0 text-body-small text-content-secondary" aria-live="polite" x-text="contrast"></p>
             </fieldset>
 
-            <div class="mt-8">
-                <div class="flex items-baseline justify-between gap-4 mb-2">
-                    <label for="token-radius" class="text-body-small text-content-secondary">{{ __('Eckenradius der Karten', 'wp-starter') }}</label>
-                    <output for="token-radius" class="text-body-small text-content tabular-nums" x-text="radiusLabel">12 px</output>
-                </div>
-                <input id="token-radius" type="range" min="0" max="48" step="2" value="12" class="token-range" x-model.number="radius" x-on:input="update()" :aria-valuetext="radiusLabel">
-            </div>
-
-            <div class="mt-8">
-                <div class="flex items-baseline justify-between gap-4 mb-2">
-                    <label for="token-button-radius" class="text-body-small text-content-secondary">{{ __('Eckenradius der Buttons', 'wp-starter') }}</label>
-                    <output for="token-button-radius" class="text-body-small text-content tabular-nums" x-text="buttonRadiusLabel">{{ __('Pille', 'wp-starter') }}</output>
-                </div>
-                <input id="token-button-radius" type="range" min="0" max="34" step="2" value="34" class="token-range" x-model.number="buttonRadius" x-on:input="update()" :aria-valuetext="buttonRadiusLabel">
-            </div>
-
-            <div class="mt-8">
-                <div class="flex items-baseline justify-between gap-4 mb-2">
-                    <label for="token-scale" class="text-body-small text-content-secondary">{{ __('Schriftgröße', 'wp-starter') }}</label>
-                    <output for="token-scale" class="text-body-small text-content tabular-nums" x-text="scaleLabel">16 px</output>
-                </div>
-                <input id="token-scale" type="range" min="0.875" max="1.25" step="0.025" value="1" class="token-range" x-model.number="scale" x-on:input="update()" :aria-valuetext="scaleLabel">
-            </div>
+            @foreach($segments as $model => $segment)
+                <fieldset class="mx-0 mb-0 mt-8 p-0 border-0">
+                    <legend class="mb-3 text-body-small text-content-secondary">{{ $segment['label'] }}</legend>
+                    <div class="token-segments">
+                        @foreach($segment['options'] as $value => $text)
+                            <label class="token-segment">
+                                <input type="radio" name="token-{{ $model }}" value="{{ $value }}" class="sr-only" x-model.number="{{ $model }}" x-on:change="update()" @checked($value === $segment['default'])>
+                                <span>{{ $text }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </fieldset>
+            @endforeach
 
             <div class="flex flex-wrap items-center justify-between gap-4 mt-8">
                 <p class="m-0 text-body-small text-content-secondary">{{ __('Ändert nur deine Ansicht, gespeichert wird nichts.', 'wp-starter') }}</p>

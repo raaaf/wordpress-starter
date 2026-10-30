@@ -111,9 +111,6 @@ export interface TokenPlaygroundComponent extends AlpineMagics {
   applied: string[];
   readonly ink: string;
   readonly contrast: string;
-  readonly radiusLabel: string;
-  readonly buttonRadiusLabel: string;
-  readonly scaleLabel: string;
   init(): void;
   update(): void;
   reset(): void;
@@ -147,18 +144,6 @@ export function createTokenPlaygroundComponent(
       return t('contrast', '%1$s text, contrast %2$s:1')
         .replace('%1$s', colour)
         .replace('%2$s', ratio.toFixed(1));
-    },
-
-    get radiusLabel() {
-      return `${this.radius} px`;
-    },
-
-    get buttonRadiusLabel() {
-      return this.buttonRadius >= BUTTON_PILL ? t('pill', 'Pill') : `${this.buttonRadius} px`;
-    },
-
-    get scaleLabel() {
-      return `${Math.round(16 * this.scale * 10) / 10} px`;
     },
 
     init() {
