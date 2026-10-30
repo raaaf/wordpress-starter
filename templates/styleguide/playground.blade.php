@@ -21,6 +21,7 @@
     $labels = [
         'black' => __('Schwarzer', 'wp-starter'),
         'white' => __('Weißer', 'wp-starter'),
+        'pill' => __('Pille', 'wp-starter'),
         /* translators: 1: "Schwarzer" or "Weißer", 2: contrast ratio such as 4.5 */
         'contrast' => __('%1$s Text, Kontrast %2$s:1', 'wp-starter'),
     ];
@@ -60,6 +61,14 @@
                     <output for="token-radius" class="text-body-small text-content tabular-nums" x-text="radiusLabel">12 px</output>
                 </div>
                 <input id="token-radius" type="range" min="0" max="48" step="2" value="12" class="token-range" x-model.number="radius" x-on:input="update()" :aria-valuetext="radiusLabel">
+            </div>
+
+            <div class="mt-8">
+                <div class="flex items-baseline justify-between gap-4 mb-2">
+                    <label for="token-button-radius" class="text-body-small text-content-secondary">{{ __('Eckenradius der Buttons', 'wp-starter') }}</label>
+                    <output for="token-button-radius" class="text-body-small text-content tabular-nums" x-text="buttonRadiusLabel">{{ __('Pille', 'wp-starter') }}</output>
+                </div>
+                <input id="token-button-radius" type="range" min="0" max="34" step="2" value="34" class="token-range" x-model.number="buttonRadius" x-on:input="update()" :aria-valuetext="buttonRadiusLabel">
             </div>
 
             <div class="mt-8">

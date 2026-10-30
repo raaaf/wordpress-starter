@@ -8,18 +8,12 @@ export const DEFAULT_ACCENT = '#FF6B35';
 // Card radius in px: the slider's unit. The theme's card radius (radius-lg) is 12px.
 export const DEFAULT_RADIUS = 12;
 export const MAX_RADIUS = 48;
+// Button corner radius in px. The top step stands for the design system's pill.
+export const BUTTON_PILL = 34;
 export const DEFAULT_SCALE = 1;
 export const CARD_RADIUS_CAP = 48;
 
-const RADIUS_TOKENS: Record<string, number> = {
-  sm: 6,
-  default: 6,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  '2xl': 20,
-  '3xl': 24,
-};
+const RADIUS_TOKENS = ['sm', 'default', 'md', 'lg', 'xl', '2xl', '3xl'];
 
 const FONT_SIZE_TOKENS = ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl'];
 
@@ -62,6 +56,7 @@ export function inkFor(accent: string): { ink: '#000000' | '#FFFFFF'; ratio: num
 export function playgroundVariables(
   accent: string,
   radius: number,
+  buttonRadius: number,
   scale: number,
   fontSizes: Record<string, string>
 ): Record<string, string> {
@@ -80,17 +75,15 @@ export function playgroundVariables(
   vars['--rafael-color-ds-accent-text-dark'] = accent;
   vars['--rafael-color-ds-accent-ink'] = inkFor(accent).ink;
 
-  // Pill turns the small radii (inputs, badges) fully round. Card-sized radii
-  // stop at CARD_RADIUS_CAP, a 999px card would clip its own corner content.
-  // Every radius scales with the card radius, so their proportions stay.
-  const factor = radius / RADIUS_TOKENS.lg;
-  const pill = radius >= MAX_RADIUS;
-  for (const [name, base] of Object.entries(RADIUS_TOKENS)) {
-    const scaled = Math.min(Math.round(base * factor * 10) / 10, CARD_RADIUS_CAP);
-    vars[`--rafael-radius-${name}`] = pill && base <= 8 ? '999px' : `${scaled}px`;
+  // Card slider: every radius except the pill (cards, inputs, small boxes).
+  const px = `${Math.min(Math.max(radius, 0), CARD_RADIUS_CAP)}px`;
+  for (const name of RADIUS_TOKENS) {
+    vars[`--rafael-radius-${name}`] = px;
   }
-  // Square means square everywhere, including the pill-shaped buttons.
-  vars['--rafael-radius-full'] = radius <= 0 ? '0px' : '999px';
+  // Button slider: radius-full drives buttons and pills; badges follow via
+  // .token-playground-live in app.css (they use Tailwind's rounded-full).
+  vars['--rafael-radius-full'] =
+    buttonRadius >= BUTTON_PILL ? '999px' : `${Math.max(buttonRadius, 0)}px`;
 
   for (const name of FONT_SIZE_TOKENS) {
     const original = fontSizes[name];
@@ -112,12 +105,14 @@ export function readFontSizes(style: CSSStyleDeclaration): Record<string, string
 export interface TokenPlaygroundComponent extends AlpineMagics {
   accent: string;
   radius: number;
+  buttonRadius: number;
   scale: number;
   fontSizes: Record<string, string>;
   applied: string[];
   readonly ink: string;
   readonly contrast: string;
   readonly radiusLabel: string;
+  readonly buttonRadiusLabel: string;
   readonly scaleLabel: string;
   init(): void;
   update(): void;
@@ -137,6 +132,7 @@ export function createTokenPlaygroundComponent(
     ...({} as AlpineMagics),
     accent: DEFAULT_ACCENT,
     radius: DEFAULT_RADIUS,
+    buttonRadius: BUTTON_PILL,
     scale: DEFAULT_SCALE,
     fontSizes: {},
     applied: [],
@@ -157,6 +153,10 @@ export function createTokenPlaygroundComponent(
       return `${this.radius} px`;
     },
 
+    get buttonRadiusLabel() {
+      return this.buttonRadius >= BUTTON_PILL ? t('pill', 'Pill') : `${this.buttonRadius} px`;
+    },
+
     get scaleLabel() {
       return `${Math.round(16 * this.scale * 10) / 10} px`;
     },
@@ -171,6 +171,7 @@ export function createTokenPlaygroundComponent(
       const vars = playgroundVariables(
         this.accent,
         Number(this.radius),
+        Number(this.buttonRadius),
         Number(this.scale),
         this.fontSizes
       );
@@ -185,9 +186,11 @@ export function createTokenPlaygroundComponent(
       for (const name of this.applied) {
         root.style.removeProperty(name);
       }
+      root.classList.remove('token-playground-live');
       this.applied = [];
       this.accent = DEFAULT_ACCENT;
       this.radius = DEFAULT_RADIUS;
+      this.buttonRadius = BUTTON_PILL;
       this.scale = DEFAULT_SCALE;
     },
   };

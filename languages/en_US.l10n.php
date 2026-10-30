@@ -399,6 +399,7 @@ return [
     'E-Mail:' => 'Email:',
     'Ecke, in der der Knopf schwebt. Oben sitzt er direkt unter dem Seitenkopf.' => 'Corner in which the button floats. At the top it sits right below the page header.',
     'Ecken' => 'Corners',
+    'Eckenradius der Buttons' => 'Button corner radius',
     'Eckenradius der Karten' => 'Card corner radius',
     'Eckig' => 'Square',
     'Eigene Farbe' => 'Custom colour',

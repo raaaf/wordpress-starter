@@ -3399,6 +3399,12 @@ html {
   }
 }
 
+/* Badges use Tailwind's rounded-full, not a token; while the playground is in
+   use they follow the button radius slider like the buttons do. */
+.token-playground-live .badge--trim {
+  border-radius: var(--rafael-radius-full);
+}
+
 .token-swatch {
   position: relative;
   display: inline-flex;
