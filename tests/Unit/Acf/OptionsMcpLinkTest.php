@@ -37,7 +37,7 @@ final class OptionsMcpLinkTest extends TestCase
         $page = $GLOBALS['wp_mock_submenu_pages'][0];
         $this->assertSame(100, $hook['priority']);
         $this->assertSame('theme-options', $page['parent']);
-        $this->assertSame('manage_options', $page['capability']);
+        $this->assertSame('edit_pages', $page['capability']);
         $this->assertSame('tools.php?page=wpsmcp', $page['menuSlug']);
     }
 }

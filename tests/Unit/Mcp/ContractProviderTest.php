@@ -87,7 +87,7 @@ final class ContractProviderTest extends TestCase
         );
     }
 
-    public function testIsReadableOnlyForPublicContentPages(): void
+    public function testIsReadableForPublishedAndDraftContentPages(): void
     {
         $GLOBALS['wp_mock_posts_by_id'] = [
             1 => ['post_type' => 'page', 'post_status' => 'publish'],
@@ -98,6 +98,9 @@ final class ContractProviderTest extends TestCase
             6 => ['post_type' => 'page', 'post_status' => 'publish'],
             7 => ['post_type' => 'post', 'post_status' => 'publish'],
             8 => ['post_type' => 'page', 'post_status' => 'publish'],
+            9 => ['post_type' => 'page', 'post_status' => 'draft'],
+            10 => ['post_type' => 'page', 'post_status' => 'pending'],
+            11 => ['post_type' => 'page', 'post_status' => 'trash'],
         ];
         $GLOBALS['wp_mock_fields']['page_is_member_area:4'] = true;
         $GLOBALS['wp_mock_fields']['page_is_protected:5'] = true;
@@ -106,8 +109,10 @@ final class ContractProviderTest extends TestCase
 
         $isReadable = $this->contract()['is_readable'];
 
-        $this->assertTrue($isReadable(1));
-        foreach ([2, 3, 4, 5, 6, 7, 8, 99] as $id) {
+        foreach ([1, 9, 10] as $id) {
+            $this->assertTrue($isReadable($id), "post {$id}");
+        }
+        foreach ([2, 3, 4, 5, 6, 7, 8, 11, 99] as $id) {
             $this->assertFalse($isReadable($id), "post {$id}");
         }
     }

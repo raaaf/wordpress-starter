@@ -26,7 +26,7 @@ use WordpressStarter\Services\StyleguidePage;
  * - writable        layout names the plugin may write (explicit allowlist)
  * - copy_meta       post meta keys to copy along when a page is duplicated
  * - layouts         callable(): array, the registered layouts (lazy, see layouts())
- * - is_readable     callable(int $postId): bool
+ * - is_readable     callable(int $postId): bool (published, draft or pending pages)
  * - after_write     callable(int $postId): void, run after the plugin stored page_sections
  * - is_allowed_embed_host  callable(string $hostOrUrl): bool
  * - design_tokens   callable(): array, the site's colours and the token file endpoint
@@ -112,6 +112,9 @@ class ContractProvider extends ServiceProvider
         '_page_is_member_area',
     ];
 
+    /** Post statuses the plugin may read; private and trashed pages stay out. */
+    private const READABLE_STATUSES = ['publish', 'draft', 'pending'];
+
     /** Page templates that render theme reference pages, never content. */
     private const REFERENCE_TEMPLATES = [
         StyleguidePage::TEMPLATE,
@@ -164,14 +167,16 @@ class ContractProvider extends ServiceProvider
     }
 
     /**
-     * Pages the plugin may read: published pages that are neither password
-     * protected, nor member-area or protected pages, nor theme reference pages
-     * (styleguide, design system).
+     * Pages the plugin may read: published pages and drafts (Claude reads its
+     * own draft copies back before updating them), but neither private nor
+     * password-protected pages, member-area or protected pages, nor theme
+     * reference pages (styleguide, design system). Whether the current user
+     * may edit the page (edit_post) is the plugin's check.
      */
     public static function isReadable(int $postId): bool
     {
         $post = get_post($postId);
-        if (!$post || $post->post_type !== 'page' || $post->post_status !== 'publish') {
+        if (!$post || $post->post_type !== 'page' || !in_array($post->post_status, self::READABLE_STATUSES, true)) {
             return false;
         }
 

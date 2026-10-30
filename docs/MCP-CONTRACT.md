@@ -5,23 +5,25 @@ write page content over MCP. It knows nothing about this theme's ACF structure a
 `wp_starter_mcp_contract`, answered by `Mcp\ContractProvider`. The filter name is a literal, not derived from the theme
 slug, so it stays the same in every theme forked with `bin/setup.php`.
 
-While the plugin is active, the theme options menu links to its page (`Acf\Options::addMcpPluginLink()`).
+While the plugin is active, the theme options menu links to its page (`Acf\Options::addMcpPluginLink()`, capability
+`edit_pages`: editors start their own connection there). Editors lack `edit_theme_options`, so WordPress shows them the
+theme options menu with only this entry.
 
 ## Version 1
 
-| Key                     | Value                                                                                               |
-| ----------------------- | --------------------------------------------------------------------------------------------------- |
-| `version`               | `1`. Additive: new keys may appear, existing keys keep their meaning                                |
-| `page_field`            | `page_sections`                                                                                     |
-| `page_field_key`        | `field_page_sections`                                                                               |
-| `writable`              | Explicit layout allowlist (`ContractProvider::WRITABLE_LAYOUTS`)                                    |
-| `copy_meta`             | Meta keys copied with a duplicated page: Yoast SEO fields, `page_is_member_area`                    |
-| `layouts`               | `callable(): array`, the registered layouts, read lazily                                            |
-| `is_readable`           | `callable(int): bool`, published pages only, no password, member-area, protected or reference pages |
-| `after_write`           | `callable(int): void`, fills missing section anchors like saving in the backend                     |
-| `is_allowed_embed_host` | `callable(string): bool`, a host (or https URL) against the embed allowlist                         |
-| `design_tokens`         | `callable(): array`, `colors` (base colours), `endpoint` (token REST route), `files`                |
-| `validate_sections`     | `callable(array): list<string>`, readable problems, empty when the sections may be written          |
+| Key                     | Value                                                                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `version`               | `1`. Additive: new keys may appear, existing keys keep their meaning                                                      |
+| `page_field`            | `page_sections`                                                                                                           |
+| `page_field_key`        | `field_page_sections`                                                                                                     |
+| `writable`              | Explicit layout allowlist (`ContractProvider::WRITABLE_LAYOUTS`)                                                          |
+| `copy_meta`             | Meta keys copied with a duplicated page: Yoast SEO fields, `page_is_member_area`                                          |
+| `layouts`               | `callable(): array`, the registered layouts, read lazily                                                                  |
+| `is_readable`           | `callable(int): bool`, published, draft or pending pages; no private, password, member-area, protected or reference pages |
+| `after_write`           | `callable(int): void`, fills missing section anchors like saving in the backend                                           |
+| `is_allowed_embed_host` | `callable(string): bool`, a host (or https URL) against the embed allowlist                                               |
+| `design_tokens`         | `callable(): array`, `colors` (base colours), `endpoint` (token REST route), `files`                                      |
+| `validate_sections`     | `callable(array): list<string>`, readable problems, empty when the sections may be written                                |
 
 `layouts` is a callable because `FlexibleContent::layouts()` is filterable and cached on first use: reading it while the
 plugin merely asks for the contract would freeze the list before themes and plugins have added theirs.

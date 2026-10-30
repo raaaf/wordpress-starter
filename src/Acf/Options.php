@@ -130,7 +130,8 @@ class Options
                 'theme-options',
                 __('Claude', 'wp-starter'),
                 '<span class="dashicons dashicons-admin-generic" style="font-size: 16px; width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></span>' . esc_html__('Claude', 'wp-starter'),
-                'manage_options',
+                // Editors start their own connection there; the plugin checks admin parts itself.
+                'edit_pages',
                 'tools.php?page=wpsmcp',
             );
         }, 100);
