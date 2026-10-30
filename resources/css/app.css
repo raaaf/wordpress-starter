@@ -3477,6 +3477,45 @@ html {
   outline-offset: 3px;
 }
 
+/* Loading hint of the token generator: pinned to the card's top edge so it
+   never shifts the pickers while the files load in the background. */
+.styleguide-generator [aria-busy] {
+  position: relative;
+}
+
+.token-gen-loading {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--typography-body-small-size, 0.875rem);
+}
+
+.token-gen-spinner {
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 2px solid var(--border-default);
+  border-top-color: var(--text-primary);
+  border-radius: 50%;
+  animation: token-gen-spin 0.8s linear infinite;
+}
+
+@keyframes token-gen-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .token-gen-spinner {
+    animation: none;
+  }
+}
+
 .token-gen-hex {
   width: 7.5rem;
   margin-top: 0.25rem;

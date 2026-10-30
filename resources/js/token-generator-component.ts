@@ -164,8 +164,8 @@ export function createTokenGeneratorComponent(
     },
 
     init() {
-      // Nothing loads with the page: the template calls load() on the first
-      // pointer or focus interaction with the generator. Until then the
+      // Nothing loads with the page: the template calls load() once the generator
+      // nears the viewport or on the first pointer or focus. Until then the
       // preview cards show the page's own tokens; only the ink on the fills
       // without a semantic text colour is worked out here from the DOM.
       this.preview = { light: inkFromDom(this.$el, 'light'), dark: inkFromDom(this.$el, 'dark') };
