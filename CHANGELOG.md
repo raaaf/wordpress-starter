@@ -1,3 +1,10 @@
+## [2.42.4](https://github.com/raaaf/wordpress-starter/compare/v2.42.3...v2.42.4) (2026-10-30)
+
+### Bug Fixes
+
+- **release:** ship the styleguide demo video in the theme zip ([1fc36c8](https://github.com/raaaf/wordpress-starter/commit/1fc36c8e527beaf308bf0f7d519a32c0a62280d4))
+- **setup:** keep plugin installs from breaking the JSON response ([2523eec](https://github.com/raaaf/wordpress-starter/commit/2523eecf22e11b92b5545d91a9042080cbfe2436))
+
 ## [2.42.3](https://github.com/raaaf/wordpress-starter/compare/v2.42.2...v2.42.3) (2026-10-26)
 
 ### Bug Fixes
