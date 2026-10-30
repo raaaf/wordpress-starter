@@ -44,9 +44,11 @@
 @php($firstLayout = $sectionLayouts[0] ?? null)
 @php($headerMeasure = $firstLayout === 'one_column' ? 'max-w-2xl mx-auto' : '')
 @unless(is_front_page() || $hasTitledHero)
-    <header class="page-header max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="{{ $headerMeasure }}">
-            <h1>{{ get_the_title() }}</h1>
-        </div>
-    </header>
+    <div class="page-header-band bg-surface">
+        <header class="page-header max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="{{ $headerMeasure }}">
+                <h1>{{ get_the_title() }}</h1>
+            </div>
+        </header>
+    </div>
 @endunless

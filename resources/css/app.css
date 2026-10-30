@@ -2690,12 +2690,16 @@ html {
 
 /* Derselbe Fall am Seitenkopf: dessen Polster und das der ersten Sektion
    stapelten sich zu einem Loch zwischen Titel und Inhalt. Auch hier nur, wenn
-   beide dieselbe Flaeche tragen. */
-.page-header:has(+ .section.bg-surface) {
-  padding-bottom: 0;
+   beide dieselbe Flaeche tragen. Der Kopf liegt dafuer in einem flachen
+   .page-header-band (bg-surface): transparent zeigte er die Rausch-Textur und
+   den Seitenschimmer des body und endete mit harter Kante ueber der flachen
+   Sektion. 16px Kopf plus 32px Sektion ergeben 48px bis zur naechsten
+   Ueberschrift. */
+.page-header-band:has(+ .section.bg-surface) > .page-header {
+  padding-bottom: 1rem;
 }
 
-.page-header + .section.bg-surface {
+.page-header-band + .section.bg-surface {
   padding-top: 2rem;
 }
 
