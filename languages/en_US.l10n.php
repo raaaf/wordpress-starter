@@ -258,6 +258,7 @@ return [
     'CTA-Button anzeigen' => 'Show CTA button',
     'Call-to-Action-Button für dieses Paket.' => 'Call-to-action button for this plan.',
     'Caption' => 'Caption',
+    'Claude' => 'Claude',
     'Code' => 'Code',
     'Contact Form 7 Plugin ist nicht installiert.' => 'The Contact Form 7 plugin is not installed.',
     'Contact Form 7: Auto-Formatierung deaktiviert, Assets-Laden optimiert' => 'Contact Form 7: auto formatting disabled, asset loading optimised',

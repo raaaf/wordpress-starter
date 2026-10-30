@@ -381,6 +381,52 @@ if (!function_exists('add_action')) {
     }
 }
 
+if (!function_exists('has_action')) {
+    // Priority of $callback on $hook, false when it is not hooked (like core).
+    function has_action(string $hook, mixed $callback = false): int|bool
+    {
+        foreach ($GLOBALS['wp_mock_hooks']['actions'][$hook] ?? [] as $action) {
+            if ($callback === false || $action['callback'] === $callback) {
+                return $callback === false ? true : $action['priority'];
+            }
+        }
+
+        return false;
+    }
+}
+
+if (!function_exists('remove_action')) {
+    function remove_action(string $hook, mixed $callback, int $priority = 10): bool
+    {
+        foreach ($GLOBALS['wp_mock_hooks']['actions'][$hook] ?? [] as $i => $action) {
+            if ($action['callback'] === $callback && $action['priority'] === $priority) {
+                unset($GLOBALS['wp_mock_hooks']['actions'][$hook][$i]);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+if (!function_exists('wp_is_post_revision')) {
+    function wp_is_post_revision(mixed $post): int|false
+    {
+        return $GLOBALS['wp_mock_revisions'][ (int) $post] ?? false;
+    }
+}
+
+if (!function_exists('add_submenu_page')) {
+    // Records every call in wp_mock_submenu_pages.
+    function add_submenu_page(string $parent, string $pageTitle, string $menuTitle, string $capability, string $menuSlug, mixed $callback = '', mixed $position = null): string
+    {
+        $GLOBALS['wp_mock_submenu_pages'][] = compact('parent', 'pageTitle', 'menuTitle', 'capability', 'menuSlug');
+
+        return $menuSlug;
+    }
+}
+
 if (!function_exists('add_filter')) {
     function add_filter(string $hook, mixed $callback, int $priority = 10, int $args = 1): bool
     {
@@ -1471,7 +1517,7 @@ if (!function_exists('get_post')) {
             return null;
         }
 
-        return (object) array_merge(['ID' => $id, 'post_type' => 'page', 'post_status' => 'publish'], $data);
+        return (object) array_merge(['ID' => $id, 'post_type' => 'page', 'post_status' => 'publish', 'post_password' => ''], $data);
     }
 }
 

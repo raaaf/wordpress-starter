@@ -6,6 +6,7 @@ namespace WordpressStarter;
 
 use Closure;
 use Illuminate\Container\Container;
+use WordpressStarter\Mcp\ContractProvider;
 use WordpressStarter\Providers\AcfServiceProvider;
 use WordpressStarter\Providers\AssetOptimizationServiceProvider;
 use WordpressStarter\Providers\BladeServiceProvider;
@@ -96,6 +97,7 @@ class Application
             MemberAreaServiceProvider::class,
             DesignTokenRestProvider::class, // not admin-gated: REST requests are frontend requests
             ChildThemeServiceProvider::class, // not admin-gated: enqueues the child tokens on the frontend, imports logos on acf/init
+            ContractProvider::class, // not admin-gated: the MCP plugin asks for the contract in REST requests
         ];
 
         // Admin-only providers: every hook they register is admin-side

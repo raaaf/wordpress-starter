@@ -62,6 +62,7 @@ class Options
         // Ohne eigene capability erbten beide edit_posts, jeder Redakteur kam ran.
         self::addSubPage(__('Werkzeuge', 'wp-starter'), 'tools', 'dashicons-admin-tools', 'manage_options');
         self::addSubPage(__('Design Tokens', 'wp-starter'), 'tokens', 'dashicons-art', 'manage_options');
+        self::addMcpPluginLink();
 
         // Register field groups directly (we're already in acf/init)
         self::registerFieldGroups();
@@ -110,6 +111,29 @@ class Options
         ];
 
         acf_add_options_sub_page($config);
+    }
+
+    /**
+     * Link to the MCP plugin's page (Werkzeuge > Claude) in the theme options
+     * menu, only while the plugin is active. The plugin reads the theme
+     * through Mcp\ContractProvider; the page itself belongs to the plugin.
+     */
+    private static function addMcpPluginLink(?bool $pluginActive = null): void
+    {
+        if (!( $pluginActive ?? defined('WPSMCP_VERSION') )) {
+            return;
+        }
+
+        // admin_menu runs after acf/init, when the theme-options parent exists.
+        add_action('admin_menu', static function (): void {
+            add_submenu_page(
+                'theme-options',
+                __('Claude', 'wp-starter'),
+                '<span class="dashicons dashicons-admin-generic" style="font-size: 16px; width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></span>' . esc_html__('Claude', 'wp-starter'),
+                'manage_options',
+                'tools.php?page=wpsmcp',
+            );
+        }, 100);
     }
 
     /**

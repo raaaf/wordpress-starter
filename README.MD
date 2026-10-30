@@ -139,6 +139,7 @@ The providers are listed in `Application::registerProviders()`; `PluginServicePr
 | `DesignTokenServiceProvider`        | Token file upload/download/validation, CSS regeneration                        |
 | `DesignTokenRestProvider`           | Public read-only REST route with the three token files for the token generator |
 | `ChildThemeServiceProvider`         | Applies a generated child theme: tokens, fonts, editor tokens, logo import     |
+| `Mcp\ContractProvider`              | Answers `wp_starter_mcp_contract`: page structure for the Claude MCP plugin    |
 | `CronServiceProvider`               | Transient and revision cleanup                                                 |
 | `LogServiceProvider`                | Structured logging to debug.log                                                |
 | `ThemeUpdateProvider`               | GitHub-based theme updates                                                     |

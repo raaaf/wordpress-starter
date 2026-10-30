@@ -765,6 +765,9 @@ msgstr "Call-to-action button for this plan."
 msgid "Caption"
 msgstr "Caption"
 
+msgid "Claude"
+msgstr "Claude"
+
 msgid "Code"
 msgstr "Code"
 

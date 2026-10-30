@@ -730,48 +730,59 @@ class AcfServiceProvider extends ServiceProvider
     }
 
     /**
-     * Auto-generate section_anchor values on save
-     *
-     * Fills empty section_anchor fields with a unique ID based on layout name
-     * and position. Preserves manually set anchors.
+     * Auto-generate section_anchor values on save, see ensureSectionAnchors().
      */
     private function registerSectionAnchorGeneration(): void
     {
-        $callback = function ($postId) use (&$callback): void {
-            if (!function_exists('have_rows') || wp_is_post_revision($postId)) {
-                return;
+        add_action('acf/save_post', [self::class, 'ensureSectionAnchors'], 20);
+    }
+
+    /**
+     * Fills empty section_anchor fields of a page with a unique ID based on
+     * layout name and position. Preserves manually set anchors.
+     *
+     * Runs on acf/save_post and after an MCP write (Mcp\ContractProvider),
+     * which stores page_sections without the ACF form.
+     */
+    public static function ensureSectionAnchors(mixed $postId): void
+    {
+        if (!function_exists('have_rows') || wp_is_post_revision($postId)) {
+            return;
+        }
+
+        $sections = get_field('page_sections', $postId, false);
+        if (!is_array($sections)) {
+            return;
+        }
+
+        $layoutCounters = [];
+        $changed = false;
+
+        foreach ($sections as &$section) {
+            $layout = $section['acf_fc_layout'] ?? '';
+            if (!$layout) {
+                continue;
             }
 
-            $sections = get_field('page_sections', $postId, false);
-            if (!is_array($sections)) {
-                return;
+            $layoutCounters[$layout] = ( $layoutCounters[$layout] ?? 0 ) + 1;
+
+            if (empty($section['section_anchor'])) {
+                $section['section_anchor'] = str_replace('_', '-', $layout) . '-' . $layoutCounters[$layout];
+                $changed = true;
             }
+        }
+        unset($section);
 
-            $layoutCounters = [];
-            $changed = false;
-
-            foreach ($sections as &$section) {
-                $layout = $section['acf_fc_layout'] ?? '';
-                if (!$layout) {
-                    continue;
-                }
-
-                $layoutCounters[$layout] = ( $layoutCounters[$layout] ?? 0 ) + 1;
-
-                if (empty($section['section_anchor'])) {
-                    $section['section_anchor'] = str_replace('_', '-', $layout) . '-' . $layoutCounters[$layout];
-                    $changed = true;
-                }
-            }
-            unset($section);
-
-            if ($changed) {
-                remove_action('acf/save_post', $callback, 20);
-                update_field('page_sections', $sections, $postId);
+        if ($changed) {
+            // update_field() fires acf/save_post again; unhook to avoid a loop.
+            $callback = [self::class, 'ensureSectionAnchors'];
+            $hooked = has_action('acf/save_post', $callback);
+            remove_action('acf/save_post', $callback, 20);
+            update_field('page_sections', $sections, $postId);
+            if ($hooked !== false) {
                 add_action('acf/save_post', $callback, 20);
             }
-        };
-        add_action('acf/save_post', $callback, 20);
+        }
     }
 
     /**
