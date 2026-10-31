@@ -227,6 +227,7 @@ final class ThemeUpdateProviderTest extends TestCase
 
     public function testReplayedOlderSignedPackageIsRejected(): void
     {
+        $this->expectErrorLog();
         // A validly signed zip of an older release, attached to a new tag.
         $GLOBALS['wp_mock_theme_version'] = '2.43.0';
         $zip = $this->themeZip('2.42.4');
@@ -241,6 +242,7 @@ final class ThemeUpdateProviderTest extends TestCase
 
     public function testSameVersionAsInstalledIsRejected(): void
     {
+        $this->expectErrorLog();
         $zip = $this->themeZip('1.0.0');
         $this->seedRelease($zip, $this->sign($zip));
 
@@ -249,6 +251,7 @@ final class ThemeUpdateProviderTest extends TestCase
 
     public function testPackagedVersionMustMatchTheAnnouncedOne(): void
     {
+        $this->expectErrorLog();
         $GLOBALS['wp_mock_site_transients']['update_themes'] = (object) [
             'response' => ['wp-starter' => ['new_version' => '2.0.0']],
         ];
@@ -263,6 +266,7 @@ final class ThemeUpdateProviderTest extends TestCase
 
     public function testPackageWithoutReadableVersionIsRejected(): void
     {
+        $this->expectErrorLog();
         foreach ([$this->themeZip(null), $this->themeZip('next'), 'not a zip'] as $content) {
             $this->seedRelease($content, $this->sign($content));
             $this->assertSame('theme_update_version_mismatch', $this->verify()->get_error_code());
