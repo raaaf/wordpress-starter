@@ -3027,15 +3027,15 @@
         },
         {
             "name": "wpackagist-plugin/acf-extended",
-            "version": "0.9.2.6",
+            "version": "0.9.2.8",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/acf-extended/",
-                "reference": "tags/0.9.2.6"
+                "reference": "tags/0.9.2.8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/acf-extended.0.9.2.6.zip"
+                "url": "https://downloads.wordpress.org/plugin/acf-extended.0.9.2.8.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
