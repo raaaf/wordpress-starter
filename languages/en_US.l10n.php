@@ -361,6 +361,7 @@ return [
     'Die Theme-Einstellungen aus dem Setup-Wizard wurden noch nicht importiert.' => 'The theme settings from the setup wizard have not been imported yet.',
     'Die Token-Dateien konnten nicht geladen werden. Bitte die Seite neu laden.' => 'The token files could not be loaded. Please reload the page.',
     'Die Uhrzeit der Veranstaltung (optional).' => 'The time of the event (optional).',
+    'Die Version im Theme-Update ist nicht neuer als die installierte oder weicht von der angekündigten ab. Das Update wurde abgebrochen.' => 'The version in the theme update is not newer than the installed one or differs from the announced one. The update was cancelled.',
     'Die angeforderte Seite existiert nicht oder wurde verschoben.' => 'The requested page does not exist or has been moved.',
     'Die anzuzeigende Zahl (wird animiert).' => 'The number to display (animated).',
     'Die https-Adresse aus dem src-Attribut des Anbieters.' => 'The https address from the provider\'s src attribute.',

@@ -1164,6 +1164,13 @@ if (!function_exists('get_transient')) {
     }
 }
 
+if (!function_exists('get_site_transient')) {
+    function get_site_transient(string $transient): mixed
+    {
+        return $GLOBALS['wp_mock_site_transients'][$transient] ?? false;
+    }
+}
+
 if (!function_exists('set_transient')) {
     function set_transient(string $transient, mixed $value, int $expiration = 0): bool
     {
@@ -1238,7 +1245,7 @@ if (!function_exists('wp_get_theme')) {
             {
                 return match ($header) {
                     'Name' => 'WP Starter',
-                    'Version' => '1.0.0',
+                    'Version' => $GLOBALS['wp_mock_theme_version'] ?? '1.0.0',
                     'TextDomain' => 'wp-starter',
                     default => '',
                 };

@@ -105,7 +105,8 @@ final class ThemeUpdateProvider extends ServiceProvider
     /**
      * Verify the downloaded theme package before WordPress installs it: the
      * `.sha256` checksum and the `.sig` signature of the same GitHub release
-     * are both mandatory.
+     * are both mandatory, and the packaged version must be the announced one
+     * and newer than the installed theme (no replay of an old signed zip).
      *
      * Hooked on core's `upgrader_pre_download` (WP_Upgrader::download_package())
      * rather than a plugin-update-checker filter: at this point we still have
@@ -144,7 +145,9 @@ final class ThemeUpdateProvider extends ServiceProvider
             return $file;
         }
 
-        $error = $this->checkChecksum($file, $package) ?? $this->checkSignature($file, $package);
+        $error = $this->checkChecksum($file, $package)
+            ?? $this->checkSignature($file, $package)
+            ?? $this->checkVersion($file);
         if ($error !== null) {
             @unlink($file);
 
@@ -230,6 +233,72 @@ final class ThemeUpdateProvider extends ServiceProvider
             'theme_update_signature_invalid',
             __('Die Signatur des Theme-Updates ist ungültig. Das Update wurde abgebrochen.', 'wp-starter')
         );
+    }
+
+    /**
+     * The signature covers the zip bytes, not the release it is attached to:
+     * a hijacked GitHub account could attach an old, validly signed zip to a
+     * new tag and downgrade every site to code with known holes. So the
+     * version in the package's own style.css must be newer than the installed
+     * theme and, when WordPress announced one, equal to the announced version.
+     */
+    private function checkVersion(string $file): ?WP_Error
+    {
+        $packaged = self::packagedVersion($file);
+        $installed = (string) wp_get_theme(self::THEME_SLUG)->get('Version');
+        $transient = get_site_transient('update_themes');
+        $announced = is_object($transient) && isset($transient->response[self::THEME_SLUG]['new_version'])
+            ? (string) $transient->response[self::THEME_SLUG]['new_version']
+            : null;
+
+        if (
+            $packaged !== null
+            && version_compare($packaged, $installed, '>')
+            && ( $announced === null || version_compare($packaged, $announced, '==') )
+        ) {
+            return null;
+        }
+
+        LogServiceProvider::warning('Theme-Update-Version passt nicht', [
+            'packaged' => $packaged,
+            'installed' => $installed,
+            'announced' => $announced,
+        ]);
+
+        return new WP_Error(
+            'theme_update_version_mismatch',
+            __('Die Version im Theme-Update ist nicht neuer als die installierte oder weicht von der angekündigten ab. Das Update wurde abgebrochen.', 'wp-starter')
+        );
+    }
+
+    /** Version header of the theme's style.css inside the zip (root or one folder deep). */
+    private static function packagedVersion(string $file): ?string
+    {
+        if (!class_exists(\ZipArchive::class)) {
+            return null;
+        }
+
+        $zip = new \ZipArchive();
+        if ($zip->open($file, \ZipArchive::RDONLY) !== true) {
+            return null;
+        }
+
+        $style = null;
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = (string) $zip->getNameIndex($i);
+            if (preg_match('#^([^/]+/)?style\.css$#', $name) === 1 && ( $style === null || strlen($name) < strlen($style) )) {
+                $style = $name;
+            }
+        }
+        $css = $style !== null ? $zip->getFromName($style, 8192) : false;
+        $zip->close();
+
+        if ($css === false || preg_match('/^[ \t\/*#@]*Version:(.*)$/mi', $css, $match) !== 1) {
+            return null;
+        }
+        $version = trim($match[1]);
+
+        return preg_match('/^\d+(\.\d+)*$/', $version) === 1 ? $version : null;
     }
 
     /**

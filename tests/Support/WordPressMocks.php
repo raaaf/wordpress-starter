@@ -55,6 +55,8 @@ trait WordPressMocks
             'wp_mock_upload_path' => null,
             'wp_mock_attachment_metadata' => [],
             'wp_mock_theme_mods' => [],
+            'wp_mock_theme_version' => null,
+            'wp_mock_site_transients' => [],
             'wp_mock_current_blog_id' => 1,
             'wp_mock_current_row' => null,
             'wp_mock_current_user_can' => [],

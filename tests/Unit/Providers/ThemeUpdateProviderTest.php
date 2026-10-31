@@ -83,6 +83,20 @@ final class ThemeUpdateProviderTest extends TestCase
         return $file;
     }
 
+    /** Bytes of a theme zip like the release build: wp-starter/style.css plus a file. */
+    private function themeZip(?string $version): string
+    {
+        $path = $this->writeTempFile('');
+        $zip = new \ZipArchive();
+        $zip->open($path, \ZipArchive::OVERWRITE);
+        $header = "/*\nTheme Name: WP Starter\n" . ( $version !== null ? "Version: {$version}\n" : '' ) . "*/\n";
+        $zip->addFromString('wp-starter/style.css', $header);
+        $zip->addFromString('wp-starter/assets/style.css', "/*\nVersion: 99.0.0\n*/\n");
+        $zip->close();
+
+        return (string) file_get_contents($path);
+    }
+
     private function sign(string $content): string
     {
         return base64_encode(sodium_crypto_sign_detached($content, $this->secretKey));
@@ -119,7 +133,8 @@ final class ThemeUpdateProviderTest extends TestCase
 
     public function testMatchingChecksumAndSignatureReturnDownloadedFile(): void
     {
-        $file = $this->seedRelease('theme package contents', $this->sign('theme package contents'));
+        $zip = $this->themeZip('1.1.0');
+        $file = $this->seedRelease($zip, $this->sign($zip));
 
         $this->assertSame($file, $this->verify());
         $this->assertFileExists($file);
@@ -204,9 +219,54 @@ final class ThemeUpdateProviderTest extends TestCase
                 base64_encode(sodium_crypto_sign_publickey_from_secretkey($this->secretKey)),
             ],
         ]);
-        $file = $this->seedRelease('theme package contents', $this->sign('theme package contents'));
+        $zip = $this->themeZip('1.1.0');
+        $file = $this->seedRelease($zip, $this->sign($zip));
 
         $this->assertSame($file, $this->verify());
+    }
+
+    public function testReplayedOlderSignedPackageIsRejected(): void
+    {
+        // A validly signed zip of an older release, attached to a new tag.
+        $GLOBALS['wp_mock_theme_version'] = '2.43.0';
+        $zip = $this->themeZip('2.42.4');
+        $file = $this->seedRelease($zip, $this->sign($zip));
+
+        $result = $this->verify();
+
+        $this->assertInstanceOf(WP_Error::class, $result);
+        $this->assertSame('theme_update_version_mismatch', $result->get_error_code());
+        $this->assertFileDoesNotExist($file);
+    }
+
+    public function testSameVersionAsInstalledIsRejected(): void
+    {
+        $zip = $this->themeZip('1.0.0');
+        $this->seedRelease($zip, $this->sign($zip));
+
+        $this->assertSame('theme_update_version_mismatch', $this->verify()->get_error_code());
+    }
+
+    public function testPackagedVersionMustMatchTheAnnouncedOne(): void
+    {
+        $GLOBALS['wp_mock_site_transients']['update_themes'] = (object) [
+            'response' => ['wp-starter' => ['new_version' => '2.0.0']],
+        ];
+        $older = $this->themeZip('1.5.0');
+        $this->seedRelease($older, $this->sign($older));
+        $this->assertSame('theme_update_version_mismatch', $this->verify()->get_error_code());
+
+        $announced = $this->themeZip('2.0.0');
+        $file = $this->seedRelease($announced, $this->sign($announced));
+        $this->assertSame($file, $this->verify());
+    }
+
+    public function testPackageWithoutReadableVersionIsRejected(): void
+    {
+        foreach ([$this->themeZip(null), $this->themeZip('next'), 'not a zip'] as $content) {
+            $this->seedRelease($content, $this->sign($content));
+            $this->assertSame('theme_update_version_mismatch', $this->verify()->get_error_code());
+        }
     }
 
     public function testShippedKeysAreEd25519PublicKeys(): void
