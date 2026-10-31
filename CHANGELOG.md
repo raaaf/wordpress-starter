@@ -1,3 +1,12 @@
+## [2.43.1](https://github.com/raaaf/wordpress-starter/compare/v2.43.0...v2.43.1) (2026-10-31)
+
+### Bug Fixes
+
+- **deps:** go back to @vitest/coverage-v8 4 ([5af3352](https://github.com/raaaf/wordpress-starter/commit/5af335255c59868d78a2f020b41e59fd74f57f85)), closes [#50](https://github.com/raaaf/wordpress-starter/issues/50)
+- **deps:** go back to phpseclib 3 ([8540190](https://github.com/raaaf/wordpress-starter/commit/8540190ebabaef610dd05bf2905a843360abd6e3)), closes [#47](https://github.com/raaaf/wordpress-starter/issues/47)
+- **styleguide:** prefetch token generator files and show their loading state ([5873b99](https://github.com/raaaf/wordpress-starter/commit/5873b9986a17db8f8fd432896f445376b951cd29))
+- **update:** reject theme packages that are not the announced, newer version ([d82d3d2](https://github.com/raaaf/wordpress-starter/commit/d82d3d2dc4c3fe23d2f453bb07c01dae9d0af9a7))
+
 # [2.43.0](https://github.com/raaaf/wordpress-starter/compare/v2.42.4...v2.43.0) (2026-10-30)
 
 ### Bug Fixes
