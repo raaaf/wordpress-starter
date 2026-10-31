@@ -55,12 +55,19 @@
 
     <div
         x-data="tokenGenerator(@js($config))"
+        {{-- Prefetch when the generator comes near the viewport, so the first
+             colour change applies at once; no request before that. --}}
+        x-intersect.once.margin.400px="load()"
         x-on:pointerenter.once="load()"
         x-on:focusin.once="load()"
         x-on:pointerdown.once="load()"
         class="flex flex-col gap-6"
     >
-        <x-card variant="outlined" padding="none" class="p-6">
+        <x-card variant="outlined" padding="none" class="p-6" x-bind:aria-busy="state === 'loading' ? 'true' : 'false'">
+            <p class="token-gen-loading" x-show="state === 'loading'" x-cloak aria-live="polite">
+                <span class="token-gen-spinner" aria-hidden="true"></span>
+                {{ __('Token-Dateien werden geladen …', 'wp-starter') }}
+            </p>
             @foreach(['palette' => [__('Paletten', 'wp-starter'), $paletteNames], 'status' => [__('Statusfarben', 'wp-starter'), $statusNames]] as $group => [$legend, $names])
                 <fieldset class="{{ $loop->first ? 'm-0' : 'mx-0 mb-0 mt-8' }} p-0 border-0" x-bind:disabled="state === 'error'">
                     <legend class="mb-4 text-body-small text-content-secondary">{{ $legend }}</legend>
@@ -116,7 +123,6 @@
 
             <div class="flex flex-wrap items-center justify-between gap-4 mt-8">
                 <p class="m-0 text-body-small text-content-secondary" aria-live="polite">
-                    <span x-show="state === 'loading'">{{ __('Token-Dateien werden geladen …', 'wp-starter') }}</span>
                     <span x-text="message"></span>
                 </p>
                 <x-button :title="__('Zurücksetzen', 'wp-starter')" variant="secondary" size="sm" x-on:click="reset()" x-bind:disabled="changed.length === 0" />

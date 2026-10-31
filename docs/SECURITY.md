@@ -331,8 +331,8 @@ These files should not be web-accessible:
 Theme updates come through `ThemeUpdateProvider` (`src/Providers/ThemeUpdateProvider.php`)
 via plugin-update-checker from GitHub releases. Before installation,
 `ThemeUpdateProvider::verifyPackageChecksum()` hooks into the WordPress core filter
-`upgrader_pre_download`, downloads the zip itself and checks two release assets. Both
-are mandatory; a missing or wrong asset aborts the installation with a `WP_Error` and
+`upgrader_pre_download`, downloads the zip itself and checks two release assets plus the
+packaged version. All three are mandatory; a missing or wrong one aborts the installation with a `WP_Error` and
 deletes the download.
 
 1. **Checksum** (`<zip>.sha256`, `shasum -a 256` output, written by
@@ -344,6 +344,12 @@ deletes the download.
    kept offline (`php scripts/release-signing.php keygen`) and never reaches GitHub, so
    neither a compromised GitHub account nor a compromised CI run can ship an update
    that installs. While the key list is empty, no update installs.
+3. **Version** (`Version:` header of `style.css` in the zip, at the root or one folder
+   deep): must be newer than the installed theme and, when WordPress announced an
+   update (`update_themes` site transient), equal to the announced version. The
+   signature covers only the zip bytes, so without this check an old, validly signed
+   zip attached to a new tag would downgrade sites to code with known holes. A zip
+   without a readable version, or a host without `ZipArchive`, is rejected.
 
 The release job runs in the GitHub environment `release`; with required reviewers set
 there, it waits for an approval before it tags and publishes. A fresh release is not

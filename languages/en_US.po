@@ -1074,6 +1074,9 @@ msgstr "The token files could not be loaded. Please reload the page."
 msgid "Die Uhrzeit der Veranstaltung (optional)."
 msgstr "The time of the event (optional)."
 
+msgid "Die Version im Theme-Update ist nicht neuer als die installierte oder weicht von der angekündigten ab. Das Update wurde abgebrochen."
+msgstr "The version in the theme update is not newer than the installed one or differs from the announced one. The update was cancelled."
+
 msgid "Die angeforderte Seite existiert nicht oder wurde verschoben."
 msgstr "The requested page does not exist or has been moved."
 
