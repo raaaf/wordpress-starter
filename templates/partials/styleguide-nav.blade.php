@@ -31,7 +31,8 @@
             // (dieselbe Erkennung wie in page-styleguide.blade.php).
             $istZwischentitel = $layout === 'one_column' && preg_match('/^\s*<h2[\s>]/i', (string) get_sub_field('content')) === 1;
 
-            if ($istZwischentitel || isset($sprungziele[$layout]) || !isset($labels[$layout])) {
+            // The jump menu renders only a floating button, no section a link could point at.
+            if ($layout === 'jump_menu' || $istZwischentitel || isset($sprungziele[$layout]) || !isset($labels[$layout])) {
                 continue;
             }
 
