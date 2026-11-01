@@ -1,3 +1,9 @@
+## [2.44.1](https://github.com/raaaf/wordpress-starter/compare/v2.44.0...v2.44.1) (2026-11-01)
+
+### Bug Fixes
+
+- **styleguide:** limit the open jump navigation to the screen height ([#68](https://github.com/raaaf/wordpress-starter/issues/68)) ([49a6ae9](https://github.com/raaaf/wordpress-starter/commit/49a6ae9f4372f2594a3e12e14879fbbdf7297c82))
+
 # [2.44.0](https://github.com/raaaf/wordpress-starter/compare/v2.43.3...v2.44.0) (2026-11-01)
 
 ### Features
