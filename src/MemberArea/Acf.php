@@ -69,7 +69,7 @@ class Acf
                     '',
                     'vertical',
                     'value',
-                    __('Welche WordPress-Rollen haben Zugang? Leer = alle angemeldeten Benutzer.', 'wp-starter'),
+                    __('Welche WordPress-Rollen haben Zugang? Leer = nur Administratoren.', 'wp-starter'),
                     [
                         [
                             [
