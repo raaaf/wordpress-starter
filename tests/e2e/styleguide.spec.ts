@@ -39,6 +39,9 @@ test.describe('Styleguide', () => {
   let page: Page;
 
   test.beforeAll(async ({ browser }: { browser: Browser }) => {
+    // The login redirect and this page alone can exceed the default 30 s hook timeout locally.
+    test.setTimeout(180_000);
+
     // Eigener Kontext statt browser.newPage(): axe-core verweigert die Arbeit
     // auf einer Seite ohne expliziten Kontext.
     context = await browser.newContext();
