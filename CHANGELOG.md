@@ -1,3 +1,9 @@
+# [2.44.0](https://github.com/raaaf/wordpress-starter/compare/v2.43.3...v2.44.0) (2026-11-01)
+
+### Features
+
+- **styleguide:** link the token generator to a child theme generator ([f66274f](https://github.com/raaaf/wordpress-starter/commit/f66274fd4e2580b8b6eff26f2935afa02a72f5f5))
+
 ## [2.43.3](https://github.com/raaaf/wordpress-starter/compare/v2.43.2...v2.43.3) (2026-11-01)
 
 ### Bug Fixes
