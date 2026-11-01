@@ -1,3 +1,9 @@
+## [2.43.3](https://github.com/raaaf/wordpress-starter/compare/v2.43.2...v2.43.3) (2026-11-01)
+
+### Bug Fixes
+
+- **styleguide:** leave the jump menu out of the jump navigation ([#65](https://github.com/raaaf/wordpress-starter/issues/65)) ([e1b431b](https://github.com/raaaf/wordpress-starter/commit/e1b431b47fbc217dc348b53e64550706de71c76c))
+
 ## [2.43.2](https://github.com/raaaf/wordpress-starter/compare/v2.43.1...v2.43.2) (2026-11-01)
 
 ### Bug Fixes
