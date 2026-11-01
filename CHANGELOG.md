@@ -1,3 +1,9 @@
+## [2.43.2](https://github.com/raaaf/wordpress-starter/compare/v2.43.1...v2.43.2) (2026-11-01)
+
+### Bug Fixes
+
+- **seo:** skip the theme's Article schema when Yoast is active ([#64](https://github.com/raaaf/wordpress-starter/issues/64)) ([12265ec](https://github.com/raaaf/wordpress-starter/commit/12265ecb341e24fe55b79bc187efa6ea0ffc9d4f))
+
 ## [2.43.1](https://github.com/raaaf/wordpress-starter/compare/v2.43.0...v2.43.1) (2026-10-31)
 
 ### Bug Fixes
