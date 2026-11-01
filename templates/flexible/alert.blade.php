@@ -2,7 +2,9 @@
     Hinweis - Flexible Content Layout
 
     Uses shared components: x-section, x-alert, x-prose
-    Fields: variant, title, content, dismissible, background_color
+    Fields: variant, title, content, dismissible, content_width, background_color
+    content_width "container" spans the box over the whole container (same edges as a
+    two-column module above); empty or "readable" keeps the text column (max-w-3xl).
 --}}
 
 @php
@@ -11,11 +13,12 @@
     $content = get_sub_field('content');
     $dismissible = (bool) get_sub_field('dismissible');
     $background = get_sub_field('background_color') ?: 'primary';
+    $wide = get_sub_field('content_width') === 'container';
 @endphp
 
 @if($title || $content)
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" padding="sm" class="alert-section">
-    <div class="max-w-3xl mx-auto">
+    <div class="{{ $wide ? '' : 'max-w-3xl mx-auto' }}">
         <x-alert :variant="$variant" :dismissible="$dismissible">
             @if($title)
                 <p class="font-normal mb-1">{{ $title }}</p>

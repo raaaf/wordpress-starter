@@ -25,6 +25,16 @@ class Team extends AbstractPostType
 
     protected static string $menuName = 'Team';
 
+    protected static function names(): array
+    {
+        return [__('Teammitglied', 'wp-starter'), __('Teammitglieder', 'wp-starter')];
+    }
+
+    protected static function menuName(): string
+    {
+        return __('Team', 'wp-starter');
+    }
+
     protected static string $menuIcon = 'dashicons-groups';
 
     protected static int $menuPosition = 26;

@@ -19,6 +19,15 @@ class FolderSync
      */
     private const DEFAULT_MAX_NEW_ENTRIES_PER_RUN = 500;
 
+    /** A sync lock older than this counts as stale (e.g. left behind by a fatal error). */
+    private const LOCK_STALE_SECONDS = 900;
+
+    /** @var list<array{host: string, path: string, message: string, time: int}> */
+    private static array $errors = [];
+
+    /** Lock value written by this request ("<time>:<token>"), null until acquired. */
+    private static ?string $lockValue = null;
+
     /**
      * Scan SFTP folder connections and imported/external entries, creating CPT
      * entries for newly discovered remote files and refreshing availability.
@@ -27,8 +36,97 @@ class FolderSync
      * '{prefix}_member_area_sync_max_entries' filter (default:
      * self::DEFAULT_MAX_NEW_ENTRIES_PER_RUN) to bound wp_insert_post() calls
      * driven by an untrusted remote listing.
+     *
+     * Returns false when another sync is already running.
      */
-    public static function run(): void
+    public static function run(): bool
+    {
+        if (!self::acquireLock()) {
+            return false;
+        }
+
+        try {
+            self::beginRun();
+            self::syncAll();
+        } finally {
+            self::finishRun();
+            self::releaseLock();
+        }
+
+        return true;
+    }
+
+    /**
+     * Atomically take the sync lock; a lock older than LOCK_STALE_SECONDS counts as stale.
+     */
+    public static function acquireLock(): bool
+    {
+        $key = ThemeContext::optionKey('sftp_sync_lock');
+        $value = time() . ':' . bin2hex(random_bytes(8));
+
+        if (add_option($key, $value, '', false)) {
+            self::$lockValue = $value;
+
+            return true;
+        }
+
+        if (time() - (int) get_option($key) <= self::LOCK_STALE_SECONDS) {
+            return false;
+        }
+
+        delete_option($key);
+
+        // If the add loses a race, the stored value differs and releaseLock() leaves it alone
+        self::$lockValue = $value;
+
+        return (bool) add_option($key, $value, '', false);
+    }
+
+    /**
+     * Release the lock only when this request still owns it (a stale takeover by another run must survive).
+     */
+    public static function releaseLock(): void
+    {
+        $key = ThemeContext::optionKey('sftp_sync_lock');
+
+        if (self::$lockValue !== null && get_option($key) === self::$lockValue) {
+            delete_option($key);
+        }
+
+        self::$lockValue = null;
+    }
+
+    public static function beginRun(): void
+    {
+        self::$errors = [];
+    }
+
+    /**
+     * Persist the errors collected since beginRun() (empty list when there were none).
+     */
+    public static function finishRun(): void
+    {
+        update_option(ThemeContext::optionKey('sftp_sync_errors'), self::$errors, autoload: false);
+    }
+
+    /**
+     * Errors of the last finished sync run.
+     *
+     * @return list<array{host: string, path: string, message: string, time: int}>
+     */
+    public static function lastErrors(): array
+    {
+        $errors = get_option(ThemeContext::optionKey('sftp_sync_errors'), []);
+
+        return is_array($errors) ? array_values($errors) : [];
+    }
+
+    public static function recordError(string $host, string $path, string $message): void
+    {
+        self::$errors[] = ['host' => $host, 'path' => $path, 'message' => $message, 'time' => time()];
+    }
+
+    private static function syncAll(): void
     {
         // Pre-load all existing SFTP identifiers in a single DB query to avoid N+1
         $existingIdentifiers = self::loadExistingIdentifiers();
@@ -65,6 +163,11 @@ class FolderSync
             'folder group',
             static function (SFTP $sftp, array $creds, int $postId, string $path) use (&$existingIdentifiers, &$newEntriesCreated, &$capLogged, $maxNewEntries): void {
                 $files = self::scanSftpDirectory($sftp, $creds['host'], $creds['port'], $path);
+
+                // Scan failed: leave posts, availability and the synced flag untouched
+                if ($files === null) {
+                    return;
+                }
 
                 foreach ($files as $file) {
                     $identifier = $creds['host'] . ':' . $creds['port'] . $file['remotePath'];
@@ -235,6 +338,7 @@ class FolderSync
                     'host' => $creds['host'],
                     'message' => $e->getMessage(),
                 ]);
+                self::recordError($creds['host'], '', $e->getMessage());
 
                 continue;
             }
@@ -248,14 +352,14 @@ class FolderSync
     /**
      * Scan an SFTP directory and return a list of files with their remote paths.
      *
-     * @return array<int, array{filename: string, ext: string, mtime: int|null, size: int, remotePath: string}>
+     * @return array<int, array{filename: string, ext: string, mtime: int|null, size: int, remotePath: string}>|null Null when the scan failed
      */
     private static function scanSftpDirectory(
         SFTP $sftp,
         string $host,
         int $port,
         string $remotePath,
-    ): array {
+    ): ?array {
         try {
             $files = SftpClient::listFiles($sftp, $remotePath, DownloadFileTypes::allowed());
 
@@ -273,8 +377,9 @@ class FolderSync
                 'path' => $remotePath,
                 'message' => $e->getMessage(),
             ]);
+            self::recordError($host, $remotePath, $e->getMessage());
 
-            return [];
+            return null;
         }
     }
 

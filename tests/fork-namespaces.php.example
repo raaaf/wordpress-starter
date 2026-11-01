@@ -1,0 +1,13 @@
+<?php
+
+/*
+ * Namespaces of the client themes forked from this starter. Copy to
+ * tests/fork-namespaces.php (git-ignored) and list the real ones, so the
+ * namespace leak tests also catch them locally.
+ */
+
+declare(strict_types=1);
+
+return [
+    // 'ClientTheme',
+];

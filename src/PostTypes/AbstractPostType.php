@@ -173,14 +173,33 @@ abstract class AbstractPostType
     }
 
     /**
+     * Translated singular and plural label. The static properties hold the
+     * German source text, which __() cannot pick up as a literal, so a post type
+     * overrides this with literal __() calls; the default returns the properties.
+     *
+     * @return array{0: string, 1: string}
+     */
+    protected static function names(): array
+    {
+        return [static::$singular, static::$plural];
+    }
+
+    /**
+     * Translated admin menu name, falls back to the plural label.
+     */
+    protected static function menuName(): string
+    {
+        return static::$menuName !== '' ? static::$menuName : static::names()[1];
+    }
+
+    /**
      * Get localized labels for the post type
      *
      * @return array<string, string>
      */
     protected static function getLabels(): array
     {
-        $singular = static::$singular;
-        $plural = static::$plural;
+        [$singular, $plural] = static::names();
 
         return [
             'name' => $plural,
@@ -271,7 +290,7 @@ abstract class AbstractPostType
             'item_scheduled' => sprintf(__('%s geplant.', 'wp-starter'), $singular),
             // translators: %s is the singular post type name
             'item_updated' => sprintf(__('%s aktualisiert.', 'wp-starter'), $singular),
-            'menu_name' => static::$menuName !== '' ? static::$menuName : $plural,
+            'menu_name' => static::menuName(),
             'name_admin_bar' => $singular,
         ];
     }

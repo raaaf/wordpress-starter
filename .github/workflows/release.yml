@@ -15,19 +15,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # v2.37.0
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2.40.0
         with:
           php-version: '8.4'
           extensions: mbstring, xml, ctype, json
           tools: composer:v2
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
           cache: 'npm'
@@ -57,6 +57,10 @@ jobs:
     name: Release
     needs: test
     runs-on: ubuntu-latest
+    # Required reviewer: the job waits until a reviewer of the "release"
+    # environment approves it (Settings > Environments > release > Required
+    # reviewers). Without that setting the environment adds no gate.
+    environment: release
     permissions:
       contents: write
       issues: write
@@ -64,13 +68,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
           cache: 'npm'
@@ -110,7 +114,7 @@ jobs:
 
       - name: Setup PHP for packaging
         if: steps.semantic.outputs.released == 'true'
-        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # v2.37.0
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2.40.0
         with:
           php-version: '8.4'
           tools: composer:v2
@@ -138,3 +142,21 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           ZIP=$(ls wp-theme/*.zip | head -1)
           gh release upload "v${VERSION}" "${ZIP}" "${ZIP}.sha256" --clobber
+
+      - name: Signing reminder
+        if: steps.semantic.outputs.released == 'true'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          ZIP=$(basename "$(ls wp-theme/*.zip | head -1)")
+          {
+            echo "## v${VERSION} still needs its signature"
+            echo
+            echo "Sites refuse this update until \`${ZIP}.sig\` is attached. The key stays offline, so sign locally:"
+            echo
+            echo '```sh'
+            echo "gh release download v${VERSION} -p '${ZIP}' -p '${ZIP}.sha256'"
+            echo "shasum -a 256 -c ${ZIP}.sha256"
+            echo "php scripts/release-signing.php sign ${ZIP} ~/.config/wp-starter/release.key"
+            echo "gh release upload v${VERSION} ${ZIP}.sig"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

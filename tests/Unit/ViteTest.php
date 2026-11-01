@@ -160,4 +160,19 @@ final class ViteTest extends TestCase
 
         $this->assertActionAdded('wp_enqueue_scripts');
     }
+
+    public function testModulePreloadTagsCoverEntryAndRecursiveImportsOnce(): void
+    {
+        $this->setViteDevMode(false);
+
+        $tags = Vite::modulePreloadTags();
+
+        $this->assertStringContainsString('<link rel="modulepreload" href="', $tags);
+        $this->assertStringContainsString('assets/app-def456.js', $tags);
+        $this->assertStringContainsString('assets/vendor-aaa111.js', $tags);
+        $this->assertStringContainsString('assets/shared-bbb222.js', $tags);
+        // The fixture has an import cycle: each file must still appear once.
+        $this->assertSame(3, substr_count($tags, 'rel="modulepreload"'));
+        $this->assertStringNotContainsString('as="script"', $tags);
+    }
 }

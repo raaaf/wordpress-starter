@@ -35,7 +35,7 @@ php bin/setup.php
 
 The setup wizard:
 
-1. Sets theme name, author, text domain
+1. Sets theme name, author, text domain (source strings are German; `languages/` ships an en_US translation as `.po`, `.mo` and `.l10n.php`)
 2. Replaces the `WordpressStarter\` namespace across all files
 3. Lets you select plugins (managed via Composer)
 4. Configures initial pages and permalinks
@@ -73,7 +73,7 @@ npm run dev
 │   │   ├── AcfExtended.php      # ACF Extended configuration
 │   │   ├── FieldDefinitions.php # Central field definitions
 │   │   ├── Fields.php           # Field helpers
-│   │   ├── FlexibleContent.php  # 38 Flexible Content layouts
+│   │   ├── FlexibleContent.php  # 39 Flexible Content layouts
 │   │   ├── Options.php          # Theme options pages
 │   │   └── PageSettings.php     # Per-page settings (landing page mode)
 │   ├── MemberArea/              # Member area (optional)
@@ -89,7 +89,7 @@ npm run dev
 │   └── Vite.php
 └── templates/
     ├── components/        # Blade components (<x-button>, <x-section> etc.)
-    ├── flexible/          # Flexible Content templates (38 layouts)
+    ├── flexible/          # Flexible Content templates (39 layouts)
     ├── layouts/           # Base layouts
     └── partials/          # Reusable partials
 ```
@@ -124,7 +124,7 @@ The providers are listed in `Application::registerProviders()`; `PluginServicePr
 
 | Provider                            | Responsibility                                                                 |
 | ----------------------------------- | ------------------------------------------------------------------------------ |
-| `ThemeServiceProvider`              | Theme support, theme version, template routing                                 |
+| `ThemeServiceProvider`              | Theme support, theme version, template routing, fallback page without ACF      |
 | `BladeServiceProvider`              | Blade engine, cache directory                                                  |
 | `AcfServiceProvider`                | ACF fields, Blade directives, REST API                                         |
 | `MenuServiceProvider`               | Register nav menus                                                             |
@@ -137,9 +137,12 @@ The providers are listed in `Application::registerProviders()`; `PluginServicePr
 | `WelcomeServiceProvider`            | Welcome notice, styleguide page, ACF options prefill                           |
 | `SeoServiceProvider`                | JSON-LD, OG tags, canonical URLs, robots meta                                  |
 | `DesignTokenServiceProvider`        | Token file upload/download/validation, CSS regeneration                        |
+| `DesignTokenRestProvider`           | Public read-only REST route with the three token files for the token generator |
+| `ChildThemeServiceProvider`         | Applies a generated child theme: tokens, fonts, editor tokens, logo import     |
+| `Mcp\ContractProvider`              | Answers `wp_starter_mcp_contract`: page structure for the Claude MCP plugin    |
 | `CronServiceProvider`               | Transient and revision cleanup                                                 |
 | `LogServiceProvider`                | Structured logging to debug.log                                                |
-| `ThemeUpdateProvider`               | GitHub-based theme updates                                                     |
+| `ThemeUpdateProvider`               | GitHub-based theme updates, checksum and offline signature required            |
 | `AssetOptimizationServiceProvider`  | Defers non-critical scripts, preloads fonts/styles, inlines above-the-fold CSS |
 | `BrandingServiceProvider`           | Favicon, login logo, syncs ACF branding with WP core custom_logo/site_icon     |
 | `EditorIntegrationServiceProvider`  | Disables Gutenberg and unused editor features, removes Global Styles output    |
@@ -173,7 +176,7 @@ Both switches default to off and work independently. Disabling landing mode rest
 
 ## Flexible Content layouts
 
-38 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
+39 layouts in `src/Acf/FlexibleContent.php`, templates in `templates/flexible/`.
 
 Grouped by function; the editor modal uses the ACF categories, see `src/Acf/CLAUDE.md`.
 
@@ -187,7 +190,7 @@ Grouped by function; the editor modal uses the ACF categories, see `src/Acf/CLAU
 
 **Posts:** posts, table
 
-**Internal area:** member-downloads
+**Internal area:** member-downloads, download-list
 
 ### Add a new layout
 
@@ -222,6 +225,8 @@ border-color: var(--border-default);
 ```
 
 Dark mode via `<html data-theme="dark">` or automatically through `prefers-color-scheme`.
+
+With the colour scheme option on "follow system", the header shows an icon switcher for light, dark and system (option "Show colour scheme switcher"). The page template **Design System** (`page-design-system.blade.php`) renders the token and component reference publicly; the **Styleguide** template adds the module gallery and stays visible to editors only.
 
 ## Custom post types
 

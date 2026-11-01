@@ -440,7 +440,24 @@ function siteHeader(): HTMLElement | null {
 }
 
 /**
- * Marks the topmost listed section in view as current. The top margin skips the
+ * The current entry among those in the band below the header: the last one in
+ * DOM order. Two sections can be in the band at once, the previous one with its
+ * bottom edge only touching it (IntersectionObserver counts edge contact as an
+ * intersection) or still reaching into it; the one whose top has entered the
+ * band is the one being read. Measured 2026-10-28: after a jump to a section the
+ * previous one stayed marked.
+ */
+export function currentEntry(entries: JumpSection[], visible: Set<string>): string | null {
+  for (let i = entries.length - 1; i >= 0; i--) {
+    if (visible.has(entries[i].id)) {
+      return entries[i].id;
+    }
+  }
+  return null;
+}
+
+/**
+ * Marks the listed section in view as current (see currentEntry). The top margin skips the
  * header and, in the top corners, the pill. Keeps the last value while none is
  * in the band.
  */
@@ -461,10 +478,9 @@ function observeActiveEntry(entries: JumpSection[], onChange: (id: string) => vo
         }
       }
 
-      // Entries are in DOM order, so the first visible one is the topmost.
-      const first = entries.find((entry) => visible.has(entry.id));
-      if (first) {
-        onChange(first.id);
+      const current = currentEntry(entries, visible);
+      if (current) {
+        onChange(current);
       }
     },
     { rootMargin: `-${top}px 0px -85% 0px`, threshold: 0 }

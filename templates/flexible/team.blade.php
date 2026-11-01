@@ -39,6 +39,9 @@
         // Use manual repeater data
         $members = get_sub_field('members') ?: [];
     }
+
+    // Spacer rows must not open an empty grid.
+    $members = array_filter($members, fn ($member) => !\WordpressStarter\Helpers\TeamMember::isEmpty($member));
 @endphp
 
 @if(!empty($members) || $title || current_user_can('edit_posts'))
@@ -52,8 +55,8 @@
             @foreach($members as $member)
                 @php
                     $imageId = $member['image'] ?? null;
-                    $name = $member['name'] ?? '';
-                    $position = $member['position'] ?? '';
+                    $name = \WordpressStarter\Helpers\TeamMember::text($member['name'] ?? '');
+                    $position = \WordpressStarter\Helpers\TeamMember::text($member['position'] ?? '');
                     $bio = $member['bio'] ?? '';
                     $email = $member['email'] ?? '';
                     $linkedin = $member['linkedin'] ?? '';

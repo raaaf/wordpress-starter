@@ -76,12 +76,13 @@
             'active:bg-[var(--bg-button-primary-hover)]',
         ]),
         'secondary' => implode(' ', [
-            'bg-transparent',
+            // Design-kit secondary: stone fill without a border, one step
+            // deeper on hover and press.
+            'bg-[var(--bg-button-secondary)]',
             'text-content',
-            'border border-line',
-            'hover:border-line-strong',
-            'hover:bg-surface-secondary',
-            'active:bg-surface-tertiary',
+            'border border-transparent',
+            'hover:bg-[var(--bg-button-secondary-hover)]',
+            'active:bg-[var(--bg-button-secondary-hover)]',
         ]),
         'ghost' => implode(' ', [
             'bg-transparent',

@@ -31,6 +31,7 @@
     $company = \WordpressStarter\Acf\Fields::option('company_name', '');
     $address = \WordpressStarter\Acf\Fields::option('address', '');
     $phone = \WordpressStarter\Acf\Fields::option('phone', '');
+    $fax = \WordpressStarter\Acf\Fields::option('fax', '');
     $email = \WordpressStarter\Acf\Fields::option('email', '');
 
     // Get social links
@@ -38,12 +39,100 @@
 
     // Replace {year} placeholder
     $copyrightText = str_replace('{year}', wp_date('Y'), $copyrightText);
+
+    // Footer style: 'simple' is two compact rows (brand and contact; copyright and legal links), anything else the column footer
+    $isSimple = \WordpressStarter\Acf\Fields::option('footer_style', 'default') === 'simple';
+
+    // The column grid follows the columns that actually render; a fixed four-column
+    // grid left the right half empty with only info and navigation. Full class
+    // names, Tailwind cannot see interpolated ones.
+    $footerColumnCount = 1 + (int) $showNav
+        + (int) ($showContact && ($address || $phone || $fax || $email))
+        + (int) ($showSocial && !empty($socialLinks));
+    $footerGridClass = match ($footerColumnCount) {
+        1 => '',
+        2 => 'md:grid-cols-2',
+        3 => 'md:grid-cols-2 lg:grid-cols-3',
+        default => 'md:grid-cols-2 lg:grid-cols-4',
+    };
 @endphp
 
-<footer class="bg-surface border-t border-line">
+@if($isSimple)
+{{-- Simple footer: two rows on desktop (brand and contact; copyright and legal links), stacked on mobile. --}}
+@php
+    // The address is one line here, so its line breaks become commas.
+    $simpleAddress = implode(', ', array_filter(array_map('trim', preg_split('/\R/', (string) $address) ?: [])));
+    $showBrand = !$reduceFooter && ($showLogo || ($showCompany && $company));
+    $showSimpleContact = !$reduceFooter && $showContact && ($simpleAddress || $phone || $fax || $email);
+@endphp
+<footer class="footer--simple bg-surface-tertiary">
+    <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-5">
+        @if($showBrand || $showSimpleContact)
+            {{-- Row 1: brand, then all contact details in one line. --}}
+            <div class="flex flex-col lg:flex-row lg:items-center gap-x-10 gap-y-4 mb-4">
+                @if($showBrand)
+                    {{-- flex: no baseline gap below the logo, so the space above the hairline is exactly 16 px --}}
+                    <div class="shrink-0 flex">
+                        @if($showLogo)
+                            @php
+                                // Same fallback chain as the header, smaller; escaped inside Fields::siteLogoMarkup.
+                                $footerLogoMarkup = \WordpressStarter\Acf\Fields::siteLogoMarkup('footer-simple');
+                            @endphp
+                            @if($isLandingPage)
+                                <span class="flex">{!! $footerLogoMarkup !!}</span>
+                            @else
+                                <a href="{{ esc_url(home_url('/')) }}" class="flex">{!! $footerLogoMarkup !!}</a>
+                            @endif
+                        @else
+                            <p class="text-h5 mt-0 text-content mb-0">{{ $company }}</p>
+                        @endif
+                    </div>
+                @endif
+
+                @if($showSimpleContact)
+                    <address class="not-italic text-content-secondary text-sm flex flex-col lg:flex-row lg:flex-wrap items-start gap-x-6 gap-y-1">
+                        @if($simpleAddress)
+                            <span>{{ $simpleAddress }}</span>
+                        @endif
+                        @if($phone)
+                            <a href="tel:{{ \WordpressStarter\Helpers\Text::telHref($phone) }}" class="hover:text-content transition-colors">{{ $phone }}</a>
+                        @endif
+                        @if($fax)
+                            <span>{{ __('Telefax', 'wp-starter') }}: {{ $fax }}</span>
+                        @endif
+                        @if($email)
+                            <a href="{{ esc_url('mailto:' . $email) }}" class="hover:text-content transition-colors">{{ $email }}</a>
+                        @endif
+                    </address>
+                @endif
+            </div>
+        @endif
+
+        {{-- Row 2: hairline, then copyright on the left axis and legal links on the right, more muted than the contact row. --}}
+        <div class="flex flex-col-reverse lg:flex-row lg:items-center lg:justify-between gap-x-8 gap-y-2 @if($showBrand || $showSimpleContact) border-t border-line pt-4 @endif">
+            <p class="text-content-tertiary text-sm mb-0">{{ $copyrightText }}</p>
+
+            @if($showLegal)
+                <nav class="legal-nav" aria-label="{{ __('Rechtliche Links', 'wp-starter') }}">
+                    <?php
+                    wp_nav_menu([
+                        'container' => false,
+                        'menu_class' => 'flex flex-wrap gap-x-6 gap-y-1 text-sm',
+                        'theme_location' => 'legal-menu',
+                        'fallback_cb' => false,
+                        'items_wrap' => '<ul id="%1$s" class="%2$s">%3$s</ul>',
+                    ]);
+                    ?>
+                </nav>
+            @endif
+        </div>
+    </div>
+</footer>
+@else
+<footer class="bg-surface-tertiary">
     @if(!$reduceFooter)
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <div class="grid grid-cols-1 md:grid-cols-2 {{ $isLandingPage ? 'lg:grid-cols-2' : 'lg:grid-cols-4' }} gap-8 lg:gap-12">
+    <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <div class="grid grid-cols-1 {{ $footerGridClass }} gap-8 lg:gap-12">
             {{-- Logo / Company Info / Footer Text --}}
             <div class="lg:col-span-1">
                 @if($showLogo)
@@ -53,13 +142,13 @@
                         $footerLogoMarkup = \WordpressStarter\Acf\Fields::siteLogoMarkup('footer');
                     @endphp
                     @if($isLandingPage)
-                        <span class="inline-block mb-4">{!! $footerLogoMarkup !!}</span>
+                        <span class="block w-fit mb-4">{!! $footerLogoMarkup !!}</span>
                     @else
-                        <a href="{{ esc_url(home_url('/')) }}" class="inline-block mb-4">{!! $footerLogoMarkup !!}</a>
+                        <a href="{{ esc_url(home_url('/')) }}" class="block w-fit mb-4">{!! $footerLogoMarkup !!}</a>
                     @endif
                 @endif
                 @if($showCompany && $company)
-                    <h2 class="text-overline text-content-secondary mb-4">{{ $company }}</h2>
+                    <h2 class="text-overline text-content-secondary mt-0! mb-4">{{ $company }}</h2>
                 @endif
                 @if($footerText)
                     <div class="footer-prose text-content-secondary text-sm prose prose-sm">
@@ -71,12 +160,12 @@
             {{-- Footer Navigation --}}
             @if($showNav)
                 <div>
-                    <h2 class="text-overline text-content-secondary mb-4">{{ $navTitle }}</h2>
+                    <h2 class="text-overline text-content-secondary mt-0! mb-4">{{ $navTitle }}</h2>
                     <nav class="footer-nav" aria-label="{{ __('Fußnavigation', 'wp-starter') }}">
                         <?php
                         wp_nav_menu([
                             'container' => false,
-                            'menu_class' => 'space-y-2 text-sm',
+                            'menu_class' => 'space-y-1 text-sm',
                             'theme_location' => $navMenu,
                             'fallback_cb' => false,
                             'items_wrap' => '<ul id="%1$s" class="%2$s">%3$s</ul>',
@@ -87,9 +176,9 @@
             @endif
 
             {{-- Contact Info --}}
-            @if($showContact && ($address || $phone || $email))
+            @if($showContact && ($address || $phone || $fax || $email))
                 <div>
-                    <h2 class="text-overline text-content-secondary mb-4">{{ $contactTitle }}</h2>
+                    <h2 class="text-overline text-content-secondary mt-0! mb-4">{{ $contactTitle }}</h2>
                     <address class="not-italic text-content-secondary text-sm space-y-2">
                         @if($address)
                             <p>{!! nl2br(esc_html($address)) !!}</p>
@@ -100,6 +189,9 @@
                                     {{ $phone }}
                                 </a>
                             </p>
+                        @endif
+                        @if($fax)
+                            <p>{{ __('Telefax', 'wp-starter') }}: {{ $fax }}</p>
                         @endif
                         @if($email)
                             <p>
@@ -115,7 +207,7 @@
             {{-- Social Links --}}
             @if($showSocial && !empty($socialLinks))
                 <div>
-                    <h2 class="text-overline text-content-secondary mb-4">{{ $socialTitle }}</h2>
+                    <h2 class="text-overline text-content-secondary mt-0! mb-4">{{ $socialTitle }}</h2>
                     <div class="flex gap-4">
                         @foreach($socialLinks as $social)
                             @if(!empty($social['url']))
@@ -162,10 +254,10 @@
 
     {{-- Bottom Bar --}}
     <div @if(!$reduceFooter) class="border-t border-line" @endif>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 md:gap-4">
                 {{-- Copyright --}}
-                <p class="text-content-secondary text-sm">
+                <p class="text-content-secondary text-sm mb-0">
                     {{ $copyrightText }}
                 </p>
 
@@ -187,3 +279,4 @@
         </div>
     </div>
 </footer>
+@endif

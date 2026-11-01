@@ -12,6 +12,12 @@
     $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
     $images = get_sub_field('images');
     $columns = get_sub_field('columns') ?: '3';
+    // Thumbnail crop: gallery-thumb is a hard 800x800 crop, so "original" needs an uncropped size.
+    [$thumbSize, $ratioClass] = match (get_sub_field('aspect_ratio') ?: 'square') {
+        '16-10' => ['hero-split', 'aspect-[16/10] object-cover'],
+        'original' => ['hero-split', 'h-auto'],
+        default => ['gallery-thumb', 'aspect-square object-cover'],
+    };
     $background = get_sub_field('background_color') ?: 'primary';
 @endphp
 
@@ -40,8 +46,8 @@
                              Bildzuschnitt, der Button fuellt sie randbuendig, ein nach
                              aussen gemalter Ring waere an allen Kanten abgeschnitten. --}}
                         <button type="button" class="block w-full rounded-lg focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--ring-focus)]" aria-label="{{ sprintf(__('Bild vergrößern: %s', 'wp-starter'), $accessibleLabel ?: __('Galeriebild', 'wp-starter')) }}">
-                        {!! wp_get_attachment_image($imageId, 'gallery-thumb', false, [
-                            'class' => 'object-cover w-full transition-[transform] duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] cursor-zoom-in aspect-square gallery-zoom group-hover:scale-[1.03]',
+                        {!! wp_get_attachment_image($imageId, $thumbSize, false, [
+                            'class' => 'w-full transition-[transform] duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] cursor-zoom-in gallery-zoom group-hover:scale-[1.03] ' . $ratioClass,
                             'sizes' => '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw',
                             {{-- Kein esc_url hier: wp_get_attachment_image() escaped jedes
                                  Attribut selbst per esc_attr(), esc_url() vorher haette das

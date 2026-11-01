@@ -46,7 +46,7 @@
         >
             {{-- Same container as the header, so the pill lines up with the content edge.
                  The full-width wrapper ignores pointer events; only pill and panel take them. --}}
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex {{ $isLeft ? 'justify-start' : 'justify-end' }}">
+            <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 flex {{ $isLeft ? 'justify-start' : 'justify-end' }}">
                 {{-- Pill first in the DOM (tab order); the bottom corners show the panel above it. --}}
                 <div class="flex gap-2 pointer-events-auto {{ $isTop ? 'flex-col' : 'flex-col-reverse' }} {{ $isLeft ? 'items-start' : 'items-end' }}">
                     <button

@@ -20,6 +20,8 @@
     <exclude-pattern>*/compiled/*</exclude-pattern>
     <exclude-pattern>*/node_modules/*</exclude-pattern>
     <exclude-pattern>*.blade.php</exclude-pattern>
+    <!-- Generated translation file (en_US.po is the source) -->
+    <exclude-pattern>*/languages/*.l10n.php</exclude-pattern>
 
     <!-- ./scripts also holds build-tooling JS (sync-icons.js, transform-tokens.js) that this
          PHP ruleset was never meant to cover; only the PHP CLI scripts in that folder are in scope. -->

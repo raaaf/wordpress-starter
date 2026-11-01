@@ -16,13 +16,14 @@
 @if($chip || $headline || $description || $column_1 || $column_2)
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="two-thirds-one-third">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
-    <x-grid cols="2/3-1/3" gap="lg" align="items-center">
+    <x-grid cols="2/3-1/3" gap="lg" align="items-start">
         <x-card variant="outlined" padding="lg">
             <div class="max-w-[58ch]">
                 <x-prose>@kses($column_1)</x-prose>
             </div>
         </x-card>
-        <div class="max-w-[58ch]">
+        {{-- Top offset = card padding (p-8) + border, so both headings share a line. --}}
+        <div class="max-w-[58ch] md:pt-[calc(2rem+1px)]">
             <x-prose>@kses($column_2)</x-prose>
         </div>
     </x-grid>

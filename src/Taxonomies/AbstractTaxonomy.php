@@ -113,14 +113,23 @@ abstract class AbstractTaxonomy
     }
 
     /**
+     * Translated singular and plural label, see AbstractPostType::names().
+     *
+     * @return array{0: string, 1: string}
+     */
+    protected static function names(): array
+    {
+        return [static::$singular, static::$plural];
+    }
+
+    /**
      * Get localized labels for the taxonomy
      *
      * @return array<string, string>
      */
     protected static function getLabels(): array
     {
-        $singular = static::$singular;
-        $plural = static::$plural;
+        [$singular, $plural] = static::names();
 
         return [
             'name' => $plural,

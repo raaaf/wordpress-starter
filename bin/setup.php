@@ -1231,6 +1231,8 @@ class ThemeSetup
             $this->findFiles($this->themeDir . '/src', '*.php'),
             $this->findFiles($this->themeDir . '/tests', '*.php'),
             glob($this->themeDir . '/config/*.php') ?: [],
+            // en_US.l10n.php names the text domain
+            glob($this->themeDir . '/languages/*.php') ?: [],
         );
 
         // Also check for root-level PHP files (excluding bin/setup.php itself)

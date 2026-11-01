@@ -14,7 +14,7 @@ use WordpressStarter\Providers\LogServiceProvider;
  */
 class Vite
 {
-    /** @var array<string, array{file: string, src?: string, css?: array<string>}>|null */
+    /** @var array<string, array{file: string, src?: string, css?: array<string>, imports?: array<string>}>|null */
     private static ?array $manifest = null;
 
     private static bool $isDev = false;
@@ -196,7 +196,7 @@ class Vite
         ));
 
         // Try to get cached icons first
-        $cacheKey = ThemeContext::prefix() . '_theme_icons_' . wp_get_theme()->get('Version') . '_' . md5(implode(',', $iconNames));
+        $cacheKey = ThemeContext::prefix() . '_theme_icons_' . wp_get_theme(get_template())->get('Version') . '_' . md5(implode(',', $iconNames));
         $cachedIcons = get_transient($cacheKey);
 
         if ($cachedIcons !== false && is_array($cachedIcons)) {
@@ -497,5 +497,44 @@ class Vite
         }
 
         return get_theme_file_uri($path);
+    }
+
+    /**
+     * Dist file URLs of an entry and all its static imports (recursive).
+     *
+     * @return array<int, string>
+     */
+    public static function getEntryChunkUrls(string $entry): array
+    {
+        self::loadManifest();
+
+        $files = [];
+        $visit = static function (string $key) use (&$visit, &$files): void {
+            $chunk = self::$manifest[$key] ?? null;
+            if ($chunk === null || in_array($chunk['file'], $files, true)) {
+                return;
+            }
+            $files[] = $chunk['file'];
+            foreach ($chunk['imports'] ?? [] as $import) {
+                $visit($import);
+            }
+        };
+        $visit($entry);
+
+        return array_map(static fn(string $file): string => get_theme_file_uri('dist/' . $file), $files);
+    }
+
+    /**
+     * Emits modulepreload links for the JS entry and its imports, so the browser
+     * fetches the whole chunk chain in parallel instead of discovering it level by level.
+     */
+    public static function modulePreloadTags(string $entry = 'resources/js/app.ts'): string
+    {
+        $tags = '';
+        foreach (self::getEntryChunkUrls($entry) as $url) {
+            $tags .= '<link rel="modulepreload" href="' . esc_url($url) . '">' . "\n";
+        }
+
+        return $tags;
     }
 }

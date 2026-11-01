@@ -18,6 +18,11 @@ class Testimonial extends AbstractPostType
     protected static string $singular = 'Kundenstimme';
     protected static string $genus = 'f';
     protected static string $plural = 'Kundenstimmen';
+
+    protected static function names(): array
+    {
+        return [__('Kundenstimme', 'wp-starter'), __('Kundenstimmen', 'wp-starter')];
+    }
     protected static string $menuIcon = 'dashicons-format-quote';
     protected static int $menuPosition = 25;
     protected static bool $hasArchive = false;

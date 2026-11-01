@@ -2,13 +2,18 @@
     // Get header CTA options
     $showCta = \WordpressStarter\Acf\Fields::option('header_cta_show');
     $headerCta = \WordpressStarter\Acf\Fields::option('header_cta');
+    // Optional outlined second button (e.g. a login), left of the CTA or alone
+    $headerCtaSecondary = \WordpressStarter\Acf\Fields::option('header_cta_secondary');
 
     $isLandingPage = \WordpressStarter\Acf\PageSettings::isLandingPage();
     $showCta = $showCta && !$isLandingPage;
+    $showPrimary = $showCta && is_array($headerCta) && !empty($headerCta['url']);
+    $showSecondary = $showCta && is_array($headerCtaSecondary) && !empty($headerCtaSecondary['url']);
+    $showThemeSwitcher = (bool) \WordpressStarter\Acf\Fields::option('header_theme_switcher', true);
 @endphp
 
 <div x-data="navigation" @keydown.window="handleKeydown($event)" class="relative">
-    <div class="flex items-center justify-between py-6">
+    <div class="flex items-center justify-between min-h-[68px] py-2">
         {{-- Left side: Logo + Desktop Navigation --}}
         <div class="flex items-center gap-8">
             @php
@@ -30,7 +35,7 @@
                     @php(
                     wp_nav_menu([
                         'container' => false,
-                        'menu_class' => 'flex space-x-6',
+                        'menu_class' => 'flex gap-1',
                         'theme_location' => 'header-menu',
                         'li_class' => 'relative',
                         'fallback_cb' => false,
@@ -40,6 +45,13 @@
                 </div>
             @endunless
         </div>
+
+        <div class="flex items-center gap-2 md:gap-3">
+        {{-- Colour scheme switcher (icons), all widths; the partial renders
+             nothing unless the colour scheme option follows the system. --}}
+        @if($showThemeSwitcher)
+            @include('partials.theme-switcher', ['compact' => true])
+        @endif
 
         {{-- Mobile menu button - visible below md --}}
         @unless($isLandingPage)
@@ -62,17 +74,29 @@
         @endunless
 
         {{-- Desktop CTA - visible at md and above --}}
-        @if($showCta && $headerCta && !empty($headerCta['url']))
-            <div class="hidden md:block">
-                <x-button
-                    :url="$headerCta['url']"
-                    :title="$headerCta['title'] ?: __('Kontakt', 'wp-starter')"
-                    :target="$headerCta['target'] ?? '_self'"
-                    variant="primary"
-                    size="sm"
-                />
+        @if($showPrimary || $showSecondary)
+            <div class="hidden md:flex items-center gap-3">
+                @if($showSecondary)
+                    <x-button
+                        :url="$headerCtaSecondary['url']"
+                        :title="$headerCtaSecondary['title'] ?: __('Login', 'wp-starter')"
+                        :target="$headerCtaSecondary['target'] ?? '_self'"
+                        variant="secondary"
+                        size="sm"
+                    />
+                @endif
+                @if($showPrimary)
+                    <x-button
+                        :url="$headerCta['url']"
+                        :title="$headerCta['title'] ?: __('Kontakt', 'wp-starter')"
+                        :target="$headerCta['target'] ?? '_self'"
+                        variant="primary"
+                        size="sm"
+                    />
+                @endif
             </div>
         @endif
+        </div>
     </div>
 
     {{-- Mobile navigation --}}
@@ -101,16 +125,28 @@
             )
             </nav>
 
-            @if($showCta && $headerCta && !empty($headerCta['url']))
-                <div class="px-4 py-4 border-t border-line">
-                    <x-button
-                        :url="$headerCta['url']"
-                        :title="$headerCta['title'] ?: __('Kontakt', 'wp-starter')"
-                        :target="$headerCta['target'] ?? '_self'"
-                        variant="primary"
-                        size="md"
-                        class="w-full justify-center"
-                    />
+            @if($showPrimary || $showSecondary)
+                <div class="flex flex-col gap-3 px-4 py-4 border-t border-line">
+                    @if($showSecondary)
+                        <x-button
+                            :url="$headerCtaSecondary['url']"
+                            :title="$headerCtaSecondary['title'] ?: __('Login', 'wp-starter')"
+                            :target="$headerCtaSecondary['target'] ?? '_self'"
+                            variant="secondary"
+                            size="md"
+                            class="w-full justify-center"
+                        />
+                    @endif
+                    @if($showPrimary)
+                        <x-button
+                            :url="$headerCta['url']"
+                            :title="$headerCta['title'] ?: __('Kontakt', 'wp-starter')"
+                            :target="$headerCta['target'] ?? '_self'"
+                            variant="primary"
+                            size="md"
+                            class="w-full justify-center"
+                        />
+                    @endif
                 </div>
             @endif
         </div>

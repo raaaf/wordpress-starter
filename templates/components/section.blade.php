@@ -47,10 +47,10 @@
 
     $paddings = [
         'none' => '',
-        'sm' => 'py-8 md:py-12',
-        'md' => 'py-12 md:py-16',
-        'lg' => 'py-16 md:py-20',
-        'xl' => 'py-20 md:py-28',
+        'sm' => 'py-[var(--section-padding-sm)]',
+        'md' => 'py-[var(--section-padding-md)]',
+        'lg' => 'py-[var(--section-padding-lg)]',
+        'xl' => 'py-[var(--section-padding-xl)]',
     ];
 
     $bgClass = $backgrounds[$background] ?? $backgrounds['primary'];
@@ -64,7 +64,7 @@
     // Rand: ohne ihn klebt der Inhalt auf dem Handy am Fensterrand.
     $containerClass = $width === 'full'
         ? 'w-full px-4 sm:px-6 lg:px-8'
-        : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8';
+        : 'max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8';
 
     // Determine if animations should be enabled
     $globalAnimations = \WordpressStarter\Acf\Fields::option('animations_enabled', false);

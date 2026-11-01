@@ -109,17 +109,17 @@
       "fluid": true,
       "fontFamilies": [
         {
-          "fontFamily": "var(--font-family-body, Inter), ui-sans-serif, system-ui, sans-serif",
+          "fontFamily": "var(--rafael-font-family-body, 'Cal Sans Text'), ui-sans-serif, system-ui, sans-serif",
           "slug": "body",
-          "name": "Body (Inter)"
+          "name": "Body (Cal Sans Text)"
         },
         {
-          "fontFamily": "var(--font-family-headline, ColaborateLight), ui-sans-serif, system-ui, sans-serif",
+          "fontFamily": "var(--rafael-font-family-headline, Colaborate), ui-sans-serif, system-ui, sans-serif",
           "slug": "headline",
           "name": "Headline"
         },
         {
-          "fontFamily": "var(--font-family-mono, 'JetBrains Mono'), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+          "fontFamily": "var(--rafael-font-family-mono, 'JetBrains Mono'), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
           "slug": "mono",
           "name": "Monospace"
         }

@@ -40,6 +40,11 @@ class Event extends AbstractPostType
 
     protected static string $plural = 'Veranstaltungen';
 
+    protected static function names(): array
+    {
+        return [__('Veranstaltung', 'wp-starter'), __('Veranstaltungen', 'wp-starter')];
+    }
+
     protected static string $menuIcon = 'dashicons-calendar-alt';
 
     protected static int $menuPosition = 27;

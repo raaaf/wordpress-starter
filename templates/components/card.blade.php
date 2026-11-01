@@ -2,7 +2,7 @@
     Card Component - Based on Figma Design System
 
     Simple usage (container only):
-    @param string $variant - default, elevated, outlined, filled
+    @param string $variant - default, elevated, outlined, filled, rule (no box: 1px top line, no background, shadow or radius)
     @param string $padding - none, sm, md, lg
     @param string $class - Additional CSS classes
 
@@ -19,9 +19,9 @@
     @param int $level - Title heading level, 2-4 (default: 3)
     @param bool $eager - Load the image eagerly with high fetch priority instead of lazy (use for above-the-fold cards)
 
-    States from Figma:
-    - Default: Subtle shadow
-    - Hover: Brand border, enhanced shadow
+    States:
+    - Rest: flat, no shadow (edge and fill only, see $variants)
+    - Hover: Brand border, shadow
     - Active: Pressed effect with inner shadow
     - Focus: Focus ring for accessibility
     - Selected: Brand border, enhanced shadow (persistent)
@@ -49,8 +49,12 @@
 @php
     // Variants from Figma - use semantic token fallbacks instead of hardcoded hex values
     $variants = [
-        'default' => 'bg-[var(--card-bg,var(--bg-primary))] border border-[var(--card-border,var(--border-default))]',
-        'elevated' => 'border border-line bg-[var(--card-bg,var(--bg-secondary))]',
+        // Flat at rest (no shadow before hover), so the three boxed variants
+        // differ by edge and fill only: default is a hairline on the section's
+        // own surface, elevated a raised tone without a line (.card-raised in
+        // app.css), filled the card surface one step above the section plus line.
+        'default' => 'card-plain bg-transparent border border-[var(--card-border,var(--border-default))]',
+        'elevated' => 'card-raised border border-transparent',
         'outlined' => 'bg-[var(--card-bg,var(--bg-primary))] border border-line',
         // Gefuellt heisst: eine Stufe ueber der Sektion, nicht fix
         // bg-surface-secondary. Der feste Wert liess die Karte auf jeder Sektion
@@ -58,6 +62,11 @@
         // 1.00 Abhebung bei Beitraegen und Preistabelle. --card-surface wird von
         // der Sektion gesetzt, der Rand bleibt als Feinschliff.
         'filled' => 'bg-[var(--card-surface,var(--bg-secondary))] border border-line',
+        // No box at all: a 1px top line and 24px above the text. Radius,
+        // overflow and padding are dropped below; app.css keeps the surface
+        // sheen and the surface text colour off it (.card--rule), so it takes
+        // the colours of the section it sits on.
+        'rule' => 'card--rule border-t border-line pt-6',
     ];
 
     $sizes = [
@@ -80,7 +89,9 @@
 
     // Use legacy padding if no structured content, else use size-based padding
     $isStructuredCard = $image || $title || $subtitle || $description;
-    $paddingClass = $isStructuredCard ? '' : ($legacyPaddings[$padding] ?? $legacyPaddings['md']);
+    $isRule = $variant === 'rule';
+    $paddingClass = $isStructuredCard || $isRule ? '' : ($legacyPaddings[$padding] ?? $legacyPaddings['md']);
+    $radiusClass = $isRule ? '' : 'rounded-[var(--card-radius)] overflow-hidden';
 
     // Interactive states (hover, active, focus)
     $isInteractive = $hoverable || $url;
@@ -88,8 +99,9 @@
         ? implode(' ', [
             // active:scale-[0.99] is a Tailwind v4 `scale` utility, not `transform`.
             'transition-[color,background,border-color,box-shadow,scale] duration-200 cursor-pointer',
-            'hover:border-line-brand hover:shadow-[var(--rafael-shadow-card-hover)]',
-            'active:shadow-[var(--rafael-shadow-inner)] active:scale-[0.99] motion-reduce:transform-none',
+            // The rule variant has no box to lift or press.
+            $isRule ? '' : 'hover:border-line-brand hover:shadow-[var(--rafael-shadow-card-hover)]',
+            $isRule ? '' : 'active:shadow-[var(--rafael-shadow-inner)] active:scale-[0.99] motion-reduce:transform-none',
             'focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--ring-focus)]',
         ])
         : '';
@@ -122,7 +134,7 @@
          optional stretched-link <a> below carries the real interactivity),
          so 'aria-disabled' here had no semantics to disable; disabled
          behaviour is expressed by omitting that link and via $disabledClasses. --}}
-    {{ $attributes->merge(['class' => "card block rounded-[var(--card-radius)] overflow-hidden {$variantClass} {$paddingClass} {$interactiveClasses} {$selectedClasses} {$disabledClasses} {$class} " . ($url && !$disabled ? 'relative' : '')]) }}
+    {{ $attributes->merge(['class' => "card block {$radiusClass} {$variantClass} {$paddingClass} {$interactiveClasses} {$selectedClasses} {$disabledClasses} {$class} " . ($url && !$disabled ? 'relative' : '')]) }}
 >
     {{-- Stretched link overlay for entire card clickability (accessibility-safe pattern) --}}
     @if($url && !$disabled)
@@ -145,7 +157,7 @@
         @endif
 
         {{-- Content --}}
-        <div class="{{ $sizeConfig['padding'] }} {{ $sizeConfig['gap'] }} flex flex-col {{ $url ? 'relative' : '' }}">
+        <div class="{{ $isRule ? '' : $sizeConfig['padding'] }} {{ $sizeConfig['gap'] }} flex flex-col {{ $url ? 'relative' : '' }}">
             @if($title || $subtitle)
                 <div class="space-y-1">
                     @if($title)

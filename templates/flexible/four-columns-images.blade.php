@@ -51,9 +51,11 @@
                     ]) !!}
                 @endif
                 @if($data['label'] || $data['text'])
-                    <div class="p-6 lg:p-8 {{ !empty($data['accordion']) ? 'pb-0 lg:pb-0' : '' }}">
+                    {{-- A label alone is a caption: compact padding, no gap below it. --}}
+                    @php($nurLabel = !$data['text'] && empty($data['accordion']))
+                    <div class="{{ $nurLabel ? 'px-6 py-4 lg:px-8 lg:py-5' : 'p-6 lg:p-8' }} {{ !empty($data['accordion']) ? 'pb-0 lg:pb-0' : '' }}">
                         @if($data['label'])
-                            <p class="text-overline text-content-secondary mb-2">{{ $data['label'] }}</p>
+                            <p class="text-overline text-content-secondary {{ $nurLabel ? 'mb-0' : 'mb-2' }}">{{ $data['label'] }}</p>
                         @endif
                         @if($data['text'])
                             <x-prose>@kses($data['text'])</x-prose>

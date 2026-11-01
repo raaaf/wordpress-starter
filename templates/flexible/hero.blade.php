@@ -1,7 +1,7 @@
 {{--
     Hero - Flexible Content Layout
 
-    Variants: centered, split, background
+    Variants: centered, split, background, stacked
     Uses wp_get_attachment_image() for automatic srcset/responsive images (split variant)
     ACF Fields: variant, badge, title, copy, cta_primary, cta_secondary, image, background_image, background_color
 --}}
@@ -111,10 +111,10 @@
             <div class="absolute inset-0 bg-surface-brand"></div>
         @endif
 
-        <div class="hero-reveal relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center text-center w-full">
+        <div class="hero-reveal relative z-10 max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center text-center w-full">
             <div class="max-w-3xl">
                 @if($badge)
-                    <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
+                    <span class="hero__overline text-overline text-content-secondary mb-4">{{ $badge }}</span>
                 @endif
 
                 @if($title)
@@ -165,7 +165,7 @@
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
                 @if($badge)
-                    <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
+                    <span class="hero__overline text-overline text-content-secondary mb-4">{{ $badge }}</span>
                 @endif
 
                 @if($title)
@@ -226,13 +226,80 @@
     </x-section>
     @endif
 
+@elseif($variant === 'stacked')
+    @if($hasText || $hasSplitImage)
+    {{-- STACKED VARIANT: text on the container axis, image below in a full-width frame.
+         No bottom padding: the frame is the last thing in the section. --}}
+    <x-section :anchor="$sectionAnchor" :background="$background_color" padding="lg" class="hero hero--stacked pb-0!">
+        @if($hasText)
+            <div>
+                @if($badge)
+                    <span class="hero__overline text-overline text-content-secondary mb-4">{{ $badge }}</span>
+                @endif
+
+                @if($title)
+                    <{{ $heroHeadingTag }} class="mt-0! mb-6">
+                        {!! $title !!}
+                    </{{ $heroHeadingTag }}>
+                @endif
+
+                @if($copy)
+                    <p class="text-body-large mb-8 max-w-[52ch] text-pretty text-content-secondary">{!! $copy !!}</p>
+                @endif
+
+                @if($cta_primary || $cta_secondary)
+                    <div class="flex flex-wrap gap-4">
+                        @if($cta_primary)
+                            <x-button
+                                :url="$cta_primary['url']"
+                                :title="$cta_primary['title'] ?: null"
+                                :target="$cta_primary['target'] ?? '_self'"
+                                variant="primary"
+                                size="lg"
+                            />
+                        @endif
+                        @if($cta_secondary)
+                            <x-button
+                                :url="$cta_secondary['url']"
+                                :title="$cta_secondary['title'] ?: null"
+                                :target="$cta_secondary['target'] ?? '_self'"
+                                variant="secondary"
+                                size="lg"
+                            />
+                        @endif
+                    </div>
+                @endif
+            </div>
+        @endif
+
+        @if($hasSplitImage)
+            <div class="hero__frame {{ $hasText ? 'mt-16' : '' }} overflow-hidden rounded-[var(--card-radius)] border border-line">
+                @if($imageId)
+                    {!! wp_get_attachment_image($imageId, 'hero-background', false, [
+                        'class' => 'block w-full h-auto aspect-[4/3] md:aspect-[14/5] object-cover',
+                        'loading' => $isFirstHero ? 'eager' : 'lazy',
+                        'fetchpriority' => $isFirstHero ? 'high' : 'auto',
+                        'sizes' => '(max-width: 1280px) 100vw, 1280px',
+                    ]) !!}
+                @else
+                    <img src="{{ esc_url($image['url']) }}"
+                         alt="{{ $image['alt'] ?? '' }}"
+                         @if(!empty($image['width']) && !empty($image['height']))width="{{ $image['width'] }}" height="{{ $image['height'] }}"@endif
+                         class="block w-full h-auto aspect-[4/3] md:aspect-[14/5] object-cover"
+                         @if($isFirstHero) loading="eager" fetchpriority="high" @else loading="lazy" @endif>
+                @endif
+            </div>
+        @endif
+    </x-section>
+    @endif
+
 @else
     @if($hasText)
     {{-- CENTERED VARIANT (default): Centered content --}}
     <x-section :anchor="$sectionAnchor" :background="$background_color" :padding="$isTitleOnly ? 'md' : 'xl'" class="hero hero--centered {{ $heroHeightClass }}">
         <div class="max-w-3xl mx-auto text-center">
             @if($badge)
-                <x-badge variant="accent" size="md" class="mb-8">{{ $badge }}</x-badge>
+                <span class="hero__overline text-overline text-content-secondary mb-4">{{ $badge }}</span>
             @endif
 
             {{-- Der untere Abstand gehoert zum Folgeelement, nicht zur Ueberschrift:

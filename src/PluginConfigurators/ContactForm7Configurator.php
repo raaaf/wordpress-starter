@@ -93,6 +93,9 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
         // Spam protection: inject honeypot + JS-only token into every form.
         add_filter('wpcf7_form_elements', [self::class, 'injectSpamTraps']);
 
+        // The honeypot plugin's field must be neither a tab stop nor read aloud.
+        add_filter('wpcf7_form_elements', [self::class, 'hideHoneypotFromAssistiveTech']);
+
         // Pflichtfelder sichtbar kennzeichnen.
         add_filter('wpcf7_form_elements', [self::class, 'markRequiredFields']);
 
@@ -122,6 +125,35 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
         );
 
         return $elements . $traps;
+    }
+
+    /**
+     * Take the contact-form-7-honeypot plugin's field out of tab order and the
+     * accessibility tree.
+     *
+     * The plugin renders its input with tabindex="1000" (a positive tabindex jumps
+     * ahead of every other field) and does not hide the wrapper from screen
+     * readers. It only hides the field visually.
+     */
+    public static function hideHoneypotFromAssistiveTech(string $elements): string
+    {
+        $elements = preg_replace_callback(
+            '/<input\b[^>]*\bdata-cf7apps-tabindex=[^>]*>/i',
+            static function (array $m): string {
+                $tag = preg_replace('/\s+(?:data-cf7apps-tabindex|tabindex|aria-hidden)="[^"]*"/i', '', $m[0]) ?? $m[0];
+
+                return preg_replace('/\s*\/?>$/', ' tabindex="-1" aria-hidden="true" />', $tag) ?? $tag;
+            },
+            $elements
+        ) ?? $elements;
+
+        return preg_replace_callback(
+            '/<span\b[^>]*\bcf7apps-honeypot-wrap\b[^>]*>/i',
+            static fn(array $m): string => str_contains($m[0], 'aria-hidden=')
+                ? $m[0]
+                : preg_replace('/\s*>$/', ' aria-hidden="true">', $m[0]) ?? $m[0],
+            $elements
+        ) ?? $elements;
     }
 
     /**
@@ -355,6 +387,7 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
             'form' => self::defaultFormTemplate(),
             'mail' => self::defaultMailTemplate(),
             'messages' => self::defaultMessages(),
+            'additional_settings' => self::defaultAdditionalSettings(),
         ]);
 
         $id = $form->save();
@@ -458,6 +491,15 @@ class ContactForm7Configurator extends AbstractPluginConfigurator
             'use_html' => false,
             'exclude_blank' => true,
         ];
+    }
+
+    /**
+     * Without this, an unticked privacy checkbox only disables the submit
+     * button silently. With it, the click runs validation and reports the error.
+     */
+    public static function defaultAdditionalSettings(): string
+    {
+        return 'acceptance_as_validation: on';
     }
 
     /**

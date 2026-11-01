@@ -777,7 +777,7 @@ class PluginServiceProvider extends ServiceProvider
      */
     private function attachPlaceholderImage(int $index, string $title, int $postId): int|false
     {
-        $file = get_stylesheet_directory() . '/assets/images/placeholder-' . ( ( ( $index - 1 ) % 6 ) + 1 ) . '.jpg';
+        $file = get_template_directory() . '/assets/images/placeholder-' . ( ( ( $index - 1 ) % 6 ) + 1 ) . '.jpg';
         if (!file_exists($file)) {
             return false;
         }

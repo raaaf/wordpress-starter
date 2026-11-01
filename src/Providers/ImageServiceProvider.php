@@ -35,7 +35,7 @@ class ImageServiceProvider extends ServiceProvider
             // Content images (max-w-4xl = 896px, 2x retina)
             add_image_size('content', 1792, 0, false);
 
-            // Hero split / two-column (50% of max-w-7xl = 640px, 2x retina)
+            // Hero split / two-column (50% of the 68rem container = 544px, 2x retina)
             add_image_size('hero-split', 1280, 0, false);
 
             // Hero background - full-width background image (2x retina for 1440px screens)
@@ -65,6 +65,10 @@ class ImageServiceProvider extends ServiceProvider
         // Limit upload originals to 2400px — prevents storing unnecessarily large source files
         // while preserving enough quality for all generated sizes (max registered: 2880px)
         add_filter('big_image_size_threshold', fn (): int => 2400);
+
+        // Only the first content image (the hero) stays eager. The default of 3
+        // makes below-the-fold images compete with the LCP image.
+        add_filter('wp_omit_loading_attr_threshold', fn (): int => 1);
 
         // Convert generated thumbnails to WebP for ~30% smaller files
         // Requires Imagick or GD with WebP support; original JPEG/PNG is preserved as fallback

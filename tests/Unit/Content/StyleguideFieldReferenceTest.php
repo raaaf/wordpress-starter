@@ -70,7 +70,17 @@ final class StyleguideFieldReferenceTest extends TestCase
         }
 
         $this->assertNotNull($titel, 'Kartentitel "title" sollte in den Kind-Feldern von "cards" stehen.');
-        $this->assertTrue($titel['required'], 'Kartentitel ist im Feldschema als required markiert.');
+        // Optional since logo cards: the logo can name the product instead.
+        $this->assertFalse($titel['required'], 'Kartentitel ist im Feldschema optional.');
+
+        $ctaTitel = null;
+        foreach (StyleguideFieldReference::fuer('cta') as $feld) {
+            if ($feld['name'] === 'title') {
+                $ctaTitel = $feld;
+            }
+        }
+        $this->assertNotNull($ctaTitel);
+        $this->assertTrue($ctaTitel['required'], 'CTA-Überschrift ist im Feldschema als required markiert.');
     }
 
     public function testChoicesHoldKeysAndBackgroundColorContainsPrimaryAndInverse(): void
@@ -169,7 +179,7 @@ final class StyleguideFieldReferenceTest extends TestCase
         }
         $this->assertNotNull($cardsKnoten);
         $anzahlKinder = count($cardsKnoten['children']);
-        $this->assertSame(4, $anzahlKinder, 'Der Repeater "cards" sollte 4 Kind-Felder haben.');
+        $this->assertSame(5, $anzahlKinder, 'Der Repeater "cards" sollte 5 Kind-Felder haben.');
 
         for ($i = 1; $i <= $anzahlKinder; $i++) {
             $this->assertSame(

@@ -19,7 +19,7 @@
                     x-cloak
                 @endif
             >
-                <div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-[var(--container-max)] px-4 py-3 sm:px-6 lg:px-8">
                     <div class="flex items-center gap-3">
                         <div class="flex-1 text-xs leading-relaxed text-content-secondary [&_p]:mb-0">
                             {!! wp_kses_post($alert['text']) !!}

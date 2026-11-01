@@ -76,7 +76,9 @@ final class SsrfGuard
             throw new InvalidArgumentException('Invalid or disallowed URL scheme: ' . $url); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
         }
 
-        $host = $parsed['host'] ?? '';
+        // wp_parse_url() keeps the brackets of an IPv6 literal ("[::1]"); without
+        // them the literal is checked as an IP instead of being sent to DNS.
+        $host = trim($parsed['host'] ?? '', '[]');
 
         self::assertHostNotBlocked($host);
         self::assertResolvedHostNotBlocked($host, 'URL host could not be resolved: ');

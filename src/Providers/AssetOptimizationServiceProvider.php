@@ -205,9 +205,10 @@ class AssetOptimizationServiceProvider extends ServiceProvider
             // the header CTA sit at the top of every page, so their weights are
             // always in the first viewport. Measured on the live site: preloading
             // a weight that is not used above the fold delays the ones that are,
-            // which showed up as a 0.765 CLS on gold-investment.
+            // which showed up as a 0.765 CLS on a client page.
             $criticalFonts = [
-                'ColabReg-webfont.woff2', // Colaborate Regular (headlines and body)
+                'colaborate-300.woff2', // Colaborate Light (hero and page headlines)
+                'cal-sans-text-300.woff2', // Cal Sans Text Light (running text)
             ];
 
             foreach ($criticalFonts as $font) {

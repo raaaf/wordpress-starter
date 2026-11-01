@@ -55,7 +55,7 @@
 @if($title || !empty($items) || current_user_can('edit_posts'))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" padding="md" class="accordion">
     <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" />
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-3xl {{ $kopf['alignment'] === 'center' ? 'mx-auto' : '' }}">
         @php $itemCount = count($items); @endphp
         <div
             class="flex flex-col"

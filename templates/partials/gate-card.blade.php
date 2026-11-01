@@ -17,7 +17,7 @@
     }
 @endphp
 <div class="text-center mb-8">
-    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--bg-brand-tint)] border border-line-brand text-content-brand [&_svg]:text-content-brand mb-4">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--rafael-color-ds-accent-base)] text-[var(--rafael-color-ds-accent-ink)] [&_svg]:text-[var(--rafael-color-ds-accent-ink)] mb-4">
         <x-icon name="{{ $gateIcon }}" class="w-8 h-8 text-icon-brand" />
     </div>
     <{{ $gateHeadingLevel }} class="text-h3 mb-2">{{ $gateHeading }}</{{ $gateHeadingLevel }}>

@@ -67,7 +67,7 @@
 
                                 @if($imageId)
                                     {!! wp_get_attachment_image((int) $imageId, 'gallery-thumb', false, [
-                                        'class' => 'mt-4 rounded-lg',
+                                        'class' => 'mt-4 w-full rounded-lg',
                                         'sizes' => '(max-width: 768px) 100vw, 50vw',
                                         'alt' => \WordpressStarter\Helpers\Text::imageAlt((int) $imageId, $eventTitle ?: strip_tags((string) $content)),
                                     ]) !!}

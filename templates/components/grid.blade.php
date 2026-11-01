@@ -2,7 +2,7 @@
     Grid Component - Flexible column layouts
 
     @param int|string $cols - Number of columns: 1, 2, 3, 4, 5, '1/3-2/3', '2/3-1/3'
-    @param string $gap - Gap size: sm, md, lg, xl (default: lg)
+    @param string $gap - Gap size: sm, md, lg, xl, rule (default: lg)
     @param string $align - items-start, items-center, items-end (default: items-start)
     @param string $class - Additional CSS classes
 --}}
@@ -35,6 +35,8 @@
         'md' => 'gap-6 lg:gap-8',
         'lg' => 'gap-8 lg:gap-12',
         'xl' => 'gap-12 lg:gap-16',
+        // Rule cards (no box): wide columns, taller rows.
+        'rule' => 'gap-x-8 gap-y-10 lg:gap-x-12 lg:gap-y-14',
     ];
 
     if (defined('WP_DEBUG') && WP_DEBUG && !isset($colClasses[$cols])) {

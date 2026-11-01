@@ -26,6 +26,28 @@ final class ThemeUpdateProvider extends ServiceProvider
     private const THEME_SLUG = 'wp-starter';
 
     /**
+     * Ed25519 public keys (base64) whose signatures an update must carry.
+     * Generated offline with `php scripts/release-signing.php keygen`; the
+     * private key stays on the maintainer's machine. While this list is
+     * empty, no update installs.
+     *
+     * @var array<int, string>
+     */
+    private const RELEASE_PUBLIC_KEYS = [
+        // Rafael Alex, generated 2026-10-30.
+        '487alxgU1p6+PM9vVumTr6jJGSv/E497NFDb1qcBZzU=',
+    ];
+
+    /**
+     * Test seam for RELEASE_PUBLIC_KEYS, set through reflection only
+     * (ThemeUpdateProviderTest), which PHPStan cannot see.
+     *
+     * @var array<int, string>|null
+     */
+    // @phpstan-ignore property.unusedType
+    private static ?array $publicKeysOverride = null;
+
+    /**
      * Register services.
      */
     public function register(): void
@@ -81,15 +103,17 @@ final class ThemeUpdateProvider extends ServiceProvider
     }
 
     /**
-     * Verify the downloaded theme package against its GitHub release
-     * checksum before WordPress installs it.
+     * Verify the downloaded theme package before WordPress installs it: the
+     * `.sha256` checksum and the `.sig` signature of the same GitHub release
+     * are both mandatory, and the packaged version must be the announced one
+     * and newer than the installed theme (no replay of an old signed zip).
      *
      * Hooked on core's `upgrader_pre_download` (WP_Upgrader::download_package())
      * rather than a plugin-update-checker filter: at this point we still have
-     * the package URL (needed to derive the `.sha256` release-asset URL) and
-     * full control over the downloaded file before installation. A later
-     * hook such as `upgrader_source_selection` only exposes an already
-     * unpacked directory, too late to hash against a single zip checksum.
+     * the package URL (needed to derive the release-asset URLs) and full
+     * control over the downloaded file before installation. A later hook such
+     * as `upgrader_source_selection` only exposes an already unpacked
+     * directory, too late to hash against a single zip checksum.
      */
     private function registerChecksumVerification(): void
     {
@@ -121,32 +145,183 @@ final class ThemeUpdateProvider extends ServiceProvider
             return $file;
         }
 
-        $checksumUrl = $package . '.sha256';
-        $response = wp_remote_get($checksumUrl, ['timeout' => 10]);
-
-        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-            // Older releases were published without a checksum asset; do not
-            // block the update, just record that it could not be verified.
-            LogServiceProvider::warning('Theme-Update-Pruefsumme nicht verfuegbar', [
-                'package' => $package,
-            ]);
-
-            return $file;
-        }
-
-        $expectedHash = $this->extractHash(wp_remote_retrieve_body($response));
-        $actualHash = hash_file('sha256', $file);
-
-        if ($expectedHash === null || $actualHash === false || ! hash_equals($expectedHash, $actualHash)) {
+        $error = $this->checkChecksum($file, $package)
+            ?? $this->checkSignature($file, $package)
+            ?? $this->checkVersion($file);
+        if ($error !== null) {
             @unlink($file);
 
+            return $error;
+        }
+
+        return $file;
+    }
+
+    /**
+     * The release's `.sha256` asset must exist and match. Catches a broken or
+     * swapped download; it proves nothing about who built the zip, because
+     * whoever can replace the zip can replace its checksum too (see
+     * checkSignature()).
+     */
+    private function checkChecksum(string $file, string $package): ?WP_Error
+    {
+        $body = $this->fetchAsset($package . '.sha256');
+        if ($body === null) {
+            LogServiceProvider::warning('Theme-Update-Pruefsumme nicht verfuegbar', ['package' => $package]);
+
+            return new WP_Error(
+                'theme_update_checksum_missing',
+                __('Zu diesem Theme-Update ist keine Prüfsumme veröffentlicht. Das Update wurde abgebrochen.', 'wp-starter')
+            );
+        }
+
+        $expectedHash = $this->extractHash($body);
+        $actualHash = hash_file('sha256', $file);
+
+        if ($expectedHash === null || $actualHash === false || ! hash_equals(strtolower($expectedHash), $actualHash)) {
             return new WP_Error(
                 'theme_update_checksum_mismatch',
                 __('Die Pruefsumme des Theme-Updates stimmt nicht mit dem veroeffentlichten Release ueberein. Das Update wurde abgebrochen.', 'wp-starter')
             );
         }
 
-        return $file;
+        return null;
+    }
+
+    /**
+     * The release's `.sig` asset must be an Ed25519 signature of the zip by
+     * one of RELEASE_PUBLIC_KEYS. The private key never leaves the maintainer's
+     * machine (scripts/release-signing.php), so neither a compromised GitHub
+     * account nor a compromised CI run can ship an update that installs.
+     */
+    private function checkSignature(string $file, string $package): ?WP_Error
+    {
+        $keys = self::releasePublicKeys();
+        if ($keys === []) {
+            return new WP_Error(
+                'theme_update_no_signing_key',
+                __('In diesem Theme ist kein Schlüssel zum Prüfen der Update-Signatur hinterlegt. Das Update wurde abgebrochen.', 'wp-starter')
+            );
+        }
+
+        $body = $this->fetchAsset($package . '.sig');
+        $signature = $body !== null ? base64_decode(trim($body), true) : false;
+        if ($signature === false || strlen($signature) !== SODIUM_CRYPTO_SIGN_BYTES) {
+            LogServiceProvider::warning('Theme-Update-Signatur nicht verfuegbar', ['package' => $package]);
+
+            return new WP_Error(
+                'theme_update_signature_missing',
+                __('Dieses Theme-Update ist noch nicht signiert. Das Update wurde abgebrochen; bitte später erneut versuchen.', 'wp-starter')
+            );
+        }
+
+        $contents = file_get_contents($file);
+        if ($contents !== false) {
+            foreach ($keys as $key) {
+                $publicKey = base64_decode($key, true);
+                if (
+                    $publicKey !== false
+                    && strlen($publicKey) === SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES
+                    && sodium_crypto_sign_verify_detached($signature, $contents, $publicKey)
+                ) {
+                    return null;
+                }
+            }
+        }
+
+        return new WP_Error(
+            'theme_update_signature_invalid',
+            __('Die Signatur des Theme-Updates ist ungültig. Das Update wurde abgebrochen.', 'wp-starter')
+        );
+    }
+
+    /**
+     * The signature covers the zip bytes, not the release it is attached to:
+     * a hijacked GitHub account could attach an old, validly signed zip to a
+     * new tag and downgrade every site to code with known holes. So the
+     * version in the package's own style.css must be newer than the installed
+     * theme and, when WordPress announced one, equal to the announced version.
+     */
+    private function checkVersion(string $file): ?WP_Error
+    {
+        $packaged = self::packagedVersion($file);
+        $installed = (string) wp_get_theme(self::THEME_SLUG)->get('Version');
+        $transient = get_site_transient('update_themes');
+        $announced = is_object($transient) && isset($transient->response[self::THEME_SLUG]['new_version'])
+            ? (string) $transient->response[self::THEME_SLUG]['new_version']
+            : null;
+
+        if (
+            $packaged !== null
+            && version_compare($packaged, $installed, '>')
+            && ( $announced === null || version_compare($packaged, $announced, '==') )
+        ) {
+            return null;
+        }
+
+        LogServiceProvider::warning('Theme-Update-Version passt nicht', [
+            'packaged' => $packaged,
+            'installed' => $installed,
+            'announced' => $announced,
+        ]);
+
+        return new WP_Error(
+            'theme_update_version_mismatch',
+            __('Die Version im Theme-Update ist nicht neuer als die installierte oder weicht von der angekündigten ab. Das Update wurde abgebrochen.', 'wp-starter')
+        );
+    }
+
+    /** Version header of the theme's style.css inside the zip (root or one folder deep). */
+    private static function packagedVersion(string $file): ?string
+    {
+        if (!class_exists(\ZipArchive::class)) {
+            return null;
+        }
+
+        $zip = new \ZipArchive();
+        if ($zip->open($file, \ZipArchive::RDONLY) !== true) {
+            return null;
+        }
+
+        $style = null;
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = (string) $zip->getNameIndex($i);
+            if (preg_match('#^([^/]+/)?style\.css$#', $name) === 1 && ( $style === null || strlen($name) < strlen($style) )) {
+                $style = $name;
+            }
+        }
+        $css = $style !== null ? $zip->getFromName($style, 8192) : false;
+        $zip->close();
+
+        if ($css === false || preg_match('/^[ \t\/*#@]*Version:(.*)$/mi', $css, $match) !== 1) {
+            return null;
+        }
+        $version = trim($match[1]);
+
+        return preg_match('/^\d+(\.\d+)*$/', $version) === 1 ? $version : null;
+    }
+
+    /**
+     * Base64 Ed25519 public keys that may sign releases. Several entries allow
+     * a key rotation: add the new key, release, then drop the old one.
+     *
+     * @return array<int, string>
+     */
+    private static function releasePublicKeys(): array
+    {
+        return self::$publicKeysOverride ?? self::RELEASE_PUBLIC_KEYS;
+    }
+
+    /** Body of a release asset, or null when it is missing or unreachable. */
+    private function fetchAsset(string $url): ?string
+    {
+        $response = wp_remote_get($url, ['timeout' => 10]);
+
+        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+            return null;
+        }
+
+        return wp_remote_retrieve_body($response);
     }
 
     /**

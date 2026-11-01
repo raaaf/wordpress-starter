@@ -149,6 +149,8 @@ class SftpClient
      * @param string[] $allowedExtensions
      *
      * @return array<int, array{filename: string, ext: string, mtime: int|null, size: int}>
+     *
+     * @throws RuntimeException When the directory listing fails.
      */
     public static function listFiles(SFTP $sftp, string $remotePath, array $allowedExtensions): array
     {
@@ -157,8 +159,9 @@ class SftpClient
 
         if ($rawList === false) {
             LogServiceProvider::warning('SFTP nlist failed', ['path' => $normalizedPath]);
-
-            return [];
+            // Throw instead of returning []: an empty list would read as "all files gone"
+            // and mark every synced entry unavailable. FolderSync records the error.
+            throw new RuntimeException('SFTP listing failed for ' . $normalizedPath); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
         }
 
         $files = [];

@@ -68,7 +68,7 @@
     <x-section-header :chip="$kopf['chip']" :headline="$kopf['headline']" :description="$kopf['description']" :alignment="$kopf['alignment']" :class="$text ? 'mb-4!' : ''" />
 
     @if($text)
-        <div class="max-w-2xl mx-auto text-center mb-8"><x-prose>@kses($text)</x-prose></div>
+        <div class="max-w-2xl mb-8 {{ $kopf['alignment'] === 'center' ? 'mx-auto text-center' : '' }}"><x-prose>@kses($text)</x-prose></div>
     @endif
 
     @if(!empty($link['url']))
@@ -89,7 +89,7 @@
             $date = $formatDate($next);
             $nextImage = $next['image'] ?? null;
         @endphp
-        <div class="max-w-3xl mx-auto w-full">
+        <div class="max-w-3xl w-full {{ $kopf['alignment'] === 'center' ? 'mx-auto' : '' }}">
             <x-card variant="filled" padding="lg">
                 <div class="{{ $nextImage ? 'flex flex-col sm:flex-row sm:items-center gap-6' : 'flex items-center gap-6' }}">
                     <div class="{{ $nextImage ? 'relative shrink-0 w-full sm:w-56 aspect-[4/3] overflow-hidden rounded-lg' : 'shrink-0' }}">

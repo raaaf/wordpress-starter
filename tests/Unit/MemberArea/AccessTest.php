@@ -33,7 +33,6 @@ final class AccessTest extends TestCase
         $reflection = new ReflectionClass(Auth::class);
         foreach (['cachedAuthMode', 'cachedCookieTtl', 'cachedSharedPassword'] as $property) {
             $prop = $reflection->getProperty($property);
-            $prop->setAccessible(true);
             $prop->setValue(null, false);
         }
     }

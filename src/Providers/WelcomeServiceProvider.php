@@ -149,7 +149,7 @@ class WelcomeServiceProvider extends ServiceProvider
         update_option(self::optActivated(), true);
         delete_option(self::optDismissed());
 
-        $configPath = get_stylesheet_directory() . '/config/acf-options.php';
+        $configPath = get_template_directory() . '/config/acf-options.php';
         if (file_exists($configPath)) {
             update_option(self::optAcfPrefillPending(), true);
 
@@ -181,7 +181,7 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function prefillAcfOptions(): void
     {
-        $configPath = get_stylesheet_directory() . '/config/acf-options.php';
+        $configPath = get_template_directory() . '/config/acf-options.php';
 
         if (!file_exists($configPath)) {
             delete_option(self::optAcfPrefillPending());
@@ -363,7 +363,7 @@ class WelcomeServiceProvider extends ServiceProvider
             }
         }
 
-        $configPath = get_stylesheet_directory() . '/config/acf-options.php';
+        $configPath = get_template_directory() . '/config/acf-options.php';
         if (!file_exists($configPath)) {
             return;
         }
@@ -704,7 +704,7 @@ class WelcomeServiceProvider extends ServiceProvider
      */
     private function importPlaceholderImages(): void
     {
-        $assetsDir = get_stylesheet_directory() . '/assets/images/';
+        $assetsDir = get_template_directory() . '/assets/images/';
 
         // Schluessel => [Datei, Titel]. Neu hinzugekommene Eintraege (z.B. 'portrait')
         // werden auch auf bereits eingerichteten Seiten nachgeladen.
@@ -959,7 +959,7 @@ class WelcomeServiceProvider extends ServiceProvider
             return;
         }
 
-        $file = get_stylesheet_directory() . '/assets/videos/styleguide-demo.mp4';
+        $file = get_template_directory() . '/assets/videos/styleguide-demo.mp4';
         if (!file_exists($file)) {
             return;
         }

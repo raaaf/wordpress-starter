@@ -80,7 +80,7 @@ final class ContentImagesTest extends TestCase
 
     public function testFallsBackToTheScaledOriginal(): void
     {
-        // Live case from goldene-strategie.de: the bare filename 404s, WordPress
+        // Live case from a client site: the bare filename 404s, WordPress
         // registered the big image as -scaled because it exceeded the threshold.
         $GLOBALS['wp_mock_attachments']['https://example.test/shutterstock_2578745199-scaled.webp'] = 55;
 

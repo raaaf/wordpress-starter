@@ -60,4 +60,10 @@ final class BreadcrumbsSchemaTest extends TestCase
     {
         return $this->renderTemplate('partials.breadcrumbs');
     }
+
+    public function testThemeBreadcrumbSchemaYieldsToYoast(): void
+    {
+        $this->assertFalse(\WordpressStarter\Providers\SeoServiceProvider::shouldOutputBreadcrumbSchema(true));
+        $this->assertTrue(\WordpressStarter\Providers\SeoServiceProvider::shouldOutputBreadcrumbSchema(false));
+    }
 }

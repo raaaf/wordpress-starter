@@ -23,7 +23,7 @@
 @if($chip || $headline || $description || $label || $imageId || ($image && !empty($image['url'])) || $content || !empty($accordion))
 <x-section :anchor="$sectionAnchor" :spacing="$sectionSpacing ?? null" :width="$sectionWidth ?? null" :background="$background" class="one-column-image">
     <x-section-header :chip="$chip" :headline="$headline" :description="$description" :alignment="$alignment" />
-    <div class="mx-auto max-w-3xl">
+    <div>
         <x-card variant="outlined" padding="none" class="overflow-hidden">
             @if($label)
                 <div class="p-6 lg:p-8 pb-0 lg:pb-0">

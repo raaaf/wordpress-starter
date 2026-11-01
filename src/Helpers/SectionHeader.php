@@ -66,16 +66,17 @@ final class SectionHeader
             'chip' => $show ? get_sub_field('section_chip') : null,
             'headline' => $show ? Text::lineBreaks(get_sub_field('section_headline')) : null,
             'description' => $show ? Text::lineBreaks(get_sub_field('section_description')) : null,
-            'alignment' => $show ? ( get_sub_field('section_alignment') ?: $fallback ) : $fallback,
+            // Also read while the header is hidden: the text column below follows it.
+            'alignment' => get_sub_field('section_alignment') ?: $fallback,
         ];
     }
 
     /**
-     * Inside a tab panel the host section is left-aligned, a centered column
-     * under a left-aligned tab bar would look broken.
+     * Without an explicit editor choice every header sits on the left content
+     * axis, like the text below it. Centring is an opt-in per module.
      */
     private static function fallbackAlignment(): string
     {
-        return SectionNesting::active() ? 'left' : 'center';
+        return 'left';
     }
 }

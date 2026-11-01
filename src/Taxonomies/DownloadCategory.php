@@ -9,6 +9,11 @@ class DownloadCategory extends AbstractTaxonomy
     protected static string $taxonomy         = 'download_category';
     protected static string $singular         = 'Dokumentenkategorie';
     protected static string $plural           = 'Dokumentenkategorien';
+
+    protected static function names(): array
+    {
+        return [__('Dokumentenkategorie', 'wp-starter'), __('Dokumentenkategorien', 'wp-starter')];
+    }
     protected static array $postTypes        = ['member_download'];
     protected static bool $hierarchical     = false;
     protected static bool $public           = false;

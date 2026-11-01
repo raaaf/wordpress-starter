@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WordpressStarter\Providers;
 
+use WordpressStarter\Support\SvgSanitizer;
+
 /**
  * Media Service Provider
  *
@@ -185,25 +187,11 @@ class MediaServiceProvider extends ServiceProvider
     }
 
     /**
-     * SVG sanitization using enshrined/svg-sanitize library
-     *
-     * Properly sanitizes SVG files by parsing the XML and removing
-     * dangerous elements and attributes, rather than using regex.
-     *
-     * @see https://github.com/darylldoyle/svg-sanitizer
+     * SVG sanitization, see Support\SvgSanitizer.
      */
     private function sanitizeSvg(string $content): string|false
     {
-        // Use the proper SVG sanitizer library
-        $sanitizer = new \enshrined\svgSanitize\Sanitizer();
-
-        // Configure allowed tags and attributes for strict sanitization
-        $sanitizer->removeRemoteReferences(true);
-        $sanitizer->removeXMLTag(false); // Keep the XML declaration
-
-        // Fail closed: false propagates to the prefilter, which rejects
-        // the upload instead of storing unsanitized content.
-        return $sanitizer->sanitize($content);
+        return SvgSanitizer::sanitize($content);
     }
 
     /**

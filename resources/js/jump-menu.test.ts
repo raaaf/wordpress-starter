@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   collectSearchSections,
   collectSections,
+  currentEntry,
   highlightMatches,
   revealMatch,
   searchSections,
@@ -634,5 +635,21 @@ describe('one text model for search, highlight and reveal', () => {
       painted: ranges.map((range) => range.toString()),
       target: revealMatch(section, query) !== null,
     }).toEqual({ count: 1, painted, target: true });
+  });
+});
+
+describe('currentEntry', () => {
+  const entries = [section('a', 'A', ''), section('b', 'B', ''), section('c', 'C', '')];
+
+  it('prefers the later section when the previous one only touches the band', () => {
+    expect(currentEntry(entries, new Set(['a', 'b']))).toBe('b');
+  });
+
+  it('returns the only section in the band', () => {
+    expect(currentEntry(entries, new Set(['c']))).toBe('c');
+  });
+
+  it('returns null when no section is in the band', () => {
+    expect(currentEntry(entries, new Set())).toBeNull();
   });
 });

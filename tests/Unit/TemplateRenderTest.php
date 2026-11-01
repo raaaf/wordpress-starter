@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionMethod;
+use Tests\Support\ForkNamespaces;
 use Throwable;
 use WordpressStarter\Application;
 
@@ -28,15 +29,6 @@ use WordpressStarter\Application;
  */
 final class TemplateRenderTest extends TestCase
 {
-    /** Namespaces of the other themes in the fork family — must never leak in. */
-    private const FOREIGN_NAMESPACES = [
-        'GoldeneStrategie\\',
-        'StiftungsNavigator\\',
-        'moenius\\',
-        'Siera\\',
-        'FIMVertrieb\\',
-    ];
-
     /** Default view data so standalone renders of partials do not fatal on required params. */
     private const VIEW_DATA = [
         'layoutCounters' => [],
@@ -229,6 +221,7 @@ final class TemplateRenderTest extends TestCase
         'index', // have_posts() not mocked
         'layouts.app', // wp_date() not mocked
         'member-area.login-page', // wp_date() not mocked
+        'page-design-system', // have_posts() not mocked
         'page-member-area', // wp_date() not mocked (partials.footer-menu)
         'page-styleguide', // sanitize_key() not mocked
         'page', // have_posts() not mocked
@@ -709,6 +702,40 @@ final class TemplateRenderTest extends TestCase
     }
 
     /**
+     * The token generator links to a child theme generator only when a plugin
+     * answers wp_starter_theme_generator_url; client sites get no link.
+     */
+    public function testTokenGeneratorLinksToThemeGeneratorOnlyWhenFilterReturnsUrl(): void
+    {
+        $app = Application::getInstance();
+        $app->boot();
+
+        $factory = blade();
+        $factory->getFinder()->addLocation($this->templatesDir());
+
+        $viewData = self::VIEW_DATA + ['slot' => new \Illuminate\View\ComponentSlot()];
+        $url = 'https://example.test/theme-generator/';
+        $hooks = $GLOBALS['wp_mock_hooks']['filters']['wp_starter_theme_generator_url'] ?? null;
+
+        try {
+            $without = $factory->make('styleguide.generator', $viewData)->render();
+            $factory->flushState();
+
+            add_filter('wp_starter_theme_generator_url', static fn (): string => $url);
+            $with = $factory->make('styleguide.generator', $viewData)->render();
+        } finally {
+            unset($GLOBALS['wp_mock_hooks']['filters']['wp_starter_theme_generator_url']);
+            if ($hooks !== null) {
+                $GLOBALS['wp_mock_hooks']['filters']['wp_starter_theme_generator_url'] = $hooks;
+            }
+        }
+
+        $this->assertStringNotContainsString('Theme generieren', $without);
+        $this->assertSame(1, substr_count($with, 'href="' . $url . '"'));
+        $this->assertStringContainsString('Theme generieren', $with);
+    }
+
+    /**
      * Flexible.posts (templates/flexible/posts.blade.php:15-19) checks the
      * backend-supplied post_type sub-field against get_post_types(['public'
      * => true]) and silently falls back to 'post' for anything not in that
@@ -777,9 +804,10 @@ final class TemplateRenderTest extends TestCase
                 continue;
             }
 
-            foreach (self::FOREIGN_NAMESPACES as $namespace) {
-                if (str_contains($content, $namespace)) {
-                    $offenders[] = $path . ' — references ' . rtrim($namespace, '\\');
+            // Namespaces of the other themes in the fork family must never leak in.
+            foreach (ForkNamespaces::all() as $namespace) {
+                if (str_contains($content, $namespace . '\\')) {
+                    $offenders[] = $path . ' — references ' . $namespace;
                 }
             }
         }
@@ -823,7 +851,6 @@ final class TemplateRenderTest extends TestCase
     private function invokeIsMockGap(string $message): bool
     {
         $method = new ReflectionMethod($this, 'isMockGap');
-        $method->setAccessible(true);
 
         return $method->invoke($this, $message);
     }

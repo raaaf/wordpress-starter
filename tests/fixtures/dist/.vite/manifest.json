@@ -8,8 +8,23 @@
     "file": "assets/app-def456.js",
     "src": "resources/js/app.ts",
     "isEntry": true,
+    "imports": [
+      "_vendor-aaa111.js"
+    ],
     "css": [
       "assets/app-abc123.css"
+    ]
+  },
+  "_vendor-aaa111.js": {
+    "file": "assets/vendor-aaa111.js",
+    "imports": [
+      "_shared-bbb222.js"
+    ]
+  },
+  "_shared-bbb222.js": {
+    "file": "assets/shared-bbb222.js",
+    "imports": [
+      "_vendor-aaa111.js"
     ]
   },
   "resources/css/editor-style.css": {

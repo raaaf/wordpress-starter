@@ -28,6 +28,14 @@
         $statsCount === 2 => 'md:w-[calc(50%-1rem)]',
         default => 'md:w-full',
     };
+
+    // Screen reader text in the same de-DE format as the visible counter
+    // (toLocaleString in Alpine), decimals as entered in the field.
+    $formatNumber = static function (array $stat): string {
+        $raw = (string) ($stat['number'] ?? 0);
+        $decimals = str_contains($raw, '.') ? strlen(rtrim(explode('.', $raw)[1], '0')) : 0;
+        return number_format(floatval($raw), $decimals, ',', '.');
+    };
 @endphp
 
 @if($title || !empty($stats) || current_user_can('edit_posts'))
@@ -60,7 +68,7 @@
                         Zahl und Suffix. --}}
                         <span class="whitespace-nowrap"><span x-text="current.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })">0</span>@if($suffix)<span>{{ in_array($suffix, ['%', '‰', '°C', '°F'], true) ? ' ' : '' }}{{ $suffix }}</span>@endif</span>
                     </div>
-                    <span class="sr-only">{{ $number }}{{ $suffix ? ' ' . $suffix : '' }}</span>
+                    <span class="sr-only">{{ $formatNumber($stat) }}{{ $suffix ? ' ' . $suffix : '' }}</span>
 
                     @if($label)
                         <p class="text-body-large text-content-secondary" id="stat-label-{{ $statsId }}-{{ $loop->index }}">{{ $label }}</p>

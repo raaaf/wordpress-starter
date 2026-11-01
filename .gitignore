@@ -120,3 +120,6 @@ tests/fixtures/compiled/
 !site.webmanifest
 # Test coverage reports (build output)
 /coverage
+
+# Real client fork namespaces for the leak tests (see tests/fork-namespaces.php.example)
+/tests/fork-namespaces.php

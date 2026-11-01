@@ -115,6 +115,36 @@ final class PageSettingsTest extends TestCase
         $this->assertStringContainsString('https://example.com/kontakt', $html);
     }
 
+    public function testHeaderSecondaryButtonHiddenWhenNotSet(): void
+    {
+        $GLOBALS['wp_mock_is_page'] = false;
+        $GLOBALS['wp_mock_fields']['header_cta_show:option'] = true;
+        $GLOBALS['wp_mock_fields']['header_cta:option'] = ['url' => 'https://example.com/cta', 'title' => 'Kontakt'];
+
+        $this->assertStringNotContainsString('button--secondary', $this->renderHeaderMenu());
+    }
+
+    public function testHeaderSecondaryButtonShownInDesktopAndMobileMenu(): void
+    {
+        $GLOBALS['wp_mock_is_page'] = false;
+        $GLOBALS['wp_mock_fields']['header_cta_show:option'] = true;
+        $GLOBALS['wp_mock_fields']['header_cta:option'] = ['url' => 'https://example.com/cta', 'title' => 'Kontakt'];
+        $GLOBALS['wp_mock_fields']['header_cta_secondary:option'] = ['url' => 'https://example.com/login', 'title' => 'Login'];
+
+        $this->assertSame(2, substr_count($this->renderHeaderMenu(), 'https://example.com/login'));
+    }
+
+    public function testHeaderSecondaryButtonStandsAloneWithoutPrimaryCta(): void
+    {
+        $GLOBALS['wp_mock_is_page'] = false;
+        $GLOBALS['wp_mock_fields']['header_cta_show:option'] = true;
+        $GLOBALS['wp_mock_fields']['header_cta_secondary:option'] = ['url' => 'https://example.com/login', 'title' => 'Login'];
+
+        $html = $this->renderHeaderMenu();
+        $this->assertSame(2, substr_count($html, 'https://example.com/login'));
+        $this->assertStringNotContainsString('button--primary', $html);
+    }
+
     public function testHeaderNavLandmarkOmittedOnLandingPage(): void
     {
         $GLOBALS['wp_mock_is_page'] = true;

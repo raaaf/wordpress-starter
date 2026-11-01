@@ -24,7 +24,7 @@
 @endphp
 
 <section class="section bg-surface py-20 md:py-28">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="max-w-md mx-auto">
             <x-card variant="outlined" padding="none">
                 <div class="p-8">

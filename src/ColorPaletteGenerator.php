@@ -201,10 +201,23 @@ class ColorPaletteGenerator
         }
 
         return [
-            'r' => (int) round($r * 255),
-            'g' => (int) round($g * 255),
-            'b' => (int) round($b * 255),
+            'r' => self::toChannel($r),
+            'g' => self::toChannel($g),
+            'b' => self::toChannel($b),
         ];
+    }
+
+    /**
+     * Scale a 0-1 channel to 0-255.
+     *
+     * Rounds to 9 decimals first: PHP 8.3 pre-rounds inside round() and PHP 8.4
+     * no longer does, so 4.499999999999997 gave 5 on one and 4 on the other.
+     * The token generator on the website (resources/js/token-generator.ts)
+     * rounds the same way; tests/fixtures/color-palette-parity.json pins both.
+     */
+    private static function toChannel(float $value): int
+    {
+        return (int) round(round($value * 255, 9));
     }
 
     /**
