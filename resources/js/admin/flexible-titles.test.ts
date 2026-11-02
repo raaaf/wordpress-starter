@@ -78,7 +78,10 @@ describe('getLayoutPreview WYSIWYG visual-mode branch', () => {
 
   it('inserts a space between block elements from the iframe body, like the source-mode branches', () => {
     const iframe = layout.querySelector('iframe')!;
-    iframe.contentDocument!.body.innerHTML = '<p>Zeile eins</p><p>Zeile zwei</p>';
+    // happy-dom 21 no longer creates a document for an empty iframe, so supply one.
+    const doc = document.implementation.createHTMLDocument('');
+    doc.body.innerHTML = '<p>Zeile eins</p><p>Zeile zwei</p>';
+    Object.defineProperty(iframe, 'contentDocument', { value: doc, configurable: true });
 
     expect(getLayoutPreview(layout)).toBe('Zeile eins Zeile zwei');
   });
