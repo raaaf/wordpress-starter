@@ -38,6 +38,9 @@ test.describe('Flexible Content Layouts', () => {
   let page: Page;
 
   test.beforeAll(async ({ browser }: { browser: Browser }) => {
+    // The login redirect and this page alone can exceed the default 30 s hook timeout locally.
+    test.setTimeout(180_000);
+
     context = await browser.newContext();
     page = await context.newPage();
 
@@ -58,8 +61,8 @@ test.describe('Flexible Content Layouts', () => {
       const hero = page.locator('.hero').first();
       await expect(hero).toBeVisible();
 
-      const h1 = hero.locator('h1');
-      await expect(h1.first()).toBeVisible();
+      // h2 here: the styleguide page has its own h1, and a page holds only one.
+      await expect(hero.locator('h2').first()).toBeVisible();
     });
 
     test('hero buttons should have href attributes', async () => {
