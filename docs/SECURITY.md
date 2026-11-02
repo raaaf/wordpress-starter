@@ -236,6 +236,22 @@ symlinks out of the folder are refused) and may only end in `css`, `svg`, `png` 
 into the media library once per build; SVGs go through the same sanitizer as uploads (`Support\SvgSanitizer`)
 and are dropped when they cannot be sanitized.
 
+### MCP contract
+
+The theme registers no MCP route itself. The separate Claude MCP plugin (own repo, own OAuth server and
+security notes) asks for the page structure through the filter `wp_starter_mcp_contract`
+(`Mcp\ContractProvider`, see [MCP-CONTRACT.md](MCP-CONTRACT.md)). The theme side limits what that plugin can
+touch:
+
+- `is_readable` only allows published, draft and pending pages. Private, password-protected, member-area,
+  protected and reference pages are never handed out.
+- `writable` is an explicit allowlist. `newsletter`, `contact_form`, `member_downloads` and `download_list`
+  stay read-only, and a new layout stays read-only until it is added to `WRITABLE_LAYOUTS`
+  (`tests/Unit/Mcp/ContractProviderTest.php` fails until that decision is made).
+- `validate_sections` rejects layouts outside the allowlist and malformed table rows before anything is
+  written; embeds go through the same host allowlist as the backend (`is_allowed_embed_host`).
+- The plugin writes drafts only. Publishing stays a human action in wp-admin.
+
 ### Sensitive Data Filtering
 
 ```php

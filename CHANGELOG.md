@@ -1,3 +1,33 @@
+## [2.44.2](https://github.com/raaaf/wordpress-starter/compare/v2.44.1...v2.44.2) (2026-11-02)
+
+### Bug Fixes
+
+- **member-area:** restrict WordPress-mode access to blog members and admins by default ([#38](https://github.com/raaaf/wordpress-starter/issues/38)) ([e73732f](https://github.com/raaaf/wordpress-starter/commit/e73732f0a8d8c19eee9067ca4beadf0159dcc52d))
+
+## [2.44.1](https://github.com/raaaf/wordpress-starter/compare/v2.44.0...v2.44.1) (2026-11-01)
+
+### Bug Fixes
+
+- **styleguide:** limit the open jump navigation to the screen height ([#68](https://github.com/raaaf/wordpress-starter/issues/68)) ([49a6ae9](https://github.com/raaaf/wordpress-starter/commit/49a6ae9f4372f2594a3e12e14879fbbdf7297c82))
+
+# [2.44.0](https://github.com/raaaf/wordpress-starter/compare/v2.43.3...v2.44.0) (2026-11-01)
+
+### Features
+
+- **styleguide:** link the token generator to a child theme generator ([f66274f](https://github.com/raaaf/wordpress-starter/commit/f66274fd4e2580b8b6eff26f2935afa02a72f5f5))
+
+## [2.43.3](https://github.com/raaaf/wordpress-starter/compare/v2.43.2...v2.43.3) (2026-11-01)
+
+### Bug Fixes
+
+- **styleguide:** leave the jump menu out of the jump navigation ([#65](https://github.com/raaaf/wordpress-starter/issues/65)) ([e1b431b](https://github.com/raaaf/wordpress-starter/commit/e1b431b47fbc217dc348b53e64550706de71c76c))
+
+## [2.43.2](https://github.com/raaaf/wordpress-starter/compare/v2.43.1...v2.43.2) (2026-11-01)
+
+### Bug Fixes
+
+- **seo:** skip the theme's Article schema when Yoast is active ([#64](https://github.com/raaaf/wordpress-starter/issues/64)) ([12265ec](https://github.com/raaaf/wordpress-starter/commit/12265ecb341e24fe55b79bc187efa6ea0ffc9d4f))
+
 ## [2.43.1](https://github.com/raaaf/wordpress-starter/compare/v2.43.0...v2.43.1) (2026-10-31)
 
 ### Bug Fixes

@@ -504,8 +504,9 @@ class SeoServiceProvider extends ServiceProvider
                 self::renderJsonLd($orgSchema);
             }
 
-            // Article Schema for single posts
-            if (is_singular('post')) {
+            // Article Schema for single posts. Yoast puts its own Article
+            // (with @id) into its graph; a second node is a duplicate.
+            if (is_singular('post') && !$seoPluginOwnsSchema) {
                 global $post;
                 $articleSchema = [
                     '@context' => 'https://schema.org',

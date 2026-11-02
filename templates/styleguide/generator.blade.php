@@ -8,6 +8,9 @@
     DesignTokenRestProvider (config/ ist auf vielen Hostern fürs Web gesperrt),
     und erst bei der ersten Interaktion. Gespeichert oder an einen Server
     geschickt wird nichts.
+
+    Der Link zu einem Child-Theme-Generator erscheint nur, wenn ein Plugin den
+    Filter wp_starter_theme_generator_url beantwortet; ohne Plugin bleibt er leer.
 --}}
 
 @php
@@ -45,6 +48,7 @@
         'dark' => 'dark.tokens.json',
         'css' => 'tokens.css',
     ];
+    $themeGeneratorUrl = (string) apply_filters('wp_starter_theme_generator_url', '');
 @endphp
 
 <x-section anchor="token-generator" background="secondary" padding="lg" class="styleguide-generator">
@@ -174,5 +178,12 @@
                 </div>
             </div>
         </x-card>
+
+        @if ($themeGeneratorUrl !== '')
+            <div class="flex flex-col items-start gap-3">
+                <p class="m-0 text-body-small text-content-secondary">{{ __('Lieber gleich ein fertiges Child-Theme? Farben, Ecken und Schrift wählen und als Theme herunterladen.', 'wp-starter') }}</p>
+                <x-button :url="$themeGeneratorUrl" :title="__('Theme generieren', 'wp-starter')" variant="secondary" />
+            </div>
+        @endif
     </div>
 </x-section>
