@@ -125,11 +125,14 @@ test.describe('Accessibility', () => {
   });
 
   test('form inputs should have labels', async ({ page }) => {
-    await page.goto('/');
+    // The homepage has no form; the contact page carries the real one.
+    const response = await page.goto('/kontakt/');
+    expect(response?.ok()).toBeTruthy();
 
     // Find all inputs that require labels
+    // The spam trap sits in an aria-hidden wrapper, out of reach for assistive technology on purpose.
     const inputs = page.locator(
-      'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select'
+      ':is(input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select):not([aria-hidden="true"] *)'
     );
     const inputCount = await inputs.count();
 
@@ -137,22 +140,24 @@ test.describe('Accessibility', () => {
     expect(inputCount).toBeGreaterThan(0);
 
     for (let i = 0; i < inputCount; i++) {
-      const input = inputs.nth(i);
-      const id = await input.getAttribute('id');
-      const ariaLabel = await input.getAttribute('aria-label');
-      const ariaLabelledBy = await input.getAttribute('aria-labelledby');
-      const hasAriaLabel = ariaLabel !== null || ariaLabelledBy !== null;
+      // input.labels covers both a wrapping <label> (how CF7 renders) and <label for>.
+      const named = await inputs.nth(i).evaluate((input: HTMLInputElement) => {
+        const labelText = [...(input.labels ?? [])]
+          .map((label) => {
+            // A wrapping label also holds the control's own text, such as select options.
+            const copy = label.cloneNode(true) as HTMLElement;
+            copy.querySelectorAll('input, select, textarea').forEach((control) => control.remove());
+            return copy.textContent?.trim() ?? '';
+          })
+          .join('');
+        return (
+          labelText !== '' ||
+          input.hasAttribute('aria-label') ||
+          input.hasAttribute('aria-labelledby')
+        );
+      });
 
-      // Input must have either a label, aria-label, or aria-labelledby
-      if (id) {
-        const label = page.locator(`label[for="${id}"]`);
-        const hasLabel = (await label.count()) > 0;
-
-        expect(hasLabel || hasAriaLabel).toBeTruthy();
-      } else {
-        // No id means a <label for> is impossible; aria-label(ledby) is mandatory.
-        expect(hasAriaLabel).toBeTruthy();
-      }
+      expect(named).toBeTruthy();
     }
   });
 
@@ -182,7 +187,10 @@ test.describe('Accessibility', () => {
     // keyboard user can see where focus is. Focus each sampled element and
     // read its computed style instead: a real outline/box-shadow must appear
     // that was not there before focus.
-    const interactiveElements = page.locator('a, button, input, select, textarea, [tabindex]');
+    // Only visible ones: controls hidden at this viewport (the mobile menu) cannot take focus at all.
+    const interactiveElements = page
+      .locator('a, button, input, select, textarea, [tabindex]')
+      .locator('visible=true');
     const count = await interactiveElements.count();
     const sampleSize = Math.min(count, 10);
 
