@@ -1,3 +1,9 @@
+## [2.44.2](https://github.com/raaaf/wordpress-starter/compare/v2.44.1...v2.44.2) (2026-11-02)
+
+### Bug Fixes
+
+- **member-area:** restrict WordPress-mode access to blog members and admins by default ([#38](https://github.com/raaaf/wordpress-starter/issues/38)) ([e73732f](https://github.com/raaaf/wordpress-starter/commit/e73732f0a8d8c19eee9067ca4beadf0159dcc52d))
+
 ## [2.44.1](https://github.com/raaaf/wordpress-starter/compare/v2.44.0...v2.44.1) (2026-11-01)
 
 ### Bug Fixes
