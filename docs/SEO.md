@@ -10,7 +10,7 @@ The theme automatically outputs Schema.org structured data for better search eng
 
 #### WebSite Schema
 
-Output on all pages:
+Output on the front page:
 
 ```json
 {
@@ -72,6 +72,8 @@ Output on single blog posts:
   "description": "Post excerpt..."
 }
 ```
+
+When Yoast SEO is active, the theme outputs none of WebSite, Organization and Article: Yoast's graph already contains them, and a second node for the same entity is a duplicate. The theme only adds its contact details to Yoast's Organization (`wpseo_schema_organization`).
 
 #### BreadcrumbList Schema
 

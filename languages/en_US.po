@@ -2304,6 +2304,9 @@ msgstr "Services"
 msgid "Letztes Backup: %s"
 msgstr "Last backup: %s"
 
+msgid "Lieber gleich ein fertiges Child-Theme? Farben, Ecken und Schrift wählen und als Theme herunterladen."
+msgstr "Prefer a finished child theme? Pick your colours, corners and font, and download it as a theme."
+
 msgid "Light Mode (Semantische Tokens)"
 msgstr "Light mode (semantic tokens)"
 
@@ -3530,6 +3533,9 @@ msgstr "Text column"
 
 msgid "Theme Setup"
 msgstr "Theme Setup"
+
+msgid "Theme generieren"
+msgstr "Generate your theme"
 
 msgid "Theme-Einstellungen"
 msgstr "Theme settings"

@@ -1,6 +1,6 @@
 {
   "name": "wp-starter",
-  "version": "2.43.1",
+  "version": "2.44.2",
   "type": "module",
   "description": "Wordpress-Starter-Theme based on Tailpress and MountainBreeze",
   "author": "Rafael Alex",
@@ -54,8 +54,8 @@
     "@types/alpinejs__collapse": "^3.13.4",
     "@types/alpinejs__intersect": "^3.13.4",
     "@types/wordpress__blocks": "^15.17.0",
-    "@vitest/coverage-v8": "^4.0.17",
-    "@vitest/ui": "^4.0.17",
+    "@vitest/coverage-v8": "^5.0.5",
+    "@vitest/ui": "^5.0.5",
     "archiver": "^8.0.0",
     "conventional-changelog-conventionalcommits": "^10.4.1",
     "cssnano": "^9.9.0",
