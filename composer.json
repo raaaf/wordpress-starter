@@ -40,7 +40,7 @@
     "wpackagist-plugin/contact-form-7": "^6.0",
     "wpackagist-plugin/wp-mail-smtp": "^4.0",
     "wpackagist-plugin/wp-optimize": "^4.0",
-    "wpackagist-plugin/admin-site-enhancements": "^8.0",
+    "wpackagist-plugin/admin-site-enhancements": "^9.3",
     "wpackagist-plugin/webp-express": "^0.25",
     "wpackagist-plugin/integrate-rybbit": "^1.6",
     "phpseclib/phpseclib": "^3.0"

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d43ddbe1b4cd8e191b80d30a3849c898",
+    "content-hash": "051a32f3fb69c1e161aa7e3d30552424",
     "packages": [
         {
             "name": "brick/math",
@@ -3129,15 +3129,15 @@
         },
         {
             "name": "wpackagist-plugin/admin-site-enhancements",
-            "version": "8.8.3",
+            "version": "9.3.0",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/admin-site-enhancements/",
-                "reference": "tags/8.8.3"
+                "reference": "tags/9.3.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/admin-site-enhancements.8.8.3.zip"
+                "url": "https://downloads.wordpress.org/plugin/admin-site-enhancements.9.3.0.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
