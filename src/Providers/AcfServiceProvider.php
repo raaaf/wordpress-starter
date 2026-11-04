@@ -739,7 +739,12 @@ class AcfServiceProvider extends ServiceProvider
 
     /**
      * Fills empty section_anchor fields of a page with a unique ID based on
-     * layout name and position. Preserves manually set anchors.
+     * layout name and position. Preserves manually set anchors and never
+     * repeats an anchor already stored on the page.
+     *
+     * Runs on acf/save_post and after an MCP write, which stores page_sections
+     * without the ACF form: also called from Mcp\ContractProvider::afterWrite()
+     * (src/Mcp/ContractProvider.php:203).
      *
      * Writes one sub field value per row and never the whole flexible field:
      * the flexible field's update_value() rebuilds _page_sections_layout_meta
@@ -774,6 +779,18 @@ class AcfServiceProvider extends ServiceProvider
             }
         }
 
+        // Anchors already on the page, so a generated one never repeats an id
+        // that another row holds (a deleted row leaves gaps in the numbering).
+        $storedAnchors = [];
+        $usedAnchors = [];
+        foreach (array_keys($layouts) as $index) {
+            $stored = acf_get_metadata_by_field($postId, ['name' => "page_sections_{$index}_section_anchor"]);
+            $storedAnchors[$index] = is_string($stored) ? $stored : '';
+            if ($storedAnchors[$index] !== '') {
+                $usedAnchors[strtolower($storedAnchors[$index])] = true;
+            }
+        }
+
         $layoutCounters = [];
 
         foreach ($layouts as $index => $layout) {
@@ -783,19 +800,21 @@ class AcfServiceProvider extends ServiceProvider
 
             $layoutCounters[$layout] = ( $layoutCounters[$layout] ?? 0 ) + 1;
 
-            if (!isset($anchorFields[$layout])) {
+            if (!isset($anchorFields[$layout]) || $storedAnchors[$index] !== '') {
                 continue;
             }
 
-            $name = "page_sections_{$index}_section_anchor";
-            if (!empty(acf_get_metadata_by_field($postId, ['name' => $name]))) {
-                continue;
+            $prefix = str_replace('_', '-', $layout) . '-';
+            while (isset($usedAnchors[$prefix . $layoutCounters[$layout]])) {
+                ++$layoutCounters[$layout];
             }
+            $anchor = $prefix . $layoutCounters[$layout];
+            $usedAnchors[$anchor] = true;
 
             acf_update_value(
-                str_replace('_', '-', $layout) . '-' . $layoutCounters[$layout],
+                $anchor,
                 $postId,
-                ['name' => $name] + $anchorFields[$layout]
+                ['name' => "page_sections_{$index}_section_anchor"] + $anchorFields[$layout]
             );
         }
     }

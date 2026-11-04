@@ -581,14 +581,7 @@ if (!function_exists('acf_add_local_field_group')) {
     }
 }
 
-// Stubs for ensureSectionAnchors(): revision lookup, ACF metadata API, field lookup and value writes.
-if (!function_exists('wp_is_post_revision')) {
-    function wp_is_post_revision(mixed $post): int|false
-    {
-        return $GLOBALS['wp_mock_revisions'][ (int) $post] ?? false;
-    }
-}
-
+// Stubs for ensureSectionAnchors(): ACF metadata API, field lookup and value writes.
 if (!function_exists('acf_get_metadata_by_field')) {
     // Reads the wp_mock_acf_meta entry keyed by post ID, colon and field name.
     function acf_get_metadata_by_field(mixed $postId = 0, array $field = [], bool $hidden = false): mixed
@@ -615,16 +608,6 @@ if (!function_exists('acf_update_value')) {
             'value' => $value,
             'post_id' => $postId,
         ];
-
-        return true;
-    }
-}
-
-if (!function_exists('update_field')) {
-    // Records into wp_mock_updated_fields (by field key, so get_field() does not see it).
-    function update_field(string $selector, mixed $value, mixed $postId = false): bool
-    {
-        $GLOBALS['wp_mock_updated_fields'][] = ['selector' => $selector, 'value' => $value, 'post_id' => $postId];
 
         return true;
     }

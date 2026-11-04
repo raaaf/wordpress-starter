@@ -68,6 +68,19 @@ final class SectionAnchorGenerationTest extends TestCase
         );
     }
 
+    public function testGeneratedAnchorSkipsAnchorsAlreadyStoredOnThePage(): void
+    {
+        // A row was deleted and a new one added: position 2 would be "hero-2", which row 0 already holds.
+        $this->givenSections(['hero', 'hero'], [0 => 'hero-2', 1 => '']);
+
+        AcfServiceProvider::ensureSectionAnchors(self::POST_ID);
+
+        $this->assertSame(
+            ['page_sections_1_section_anchor' => ['field_hero_section_anchor', 'hero-3']],
+            $this->written()
+        );
+    }
+
     public function testLayoutWithoutAnchorFieldIsSkipped(): void
     {
         $this->givenSections(['one_column', 'spacer'], [0 => '']);
