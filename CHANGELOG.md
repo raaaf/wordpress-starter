@@ -1,3 +1,15 @@
+# [2.45.0](https://github.com/raaaf/wordpress-starter/compare/v2.44.2...v2.45.0) (2026-11-04)
+
+### Bug Fixes
+
+- **acf:** avoid duplicate generated section anchors ([2f6e8ec](https://github.com/raaaf/wordpress-starter/commit/2f6e8ec4bb839e317e3610b9b5c13b37ccbfb439))
+- **acf:** keep layout rename and disable when saving a page ([82699a8](https://github.com/raaaf/wordpress-starter/commit/82699a8db88304f49547feeb16f9500a18fbea80))
+- **deps:** pin typescript to the range typescript-eslint supports ([df02eb4](https://github.com/raaaf/wordpress-starter/commit/df02eb41c43806941209d150a4a015943d62f2a3))
+
+### Features
+
+- **nav:** width-driven navbar, menu motion and editor badge format ([53dae06](https://github.com/raaaf/wordpress-starter/commit/53dae068cbd55e54ecad9699c415f4fc4c5441d4))
+
 ## [2.44.2](https://github.com/raaaf/wordpress-starter/compare/v2.44.1...v2.44.2) (2026-11-02)
 
 ### Bug Fixes
