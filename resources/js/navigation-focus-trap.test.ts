@@ -75,6 +75,7 @@ function mountWith(markup: string): NavigationComponent {
   stubThemeStrings();
   document.body.innerHTML = markup;
   const navigation = createNavigationComponent() as NavigationComponent;
+  navigation.$watch = () => {};
   navigation.$nextTick = (callback?: () => void) => {
     callback?.();
     return Promise.resolve();
@@ -159,6 +160,17 @@ describe('Mobile navigation focus trap', () => {
       expect(hrefs).not.toContain('/leistungen/beratung');
     });
 
+    it('excludes closed submenu links (visibility:hidden keeps offsetParent) and includes open ones', () => {
+      const submenu = document.querySelector<HTMLElement>('.sub-menu') as HTMLElement;
+      const hrefsOf = () => navigation.getFocusableElements().map((el) => el.getAttribute('href'));
+
+      submenu.classList.remove('is-open');
+      expect(hrefsOf()).not.toContain('/leistungen/beratung');
+
+      submenu.classList.add('is-open');
+      expect(hrefsOf()).toContain('/leistungen/beratung');
+    });
+
     it('keeps Tab wrapping when a hidden element trails the list', () => {
       // This is what the filter actually protects. trapFocus compares
       // document.activeElement against the LAST entry. If a hidden element
@@ -201,6 +213,7 @@ describe('Mobile navigation focus trap', () => {
 
     it('returns an empty list when the container is missing', () => {
       const detached = createNavigationComponent() as NavigationComponent;
+      detached.$watch = () => {};
       detached.$nextTick = (cb?: () => void) => {
         cb?.();
         return Promise.resolve();

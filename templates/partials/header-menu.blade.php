@@ -13,9 +13,10 @@
 @endphp
 
 <div x-data="navigation" @keydown.window="handleKeydown($event)" class="relative">
-    <div class="flex items-center justify-between min-h-[68px] py-2">
+    <div data-nav-row class="flex items-center justify-between gap-4 min-h-[68px] py-2">
         {{-- Left side: Logo + Desktop Navigation --}}
-        <div class="flex items-center gap-8">
+        {{-- Below md the logo group may shrink, otherwise logo plus switcher is wider than a 320 px viewport --}}
+        <div class="flex items-center gap-8 min-w-0 md:shrink-0">
             @php
                 // ACF option first, then Customizer, then default (see Fields::siteLogoMarkup)
                 $logoMarkup = \WordpressStarter\Acf\Fields::siteLogoMarkup('header');
@@ -26,12 +27,12 @@
                 <span class="inline-block">{!! $logoMarkup !!}</span>
             @else
                 <a href="{{ esc_url(get_bloginfo('url')) }}"
-                    class="inline-block transition-opacity duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] hover:opacity-75">{!! $logoMarkup !!}</a>
+                    class="inline-block min-w-0 md:shrink-0 transition-opacity duration-[var(--motion-enter-duration)] ease-[var(--motion-enter-ease)] hover:opacity-75">{!! $logoMarkup !!}</a>
             @endif
 
             {{-- Desktop navigation (landmark provided by outer nav in header.blade.php) --}}
             @unless($isLandingPage)
-                <div class="desktop-nav hidden md:flex">
+                <div class="desktop-nav hidden md:flex shrink-0">
                     @php(
                     wp_nav_menu([
                         'container' => false,
@@ -46,7 +47,7 @@
             @endunless
         </div>
 
-        <div class="flex items-center gap-2 md:gap-3">
+        <div class="flex items-center gap-2 md:gap-3 shrink-0">
         {{-- Colour scheme switcher (icons), all widths; the partial renders
              nothing unless the colour scheme option follows the system. --}}
         @if($showThemeSwitcher)
@@ -62,20 +63,21 @@
                     :aria-expanded="isOpen"
 
                     aria-controls="mobile-navigation">
-                {{-- Hamburger icon --}}
-                <span x-show="!isOpen">
-                    <x-icon name="menu" size="xl" class="text-content" />
-                </span>
-                {{-- Close icon --}}
-                <span x-show="isOpen" x-cloak>
-                    <x-icon name="close" size="xl" class="text-content" />
+                {{-- Both icons stay rendered and cross-fade via CSS on aria-expanded --}}
+                <span class="nav-icon-stack">
+                    <span class="nav-icon nav-icon--menu">
+                        <x-icon name="menu" size="xl" class="text-content" />
+                    </span>
+                    <span class="nav-icon nav-icon--close">
+                        <x-icon name="close" size="xl" class="text-content" />
+                    </span>
                 </span>
             </button>
         @endunless
 
         {{-- Desktop CTA - visible at md and above --}}
         @if($showPrimary || $showSecondary)
-            <div class="hidden md:flex items-center gap-3">
+            <div data-nav-desktop-cta class="hidden md:flex items-center gap-3">
                 @if($showSecondary)
                     <x-button
                         :url="$headerCtaSecondary['url']"
@@ -102,12 +104,13 @@
     {{-- Mobile navigation --}}
     @unless($isLandingPage)
         <div x-show="isOpen"
-             x-transition:enter="transition ease-[var(--motion-enter-ease)] duration-[var(--motion-enter-duration)]"
-             x-transition:enter-start="opacity-0 transform scale-95"
-             x-transition:enter-end="opacity-100 transform scale-100"
-             x-transition:leave="transition ease-[var(--motion-exit-ease)] duration-[var(--motion-exit-duration)]"
-             x-transition:leave-start="opacity-100 transform scale-100"
-             x-transition:leave-end="opacity-0 transform scale-95"
+             x-transition:enter="nav-panel-enter"
+             x-transition:enter-start="nav-panel-from"
+             x-transition:enter-end="nav-panel-to"
+             x-transition:leave="nav-panel-leave"
+             x-transition:leave-start="nav-panel-to"
+             x-transition:leave-end="nav-panel-out"
+             :class="{ 'is-open': isOpen }"
              @click.away="close()"
              @keydown="trapFocus($event)"
              class="mobile-nav-container absolute top-full left-0 right-0 bg-surface shadow-lg rounded-md md:hidden z-50"
@@ -118,7 +121,7 @@
                     'container' => false,
                     'menu_class' => 'py-2',
                     'theme_location' => 'header-menu',
-                    'li_class' => 'relative px-4 py-2 hover:bg-surface-secondary',
+                    'li_class' => 'relative',
                     'fallback_cb' => false,
                     'items_wrap' => '<ul id="%1$s" class="%2$s">%3$s</ul>',
                 ])
@@ -126,7 +129,7 @@
             </nav>
 
             @if($showPrimary || $showSecondary)
-                <div class="flex flex-col gap-3 px-4 py-4 border-t border-line">
+                <div class="nav-panel-cta flex flex-col gap-3 px-4 py-4 border-t border-line">
                     @if($showSecondary)
                         <x-button
                             :url="$headerCtaSecondary['url']"

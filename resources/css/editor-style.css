@@ -441,3 +441,32 @@ body.mce-content-body .inline-icon {
 body.mce-content-body .inline-icon svg {
   fill: currentColor;
 }
+
+/* ============================================
+   BADGE
+   Same as .badge--inline in app.css
+   ============================================ */
+
+body.mce-content-body .badge--inline {
+  --badge-py: var(--badge-md-padding-y);
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding-inline: var(--badge-md-padding-x);
+  padding-top: calc(var(--badge-py) + 0.5px);
+  padding-bottom: calc(var(--badge-py) - 0.5px);
+  border-radius: 9999px;
+  background-color: var(--bg-accent-subtle);
+  color: var(--text-accent);
+  font-size: var(--typography-caption-size);
+  font-weight: var(--typography-caption-weight);
+  line-height: var(--typography-caption-line-height);
+  letter-spacing: var(--typography-caption-letter-spacing);
+}
+
+@supports (text-box: trim-both cap alphabetic) {
+  body.mce-content-body .badge--inline {
+    padding-block: calc(var(--badge-py) + (1lh - 1cap) / 2);
+    text-box: trim-both cap alphabetic;
+  }
+}

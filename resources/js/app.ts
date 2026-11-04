@@ -47,8 +47,11 @@ function getThemeStrings(): typeof FALLBACK_STRINGS {
 
 export interface NavigationComponent extends AlpineMagics {
   isOpen: boolean;
+  collapsed: boolean;
   toggleButton: HTMLElement | null;
   mobileNavContainer: HTMLElement | null;
+  navRow: HTMLElement | null;
+  measure(): void;
   toggle(): void;
   close(): void;
   init(): void;
@@ -63,13 +66,57 @@ export function createNavigationComponent(): NavigationComponent {
     // Alpine magic properties ($el, $nextTick, etc.) are injected at runtime
     ...({} as AlpineMagics),
     isOpen: false,
+    // True from md up when the desktop row overflows: the mobile layout takes over
+    collapsed: false,
     toggleButton: null,
     mobileNavContainer: null,
+    navRow: null,
 
     init() {
       this.toggleButton = this.$el.querySelector('[data-nav-toggle]');
       this.mobileNavContainer = this.$el.querySelector('.mobile-nav-container');
+      this.navRow = this.$el.querySelector('[data-nav-row]');
       this.initMobileSubmenus();
+      this.$watch('isOpen', (open: boolean) => {
+        if (!open) this.measure();
+      });
+
+      const row = this.navRow;
+      if (!row) return;
+      this.measure();
+      let lastWidth = row.clientWidth;
+      const observer = new ResizeObserver(() => {
+        if (row.clientWidth === lastWidth) return;
+        lastWidth = row.clientWidth;
+        this.measure();
+      });
+      observer.observe(row);
+      void document.fonts?.ready.then(() => this.measure());
+    },
+
+    measure() {
+      const row = this.navRow;
+      if (!row) return;
+      const atMd = window.matchMedia?.('(min-width: 48rem)').matches ?? false;
+      // A probe would hide an open collapsed panel (display:none) and reset its scroll,
+      // focus and stagger. The isOpen watcher in init() measures again once it closes.
+      if (this.collapsed && this.isOpen) return;
+      let next = false;
+      if (atMd) {
+        // Probe the desktop layout synchronously, then settle before paint
+        this.$el.classList.remove('nav-collapsed');
+        // In-flow content only: absolutely positioned dropdowns would inflate scrollWidth.
+        // The last rendered child is the right-hand controls (a hidden mobile toggle has no width).
+        const rowRight = row.getBoundingClientRect().right;
+        const last = Array.from(row.children)
+          .reverse()
+          .find((el) => el.getBoundingClientRect().width > 0);
+        next = last ? last.getBoundingClientRect().right > rowRight + 0.5 : false;
+      }
+      this.$el.classList.toggle('nav-collapsed', next);
+      // The desktop layout has no panel, so an open one closes when it returns
+      if (atMd && !next) this.isOpen = false;
+      this.collapsed = next;
     },
 
     initMobileSubmenus() {
@@ -117,7 +164,16 @@ export function createNavigationComponent(): NavigationComponent {
           }
         });
 
-        item.appendChild(toggle);
+        // The clip wrapper lets CSS animate the height (grid 0fr to 1fr)
+        const clip = document.createElement('div');
+        clip.className = 'sub-menu-clip';
+        submenu.before(clip);
+        clip.appendChild(submenu);
+
+        // Right after the link: grid column 2 of row 1, and tab order link, toggle, submenu
+        const link = item.querySelector(':scope > a');
+        if (link) link.after(toggle);
+        else item.prepend(toggle);
       });
     },
 
@@ -170,10 +226,12 @@ export function createNavigationComponent(): NavigationComponent {
     getFocusableElements(): HTMLElement[] {
       if (!this.mobileNavContainer) return [];
       const selector = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
-      // offsetParent is null for display:none elements (e.g. collapsed submenus),
-      // filtering them out so the trap's boundaries are always elements Tab can reach.
+      // offsetParent is null for display:none elements. Closed submenus use
+      // visibility:hidden (so they can animate), which keeps offsetParent set,
+      // so they are excluded explicitly. Both keep the trap's boundaries on
+      // elements Tab can reach.
       return Array.from(this.mobileNavContainer.querySelectorAll<HTMLElement>(selector)).filter(
-        (el) => el.offsetParent !== null
+        (el) => el.offsetParent !== null && !el.closest('.sub-menu:not(.is-open)')
       );
     },
   };

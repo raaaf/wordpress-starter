@@ -48,7 +48,7 @@
 
     {{-- Skip Link for Accessibility --}}
     <a href="#main-content"
-        class="absolute top-0 left-0 p-2 text-content-inverse no-underline transform -translate-y-full bg-surface-inverse transition-transform duration-150 ease-[var(--motion-enter-ease)] motion-reduce:transition-none focus-visible:translate-y-0 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] rounded">
+        class="skip-link p-2 text-content-inverse no-underline bg-surface-inverse focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] rounded">
         {{ __('Zum Inhalt springen', 'wp-starter') }}
     </a>
 
@@ -58,7 +58,7 @@
     @endphp
 
     <header class="bg-surface/92 backdrop-blur-md {{ $headerSticky ? 'sticky top-0 z-50' : '' }}" role="banner">
-        <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8">
             @if($isLandingPage)
                 <div>
                     @include('partials.header-menu')

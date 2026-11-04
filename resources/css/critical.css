@@ -42,26 +42,28 @@
     color: var(--text-primary, #1a1a1a);
   }
 
-  /* Skip link - accessible but visually hidden until focused */
+  /* Skip link: reachable by keyboard, never painted at rest. Clip, opacity and
+     pointer-events keep macOS rubber-band overscroll from revealing it. */
   .skip-link {
-    position: absolute;
-    left: -9999px;
-    top: auto;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    z-index: 9999;
+    position: fixed;
+    top: var(--wp-admin--admin-bar--height, 0px);
+    left: 0;
+    z-index: 60;
+    clip-path: inset(50%);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-100%);
+    transition: none;
   }
 
+  /* Visible on any focus, so assistive-technology focus reveals it (WCAG 2.4.7).
+     Mouse focus cannot reach it: pointer-events is none at rest. Padding and colours
+     come from the utilities on the element. */
   .skip-link:focus {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: auto;
-    height: auto;
-    padding: 0.5rem 1rem;
-    background: var(--bg-inverse, #1a1a1a);
-    color: var(--text-inverse, #fff);
+    clip-path: none;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
     font-weight: 400;
   }
 

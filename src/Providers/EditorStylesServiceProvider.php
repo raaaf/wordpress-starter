@@ -63,9 +63,10 @@ class EditorStylesServiceProvider extends ServiceProvider
     /**
      * Register custom formats for the TinyMCE Formats dropdown.
      *
-     * Two groups:
+     * Top-level entries:
      * - Typografie: Typography styles (Display, Headings, Body variants, Caption, Overline, Code)
      * - Buttons: Link button styles (Primary, Secondary, Ghost)
+     * - Badge: Inline pill for selected text, same look as <x-badge variant="accent">
      *
      * Headings (h1-h5) use only the block element change — no extra class needed
      * because base heading styles in editor-style.css cover them completely.
@@ -202,6 +203,11 @@ class EditorStylesServiceProvider extends ServiceProvider
                             ],
                         ],
                     ],
+                ],
+                [
+                    'title' => __('Badge', 'wp-starter'),
+                    'inline' => 'span',
+                    'classes' => 'badge badge--inline',
                 ],
             ];
 

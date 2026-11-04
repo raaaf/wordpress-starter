@@ -13,6 +13,7 @@ describe('Navigation Component', () => {
   beforeEach(() => {
     navigation = createNavigationComponent() as TestableNavigationComponent;
     // Mock Alpine.js magic properties
+    navigation.$watch = () => {};
     navigation.$nextTick = (callback?: () => void) => {
       callback?.();
       return Promise.resolve();
@@ -123,6 +124,7 @@ describe('Navigation Component init()', () => {
     document.body.appendChild(root);
 
     navigation = createNavigationComponent() as TestableNavigationComponent;
+    navigation.$watch = () => {};
     navigation.$nextTick = (callback?: () => void) => {
       callback?.();
       return Promise.resolve();
@@ -182,6 +184,7 @@ describe('Navigation Component init() without themeStrings', () => {
 
   it('falls back to German default labels instead of throwing', () => {
     const navigation = createNavigationComponent() as TestableNavigationComponent;
+    navigation.$watch = () => {};
     navigation.$nextTick = (callback?: () => void) => {
       callback?.();
       return Promise.resolve();
@@ -192,5 +195,111 @@ describe('Navigation Component init() without themeStrings', () => {
 
     const toggle = root.querySelector<HTMLButtonElement>('.submenu-toggle')!;
     expect(toggle.getAttribute('aria-label')).toBe('Untermenü öffnen');
+  });
+});
+
+describe('Navigation collapse measuring', () => {
+  const originalMatchMedia = window.matchMedia;
+  let navigation: NavigationComponent;
+  let root: HTMLElement;
+  let row: HTMLElement;
+  let child: HTMLElement;
+
+  function setMd(matches: boolean) {
+    window.matchMedia = (() => ({ matches })) as unknown as typeof window.matchMedia;
+  }
+
+  // The overflow check reads the last rendered child of the row against the row itself
+  function rect(right: number, width = 100) {
+    return () => ({ right, width }) as DOMRect;
+  }
+
+  function setRowWidths(scrollWidth: number, clientWidth: number) {
+    child.getBoundingClientRect = rect(scrollWidth);
+    row.getBoundingClientRect = rect(clientWidth, clientWidth);
+  }
+
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.innerHTML = '<div data-nav-row><div></div></div>';
+    row = root.firstElementChild as HTMLElement;
+    child = row.firstElementChild as HTMLElement;
+    navigation = createNavigationComponent() as NavigationComponent;
+    navigation.$el = root;
+    navigation.navRow = row;
+    setMd(true);
+  });
+
+  afterEach(() => {
+    window.matchMedia = originalMatchMedia;
+  });
+
+  it('stays expanded when the row fits', () => {
+    setRowWidths(900, 900);
+
+    navigation.measure();
+
+    expect(navigation.collapsed).toBe(false);
+    expect(root.classList.contains('nav-collapsed')).toBe(false);
+  });
+
+  it('collapses when the row overflows', () => {
+    setRowWidths(1000, 900);
+
+    navigation.measure();
+
+    expect(navigation.collapsed).toBe(true);
+    expect(root.classList.contains('nav-collapsed')).toBe(true);
+  });
+
+  it('does not collapse below md even when the row overflows', () => {
+    setMd(false);
+    setRowWidths(1000, 900);
+
+    navigation.measure();
+
+    expect(navigation.collapsed).toBe(false);
+    expect(root.classList.contains('nav-collapsed')).toBe(false);
+  });
+
+  it('closes a panel opened below the breakpoint once desktop returns without overflow', () => {
+    setMd(false);
+    navigation.isOpen = true;
+    setRowWidths(900, 900);
+
+    navigation.measure();
+    expect(navigation.isOpen).toBe(true);
+
+    setMd(true);
+    navigation.measure();
+
+    expect(navigation.collapsed).toBe(false);
+    expect(navigation.isOpen).toBe(false);
+  });
+
+  it('leaves an open collapsed panel alone and measures again after it closes', () => {
+    let onOpenChange: ((open: boolean) => void) | undefined;
+    navigation.$watch = ((_property: string, callback: (open: boolean) => void) => {
+      onOpenChange = callback;
+    }) as unknown as NavigationComponent['$watch'];
+    navigation.$nextTick = (() => Promise.resolve()) as unknown as NavigationComponent['$nextTick'];
+    setRowWidths(900, 900);
+    navigation.init();
+
+    navigation.collapsed = true;
+    navigation.isOpen = true;
+    root.classList.add('nav-collapsed');
+
+    navigation.measure();
+
+    expect(navigation.collapsed).toBe(true);
+    expect(navigation.isOpen).toBe(true);
+    expect(root.classList.contains('nav-collapsed')).toBe(true);
+
+    navigation.isOpen = false;
+    onOpenChange?.(false);
+
+    expect(navigation.collapsed).toBe(false);
+    expect(root.classList.contains('nav-collapsed')).toBe(false);
   });
 });

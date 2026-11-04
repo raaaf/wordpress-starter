@@ -2205,6 +2205,7 @@ html {
   /* Desktop nav link styles */
   /* Soft pills: the link carries its own padding, the hover fills it in stone. */
   .desktop-nav > ul > li > a {
+    white-space: nowrap;
     display: block;
     padding: 0.5rem 0.75rem;
     border-radius: var(--rafael-radius-md);
@@ -2253,6 +2254,22 @@ html {
     height: 1.25rem;
     border-left: var(--border-width-1, 1px) solid var(--border-default);
     translate: 0 -50%;
+  }
+
+  /* Overflowing row (set by the navigation component): switch to the mobile
+     layout. Unlayered, so these beat the md:hidden / hidden utilities; the
+     panel stays closed because x-show sets an inline display:none. */
+  .nav-collapsed .desktop-nav,
+  .nav-collapsed [data-nav-desktop-cta] {
+    display: none;
+  }
+
+  .nav-collapsed [data-nav-toggle] {
+    display: inline-block;
+  }
+
+  .nav-collapsed .mobile-nav-container {
+    display: block;
   }
 
   /* Parent menu item with submenu */
@@ -2326,8 +2343,11 @@ html {
 
   .desktop-nav .sub-menu a {
     display: block;
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 0.75rem;
     color: var(--text-secondary);
+    font-size: var(--rafael-font-size-sm);
+    font-weight: 400;
+    line-height: 1.5;
     white-space: nowrap;
     transition:
       color var(--motion-enter-duration) var(--motion-enter-ease),
@@ -2352,6 +2372,10 @@ html {
     background: var(--bg-secondary);
   }
 
+  .desktop-nav .sub-menu a:active {
+    background: var(--bg-tertiary);
+  }
+
   .desktop-nav .sub-menu .current-menu-item > a {
     color: var(--text-primary);
     /* Colour alone is not a signal: the underline marks the current page. WCAG 1.4.1. */
@@ -2368,6 +2392,11 @@ html {
     margin-left: 0;
   }
 
+  /* Room for the nested-menu arrow */
+  .desktop-nav .sub-menu .menu-item-has-children > a {
+    padding-right: 2rem;
+  }
+
   .desktop-nav .sub-menu .menu-item-has-children > a::after {
     transform: rotate(-45deg);
     position: absolute;
@@ -2376,22 +2405,48 @@ html {
   }
 }
 
+/* Below md the header logo scales down instead of widening the row past the viewport. */
+[data-nav-row] :is(.site-logo--light, .site-logo--dark) {
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left;
+}
+
 /* Mobile Navigation - Accordion Submenus */
 .mobile-nav .menu-item-has-children {
-  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.mobile-nav .menu-item-has-children > .sub-menu-clip,
+.mobile-nav .menu-item-has-children > .sub-menu {
+  grid-column: 1 / -1;
 }
 
 /* Mobile nav link styles */
+/* The padding sits on the link, so the whole row is the touch target. */
+.mobile-nav li {
+  padding: 0;
+}
+
 .mobile-nav > ul > li > a {
   display: block;
-  padding-right: 3rem;
+  border-radius: var(--rafael-radius-md, 0.5rem);
+  min-height: 2.75rem;
+  padding: 0.625rem 1rem;
   color: var(--text-secondary);
   font-weight: 400;
-  transition: color var(--motion-enter-duration) var(--motion-enter-ease);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color var(--motion-enter-duration) var(--motion-enter-ease),
+    background-color 150ms var(--motion-enter-ease);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .mobile-nav > ul > li > a:hover {
+  .mobile-nav > ul > li > a:hover,
+  .mobile-nav .submenu-toggle:hover {
+    background: var(--bg-secondary);
     color: var(--text-primary);
   }
 }
@@ -2408,23 +2463,28 @@ html {
 
 /* Toggle button for mobile submenu */
 .mobile-nav .submenu-toggle {
-  position: absolute;
-  right: 0;
-  top: 0;
+  /* Same grid row as the parent link, so the chevron centres on it at any row height. */
   width: 3rem;
-  height: 100%;
+  min-height: 2.75rem;
+  margin-block: 0;
+  padding-right: 1rem;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  color: var(--text-secondary);
   cursor: pointer;
   background: transparent;
   border: none;
-  color: var(--text-tertiary);
-  transition: color var(--motion-enter-duration) var(--motion-enter-ease);
+  border-radius: var(--rafael-radius-md, 0.5rem);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color var(--motion-enter-duration) var(--motion-enter-ease),
+    background-color 150ms var(--motion-enter-ease);
 }
 
-.mobile-nav .submenu-toggle:hover {
-  color: var(--text-primary);
+/* The toggle has its own grid column, so the link needs no room for it. */
+.mobile-nav > ul > li.menu-item-has-children > a {
+  padding-right: 0;
 }
 
 .mobile-nav .submenu-toggle svg {
@@ -2440,7 +2500,6 @@ html {
 /* Mobile submenu */
 .mobile-nav .sub-menu {
   display: none;
-  padding-left: 1rem;
   background: var(--bg-secondary);
 }
 
@@ -2448,16 +2507,225 @@ html {
   display: block;
 }
 
-.mobile-nav .sub-menu a {
+/* With JS, each submenu sits in a clip wrapper that animates its height
+   (grid 0fr to 1fr). Closed submenus use visibility:hidden, which keeps
+   their links out of the tab order. */
+.sub-menu-clip {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 180ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.sub-menu-clip:has(> .sub-menu.is-open) {
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 240ms var(--nav-ease-out);
+}
+
+.sub-menu-clip > .sub-menu {
   display: block;
-  padding: 0.5rem 1rem;
+  min-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: 0;
+  translate: 0 -4px;
+  transition:
+    opacity 120ms cubic-bezier(0.4, 0, 1, 1),
+    translate 120ms cubic-bezier(0.4, 0, 1, 1),
+    visibility 0s linear 180ms;
+}
+
+.sub-menu-clip > .sub-menu.is-open {
+  visibility: visible;
+  opacity: 1;
+  translate: 0;
+  transition:
+    opacity 200ms var(--nav-ease-out),
+    translate 240ms var(--nav-ease-out),
+    visibility 0s;
+}
+
+/* An open submenu inside a closed parent must stay out of the tab order. */
+.sub-menu-clip > .sub-menu:not(.is-open) .sub-menu {
+  visibility: hidden;
+}
+
+/* Hamburger and close icon cross-fade; both stay rendered */
+.nav-icon-stack {
+  display: grid;
+}
+
+.nav-icon {
+  grid-area: 1 / 1;
+  transition:
+    opacity 200ms var(--nav-ease-out),
+    scale 200ms var(--nav-ease-out),
+    filter 200ms var(--nav-ease-out);
+}
+
+.nav-icon--menu,
+[data-nav-toggle][aria-expanded='true'] .nav-icon--close {
+  opacity: 1;
+  scale: 1;
+  filter: blur(0);
+}
+
+.nav-icon--close,
+[data-nav-toggle][aria-expanded='true'] .nav-icon--menu {
+  opacity: 0;
+  scale: 0.3;
+  filter: blur(3px);
+}
+
+/* Mobile panel motion. Classes are applied by Alpine x-transition. */
+:root {
+  --nav-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.mobile-nav-container {
+  transform-origin: top;
+  /* 100% is the header root height (the panel's containing block): a short viewport scrolls the panel */
+  max-height: calc(100dvh - 100% - var(--wp-admin--admin-bar--height, 0px) - 1rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.nav-panel-enter {
+  transition:
+    opacity 260ms var(--nav-ease-out),
+    translate 260ms var(--nav-ease-out),
+    scale 260ms var(--nav-ease-out);
+}
+
+.nav-panel-leave {
+  transition:
+    opacity 160ms cubic-bezier(0.4, 0, 1, 1),
+    translate 160ms cubic-bezier(0.4, 0, 1, 1),
+    scale 160ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.nav-panel-from {
+  opacity: 0;
+  translate: 0 -8px;
+  scale: 0.98;
+}
+
+.nav-panel-to {
+  opacity: 1;
+  translate: 0;
+  scale: 1;
+}
+
+.nav-panel-out {
+  opacity: 0;
+  translate: 0 -4px;
+  scale: 0.99;
+}
+
+/* Item stagger, enter only. Nothing plays until the panel gets .is-open. */
+/* Items start above their rest position: downward travel would make the panel scrollable. */
+@keyframes nav-item-in {
+  from {
+    opacity: 0;
+    translate: 0 -6px;
+  }
+  to {
+    opacity: 1;
+    translate: 0;
+  }
+}
+
+.mobile-nav-container.is-open .mobile-nav > ul > li {
+  animation: nav-item-in 240ms var(--nav-ease-out) both;
+  animation-delay: calc(var(--nav-i, 8) * 24ms);
+}
+
+.mobile-nav-container.is-open .mobile-nav > ul > li:nth-child(1) {
+  --nav-i: 0;
+}
+.mobile-nav-container.is-open .mobile-nav > ul > li:nth-child(2) {
+  --nav-i: 1;
+}
+.mobile-nav-container.is-open .mobile-nav > ul > li:nth-child(3) {
+  --nav-i: 2;
+}
+.mobile-nav-container.is-open .mobile-nav > ul > li:nth-child(4) {
+  --nav-i: 3;
+}
+.mobile-nav-container.is-open .mobile-nav > ul > li:nth-child(5) {
+  --nav-i: 4;
+}
+.mobile-nav-container.is-open .mobile-nav > ul > li:nth-child(6) {
+  --nav-i: 5;
+}
+.mobile-nav-container.is-open .mobile-nav > ul > li:nth-child(7) {
+  --nav-i: 6;
+}
+.mobile-nav-container.is-open .mobile-nav > ul > li:nth-child(8) {
+  --nav-i: 7;
+}
+
+.mobile-nav-container.is-open .nav-panel-cta {
+  animation: nav-item-in 240ms var(--nav-ease-out) both;
+  animation-delay: 120ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-panel-enter,
+  .nav-panel-leave,
+  .sub-menu-clip,
+  .sub-menu-clip:has(> .sub-menu.is-open),
+  .sub-menu-clip > .sub-menu,
+  .sub-menu-clip > .sub-menu.is-open,
+  .nav-icon {
+    transition: none;
+  }
+
+  .nav-panel-from,
+  .nav-panel-out {
+    opacity: 1;
+    translate: 0;
+    scale: 1;
+  }
+
+  .mobile-nav-container.is-open .mobile-nav > ul > li,
+  .mobile-nav-container.is-open .nav-panel-cta {
+    animation: none;
+  }
+
+  .sub-menu-clip > .sub-menu,
+  .sub-menu-clip > .sub-menu.is-open {
+    translate: 0;
+  }
+}
+
+.mobile-nav .sub-menu a {
+  display: flex;
+  border-radius: var(--rafael-radius-md, 0.5rem);
+  align-items: center;
+  min-height: 2.75rem;
+  /* Text sits 1rem deeper than the parent link text */
+  padding: 0.25rem 1rem 0.25rem 2rem;
   color: var(--text-secondary);
   font-size: 0.875rem;
-  transition: color var(--motion-enter-duration) var(--motion-enter-ease);
+  font-weight: 400;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color var(--motion-enter-duration) var(--motion-enter-ease),
+    background-color 150ms var(--motion-enter-ease);
+}
+
+/* Each nested level indents a further 1rem */
+.mobile-nav .sub-menu .sub-menu a {
+  padding-left: 3rem;
+}
+
+.mobile-nav .sub-menu .sub-menu .sub-menu a {
+  padding-left: 4rem;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .mobile-nav .sub-menu a:hover {
+    background: var(--bg-tertiary);
     color: var(--text-primary);
   }
 }
@@ -2469,6 +2737,18 @@ html {
   text-decoration-color: var(--rafael-color-ds-accent-base);
   text-decoration-thickness: 2px;
   text-underline-offset: 4px;
+}
+
+.mobile-nav > ul > li > a:active,
+.mobile-nav .submenu-toggle:active,
+.mobile-nav .sub-menu a:active {
+  background: var(--bg-tertiary);
+}
+
+/* The submenu clip has overflow:hidden, so an outer focus ring would be cut off. */
+.mobile-nav a:focus-visible,
+.mobile-nav .submenu-toggle:focus-visible {
+  outline-offset: -2px;
 }
 
 /* ============================================
@@ -3672,4 +3952,36 @@ html {
 .token-segment input:focus-visible + span {
   outline: 3px solid var(--ring-focus);
   outline-offset: 2px;
+}
+
+/* Badge from the editor's Formats dropdown (EditorStylesServiceProvider). TinyMCE
+   wraps the selection in a single span, so neither the component's utility classes
+   nor a .badge__label child exist here. Same look as <x-badge variant="accent">.
+   inline-block instead of inline-flex: text-box only trims block containers. */
+.badge--inline {
+  --badge-py: var(--badge-md-padding-y);
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding-inline: var(--badge-md-padding-x);
+  padding-top: calc(var(--badge-py) + 0.5px);
+  padding-bottom: calc(var(--badge-py) - 0.5px);
+  border-radius: 9999px;
+  background-color: var(--bg-accent-subtle);
+  color: var(--text-accent);
+  font-size: var(--typography-caption-size);
+  font-weight: var(--typography-caption-weight);
+  line-height: var(--typography-caption-line-height);
+  letter-spacing: var(--typography-caption-letter-spacing);
+
+  @variant dark {
+    background-color: var(--bg-accent);
+    color: var(--text-inverse);
+  }
+}
+@supports (text-box: trim-both cap alphabetic) {
+  .badge--inline {
+    padding-block: calc(var(--badge-py) + (1lh - 1cap) / 2);
+    text-box: trim-both cap alphabetic;
+  }
 }
