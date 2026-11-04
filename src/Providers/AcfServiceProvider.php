@@ -741,47 +741,62 @@ class AcfServiceProvider extends ServiceProvider
      * Fills empty section_anchor fields of a page with a unique ID based on
      * layout name and position. Preserves manually set anchors.
      *
-     * Runs on acf/save_post and after an MCP write (Mcp\ContractProvider),
-     * which stores page_sections without the ACF form.
+     * Writes one sub field value per row and never the whole flexible field:
+     * the flexible field's update_value() rebuilds _page_sections_layout_meta
+     * from the rows it is given, so a rewrite would drop the editor's Rename
+     * and Disable of every layout. Layout names and stored anchors are read
+     * through ACF's metadata API (not get_post_meta) so ACF Extended's
+     * performance module sees the same data. The field comes from the row's
+     * own layout, so the reference key matches that layout.
      */
     public static function ensureSectionAnchors(mixed $postId): void
     {
-        if (!function_exists('have_rows') || wp_is_post_revision($postId)) {
+        if (!function_exists('acf_get_metadata_by_field') || wp_is_post_revision($postId)) {
             return;
         }
 
-        $sections = get_field('page_sections', $postId, false);
-        if (!is_array($sections)) {
+        $layouts = acf_get_metadata_by_field($postId, ['name' => 'page_sections']);
+        if (!is_array($layouts)) {
             return;
+        }
+
+        $flexible = acf_get_field('field_page_sections');
+        if (!is_array($flexible)) {
+            return;
+        }
+
+        $anchorFields = [];
+        foreach ($flexible['layouts'] ?? [] as $layoutDefinition) {
+            foreach ($layoutDefinition['sub_fields'] ?? [] as $subField) {
+                if (isset($subField['name']) && $subField['name'] === 'section_anchor') {
+                    $anchorFields[$layoutDefinition['name']] = $subField;
+                }
+            }
         }
 
         $layoutCounters = [];
-        $changed = false;
 
-        foreach ($sections as &$section) {
-            $layout = $section['acf_fc_layout'] ?? '';
-            if (!$layout) {
+        foreach ($layouts as $index => $layout) {
+            if (!is_string($layout) || $layout === '') {
                 continue;
             }
 
             $layoutCounters[$layout] = ( $layoutCounters[$layout] ?? 0 ) + 1;
 
-            if (empty($section['section_anchor'])) {
-                $section['section_anchor'] = str_replace('_', '-', $layout) . '-' . $layoutCounters[$layout];
-                $changed = true;
+            if (!isset($anchorFields[$layout])) {
+                continue;
             }
-        }
-        unset($section);
 
-        if ($changed) {
-            // update_field() fires acf/save_post again; unhook to avoid a loop.
-            $callback = [self::class, 'ensureSectionAnchors'];
-            $hooked = has_action('acf/save_post', $callback);
-            remove_action('acf/save_post', $callback, 20);
-            update_field('page_sections', $sections, $postId);
-            if ($hooked !== false) {
-                add_action('acf/save_post', $callback, 20);
+            $name = "page_sections_{$index}_section_anchor";
+            if (!empty(acf_get_metadata_by_field($postId, ['name' => $name]))) {
+                continue;
             }
+
+            acf_update_value(
+                str_replace('_', '-', $layout) . '-' . $layoutCounters[$layout],
+                $postId,
+                ['name' => $name] + $anchorFields[$layout]
+            );
         }
     }
 

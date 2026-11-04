@@ -119,19 +119,39 @@ final class ContractProviderTest extends TestCase
 
     public function testAfterWriteFillsMissingAnchorsLikeSaving(): void
     {
-        $GLOBALS['wp_mock_fields']['page_sections:12'] = [
-            ['acf_fc_layout' => 'hero', 'section_anchor' => ''],
-            ['acf_fc_layout' => 'cards', 'section_anchor' => 'leistungen'],
-            ['acf_fc_layout' => 'hero'],
-        ];
+        $this->givenStoredSections(12, ['hero', 'cards', 'hero'], [0 => '', 1 => 'leistungen']);
 
         ( $this->contract()['after_write'] )(12);
 
-        $this->assertCount(1, $GLOBALS['wp_mock_updated_fields']);
-        $update = $GLOBALS['wp_mock_updated_fields'][0];
-        $this->assertSame('page_sections', $update['selector']);
-        $this->assertSame(12, $update['post_id']);
-        $this->assertSame(['hero-1', 'leistungen', 'hero-2'], array_column($update['value'], 'section_anchor'));
+        $this->assertSame([], $GLOBALS['wp_mock_updated_fields'], 'the flexible field is not rewritten');
+        $written = array_column($GLOBALS['wp_mock_acf_written_values'], 'value', 'name');
+        $this->assertSame(
+            ['page_sections_0_section_anchor' => 'hero-1', 'page_sections_2_section_anchor' => 'hero-2'],
+            $written
+        );
+    }
+
+    /**
+     * @param list<string>       $layouts
+     * @param array<int, string> $anchors
+     */
+    private function givenStoredSections(int $postId, array $layouts, array $anchors): void
+    {
+        $GLOBALS['wp_mock_acf_meta'] = ["{$postId}:page_sections" => $layouts];
+        foreach ($anchors as $index => $anchor) {
+            $GLOBALS['wp_mock_acf_meta']["{$postId}:page_sections_{$index}_section_anchor"] = $anchor;
+        }
+        $GLOBALS['wp_mock_acf_written_values'] = [];
+
+        $anchorField = static fn (string $layout): array => ['key' => "field_{$layout}_section_anchor", 'name' => 'section_anchor'];
+        $GLOBALS['wp_mock_acf_fields']['field_page_sections'] = [
+            'key' => 'field_page_sections',
+            'name' => 'page_sections',
+            'layouts' => [
+                ['name' => 'hero', 'sub_fields' => [$anchorField('hero')]],
+                ['name' => 'cards', 'sub_fields' => [$anchorField('cards')]],
+            ],
+        ];
     }
 
     public function testEmbedHostTakesHostOrUrl(): void
@@ -176,7 +196,7 @@ final class ContractProviderTest extends TestCase
         $this->assertStringContainsString('1 cells for 2 columns', $problems[2]);
     }
 
-    public function testSaveHookStillAddsAnchorsAndUnhooksDuringItsOwnWrite(): void
+    public function testSaveHookFillsAnchorsThroughTheSameCallback(): void
     {
         $provider = new AcfServiceProvider();
         $method = new \ReflectionMethod($provider, 'registerSectionAnchorGeneration');
@@ -185,15 +205,13 @@ final class ContractProviderTest extends TestCase
         $callback = [AcfServiceProvider::class, 'ensureSectionAnchors'];
         $this->assertSame(20, has_action('acf/save_post', $callback));
 
-        $GLOBALS['wp_mock_fields']['page_sections:5'] = [['acf_fc_layout' => 'cta']];
+        $this->givenStoredSections(5, ['hero'], [0 => '']);
         do_action('acf/save_post', 5);
 
-        $this->assertSame('cta-1', $GLOBALS['wp_mock_updated_fields'][0]['value'][0]['section_anchor']);
-        $this->assertSame(20, has_action('acf/save_post', $callback), 'hooked again after the write');
-
-        $GLOBALS['wp_mock_revisions'][6] = 5;
-        $GLOBALS['wp_mock_fields']['page_sections:6'] = [['acf_fc_layout' => 'cta']];
-        AcfServiceProvider::ensureSectionAnchors(6);
-        $this->assertCount(1, $GLOBALS['wp_mock_updated_fields'], 'revisions are skipped');
+        $this->assertSame(
+            ['page_sections_0_section_anchor' => 'hero-1'],
+            array_column($GLOBALS['wp_mock_acf_written_values'], 'value', 'name')
+        );
+        $this->assertSame([], $GLOBALS['wp_mock_updated_fields']);
     }
 }
