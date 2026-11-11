@@ -1,3 +1,13 @@
+# [2.46.0](https://github.com/raaaf/wordpress-starter/compare/v2.45.1...v2.46.0) (2026-11-11)
+
+### Bug Fixes
+
+- **css:** keep the colour-literal ceiling for the inline-colour exclusions ([6ce6813](https://github.com/raaaf/wordpress-starter/commit/6ce68136bf50756b4643d62e257d52a236b4586f))
+
+### Features
+
+- content robustness backported from the client themes ([24e0d26](https://github.com/raaaf/wordpress-starter/commit/24e0d26c53cee1d098e206b73da3d919ec50a453))
+
 ## [2.45.1](https://github.com/raaaf/wordpress-starter/compare/v2.45.0...v2.45.1) (2026-11-11)
 
 ### Bug Fixes
