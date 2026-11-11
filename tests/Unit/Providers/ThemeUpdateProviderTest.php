@@ -104,7 +104,7 @@ final class ThemeUpdateProviderTest extends TestCase
 
     private function verify(): mixed
     {
-        return $this->provider->verifyPackageChecksum(false, self::PACKAGE, new \WP_Upgrader(), ['theme' => 'wp-starter']);
+        return $this->provider->verifyPackageChecksum(false, self::PACKAGE, new \WP_Upgrader(), ['theme' => 'wordpress-starter-theme']);
     }
 
     public function testIgnoresPackagesForOtherThemes(): void
@@ -125,7 +125,7 @@ final class ThemeUpdateProviderTest extends TestCase
             '/already/downloaded/file.zip',
             'https://example.com/wp-starter.zip',
             new \WP_Upgrader(),
-            ['theme' => 'wp-starter']
+            ['theme' => 'wordpress-starter-theme']
         );
 
         $this->assertSame('/already/downloaded/file.zip', $result);
@@ -153,7 +153,7 @@ final class ThemeUpdateProviderTest extends TestCase
             false,
             'https://example.com/wp-starter.zip',
             new \WP_Upgrader(),
-            ['theme' => 'wp-starter']
+            ['theme' => 'wordpress-starter-theme']
         );
 
         $this->assertInstanceOf(WP_Error::class, $result);
@@ -253,7 +253,7 @@ final class ThemeUpdateProviderTest extends TestCase
     {
         $this->expectErrorLog();
         $GLOBALS['wp_mock_site_transients']['update_themes'] = (object) [
-            'response' => ['wp-starter' => ['new_version' => '2.0.0']],
+            'response' => ['wordpress-starter-theme' => ['new_version' => '2.0.0']],
         ];
         $older = $this->themeZip('1.5.0');
         $this->seedRelease($older, $this->sign($older));
@@ -292,6 +292,60 @@ final class ThemeUpdateProviderTest extends TestCase
 
         $this->assertInstanceOf(WP_Error::class, $result);
         $this->assertSame('theme_update_no_signing_key', $result->get_error_code());
+    }
+
+    public function testApiAssetUrlResolvesSiblingChecksumAndSignatureAssets(): void
+    {
+        $zip = $this->themeZip('1.1.0');
+        $file = $this->seedDownload($zip);
+        $package = 'https://api.github.com/repos/raaaf/wordpress-starter/releases/assets/201';
+        $base = 'https://api.github.com/repos/raaaf/wordpress-starter/releases';
+
+        $GLOBALS['wp_mock_remote_responses'][$base . '?per_page=100'] = [
+            'response' => ['code' => 200],
+            'body' => wp_json_encode([
+                [
+                    'assets' => [
+                        ['id' => 201, 'name' => 'wordpress-starter-theme-1.1.0.zip', 'url' => $package],
+                        ['id' => 202, 'name' => 'wordpress-starter-theme-1.1.0.zip.sha256', 'url' => $base . '/assets/202'],
+                        ['id' => 203, 'name' => 'wordpress-starter-theme-1.1.0.zip.sig', 'url' => $base . '/assets/203'],
+                    ],
+                ],
+            ]),
+        ];
+        $GLOBALS['wp_mock_remote_responses'][$base . '/assets/202'] = [
+            'response' => ['code' => 200],
+            'body' => hash_file('sha256', $file) . '  wordpress-starter-theme-1.1.0.zip',
+        ];
+        $GLOBALS['wp_mock_remote_responses'][$base . '/assets/203'] = [
+            'response' => ['code' => 200],
+            'body' => $this->sign($zip) . "\n",
+        ];
+        // What GitHub answers for "<package>.sha256" and "<package>.sig": the zip itself.
+        foreach (['.sha256', '.sig'] as $suffix) {
+            $GLOBALS['wp_mock_remote_responses'][$package . $suffix] = [
+                'response' => ['code' => 200],
+                'body' => $zip,
+            ];
+        }
+
+        $result = $this->provider->verifyPackageChecksum(false, $package, new \WP_Upgrader(), ['theme' => 'wordpress-starter-theme']);
+
+        $this->assertSame($file, $result);
+    }
+
+    public function testVerificationRunsWhenHookThemeIsTheDirectoryName(): void
+    {
+        $this->seedDownload('theme package contents');
+        $GLOBALS['wp_mock_remote_responses'][self::PACKAGE . '.sha256'] = [
+            'response' => ['code' => 200],
+            'body' => str_repeat('a', 64) . '  wp-starter.zip',
+        ];
+
+        $result = $this->verify();
+
+        $this->assertInstanceOf(WP_Error::class, $result);
+        $this->assertSame('theme_update_checksum_mismatch', $result->get_error_code());
     }
 
     public function testFilterAcceptsCoreArgumentOrder(): void

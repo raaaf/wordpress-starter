@@ -129,7 +129,7 @@ final class ThemeUpdateProvider extends ServiceProvider
     public function verifyPackageChecksum(mixed $reply, string $package, \WP_Upgrader $upgrader, array $hookExtra): mixed
     {
         // Not our theme's package: leave core's default download flow alone.
-        if (( $hookExtra['theme'] ?? null ) !== self::THEME_SLUG) {
+        if (( $hookExtra['theme'] ?? null ) !== get_template()) {
             return $reply;
         }
 
@@ -165,7 +165,7 @@ final class ThemeUpdateProvider extends ServiceProvider
      */
     private function checkChecksum(string $file, string $package): ?WP_Error
     {
-        $body = $this->fetchAsset($package . '.sha256');
+        $body = $this->fetchAsset($package, '.sha256');
         if ($body === null) {
             LogServiceProvider::warning('Theme-Update-Pruefsumme nicht verfuegbar', ['package' => $package]);
 
@@ -204,7 +204,7 @@ final class ThemeUpdateProvider extends ServiceProvider
             );
         }
 
-        $body = $this->fetchAsset($package . '.sig');
+        $body = $this->fetchAsset($package, '.sig');
         $signature = $body !== null ? base64_decode(trim($body), true) : false;
         if ($signature === false || strlen($signature) !== SODIUM_CRYPTO_SIGN_BYTES) {
             LogServiceProvider::warning('Theme-Update-Signatur nicht verfuegbar', ['package' => $package]);
@@ -245,10 +245,10 @@ final class ThemeUpdateProvider extends ServiceProvider
     private function checkVersion(string $file): ?WP_Error
     {
         $packaged = self::packagedVersion($file);
-        $installed = (string) wp_get_theme(self::THEME_SLUG)->get('Version');
+        $installed = (string) wp_get_theme(get_template())->get('Version');
         $transient = get_site_transient('update_themes');
-        $announced = is_object($transient) && isset($transient->response[self::THEME_SLUG]['new_version'])
-            ? (string) $transient->response[self::THEME_SLUG]['new_version']
+        $announced = is_object($transient) && isset($transient->response[get_template()]['new_version'])
+            ? (string) $transient->response[get_template()]['new_version']
             : null;
 
         if (
@@ -312,16 +312,83 @@ final class ThemeUpdateProvider extends ServiceProvider
         return self::$publicKeysOverride ?? self::RELEASE_PUBLIC_KEYS;
     }
 
-    /** Body of a release asset, or null when it is missing or unreachable. */
-    private function fetchAsset(string $url): ?string
+    /**
+     * Body of the release asset next to the package (`<zip name><suffix>`),
+     * or null when it is missing or unreachable.
+     */
+    private function fetchAsset(string $package, string $suffix): ?string
     {
-        $response = wp_remote_get($url, ['timeout' => 10]);
+        $url = $this->resolveSiblingAssetUrl($package, $suffix);
+        if ($url === null) {
+            return null;
+        }
+
+        $response = wp_remote_get($url, [
+            'timeout' => 10,
+            'headers' => ['Accept' => 'application/octet-stream'],
+        ]);
 
         if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
             return null;
         }
 
         return wp_remote_retrieve_body($response);
+    }
+
+    /**
+     * Resolve the download URL of the release asset next to the package
+     * (`<zip name><suffix>`).
+     *
+     * A GitHub API asset URL (`.../releases/assets/<id>`) cannot simply get
+     * the suffix appended: GitHub answers that with the zip itself. Look up
+     * the sibling asset in the releases list instead. Authentication for
+     * these requests comes from plugin-update-checker's `http_request_args`
+     * filter, which covers the whole `/repos/<owner>/<repo>/` prefix.
+     *
+     * @return string|null null when the sibling asset cannot be found
+     */
+    private function resolveSiblingAssetUrl(string $package, string $suffix): ?string
+    {
+        if (preg_match('#^https://api\.github\.com/repos/([^/]+/[^/]+)/releases/assets/(\d+)$#', $package, $match) !== 1) {
+            return $package . $suffix;
+        }
+
+        $response = wp_remote_get(
+            'https://api.github.com/repos/' . $match[1] . '/releases?per_page=100',
+            ['timeout' => 10, 'headers' => ['Accept' => 'application/vnd.github+json']]
+        );
+
+        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+            return null;
+        }
+
+        $releases = json_decode(wp_remote_retrieve_body($response), true);
+
+        if (! is_array($releases)) {
+            return null;
+        }
+
+        foreach ($releases as $release) {
+            $assets = is_array($release) && is_array($release['assets'] ?? null) ? $release['assets'] : [];
+
+            foreach ($assets as $asset) {
+                if (! is_array($asset) || (string) ( $asset['id'] ?? '' ) !== $match[2]) {
+                    continue;
+                }
+
+                $siblingName = ( $asset['name'] ?? '' ) . $suffix;
+
+                foreach ($assets as $sibling) {
+                    if (is_array($sibling) && ( $sibling['name'] ?? null ) === $siblingName && is_string($sibling['url'] ?? null)) {
+                        return $sibling['url'];
+                    }
+                }
+
+                return null;
+            }
+        }
+
+        return null;
     }
 
     /**
