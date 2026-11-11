@@ -1,3 +1,14 @@
+# [2.49.0](https://github.com/raaaf/wordpress-starter/compare/v2.48.0...v2.49.0) (2026-11-11)
+
+### Bug Fixes
+
+- address playground audit findings ([a830938](https://github.com/raaaf/wordpress-starter/commit/a8309389af7058f7bb2091891e5a70bdc2cc76e7))
+- **css:** guard the font pairing face with a fallback ([37662b4](https://github.com/raaaf/wordpress-starter/commit/37662b41d0056503101402c162d037b2a72bd6e2))
+
+### Features
+
+- **styleguide:** font pairings and a generator link in the token playground ([e3dca4c](https://github.com/raaaf/wordpress-starter/commit/e3dca4c45e8e73ce50aecc1289b7f0b3dc9d26aa))
+
 # [2.48.0](https://github.com/raaaf/wordpress-starter/compare/v2.47.0...v2.48.0) (2026-11-11)
 
 ### Features
