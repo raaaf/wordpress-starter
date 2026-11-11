@@ -130,30 +130,34 @@ export function buttonRadiusParam(buttonRadius: number): string {
   return buttonRadius >= BUTTON_PILL ? 'pill' : String(buttonRadius);
 }
 
+export interface LookState {
+  accent: string;
+  radius: number;
+  buttonRadius: number;
+  scale: number;
+  pairing: FontPairing | null;
+}
+
+/** True once any value differs from the defaults (the type scale counts). */
+export function isLookChanged(state: LookState): boolean {
+  return (
+    state.accent.trim().toLowerCase() !== DEFAULT_ACCENT.toLowerCase() ||
+    state.radius !== DEFAULT_RADIUS ||
+    state.buttonRadius !== BUTTON_PILL ||
+    state.scale !== DEFAULT_SCALE ||
+    state.pairing !== null
+  );
+}
+
 /**
  * Generator link carrying the look. An untouched playground gives the plain
  * URL. Once any value differs from the defaults (the type scale counts, but is
  * never sent) the link carries the full look: accent, card radius and button
  * radius, plus both fonts when a pairing is chosen.
  */
-export function generatorUrl(
-  base: string,
-  state: {
-    accent: string;
-    radius: number;
-    buttonRadius: number;
-    scale: number;
-    pairing: FontPairing | null;
-  }
-): string {
+export function generatorUrl(base: string, state: LookState): string {
+  if (!isLookChanged(state)) return base;
   const accent = state.accent.trim().toLowerCase();
-  const changed =
-    accent !== DEFAULT_ACCENT.toLowerCase() ||
-    state.radius !== DEFAULT_RADIUS ||
-    state.buttonRadius !== BUTTON_PILL ||
-    state.scale !== DEFAULT_SCALE ||
-    state.pairing !== null;
-  if (!changed) return base;
 
   const params: Array<[string, string]> = [
     ['accent', accent],
@@ -191,8 +195,13 @@ export interface TokenPlaygroundComponent extends AlpineMagics {
   readonly ink: string;
   readonly contrast: string;
   readonly pairing: FontPairing | null;
+  readonly lookState: LookState;
   readonly href: string;
+  readonly changed: boolean;
+  opener: HTMLElement | null;
   init(): void;
+  open(trigger: HTMLElement): void;
+  close(): void;
   update(): void;
   reset(): void;
 }
@@ -221,19 +230,28 @@ export function createTokenPlaygroundComponent(
     applied: [],
     panelOpen: false,
     themeFace: '',
+    opener: null,
 
     get pairing() {
       return this.font === '' ? null : (this.fonts[Number(this.font)] ?? null);
     },
 
-    get href() {
-      return generatorUrl(config.generatorUrl ?? '', {
+    get lookState(): LookState {
+      return {
         accent: this.accent,
         radius: Number(this.radius),
         buttonRadius: Number(this.buttonRadius),
         scale: Number(this.scale),
         pairing: this.pairing,
-      });
+      };
+    },
+
+    get href() {
+      return generatorUrl(config.generatorUrl ?? '', this.lookState);
+    },
+
+    get changed() {
+      return isLookChanged(this.lookState);
     },
 
     get ink() {
@@ -252,6 +270,31 @@ export function createTokenPlaygroundComponent(
       const style = getComputedStyle(document.documentElement);
       this.fontSizes = readFontSizes(style);
       this.themeFace = style.getPropertyValue('--rafael-font-family-headline').trim();
+    },
+
+    /** Opens the drawer and remembers the trigger, so close() can give focus back. */
+    open(trigger) {
+      this.opener = trigger;
+      this.panelOpen = true;
+      // lg+: the close button; below lg the sheet opens above the bar, so the first control.
+      const wide = window.matchMedia('(min-width: 64rem)').matches;
+      this.$nextTick(() => {
+        // The close button is display:none below lg, so take the first visible focusable.
+        const target = wide
+          ? this.$refs.close
+          : [...this.$refs.panelBody.querySelectorAll<HTMLElement>('input, button, a[href]')].find(
+              (el) => el.checkVisibility?.() ?? el.offsetParent !== null
+            );
+        target?.focus();
+      });
+    },
+
+    /** Closes the drawer; focus returns to the opener only if it was inside the drawer. */
+    close() {
+      const inside = this.$refs.panel.contains(document.activeElement);
+      this.panelOpen = false;
+      // After the next render: a hidden floating opener is shown again by then.
+      if (inside) this.$nextTick(() => this.opener?.focus({ preventScroll: true }));
     },
 
     update() {

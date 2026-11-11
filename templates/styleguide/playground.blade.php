@@ -4,9 +4,11 @@
     Akzentfarbe, Eckenradius, Schriftgröße und Schriftpaar live umstellen. Die Komponente
     (resources/js/token-playground.ts) schreibt die Werte als CSS-Variablen
     inline auf <html>, deshalb folgt die ganze Seite: rechts die Abschnitte Tokens und
-    Komponenten sind die Vorschau. Ab lg klebt das Bedienfeld links, darunter ist es ein
-    festes Bottom Sheet (Zustand panelOpen). Der Wrapper trägt die Alpine-Komponente,
-    damit Bedienfeld und Leiste denselben Zustand teilen.
+    Komponenten sind die Vorschau. Das Bedienfeld ist standardmäßig zu: ab lg eine Schublade
+    von rechts (ohne Hintergrund, Scroll-Sperre oder Fokusfalle, die Seite bleibt bedienbar),
+    darunter ein festes Bottom Sheet (Zustand panelOpen). Geöffnet wird es über den Button
+    oberhalb der Tokens und ab lg über den schwebenden Button. Der Wrapper trägt die
+    Alpine-Komponente, damit Bedienfeld, Auslöser und Leiste denselben Zustand teilen.
     Gespeichert wird nichts: Neu laden oder "Zurücksetzen" stellt das Theme her.
 --}}
 
@@ -56,17 +58,15 @@
     ];
 @endphp
 
-{{-- Full-bleed surface, so no page background shows beside the constrained layout. --}}
-<div class="bg-surface">
 <div
     x-data="tokenPlayground(@js($labels), @js($config))"
-    x-on:keydown.escape.window="if (panelOpen) { const inside = $refs.panel.contains(document.activeElement); panelOpen = false; if (inside) $refs.toggle.focus(); }"
-    class="ds-layout max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 lg:grid lg:grid-cols-[21rem_minmax(0,1fr)] lg:items-start lg:gap-8"
+    x-on:keydown.escape.window="if (panelOpen) close()"
+    class="ds-layout"
 >
-    <aside x-ref="panel" aria-label="{{ __('Dein Look', 'wp-starter') }}" class="ds-panel">
+    <aside x-ref="panel" aria-label="{{ __('Dein Look', 'wp-starter') }}" class="ds-panel" :class="{ 'is-open': panelOpen }">
         {{-- Below lg: the bar stays at the bottom, the body opens above it (CSS reverses the order). The bar comes first in the DOM, so keyboard users reach the toggle before the controls. --}}
         <div class="ds-panel__bar">
-            <button type="button" class="ds-panel__toggle" x-ref="toggle" aria-controls="ds-panel-body" x-bind:aria-expanded="panelOpen.toString()" x-on:click="panelOpen = ! panelOpen; panelOpen ? $nextTick(() => $refs.panelBody.querySelector('input, button, a[href]')?.focus()) : $refs.toggle.focus()">
+            <button type="button" class="ds-panel__toggle" x-ref="toggle" aria-controls="ds-panel-body" x-bind:aria-expanded="panelOpen.toString()" x-on:click="panelOpen ? close() : open($el)">
                 <span x-show="! panelOpen">{{ __('Look anpassen', 'wp-starter') }}</span>
                 <span x-show="panelOpen" x-cloak>{{ __('Fertig', 'wp-starter') }}</span>
             </button>
@@ -75,9 +75,17 @@
             @endif
         </div>
 
-        <div id="ds-panel-body" x-ref="panelBody" class="ds-panel__body" :class="{ 'is-open': panelOpen }">
-            <h2 class="text-h4 m-0">{{ __('Dein Look', 'wp-starter') }}</h2>
-            <p class="mt-1 mb-0 text-body-small text-content-secondary">{{ __('Die ganze Seite folgt deiner Auswahl.', 'wp-starter') }}</p>
+        {{-- inert on the body only (not the aside), so the bar stays operable while the drawer is closed. --}}
+        <div id="ds-panel-body" x-ref="panelBody" class="ds-panel__body" :class="{ 'is-open': panelOpen }" x-bind:inert="! panelOpen" inert>
+            <div class="ds-panel__header">
+                <div>
+                    <h2 class="text-h4 m-0">{{ __('Dein Look', 'wp-starter') }}</h2>
+                    <p class="mt-1 mb-0 text-body-small text-content-secondary">{{ __('Die ganze Seite folgt deiner Auswahl.', 'wp-starter') }}</p>
+                </div>
+                <button type="button" class="ds-panel__close" x-ref="close" aria-label="{{ __('Schließen', 'wp-starter') }}" x-on:click="close()">
+                    <x-icon name="close" size="lg" />
+                </button>
+            </div>
 
             <fieldset class="mx-0 mb-0 mt-5 p-0 border-0">
                 <legend class="mb-3 text-body-small text-content-secondary">{{ __('Akzentfarbe', 'wp-starter') }}</legend>
@@ -137,8 +145,8 @@
             @endforeach
 
 
-            {{-- From lg the actions stick to the bottom of the scrolling panel; below lg the bar carries the CTA. --}}
-            <div class="ds-panel__actions mt-5 flex flex-col items-start gap-3">
+            {{-- From lg the actions stick to the bottom of the scrolling drawer; below lg the bar carries the CTA. --}}
+            <div class="ds-panel__actions mt-5 lg:mt-auto flex flex-col items-start gap-3">
                 @if($generatorUrl !== '')
                     <x-button :url="$generatorUrl" :title="__('Mit diesem Look ein Theme bauen', 'wp-starter')" variant="primary" class="ds-panel__cta w-full" :analytics="['event' => 'generator_playground_cta']" x-bind:href="href" />
                 @endif
@@ -148,9 +156,23 @@
         </div>
     </aside>
 
-    <div class="ds-layout__main">
-        @include('styleguide.tokens', ['overline' => false])
-        @include('styleguide.components', ['overline' => false])
+    {{-- Inline trigger above the tokens section, on the header band's surface so it reads as part of the page head. --}}
+    <div class="bg-surface">
+    <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 pt-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <x-button :title="__('Look anpassen', 'wp-starter')" variant="secondary" aria-controls="ds-panel-body" x-bind:aria-expanded="panelOpen.toString()" x-on:click="panelOpen ? close() : open($el)">
+            <x-icon name="sliders-horizontal" size="lg" class="order-first" />
+        </x-button>
+        <p class="m-0 text-body-small text-content-secondary">{{ __('Akzentfarbe, Ecken und Schrift live ausprobieren. Die ganze Seite folgt.', 'wp-starter') }}</p>
     </div>
-</div>
+    </div>
+
+    {{-- From lg, once the drawer is closed: fixed pill with fixed styling (not radius tokens). The dot shows the current accent once the look differs from the defaults. --}}
+    <button type="button" class="ds-fab" x-show="! panelOpen" aria-controls="ds-panel-body" x-bind:aria-expanded="panelOpen.toString()" x-bind:aria-label="changed ? @js(__('Look anpassen (geändert)', 'wp-starter')) : @js(__('Look anpassen', 'wp-starter'))" x-on:click="open($el)">
+        <x-icon name="sliders-horizontal" size="lg" />
+        <span>{{ __('Look anpassen', 'wp-starter') }}</span>
+        <span class="ds-fab__dot" x-show="changed" x-cloak style="background: var(--rafael-color-accent-500)" aria-hidden="true"></span>
+    </button>
+
+    @include('styleguide.tokens', ['overline' => false])
+    @include('styleguide.components', ['overline' => false])
 </div>

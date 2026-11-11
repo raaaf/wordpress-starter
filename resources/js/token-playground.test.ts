@@ -7,6 +7,7 @@ import {
   DEFAULT_ACCENT,
   generatorUrl,
   inkFor,
+  isLookChanged,
   playgroundVariables,
 } from './token-playground';
 
@@ -195,5 +196,31 @@ describe('generatorUrl', () => {
     expect(generatorUrl('https://x.test/?p=1', { ...unchanged, radius: 0 })).toBe(
       'https://x.test/?p=1&accent=%23ff6b35&card_radius=0&button_radius=pill'
     );
+  });
+});
+
+describe('isLookChanged', () => {
+  const base = {
+    accent: DEFAULT_ACCENT,
+    radius: 12,
+    buttonRadius: BUTTON_PILL,
+    scale: 1,
+    pairing: null,
+  };
+  const pairing = { headline: 'a', body: 'b', label: 'A', headlineFace: 'a', bodyFace: 'b' };
+
+  it('is false for the defaults, whatever the case of the accent', () => {
+    expect(isLookChanged(base)).toBe(false);
+    expect(isLookChanged({ ...base, accent: DEFAULT_ACCENT.toLowerCase() })).toBe(false);
+  });
+
+  it.each([
+    { accent: '#2563EB' },
+    { radius: 24 },
+    { buttonRadius: 6 },
+    { scale: 1.25 },
+    { pairing },
+  ])('is true when a single field changes: %j', (change) => {
+    expect(isLookChanged({ ...base, ...change })).toBe(true);
   });
 });

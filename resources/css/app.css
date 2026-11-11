@@ -3946,8 +3946,9 @@ html {
 
 /* Design System page: "Dein Look" panel (templates/styleguide/playground.blade.php).
    Below lg the aside is a fixed bottom sheet (bar plus a body that opens above it);
-   from lg it is a sticky column and the bar is hidden. Fixed radii, not tokens, so
-   the panel does not morph with the radius settings it controls. */
+   from lg it is an off-canvas drawer from the right (no backdrop, no scroll lock) and
+   the bar is hidden. Fixed radii, not tokens, so the panel does not morph with the
+   radius settings it controls. */
 @media (max-width: 63.99rem) {
   /* Room for the fixed bar, so it never covers the site footer. */
   body:has(.ds-layout) {
@@ -3977,6 +3978,18 @@ html {
 
 .ds-panel__body.is-open {
   display: block;
+}
+
+.ds-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ds-panel__close,
+.ds-fab {
+  display: none;
 }
 
 .ds-panel__bar {
@@ -4010,28 +4023,6 @@ html {
   outline-offset: 2px;
 }
 
-/* The Tokens and Components sections bring their own container; in the narrower
-   column it drops its width cap and side padding, the section pads itself. */
-/* One surface: the sections paint no background of their own here. */
-.ds-layout__main .section {
-  background: transparent;
-  padding-inline: 0;
-  padding-block: 2.5rem 0;
-}
-
-.ds-layout__main .section:first-child {
-  padding-top: 2rem;
-}
-
-.ds-layout__main .section:last-child {
-  padding-bottom: 2.5rem;
-}
-
-.ds-layout__main .section > div {
-  max-width: none;
-  padding-inline: 0;
-}
-
 @media (min-width: 64rem) {
   .token-swatch {
     width: 2rem;
@@ -4040,20 +4031,47 @@ html {
 
   .ds-panel {
     display: block;
-    position: sticky;
-    inset-inline: auto;
+    inset-inline: auto 0;
+    top: 0;
     bottom: auto;
-    top: calc(var(--header-height, 80px) + 1.5rem);
-    z-index: auto;
-    max-height: calc(100dvh - var(--header-height, 80px) - 3rem);
+    width: 22rem;
+    height: 100dvh;
+    z-index: 60; /* above the sticky header (z-50) */
     overflow-y: auto;
-    border: 1px solid var(--border-default);
-    border-radius: 0.75rem;
-    box-shadow: none;
+    border-top: 0;
+    border-left: 1px solid var(--border-default);
+    box-shadow: -8px 0 24px color-mix(in oklch, var(--text-primary) 14%, transparent);
+    transform: translateX(100%);
+    visibility: hidden;
+    transition:
+      transform 250ms var(--motion-enter-ease, ease-out),
+      visibility 0s linear 250ms;
   }
 
-  .ds-panel__body {
-    display: block;
+  /* Logged-in users: keep the close button below the WordPress admin bar. */
+  body.admin-bar .ds-panel {
+    top: var(--wp-admin--admin-bar--height, 32px);
+    height: calc(100dvh - var(--wp-admin--admin-bar--height, 32px));
+  }
+
+  .ds-panel.is-open {
+    transform: none;
+    visibility: visible;
+    transition: transform 250ms var(--motion-enter-ease, ease-out);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ds-panel,
+    .ds-panel.is-open {
+      transition: none;
+    }
+  }
+
+  .ds-panel__body,
+  .ds-panel__body.is-open {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
     max-height: none;
     overflow: visible;
     padding: 1.25rem;
@@ -4062,6 +4080,31 @@ html {
 
   .ds-panel__bar {
     display: none;
+  }
+
+  .ds-panel__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: -0.25rem -0.5rem 0 0;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+
+  .ds-panel__close:hover {
+    background: var(--bg-secondary);
+  }
+
+  .ds-panel__close:focus-visible {
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
   }
 
   .ds-panel__actions {
@@ -4074,7 +4117,40 @@ html {
     background: var(--bg-primary);
   }
 
-  .ds-layout__main .section:first-child {
-    padding-top: 0;
+  .ds-fab {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0 1.25rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--bg-button-primary);
+    color: var(--text-button-primary);
+    font-size: var(--typography-body-small-size, 0.875rem);
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 16px color-mix(in oklch, var(--text-primary) 20%, transparent);
+  }
+
+  .ds-fab:hover {
+    background: var(--bg-button-primary-hover);
+  }
+
+  .ds-fab:focus-visible {
+    outline: 3px solid var(--ring-focus);
+    outline-offset: 2px;
+  }
+
+  .ds-fab__dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 999px;
+    border: 2px solid var(--bg-primary);
+    box-sizing: content-box;
   }
 }

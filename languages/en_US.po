@@ -4485,3 +4485,11 @@ msgstr "Button corners (px)"
 #: templates/styleguide/playground.blade.php
 msgid "Fertig"
 msgstr "Done"
+
+#: templates/styleguide/playground.blade.php
+msgid "Akzentfarbe, Ecken und Schrift live ausprobieren. Die ganze Seite folgt."
+msgstr "Try accent, corners and fonts live. The whole page follows."
+
+#: templates/styleguide/playground.blade.php
+msgid "Look anpassen (geändert)"
+msgstr "Adjust look (changed)"
