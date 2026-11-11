@@ -4038,6 +4038,10 @@ html {
     height: 100dvh;
     z-index: 60; /* above the sticky header (z-50) */
     overflow-y: auto;
+    /* The page keeps scrolling (no scroll lock), so with classic scrollbars a
+       visible panel scrollbar would sit right next to the page's. The sticky
+       actions block cuts off the font list, which shows there is more. */
+    scrollbar-width: none;
     border-top: 0;
     border-left: 1px solid var(--border-default);
     box-shadow: -8px 0 24px color-mix(in oklch, var(--text-primary) 14%, transparent);
@@ -4046,6 +4050,10 @@ html {
     transition:
       transform 250ms var(--motion-enter-ease, ease-out),
       visibility 0s linear 250ms;
+  }
+
+  .ds-panel::-webkit-scrollbar {
+    display: none;
   }
 
   /* Logged-in users: keep the close button below the WordPress admin bar. */
@@ -4105,6 +4113,12 @@ html {
   .ds-panel__close:focus-visible {
     outline: 3px solid var(--ring-focus);
     outline-offset: 2px;
+  }
+
+  /* The actions sit at margin-top: auto, which can shrink to 0 once the drawer
+     scrolls; this keeps the last control clear of their top border. */
+  .ds-panel__body > fieldset:last-of-type {
+    margin-bottom: 2rem;
   }
 
   .ds-panel__actions {

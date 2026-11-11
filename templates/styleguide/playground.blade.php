@@ -3,8 +3,9 @@
 
     Akzentfarbe, Eckenradius, Schriftgröße und Schriftpaar live umstellen. Die Komponente
     (resources/js/token-playground.ts) schreibt die Werte als CSS-Variablen
-    inline auf <html>, deshalb folgt die ganze Seite: rechts die Abschnitte Tokens und
-    Komponenten sind die Vorschau. Das Bedienfeld ist standardmäßig zu: ab lg eine Schublade
+    inline auf <html>, deshalb folgt die ganze Seite. Direkt unter dem Auslöser zeigen zwei
+    Vorschaukarten die Änderung sofort, darunter folgen Tokens und Komponenten. Das
+    Bedienfeld ist standardmäßig zu: ab lg eine Schublade
     von rechts (ohne Hintergrund, Scroll-Sperre oder Fokusfalle, die Seite bleibt bedienbar),
     darunter ein festes Bottom Sheet (Zustand panelOpen). Geöffnet wird es über den Button
     oberhalb der Tokens und ab lg über den schwebenden Button. Der Wrapper trägt die
@@ -87,8 +88,8 @@
                 </button>
             </div>
 
-            <fieldset class="mx-0 mb-0 mt-5 p-0 border-0">
-                <legend class="mb-3 text-body-small text-content-secondary">{{ __('Akzentfarbe', 'wp-starter') }}</legend>
+            <fieldset class="mx-0 mb-0 mt-7 p-0 border-0">
+                <legend class="mb-3 text-body-small font-semibold text-content">{{ __('Akzentfarbe', 'wp-starter') }}</legend>
                 <div class="flex flex-wrap items-center gap-2">
                     @foreach($swatches as $hex => $name)
                         <label class="token-swatch" style="--swatch: {{ $hex }}">
@@ -107,8 +108,8 @@
             @foreach($segments as $model => $segment)
                 {{-- Schrift sits before the type scale, so the font row is emitted ahead of that segment. --}}
                 @if($model === 'scale' && $pairings !== [])
-                    <fieldset class="mx-0 mb-0 mt-5 p-0 border-0">
-                        <legend class="mb-3 text-body-small text-content-secondary">{{ __('Schrift', 'wp-starter') }}</legend>
+                    <fieldset class="mx-0 mb-0 mt-7 p-0 border-0">
+                        <legend class="mb-3 text-body-small font-semibold text-content">{{ __('Schrift', 'wp-starter') }}</legend>
                         <div class="token-fonts">
                             {{-- The Standard sample pins the theme headline face read at init, so the playground's <html> font override does not change it. --}}
                             <label class="token-font">
@@ -131,8 +132,8 @@
                         </div>
                     </fieldset>
                 @endif
-                <fieldset class="mx-0 mb-0 mt-5 p-0 border-0">
-                    <legend class="mb-3 text-body-small text-content-secondary">{{ $segment['label'] }}</legend>
+                <fieldset class="mx-0 mb-0 mt-7 p-0 border-0">
+                    <legend class="mb-3 text-body-small font-semibold text-content">{{ $segment['label'] }}</legend>
                     <div class="token-segments">
                         @foreach($segment['options'] as $value => $text)
                             <label class="token-segment">
@@ -146,12 +147,15 @@
 
 
             {{-- From lg the actions stick to the bottom of the scrolling drawer; below lg the bar carries the CTA. --}}
-            <div class="ds-panel__actions mt-5 lg:mt-auto flex flex-col items-start gap-3">
+            <div class="ds-panel__actions mt-8 lg:mt-auto flex flex-col gap-3">
                 @if($generatorUrl !== '')
                     <x-button :url="$generatorUrl" :title="__('Mit diesem Look ein Theme bauen', 'wp-starter')" variant="primary" class="ds-panel__cta w-full" :analytics="['event' => 'generator_playground_cta']" x-bind:href="href" />
                 @endif
-                <x-button :title="__('Zurücksetzen', 'wp-starter')" variant="ghost" size="sm" x-on:click="reset()" />
-                <p class="m-0 text-body-small text-content-secondary">{{ __('Ändert nur deine Ansicht, gespeichert wird nichts.', 'wp-starter') }}</p>
+                {{-- Secondary row: the note left, Reset right; the negative margin pulls the ghost button's padding back so its label lines up with the CTA edge. --}}
+                <div class="flex items-center justify-between gap-3">
+                    <p class="m-0 text-caption text-content-secondary">{{ __('Ändert nur deine Ansicht, gespeichert wird nichts.', 'wp-starter') }}</p>
+                    <x-button :title="__('Zurücksetzen', 'wp-starter')" variant="ghost" size="sm" class="shrink-0 mr-[calc(var(--button-sm-padding-x)*-1)]" x-on:click="reset()" />
+                </div>
             </div>
         </div>
     </aside>
@@ -163,6 +167,30 @@
             <x-icon name="sliders-horizontal" size="lg" class="order-first" />
         </x-button>
         <p class="m-0 text-body-small text-content-secondary">{{ __('Akzentfarbe, Ecken und Schrift live ausprobieren. Die ganze Seite folgt.', 'wp-starter') }}</p>
+    </div>
+    {{-- Preview right under the trigger, so a change shows without scrolling. Capped at 40rem: from lg the open drawer (22rem) overlays the right side and must not cover it. The buttons are demo only, so the block is inert (no dead tab stops). --}}
+    <div class="max-w-[var(--container-max)] mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div class="grid gap-4 sm:grid-cols-2 max-w-[40rem]" inert>
+            <x-card variant="outlined" padding="none" class="p-6 flex flex-col gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-[var(--card-radius)] bg-surface-brand text-content-on-brand">
+                        <x-icon name="lightning" class="w-5 h-5" />
+                    </span>
+                    <p class="m-0 text-overline">{{ __('Vorschau', 'wp-starter') }}</p>
+                </div>
+                <p class="m-0 text-h4">{{ __('Ein Akzent, viele Flächen.', 'wp-starter') }}</p>
+                <p class="m-0 text-body-small text-content-secondary">{{ __('Buttons, Karten, Badges und Ecken lesen alle dieselben Tokens.', 'wp-starter') }}</p>
+                <div class="mt-auto flex flex-wrap items-center gap-2">
+                    <x-button :title="__('Button', 'wp-starter')" variant="primary" size="sm" type="button" />
+                    <x-button :title="__('Zweiter Button', 'wp-starter')" variant="secondary" size="sm" type="button" />
+                </div>
+            </x-card>
+            <div class="p-6 flex flex-col gap-3 rounded-[var(--card-radius)] bg-surface-brand text-content-on-brand">
+                <div><x-badge variant="gray">{{ __('Neu', 'wp-starter') }}</x-badge></div>
+                <p class="m-0 text-h4">{{ __('Karte mit Inhalt', 'wp-starter') }}</p>
+                <p class="m-0 text-body-small">{{ __('Ecken, Fläche und Schrift kommen aus den Tokens.', 'wp-starter') }}</p>
+            </div>
+        </div>
     </div>
     </div>
 
