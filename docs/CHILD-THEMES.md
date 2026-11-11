@@ -68,8 +68,34 @@ replaced. SVG logos go through `Support\SvgSanitizer` like uploads.
 The token generator link points to `home_url('/design-system/#token-generator')`; the filter
 `{prefix}_token_generator_url` changes it, for example to a central generator site.
 
+The design system page (`templates/styleguide/generator.blade.php`) has two hooks for a generator plugin. The filter
+`wp_starter_theme_generator_url` returns the URL of the generator page; the link to it appears only when a plugin
+answers. The action `wp_starter_styleguide_font_switcher` fires above that link; a plugin may print markup there, for
+example a headline and text font switcher that sets `--rafael-font-family-headline`, `--rafael-font-family-body` and
+`--rafael-font-family-ui` on the page. Without a plugin nothing is printed and no wrapper or gap remains.
+
 Parent paths and versions always come from the parent (`get_template_directory()`, `wp_get_theme(get_template())`),
 so assets, config and the update check never look into the child folder.
+
+## Eigene Schrift verwenden
+
+Die Schriften eines generierten Childs liegen in `assets/fonts/`: die `*.woff2`-Dateien, eine Lizenzdatei je Schrift
+(`OFL-<id>.txt`) und `fonts.css` mit den `@font-face`-Regeln (der Generator schreibt sie in `FontCatalog::css`).
+`settings.json` verweist über `fonts_css` auf diese Datei, das Parent lädt sie im Frontend und im Editor. Die
+Schriftnamen stehen im `assets/tokens.css` des Childs, in den Eigenschaften `--rafael-font-family-headline`
+(Display, H1, H2) und `--rafael-font-family-body` sowie `--rafael-font-family-ui` (übrige Rollen).
+`--rafael-font-family-mono` bleibt die Mono-Schrift des Parents.
+
+1. Die `woff2`-Dateien nach `assets/fonts/` des Childs legen (nur `woff2` ist als Dateityp zugelassen).
+2. In `assets/fonts/fonts.css` je Datei eine `@font-face`-Regel ergänzen, mit `font-family`, `font-weight`,
+   `font-display: swap` und `src: url('datei.woff2') format('woff2')`. Der Pfad ist relativ zu `fonts.css`.
+3. In `assets/tokens.css` die drei Eigenschaften auf den neuen `font-family`-Namen setzen, in Anführungszeichen
+   (zum Beispiel `--rafael-font-family-headline: "Meine Schrift";`). Dieselben Zeilen stehen in
+   `assets/tokens-editor.css`; dort ebenfalls ändern, damit der Editor dieselbe Schrift zeigt.
+
+Lizenz: nur Schriften verwenden, deren Lizenz Self-Hosting und Weitergabe im Theme-Paket erlaubt (zum Beispiel die
+SIL Open Font License 1.1). Lizenzdatei neben die Schrift legen, wie es der Generator mit `OFL-<id>.txt` tut.
+Schriften aus Diensten, die nur die Einbindung per Link erlauben, gehören nicht ins Theme.
 
 ## Without ACF
 

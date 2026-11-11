@@ -11,6 +11,9 @@
 
     Der Link zu einem Child-Theme-Generator erscheint nur, wenn ein Plugin den
     Filter wp_starter_theme_generator_url beantwortet; ohne Plugin bleibt er leer.
+    Dasselbe gilt für die Schriftauswahl: die Action
+    wp_starter_styleguide_font_switcher gibt ein Plugin frei (zum Beispiel zum
+    Ausprobieren von Schriftpaaren auf dieser Seite); ohne Plugin erscheint nichts.
 --}}
 
 @php
@@ -178,6 +181,9 @@
                 </div>
             </div>
         </x-card>
+
+        {{-- Ohne Plugin gibt die Action nichts aus; nichts wird umschlossen, es entsteht kein leerer Abstand. --}}
+        @php do_action('wp_starter_styleguide_font_switcher'); @endphp
 
         @if ($themeGeneratorUrl !== '')
             <div class="flex flex-col items-start gap-3">
