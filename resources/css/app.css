@@ -4014,7 +4014,7 @@ html {
 }
 
 .token-segment span.token-segment__face {
-  font-family: var(--pair-face), sans-serif;
+  font-family: var(--pair-face, inherit);
 }
 
 .token-segment input:checked + span {
