@@ -1,3 +1,9 @@
+## [2.45.1](https://github.com/raaaf/wordpress-starter/compare/v2.45.0...v2.45.1) (2026-11-11)
+
+### Bug Fixes
+
+- **update:** resolve release checksum asset and match theme directory ([6d97e1c](https://github.com/raaaf/wordpress-starter/commit/6d97e1c524e25e1e51382bec3e8735f3a60eb2b1))
+
 # [2.45.0](https://github.com/raaaf/wordpress-starter/compare/v2.44.2...v2.45.0) (2026-11-04)
 
 ### Bug Fixes
