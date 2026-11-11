@@ -13,6 +13,19 @@ export const BUTTON_PILL = 34;
 export const DEFAULT_SCALE = 1;
 export const CARD_RADIUS_CAP = 48;
 
+export interface FontPairing {
+  headline: string;
+  body: string;
+  label: string;
+  headlineFace: string;
+  bodyFace: string;
+}
+
+export interface PlaygroundConfig {
+  fonts?: FontPairing[];
+  generatorUrl?: string;
+}
+
 const RADIUS_TOKENS = ['sm', 'default', 'md', 'lg', 'xl', '2xl', '3xl'];
 
 const FONT_SIZE_TOKENS = ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl'];
@@ -51,14 +64,16 @@ export function inkFor(accent: string): { ink: '#000000' | '#FFFFFF'; ratio: num
 /**
  * Inline custom properties for one playground state. `fontSizes` holds the
  * theme's own font-size values, read before any override, so the scale wraps
- * them instead of replacing the fluid clamp() formulas.
+ * them instead of replacing the fluid clamp() formulas. A `pairing` sets the
+ * three font families; without one they are absent, so the theme's stay.
  */
 export function playgroundVariables(
   accent: string,
   radius: number,
   buttonRadius: number,
   scale: number,
-  fontSizes: Record<string, string>
+  fontSizes: Record<string, string>,
+  pairing: FontPairing | null = null
 ): Record<string, string> {
   const vars: Record<string, string> = {};
   const deep = `color-mix(in oklch, ${accent}, black 18%)`;
@@ -90,7 +105,56 @@ export function playgroundVariables(
     if (original) vars[`--rafael-font-size-${name}`] = `calc(${original} * ${scale})`;
   }
 
+  if (pairing) {
+    vars['--rafael-font-family-headline'] = `'${pairing.headlineFace}', sans-serif`;
+    vars['--rafael-font-family-body'] = `'${pairing.bodyFace}', sans-serif`;
+    vars['--rafael-font-family-ui'] = `'${pairing.bodyFace}', sans-serif`;
+  }
+
   return vars;
+}
+
+/** The generator's value for a button radius step: the top step is its "pill". */
+export function buttonRadiusParam(buttonRadius: number): string {
+  return buttonRadius >= BUTTON_PILL ? 'pill' : String(buttonRadius);
+}
+
+/**
+ * Generator link carrying the look. An untouched playground gives the plain
+ * URL. Once any value differs from the defaults (the type scale counts, but is
+ * never sent) the link carries the full look: accent, card radius and button
+ * radius, plus both fonts when a pairing is chosen.
+ */
+export function generatorUrl(
+  base: string,
+  state: {
+    accent: string;
+    radius: number;
+    buttonRadius: number;
+    scale: number;
+    pairing: FontPairing | null;
+  }
+): string {
+  const accent = state.accent.trim().toLowerCase();
+  const changed =
+    accent !== DEFAULT_ACCENT.toLowerCase() ||
+    state.radius !== DEFAULT_RADIUS ||
+    state.buttonRadius !== BUTTON_PILL ||
+    state.scale !== DEFAULT_SCALE ||
+    state.pairing !== null;
+  if (!changed) return base;
+
+  const params: Array<[string, string]> = [
+    ['accent', accent],
+    ['card_radius', String(state.radius)],
+    ['button_radius', buttonRadiusParam(state.buttonRadius)],
+  ];
+  if (state.pairing) {
+    params.push(['font_headline', state.pairing.headline], ['font_body', state.pairing.body]);
+  }
+
+  const query = params.map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  return base + (base.includes('?') ? '&' : '?') + query;
 }
 
 export function readFontSizes(style: CSSStyleDeclaration): Record<string, string> {
@@ -107,10 +171,14 @@ export interface TokenPlaygroundComponent extends AlpineMagics {
   radius: number;
   buttonRadius: number;
   scale: number;
+  font: string;
+  fonts: FontPairing[];
   fontSizes: Record<string, string>;
   applied: string[];
   readonly ink: string;
   readonly contrast: string;
+  readonly pairing: FontPairing | null;
+  readonly href: string;
   init(): void;
   update(): void;
   reset(): void;
@@ -118,10 +186,13 @@ export interface TokenPlaygroundComponent extends AlpineMagics {
 
 /**
  * Alpine component. `labels` carries the translated strings from the template,
- * so the TypeScript side stays free of copy.
+ * so the TypeScript side stays free of copy. `config` carries the font pairings
+ * and the generator URL the server rendered; `font` is '' (theme fonts) or the
+ * index of a pairing as a string, the value of its radio input.
  */
 export function createTokenPlaygroundComponent(
-  labels: Record<string, string> = {}
+  labels: Record<string, string> = {},
+  config: PlaygroundConfig = {}
 ): TokenPlaygroundComponent {
   const t = (key: string, fallback: string) => labels[key] ?? fallback;
 
@@ -131,8 +202,24 @@ export function createTokenPlaygroundComponent(
     radius: DEFAULT_RADIUS,
     buttonRadius: BUTTON_PILL,
     scale: DEFAULT_SCALE,
+    font: '',
+    fonts: config.fonts ?? [],
     fontSizes: {},
     applied: [],
+
+    get pairing() {
+      return this.font === '' ? null : (this.fonts[Number(this.font)] ?? null);
+    },
+
+    get href() {
+      return generatorUrl(config.generatorUrl ?? '', {
+        accent: this.accent,
+        radius: Number(this.radius),
+        buttonRadius: Number(this.buttonRadius),
+        scale: Number(this.scale),
+        pairing: this.pairing,
+      });
+    },
 
     get ink() {
       return inkFor(this.accent).ink;
@@ -158,8 +245,14 @@ export function createTokenPlaygroundComponent(
         Number(this.radius),
         Number(this.buttonRadius),
         Number(this.scale),
-        this.fontSizes
+        this.fontSizes,
+        this.pairing
       );
+      // A variable set earlier and absent now (the font families after "Standard")
+      // is removed, so the theme's value shows again.
+      for (const name of this.applied) {
+        if (!(name in vars)) root.style.removeProperty(name);
+      }
       for (const [name, value] of Object.entries(vars)) {
         root.style.setProperty(name, value);
       }
@@ -177,6 +270,7 @@ export function createTokenPlaygroundComponent(
       this.radius = DEFAULT_RADIUS;
       this.buttonRadius = BUTTON_PILL;
       this.scale = DEFAULT_SCALE;
+      this.font = '';
     },
   };
 }

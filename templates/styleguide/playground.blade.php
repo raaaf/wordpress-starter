@@ -1,7 +1,7 @@
 {{--
     Design-System-Referenz: Token-Spielwiese
 
-    Akzentfarbe, Eckenradius und Schriftgröße live umstellen. Die Komponente
+    Akzentfarbe, Eckenradius, Schriftgröße und Schriftpaar live umstellen. Die Komponente
     (resources/js/token-playground.ts) schreibt die Werte als CSS-Variablen
     inline auf <html>, deshalb folgt die ganze Seite, nicht nur die Vorschau.
     Gespeichert wird nichts: Neu laden oder "Zurücksetzen" stellt das Theme her.
@@ -40,6 +40,11 @@
             'default' => 1,
         ],
     ];
+    // Font pairings come from a plugin (filter wp_starter_styleguide_font_pairings),
+    // already validated by FontPairings; without any the whole row is left out.
+    $pairings = \WordpressStarter\Helpers\FontPairings::all();
+    $generatorUrl = (string) apply_filters('wp_starter_theme_generator_url', '');
+    $config = ['fonts' => $pairings, 'generatorUrl' => $generatorUrl];
     $labels = [
         'black' => __('Schwarzer', 'wp-starter'),
         'white' => __('Weißer', 'wp-starter'),
@@ -55,7 +60,7 @@
     />
 
     <div
-        x-data="tokenPlayground(@js($labels))"
+        x-data="tokenPlayground(@js($labels), @js($config))"
         class="grid grid-cols-1 gap-6 lg:grid-cols-2"
     >
         <x-card variant="outlined" padding="none" class="p-6">
@@ -90,9 +95,33 @@
                 </fieldset>
             @endforeach
 
+            @if($pairings !== [])
+                <fieldset class="mx-0 mb-0 mt-8 p-0 border-0">
+                    <legend class="mb-3 text-body-small text-content-secondary">{{ __('Schrift', 'wp-starter') }}</legend>
+                    <div class="token-segments">
+                        <label class="token-segment">
+                            <input type="radio" name="token-font" value="" class="sr-only" x-model="font" x-on:change="update()" checked>
+                            <span>{{ __('Standard', 'wp-starter') }}</span>
+                        </label>
+                        @foreach($pairings as $index => $pairing)
+                            <label class="token-segment">
+                                <input type="radio" name="token-font" value="{{ $index }}" class="sr-only" x-model="font" x-on:change="update()">
+                                {{-- The face is a validated slug; the pill shows its label in the headline face. --}}
+                                <span class="token-segment__face" style="--pair-face: '{{ $pairing['headlineFace'] }}'">{{ $pairing['label'] }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </fieldset>
+            @endif
+
             <div class="flex flex-wrap items-center justify-between gap-4 mt-8">
                 <p class="m-0 text-body-small text-content-secondary">{{ __('Ändert nur deine Ansicht, gespeichert wird nichts.', 'wp-starter') }}</p>
-                <x-button :title="__('Zurücksetzen', 'wp-starter')" variant="secondary" size="sm" x-on:click="reset()" />
+                <div class="flex flex-wrap items-center gap-3">
+                    @if($generatorUrl !== '')
+                        <x-button :url="$generatorUrl" :title="__('Mit diesem Look ein Theme bauen', 'wp-starter')" variant="ghost" size="sm" x-bind:href="href" />
+                    @endif
+                    <x-button :title="__('Zurücksetzen', 'wp-starter')" variant="secondary" size="sm" x-on:click="reset()" />
+                </div>
             </div>
         </x-card>
 

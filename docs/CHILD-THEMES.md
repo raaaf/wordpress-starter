@@ -68,11 +68,15 @@ replaced. SVG logos go through `Support\SvgSanitizer` like uploads.
 The token generator link points to `home_url('/design-system/#token-generator')`; the filter
 `{prefix}_token_generator_url` changes it, for example to a central generator site.
 
-The design system page (`templates/styleguide/generator.blade.php`) has two hooks for a generator plugin. The filter
-`wp_starter_theme_generator_url` returns the URL of the generator page; the link to it appears only when a plugin
-answers. The action `wp_starter_styleguide_font_switcher` fires above that link; a plugin may print markup there, for
-example a headline and text font switcher that sets `--rafael-font-family-headline`, `--rafael-font-family-body` and
-`--rafael-font-family-ui` on the page. Without a plugin nothing is printed and no wrapper or gap remains.
+The design system page has two filters for a generator plugin. `wp_starter_theme_generator_url` returns the URL of the
+generator page; the links to it (`templates/styleguide/generator.blade.php` and the playground footer) appear only when
+a plugin answers. `wp_starter_styleguide_font_pairings` (default `[]`) returns font pairings for the playground's
+"Schrift" row; each entry has `headline` and `body` (ids), `label`, `headlineFace` and `bodyFace` (CSS font-family
+names the plugin has loaded). The theme keeps only entries whose ids and faces match `/^[a-z0-9-]+$/` and whose label is
+non-empty text (`WordpressStarter\Helpers\FontPairings`), sets `--rafael-font-family-headline`, `--rafael-font-family-body`
+and `--rafael-font-family-ui` from the chosen pairing, and adds `accent`, `card_radius`, `button_radius`, `font_headline`
+and `font_body` to the generator link once the visitor changed any playground value. Without a plugin the row and the link are not
+rendered.
 
 Parent paths and versions always come from the parent (`get_template_directory()`, `wp_get_theme(get_template())`),
 so assets, config and the update check never look into the child folder.

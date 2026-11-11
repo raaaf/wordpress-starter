@@ -4013,6 +4013,10 @@ html {
   }
 }
 
+.token-segment span.token-segment__face {
+  font-family: var(--pair-face), sans-serif;
+}
+
 .token-segment input:checked + span {
   background-color: var(--text-primary);
   border-color: var(--text-primary);
