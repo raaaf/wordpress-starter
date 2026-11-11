@@ -649,7 +649,7 @@ html {
 /* Inline text colours from the classic editor (<span style="color: #1d649d;">)
    are off-brand and unreadable in dark mode. Every coloured run in editor
    content takes the brand text colour, which switches per scheme. White stays
-   (#fff, #ffffff, white, rgb(255, 255, 255)), it marks text on a dark fill, and
+   (TinyMCE writes `color: #ffffff;`, the #fff prefix covers both hex forms), it marks text on a dark fill, and
    so do runs inside brand and inverse sections, which set their own text colour.
    TinyMCE writes the colour declaration first, so the rule only matches style
    attributes that START with it (`background-color: white` is not a text
@@ -658,13 +658,7 @@ html {
 .prose
   :is([style^='color' i]):not(
     [style^='color: #fff' i],
-    [style^='color:#fff' i],
-    [style^='color: #ffffff' i],
-    [style^='color:#ffffff' i],
     [style^='color: white' i],
-    [style^='color:white' i],
-    [style^='color: rgb(255, 255, 255)' i],
-    [style^='color:rgb(255,255,255)' i],
     .bg-surface-brand *,
     .bg-surface-inverse *
   ) {
