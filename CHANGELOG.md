@@ -1,3 +1,9 @@
+# [2.48.0](https://github.com/raaaf/wordpress-starter/compare/v2.47.0...v2.48.0) (2026-11-11)
+
+### Features
+
+- **styleguide:** add a font switcher slot and an own-font guide ([5b8bf9f](https://github.com/raaaf/wordpress-starter/commit/5b8bf9fb47dc374a69c65e76f0c419bfb9580667))
+
 # [2.47.0](https://github.com/raaaf/wordpress-starter/compare/v2.46.0...v2.47.0) (2026-11-11)
 
 ### Features
