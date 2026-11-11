@@ -1,3 +1,9 @@
+# [2.51.0](https://github.com/raaaf/wordpress-starter/compare/v2.50.0...v2.51.0) (2026-11-11)
+
+### Features
+
+- **styleguide:** one "Dein Look" panel drives the whole design system page ([f672003](https://github.com/raaaf/wordpress-starter/commit/f672003053af9c7611781ee84f2f6da5dc27dda8))
+
 # [2.50.0](https://github.com/raaaf/wordpress-starter/compare/v2.49.0...v2.50.0) (2026-11-11)
 
 ### Features
