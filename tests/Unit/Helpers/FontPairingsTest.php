@@ -45,6 +45,7 @@ final class FontPairingsTest extends TestCase
             'uppercase id' => [['headline' => 'Lora']],
             'face with a quote' => [['headlineFace' => "x'; color: red"]],
             'face with a space' => [['bodyFace' => 'wpsg inter']],
+            'trailing newline' => [['headline' => "lora\n"]],
             'empty body id' => [['body' => '']],
             'array id' => [['body' => ['inter']]],
             'empty label' => [['label' => '']],

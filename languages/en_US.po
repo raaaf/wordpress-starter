@@ -2478,6 +2478,9 @@ msgstr "With border"
 msgid "Mit dem Absenden stimmst du der Verarbeitung deiner E-Mail-Adresse zu."
 msgstr "By submitting you agree to the processing of your email address."
 
+msgid "Mit diesem Look ein Theme bauen"
+msgstr "Build a theme with this look"
+
 msgid "Mitglied hinzufügen"
 msgstr "Add member"
 
@@ -3143,6 +3146,9 @@ msgstr "Narrow"
 
 msgid "Schmal passt zu Hochformat und Bildschirmfotos, breit zu Panoramen. Ganze Inhaltsbreite schließt mit den Kanten eines Zweispalters ab."
 msgstr "Narrow suits portrait images and screenshots, wide suits panoramas. Full content width lines up with the edges of a two-column layout."
+
+msgid "Schrift"
+msgstr "Font"
 
 msgid "Schriftgröße"
 msgstr "Font size"

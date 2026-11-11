@@ -16,7 +16,7 @@ final class FontPairings
 {
     public const FILTER = 'wp_starter_styleguide_font_pairings';
 
-    private const SLUG = '/^[a-z0-9-]+$/';
+    private const SLUG = '/^[a-z0-9-]+\z/';
 
     /** @return list<array{headline: string, body: string, label: string, headlineFace: string, bodyFace: string}> */
     public static function all(): array

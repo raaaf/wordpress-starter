@@ -43,7 +43,7 @@
     // Font pairings come from a plugin (filter wp_starter_styleguide_font_pairings),
     // already validated by FontPairings; without any the whole row is left out.
     $pairings = \WordpressStarter\Helpers\FontPairings::all();
-    $generatorUrl = (string) apply_filters('wp_starter_theme_generator_url', '');
+    $generatorUrl = esc_url((string) apply_filters('wp_starter_theme_generator_url', ''));
     $config = ['fonts' => $pairings, 'generatorUrl' => $generatorUrl];
     $labels = [
         'black' => __('Schwarzer', 'wp-starter'),
@@ -118,7 +118,7 @@
                 <p class="m-0 text-body-small text-content-secondary">{{ __('Ändert nur deine Ansicht, gespeichert wird nichts.', 'wp-starter') }}</p>
                 <div class="flex flex-wrap items-center gap-3">
                     @if($generatorUrl !== '')
-                        <x-button :url="$generatorUrl" :title="__('Mit diesem Look ein Theme bauen', 'wp-starter')" variant="ghost" size="sm" x-bind:href="href" />
+                        <x-button :url="$generatorUrl" :title="__('Mit diesem Look ein Theme bauen', 'wp-starter')" variant="ghost" size="sm" :analytics="['event' => 'generator_playground_cta']" x-bind:href="href" />
                     @endif
                     <x-button :title="__('Zurücksetzen', 'wp-starter')" variant="secondary" size="sm" x-on:click="reset()" />
                 </div>
