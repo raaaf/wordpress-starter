@@ -1,3 +1,9 @@
+# [2.47.0](https://github.com/raaaf/wordpress-starter/compare/v2.46.0...v2.47.0) (2026-11-11)
+
+### Features
+
+- **tokens:** enlarge display and h1 type scale to a 1.25 ratio ([7f090e3](https://github.com/raaaf/wordpress-starter/commit/7f090e325b940f74d262d986fda00d52a2a21e92))
+
 # [2.46.0](https://github.com/raaaf/wordpress-starter/compare/v2.45.1...v2.46.0) (2026-11-11)
 
 ### Bug Fixes
