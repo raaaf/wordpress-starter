@@ -1,6 +1,6 @@
 # Child themes
 
-The token generator on the design system page builds a child theme for this parent. The child carries no logic: its
+A theme generator (offered through the filter `wp_starter_theme_generator_url` below) builds a child theme for this parent. The child carries no logic: its
 `functions.php` only has the `strict_types` declaration and the `ABSPATH` guard. Everything it changes is listed in
 `settings.json`, and the parent applies it (`Providers\ChildThemeServiceProvider`, reader `Support\ChildThemeSettings`).
 
@@ -59,17 +59,17 @@ wp-starter-child/
 | Frontend   | Enqueues `tokens.css` after `app-css` (its custom properties win) and `fonts.css`, versioned by `build_id`     |
 | TinyMCE    | Appends `fonts.css` and `tokens-editor.css` to `mce_css` after the theme's editor stylesheet                   |
 | `acf/init` | Imports the logos into the media library and the logo options, once per `build_id` and only into empty options |
-| Backend    | The Design tokens page is read-only (no upload, restore or colour pickers) and links to the token generator    |
+| Backend    | The Design tokens page is read-only (no upload, restore or colour pickers) and links to the design system page |
 
 The logo import claims the option `{prefix}_child_import_<build_id>` before it runs, so parallel requests cannot import
 twice and a failed import is not retried on every page view; a new build retries. A logo chosen in the backend is never
 replaced. SVG logos go through `Support\SvgSanitizer` like uploads.
 
-The token generator link points to `home_url('/design-system/#token-generator')`; the filter
+The backend link points to the design system page, by default `home_url('/design-system/')`; the filter
 `{prefix}_token_generator_url` changes it, for example to a central generator site.
 
 The design system page has two filters for a generator plugin. `wp_starter_theme_generator_url` returns the URL of the
-generator page; the links to it (`templates/styleguide/generator.blade.php` and the playground's button below its preview) appear only when
+generator page; the links to it (the "Dein Look" panel's button and the compact one in its mobile bar, `templates/styleguide/playground.blade.php`) appear only when
 a plugin answers. `wp_starter_styleguide_font_pairings` (default `[]`) returns font pairings for the playground's
 "Schrift" row; each entry has `headline` and `body` (ids), `label`, `headlineFace` and `bodyFace` (CSS font-family
 names the plugin has loaded). The theme keeps only entries whose ids and faces match `/^[a-z0-9-]+$/` and whose label is

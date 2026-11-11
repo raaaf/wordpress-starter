@@ -3762,8 +3762,9 @@ html {
 .token-swatch {
   position: relative;
   display: inline-flex;
-  width: 2.75rem;
-  height: 2.75rem;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 999px;
   background: var(--swatch, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--text-primary) 15%, transparent);
@@ -3805,200 +3806,29 @@ html {
   cursor: pointer;
 }
 
-/* Token generator (templates/styleguide/generator.blade.php). The picker is a
-   swatch like the playground's; the shade strip and the preview cards read
-   custom properties the component sets from the generated token files. */
-.token-gen-picker {
-  flex: none;
-  overflow: hidden;
-}
-
-.token-gen-picker input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.token-gen-picker:has(input:focus-visible) {
-  outline: 3px solid var(--ring-focus);
-  outline-offset: 3px;
-}
-
-/* Loading hint of the token generator: pinned to the card's top edge so it
-   never shifts the pickers while the files load in the background. */
-.styleguide-generator [aria-busy] {
-  position: relative;
-}
-
-.token-gen-loading {
-  position: absolute;
-  top: 0.75rem;
-  right: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: var(--typography-body-small-size, 0.875rem);
-}
-
-.token-gen-spinner {
-  width: 0.875rem;
-  height: 0.875rem;
-  border: 2px solid var(--border-default);
-  border-top-color: var(--text-primary);
-  border-radius: 50%;
-  animation: token-gen-spin 0.8s linear infinite;
-}
-
-@keyframes token-gen-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .token-gen-spinner {
-    animation: none;
-  }
-}
-
-.token-gen-hex {
-  width: 7.5rem;
-  margin-top: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  border: 1px solid var(--border-control, var(--border-default));
-  border-radius: var(--rafael-radius-sm, 4px);
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: var(--typography-body-small-size, 0.875rem);
-  text-transform: uppercase;
-}
-
-.token-gen-hex:focus-visible {
-  outline: 3px solid var(--ring-focus);
-  outline-offset: 2px;
-}
-
-.token-gen-shades {
-  display: flex;
-  margin: 1rem 0 0;
-  padding: 0;
-  list-style: none;
-  overflow: hidden;
-  border-radius: var(--rafael-radius-sm, 4px);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--text-primary) 10%, transparent);
-}
-
-.token-gen-shades li {
-  flex: 1 1 0;
-  height: 2rem;
-  margin: 0;
-  background: var(--swatch, transparent);
-}
-
-.token-gen-preview {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
-  border-radius: var(--card-radius);
-  background: var(--gp-bg, var(--bg-primary));
-  color: var(--gp-text, var(--text-primary));
-  box-shadow: inset 0 0 0 1px var(--gp-border, var(--border-default));
-}
-
-.token-gen-preview__card {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
-  border-radius: var(--card-radius);
-  background: var(--gp-card, var(--bg-secondary));
-  box-shadow: inset 0 0 0 1px var(--gp-border, var(--border-default));
-}
-
-.token-gen-preview .text-h4 {
-  color: var(--gp-text, var(--text-primary));
-}
-
-.token-gen-preview__muted {
-  color: var(--gp-muted, var(--text-secondary));
-}
-
-.token-gen-preview__accent {
-  color: var(--gp-accent, var(--text-accent));
-  font-weight: 600;
-}
-
-.token-gen-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  padding: 0 1.25rem;
-  border-radius: var(--rafael-radius-full, 999px);
-  font-size: var(--typography-body-small-size, 0.875rem);
-  font-weight: 600;
-}
-
-.token-gen-pill--sm {
-  min-height: 2rem;
-  padding: 0 0.75rem;
-}
-
-.token-gen-pill--button {
-  background: var(--gp-button, var(--bg-button-primary));
-  color: var(--gp-button-ink, var(--text-button-primary));
-}
-
-.token-gen-pill--brand {
-  background: var(--gp-brand, var(--bg-brand));
-  color: var(--gp-on-brand, var(--text-on-brand));
-}
-
-.token-gen-pill--brand-2 {
-  background: var(--gp-brand-2, var(--bg-brand-secondary));
-  color: var(--gp-brand-2-ink, var(--text-on-color));
-}
-
-.token-gen-pill--success {
-  background: var(--gp-success, var(--bg-success-strong));
-  color: var(--gp-success-ink, var(--text-on-color));
-}
-
-.token-gen-pill--warning {
-  background: var(--gp-warning, var(--bg-warning-strong));
-  color: var(--gp-warning-ink, var(--text-on-color));
-}
-
-.token-gen-pill--error {
-  background: var(--gp-error, var(--bg-error-strong));
-  color: var(--gp-error-ink, var(--text-on-color));
-}
-
-/* Segmented choice (radio group): wraps at narrow widths instead of
-   scrolling, the chosen step is filled. */
+/* Segmented choice (radio group): one row of equal columns, the chosen step
+   is filled. */
 .token-segments {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0.375rem;
 }
 
 .token-segment {
+  display: block;
   cursor: pointer;
 }
 
 .token-segment span {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
   align-items: center;
-  min-height: 2.75rem;
-  padding: 0 1rem;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0 0.25rem;
   border: 1px solid var(--border-default);
-  border-radius: 999px;
+  border-radius: 0.5rem;
   font-size: var(--typography-body-small-size, 0.875rem);
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);
@@ -4024,55 +3854,60 @@ html {
   outline-offset: 2px;
 }
 
-/* Font tile (3x3 grid): fixed radius, not a token, so the controls do not
-   morph with the playground's own radius setting. */
-.token-font-tile {
+/* Font choice: one row per pairing. Fixed radius, not a token, so the controls do
+   not morph with the playground's own radius setting. */
+.token-fonts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.token-font {
   display: block;
   min-width: 0;
   cursor: pointer;
 }
 
-.token-font-tile__body {
+.token-font__body {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-height: 2.75rem;
-  height: 100%;
-  padding: 0.75rem;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
   border: 1px solid var(--border-default);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   color: var(--text-primary);
   transition: border-color 150ms var(--motion-enter-ease);
 }
 
-.token-font-tile__sample {
-  margin-bottom: 0.25rem;
+.token-font__sample {
+  flex: none;
   font-family: var(--pair-face, inherit);
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   line-height: 1;
 }
 
-.token-font-tile__name {
+.token-font__name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-size: var(--typography-body-small-size, 0.875rem);
-  line-height: 1.3;
-}
-
-.token-font-tile__name--muted {
-  color: var(--text-secondary);
 }
 
 @media (hover: hover) {
-  .token-font-tile:hover .token-font-tile__body {
+  .token-font:hover .token-font__body {
     border-color: var(--text-primary);
   }
 }
 
-.token-font-tile input:checked + .token-font-tile__body {
+.token-font input:checked + .token-font__body {
   border-color: var(--text-primary);
   box-shadow: inset 0 0 0 1px var(--text-primary);
 }
 
-.token-font-tile input:focus-visible + .token-font-tile__body {
+.token-font input:focus-visible + .token-font__body {
   outline: 3px solid var(--ring-focus);
   outline-offset: 2px;
 }
@@ -4106,5 +3941,140 @@ html {
   .badge--inline {
     padding-block: calc(var(--badge-py) + (1lh - 1cap) / 2);
     text-box: trim-both cap alphabetic;
+  }
+}
+
+/* Design System page: "Dein Look" panel (templates/styleguide/playground.blade.php).
+   Below lg the aside is a fixed bottom sheet (bar plus a body that opens above it);
+   from lg it is a sticky column and the bar is hidden. Fixed radii, not tokens, so
+   the panel does not morph with the radius settings it controls. */
+@media (max-width: 63.99rem) {
+  /* Room for the fixed bar, so it never covers the site footer. */
+  body:has(.ds-layout) {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.ds-panel {
+  display: flex;
+  flex-direction: column-reverse;
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 40;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-default);
+  box-shadow: 0 -4px 16px color-mix(in oklch, var(--text-primary) 12%, transparent);
+}
+
+.ds-panel__body {
+  display: none;
+  max-height: 55dvh;
+  overflow-y: auto;
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.ds-panel__body.is-open {
+  display: block;
+}
+
+.ds-panel__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+.ds-panel__toggle {
+  flex: 1;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  background: transparent;
+  font-size: var(--typography-body-small-size, 0.875rem);
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+@media (max-width: 63.99rem) {
+  .ds-panel__actions .ds-panel__cta {
+    display: none;
+  }
+}
+
+.ds-panel__toggle:focus-visible {
+  outline: 3px solid var(--ring-focus);
+  outline-offset: 2px;
+}
+
+/* The Tokens and Components sections bring their own container; in the narrower
+   column it drops its width cap and side padding, the section pads itself. */
+/* One surface: the sections paint no background of their own here. */
+.ds-layout__main .section {
+  background: transparent;
+  padding-inline: 0;
+  padding-block: 2.5rem 0;
+}
+
+.ds-layout__main .section:first-child {
+  padding-top: 2rem;
+}
+
+.ds-layout__main .section:last-child {
+  padding-bottom: 2.5rem;
+}
+
+.ds-layout__main .section > div {
+  max-width: none;
+  padding-inline: 0;
+}
+
+@media (min-width: 64rem) {
+  .token-swatch {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .ds-panel {
+    display: block;
+    position: sticky;
+    inset-inline: auto;
+    bottom: auto;
+    top: calc(var(--header-height, 80px) + 1.5rem);
+    z-index: auto;
+    max-height: calc(100dvh - var(--header-height, 80px) - 3rem);
+    overflow-y: auto;
+    border: 1px solid var(--border-default);
+    border-radius: 0.75rem;
+    box-shadow: none;
+  }
+
+  .ds-panel__body {
+    display: block;
+    max-height: none;
+    overflow: visible;
+    padding: 1.25rem;
+    border-bottom: 0;
+  }
+
+  .ds-panel__bar {
+    display: none;
+  }
+
+  .ds-panel__actions {
+    position: sticky;
+    bottom: 0;
+    margin-inline: -1.25rem;
+    margin-bottom: -1.25rem;
+    padding: 1rem 1.25rem 1.25rem;
+    border-top: 1px solid var(--border-default);
+    background: var(--bg-primary);
+  }
+
+  .ds-layout__main .section:first-child {
+    padding-top: 0;
   }
 }

@@ -14,7 +14,6 @@ import {
   transitionColorScheme,
 } from './motion';
 import { createTokenPlaygroundComponent } from './token-playground';
-import { createTokenGeneratorComponent } from './token-generator-component';
 
 // Declare localized strings from WordPress (object name is fixed as 'themeStrings' for all themes)
 declare const themeStrings:
@@ -707,7 +706,6 @@ Alpine.data('statsCounter', (target: number) => createStatsCounterComponent(targ
 Alpine.data('beforeAfterSlider', createBeforeAfterComponent);
 Alpine.data('themeSwitcher', createThemeSwitcherComponent);
 Alpine.data('tokenPlayground', createTokenPlaygroundComponent);
-Alpine.data('tokenGenerator', createTokenGeneratorComponent);
 Alpine.data('styleguideModul', createStyleguideModulComponent);
 Alpine.data('jumpMenu', createJumpMenuComponent);
 

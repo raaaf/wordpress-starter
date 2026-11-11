@@ -1,10 +1,8 @@
 /**
  * Token transform core: token JSON in, CSS out, no file system.
  *
- * Shared by scripts/transform-tokens.js (npm run tokens, writes the files)
- * and the public token generator on the design system page
- * (resources/js/token-generator.ts), which builds tokens.css in the browser.
- * Keep it free of Node APIs so both can import it.
+ * Used by scripts/transform-tokens.js (npm run tokens, writes the files).
+ * Kept free of Node APIs so it stays a pure function module.
  */
 
 // Fluid typography configuration.

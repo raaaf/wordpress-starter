@@ -748,10 +748,11 @@ final class TemplateRenderTest extends TestCase
     }
 
     /**
-     * The token generator links to a child theme generator only when a plugin
-     * answers wp_starter_theme_generator_url; client sites get no link.
+     * The playground panel links to a child theme generator only when a plugin
+     * answers wp_starter_theme_generator_url; client sites get no link. The
+     * link appears twice: the panel button and the compact one in the mobile bar.
      */
-    public function testTokenGeneratorLinksToThemeGeneratorOnlyWhenFilterReturnsUrl(): void
+    public function testPlaygroundLinksToThemeGeneratorOnlyWhenFilterReturnsUrl(): void
     {
         $app = Application::getInstance();
         $app->boot();
@@ -764,11 +765,11 @@ final class TemplateRenderTest extends TestCase
         $hooks = $GLOBALS['wp_mock_hooks']['filters']['wp_starter_theme_generator_url'] ?? null;
 
         try {
-            $without = $factory->make('styleguide.generator', $viewData)->render();
+            $without = $factory->make('styleguide.playground', $viewData)->render();
             $factory->flushState();
 
             add_filter('wp_starter_theme_generator_url', static fn (): string => $url);
-            $with = $factory->make('styleguide.generator', $viewData)->render();
+            $with = $factory->make('styleguide.playground', $viewData)->render();
         } finally {
             unset($GLOBALS['wp_mock_hooks']['filters']['wp_starter_theme_generator_url']);
             if ($hooks !== null) {
@@ -776,9 +777,9 @@ final class TemplateRenderTest extends TestCase
             }
         }
 
-        $this->assertStringNotContainsString('Theme generieren', $without);
-        $this->assertSame(1, substr_count($with, 'href="' . $url . '"'));
-        $this->assertStringContainsString('Theme generieren', $with);
+        $this->assertStringNotContainsString('Theme bauen', $without);
+        $this->assertSame(2, substr_count($with, 'href="' . $url . '"'));
+        $this->assertStringContainsString('Theme bauen', $with);
     }
 
     /**

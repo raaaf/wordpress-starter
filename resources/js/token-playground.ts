@@ -78,6 +78,17 @@ export function playgroundVariables(
   const vars: Record<string, string> = {};
   const deep = `color-mix(in oklch, ${accent}, black 18%)`;
 
+  // Light steps (subtle accent surfaces, badges, borders) and the darkest step
+  // follow the accent too; without them they would stay at the theme's orange.
+  for (const [step, white] of [
+    [50, 92],
+    [100, 84],
+    [200, 68],
+    [300, 45],
+  ]) {
+    vars[`--rafael-color-accent-${step}`] = `color-mix(in oklch, ${accent}, white ${white}%)`;
+  }
+  vars['--rafael-color-accent-900'] = `color-mix(in oklch, ${accent}, black 60%)`;
   vars['--rafael-color-accent-400'] = `color-mix(in oklch, ${accent}, white 18%)`;
   vars['--rafael-color-accent-500'] = accent;
   vars['--rafael-color-accent-600'] = deep;
@@ -175,6 +186,7 @@ export interface TokenPlaygroundComponent extends AlpineMagics {
   fonts: FontPairing[];
   fontSizes: Record<string, string>;
   applied: string[];
+  panelOpen: boolean;
   themeFace: string;
   readonly ink: string;
   readonly contrast: string;
@@ -207,6 +219,7 @@ export function createTokenPlaygroundComponent(
     fonts: config.fonts ?? [],
     fontSizes: {},
     applied: [],
+    panelOpen: false,
     themeFace: '',
 
     get pairing() {

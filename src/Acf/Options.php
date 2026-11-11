@@ -1500,9 +1500,9 @@ class Options
                 FieldDefinitions::infoBoxField(
                     'field_tokens_child_theme_info',
                     '<strong>' . esc_html__('Tokens aus dem Child-Theme', 'wp-starter') . '</strong><br>' .
-                    esc_html__('Farben und Schriften kommen aus dem aktiven Child-Theme, deshalb lassen sie sich hier nicht bearbeiten. Neue Tokens erzeugst du im Token-Generator und spielst sie als neues Child-Theme ein.', 'wp-starter') .
-                    '<br><a href="' . esc_url( (string) apply_filters(ThemeContext::prefix() . '_token_generator_url', home_url('/design-system/#token-generator'))) . '">' .
-                    esc_html__('Zum Token-Generator', 'wp-starter') . '</a>',
+                    esc_html__('Farben und Schriften kommen aus dem aktiven Child-Theme, deshalb lassen sie sich hier nicht bearbeiten. Einen neuen Look stellst du auf der Design-System-Seite zusammen und spielst ihn als neues Child-Theme ein.', 'wp-starter') .
+                    '<br><a href="' . esc_url( (string) apply_filters(ThemeContext::prefix() . '_token_generator_url', home_url('/design-system/'))) . '">' .
+                    esc_html__('Zur Design-System-Seite', 'wp-starter') . '</a>',
                     'warning',
                 ),
             ],

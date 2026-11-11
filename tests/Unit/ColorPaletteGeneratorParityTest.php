@@ -8,9 +8,8 @@ use Tests\Support\TestCase;
 use WordpressStarter\ColorPaletteGenerator;
 
 /**
- * The public token generator (resources/js/token-generator.ts) ports the
- * palette maths to TypeScript. Both sides read the same fixture, so a palette
- * made on the website and one made in wp-admin stay identical.
+ * The fixture pins the PHP palette output as a regression baseline, so a
+ * change to the palette maths shows up as a diff here.
  */
 final class ColorPaletteGeneratorParityTest extends TestCase
 {

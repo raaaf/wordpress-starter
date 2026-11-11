@@ -43,6 +43,19 @@ describe('playgroundVariables', () => {
     expect(vars['--rafael-color-ds-accent-ink']).toBe('#FFFFFF');
   });
 
+  it('sets the light steps and the darkest step from the accent', () => {
+    const vars = playgroundVariables('#2563EB', 1, BUTTON_PILL, 1, sizes);
+    for (const [step, mix] of [
+      [50, 'white 92%'],
+      [100, 'white 84%'],
+      [200, 'white 68%'],
+      [300, 'white 45%'],
+      [900, 'black 60%'],
+    ]) {
+      expect(vars[`--rafael-color-accent-${step}`]).toBe(`color-mix(in oklch, #2563EB, ${mix})`);
+    }
+  });
+
   it('gives cards, inputs and small boxes the card radius in px', () => {
     for (const r of [0, 2, 24, 48]) {
       const vars = playgroundVariables(DEFAULT_ACCENT, r, BUTTON_PILL, 1, sizes);

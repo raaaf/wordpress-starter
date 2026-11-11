@@ -1476,8 +1476,8 @@ msgstr "Colour for warnings and notices."
 msgid "Farben für Feedback und Statusmeldungen. Light/Dark-Varianten werden automatisch generiert."
 msgstr "Colours for feedback and status messages. Light and dark variants are generated automatically."
 
-msgid "Farben und Schriften kommen aus dem aktiven Child-Theme, deshalb lassen sie sich hier nicht bearbeiten. Neue Tokens erzeugst du im Token-Generator und spielst sie als neues Child-Theme ein."
-msgstr "Colours and fonts come from the active child theme, so they cannot be edited here. Create new tokens in the token generator and install them as a new child theme."
+msgid "Farben und Schriften kommen aus dem aktiven Child-Theme, deshalb lassen sie sich hier nicht bearbeiten. Einen neuen Look stellst du auf der Design-System-Seite zusammen und spielst ihn als neues Child-Theme ein."
+msgstr "Colours and fonts come from the active child theme, so they cannot be edited here. Put together a new look on the design system page and install it as a new child theme."
 
 msgid "Farben zurückgesetzt."
 msgstr "Colours reset."
@@ -4119,8 +4119,8 @@ msgstr "Skip to content"
 msgid "Zum Theme Setup"
 msgstr "Go to theme setup"
 
-msgid "Zum Token-Generator"
-msgstr "Open the token generator"
+msgid "Zur Design-System-Seite"
+msgstr "Open the design system page"
 
 msgid "Zur Anmeldung"
 msgstr "Go to login"
@@ -4457,3 +4457,31 @@ msgstr "Card with content"
 
 msgid "Ecken, Fläche und Schrift kommen aus den Tokens."
 msgstr "Corners, surface and type come from the tokens."
+
+#: templates/styleguide/playground.blade.php
+msgid "Dein Look"
+msgstr "Your look"
+
+#: templates/styleguide/playground.blade.php
+msgid "Die ganze Seite folgt deiner Auswahl."
+msgstr "The whole page follows your choices."
+
+#: templates/styleguide/playground.blade.php
+msgid "Look anpassen"
+msgstr "Adjust look"
+
+#: templates/styleguide/playground.blade.php
+msgid "Theme bauen"
+msgstr "Build theme"
+
+#: templates/styleguide/playground.blade.php
+msgid "Ecken der Karten (px)"
+msgstr "Card corners (px)"
+
+#: templates/styleguide/playground.blade.php
+msgid "Ecken der Buttons (px)"
+msgstr "Button corners (px)"
+
+#: templates/styleguide/playground.blade.php
+msgid "Fertig"
+msgstr "Done"

@@ -224,8 +224,8 @@ register_rest_route('theme/v1', '/options', [
 
 The one public route is `DesignTokenRestProvider` (`GET /wp-json/{prefix}/v1/design-tokens/{primitives|light|dark}`,
 `permission_callback` `__return_true`, marked `INTENTIONAL`). It serves exactly those three token files, the
-theme's published design values, for the token generator on the design system page; the file name is an
-allowlist, never a path. Hosts may keep `config/` blocked for the web, the generator does not need it.
+theme's published design values, advertised by the MCP contract (`src/Mcp/ContractProvider.php`); the file name is an
+allowlist, never a path. Hosts may keep `config/` blocked for the web, the route does not need it.
 
 ### Child theme files
 

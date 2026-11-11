@@ -212,8 +212,8 @@ class ColorPaletteGenerator
      *
      * Rounds to 9 decimals first: PHP 8.3 pre-rounds inside round() and PHP 8.4
      * no longer does, so 4.499999999999997 gave 5 on one and 4 on the other.
-     * The token generator on the website (resources/js/token-generator.ts)
-     * rounds the same way; tests/fixtures/color-palette-parity.json pins both.
+     * tests/fixtures/color-palette-parity.json pins the palette output as a
+     * regression baseline.
      */
     private static function toChannel(float $value): int
     {

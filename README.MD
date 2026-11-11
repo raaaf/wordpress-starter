@@ -137,7 +137,7 @@ The providers are listed in `Application::registerProviders()`; `PluginServicePr
 | `WelcomeServiceProvider`            | Welcome notice, styleguide page, ACF options prefill                           |
 | `SeoServiceProvider`                | JSON-LD, OG tags, canonical URLs, robots meta                                  |
 | `DesignTokenServiceProvider`        | Token file upload/download/validation, CSS regeneration                        |
-| `DesignTokenRestProvider`           | Public read-only REST route with the three token files for the token generator |
+| `DesignTokenRestProvider`           | Public read-only REST route with the three token files for the MCP contract    |
 | `ChildThemeServiceProvider`         | Applies a generated child theme: tokens, fonts, editor tokens, logo import     |
 | `Mcp\ContractProvider`              | Answers `wp_starter_mcp_contract`: page structure for the Claude MCP plugin    |
 | `CronServiceProvider`               | Transient and revision cleanup                                                 |

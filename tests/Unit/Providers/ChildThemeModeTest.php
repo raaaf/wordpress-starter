@@ -54,7 +54,7 @@ final class ChildThemeModeTest extends TestCase
 
         $this->assertSame('group_options_design_tokens', $group['key']);
         $this->assertCount(1, $group['fields']);
-        $this->assertStringContainsString('#token-generator', $group['fields'][0]['message']);
+        $this->assertStringContainsString('/design-system/', $group['fields'][0]['message']);
     }
 
     public function testTokenGeneratorLinkIsFilterable(): void

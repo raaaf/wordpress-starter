@@ -31,11 +31,9 @@
                 </header>
             </div>
 
-            {{-- The page h1 already names the design system, so no overline per section. --}}
+            {{-- The playground partial holds the "Dein Look" panel and the Tokens and Components
+                 sections as its live preview; the h1 already names the design system, so no overline. --}}
             @include('styleguide.playground')
-            @include('styleguide.generator')
-            @include('styleguide.tokens', ['overline' => false])
-            @include('styleguide.components', ['overline' => false])
         @endif
     </article>
     @endwhile
