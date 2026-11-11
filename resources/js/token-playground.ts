@@ -192,6 +192,7 @@ export interface TokenPlaygroundComponent extends AlpineMagics {
   applied: string[];
   panelOpen: boolean;
   themeFace: string;
+  announced: string;
   readonly ink: string;
   readonly contrast: string;
   readonly pairing: FontPairing | null;
@@ -203,6 +204,7 @@ export interface TokenPlaygroundComponent extends AlpineMagics {
   open(trigger: HTMLElement): void;
   close(): void;
   update(): void;
+  announce(): void;
   reset(): void;
 }
 
@@ -230,6 +232,7 @@ export function createTokenPlaygroundComponent(
     applied: [],
     panelOpen: false,
     themeFace: '',
+    announced: '',
     opener: null,
 
     get pairing() {
@@ -319,6 +322,11 @@ export function createTokenPlaygroundComponent(
       this.applied = Object.keys(vars);
     },
 
+    /** Copies the contrast text into the live region; called on change events only. */
+    announce() {
+      this.announced = this.contrast;
+    },
+
     reset() {
       const root = document.documentElement;
       for (const name of this.applied) {
@@ -331,6 +339,7 @@ export function createTokenPlaygroundComponent(
       this.buttonRadius = BUTTON_PILL;
       this.scale = DEFAULT_SCALE;
       this.font = '';
+      this.announce();
     },
   };
 }

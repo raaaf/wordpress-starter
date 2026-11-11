@@ -4401,8 +4401,8 @@ msgstr "© {year} Company name. All rights reserved."
 msgid "Älteste zuerst"
 msgstr "Oldest first"
 
-msgid "Ändert nur deine Ansicht, gespeichert wird nichts."
-msgstr "Only changes your view, nothing is saved."
+msgid "Nichts wird gespeichert."
+msgstr "Nothing is saved."
 
 msgid "Öffnet das Bild in voller Größe in der Lightbox, wie in der Galerie. Sinnvoll für Bildschirmfotos und Details."
 msgstr "Opens the image at full size in the lightbox, like in the gallery. Useful for screenshots and details."

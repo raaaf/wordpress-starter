@@ -3769,17 +3769,31 @@ html {
   background: var(--swatch, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--text-primary) 15%, transparent);
   cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    outline-color 150ms var(--motion-enter-ease),
+    outline-offset 150ms var(--motion-enter-ease),
+    box-shadow 150ms var(--motion-enter-ease),
+    transform 100ms var(--motion-enter-ease);
 }
 
+/* Checked is a box-shadow pair (gap ring in the page colour, then the 2px ink ring),
+   so the outline stays free for focus: a focused checked swatch shows both. */
 .token-swatch:has(input:checked),
 .token-swatch--custom.is-selected {
-  outline: 2px solid var(--text-primary);
-  outline-offset: 3px;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--text-primary) 15%, transparent),
+    0 0 0 3px var(--bg-primary),
+    0 0 0 5px var(--text-primary);
 }
 
 .token-swatch:has(input:focus-visible) {
   outline: 3px solid var(--ring-focus);
-  outline-offset: 3px;
+  outline-offset: 6px;
+}
+
+.token-swatch:active {
+  transform: scale(0.96);
 }
 
 /* Custom colour: the native picker fills the swatch, its own chrome hidden. */
@@ -3794,7 +3808,6 @@ html {
     #d946ef,
     #f43f5e
   );
-  overflow: hidden;
 }
 
 .token-swatch--custom input {
@@ -3802,6 +3815,7 @@ html {
   inset: 0;
   width: 100%;
   height: 100%;
+  border-radius: inherit;
   opacity: 0;
   cursor: pointer;
 }
@@ -3825,16 +3839,23 @@ html {
   width: 100%;
   align-items: center;
   justify-content: center;
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   padding: 0 0.25rem;
   border: 1px solid var(--border-default);
   border-radius: 0.5rem;
   font-size: var(--typography-body-small-size, 0.875rem);
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);
+  touch-action: manipulation;
   transition:
     background-color 150ms var(--motion-enter-ease),
-    color 150ms var(--motion-enter-ease);
+    color 150ms var(--motion-enter-ease),
+    border-color 150ms var(--motion-enter-ease),
+    transform 100ms var(--motion-enter-ease);
+}
+
+.token-segment:active span {
+  transform: scale(0.96);
 }
 
 @media (hover: hover) {
@@ -3873,16 +3894,25 @@ html {
   align-items: center;
   gap: 0.625rem;
   min-width: 0;
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   padding: 0 0.75rem;
   border: 1px solid var(--border-default);
   border-radius: 0.5rem;
   color: var(--text-primary);
-  transition: border-color 150ms var(--motion-enter-ease);
+  touch-action: manipulation;
+  transition:
+    border-color 150ms var(--motion-enter-ease),
+    box-shadow 150ms var(--motion-enter-ease),
+    transform 100ms var(--motion-enter-ease);
+}
+
+.token-font:active .token-font__body {
+  transform: scale(0.98);
 }
 
 .token-font__sample {
   flex: none;
+  width: 1.75rem;
   font-family: var(--pair-face, inherit);
   font-size: 1.25rem;
   line-height: 1;
@@ -3956,6 +3986,21 @@ html {
   }
 }
 
+/* Dark mode: the light-mode shadows mix --text-primary, which is light there and
+   would glow. A 1px white ring plus a black shadow instead (--ds-edge, --ds-shade);
+   same scoping pair as the dark token blocks above. */
+:root[data-theme='dark'] {
+  --ds-edge: 0 0 0 1px rgb(255 255 255 / 0.1);
+  --ds-shade: rgb(0 0 0 / 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ds-edge: 0 0 0 1px rgb(255 255 255 / 0.1);
+    --ds-shade: rgb(0 0 0 / 0.5);
+  }
+}
+
 .ds-panel {
   display: flex;
   flex-direction: column-reverse;
@@ -3965,7 +4010,9 @@ html {
   z-index: 40;
   background: var(--bg-primary);
   border-top: 1px solid var(--border-default);
-  box-shadow: 0 -4px 16px color-mix(in oklch, var(--text-primary) 12%, transparent);
+  box-shadow:
+    var(--ds-edge, 0 0 0 0 transparent),
+    0 -4px 16px var(--ds-shade, color-mix(in oklch, var(--text-primary) 12%, transparent));
 }
 
 .ds-panel__body {
@@ -3974,10 +4021,29 @@ html {
   overflow-y: auto;
   padding: 1.25rem 1rem;
   border-bottom: 1px solid var(--border-default);
+  overscroll-behavior: contain;
+  opacity: 0;
+  transform: translateY(0.5rem);
+  /* Exit: display flips to none only after the fade (allow-discrete). */
+  transition:
+    opacity var(--motion-exit-duration) var(--motion-exit-ease),
+    transform var(--motion-exit-duration) var(--motion-exit-ease),
+    display var(--motion-exit-duration) var(--motion-exit-ease) allow-discrete;
 }
 
 .ds-panel__body.is-open {
   display: block;
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 200ms var(--motion-enter-ease),
+    transform 200ms var(--motion-enter-ease),
+    display 200ms var(--motion-enter-ease) allow-discrete;
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
 }
 
 .ds-panel__header {
@@ -4010,6 +4076,12 @@ html {
   font-weight: 600;
   color: var(--text-primary);
   cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 100ms var(--motion-enter-ease);
+}
+
+.ds-panel__toggle:active {
+  transform: scale(0.96);
 }
 
 @media (max-width: 63.99rem) {
@@ -4029,6 +4101,19 @@ html {
     height: 2rem;
   }
 
+  /* Hit area: 2.5rem clickable around the 2rem dot. */
+  .token-swatch::after {
+    content: '';
+    position: absolute;
+    inset: -0.25rem;
+    border-radius: 999px;
+  }
+
+  .token-segment span,
+  .token-font__body {
+    min-height: 2.5rem;
+  }
+
   .ds-panel {
     display: block;
     inset-inline: auto 0;
@@ -4044,12 +4129,14 @@ html {
     scrollbar-width: none;
     border-top: 0;
     border-left: 1px solid var(--border-default);
-    box-shadow: -8px 0 24px color-mix(in oklch, var(--text-primary) 14%, transparent);
+    box-shadow:
+      var(--ds-edge, 0 0 0 0 transparent),
+      -8px 0 24px var(--ds-shade, color-mix(in oklch, var(--text-primary) 14%, transparent));
     transform: translateX(100%);
     visibility: hidden;
     transition:
-      transform 250ms var(--motion-enter-ease, ease-out),
-      visibility 0s linear 250ms;
+      transform var(--motion-exit-duration) var(--motion-exit-ease),
+      visibility 0s linear var(--motion-exit-duration);
   }
 
   .ds-panel::-webkit-scrollbar {
@@ -4084,6 +4171,9 @@ html {
     overflow: visible;
     padding: 1.25rem;
     border-bottom: 0;
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
   .ds-panel__bar {
@@ -4104,10 +4194,13 @@ html {
     background: transparent;
     color: var(--text-primary);
     cursor: pointer;
+    transition: background-color 150ms var(--motion-enter-ease);
   }
 
-  .ds-panel__close:hover {
-    background: var(--bg-secondary);
+  @media (hover: hover) {
+    .ds-panel__close:hover {
+      background: var(--bg-secondary);
+    }
   }
 
   .ds-panel__close:focus-visible {
@@ -4148,11 +4241,23 @@ html {
     font-size: var(--typography-body-small-size, 0.875rem);
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 16px color-mix(in oklch, var(--text-primary) 20%, transparent);
+    touch-action: manipulation;
+    box-shadow:
+      var(--ds-edge, 0 0 0 0 transparent),
+      0 4px 16px var(--ds-shade, color-mix(in oklch, var(--text-primary) 20%, transparent));
+    transition:
+      background-color 150ms var(--motion-enter-ease),
+      transform 100ms var(--motion-enter-ease);
   }
 
-  .ds-fab:hover {
-    background: var(--bg-button-primary-hover);
+  @media (hover: hover) {
+    .ds-fab:hover {
+      background: var(--bg-button-primary-hover);
+    }
+  }
+
+  .ds-fab:active {
+    transform: scale(0.96);
   }
 
   .ds-fab:focus-visible {
@@ -4166,5 +4271,30 @@ html {
     border-radius: 999px;
     border: 2px solid var(--bg-primary);
     box-sizing: content-box;
+  }
+}
+
+/* Playground motion off: no press scale, no sheet slide. */
+@media (prefers-reduced-motion: reduce) {
+  .token-swatch,
+  .token-segment span,
+  .token-font__body,
+  .ds-panel__toggle,
+  .ds-fab {
+    transition-property: color, background-color, border-color, outline-color, box-shadow;
+  }
+
+  .token-swatch:active,
+  .token-segment:active span,
+  .token-font:active .token-font__body,
+  .ds-panel__toggle:active,
+  .ds-fab:active {
+    transform: none;
+  }
+
+  .ds-panel__body,
+  .ds-panel__body.is-open {
+    transform: none;
+    transition: none;
   }
 }

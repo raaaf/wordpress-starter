@@ -72,7 +72,7 @@
                 <span x-show="panelOpen" x-cloak>{{ __('Fertig', 'wp-starter') }}</span>
             </button>
             @if($generatorUrl !== '')
-                <x-button :url="$generatorUrl" :title="__('Theme bauen', 'wp-starter')" variant="primary" size="sm" :analytics="['event' => 'generator_playground_cta']" x-bind:href="href" />
+                <x-button :url="$generatorUrl" :title="__('Theme bauen', 'wp-starter')" variant="primary" size="sm" class="min-h-11!" :analytics="['event' => 'generator_playground_cta']" x-bind:href="href" />
             @endif
         </div>
 
@@ -93,16 +93,19 @@
                 <div class="flex flex-wrap items-center gap-2">
                     @foreach($swatches as $hex => $name)
                         <label class="token-swatch" style="--swatch: {{ $hex }}">
-                            <input type="radio" name="token-accent" value="{{ $hex }}" class="sr-only" x-model="accent" x-on:change="update()" @checked($loop->first)>
+                            <input type="radio" name="token-accent" value="{{ $hex }}" class="sr-only" x-model="accent" x-on:change="update(); announce()" @checked($loop->first)>
                             <span class="sr-only">{{ $name }}</span>
                         </label>
                     @endforeach
-                    <label class="token-swatch token-swatch--custom" :class="{ 'is-selected': ! @js(array_keys($swatches)).includes(accent.toUpperCase()) }">
+                    {{-- Selected custom colour: the swatch shows the picked colour instead of the conic gradient. --}}
+                    <label class="token-swatch token-swatch--custom" x-data="{ get picked() { return ! @js(array_keys($swatches)).includes(accent.toUpperCase()) } }" :class="{ 'is-selected': picked }" x-bind:style="picked ? { background: accent } : {}">
                         <span class="sr-only">{{ __('Eigene Farbe', 'wp-starter') }}</span>
-                        <input type="color" value="#FF6B35" x-model="accent" x-on:input="update()">
+                        <input type="color" value="#FF6B35" x-model="accent" x-on:input="update()" x-on:change="announce()">
                     </label>
                 </div>
-                <p class="mt-3 mb-0 text-body-small text-content-secondary" aria-live="polite" x-text="contrast"></p>
+                <p class="mt-3 mb-0 text-body-small text-content-secondary tabular-nums" x-text="contrast"></p>
+                {{-- The colour input fires `input` on every drag step; screen readers get the text only on change and reset. --}}
+                <p class="sr-only" aria-live="polite" x-text="announced"></p>
             </fieldset>
 
             @foreach($segments as $model => $segment)
@@ -153,7 +156,7 @@
                 @endif
                 {{-- Secondary row: the note left, Reset right; the negative margin pulls the ghost button's padding back so its label lines up with the CTA edge. --}}
                 <div class="flex items-center justify-between gap-3">
-                    <p class="m-0 text-caption text-content-secondary">{{ __('Ändert nur deine Ansicht, gespeichert wird nichts.', 'wp-starter') }}</p>
+                    <p class="m-0 text-caption text-content-secondary">{{ __('Nichts wird gespeichert.', 'wp-starter') }}</p>
                     <x-button :title="__('Zurücksetzen', 'wp-starter')" variant="ghost" size="sm" class="shrink-0 mr-[calc(var(--button-sm-padding-x)*-1)]" x-on:click="reset()" />
                 </div>
             </div>
