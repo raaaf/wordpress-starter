@@ -1,3 +1,9 @@
+# [2.52.0](https://github.com/raaaf/wordpress-starter/compare/v2.51.0...v2.52.0) (2026-11-11)
+
+### Features
+
+- **styleguide:** "Dein Look" as an off-canvas drawer ([8befc43](https://github.com/raaaf/wordpress-starter/commit/8befc439570c3d86c845a87c0e2e8ff21453523f))
+
 # [2.51.0](https://github.com/raaaf/wordpress-starter/compare/v2.50.0...v2.51.0) (2026-11-11)
 
 ### Features
