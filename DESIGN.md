@@ -59,7 +59,7 @@ Unverändert: `bg-brand`, `bg-brand-hover`, `bg-brand-active`, `*-brand-secondar
 - Spacing: DS-Skala in Starter-Namen (1, 1-5, 2, 2-5, 3, 3-5, 4, 5, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32).
 - Radius: `sm` = 6, `md` = 8, `lg` = 12, `full` = 999. Buttons sind Pillen (`radius.button` = 999 im Design System), Karten und Medien 12, Chips 8.
 - `fontFamily`: `headline` = Colaborate (Light 300, Regular 400), `body` = Cal Sans Text (Light 300, Regular 400, Medium 500), neu `ui` = Cal Sans UI (Regular 400, SemiBold 600), `mono` bleibt JetBrains Mono. Rollen wie im Design-Kit: Display, h1 und h2 Colaborate Light; h3 bis h6 Cal Sans Text Medium (Section/Title); Fließtext und Lead Cal Sans Text Light, `strong` Text Medium; Buttons, Badges, Navigation, Labels, Overline und Caption Cal Sans UI, Button-Labels SemiBold. Die Rolle steht je Stufe als `--typography-<rolle>-family` in `tokens.css`. Schriftdateien: Latin- und Latin-Extended-A-Teilmengen der Design-Kit-Dateien (`pyftsubset`, woff2), Lizenzen in `resources/fonts/OFL-*.txt`, Liste in `config/fonts.json`.
-- `fontSize` (Desktop / Mobil, fließend bis 1440 px): `xs` 13, `sm` 14, `base` 16, `lg` 18/17 (Fließtext), `xl` 20/19, `2xl` 22/20 (h3), `3xl` 24/21 (Lead), `4xl` 48/29 (h2), `5xl` 56/34 (h1), `6xl` 64/38 (Display).
+- `fontSize` (Desktop / Mobil, fließend bis 1440 px): `xs` 13, `sm` 14, `base` 16, `lg` 18/17 (Fließtext), `xl` 20/19, `2xl` 22/20 (h3), `3xl` 24/21 (Lead), `4xl` 48/29 (h2), `5xl` 60/36 (h1), `6xl` 76/44 (Display).
 - `fontWeight`: `regular` = 400, `medium` = 500, `light` = 300, `semibold`/`bold` = 600 (nur Cal Sans UI hat 600, Text-Rollen bleiben bei höchstens 500).
 - Neu: `motion/ease/standard` (String, `cubic-bezier(...)`), `motion/duration/{fast,base,medium,slow,reveal}` (ms) → `--ease-standard`, `--dur-fast`…`--dur-reveal`.
 - Neu: `a11y/tap-target`, `a11y/focus-ring/width`, `a11y/focus-ring/offset` (px) → `--a11y-tap-target`, `--a11y-focus-ring-width`, `--a11y-focus-ring-offset`.
@@ -69,7 +69,7 @@ Unverändert: `bg-brand`, `bg-brand-hover`, `bg-brand-active`, `*-brand-secondar
 
 - **Spacing `0` und `0-5`:** bleiben, das Design System kennt sie nicht als eigene Stufe.
 - **Radius `xl`/`2xl`/`3xl`:** bleiben unverändert, das Design System definiert nur `sm`/`md`/`lg`/`full`.
-- **`fontSize` `5xl`/`6xl`:** bleiben unverändert, außerhalb der DS-Skala.
+- **`fontSize` `5xl`/`6xl`:** 60/36 (h1) und 76/44 (Display), Verhältnis 1,25 zu h1; bewusst außerhalb der DS-Skala (Figma-Variablen 1:2012/1:2013 nicht nachgezogen).
 - **`fontWeight` `semibold`/`bold`:** bleiben bei 400 (der Starter kennt keine echte Fettschrift für die Headline-Schriftart; eine Anpassung ist eine Typografie-Entscheidung, kein Mapping-Fehler).
 - **Checkbox-/Radio-Häkchen (`:checked`-SVG in app.css):** zwei Literale, weil ein data URI keine CSS-Custom-Property lesen kann: `#FFFFFF` im Hellen (Label des Primär-Buttons auf Tinte), `#1C1917` im Dunkeln (Tinte auf #E8E8E6). Bei einer Änderung von `button.primary-label` müssen beide von Hand nachgezogen werden.
 - **Sekundär-Button:** eigene Rollen `--bg-button-secondary(-hover)` und `--bg-button-secondary-on-stone(-hover)` in app.css, weil das Design-Kit ihn im Hellen mit Stein, im Dunkeln mit der erhöhten Fläche füllt; die Starter-Rollen `bg-secondary`/`bg-tertiary` bilden diesen Wechsel nicht ab.

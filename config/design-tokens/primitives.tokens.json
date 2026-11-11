@@ -2654,7 +2654,7 @@
     },
     "5xl": {
       "$type": "number",
-      "$value": 56,
+      "$value": 60,
       "$extensions": {
         "com.figma.variableId": "VariableID:1:2012",
         "com.figma.hiddenFromPublishing": true
@@ -2662,7 +2662,7 @@
     },
     "6xl": {
       "$type": "number",
-      "$value": 64,
+      "$value": 76,
       "$extensions": {
         "com.figma.variableId": "VariableID:1:2013",
         "com.figma.hiddenFromPublishing": true

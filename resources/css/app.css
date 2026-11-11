@@ -1475,7 +1475,7 @@ html {
    ============================================ */
 
 @layer utilities {
-  /* Display Heading - 60px / Bold */
+  /* Display Heading - 76px / Light (token 6xl) */
   .text-display {
     font-family: var(--typography-display-family), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--typography-display-size);
