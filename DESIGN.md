@@ -69,7 +69,7 @@ Unverändert: `bg-brand`, `bg-brand-hover`, `bg-brand-active`, `*-brand-secondar
 
 - **Spacing `0` und `0-5`:** bleiben, das Design System kennt sie nicht als eigene Stufe.
 - **Radius `xl`/`2xl`/`3xl`:** bleiben unverändert, das Design System definiert nur `sm`/`md`/`lg`/`full`.
-- **`fontSize` `5xl`/`6xl`:** 60/36 (h1) und 76/44 (Display), Verhältnis 1,25 zu h1; bewusst außerhalb der DS-Skala (Figma-Variablen 1:2012/1:2013 nicht nachgezogen).
+- **`fontSize` `5xl`/`6xl`:** 60/36 (h1) und 76/44 (Display), Verhältnis rund 1,25 zu h1 (1,27 Desktop, 1,22 mobil); bewusst außerhalb der DS-Skala (Figma-Variablen 1:2012/1:2013 nicht nachgezogen).
 - **`fontWeight` `semibold`/`bold`:** bleiben bei 400 (der Starter kennt keine echte Fettschrift für die Headline-Schriftart; eine Anpassung ist eine Typografie-Entscheidung, kein Mapping-Fehler).
 - **Checkbox-/Radio-Häkchen (`:checked`-SVG in app.css):** zwei Literale, weil ein data URI keine CSS-Custom-Property lesen kann: `#FFFFFF` im Hellen (Label des Primär-Buttons auf Tinte), `#1C1917` im Dunkeln (Tinte auf #E8E8E6). Bei einer Änderung von `button.primary-label` müssen beide von Hand nachgezogen werden.
 - **Sekundär-Button:** eigene Rollen `--bg-button-secondary(-hover)` und `--bg-button-secondary-on-stone(-hover)` in app.css, weil das Design-Kit ihn im Hellen mit Stein, im Dunkeln mit der erhöhten Fläche füllt; die Starter-Rollen `bg-secondary`/`bg-tertiary` bilden diesen Wechsel nicht ab.
