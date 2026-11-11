@@ -1,3 +1,9 @@
+# [2.53.0](https://github.com/raaaf/wordpress-starter/compare/v2.52.0...v2.53.0) (2026-11-11)
+
+### Features
+
+- **styleguide:** preview cards under "Look anpassen", calmer drawer ([d155738](https://github.com/raaaf/wordpress-starter/commit/d155738c4a041b3d7867e231b6a1622e1911ddcd))
+
 # [2.52.0](https://github.com/raaaf/wordpress-starter/compare/v2.51.0...v2.52.0) (2026-11-11)
 
 ### Features
