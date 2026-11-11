@@ -1,3 +1,9 @@
+# [2.50.0](https://github.com/raaaf/wordpress-starter/compare/v2.49.0...v2.50.0) (2026-11-11)
+
+### Features
+
+- **styleguide:** font tiles and a content-height preview in the token playground ([162622c](https://github.com/raaaf/wordpress-starter/commit/162622c58ecedacb62060386cfdb88f3e0c0f6a8))
+
 # [2.49.0](https://github.com/raaaf/wordpress-starter/compare/v2.48.0...v2.49.0) (2026-11-11)
 
 ### Bug Fixes
