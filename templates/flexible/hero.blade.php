@@ -3,13 +3,16 @@
 
     Variants: centered, split, background, stacked
     Uses wp_get_attachment_image() for automatic srcset/responsive images (split variant)
-    ACF Fields: variant, badge, title, copy, cta_primary, cta_secondary, image, background_image, background_color
+    ACF Fields: variant, badge, title, copy, cta_primary, cta_secondary, image, background_image, background_image_mobile, background_color
 --}}
 
 @php
     $variant = get_sub_field('variant') ?: 'centered';
     $badge = get_sub_field('badge');
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
+    // A long title (more than 45 visible characters) takes the h1 step instead of
+    // the display size, so it does not run over many lines in the background hero.
+    $titleIsLong = mb_strlen(trim(preg_replace('/\s+/u', ' ', strip_tags(str_replace('[br]', ' ', (string) get_sub_field('title')))))) > 45;
     $copy = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('copy'));
 
     // Render h1 only for the first hero on a singular page; all others use h2.
@@ -35,6 +38,9 @@
 
     $backgroundImageData = \WordpressStarter\Helpers\ImageData::resolve($background_image, 'hero-background');
     $background_image = $backgroundImageData;
+
+    // Hochformat-Variante fuer Smartphones (Art Direction per <picture>).
+    $mobileImageId = (int) (\WordpressStarter\Helpers\ImageData::resolve(get_sub_field('background_image_mobile'), 'full')['id'] ?? 0);
 
     // Only the first hero rendered on the page carries fetchpriority/eager
     // loading (the LCP candidate); later heroes get lazy loading instead.
@@ -90,6 +96,8 @@
         @if($background_image && !empty($background_image['url']))
             <div class="absolute inset-0">
                 @if(!empty($background_image['id']))
+                    {{-- Art Direction: Smartphones bekommen das Hochformat, alle anderen das Hintergrundbild. --}}
+                    @if($mobileImageId)<picture class="block w-full h-full"><source media="(max-width: 767px)" srcset="{{ wp_get_attachment_image_srcset($mobileImageId, 'full') ?: wp_get_attachment_image_url($mobileImageId, 'full') }}" sizes="100vw">@endif
                     {!! wp_get_attachment_image($background_image['id'], 'hero-background', false, [
                         'class' => 'w-full h-full object-cover',
                         'loading' => $isFirstHero ? 'eager' : 'lazy',
@@ -97,6 +105,7 @@
                         'sizes' => '100vw',
                         'alt' => '',
                     ]) !!}
+                    @if($mobileImageId)</picture>@endif
                 @else
                     <img src="{{ esc_url($background_image['url']) }}"
                          alt="{{ $background_image['alt'] ?? '' }}"
@@ -118,7 +127,7 @@
                 @endif
 
                 @if($title)
-                    <{{ $heroHeadingTag }} class="text-display mt-0! mb-6 text-content-on-color">
+                    <{{ $heroHeadingTag }} class="text-display {{ $titleIsLong ? 'hero__title--long ' : '' }}mt-0! mb-6 text-content-on-color">
                         {!! $title !!}
                     </{{ $heroHeadingTag }}>
                 @endif

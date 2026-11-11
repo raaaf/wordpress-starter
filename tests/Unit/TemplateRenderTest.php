@@ -702,6 +702,52 @@ final class TemplateRenderTest extends TestCase
     }
 
     /**
+     * Background hero: the optional portrait image reaches phones through a
+     * <picture> source; without it no <source> is emitted. Titles over 45
+     * visible characters take the h1 step (hero__title--long).
+     */
+    public function testHeroBackgroundServesMobileImageAndShrinksLongTitles(): void
+    {
+        $app = Application::getInstance();
+        $app->boot();
+
+        $factory = blade();
+        $factory->getFinder()->addLocation($this->templatesDir());
+        $viewData = self::VIEW_DATA + ['sectionAnchor' => null];
+
+        $GLOBALS['wp_mock_attachments'][10] = ['hero-background' => ['https://example.test/wide.webp', 1920, 1080]];
+        $GLOBALS['wp_mock_attachments'][11] = ['full' => ['https://example.test/portrait.webp', 800, 1000], 'srcset' => 'https://example.test/portrait.webp 800w'];
+
+        try {
+            $fields = ['variant' => 'background', 'title' => 'Kurzer Titel', 'background_image' => 10];
+
+            $GLOBALS['wp_mock_sub_fields'] = $fields + ['background_image_mobile' => 11];
+            $withMobile = $factory->make('flexible.hero', $viewData)->render();
+            $factory->flushState();
+            $this->assertStringContainsString('<source media="(max-width: 767px)" srcset="https://example.test/portrait.webp 800w"', $withMobile);
+            $this->assertStringContainsString('wide.webp', $withMobile);
+            $this->assertStringNotContainsString('hero__title--long', $withMobile);
+
+            $GLOBALS['wp_mock_sub_fields'] = $fields;
+            $withoutMobile = $factory->make('flexible.hero', $viewData)->render();
+            $factory->flushState();
+            $this->assertStringContainsString('wide.webp', $withoutMobile);
+            $this->assertStringNotContainsString('<source', $withoutMobile);
+
+            $GLOBALS['wp_mock_sub_fields']['title'] = 'Ein sehr langer Titel, der deutlich mehr als fünfundvierzig Zeichen hat';
+            $longTitle = $factory->make('flexible.hero', $viewData)->render();
+            $factory->flushState();
+            $this->assertStringContainsString('hero__title--long', $longTitle);
+        } finally {
+            unset(
+                $GLOBALS['wp_mock_sub_fields'],
+                $GLOBALS['wp_mock_attachments'][10],
+                $GLOBALS['wp_mock_attachments'][11],
+            );
+        }
+    }
+
+    /**
      * The token generator links to a child theme generator only when a plugin
      * answers wp_starter_theme_generator_url; client sites get no link.
      */

@@ -637,6 +637,82 @@ html {
   }
 }
 
+/* Editor content robustness: arbitrary pasted markup must not break the layout. */
+
+/* Long URLs and compounds wrap whether or not they are links (privacy pages have
+   bare URLs). break-word, not anywhere: anywhere also shrinks the min-content
+   width and squeezes the text column in flex and grid parents. */
+.prose :is(a, p, li) {
+  overflow-wrap: break-word;
+}
+
+/* Inline text colours from the classic editor (<span style="color: #1d649d;">)
+   are off-brand and unreadable in dark mode. Every coloured run in editor
+   content takes the brand text colour, which switches per scheme. White stays
+   (#fff, #ffffff, white, rgb(255, 255, 255)), it marks text on a dark fill, and
+   so do runs inside brand and inverse sections, which set their own text colour.
+   TinyMCE writes the colour declaration first, so the rule only matches style
+   attributes that START with it (`background-color: white` is not a text
+   colour and stays out). The white exclusions are anchored on the start too.
+   !important only because an inline style outranks any selector. */
+.prose
+  :is([style^='color' i]):not(
+    [style^='color: #fff' i],
+    [style^='color:#fff' i],
+    [style^='color: #ffffff' i],
+    [style^='color:#ffffff' i],
+    [style^='color: white' i],
+    [style^='color:white' i],
+    [style^='color: rgb(255, 255, 255)' i],
+    [style^='color:rgb(255,255,255)' i],
+    .bg-surface-brand *,
+    .bg-surface-inverse *
+  ) {
+  color: var(--text-brand) !important;
+}
+
+/* Alignment pasted into editor content (inline text-align from the WYSIWYG)
+   puts text on a second axis next to the section header; the single start axis
+   wins. Alignment is a module setting, not a prose one. */
+.prose :is(p, h1, h2, h3, h4, h5, h6, li, blockquote)[style*='text-align'] {
+  text-align: start !important;
+}
+
+/* Empty headings (an <h4></h4> left over from pasting) take no space. */
+.prose :is(h1, h2, h3, h4, h5, h6):empty {
+  display: none;
+}
+
+/* The text column next to a card is pushed down by the card padding so both
+   headings share a line (md:pt-* on the column wrapper in the two
+   templates). A column that starts with an image has no heading to
+   align: it starts flush with the card's top edge. */
+@media (min-width: 768px) {
+  :is(.one-third-two-thirds, .two-thirds-one-third)
+    [class*='md:pt-']:has(> .prose > p:first-child > img:first-child),
+  :is(.one-third-two-thirds, .two-thirds-one-third)
+    [class*='md:pt-']:has(> .prose > img:first-child),
+  :is(.one-third-two-thirds, .two-thirds-one-third)
+    [class*='md:pt-']:has(> .prose > figure:first-child) {
+    padding-top: 0;
+  }
+
+  :is(.one-third-two-thirds, .two-thirds-one-third) .prose > p:first-child > img:first-child,
+  :is(.one-third-two-thirds, .two-thirds-one-third) .prose > img:first-child,
+  :is(.one-third-two-thirds, .two-thirds-one-third) .prose > figure:first-child {
+    margin-top: 0;
+  }
+}
+
+/* Long hero titles (over 45 visible characters, set in the hero template) take
+   the h1 step instead of display. Unlayered, so it beats .text-display. */
+.hero__title--long {
+  font-size: var(--typography-h1-size);
+  font-weight: var(--typography-h1-weight);
+  line-height: var(--typography-h1-line-height);
+  letter-spacing: var(--typography-h1-letter-spacing);
+}
+
 /* Auto-inherit for prose inside inverse/brand sections.
    Der Selektor hiess bis 2026-08-10 .text-content-on-color; diese Klasse gibt
    das Theme nirgends aus. templates/components/section.blade.php emittiert

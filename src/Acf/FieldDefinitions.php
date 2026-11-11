@@ -1518,6 +1518,17 @@ class FieldDefinitions
                 __('Empfohlene Größe: mindestens 1920×1080 Pixel (16:9).', 'wp-starter'),
             ),
 
+            // Hochformat-Variante fuer Smartphones (Art Direction per <picture>).
+            self::imageField(
+                "field_{$prefix}_background_image_mobile",
+                __('Hintergrundbild mobil', 'wp-starter'),
+                'background_image_mobile',
+                false,
+                'array',
+                $showOnBackground,
+                __('Optional: Hochformat (4:5) für Smartphones, mindestens 800×1000 Pixel. Ohne dieses Bild wird das Hintergrundbild zugeschnitten.', 'wp-starter'),
+            ),
+
             self::tabField("field_{$prefix}_tab_style", __('Darstellung', 'wp-starter')),
 
             // Hoehe des Heros.
