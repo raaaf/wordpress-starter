@@ -69,7 +69,7 @@ The token generator link points to `home_url('/design-system/#token-generator')`
 `{prefix}_token_generator_url` changes it, for example to a central generator site.
 
 The design system page has two filters for a generator plugin. `wp_starter_theme_generator_url` returns the URL of the
-generator page; the links to it (`templates/styleguide/generator.blade.php` and the playground footer) appear only when
+generator page; the links to it (`templates/styleguide/generator.blade.php` and the playground's button below its preview) appear only when
 a plugin answers. `wp_starter_styleguide_font_pairings` (default `[]`) returns font pairings for the playground's
 "Schrift" row; each entry has `headline` and `body` (ids), `label`, `headlineFace` and `bodyFace` (CSS font-family
 names the plugin has loaded). The theme keeps only entries whose ids and faces match `/^[a-z0-9-]+$/` and whose label is

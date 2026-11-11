@@ -4448,3 +4448,12 @@ msgstr "– No icon –"
 
 msgid "„Route planen“-Link anzeigen"
 msgstr "Show \"Plan route\" link"
+
+msgid "Theme-Schrift"
+msgstr "Theme font"
+
+msgid "Karte mit Inhalt"
+msgstr "Card with content"
+
+msgid "Ecken, Fläche und Schrift kommen aus den Tokens."
+msgstr "Corners, surface and type come from the tokens."

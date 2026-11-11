@@ -98,16 +98,32 @@
             @if($pairings !== [])
                 <fieldset class="mx-0 mb-0 mt-8 p-0 border-0">
                     <legend class="mb-3 text-body-small text-content-secondary">{{ __('Schrift', 'wp-starter') }}</legend>
-                    <div class="token-segments">
-                        <label class="token-segment">
+                    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        {{-- The Standard sample pins the theme headline face read at init, so the playground's <html> font override does not change it. --}}
+                        <label class="token-font-tile">
                             <input type="radio" name="token-font" value="" class="sr-only" x-model="font" x-on:change="update()" checked>
-                            <span>{{ __('Standard', 'wp-starter') }}</span>
+                            <span class="token-font-tile__body">
+                                <span class="token-font-tile__sample" aria-hidden="true" x-bind:style="themeFace ? { '--pair-face': themeFace } : {}">Aa</span>
+                                <span class="token-font-tile__name">{{ __('Standard', 'wp-starter') }}</span>
+                                <span class="token-font-tile__name token-font-tile__name--muted">{{ __('Theme-Schrift', 'wp-starter') }}</span>
+                            </span>
                         </label>
                         @foreach($pairings as $index => $pairing)
-                            <label class="token-segment">
+                            @php
+                                // The faces are internal slugs (wpsg-…), so the names come from the
+                                // label, which the plugin builds as "Headline + Body".
+                                [$headlineName, $bodyName] = array_pad(explode(' + ', $pairing['label'], 2), 2, '');
+                            @endphp
+                            <label class="token-font-tile">
                                 <input type="radio" name="token-font" value="{{ $index }}" class="sr-only" x-model="font" x-on:change="update()">
-                                {{-- The face is a validated slug; the pill shows its label in the headline face. --}}
-                                <span class="token-segment__face" style="--pair-face: '{{ $pairing['headlineFace'] }}'">{{ $pairing['label'] }}</span>
+                                {{-- The face is a validated slug; the sample shows it in the headline face. --}}
+                                <span class="token-font-tile__body">
+                                    <span class="token-font-tile__sample" aria-hidden="true" style="--pair-face: '{{ $pairing['headlineFace'] }}'">Aa</span>
+                                    <span class="token-font-tile__name">{{ $headlineName }}</span>
+                                    @if($bodyName !== '')
+                                        <span class="token-font-tile__name token-font-tile__name--muted">+&nbsp;{{ $bodyName }}</span>
+                                    @endif
+                                </span>
                             </label>
                         @endforeach
                     </div>
@@ -116,29 +132,35 @@
 
             <div class="flex flex-wrap items-center justify-between gap-4 mt-8">
                 <p class="m-0 text-body-small text-content-secondary">{{ __('Ändert nur deine Ansicht, gespeichert wird nichts.', 'wp-starter') }}</p>
-                <div class="flex flex-wrap items-center gap-3">
-                    @if($generatorUrl !== '')
-                        <x-button :url="$generatorUrl" :title="__('Mit diesem Look ein Theme bauen', 'wp-starter')" variant="ghost" size="sm" :analytics="['event' => 'generator_playground_cta']" x-bind:href="href" />
-                    @endif
-                    <x-button :title="__('Zurücksetzen', 'wp-starter')" variant="secondary" size="sm" x-on:click="reset()" />
-                </div>
+                <x-button :title="__('Zurücksetzen', 'wp-starter')" variant="ghost" size="sm" x-on:click="reset()" />
             </div>
         </x-card>
 
-        {{-- Vorschau: dieselben Flächen und Bausteine wie auf der Seite. --}}
-        <div class="token-preview flex flex-col gap-6 p-6 rounded-[var(--card-radius)] bg-surface-brand text-content-on-brand">
-            <div class="flex items-center gap-4">
-                <span class="flex items-center justify-center w-12 h-12 rounded-[var(--card-radius)] bg-surface text-content">
-                    <x-icon name="lightning" class="w-6 h-6" />
-                </span>
-                <p class="m-0 text-overline">{{ __('Vorschau', 'wp-starter') }}</p>
-            </div>
-            <p class="m-0 text-h3">{{ __('Ein Akzent, viele Flächen.', 'wp-starter') }}</p>
-            <p class="m-0">{{ __('Buttons, Karten, Badges und Ecken lesen alle dieselben Tokens.', 'wp-starter') }}</p>
-            <div class="flex flex-wrap items-center gap-3">
-                <x-badge variant="gray">{{ __('Badge', 'wp-starter') }}</x-badge>
-                <x-button :title="__('Button', 'wp-starter')" variant="secondary" />
-            </div>
+        {{-- Vorschau: dieselben Flächen und Bausteine wie auf der Seite. Die Buttons sind nur Demo. --}}
+        <div class="flex flex-col gap-4 self-start lg:sticky lg:top-[calc(var(--header-height,80px)+1.5rem)]">
+            <x-card variant="outlined" padding="none" class="token-preview p-6 flex flex-col gap-5">
+                <div class="flex items-center gap-4">
+                    <span class="flex items-center justify-center w-12 h-12 rounded-[var(--card-radius)] bg-surface-brand text-content-on-brand">
+                        <x-icon name="lightning" class="w-6 h-6" />
+                    </span>
+                    <p class="m-0 text-overline">{{ __('Vorschau', 'wp-starter') }}</p>
+                </div>
+                <p class="m-0 text-h2">{{ __('Ein Akzent, viele Flächen.', 'wp-starter') }}</p>
+                <p class="m-0">{{ __('Buttons, Karten, Badges und Ecken lesen alle dieselben Tokens.', 'wp-starter') }}</p>
+                <div class="flex flex-col gap-2 p-4 rounded-[var(--card-radius)] bg-surface-brand text-content-on-brand">
+                    <div><x-badge variant="gray">{{ __('Neu', 'wp-starter') }}</x-badge></div>
+                    <p class="m-0 text-h4">{{ __('Karte mit Inhalt', 'wp-starter') }}</p>
+                    <p class="m-0 text-body-small">{{ __('Ecken, Fläche und Schrift kommen aus den Tokens.', 'wp-starter') }}</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <x-button :title="__('Button', 'wp-starter')" variant="primary" type="button" />
+                    <x-button :title="__('Zweiter Button', 'wp-starter')" variant="secondary" type="button" />
+                </div>
+            </x-card>
+
+            @if($generatorUrl !== '')
+                <x-button :url="$generatorUrl" :title="__('Mit diesem Look ein Theme bauen', 'wp-starter')" variant="primary" class="w-full sm:w-auto sm:self-start" :analytics="['event' => 'generator_playground_cta']" x-bind:href="href" />
+            @endif
         </div>
     </div>
 </x-section>

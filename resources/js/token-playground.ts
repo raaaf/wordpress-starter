@@ -175,6 +175,7 @@ export interface TokenPlaygroundComponent extends AlpineMagics {
   fonts: FontPairing[];
   fontSizes: Record<string, string>;
   applied: string[];
+  themeFace: string;
   readonly ink: string;
   readonly contrast: string;
   readonly pairing: FontPairing | null;
@@ -206,6 +207,7 @@ export function createTokenPlaygroundComponent(
     fonts: config.fonts ?? [],
     fontSizes: {},
     applied: [],
+    themeFace: '',
 
     get pairing() {
       return this.font === '' ? null : (this.fonts[Number(this.font)] ?? null);
@@ -234,7 +236,9 @@ export function createTokenPlaygroundComponent(
     },
 
     init() {
-      this.fontSizes = readFontSizes(getComputedStyle(document.documentElement));
+      const style = getComputedStyle(document.documentElement);
+      this.fontSizes = readFontSizes(style);
+      this.themeFace = style.getPropertyValue('--rafael-font-family-headline').trim();
     },
 
     update() {
