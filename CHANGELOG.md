@@ -1,3 +1,9 @@
+## [2.55.1](https://github.com/raaaf/wordpress-starter/compare/v2.55.0...v2.55.1) (2026-11-12)
+
+### Bug Fixes
+
+- **deps:** update phpseclib to 3.0.58 ([07e416d](https://github.com/raaaf/wordpress-starter/commit/07e416d94eb97e061cd9ca143d98076e01fe9436))
+
 # [2.55.0](https://github.com/raaaf/wordpress-starter/compare/v2.54.0...v2.55.0) (2026-11-12)
 
 ### Features
