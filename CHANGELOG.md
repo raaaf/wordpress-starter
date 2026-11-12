@@ -1,3 +1,9 @@
+# [2.55.0](https://github.com/raaaf/wordpress-starter/compare/v2.54.0...v2.55.0) (2026-11-12)
+
+### Features
+
+- **acf:** add vertical alignment option to one-third/two-thirds column layouts ([afaa15f](https://github.com/raaaf/wordpress-starter/commit/afaa15f75fffd93c6c572fb597ed25d5b5f09170))
+
 # [2.54.0](https://github.com/raaaf/wordpress-starter/compare/v2.53.0...v2.54.0) (2026-11-12)
 
 ### Bug Fixes
