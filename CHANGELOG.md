@@ -1,3 +1,13 @@
+# [2.54.0](https://github.com/raaaf/wordpress-starter/compare/v2.53.0...v2.54.0) (2026-11-12)
+
+### Bug Fixes
+
+- **styleguide:** take the dark drawer shadow colours from the token export ([f2bbb0b](https://github.com/raaaf/wordpress-starter/commit/f2bbb0bf6a66009b104b3d77f2feadf9c13dcd6f))
+
+### Features
+
+- **styleguide:** polish the "Dein Look" controls after a design review ([e8d71e9](https://github.com/raaaf/wordpress-starter/commit/e8d71e906ea0d4880f919b868ad7c3e822e1b5f4))
+
 # [2.53.0](https://github.com/raaaf/wordpress-starter/compare/v2.52.0...v2.53.0) (2026-11-11)
 
 ### Features
