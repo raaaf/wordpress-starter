@@ -908,10 +908,38 @@ class StyleguideLayoutData
             'background_color' => 'primary',
         ]));
 
+        $catalog[] = $this->layout('one_third_two_thirds', array_merge($header('1/3 + 2/3, vertikal mittig'), [
+            'column_1' => '<p>Schmale Spalte.</p>',
+            'column_2' => '<p>Breite Spalte.</p>',
+            'background_color' => 'primary',
+            'vertical_alignment' => 'center',
+        ]));
+
+        $catalog[] = $this->layout('one_third_two_thirds', array_merge($header('1/3 + 2/3, vertikal unten'), [
+            'column_1' => '<p>Schmale Spalte.</p>',
+            'column_2' => '<p>Breite Spalte.</p>',
+            'background_color' => 'primary',
+            'vertical_alignment' => 'bottom',
+        ]));
+
         $catalog[] = $this->layout('two_thirds_one_third', array_merge($header('2/3 + 1/3 mit Sektionskopf'), [
             'column_1' => '<p>Breite Spalte.</p>',
             'column_2' => '<p>Schmale Spalte.</p>',
             'background_color' => 'secondary',
+        ]));
+
+        $catalog[] = $this->layout('two_thirds_one_third', array_merge($header('2/3 + 1/3, vertikal mittig'), [
+            'column_1' => '<p>Breite Spalte.</p>',
+            'column_2' => '<p>Schmale Spalte.</p>',
+            'background_color' => 'secondary',
+            'vertical_alignment' => 'center',
+        ]));
+
+        $catalog[] = $this->layout('two_thirds_one_third', array_merge($header('2/3 + 1/3, vertikal unten'), [
+            'column_1' => '<p>Breite Spalte.</p>',
+            'column_2' => '<p>Schmale Spalte.</p>',
+            'background_color' => 'secondary',
+            'vertical_alignment' => 'bottom',
         ]));
 
         $catalog[] = $this->layout('one_column_image', array_merge($header('Eine Spalte mit Bild und Sektionskopf'), [

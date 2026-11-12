@@ -696,6 +696,14 @@ html {
   :is(.one-third-two-thirds, .two-thirds-one-third) .prose > figure:first-child {
     margin-top: 0;
   }
+
+  /* A column that ends with an image keeps no bottom margin, so a centred or
+   bottom-aligned image sits at the true centre or bottom next to the card. */
+  :is(.one-third-two-thirds, .two-thirds-one-third) .prose > p:last-child > img:last-child,
+  :is(.one-third-two-thirds, .two-thirds-one-third) .prose > img:last-child,
+  :is(.one-third-two-thirds, .two-thirds-one-third) .prose > figure:last-child {
+    margin-bottom: 0;
+  }
 }
 
 /* Long hero titles (over 45 visible characters, set in the hero template) take

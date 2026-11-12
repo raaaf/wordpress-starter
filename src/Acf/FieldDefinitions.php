@@ -2347,6 +2347,18 @@ class FieldDefinitions
                 '66.667',
                 __('Inhalt der breiten rechten Spalte (ca. 2/3 der Breite).', 'wp-starter'),
             ),
+            self::buttonGroupField(
+                "field_{$prefix}_vertical_alignment",
+                __('Vertikale Ausrichtung', 'wp-starter'),
+                'vertical_alignment',
+                [
+                    'top' => __('Oben', 'wp-starter'),
+                    'center' => __('Mittig', 'wp-starter'),
+                    'bottom' => __('Unten', 'wp-starter'),
+                ],
+                'top',
+                __('Wie die beiden Spalten vertikal zueinander stehen.', 'wp-starter'),
+            ),
             ...self::displaySettingsFields($prefix),
         ];
     }
@@ -2377,6 +2389,18 @@ class FieldDefinitions
                 false,
                 '33.333',
                 __('Inhalt der schmalen rechten Spalte (ca. 1/3 der Breite).', 'wp-starter'),
+            ),
+            self::buttonGroupField(
+                "field_{$prefix}_vertical_alignment",
+                __('Vertikale Ausrichtung', 'wp-starter'),
+                'vertical_alignment',
+                [
+                    'top' => __('Oben', 'wp-starter'),
+                    'center' => __('Mittig', 'wp-starter'),
+                    'bottom' => __('Unten', 'wp-starter'),
+                ],
+                'top',
+                __('Wie die beiden Spalten vertikal zueinander stehen.', 'wp-starter'),
             ),
             ...self::displaySettingsFields($prefix),
         ];
