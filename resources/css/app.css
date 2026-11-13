@@ -3630,6 +3630,30 @@ html {
   }
 }
 
+/* Running text hyphenates below desktop width only, where long German compounds
+   ("Portfoliomanagement") would otherwise stick out of narrow cards. Only words
+   of 10 or more letters split, so "Region" or "solche" stay whole. */
+@media (max-width: 1023px) {
+  p,
+  li {
+    hyphens: auto;
+    hyphenate-limit-chars: 10 4 4;
+    overflow-wrap: break-word;
+  }
+}
+
+/* From desktop width up, multi-column grids (three to five columns) stay as
+   narrow as a phone column, so their running text keeps hyphenating. Without
+   this, "Marketingunterlagen" in a four-column card broke mid-word without a
+   hyphen (overflow-wrap). */
+@media (min-width: 64rem) {
+  :is(.lg\:grid-cols-3, .lg\:grid-cols-4, .lg\:grid-cols-5) :is(p, li) {
+    hyphens: auto;
+    hyphenate-limit-chars: 10 4 4;
+    overflow-wrap: break-word;
+  }
+}
+
 /* Secondary button on a stone section: the fill steps one level deeper, the
    stone fill would otherwise vanish into the section. */
 .bg-surface-tertiary .button--secondary {
