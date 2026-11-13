@@ -1,3 +1,9 @@
+## [2.55.2](https://github.com/raaaf/wordpress-starter/compare/v2.55.1...v2.55.2) (2026-11-13)
+
+### Bug Fixes
+
+- **css:** hyphenate running text in multi-column grids on desktop ([d1d1dbf](https://github.com/raaaf/wordpress-starter/commit/d1d1dbf8928594091fddfc307c563558c5005aeb))
+
 ## [2.55.1](https://github.com/raaaf/wordpress-starter/compare/v2.55.0...v2.55.1) (2026-11-12)
 
 ### Bug Fixes
