@@ -116,16 +116,16 @@
                 <caption class="sr-only">{{ __('Verfügbare Dokumente', 'wp-starter') }}</caption>
                 <thead>
                     <tr class="bg-surface-secondary border-b border-line">
-                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase tracking-wide">
+                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase font-case tracking-wide">
                             {{ __('Dateiname', 'wp-starter') }}
                         </th>
-                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
+                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase font-case tracking-wide whitespace-nowrap">
                             {{ __('Typ', 'wp-starter') }}
                         </th>
-                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
+                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase font-case tracking-wide whitespace-nowrap">
                             {{ __('Kategorie', 'wp-starter') }}
                         </th>
-                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase tracking-wide whitespace-nowrap">
+                        <th scope="col" class="px-4 py-3 text-left font-normal text-content-secondary text-xs uppercase font-case tracking-wide whitespace-nowrap">
                             {{ __('Datum', 'wp-starter') }}
                         </th>
                         <th scope="col" class="px-4 py-3 whitespace-nowrap"><span class="sr-only">{{ __('Aktionen', 'wp-starter') }}</span></th>

@@ -102,7 +102,7 @@
                         @endif
                         <time datetime="{{ $date['iso'] }}" class="{{ $nextImage ? 'absolute top-3 left-3' : '' }} flex flex-col items-center justify-center w-20 h-20 rounded-lg text-center bg-[var(--bg-brand-tint)] text-content-brand">
                             <span class="text-h3 leading-none w-full text-center m-0">{{ $date['day'] }}</span>
-                            <span class="text-xs uppercase tracking-wide w-full text-center text-content-brand">{{ $date['month'] }}{{ $date['year'] ? ' ' . $date['year'] : '' }}</span>
+                            <span class="text-xs uppercase font-case tracking-wide w-full text-center text-content-brand">{{ $date['month'] }}{{ $date['year'] ? ' ' . $date['year'] : '' }}</span>
                         </time>
                     </div>
                     <div class="min-w-0">

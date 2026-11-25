@@ -289,7 +289,7 @@ class EditorStylesServiceProvider extends ServiceProvider
 
     var STYLE_ID = 'theme-icon-picker-style';
     var CSS = ''
-        + '.tip-dialog{width:min(760px,calc(100vw - 32px));height:min(680px,calc(100vh - 64px));padding:0;border:0;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.35);color:#1d2327;font-size:13px;overflow:hidden;}'
+        + '.tip-dialog{width:min(760px,calc(100vw - 32px));height:min(680px,calc(100dvh - 64px));padding:0;border:0;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.35);color:#1d2327;font-size:13px;overflow:hidden;}'
         + '.tip-dialog[open]{display:flex;flex-direction:column;}'
         + '.tip-dialog::backdrop{background:rgba(0,0,0,.55);}'
         + '.tip-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 12px;}'

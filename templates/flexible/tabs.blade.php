@@ -110,7 +110,7 @@
                         :tabindex="activeTab === {{ $index }} ? 0 : -1"
                         {{-- Radius nur oben: der Fokusring bleibt weich, die Unterstreichung des aktiven
                              Tabs bleibt flach. Ein umlaufender Radius rundete auch sie ab. --}}
-                        class="inline-flex items-center gap-2 px-1 py-3 font-normal border-b-2 -mb-px transition-colors cursor-pointer rounded-t-[var(--rafael-radius-sm)] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)]"
+                        class="inline-flex items-center gap-2 px-1 py-3 font-normal border-b-2 -mb-px transition-colors cursor-pointer rounded-t-[var(--rafael-radius-sm)] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] focus-visible:shadow-[0_0_0_2px_var(--text-primary)]"
                         role="tab"
                         aria-controls="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"
                     >
@@ -130,7 +130,7 @@
                  uebergehen kann; overflow nur waehrend der Fahrt, sonst schnitte es Fokusringe und
                  Schatten ab. Der Zustand haengt allein an `inert`: Alpines :class entfernt
                  keine Klassen aus dem statischen class-Attribut. Anfangszustand serverseitig. --}}
-            <div x-ref="panels" class="transition-[height] duration-[250ms] ease-[var(--ease-standard)] motion-reduce:transition-none">
+            <div x-ref="panels" class="transition-[height] duration-[var(--dur-medium)] ease-[var(--ease-standard)] motion-reduce:transition-none">
                 @php $index = -1; @endphp
                 @while(have_rows('tabs'))
                     @php
@@ -139,7 +139,7 @@
                         $isFirst = $index === 0;
                     @endphp
                     <div
-                        class="transition-opacity duration-150 ease-[var(--motion-enter-ease)] motion-reduce:transition-none inert:hidden"
+                        class="transition-opacity duration-[var(--dur-fast)] ease-[var(--motion-enter-ease)] motion-reduce:transition-none inert:hidden"
                         :class="{ 'starting:opacity-0': run > 0 }"
                         @unless($isFirst) inert aria-hidden="true" @endunless
                         :inert="activeTab !== {{ $index }}"

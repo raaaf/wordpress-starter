@@ -14,16 +14,6 @@
     $background = get_sub_field('background_color') ?: 'primary';
     $uniqueId = 'logo-slider-' . uniqid();
 
-    $gradientColors = [
-        'primary'      => 'from-surface',
-        'secondary'    => 'from-surface-secondary',
-        'tertiary'     => 'from-surface-tertiary',
-        'brand'        => 'from-surface-brand',
-        'brand-subtle' => 'from-surface-brand-subtle',
-        'inverse'      => 'from-surface-inverse',
-    ];
-    $gradientFrom = $gradientColors[$background] ?? 'from-surface';
-
     // Prepare logo data
     $logoData = [];
     if ($logos) {
@@ -139,10 +129,8 @@
                     </span>
                 </button>
             @endif
-            {{-- Gradient overlays for seamless edges --}}
-            <div class="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r {{ $gradientFrom }} to-transparent z-10 pointer-events-none"></div>
-            <div class="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l {{ $gradientFrom }} to-transparent z-10 pointer-events-none"></div>
-
+            {{-- The track moves, so the edge fade sits on a static wrapper. --}}
+            <div class="edge-fade-x">
             <div
                 class="flex gap-12 {{ $autoplay ? 'logo-scroll' : 'flex-wrap justify-center' }}"
                 @if($autoplay) :class="{ 'animation-paused': paused }" @endif
@@ -192,6 +180,7 @@
                         </div>
                     @endforeach
                 @endfor
+            </div>
             </div>
         </div>
 
