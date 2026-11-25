@@ -2832,9 +2832,6 @@ msgstr "Optional photo of the person. Shown as a small circle, square images rec
 msgid "Optionales Icon für dieses Ereignis."
 msgstr "Optional icon for this event."
 
-msgid "Optionales Icon neben dem Tab-Titel."
-msgstr "Optional icon next to the tab title."
-
 msgid "Optionales Icon vor dem Titel."
 msgstr "Optional icon before the title."
 

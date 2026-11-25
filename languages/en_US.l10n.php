@@ -960,7 +960,6 @@ return [
     'Optionales Bild zum Ereignis.' => 'Optional image for the event.',
     'Optionales Foto der Person. Wird als kleiner Kreis dargestellt, quadratische Bilder empfohlen.' => 'Optional photo of the person. Shown as a small circle, square images recommended.',
     'Optionales Icon für dieses Ereignis.' => 'Optional icon for this event.',
-    'Optionales Icon neben dem Tab-Titel.' => 'Optional icon next to the tab title.',
     'Optionales Icon vor dem Titel.' => 'Optional icon before the title.',
     'Optionales Portrait neben dem Zitat.' => 'Optional portrait next to the quote.',
     'Optionales Suffix nach der Zahl.' => 'Optional suffix after the number.',

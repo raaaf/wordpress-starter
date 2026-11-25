@@ -3,7 +3,7 @@
 
     Uses shared components: x-section, x-section-header
     Uses Alpine.js for tab switching
-    Fields: title, tabs (repeater: title, icon, modules), background_color
+    Fields: title, tabs (repeater: title, modules), background_color
     The tab text lives in a nested one_column module.
     Nested modules render through their own flexible templates without section chrome.
 --}}
@@ -11,14 +11,14 @@
 @php
     $title = \WordpressStarter\Helpers\Text::lineBreaks(get_sub_field('title'));
     $kopf = \WordpressStarter\Helpers\SectionHeader::extras($title);
-    // Nur Titel und Icon fuer die Buttons: get_sub_field('tabs') laedt jede Zeile samt
+    // Nur der Titel fuer die Buttons: get_sub_field('tabs') laedt jede Zeile samt
     // Modulen, die unten nochmal per have_rows() geladen werden. Eine durchlaufene
     // Schleife raeumt ihren ACF-Loop selbst weg, reset_rows() danach wuerde den
     // Loop der uebergeordneten Sektion entfernen.
     $tabs = [];
     while (have_rows('tabs')) {
         the_row();
-        $tabs[] = ['title' => get_sub_field('title'), 'icon' => get_sub_field('icon')];
+        $tabs[] = ['title' => get_sub_field('title')];
     }
     $background = get_sub_field('background_color') ?: 'primary';
     $uniqueId = 'tabs-' . uniqid();
@@ -110,13 +110,10 @@
                         :tabindex="activeTab === {{ $index }} ? 0 : -1"
                         {{-- Radius nur oben: der Fokusring bleibt weich, die Unterstreichung des aktiven
                              Tabs bleibt flach. Ein umlaufender Radius rundete auch sie ab. --}}
-                        class="inline-flex items-center gap-2 px-1 py-3 font-normal border-b-2 -mb-px transition-colors cursor-pointer rounded-t-[var(--rafael-radius-sm)] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] focus-visible:shadow-[0_0_0_2px_var(--text-primary)]"
+                        class="inline-flex items-center px-1 py-3 font-normal border-b-2 -mb-px transition-colors cursor-pointer rounded-t-[var(--rafael-radius-sm)] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] focus-visible:shadow-[0_0_0_2px_var(--text-primary)]"
                         role="tab"
                         aria-controls="{{ esc_attr($uniqueId) }}-panel-{{ $index }}"
                     >
-                        @if(!empty($tab['icon']))
-                            <x-icon :name="$tab['icon']" size="md" />
-                        @endif
                         {{ $tab['title'] ?? __('Tab', 'wp-starter') . ' ' . ($index + 1) }}
                     </button>
                 @endforeach
