@@ -1,3 +1,9 @@
+## [2.55.3](https://github.com/raaaf/wordpress-starter/compare/v2.55.2...v2.55.3) (2026-11-26)
+
+### Bug Fixes
+
+- **design-system:** apply new design-system rules ([#69](https://github.com/raaaf/wordpress-starter/issues/69)) ([004a63b](https://github.com/raaaf/wordpress-starter/commit/004a63b770cfc02c92460f4fd3429f651e1c8884))
+
 ## [2.55.2](https://github.com/raaaf/wordpress-starter/compare/v2.55.1...v2.55.2) (2026-11-13)
 
 ### Bug Fixes
