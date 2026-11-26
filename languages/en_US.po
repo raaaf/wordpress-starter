@@ -24,6 +24,11 @@ msgid_plural "%d Beiträge"
 msgstr[0] "%d post"
 msgstr[1] "%d posts"
 
+msgid "%d Demo-Beitrag löschen?"
+msgid_plural "%d Demo-Beiträge löschen?"
+msgstr[0] "Delete %d demo post?"
+msgstr[1] "Delete %d demo posts?"
+
 msgid "%d Demo-Blogbeitrag vorhanden"
 msgid_plural "%d Demo-Blogbeiträge vorhanden"
 msgstr[0] "%d demo blog post available"
@@ -257,9 +262,6 @@ msgstr "All %s"
 
 msgid "Alle Demo-Beiträge löschen"
 msgstr "Delete all demo posts"
-
-msgid "Alle Demo-Beiträge wirklich löschen?"
-msgstr "Really delete all demo posts?"
 
 msgid "Alle Kategorien"
 msgstr "All categories"
@@ -786,9 +788,6 @@ msgstr "Content setup"
 msgid "Content-Setup jetzt ausführen"
 msgstr "Run content setup now"
 
-msgid "Content-Setup wirklich erneut ausführen? Bestehende Seiten bleiben erhalten, fehlende werden erstellt."
-msgstr "Really run the content setup again? Existing pages are kept, missing ones are created."
-
 msgid "Content-Setup wurde bereits ausgeführt"
 msgstr "Content setup has already run"
 
@@ -809,6 +808,9 @@ msgstr "Appearance"
 
 msgid "Das Child-Theme nutzt Vertragsversion %1$d, dieses Theme kennt bis Version %2$d. Bekannte Einstellungen werden übernommen, neuere ignoriert. Bitte das Parent-Theme aktualisieren."
 msgstr "The child theme uses contract version %1$d, this theme supports up to version %2$d. Known settings are applied, newer ones are ignored. Please update the parent theme."
+
+msgid "Das Content-Setup erneut ausführen? Fehlende Seiten werden erstellt, bestehende bleiben erhalten."
+msgstr "Run the content setup again? Missing pages are created, existing ones are kept."
 
 msgid "Das Datum der Veranstaltung."
 msgstr "The date of the event."
@@ -1056,8 +1058,14 @@ msgstr "The checksum of the theme update does not match the published release. T
 msgid "Die Signatur des Theme-Updates ist ungültig. Das Update wurde abgebrochen."
 msgstr "The signature of the theme update is invalid. The update was cancelled."
 
+msgid "Die Styleguide-Seite endgültig löschen? Das lässt sich nicht rückgängig machen."
+msgstr "Permanently delete the styleguide page? This cannot be undone."
+
 msgid "Die Styleguide-Seite konnte nicht angelegt werden. Versuche es unter Theme-Einstellungen – Werkzeuge erneut."
 msgstr "The styleguide page could not be created. Try again under Theme settings – Tools."
+
+msgid "Die Styleguide-Seite löschen und neu erstellen?"
+msgstr "Delete and recreate the styleguide page?"
 
 msgid "Die Synchronisierung ist fehlgeschlagen. Prüfe Host, Benutzername, Passwort und Pfad und versuche es erneut."
 msgstr "The sync failed. Check host, username, password and path and try again."
@@ -3381,9 +3389,6 @@ msgstr "Regenerate styleguide"
 msgid "Styleguide umstellen"
 msgstr "Switch styleguide"
 
-msgid "Styleguide-Seite endgültig löschen?"
-msgstr "Delete the styleguide page permanently?"
-
 msgid "Styleguide-Seite erstellen"
 msgstr "Create styleguide page"
 
@@ -3392,9 +3397,6 @@ msgstr "Styleguide page exists"
 
 msgid "Styleguide-Seite liegt im Papierkorb"
 msgstr "Styleguide page is in the trash"
-
-msgid "Styleguide-Seite wirklich neu erstellen? Die bestehende Seite wird gelöscht."
-msgstr "Really rebuild the styleguide page? The existing page will be deleted."
 
 msgid "Suchbegriff"
 msgstr "Search term"
