@@ -45,7 +45,7 @@
                                         <span class="flex justify-between gap-3">
                                             <span class="underline underline-offset-4 min-w-0">{{ $item['label'] ?? '' }}</span>
                                             @if($fileType !== '')
-                                                <span class="flex shrink-0 items-center h-[1lh]"><x-badge variant="gray" size="sm" class="uppercase tracking-wide">{{ $fileType }}</x-badge></span>
+                                                <span class="flex shrink-0 items-center h-[1lh]"><x-badge variant="gray" size="sm" class="uppercase font-case tracking-wide">{{ $fileType }}</x-badge></span>
                                             @endif
                                         </span>
                                         @if(!empty($item['note']))

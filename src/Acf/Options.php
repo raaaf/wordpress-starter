@@ -968,7 +968,7 @@ class Options
                     esc_url($restoreUrl),
                     esc_html__('Wiederherstellen', 'wp-starter'),
                     esc_url($deleteUrl),
-                    esc_js(__('Styleguide-Seite endgültig löschen?', 'wp-starter')),
+                    esc_js(__('Die Styleguide-Seite endgültig löschen? Das lässt sich nicht rückgängig machen.', 'wp-starter')),
                     esc_html__('Endgültig löschen', 'wp-starter'),
                 ),
             );
@@ -1028,7 +1028,7 @@ class Options
             esc_html__('Styleguide neu generieren', 'wp-starter'),
             esc_html__('Erstellt die Styleguide-Seite neu mit allen aktuellen Design-Tokens und Block-Beispielen. Die bestehende Seite wird ersetzt.', 'wp-starter'),
             esc_url($regenerateUrl),
-            esc_js(__('Styleguide-Seite wirklich neu erstellen? Die bestehende Seite wird gelöscht.', 'wp-starter')),
+            esc_js(__('Die Styleguide-Seite löschen und neu erstellen?', 'wp-starter')),
             esc_html__('Neu generieren', 'wp-starter'),
         );
 
@@ -1048,7 +1048,7 @@ class Options
                         <a href="%s" class="button" onclick="return confirm(\'%s\');">%s</a>
                     </p>',
                     esc_url($contentSetupUrl),
-                    esc_js(__('Content-Setup wirklich erneut ausführen? Bestehende Seiten bleiben erhalten, fehlende werden erstellt.', 'wp-starter')),
+                    esc_js(__('Das Content-Setup erneut ausführen? Fehlende Seiten werden erstellt, bestehende bleiben erhalten.', 'wp-starter')),
                     esc_html__('Erneut ausführen', 'wp-starter'),
                 ),
             );
@@ -1205,7 +1205,11 @@ class Options
                     esc_url($generateUrl),
                     esc_html__('5 weitere generieren', 'wp-starter'),
                     esc_url($deleteUrl),
-                    esc_js(__('Alle Demo-Beiträge wirklich löschen?', 'wp-starter')),
+                    esc_js(sprintf(
+                        /* translators: %d: number of demo blog posts */
+                        _n('%d Demo-Beitrag löschen?', '%d Demo-Beiträge löschen?', $postCount, 'wp-starter'),
+                        $postCount,
+                    )),
                     esc_html__('Alle Demo-Beiträge löschen', 'wp-starter'),
                     esc_url(admin_url('edit.php')),
                     esc_html__('Beiträge ansehen', 'wp-starter'),

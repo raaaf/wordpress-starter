@@ -59,7 +59,7 @@
     // button--<variante> traegt keine Gestaltung, sie macht die Variante nur
     // adressierbar: fuer Flaechen, die der Utility-Klasse nicht bekannt sind
     // (invers, Markenflaeche, Hero-Scrim), und fuer Messungen.
-    $baseClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-normal transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] active:scale-[0.97] motion-reduce:transform-none';
+    $baseClasses = 'button button--' . $variant . ' relative inline-flex items-center justify-center font-normal transition-[color,background,border-color,box-shadow,scale] duration-200 no-underline cursor-pointer select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring-focus)] focus-visible:shadow-[0_0_0_2px_var(--text-primary)] active:scale-[0.97] motion-reduce:transform-none';
 
     // Variants: hairline pill at rest, flat fill on hover/active, never a
     // gradient (rafaelalex.de design system, section 5). No shadow on any
@@ -117,7 +117,11 @@
     ];
 
     // Disabled state overrides (same for all variants)
-    $disabledClasses = 'bg-surface-disabled text-content-disabled border border-line-disabled cursor-not-allowed shadow-none hover:bg-surface-disabled hover:shadow-none active:bg-surface-disabled';
+    // Solid variants (primary, danger) drop to the inset step (stone-deep) with
+    // a tertiary label at full opacity; the rest keep the muted disabled look.
+    $disabledClasses = in_array($variant, ['primary', 'danger'], true)
+        ? 'bg-[var(--bg-tertiary-elevated)] text-content-tertiary border border-transparent cursor-not-allowed shadow-none hover:bg-[var(--bg-tertiary-elevated)] hover:shadow-none active:bg-[var(--bg-tertiary-elevated)]'
+        : 'bg-surface-disabled text-content-disabled border border-line-disabled cursor-not-allowed shadow-none hover:bg-surface-disabled hover:shadow-none active:bg-surface-disabled';
 
     // Sizes matching Figma with CSS variables.
     //

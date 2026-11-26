@@ -8,7 +8,7 @@
     {{-- Bewusst ohne Veranstaltungsbild: bei 64px liest sich kein Motiv, das Bild zeigt nur die grosse Karte. --}}
     <time datetime="{{ $date['iso'] }}" class="shrink-0 flex flex-col items-center justify-center w-16 h-16 rounded-lg text-center bg-[var(--card-surface,var(--bg-secondary))]">
         <span class="text-h4 leading-none w-full text-center m-0">{{ $date['day'] }}</span>
-        <span class="text-xs uppercase tracking-wide w-full text-center text-content-secondary">{{ $date['month'] }}{{ $date['year'] ? ' ' . $date['year'] : '' }}</span>
+        <span class="text-xs uppercase font-case tracking-wide w-full text-center text-content-secondary">{{ $date['month'] }}{{ $date['year'] ? ' ' . $date['year'] : '' }}</span>
     </time>
     <div class="min-w-0">
         <h4 class="m-0 break-words font-sans text-base font-medium leading-normal tracking-normal text-content">
